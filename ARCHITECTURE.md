@@ -1,35 +1,52 @@
-# Architecture & Design
+# アーキテクチャと設計
 
-This document describes the design principles and technical architecture of `multi-game-engines`.
+このドキュメントでは、`multi-game-engines` の設計原則と技術アーキテクチャについて説明します。
 
-## Core Concepts
+## コアコンセプト
 
-The system is built on three main layers:
+システムは主に3つのレイヤーで構成されています。
 
-1.  **Bridge (Core)**: The orchestrator that manages engine lifecycles and provides a unified API.
-2.  **Adapter Interface**: A strictly typed set of interfaces that every engine plugin must implement.
-3.  **Engine Adapter**: The implementation layer that translates the unified API calls into engine-specific commands (e.g., UCI for Chess, USI for Shogi).
+1.  **ブリッジ (Core)**: エンジンのライフサイクルを管理し、統一されたAPIを提供するオーケストレーター。
+2.  **アダプターインターフェース**: すべてのエンジン実装が遵守すべき厳密に定義されたインターフェース。
+3.  **エンジンアダプター**: 統一されたAPIコールをエンジン固有のコマンド（チェスのUCI、将棋のUSIなど）に変換する実装レイヤー。
 
-## Plugin System
+## プラグインシステム
 
-To ensure that anyone can create a plugin, the `@multi-game-engines/core` package exports the `BaseAdapter` class and `IEngine` interface.
+誰でもプラグインを作成できるように、`@multi-game-engines/core` パッケージは `BaseAdapter` クラスと `IEngine` インターフェースをエクスポートします。
 
-### Extensibility
+### 拡張性
 
-While we provide a unified interface for common tasks (search, move, evaluate), we recognize that engines have unique capabilities. Adapters can expose engine-specific methods that users can access via type-safe generics:
+共通のタスク（探索、指し手、評価）のための統一インターフェースを提供しつつ、エンジン独自の機能を活用できる設計にしています。アダプターはエンジン固有のメソッドを公開でき、ユーザーはTypeScriptのジェネリクスを使用して型安全にアクセスできます。
 
 ```typescript
 const stockfish = bridge.getEngine<StockfishAdapter>('stockfish');
-stockfish.setSkillLevel(20); // Engine-specific method
+stockfish.setSkillLevel(20); // エンジン固有のメソッド
 ```
 
-## Licensing Strategy
+## ライセンス戦略
 
-- **Core**: MIT License. It contains no engine-specific code and can be used in any project.
-- **Adapters**: Each adapter is a separate npm package. This allows us to include GPL-licensed engines like Stockfish in the ecosystem without forcing the GPL on the core library or the end-user's application (unless they choose to use that specific adapter).
+- **コア (Core)**: MITライセンス。エンジン固有のコードを含まず、あらゆるプロジェクトで使用可能です。
+- **アダプター (Adapters)**: 各アダプターは個別のnpmパッケージです。これにより、StockfishのようなGPLライセンスのエンジンをエコシステムに含めつつ、コアライブラリや利用者のアプリケーションにGPLを強制することを避けることができます（そのアダプターを明示的に使用しない限り）。
 
-## Engine Loading (WASM/Remote)
+## エンジンのロード戦略 (Loading Strategy)
 
-Adapters are responsible for how the engine is loaded. 
-- **WASM**: The adapter package can include the `.wasm` file or fetch it from a CDN at runtime.
-- **Worker**: Adapters should ideally run engines in a Web Worker to avoid blocking the main thread.
+ライセンスの隔離とユーザー体験を両立するため、エンジンのロード（WASMのダウンロード等）に関して3つの戦略を提供し、アプリ開発者が制御できるようにします。
+
+1.  **手動ロード (Manual)**:
+    - ユーザーの明示的な操作（「エンジンをインストール」ボタンなど）を待ってロードを開始します。
+    - 通信量の節約や、ライセンスへの同意を求める場合に最適です。
+2.  **オンデマンド・フォールバック (On-demand / Fallback)**:
+    - デフォルトの設定です。基本は手動ですが、準備ができていない状態でエンジンの機能（探索など）が呼び出された場合、自動的にロードを開始します。
+    - ユーザーの手間を減らしつつ、必要になるまでリソースを消費しません。
+3.  **先行ロード (Eager)**:
+    - アプリケーション起動後、またはアダプター登録後、即座にバックグラウンドでロードを開始します。
+    - ユーザーに待ち時間を感じさせないシームレスな体験を提供します。
+
+### ロード状況の可視化と I/O
+
+いずれの戦略においても、アダプターは詳細な進捗状況（`ILoadProgress`）を報告します。これにより、アプリ開発者は以下のようなUIを容易に実装できます。
+- インストール済みのエンジンの管理画面
+- 初回ロード時のプログレスバー
+- エンジン固有のライセンス同意ダイアログ
+
+エンジンの実体（WASM等）は、Webコンテキストであれば IndexedDB や Cache Storage API を利用して永続化し、二回目以降のロードを高速化します。

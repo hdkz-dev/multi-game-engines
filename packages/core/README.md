@@ -1,8 +1,8 @@
 # @multi-game-engines/core
 
-This is the core library for the multi-game-engines ecosystem. It defines the interfaces and provides the bridge logic.
+multi-game-engines エコシステムのコアライブラリです。インターフェースを定義し、ブリッジロジックを提供します。
 
-## Usage
+## 使い方
 
 ```typescript
 import { EngineBridge } from '@multi-game-engines/core';

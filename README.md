@@ -1,34 +1,34 @@
 # multi-game-engines
 
-A flexible, decoupled bridge library for integrating various game engines (Chess, Shogi, etc.) into any JavaScript/TypeScript application.
+さまざまなゲームエンジン（チェス、将棋など）を、JavaScript/TypeScriptアプリケーションに統合するための柔軟で疎結合なブリッジライブラリです。
 
-## Overview
+## 概要
 
-This project provides a plugin-based architecture to interface with different game engines. By separating the core logic from specific engine implementations, it ensures high reusability and clear license boundaries.
+このプロジェクトは、異なるゲームエンジンとインターフェースするためのプラグインベースのアーキテクチャを提供します。コアロジックを特定のエンジン実装から分離することで、高い再利用性と明確なライセンス境界を確保します。
 
-### Key Features
+### 主な特徴
 
-- **Decoupled Architecture**: The core library defines the interface; adapters handle specific engine logic.
-- **Monorepo Structure**: Managed with npm workspaces for easy development and consistent versioning.
-- **License-Friendly**: The core is MIT licensed, while engine adapters can follow the specific licenses of the engines they wrap (e.g., GPL for Stockfish).
-- **Universal Support**: Designed to work with WebAssembly (WASM), native binaries, or remote server-based engines.
+- **疎結合アーキテクチャ**: コアライブラリがインターフェースを定義し、アダプタが特定のエンジンロジックを処理します。
+- **モノリポ構成**: npm workspacesを使用して管理され、容易な開発と一貫したバージョン管理を実現します。
+- **ライセンスへの配慮**: コアはMITライセンスですが、エンジンアダプタはラップするエンジンの特定のライセンス（Stockfishの場合はGPLなど）に従うことができます。
+- **ユニバーサルサポート**: WebAssembly (WASM)、ネイティブバイナリ、またはリモートサーバーベースのエンジンで動作するように設計されています。
 
-## Project Structure
+## プロジェクト構造
 
 ```text
 /
 ├── packages/
-│   ├── core/              # Core bridge logic and Type definitions (MIT)
-│   └── adapter-stockfish/ # Stockfish implementation (GPL)
-├── examples/              # Usage examples
-└── ARCHITECTURE.md        # Detailed design documentation
+│   ├── core/              # コアブリッジロジックと型定義 (MIT)
+│   └── adapter-stockfish/ # Stockfish実装 (GPL)
+├── examples/              # 使用例
+└── ARCHITECTURE.md        # 詳細な設計ドキュメント
 ```
 
-## Getting Started
+## はじめに
 
-*(Work in Progress)*
+*(準備中)*
 
-## License
+## ライセンス
 
-- Core Bridge: MIT
-- Adapters: Depends on the underlying engine (see individual package READMEs)
+- コアブリッジ: MIT
+- アダプタ: 各エンジンのライセンスに依存（個別のパッケージのREADMEを参照）
