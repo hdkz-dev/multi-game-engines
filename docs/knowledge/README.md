@@ -6,12 +6,13 @@
 
 ## 📚 ドキュメント一覧
 
-| ファイル                                                 | 内容                     |
-| -------------------------------------------------------- | ------------------------ |
-| [ARCHITECTURE_KNOWLEDGE.md](./ARCHITECTURE_KNOWLEDGE.md) | アーキテクチャと設計原則 |
-| [COMPONENT_DESIGN.md](./COMPONENT_DESIGN.md)             | コンポーネント設計詳細   |
-| [SESSION_LOG.md](./SESSION_LOG.md)                       | 作業セッションログ       |
-| [CHANGELOG.md](./CHANGELOG.md)                           | 変更履歴                 |
+| ファイル                                                 | 内容                                                |
+| -------------------------------------------------------- | --------------------------------------------------- |
+| [ARCHITECTURE_KNOWLEDGE.md](./ARCHITECTURE_KNOWLEDGE.md) | アーキテクチャと設計原則                            |
+| [COMPONENT_DESIGN.md](./COMPONENT_DESIGN.md)             | コンポーネント設計詳細 (アダプターとブリッジの関係) |
+| [RUNTIME_SUPPORT.md](./RUNTIME_SUPPORT.md)               | 実行環境サポート (Node.js/ブラウザ互換性)           |
+| [SESSION_LOG.md](./SESSION_LOG.md)                       | 作業セッションログ                                  |
+| [CHANGELOG.md](./CHANGELOG.md)                           | 変更履歴                                            |
 
 ## 🔗 関連ドキュメント
 
