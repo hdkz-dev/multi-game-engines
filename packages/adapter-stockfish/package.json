@@ -1,0 +1,48 @@
+{
+  "name": "@multi-game-engines/adapter-stockfish",
+  "version": "0.1.0",
+  "description": "Stockfish chess engine adapter for multi-game-engines ecosystem",
+  "license": "MIT",
+  "author": "multi-game-engines contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/multi-game-engines.git",
+    "directory": "packages/adapter-stockfish"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "chess",
+    "stockfish",
+    "engine",
+    "uci",
+    "wasm",
+    "multi-game-engines"
+  ],
+  "peerDependencies": {
+    "@multi-game-engines/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

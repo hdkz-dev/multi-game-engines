@@ -1,0 +1,29 @@
+name = "engine-cdn"
+main = "worker.ts"
+compatibility_date = "2024-01-01"
+
+# R2 バケットバインディング
+[[r2_buckets]]
+binding = "ENGINE_BUCKET"
+bucket_name = "engine-binaries"
+
+# カスタムドメイン (要設定)
+# routes = [
+#   { pattern = "engines.multi-game-engines.dev/*", zone_name = "multi-game-engines.dev" }
+# ]
+
+# 開発環境
+[env.development]
+name = "engine-cdn-dev"
+
+[[env.development.r2_buckets]]
+binding = "ENGINE_BUCKET"
+bucket_name = "engine-binaries-dev"
+
+# 本番環境
+[env.production]
+name = "engine-cdn"
+
+[[env.production.r2_buckets]]
+binding = "ENGINE_BUCKET"
+bucket_name = "engine-binaries"
