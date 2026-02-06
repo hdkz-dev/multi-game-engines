@@ -1,26 +1,16 @@
-# プロジェクト・ロードマップ
-
-このプロジェクトのフェーズ別開発計画です。
+# プロジェクト・ロードマップ (最終更新)
 
 ## フェーズ 1: 基盤構築 (現在)
-- [x] モノリポ構成のセットアップ (npm workspaces)
-- [x] AI 向けドキュメント・規約の整備
-- [x] コア・インターフェースの定義 (`ILoadProgress`, `ISearchTask` 等)
-- [ ] `BaseAdapter` 抽象クラスの実装
-- [ ] OPFS / IndexedDB ストレージ抽象化の実装
+- [x] モノリポ構成のセットアップ
+- [x] 究極の型定義の策定 (`any` 排除, ジェネリクス完全化)
+- [x] Facade パターンによる API 分離の設計
+- [x] AI 協働環境の極致化
+- [ ] Core: `EngineBridge` と `BaseAdapter` の実装
+- [ ] Core: `CapabilityDetector` と `FileStorage` の実装
 
 ## フェーズ 2: 最初の実証 (Stockfish)
-- [ ] `adapter-stockfish` のプロトタイプ作成
-- [ ] WASM 版 Stockfish の動的ロード実装
-- [ ] UCI プロトコル変換ロジックの実装
-- [ ] ブラウザ環境でのデモ作成
+- [ ] `adapter-stockfish` のプロトタイプ
+- [ ] WASM/WASI ロードと SRI 検証の実装
+- [ ] OPFS によるバイナリキャッシュ
 
-## フェーズ 3: 拡張性とエコシステム
-- [ ] 将棋エンジンアダプターの作成 (USI対応)
-- [ ] React / Vue 向けの軽量フックパッケージの提供
-- [ ] GitHub リリースページからのバイナリ自動取得機能
-
-## フェーズ 4: 安定化とリリース
-- [ ] テストカバレッジの向上
-- [ ] CI/CD パイプラインの構築
-- [ ] npm 公開
+...（後略）...
