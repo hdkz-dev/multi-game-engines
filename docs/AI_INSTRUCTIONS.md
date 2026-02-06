@@ -1,11 +1,11 @@
-# AI Instructions (究極版)
+# AIへの指示事項
 
-## プロジェクト・ミッション
-世界で最も堅牢、かつ柔軟なゲームエンジン・ブリッジを提供し、オープンソース・エンジンの可能性を最大化する。
+## プロジェクトの使命
+厳格なライセンス分離を維持しながら、さまざまなゲームエンジンに対して統一された、高度に拡張可能なブリッジを提供すること。
 
-## 技術的優先事項 (Technical Priorities)
-1. **Abstraction (抽象化)**: Core は `IEngine` のみを知り、実装の詳細には関知しない。
-2. **Standardization (標準化)**: 独自の実装よりも Web 標準 API (AbortSignal, AsyncIterable 等) を優先。
-3. **Efficiency (効率)**: Zero-copy 通信、WebGPU/WebNN によるハードウェア加速。
-4. **Safety (安全性)**: Branded Types による型安全、SRI による整合性検証、Capability Detection による実行環境の保護。
-5. **Observability (観測可能性)**: 統合ロギングと Performance API によるテレメトリ。
+## 技術的優先事項
+1. **Abstraction (抽象化)**: Core は `IEngine` インターフェースのみを知るべきであり、実装の詳細（UCI/USI等）には関知しません。
+2. **License Isolation (ライセンス分離)**: Core (MIT) と Adapters (GPL等) の境界を厳格に守ります。Core にはエンジン固有のロジックやライセンス制限のあるコードを一切含めないでください。
+3. **Type Safety (型安全性)**: ジェネリクスを使用して、エンジン固有の機能へのアクセスを可能にします。`any` 型の使用は禁止です。
+4. **Async first (非同期第一)**: エンジンの操作（探索、指し手）は非同期（Promise/AsyncIterable）である必要があります。
+5. **WASM & Next-gen API**: WASM (WASI), OPFS, WebGPU 等の最新 Web 標準を積極的に活用します。

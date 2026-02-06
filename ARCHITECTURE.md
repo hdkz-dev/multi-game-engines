@@ -22,7 +22,7 @@
 
 ## プラグインシステム
 
-誰でもプラグインを作成できるように、`@multi-game-engines/core` パッケージは `BaseAdapter` クラスと `IEngine` インターフェースをエクスポートします。
+誰でもプラグインを作成できるように、`@multi-game-engines/core` パッケージは `IEngineAdapter` インターフェースと `IEngine` インターフェースをエクスポートします。
 
 ### 拡張性
 
