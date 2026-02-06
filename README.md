@@ -13,7 +13,18 @@
 - **ライセンスへの配慮**: コアはMITライセンスですが、エンジンアダプタはラップするエンジンの特定のライセンス（Stockfishの場合はGPLなど）に従うことができます。
 - **ユニバーサルサポート**: WebAssembly (WASM)、ネイティブバイナリ、またはリモートサーバーベースのエンジンで動作するように設計されています。
 
+## プロジェクト管理
+
+プロジェクトの進行状況や方針については、以下のドキュメントを参照してください。
+
+- [運営方針 (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md): 開発ルールと検討プロセス。
+- [タスク管理 (TASKS.md)](docs/TASKS.md): 現在の進捗と今後の予定。
+- [対応履歴 (PROGRESS.md)](docs/PROGRESS.md): これまでの実施内容。
+- [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md): 重要な設計判断の履歴。
+- [ロードマップ (docs/ROADMAP.md)](docs/ROADMAP.md): 中長期的な計画。
+
 ## プロジェクト構造
+...（中略）...
 
 ```text
 /
