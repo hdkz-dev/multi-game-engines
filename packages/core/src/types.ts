@@ -1,36 +1,48 @@
 /**
- * 公称型 (Branded Types)
+ * 究極の型定義 (The Ultimate Type Definitions)
  */
+
 export type Brand<T, K> = T & { __brand: K };
 export type FEN = Brand<string, 'FEN'>;
 export type Move = Brand<string, 'Move'>;
 
 /**
- * 実行環境のセキュリティ・診断ステータス
+ * 実行環境の能力診断
  */
-export interface ISecurityStatus {
-  isCrossOriginIsolated: boolean; // SharedArrayBuffer が利用可能か
-  canUseThreads: boolean;
-  missingHeaders?: string[]; // 不足している HTTP ヘッダーのリスト
+export interface ICapabilities {
+  opfs: boolean;
+  wasmThreads: boolean;
+  wasmSimd: boolean;
+  webNN: boolean;
+  webGPU: boolean;    // 追加: 次世代 GPU 計算
+  webTransport: boolean; // 追加: 超低遅延通信
 }
 
 /**
- * ミドルウェア
+ * ロード進捗
  */
-export interface IMiddlewareContext {
-  engineId: string;
-  adapterName: string;
-  timestamp: number;
-}
-
-export interface IMiddleware {
-  onCommand?(command: string | Uint8Array, context: IMiddlewareContext): string | Uint8Array | Promise<string | Uint8Array>;
-  onInfo?(info: any, context: IMiddlewareContext): any | Promise<any>;
-  onResult?(result: any, context: IMiddlewareContext): any | Promise<any>;
+export interface ILoadProgress {
+  phase: 'not-started' | 'downloading' | 'initializing' | 'ready' | 'error';
+  percentage: number;
+  i18n: {
+    key: string;
+    params?: Record<string, string | number>;
+    defaultMessage: string;
+  };
+  error?: Error;
 }
 
 /**
- * エンジンアダプター
+ * 探索タスク
+ */
+export interface ISearchTask {
+  info: AsyncIterable<any>;
+  result: Promise<any>;
+  stop(): Promise<void>;
+}
+
+/**
+ * エンジンアダプター（WASI, WebGPU, WebTransport を包含）
  */
 export interface IEngineAdapter {
   readonly id: string;
@@ -38,11 +50,9 @@ export interface IEngineAdapter {
   readonly version: string;
   readonly license: string;
   
-  /** 投機的ロード（低優先度でのダウンロード開始） */
   prefetch?(): Promise<void>;
-  
   load(): Promise<void>;
-  search(options: ISearchOptions): ISearchTask;
+  search(options: any): ISearchTask;
   dispose(): Promise<void>;
 }
 
@@ -52,23 +62,7 @@ export interface IEngineAdapter {
 export interface IEngineBridge {
   registerAdapter(adapter: IEngineAdapter): void;
   getEngine(id: string): IEngine;
-  use(middleware: IMiddleware): void;
-  
-  /** 環境診断 */
-  getSecurityStatus(): ISecurityStatus;
-}
-
-export interface ISearchOptions {
-  fen: FEN;
-  depth?: number;
-  time?: number;
-  signal?: AbortSignal;
-}
-
-export interface ISearchTask {
-  info: AsyncIterable<any>;
-  result: Promise<any>;
-  stop(): Promise<void>;
+  checkCapabilities(): Promise<ICapabilities>;
 }
 
 export interface IEngine extends IEngineAdapter {
