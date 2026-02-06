@@ -1,26 +1,47 @@
 /**
- * エンジンのライフサイクル状態
+ * ログレベル
  */
-export type EngineStatus =
-  | 'idle'
-  | 'loading'
-  | 'ready'
-  | 'busy'
-  | 'error'
-  | 'terminated';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 /**
- * カスタムエラークラス
+ * 外部から注入可能なロガー
  */
-export class EngineError extends Error {
-  constructor(
-    public readonly code: string,
-    message: string,
-    public readonly originalError?: unknown
-  ) {
-    super(message);
-    this.name = 'EngineError';
-  }
+export interface ILogger {
+  log(level: LogLevel, message: string, context?: Record<string, unknown>): void;
+}
+
+/**
+ * 国際化対応のメッセージ情報
+ */
+export interface II18nMessage {
+  key: string;
+  params?: Record<string, string | number>;
+  defaultMessage: string; // 日本語等のデフォルトメッセージ
+}
+
+/**
+ * エンジンのライフサイクル状態
+ */
+export type EngineStatus = 'idle' | 'loading' | 'ready' | 'busy' | 'error' | 'terminated';
+
+/**
+ * エンジンのロード進捗状況
+ */
+export interface ILoadProgress {
+  phase: 'not-started' | 'downloading' | 'initializing' | 'ready' | 'error';
+  percentage: number;
+  i18n: II18nMessage; // 文字列の代わりに構造化されたメッセージを返す
+  error?: Error;
+}
+
+/**
+ * 実行環境の機能サポート状況
+ */
+export interface ICapabilities {
+  opfs: boolean;
+  wasmThreads: boolean;
+  wasmSimd: boolean;
+  webNN: boolean;
 }
 
 /**
@@ -31,9 +52,7 @@ export interface ISearchOptions {
   depth?: number;
   time?: number;
   nodes?: number;
-  /** 標準のキャンセル信号 */
   signal?: AbortSignal;
-  /** エンジン固有の追加オプション */
   extra?: Record<string, unknown>;
 }
 
@@ -64,7 +83,6 @@ export interface ISearchResult {
 export interface ISearchTask {
   info: AsyncIterable<ISearchInfo>;
   result: Promise<ISearchResult>;
-  /** 明示的な停止（AbortController 以外での制御用） */
   stop(): Promise<void>;
 }
 
@@ -77,17 +95,31 @@ export interface IEngineAdapter {
   readonly version: string;
   readonly license: string;
   readonly status: EngineStatus;
+  readonly progress: ILoadProgress;
 
+  onStatusChange(callback: (status: EngineStatus) => void): void;
+  onProgress(callback: (progress: ILoadProgress) => void): void;
+  
   load(): Promise<void>;
-  /** 標準の ISearchOptions を受け取る */
   search(options: ISearchOptions): ISearchTask;
   dispose(): Promise<void>;
 }
 
 /**
- * ストレージ操作（SRI検証を含む）
+ * エンジンブリッジ（管理者）のインターフェース
  */
-export interface IFileStorage {
-  read(path: string, integrity?: string): Promise<ArrayBuffer>;
-  write(path: string, data: ArrayBuffer): Promise<void>;
+export interface IEngineBridge {
+  registerAdapter(adapter: IEngineAdapter): void;
+  getEngine(id: string): IEngine;
+  setLogger(logger: ILogger): void;
+  checkCapabilities(): Promise<ICapabilities>;
+}
+
+/**
+ * アプリケーションが直接触れるエンジン操作インターフェース
+ */
+export interface IEngine extends IEngineAdapter {
+  readonly adapter: IEngineAdapter;
+  stop(): Promise<void>;
+  quit(): Promise<void>;
 }

@@ -79,5 +79,19 @@ WASM だけでなく、ブラウザ標準の Web Neural Network API (WebNN) を�
 ### 5.8 プラグ＆プレイ・ダイナミックロード
 外部 URL からアダプターを直接ロードする際、そのアダプターが信頼できるか、および `IEngineAdapter` インターフェースを正しく実装しているかを、メタデータ検証によって実行時に担保します。
 
-### 5.9 ユニバーサル・ランタイム
-コアロジックは Web 標準 API にのみ依存し、Browser, Node.js, Deno, Bun, VS Code 拡張などの多様な JavaScript ランタイムで同一の動作を保証します。環境依存（ストレージ、通信等）は DI 経由で各ランタイム向けに最適化されます。
+### 5.10 国際化 (i18n) 対応
+ライブラリが発するメッセージ（進捗、エラー等）は直接的な文字列ではなく、`I18nKey` を用いて管理されます。これにより、利用者のアプリケーションの言語設定に合わせた翻訳が可能です。
+
+### 5.11 機能検知とレジリエンス (Capability Detection)
+実行環境の Web 標準 API サポート状況（OPFS, WebAssembly Threads, WebNN 等）を起動時に診断します。最適な機能が利用できない場合でも、スムーズに代替手段（IndexedDB, Single-thread WASM 等）へ切り替えるレジリエンスを備えます。
+
+### 5.12 統合ロギングインターフェース
+Worker 内部を含む全レイヤーの動作ログを、アプリケーションが注入したロガー（例：Sentry, Winston, または単なる console）へ統合出力できる仕組みを提供します。
+
+## 8. リリースと品質保証
+
+### 8.1 Changesets による自動バージョニング
+モノリポ内のパッケージ間の依存関係を考慮し、[Changesets](https://github.com/changesets/changesets) を用いた自動バージョニングと Changelog 生成を行います。
+
+### 8.2 クロスブラウザ・テスト
+GitHub Actions 上で、Playwright を用いた複数ブラウザ環境での Worker/WASM 動作検証を自動化します。
