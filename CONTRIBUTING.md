@@ -1,10 +1,10 @@
-# Contributing to multi-game-engines
+# 貢献ガイド
 
-## Development Workflow
+## 開発ワークフロー
 
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Push to your branch and submit a Pull Request.
+1. リポジトリをフォークします。
+2. フィーチャーブランチを作成します。
+3. 変更をコミットします。
+4. ブランチをプッシュし、プルリクエストを送信します。
 
-**Note**: Direct pushes to the `main` branch are restricted. All changes must go through a Pull Request and be reviewed.
+**注意**: `main` ブランチへの直接プッシュは制限されています。すべての変更はプルリクエストを経由し、レビューを受ける必要があります。

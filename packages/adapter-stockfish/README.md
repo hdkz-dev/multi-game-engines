@@ -1,7 +1,7 @@
 # @multi-game-engines/adapter-stockfish
 
-Stockfish adapter for the multi-game-engines ecosystem.
+multi-game-engines エコシステム用の Stockfish アダプターです。
 
-## License
+## ライセンス
 
-GPL-3.0 - This package wraps Stockfish, which is licensed under the GNU General Public License v3.0.
+GPL-3.0 - このパッケージは GNU General Public License v3.0 でライセンスされている Stockfish をラップしています。

@@ -1,10 +1,10 @@
-# AI Instructions
+# AIへの指示事項
 
-## Project Mission
-To provide a unified, highly extensible bridge for various game engines while maintaining strict license separation.
+## プロジェクトの使命
+厳格なライセンス分離を維持しながら、さまざまなゲームエンジンに対して統一された、高度に拡張可能なブリッジを提供すること。
 
-## Technical Priorities
-1. **Abstraction**: The Core should only know about the `IEngine` interface.
-2. **Type Safety**: Use Generics to allow access to engine-specific features.
-3. **Async first**: Engine operations (search, move) must be asynchronous (Promises).
-4. **WASM readiness**: Design adapters to handle WASM instantiation and messaging.
+## 技術的優先事項
+1. **抽象化**: コアは `IEngine` インターフェースのみを知るべきです。
+2. **型安全性**: ジェネリクスを使用して、エンジン固有の機能へのアクセスを可能にします。
+3. **非同期第一**: エンジンの操作（探索、指し手）は非同期（Promise）である必要があります。
+4. **WASM対応**: WASMのインスタンス化とメッセージングを処理するようにアダプターを設計します。

@@ -1,12 +1,12 @@
-# Coding Conventions
+# コーディング規約
 
-## Naming
-- Packages: `@multi-game-engines/<name>`
-- Interfaces: `I` prefix (e.g., `IEngine`, `IAdapterOptions`)
-- Classes: PascalCase (e.g., `EngineBridge`)
-- Files: kebab-case (e.g., `engine-bridge.ts`)
+## 命名規則
+- パッケージ: `@multi-game-engines/<name>`
+- インターフェース: `I` プレフィックス (例: `IEngine`, `IAdapterOptions`)
+- クラス: PascalCase (例: `EngineBridge`)
+- ファイル: kebab-case (例: `engine-bridge.ts`)
 
-## Folder Structure
+## フォルダ構造
 ```
 packages/<name>/
   src/

@@ -1,14 +1,14 @@
-# TypeScript & Monorepo Style Guide
+# TypeScript & モノリポ スタイルガイド
 
-## General Principles
-- Use TypeScript for all source code.
-- Prefer Interfaces over Types for public APIs.
-- Export all shared types from `@multi-game-engines/core`.
+## 一般原則
+- すべてのソースコードにTypeScriptを使用する。
+- パブリックAPIにはTypeよりもInterfaceを優先する。
+- 共有型はすべて `@multi-game-engines/core` からエクスポートする。
 
-## Monorepo Rules
-- Do not import directly from `../package-name`. Use the workspace name `@multi-game-engines/package-name`.
-- Keep dependencies lean in `core`.
+## モノリポのルール
+- `../package-name` から直接インポートしない。ワークスペース名 `@multi-game-engines/package-name` を使用する。
+- `core` の依存関係は最小限に保つ。
 
-## Comments
-- Write comments in **Japanese**.
-- Use JSDoc for public methods and interfaces.
+## コメント
+- コメントは**日本語**で記述する。
+- パブリックメソッドやインターフェースにはJSDocを使用する。

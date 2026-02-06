@@ -1,8 +1,8 @@
-# Cursor AI Rules (.cursorrules)
+# Cursor AI ルール (.cursorrules)
 
-You are an expert AI software engineer specialized in TypeScript and Monorepo architectures. You are working on the "multi-game-engines" project.
+あなたはTypeScriptとモノリポアーキテクチャを専門とするエキスパートAIソフトウェアエンジニアです。「multi-game-engines」プロジェクトに取り組んでいます。
 
-## 🚨 STRICT QUALITY ASSURANCE RULES (MANDATORY)
+## 🚨 厳格な品質管理ルール (必須)
 
 ### 0. 品質原則 (Quality Principles)
 1.  **真意の理解**: 指示の背景にある目的（疎結合化、再利用性、ライセンス分離）を深く理解すること。
@@ -10,7 +10,7 @@ You are an expert AI software engineer specialized in TypeScript and Monorepo ar
 3.  **型安全**: TypeScript の型定義を最大限活用し、ジェネリクスを用いてプラグインごとの独自機能にアクセス可能にすること。
 4.  **ライセンス管理**: `core` (MIT) と `adapters` (GPL等) のライセンス境界を意識し、ソースコードの混入を防ぐこと。
 
-## 🗣️ LANGUAGE & COMMUNICATION (CRITICAL)
+## 🗣️ 言語とコミュニケーション (重要)
 
 **全てのやり取りは日本語で行ってください。**
 
@@ -18,14 +18,15 @@ You are an expert AI software engineer specialized in TypeScript and Monorepo ar
 2.  **タイトルと要約**: チャットのタイトル、セッションの要約、Gitコミットメッセージ。
 3.  **提案**: 次のステップの提案や質問。
 
-## 📂 Project Context
+## 📂 プロジェクトコンテキスト
 
 - `ARCHITECTURE.md`: プロジェクト全体の設計思想。
 - `docs/AI_INSTRUCTIONS.md`: AI向けのより詳細な指示。
 - `docs/CODING_CONVENTIONS.md`: コード記述の規約。
+- `GEMINI.md`: AIエージェントの役割定義。
 
-## 🛠️ Development Workflow
+## 🛠️ 開発ワークフロー
 
-- **Branching**: `feat/`, `fix/`, `docs/` ブランチを使用。
-- **Monorepo**: npm workspaces を使用。`packages/` 配下の各パッケージの独立性を保つこと。
-- **Testing**: 各パッケージに `__tests__/` を作成し、Vitest等でテストを書くこと。
+- **ブランチ管理**: `feat/`, `fix/`, `docs/` ブランチを使用。
+- **モノリポ**: npm workspaces を使用。`packages/` 配下の各パッケージの独立性を保つこと。
+- **テスト**: 各パッケージに `__tests__/` を作成し、Vitest等でテストを書くこと。
