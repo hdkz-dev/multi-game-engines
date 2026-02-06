@@ -21,7 +21,11 @@
 │   ├── core/              # コアブリッジロジックと型定義 (MIT)
 │   └── adapter-stockfish/ # Stockfish実装 (GPL)
 ├── examples/              # 使用例
-└── ARCHITECTURE.md        # 詳細な設計ドキュメント
+├── docs/
+│   ├── ARCHITECTURE.md    # 詳細な設計ドキュメント
+│   ├── TECHNICAL_SPECS.md # 技術仕様書
+│   └── initial-specs/     # 初期検討資料（歴史的経緯）
+└── ARCHITECTURE.md        # 設計思想（ルートへのリンク）
 ```
 
 ## はじめに
