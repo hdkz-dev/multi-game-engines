@@ -78,8 +78,29 @@ fi
 # 出力ディレクトリ作成
 mkdir -p "$OUTPUT_DIR/$ENGINE/$VERSION"
 
-info "Downloading $ENGINE v$VERSION..."
+info "Target: $ENGINE"
 info "CDN: $CDN_BASE_URL"
+
+# "latest" の場合、ルートマニフェストから最新バージョンを解決
+if [[ "$VERSION" == "latest" ]]; then
+    INDEX_URL="$CDN_BASE_URL/manifest.json"
+    info "Resolving latest version from $INDEX_URL..."
+    
+    INDEX_JSON=$(curl -sf "$INDEX_URL") || error "Failed to fetch root manifest to resolve 'latest'. Please specify a distinct version."
+    
+    # jq で最新バージョンを抽出
+    RESOLVED_VERSION=$(echo "$INDEX_JSON" | jq -r ".engines[\"$ENGINE\"].latestVersion")
+    
+    if [[ "$RESOLVED_VERSION" == "null" || -z "$RESOLVED_VERSION" ]]; then
+        error "Engine '$ENGINE' not found in root manifest or no latest version defined."
+    fi
+    
+    info "Resolved latest version: $RESOLVED_VERSION"
+    VERSION="$RESOLVED_VERSION"
+fi
+
+info "Downloading $ENGINE v$VERSION..."
+mkdir -p "$OUTPUT_DIR/$ENGINE/$VERSION"
 info "Output: $OUTPUT_DIR/$ENGINE/$VERSION"
 
 # manifest.json を取得
