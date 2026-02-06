@@ -1,25 +1,90 @@
 /**
- * 究極の型定義 (The Ultimate Type Definitions)
+ * 公称型 (Branded Types)
  */
-
 export type Brand<T, K> = T & { __brand: K };
 export type FEN = Brand<string, 'FEN'>;
 export type Move = Brand<string, 'Move'>;
 
 /**
- * 実行環境の能力診断
+ * 実行環境のセキュリティ・診断ステータス
  */
-export interface ICapabilities {
-  opfs: boolean;
-  wasmThreads: boolean;
-  wasmSimd: boolean;
-  webNN: boolean;
-  webGPU: boolean;    // 追加: 次世代 GPU 計算
-  webTransport: boolean; // 追加: 超低遅延通信
+export interface ISecurityStatus {
+  /** SharedArrayBuffer が利用可能か */
+  isCrossOriginIsolated: boolean;
+  /** マルチスレッドが利用可能か */
+  canUseThreads: boolean;
+  /** 不足している HTTP ヘッダー */
+  missingHeaders?: string[];
+  /** SRI (Subresource Integrity) がサポートされているか */
+  sriSupported: boolean;
+  /** ロードされたリソースが SRI で検証されたか */
+  sriVerified?: boolean;
 }
 
 /**
- * ロード進捗
+ * ミドルウェアのコンテキスト
+ */
+export interface IMiddlewareContext {
+  engineId: string;
+  adapterName: string;
+  timestamp: number;
+}
+
+/**
+ * 探索オプションの基底
+ */
+export interface IBaseSearchOptions {
+  fen: FEN;
+  depth?: number;
+  time?: number;
+  nodes?: number;
+  signal?: AbortSignal;
+}
+
+/**
+ * 思考状況の基底
+ */
+export interface IBaseSearchInfo {
+  depth: number;
+  score: number;
+  pv?: Move[];
+  nps?: number;
+  time?: number;
+  raw?: string;
+}
+
+/**
+ * 探索結果の基底
+ */
+export interface IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
+  raw?: string;
+}
+
+/**
+ * 実行中の探索タスク
+ */
+export interface ISearchTask<
+  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult
+> {
+  readonly info: AsyncIterable<T_INFO>;
+  readonly result: Promise<T_RESULT>;
+  stop(): Promise<void>;
+}
+
+/**
+ * ミドルウェアの定義
+ */
+export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown> {
+  onCommand?(command: string | Uint8Array, context: IMiddlewareContext): string | Uint8Array | Promise<string | Uint8Array>;
+  onInfo?(info: T_INFO, context: IMiddlewareContext): T_INFO | Promise<T_INFO>;
+  onResult?(result: T_RESULT, context: IMiddlewareContext): T_RESULT | Promise<T_RESULT>;
+}
+
+/**
+ * エンジンのロード進捗状況
  */
 export interface ILoadProgress {
   phase: 'not-started' | 'downloading' | 'initializing' | 'ready' | 'error';
@@ -33,38 +98,89 @@ export interface ILoadProgress {
 }
 
 /**
- * 探索タスク
+ * エンジンライフサイクル状態
  */
-export interface ISearchTask {
-  info: AsyncIterable<any>;
-  result: Promise<any>;
-  stop(): Promise<void>;
-}
+export type EngineStatus = 'idle' | 'loading' | 'ready' | 'busy' | 'error' | 'terminated';
 
 /**
- * エンジンアダプター（WASI, WebGPU, WebTransport を包含）
+ * エンジンアダプターの共通インターフェース
  */
-export interface IEngineAdapter {
+export interface IEngineAdapter<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult
+> {
   readonly id: string;
   readonly name: string;
   readonly version: string;
   readonly license: string;
-  
+  readonly status: EngineStatus;
+  readonly progress: ILoadProgress;
+
   prefetch?(): Promise<void>;
   load(): Promise<void>;
-  search(options: any): ISearchTask;
+  search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
   dispose(): Promise<void>;
+  
+  onStatusChange(callback: (status: EngineStatus) => void): void;
+  onProgress(callback: (progress: ILoadProgress) => void): void;
 }
 
 /**
- * エンジンブリッジ
+ * アプリケーションが直接触れるエンジン操作インターフェース (Facade)
  */
-export interface IEngineBridge {
-  registerAdapter(adapter: IEngineAdapter): void;
-  getEngine(id: string): IEngine;
-  checkCapabilities(): Promise<ICapabilities>;
+export interface IEngine<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult
+> {
+  /** アダプターの情報と状態への参照 */
+  readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>;
+  
+  /** 探索開始 */
+  search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
+  /** 明示的なロード */
+  load(): Promise<void>;
+  /** 停止 */
+  stop(): Promise<void>;
+  /** 終了処理・破棄 */
+  quit(): Promise<void>;
 }
 
-export interface IEngine extends IEngineAdapter {
-  readonly adapter: IEngineAdapter;
+/**
+ * エンジンブリッジ（管理者）のインターフェース
+ */
+export interface IEngineBridge {
+  /** アダプターの登録 */
+  registerAdapter<
+    T_OPTIONS extends IBaseSearchOptions,
+    T_INFO extends IBaseSearchInfo,
+    T_RESULT extends IBaseSearchResult
+  >(adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>): void;
+
+  /** エンジンの取得 */
+  getEngine<
+    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+    T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+    T_RESULT extends IBaseSearchResult = IBaseSearchResult
+  >(id: string): IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+
+  /** ミドルウェアの登録 */
+  use<T_INFO = unknown, T_RESULT = unknown>(middleware: IMiddleware<T_INFO, T_RESULT>): void;
+
+  /** 環境診断 */
+  checkCapabilities(): Promise<ICapabilities>;
+  getSecurityStatus(): ISecurityStatus;
+}
+
+/**
+ * 実行環境の能力診断
+ */
+export interface ICapabilities {
+  opfs: boolean;
+  wasmThreads: boolean;
+  wasmSimd: boolean;
+  webNN: boolean;
+  webGPU: boolean;
+  webTransport: boolean;
 }
