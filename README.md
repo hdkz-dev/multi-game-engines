@@ -1,49 +1,18 @@
 # multi-game-engines
 
-さまざまなゲームエンジン（チェス、将棋など）を、JavaScript/TypeScriptアプリケーションに統合するための柔軟で疎結合なブリッジライブラリです。
+さまざまなゲームエンジン（チェス、将棋、オセロ等）を統合するための、世界最高水準の TypeScript 疎結合ブリッジライブラリ。
 
-## 概要
+## 🌟 プロジェクトのビジョン
+「ライセンスの壁」と「実装の複雑さ」を取り払い、あらゆるアプリケーションが最高性能の AI エンジンを自由に利用できるエコシステムを構築します。
 
-このプロジェクトは、異なるゲームエンジンとインターフェースするためのプラグインベースのアーキテクチャを提供します。コアロジックを特定のエンジン実装から分離することで、高い再利用性と明確なライセンス境界を確保します。
+## 🚀 究極の技術スタック
+- **Universal Runtime**: ブラウザ, Node.js, Deno, Bun, VS Code 拡張に対応。
+- **Modern Web APIs**: OPFS, WebNN, AbortSignal, AsyncIterable をフル活用。
+- **Zero Copy I/O**: Transferable Objects による高速なバイナリ通信。
+- **Strict License Isolation**: コア (MIT) とアダプタを物理・論理的に分離。
 
-### 主な特徴
-
-- **疎結合アーキテクチャ**: コアライブラリがインターフェースを定義し、アダプタが特定のエンジンロジックを処理します。
-- **モノリポ構成**: npm workspacesを使用して管理され、容易な開発と一貫したバージョン管理を実現します。
-- **ライセンスへの配慮**: コアはMITライセンスですが、エンジンアダプタはラップするエンジンの特定のライセンス（Stockfishの場合はGPLなど）に従うことができます。
-- **ユニバーサルサポート**: WebAssembly (WASM)、ネイティブバイナリ、またはリモートサーバーベースのエンジンで動作するように設計されています。
-
-## プロジェクト管理
-
-プロジェクトの進行状況や方針については、以下のドキュメントを参照してください。
-
-- [運営方針 (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md): 開発ルールと検討プロセス。
-- [タスク管理 (TASKS.md)](docs/TASKS.md): 現在の進捗と今後の予定。
-- [対応履歴 (PROGRESS.md)](docs/PROGRESS.md): これまでの実施内容。
-- [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md): 重要な設計判断の履歴。
-- [ロードマップ (docs/ROADMAP.md)](docs/ROADMAP.md): 中長期的な計画。
-
-## プロジェクト構造
-...（中略）...
-
-```text
-/
-├── packages/
-│   ├── core/              # コアブリッジロジックと型定義 (MIT)
-│   └── adapter-stockfish/ # Stockfish実装 (GPL)
-├── examples/              # 使用例
-├── docs/
-│   ├── ARCHITECTURE.md    # 詳細な設計ドキュメント
-│   ├── TECHNICAL_SPECS.md # 技術仕様書
-│   └── initial-specs/     # 初期検討資料（歴史的経緯）
-└── ARCHITECTURE.md        # 設計思想（ルートへのリンク）
-```
-
-## はじめに
-
-*(準備中)*
-
-## ライセンス
-
-- コアブリッジ: MIT
-- アダプタ: 各エンジンのライセンスに依存（個別のパッケージのREADMEを参照）
+## 📖 ドキュメント案内
+- **設計思想**: [ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **技術仕様**: [TECHNICAL_SPECS.md](docs/TECHNICAL_SPECS.md)
+- **管理ルール**: [PROJECT_MANAGEMENT.md](docs/PROJECT_MANAGEMENT.md)
+- **進行状況**: [TASKS.md](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
