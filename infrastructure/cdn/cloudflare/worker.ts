@@ -74,8 +74,14 @@ export default {
     }
 
     // パス・トラバーサルおよび不正なパスの防御
-    // 正規化されたパスでチェック
-    const normalizedPath = decodeURIComponent(path).replace(/\/+/g, "/");
+    let normalizedPath: string;
+    try {
+      // 正規化されたパスでチェック
+      normalizedPath = decodeURIComponent(path).replace(/\/+/g, "/");
+    } catch (e) {
+      return errorResponse("Bad Request: Malformed URL encoding", 400);
+    }
+
     if (normalizedPath.includes("..") || normalizedPath.includes("./")) {
       return errorResponse("Forbidden: Invalid path patterns detected", 403);
     }
