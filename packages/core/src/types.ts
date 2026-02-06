@@ -1,13 +1,21 @@
 /**
- * 公称型 (Branded Types) の定義
+ * 公称型 (Branded Types)
  */
 export type Brand<T, K> = T & { __brand: K };
-
 export type FEN = Brand<string, 'FEN'>;
 export type Move = Brand<string, 'Move'>;
 
 /**
- * ミドルウェアの定義
+ * 実行環境のセキュリティ・診断ステータス
+ */
+export interface ISecurityStatus {
+  isCrossOriginIsolated: boolean; // SharedArrayBuffer が利用可能か
+  canUseThreads: boolean;
+  missingHeaders?: string[]; // 不足している HTTP ヘッダーのリスト
+}
+
+/**
+ * ミドルウェア
  */
 export interface IMiddlewareContext {
   engineId: string;
@@ -16,90 +24,53 @@ export interface IMiddlewareContext {
 }
 
 export interface IMiddleware {
-  onCommand?(command: string, context: IMiddlewareContext): string | Promise<string>;
+  onCommand?(command: string | Uint8Array, context: IMiddlewareContext): string | Uint8Array | Promise<string | Uint8Array>;
   onInfo?(info: any, context: IMiddlewareContext): any | Promise<any>;
   onResult?(result: any, context: IMiddlewareContext): any | Promise<any>;
 }
 
 /**
- * エンジンのライフサイクル状態
- */
-export type EngineStatus = 'idle' | 'loading' | 'ready' | 'busy' | 'error' | 'terminated';
-
-/**
- * エンジンのロード進捗状況
- */
-export interface ILoadProgress {
-  phase: 'not-started' | 'downloading' | 'initializing' | 'ready' | 'error';
-  percentage: number;
-  i18n: {
-    key: string;
-    params?: Record<string, string | number>;
-    defaultMessage: string;
-  };
-  error?: Error;
-}
-
-/**
- * 探索オプション
- */
-export interface ISearchOptions {
-  fen: FEN;
-  depth?: number;
-  time?: number;
-  nodes?: number;
-  signal?: AbortSignal;
-  extra?: Record<string, unknown>;
-}
-
-/**
- * 探索結果
- */
-export interface ISearchResult {
-  bestMove: Move;
-  ponder?: Move;
-  raw?: string;
-}
-
-/**
- * エンジンアダプターの共通インターフェース
+ * エンジンアダプター
  */
 export interface IEngineAdapter {
   readonly id: string;
   readonly name: string;
   readonly version: string;
   readonly license: string;
-  readonly status: EngineStatus;
-  readonly progress: ILoadProgress;
-
+  
+  /** 投機的ロード（低優先度でのダウンロード開始） */
+  prefetch?(): Promise<void>;
+  
   load(): Promise<void>;
   search(options: ISearchOptions): ISearchTask;
   dispose(): Promise<void>;
-  
-  /** 自己修復のための状態復旧 */
-  recover?(lastFen: FEN): Promise<void>;
 }
 
 /**
- * エンジンブリッジのインターフェース
+ * エンジンブリッジ
  */
 export interface IEngineBridge {
   registerAdapter(adapter: IEngineAdapter): void;
   getEngine(id: string): IEngine;
   use(middleware: IMiddleware): void;
   
-  /** 全体での CPU リソース制限 */
-  setMaxThreads(count: number): void;
+  /** 環境診断 */
+  getSecurityStatus(): ISecurityStatus;
+}
+
+export interface ISearchOptions {
+  fen: FEN;
+  depth?: number;
+  time?: number;
+  signal?: AbortSignal;
 }
 
 export interface ISearchTask {
   info: AsyncIterable<any>;
-  result: Promise<ISearchResult>;
+  result: Promise<any>;
   stop(): Promise<void>;
 }
 
 export interface IEngine extends IEngineAdapter {
   readonly adapter: IEngineAdapter;
-  stop(): Promise<void>;
-  quit(): Promise<void>;
 }

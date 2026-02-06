@@ -94,8 +94,14 @@ WASM だけでなく、ブラウザ標準の Web Neural Network API (WebNN) を�
 ### 5.15 グローバル・リソース管理 (Concurrency Control)
 デバイスの論理コア数を検知し、複数エンジンが稼働する場合でもシステム全体の CPU 負荷が適切に分散されるよう、スレッド割り当てを統治（Orchestration）します。
 
-### 5.16 公称型 (Branded Types) による型安全の極致
-`string` 型の混用（チェスの手に将棋の手を渡す等）を防ぐため、TypeScript の Brand 符号化を採用し、ドメイン固有の値を型レベルで厳密に区別します。
+### 5.17 セキュリティ診断とマルチスレッド統治 (COOP/COEP)
+WASM マルチスレッドを有効にするためのブラウザ制限（Cross-Origin Isolation）を自動診断します。設定が不足している場合、開発者に対して必要な HTTP ヘッダー（COOP/COEP）の設定ガイドをプログラム経由で提供します。
+
+### 5.18 投機的プリフェッチ (Predictive Prefetching)
+利用者の行動（マウスホバー、メニュー選択等）をシグナルとして、エンジンのダウンロードを投機的に開始する `prefetch()` API を提供します。これにより、実際の使用時点での待ち時間をゼロに近づけます。
+
+### 5.19 バイナリ・ファースト・通信
+大量のデータを扱う場合、文字列ベースのプロトコルをバイナリ（Uint8Array）でラップし、`Transferable Objects` を活用したゼロコピー通信を優先します。これにより、高 NPS (Nodes Per Second) 環境でのメインスレッドの負荷を最小化します。
 
 ### 8.1 Changesets による自動バージョニング
 モノリポ内のパッケージ間の依存関係を考慮し、[Changesets](https://github.com/changesets/changesets) を用いた自動バージョニングと Changelog 生成を行います。
