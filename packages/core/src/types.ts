@@ -1,4 +1,15 @@
 /**
+ * エンジンのライフサイクル状態
+ */
+export type EngineStatus =
+  | 'idle'         // 初期状態
+  | 'loading'      // ロード中
+  | 'ready'        // 準備完了・待機中
+  | 'busy'         // 思考中
+  | 'error'        // エラー発生
+  | 'terminated';  // 破棄済み
+
+/**
  * エンジンのロード進捗状況
  */
 export interface ILoadProgress {
@@ -19,7 +30,7 @@ export interface ISearchInfo {
   nps?: number;
   pv?: string[];
   time?: number;
-  raw?: string; // エンジンからの生メッセージ（UCI/USI等）
+  raw?: string;
 }
 
 /**
@@ -35,12 +46,19 @@ export interface ISearchResult {
  * 実行中の探索タスク
  */
 export interface ISearchTask {
-  /** 思考状況を非同期ストリームとして提供 */
   info: AsyncIterable<ISearchInfo>;
-  /** 最終結果を Promise として提供 */
   result: Promise<ISearchResult>;
-  /** 探索を停止する */
   stop(): Promise<void>;
+}
+
+/**
+ * ストレージ操作のインターフェース (DI用)
+ */
+export interface IFileStorage {
+  exists(path: string): Promise<boolean>;
+  read(path: string): Promise<ArrayBuffer>;
+  write(path: string, data: ArrayBuffer): Promise<void>;
+  delete(path: string): Promise<void>;
 }
 
 /**
@@ -56,30 +74,33 @@ export interface IEngineAdapter {
   readonly name: string;
   readonly version: string;
   readonly license: string;
+  readonly status: EngineStatus;
   readonly progress: ILoadProgress;
 
+  onStatusChange(callback: (status: EngineStatus) => void): void;
   onProgress(callback: (progress: ILoadProgress) => void): void;
-  load(): Promise<void>;
-  isCached(): Promise<boolean>;
-  clearCache(): Promise<void>;
   
-  /** 探索の実行 */
+  load(): Promise<void>;
   search(options: any): ISearchTask;
+  
+  /** リソース解放 */
+  dispose(): Promise<void>;
+}
+
+/**
+ * エンジンブリッジ（管理者）のインターフェース
+ */
+export interface IEngineBridge {
+  registerAdapter(adapter: IEngineAdapter): void;
+  getEngine(id: string): IEngine;
+  setStorage(storage: IFileStorage): void;
 }
 
 /**
  * アプリケーションが直接触れるエンジン操作インターフェース
  */
 export interface IEngine extends IEngineAdapter {
-  /** アダプターへの参照 */
   readonly adapter: IEngineAdapter;
-  
-  /** 探索開始（未ロード時は戦略に従い自動ロードされる場合がある） */
-  search(options: any): ISearchTask;
-  
-  /** 停止 */
   stop(): Promise<void>;
-  
-  /** 終了処理 */
   quit(): Promise<void>;
 }
