@@ -1,22 +1,24 @@
 /**
- * ログレベル
+ * 公称型 (Branded Types) の定義
  */
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type Brand<T, K> = T & { __brand: K };
+
+export type FEN = Brand<string, 'FEN'>;
+export type Move = Brand<string, 'Move'>;
 
 /**
- * 外部から注入可能なロガー
+ * ミドルウェアの定義
  */
-export interface ILogger {
-  log(level: LogLevel, message: string, context?: Record<string, unknown>): void;
+export interface IMiddlewareContext {
+  engineId: string;
+  adapterName: string;
+  timestamp: number;
 }
 
-/**
- * 国際化対応のメッセージ情報
- */
-export interface II18nMessage {
-  key: string;
-  params?: Record<string, string | number>;
-  defaultMessage: string; // 日本語等のデフォルトメッセージ
+export interface IMiddleware {
+  onCommand?(command: string, context: IMiddlewareContext): string | Promise<string>;
+  onInfo?(info: any, context: IMiddlewareContext): any | Promise<any>;
+  onResult?(result: any, context: IMiddlewareContext): any | Promise<any>;
 }
 
 /**
@@ -30,25 +32,19 @@ export type EngineStatus = 'idle' | 'loading' | 'ready' | 'busy' | 'error' | 'te
 export interface ILoadProgress {
   phase: 'not-started' | 'downloading' | 'initializing' | 'ready' | 'error';
   percentage: number;
-  i18n: II18nMessage; // 文字列の代わりに構造化されたメッセージを返す
+  i18n: {
+    key: string;
+    params?: Record<string, string | number>;
+    defaultMessage: string;
+  };
   error?: Error;
-}
-
-/**
- * 実行環境の機能サポート状況
- */
-export interface ICapabilities {
-  opfs: boolean;
-  wasmThreads: boolean;
-  wasmSimd: boolean;
-  webNN: boolean;
 }
 
 /**
  * 探索オプション
  */
 export interface ISearchOptions {
-  fen: string;
+  fen: FEN;
   depth?: number;
   time?: number;
   nodes?: number;
@@ -57,33 +53,12 @@ export interface ISearchOptions {
 }
 
 /**
- * 探索中の思考状況
- */
-export interface ISearchInfo {
-  depth: number;
-  score: number;
-  pv?: string[];
-  nps?: number;
-  time?: number;
-  raw?: string;
-}
-
-/**
- * 最終的な探索結果
+ * 探索結果
  */
 export interface ISearchResult {
-  bestMove: string;
-  ponder?: string;
+  bestMove: Move;
+  ponder?: Move;
   raw?: string;
-}
-
-/**
- * 実行中の探索タスク
- */
-export interface ISearchTask {
-  info: AsyncIterable<ISearchInfo>;
-  result: Promise<ISearchResult>;
-  stop(): Promise<void>;
 }
 
 /**
@@ -97,27 +72,32 @@ export interface IEngineAdapter {
   readonly status: EngineStatus;
   readonly progress: ILoadProgress;
 
-  onStatusChange(callback: (status: EngineStatus) => void): void;
-  onProgress(callback: (progress: ILoadProgress) => void): void;
-  
   load(): Promise<void>;
   search(options: ISearchOptions): ISearchTask;
   dispose(): Promise<void>;
+  
+  /** 自己修復のための状態復旧 */
+  recover?(lastFen: FEN): Promise<void>;
 }
 
 /**
- * エンジンブリッジ（管理者）のインターフェース
+ * エンジンブリッジのインターフェース
  */
 export interface IEngineBridge {
   registerAdapter(adapter: IEngineAdapter): void;
   getEngine(id: string): IEngine;
-  setLogger(logger: ILogger): void;
-  checkCapabilities(): Promise<ICapabilities>;
+  use(middleware: IMiddleware): void;
+  
+  /** 全体での CPU リソース制限 */
+  setMaxThreads(count: number): void;
 }
 
-/**
- * アプリケーションが直接触れるエンジン操作インターフェース
- */
+export interface ISearchTask {
+  info: AsyncIterable<any>;
+  result: Promise<ISearchResult>;
+  stop(): Promise<void>;
+}
+
 export interface IEngine extends IEngineAdapter {
   readonly adapter: IEngineAdapter;
   stop(): Promise<void>;

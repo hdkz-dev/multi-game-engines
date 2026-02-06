@@ -85,10 +85,17 @@ WASM だけでなく、ブラウザ標準の Web Neural Network API (WebNN) を�
 ### 5.11 機能検知とレジリエンス (Capability Detection)
 実行環境の Web 標準 API サポート状況（OPFS, WebAssembly Threads, WebNN 等）を起動時に診断します。最適な機能が利用できない場合でも、スムーズに代替手段（IndexedDB, Single-thread WASM 等）へ切り替えるレジリエンスを備えます。
 
-### 5.12 統合ロギングインターフェース
-Worker 内部を含む全レイヤーの動作ログを、アプリケーションが注入したロガー（例：Sentry, Winston, または単なる console）へ統合出力できる仕組みを提供します。
+### 5.13 自己修復 (Self-Healing)
+エンジンのプロセス（Worker）が異常終了した場合、直前の局面（FEN等）を保持し、自動的にプロセスを再起動して状態を復元するレジリエンス機能を備えます。
 
-## 8. リリースと品質保証
+### 5.14 ミドルウェア・パイプライン
+エンジンとの通信（Command/Info/Result）の間に、任意のミドルウェアを挿入可能にします。これにより、ログ収集、メトリクス送信、メッセージの動的変換などをコアを修正することなく実現できます。
+
+### 5.15 グローバル・リソース管理 (Concurrency Control)
+デバイスの論理コア数を検知し、複数エンジンが稼働する場合でもシステム全体の CPU 負荷が適切に分散されるよう、スレッド割り当てを統治（Orchestration）します。
+
+### 5.16 公称型 (Branded Types) による型安全の極致
+`string` 型の混用（チェスの手に将棋の手を渡す等）を防ぐため、TypeScript の Brand 符号化を採用し、ドメイン固有の値を型レベルで厳密に区別します。
 
 ### 8.1 Changesets による自動バージョニング
 モノリポ内のパッケージ間の依存関係を考慮し、[Changesets](https://github.com/changesets/changesets) を用いた自動バージョニングと Changelog 生成を行います。
