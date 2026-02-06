@@ -10,8 +10,7 @@ infrastructure/
 ├── cdn/
 │   ├── CDN_COMPARISON.md  # CDN サービス詳細比較
 │   ├── cloudflare/        # Cloudflare R2/Workers 設定
-│   ├── nginx/             # 自己ホスト用 nginx 設定
-│   └── docker/            # Docker イメージ
+│   └── docker/            # Docker イメージ (nginx 設定含む)
 └── scripts/
     └── download-engine.sh # エンジンダウンロードスクリプト
 ```

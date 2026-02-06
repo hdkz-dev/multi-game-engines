@@ -96,12 +96,12 @@ const stockfish = bridge.getEngine("stockfish");
 
 ```typescript
 type EngineStatus =
-  | "idle"
-  | "loading"
-  | "ready"
-  | "busy"
-  | "error"
-  | "terminated";
+  | "idle" // 初期状態
+  | "loading" // ロード中 (バイナリ取得、初期化)
+  | "ready" // 実行可能状態
+  | "busy" // 探索・計算中
+  | "error" // 致命的エラー
+  | "terminated"; // quit() 呼び出し後、完全に破棄された状態 (再利用不可)
 
 interface ILoadProgress {
   phase: "not-started" | "downloading" | "initializing" | "ready" | "error";
@@ -115,6 +115,8 @@ interface ILoadProgress {
 }
 ```
 
+> **注意**: `terminated` 状態のアダプターはガベージコレクションの対象となり得ます。再びエンジンを使用する場合は `EngineBridge.getEngine()` で新しいインスタンスを取得する必要があります。
+
 ### クラス設計
 
 ```typescript
@@ -123,28 +125,46 @@ abstract class BaseAdapter<
   T_INFO extends IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult,
 > implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
-  // サブクラスが定義
+  // サブクラスが定義 (IEngineAdapterInfo の実装)
   abstract readonly id: string;
   abstract readonly name: string;
   abstract readonly version: string;
-  abstract readonly license: string;
+  abstract readonly engineLicense: ILicenseInfo;
+  abstract readonly adapterLicense: ILicenseInfo;
+  abstract readonly sources?: Record<string, IEngineSourceConfig>;
 
   // 状態管理
   protected _status: EngineStatus = "idle";
   protected _progress: ILoadProgress = {
-    /* ... */
+    phase: "not-started",
+    percentage: 0,
+    i18n: { key: "progress.idle", defaultMessage: "Initializing..." },
   };
 
   // ライフサイクル (サブクラスがオーバーライド)
+  abstract prefetch?(): Promise<void>;
   abstract load(): Promise<void>;
   abstract search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
   abstract dispose(): Promise<void>;
 
-  // イベント発火
+  // 状態取得
+  get status(): EngineStatus {
+    return this._status;
+  }
+  get progress(): ILoadProgress {
+    return this._progress;
+  }
+
+  // イベント登録・発火
+  abstract onStatusChange(callback: (status: EngineStatus) => void): void;
+  abstract onProgress(callback: (progress: ILoadProgress) => void): void;
+
   protected emitStatusChange(status: EngineStatus): void {
+    this._status = status;
     /* ... */
   }
   protected emitProgress(progress: ILoadProgress): void {
+    this._progress = progress;
     /* ... */
   }
 }

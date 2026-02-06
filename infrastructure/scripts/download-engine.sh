@@ -70,6 +70,11 @@ if [[ -z "$ENGINE" ]]; then
     usage
 fi
 
+# パス・トラバーサルガード
+if [[ "$ENGINE" =~ \.\. ]] || [[ "$VERSION" =~ \.\. ]]; then
+    error "Potential path traversal detected in arguments"
+fi
+
 # 出力ディレクトリ作成
 mkdir -p "$OUTPUT_DIR/$ENGINE/$VERSION"
 
@@ -84,10 +89,19 @@ info "Fetching manifest from $MANIFEST_URL..."
 MANIFEST=$(curl -sf "$MANIFEST_URL") || error "Failed to fetch manifest"
 
 # ファイル一覧を取得してダウンロード
-echo "$MANIFEST" | jq -r '.files | to_entries[] | "\(.key) \(.value.url) \(.value.sri) \(.value.size)"' | while read -r key url sri size; do
+# パイプではなくプロセス置換を使用することで、ループ内での exit が親プロセスに伝わるようにする
+while read -r key url sri size; do
+    # マニフェスト内の url に対するパス・トラバーサルガード
+    if [[ "$url" =~ \.\. ]] || [[ "$url" == /* ]]; then
+        error "Invalid file path in manifest: $url"
+    fi
+
     FILE_URL="$CDN_BASE_URL/v1/$ENGINE/$VERSION/$url"
     OUTPUT_FILE="$OUTPUT_DIR/$ENGINE/$VERSION/$url"
     
+    # 必要に応じてサブディレクトリを作成
+    mkdir -p "$(dirname "$OUTPUT_FILE")"
+
     info "Downloading $key ($size bytes)..."
     
     # ダウンロード
@@ -102,22 +116,28 @@ echo "$MANIFEST" | jq -r '.files | to_entries[] | "\(.key) \(.value.url) \(.valu
         EXPECTED_HASH=$(echo "$sri" | cut -d'-' -f2)
         
         # ファイルハッシュを計算
+        # openssl dgst は多くの環境で標準的であり、バイナリ出力を直接 base64 に渡せる
         case "$ALGO" in
-            sha256) ACTUAL_HASH=$(shasum -a 256 "$OUTPUT_FILE" | cut -d' ' -f1 | xxd -r -p | base64) ;;
-            sha384) ACTUAL_HASH=$(shasum -a 384 "$OUTPUT_FILE" | cut -d' ' -f1 | xxd -r -p | base64) ;;
-            sha512) ACTUAL_HASH=$(shasum -a 512 "$OUTPUT_FILE" | cut -d' ' -f1 | xxd -r -p | base64) ;;
-            *) warn "Unknown hash algorithm: $ALGO, skipping verification" ;;
+            sha256) ACTUAL_HASH=$(openssl dgst -sha256 -binary "$OUTPUT_FILE" | openssl base64) ;;
+            sha384) ACTUAL_HASH=$(openssl dgst -sha384 -binary "$OUTPUT_FILE" | openssl base64) ;;
+            sha512) ACTUAL_HASH=$(openssl dgst -sha512 -binary "$OUTPUT_FILE" | openssl base64) ;;
+            *) warn "Unknown hash algorithm: $ALGO, skipping verification" ; ACTUAL_HASH="" ;;
         esac
         
-        if [[ "$ACTUAL_HASH" == "$EXPECTED_HASH" ]]; then
-            success "SRI verification passed for $key"
-        else
-            error "SRI verification failed for $key\nExpected: $EXPECTED_HASH\nActual: $ACTUAL_HASH"
+        # 空白削除 (openssl の出力には改行が含まれることがある)
+        ACTUAL_HASH=$(echo "$ACTUAL_HASH" | tr -d ' \n\r')
+
+        if [[ -n "$ACTUAL_HASH" ]]; then
+            if [[ "$ACTUAL_HASH" == "$EXPECTED_HASH" ]]; then
+                success "SRI verification passed for $key"
+            else
+                error "SRI verification failed for $key\nExpected: $EXPECTED_HASH\nActual: $ACTUAL_HASH"
+            fi
         fi
     else
         warn "No SRI hash for $key, skipping verification"
     fi
-done
+done < <(echo "$MANIFEST" | jq -r '.files | to_entries[] | "\(.key) \(.value.url) \(.value.sri) \(.value.size)"')
 
 # manifest.json もコピー
 echo "$MANIFEST" > "$OUTPUT_DIR/$ENGINE/$VERSION/manifest.json"

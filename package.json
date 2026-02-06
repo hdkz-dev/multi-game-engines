@@ -6,9 +6,19 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test -w packages/*",
+    "lint": "npm run lint -w packages/*",
+    "typecheck": "npm run typecheck -w packages/*",
+    "build": "npm run build -w packages/*",
+    "clean": "find . -name \"dist\" -type d -exec rm -rf {} +",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\""
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.7.0",
+    "prettier": "^3.0.0"
   }
 }

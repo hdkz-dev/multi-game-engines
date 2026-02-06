@@ -9,16 +9,24 @@ export type Move = Brand<string, "Move">;
  * 実行環境のセキュリティ・診断ステータス
  */
 export interface ISecurityStatus {
-  /** SharedArrayBuffer が利用可能か */
+  /** SharedArrayBuffer が利用可能か (マルチスレッド対応に必須) */
   isCrossOriginIsolated: boolean;
-  /** マルチスレッドが利用可能か */
+  /**
+   * マルチスレッドが実際に利用可能か。
+   * SharedArrayBuffer があっても、ブラウザのポリシーで制限されている場合があります。
+   */
   canUseThreads: boolean;
-  /** 不足している HTTP ヘッダー */
+  /**
+   * 不足している HTTP ヘッダー (COOP/COEP など)。
+   * これらが不足していると WebWorker 間のメモリ共有ができません。
+   */
   missingHeaders?: string[];
-  /** SRI (Subresource Integrity) がサポートされているか */
+  /** ブラウザが Fetch API の integrity 属性をサポートしているか */
   sriSupported: boolean;
-  /** ロードされたリソースが SRI で検証されたか */
+  /** 実際にロードされたすべてのバイナリが SRI 検証を通過したか */
   sriVerified?: boolean;
+  /** 安全に実行するために必要な推奨アクション (例: "適切にヘッダーを設定してください") */
+  recommendedActions?: string[];
 }
 
 /**
@@ -28,6 +36,11 @@ export interface IMiddlewareContext {
   engineId: string;
   adapterName: string;
   timestamp: number;
+  /**
+   * ゼロコピー通信のための Transferable オブジェクトのリスト。
+   * 大容量の ArrayBuffer をスレッド間で転送する際に使用します。
+   */
+  transfer?: Transferable[];
 }
 
 /**
@@ -75,14 +88,29 @@ export interface ISearchTask<
 }
 
 /**
+ * ミドルウェアの優先度
+ */
+export enum MiddlewarePriority {
+  LOW = 0,
+  NORMAL = 100,
+  HIGH = 200,
+  MONITOR = 1000, // 変更を加えず監視のみを行う
+}
+
+/**
  * ミドルウェアの定義
  */
 export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown> {
+  /** 実行優先度 */
+  priority?: MiddlewarePriority;
+
   onCommand?(
     command: string | Uint8Array,
     context: IMiddlewareContext,
   ): string | Uint8Array | Promise<string | Uint8Array>;
+
   onInfo?(info: T_INFO, context: IMiddlewareContext): T_INFO | Promise<T_INFO>;
+
   onResult?(
     result: T_RESULT,
     context: IMiddlewareContext,
@@ -105,12 +133,72 @@ export interface IEngineSourceConfig {
 }
 
 /**
- * ライセンス詳細メタデータ
+ * 独自 CDN (R2) のルートマニフェスト構造 (Index)
+ */
+export interface IEngineManifestIndex {
+  version: string; // API バージョン (例: "v1")
+  updatedAt: string;
+  engines: Record<
+    string,
+    {
+      description: string;
+      latestVersion: string;
+      versions: string[]; // 利用可能な全バージョン
+    }
+  >;
+}
+
+/**
+ * 独自 CDN (R2) の各バージョンごとのマニフェスト構造
+ * パス: /v1/{engine}/{version}/manifest.json
+ */
+export interface IEngineVersionManifest {
+  engineId: string;
+  version: string;
+  files: Record<
+    string,
+    {
+      url: string; // CDN オリジンからの相対パス、または絶対URL
+      sri: string; // サブリソース整合性ハッシュ
+      size: number;
+      type: IEngineSourceConfig["type"];
+    }
+  >;
+}
+
+/**
+ * 標準化されたエラーコード
+ */
+export enum EngineErrorCode {
+  NETWORK_ERROR = "NETWORK_ERROR", // ダウンロード失敗
+  SRI_VERIFICATION_FAILED = "SRI_FAILED", // 改竄検知
+  WASM_NOT_SUPPORTED = "WASM_NOT_SUPPORTED", // WASM実行不可
+  INITIALIZATION_FAILED = "INIT_FAILED", // 起動時エラー
+  SEARCH_TIMEOUT = "TIMEOUT", // 探索中タイムアウト
+  MEMORY_LIMIT_EXCEEDED = "OUT_OF_MEMORY", // メモリ不足
+  INTERNAL_ENGINE_ERROR = "ENGINE_ERROR", // エンジン内部エラー (UCI/USIプロトコル外)
+  SECURITY_VIOLATION = "SECURITY_VIOLATION", // セキュリティ制限による停止
+}
+
+export interface IEngineError extends Error {
+  code: EngineErrorCode;
+  engineId?: string;
+  originalError?: unknown;
+}
+
+/**
+ * ライセンス詳細メタデータ (SPDX-準拠推奨)
  */
 export interface ILicenseInfo {
-  name: string; // "GPL-3.0", "MIT", etc.
+  /**
+   * ライセンス名。可能な限り SPDX License Identifier (例: "MIT", "GPL-3.0-only", "Apache-2.0") を使用してください。
+   * 参考: https://spdx.org/licenses/
+   */
+  name: string;
+  /** ライセンス文の全文または公式サイトへのリンク */
   url: string;
-  sourceCodeUrl?: string; // GPL等の場合、ソース公開義務に応えるためのリンク
+  /** GPL/LGPL等の場合、ソース公開義務に応えるためのリポジトリリンク */
+  sourceCodeUrl?: string;
 }
 
 /**
@@ -124,7 +212,7 @@ export interface ITelemetryEvent {
     | "error_rate"
     | "initialization_latency";
   value: number;
-  unit: string;
+  unit: "ms" | "nodes/s" | "nodes" | "bytes" | "ratio" | "percentage" | "ply";
   timestamp: number;
   metadata?: Record<string, string | number | boolean>;
 }
@@ -155,13 +243,9 @@ export type EngineStatus =
   | "terminated";
 
 /**
- * エンジンアダプターの共通インターフェース
+ * エンジンアダプターの公開情報 (Facade利用者のための読取専用インターフェース)
  */
-export interface IEngineAdapter<
-  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-> {
+export interface IEngineAdapterInfo {
   readonly id: string;
   readonly name: string;
   readonly version: string;
@@ -176,7 +260,16 @@ export interface IEngineAdapter<
 
   readonly status: EngineStatus;
   readonly progress: ILoadProgress;
+}
 
+/**
+ * エンジンアダプターの共通インターフェース
+ */
+export interface IEngineAdapter<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+> extends IEngineAdapterInfo {
   prefetch?(): Promise<void>;
   load(): Promise<void>;
   search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
@@ -196,16 +289,28 @@ export interface IEngine<
   T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > {
-  /** アダプターの情報と状態への参照 */
-  readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>;
+  /** アダプターの情報と状態への参照 (内部メソッドは隠蔽) */
+  readonly adapter: IEngineAdapterInfo;
 
-  /** 探索開始 */
+  /**
+   * 探索を開始。
+   * 非同期イテレータを通じて思考状況 (T_INFO) を、Promise を通じて最終結果 (T_RESULT) を提供。
+   */
   search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
-  /** 明示的なロード */
+  /**
+   * エンジンのバイナリをロード・初期化。
+   * search() を呼ぶ前に明示的に呼ぶことが推奨されますが、実装によっては search() 時に暗黙的に実行されます。
+   */
   load(): Promise<void>;
-  /** 停止 */
+  /**
+   * 現在進行中の探索 (search) を即座に停止。
+   * アダプターは生きており、次の search() をすぐに開始できます。
+   */
   stop(): Promise<void>;
-  /** 終了処理・破棄 */
+  /**
+   * エンジンを終了し、リソース (WebWorker, メモリなど) を解放。
+   * これを呼んだ後のインスタンスは利用不可能 (terminated状態) になります。
+   */
   quit(): Promise<void>;
 
   /** UI表示用のライセンス・クレジット情報の一括取得 (アトリビューション自動化) */
@@ -257,4 +362,19 @@ export interface ICapabilities {
   webNN: boolean; // Web Neural Network API
   webGPU: boolean; // WebGPU (AI/Compute加速)
   webTransport: boolean;
+  /** 詳細な診断メッセージ（デバッグ用） */
+  details?: Record<keyof Omit<ICapabilities, "details">, string>;
+}
+
+/**
+ * エンジン固有のオプション拡張
+ */
+export interface IEngineSpecificOptions extends Record<
+  string,
+  string | number | boolean | Record<string, unknown> | undefined
+> {
+  /** マルチスレッドエンジン用のスレッド数指定 */
+  threads?: number;
+  /** Hashメモリサイズ (MB) */
+  hashSize?: number;
 }

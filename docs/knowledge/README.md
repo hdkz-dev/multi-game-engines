@@ -16,8 +16,8 @@
 ## 🔗 関連ドキュメント
 
 - [ARCHITECTURE.md](../ARCHITECTURE.md) - アーキテクチャ概要
-- [DECISION_LOG.md](./DECISION_LOG.md) - 意思決定記録 (ADR)
-- [TECHNICAL_SPECS.md](./TECHNICAL_SPECS.md) - 技術仕様書
+- [DECISION_LOG.md](../DECISION_LOG.md) - 意思決定記録 (ADR)
+- [TECHNICAL_SPECS.md](../TECHNICAL_SPECS.md) - 技術仕様書
 
 ## 📝 更新ガイドライン
 

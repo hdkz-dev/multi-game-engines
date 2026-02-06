@@ -6,7 +6,7 @@
   "author": "multi-game-engines contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/user/multi-game-engines.git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-stockfish"
   },
   "type": "module",
@@ -35,10 +35,15 @@
     "@multi-game-engines/core": "^0.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "tsup": "^8.0.0",
+    "vitest": "^3.0.0",
+    "eslint": "^9.0.0",
+    "@multi-game-engines/core": "workspace:*"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "test": "vitest run",
     "lint": "eslint src"
   },
