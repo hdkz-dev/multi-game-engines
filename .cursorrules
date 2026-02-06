@@ -5,23 +5,22 @@
 ## 🚨 厳格な品質管理と運用ルール (必須)
 
 ### 0. 開発のガバナンス
-1.  **ドキュメント駆動開発**: コードを書く前に必ず `docs/implementation_plans/` に計画書を作成し、合意を得ること。
-2.  **管理ドキュメントの更新**: 実装が完了したら `docs/PROGRESS.md` と `docs/TASKS.md` を自律的に更新すること。
-3.  **意思決定の記録**: 重要な設計変更は `docs/DECISION_LOG.md` に ADR として記録すること。
+1. **ドキュメント駆動開発**: コードを書く前に必ず `docs/implementation_plans/` に計画書を作成し、合意を得ること。
+2. **管理ドキュメントの更新**: 実装が完了したら `docs/PROGRESS.md` と `docs/TASKS.md` を自律的に更新すること。
+3. **意思決定の記録**: 重要な設計変更は `docs/DECISION_LOG.md` に ADR として記録すること。
 
 ### 1. 技術的品質原則
-1.  **最新 Web 標準の遵守**: WASM, OPFS, WebNN, AbortSignal, AsyncIterable を優先して採用すること。
-2.  **疎結合とライセンス隔離**: `core` (MIT) と `adapters` (各エンジンライセンス) の境界を厳格に守ること。
-3.  **型安全性と DX**: ジェネリクスを最大限活用し、利用者が型補完で快適に開発できるようにすること。
-4.  **セキュリティ**: 動的ロードには必ず SRI (Subresource Integrity) の検証を組み込むこと。
+1. **最先端 Web 標準の遵守**: WASM (WASI), OPFS, WebNN, WebGPU, WebTransport, AbortSignal, AsyncIterable を優先して採用すること。
+2. **疎結合とライセンス隔離**: `core` (MIT) と `adapters` (各エンジンライセンス) の境界を厳格に守ること。
+3. **型安全性と DX**: Branded Types (FEN, Move) を使用し、型レベルでバグを防止すること。
+4. **レジリエンス**: Self-Healing (自己修復) と Capability Detection (機能検知) を実装すること。
+5. **セキュリティ**: 動的ロードには SRI (Subresource Integrity) 検証を組み込むこと。
 
 ## 🗣️ 言語とコミュニケーション
-
-**全てのやり取り（応答、コミットメッセージ、PR、ドキュメント、コードコメント）は日本語で行ってください。**
+**全てのやり取りは日本語で行ってください。**
 
 ## 📂 参照優先度
 1. `GEMINI.md`: あなた自身の役割定義。
 2. `docs/PROJECT_MANAGEMENT.md`: 運営ルール。
-3. `docs/TECHNICAL_SPECS.md`: 技術的な詳細仕様。
-4. `docs/CODING_CONVENTIONS.md`: 命名・構造ルール。
-5. `ARCHITECTURE.md`: 設計思想の総論。
+3. `docs/TECHNICAL_SPECS.md`: 究極の技術仕様。
+4. `docs/DECISION_LOG.md`: 過去の意思決定履歴。
