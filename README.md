@@ -1,34 +1,18 @@
 # multi-game-engines
 
-さまざまなゲームエンジン（チェス、将棋など）を、JavaScript/TypeScriptアプリケーションに統合するための柔軟で疎結合なブリッジライブラリです。
+さまざまなゲームエンジン（チェス、将棋、オセロ等）を統合するための、世界最高水準の TypeScript 疎結合ブリッジライブラリ。
 
-## 概要
+## 🌟 プロジェクトのビジョン
+「ライセンスの壁」と「実装の複雑さ」を取り払い、あらゆるアプリケーションが最高性能の AI エンジンを自由に利用できるエコシステムを構築します。
 
-このプロジェクトは、異なるゲームエンジンとインターフェースするためのプラグインベースのアーキテクチャを提供します。コアロジックを特定のエンジン実装から分離することで、高い再利用性と明確なライセンス境界を確保します。
+## 🚀 究極の技術スタック
+- **Universal Runtime**: ブラウザ, Node.js, Deno, Bun, VS Code 拡張に対応。
+- **Modern Web APIs**: OPFS, WebNN, AbortSignal, AsyncIterable をフル活用。
+- **Zero Copy I/O**: Transferable Objects による高速なバイナリ通信。
+- **Strict License Isolation**: コア (MIT) とアダプタを物理・論理的に分離。
 
-### 主な特徴
-
-- **疎結合アーキテクチャ**: コアライブラリがインターフェースを定義し、アダプタが特定のエンジンロジックを処理します。
-- **モノリポ構成**: npm workspacesを使用して管理され、容易な開発と一貫したバージョン管理を実現します。
-- **ライセンスへの配慮**: コアはMITライセンスですが、エンジンアダプタはラップするエンジンの特定のライセンス（Stockfishの場合はGPLなど）に従うことができます。
-- **ユニバーサルサポート**: WebAssembly (WASM)、ネイティブバイナリ、またはリモートサーバーベースのエンジンで動作するように設計されています。
-
-## プロジェクト構造
-
-```text
-/
-├── packages/
-│   ├── core/              # コアブリッジロジックと型定義 (MIT)
-│   └── adapter-stockfish/ # Stockfish実装 (GPL)
-├── examples/              # 使用例
-└── ARCHITECTURE.md        # 詳細な設計ドキュメント
-```
-
-## はじめに
-
-*(準備中)*
-
-## ライセンス
-
-- コアブリッジ: MIT
-- アダプタ: 各エンジンのライセンスに依存（個別のパッケージのREADMEを参照）
+## 📖 ドキュメント案内
+- **設計思想**: [ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **技術仕様**: [TECHNICAL_SPECS.md](docs/TECHNICAL_SPECS.md)
+- **管理ルール**: [PROJECT_MANAGEMENT.md](docs/PROJECT_MANAGEMENT.md)
+- **進行状況**: [TASKS.md](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
