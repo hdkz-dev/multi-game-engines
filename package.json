@@ -1,0 +1,14 @@
+{
+  "name": "multi-game-engines",
+  "private": true,
+  "description": "A bridge library for various game engines with a plugin-based architecture.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
