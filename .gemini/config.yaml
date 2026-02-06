@@ -1,0 +1,6 @@
+project_name: multi-game-engines
+language: ja
+ignore_patterns:
+  - '**/dist/**'
+  - '**/node_modules/**'
+  - '**/.git/**'
