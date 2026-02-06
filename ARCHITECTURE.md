@@ -29,8 +29,9 @@
 共通のタスク（探索、指し手、評価）のための統一インターフェースを提供しつつ、エンジン独自の機能を活用できる設計にしています。アダプターはエンジン固有のメソッドを公開でき、ユーザーはTypeScriptのジェネリクスを使用して型安全にアクセスできます。
 
 ```typescript
-const stockfish = bridge.getEngine<StockfishAdapter>('stockfish');
-stockfish.setSkillLevel(20); // エンジン固有のメソッド
+// エンジン固有の型を指定して型安全にアクセス
+const stockfish = bridge.getEngine<StockfishOptions, StockfishInfo, StockfishResult>('stockfish');
+stockfish.search({ fen: '...' as FEN, depth: 20 }); // 型安全な探索
 ```
 
 ## ライセンス戦略
