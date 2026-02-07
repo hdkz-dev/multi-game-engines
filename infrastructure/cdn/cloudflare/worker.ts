@@ -28,6 +28,8 @@ const CORS_HEADERS = {
 const SECURITY_HEADERS = {
   "Cross-Origin-Resource-Policy": "cross-origin",
   "X-Content-Type-Options": "nosniff",
+  "Cross-Origin-Opener-Policy": "same-origin",
+  "Cross-Origin-Embedder-Policy": "require-corp",
 };
 
 const CACHE_HEADERS = {
