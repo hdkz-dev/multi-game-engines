@@ -28,7 +28,7 @@
 | **Class B 操作** (読み取り) | 1000万回/月    | $0.36/100万回 |
 | **エグレス (転送量)**       | **無制限無料** | **$0**        |
 
-#### コスト試算
+#### コスト試算 (Cloudflare R2)
 
 | ダウンロード数/月 | 転送量 | ストレージ | 読み取り操作 | 月額コスト |
 | ----------------- | ------ | ---------- | ------------ | ---------- |
@@ -52,7 +52,7 @@
 
 #### 利用方法
 
-```
+```text
 # npm パッケージから
 https://cdn.jsdelivr.net/npm/@engine-binaries/stockfish@16.1/stockfish.wasm
 
@@ -60,7 +60,7 @@ https://cdn.jsdelivr.net/npm/@engine-binaries/stockfish@16.1/stockfish.wasm
 https://cdn.jsdelivr.net/gh/user/stockfish-wasm@v16.1/stockfish.wasm
 ```
 
-#### コスト試算
+#### コスト試算 (jsDelivr)
 
 | ダウンロード数/月 | 転送量 | 月額コスト |
 | ----------------- | ------ | ---------- |
@@ -81,11 +81,11 @@ https://cdn.jsdelivr.net/gh/user/stockfish-wasm@v16.1/stockfish.wasm
 
 #### 利用方法
 
-```
+```text
 https://unpkg.com/@engine-binaries/stockfish@16.1/stockfish.wasm
 ```
 
-#### コスト試算
+#### コスト試算 (unpkg)
 
 | ダウンロード数/月 | 転送量 | 月額コスト |
 | ----------------- | ------ | ---------- |
@@ -106,11 +106,11 @@ https://unpkg.com/@engine-binaries/stockfish@16.1/stockfish.wasm
 
 #### 利用方法
 
-```
+```text
 https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 ```
 
-#### コスト試算
+#### コスト試算 (GitHub Releases)
 
 | ダウンロード数/月 | 転送量  | 月額コスト            |
 | ----------------- | ------- | --------------------- |
@@ -129,7 +129,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **超過料金**       | $0.15/GB       | $0.15/GB       |
 | **ファイルサイズ** | 50 MB/ファイル | 50 MB/ファイル |
 
-#### コスト試算 (Hobby)
+#### コスト試算 (Vercel Hobby)
 
 | ダウンロード数/月 | 転送量 | 月額コスト          |
 | ----------------- | ------ | ------------------- |
@@ -149,7 +149,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **帯域幅**   | 100 GB/月 | 1 TB/月      |
 | **超過料金** | $0.20/GB  | $0.20/GB     |
 
-#### コスト試算 (無料枠)
+#### コスト試算 (Netlify Free)
 
 | ダウンロード数/月 | 転送量 | 月額コスト          |
 | ----------------- | ------ | ------------------- |
@@ -174,7 +174,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **ストレージ**      | $0.01/GB/月 |
 | **最低料金**        | $1/月       |
 
-#### コスト試算
+#### コスト試算 (Bunny CDN)
 
 | ダウンロード数/月 | 転送量 | ストレージ | 月額コスト      |
 | ----------------- | ------ | ---------- | --------------- |
@@ -196,7 +196,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **CloudFront 転送量**     | $0.085/GB (最初 10TB) |
 | **CloudFront リクエスト** | $0.0075/10000         |
 
-#### コスト試算
+#### コスト試算 (AWS CloudFront)
 
 | ダウンロード数/月 | 転送量 | ストレージ | リクエスト | 月額コスト  |
 | ----------------- | ------ | ---------- | ---------- | ----------- |
@@ -218,7 +218,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **CDN 転送量 (アジア)**    | $0.12/GB          |
 | **キャッシュ無効化**       | $0.005/リクエスト |
 
-#### コスト試算 (平均 $0.10/GB)
+#### コスト試算 (Google Cloud CDN)
 
 | ダウンロード数/月 | 転送量 | 月額コスト  |
 | ----------------- | ------ | ----------- |
@@ -239,7 +239,7 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 | **転送量**     | $5/月 (1 TB 含む)   |
 | **超過転送量** | $0.01/GB            |
 
-#### コスト試算
+#### コスト試算 (DigitalOcean)
 
 | ダウンロード数/月 | 転送量 | 月額コスト |
 | ----------------- | ------ | ---------- |
@@ -314,21 +314,25 @@ https://github.com/user/stockfish-wasm/releases/download/v16.1/stockfish.wasm
 
 ## 6. 推奨構成
 
-### 6.1 開発初期 (月間 ~10,000 DL)
+### 6.1 推奨構成（プロジェクト戦略に基づく）
 
-| 役割           | サービス      | 理由                    |
-| -------------- | ------------- | ----------------------- |
-| **プライマリ** | Cloudflare R2 | 無料、カスタム API 可能 |
-| **ミラー**     | jsDelivr      | 完全無料、追加設定不要  |
+詳細な実装フェーズについては [stockfish-wasm-strategy.md](../../docs/implementation_plans/stockfish-wasm-strategy.md) および [ADR-016](../../docs/adr/016-two-stage-release.md) を参照してください。
 
-### 6.2 成長期 (月間 ~100,000 DL)
+#### Phase 1: 即時導入（ゼロ運用コスト）
 
-| 役割           | サービス                   | 理由         |
-| -------------- | -------------------------- | ------------ |
-| **プライマリ** | Cloudflare R2              | 引き続き無料 |
-| **ミラー**     | jsDelivr + GitHub Releases | 冗長性確保   |
+| 役割         | サービス | 理由               |
+| ------------ | -------- | ------------------ |
+| **Primary**  | jsDelivr | 完全無料、設定不要 |
+| **Fallback** | unpkg    | 冗長性確保         |
 
-### 6.3 大規模 (月間 1,000,000+ DL)
+#### Phase 2: カスタム運用（機能を拡張する場合）
+
+| 役割        | サービス      | 理由                  |
+| ----------- | ------------- | --------------------- |
+| **Primary** | Cloudflare R2 | カスタムドメイン、API |
+| **Mirror**  | jsDelivr      | コミュニティアクセス  |
+
+### 6.2 大規模 (月間 1,000,000+ DL)
 
 | 役割             | サービス      | 理由                   |
 | ---------------- | ------------- | ---------------------- |

@@ -219,23 +219,37 @@ export class StockfishLoader {
 
   private async loadFromSource(source: EngineSource): Promise<Worker> {
     // Web Worker を作成
-    const workerBlob = await this.fetchWithTimeout(source.js);
+    const workerBlob = await this.fetchWithTimeout(source.js, source.sri?.js);
     const workerUrl = URL.createObjectURL(workerBlob);
 
-    const worker = new Worker(workerUrl, { type: "module" });
+    try {
+      const worker = new Worker(workerUrl, { type: "module" });
 
-    // WASM の場所を通知
-    worker.postMessage({ type: "init", wasmUrl: source.wasm });
+      // WASM の場所を通知
+      worker.postMessage({ type: "init", wasmUrl: source.wasm });
 
-    return worker;
+      return worker;
+    } finally {
+      // Blob URL を解放してメモリリークを防ぐ
+      URL.revokeObjectURL(workerUrl);
+    }
   }
 
-  private async fetchWithTimeout(url: string): Promise<Blob> {
+  private async fetchWithTimeout(
+    url: string,
+    integrity?: string,
+  ): Promise<Blob> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const response = await fetch(url, { signal: controller.signal });
+      // SRI ハッシュがある場合は integrity オプションを指定
+      const options: RequestInit = {
+        signal: controller.signal,
+        integrity: integrity,
+      };
+
+      const response = await fetch(url, options);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
