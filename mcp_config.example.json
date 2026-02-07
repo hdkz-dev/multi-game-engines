@@ -10,12 +10,7 @@
         "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
       }
     },
-    "github": {
-      "serverUrl": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_PERSONAL_ACCESS_TOKEN"
-      }
-    },
+
     "mcp-memory-service": {
       "command": "uv",
       "args": [
@@ -67,7 +62,7 @@
       "args": [
         "mcp-server-sqlite",
         "--db-path",
-        "data/games.db"
+        "YOUR_SQLITE_DB_PATH"
       ]
     },
     "time": {

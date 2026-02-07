@@ -40,3 +40,4 @@ tmp/
 # Turborepo
 .turbo/
 pr_feedback.json
+mcp_config.json

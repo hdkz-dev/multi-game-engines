@@ -9,19 +9,19 @@ tags: javascript, dom, css, performance, reflow
 
 Avoid changing styles one property at a time. Group multiple CSS changes together via classes or `cssText` to minimize browser reflows.
 
-**Incorrect (multiple reflows):**
+### Incorrect (multiple reflows)
 
 ```typescript
 function updateElementStyles(element: HTMLElement) {
   // Each line triggers a reflow
-  element.style.width = '100px'
-  element.style.height = '200px'
-  element.style.backgroundColor = 'blue'
-  element.style.border = '1px solid black'
+  element.style.width = "100px";
+  element.style.height = "200px";
+  element.style.backgroundColor = "blue";
+  element.style.border = "1px solid black";
 }
 ```
 
-**Correct (add class - single reflow):**
+### Correct (add class - single reflow)
 
 ```typescript
 // CSS file
@@ -38,7 +38,7 @@ function updateElementStyles(element: HTMLElement) {
 }
 ```
 
-**Correct (change cssText - single reflow):**
+### Correct (change cssText - single reflow)
 
 ```typescript
 function updateElementStyles(element: HTMLElement) {
@@ -47,35 +47,37 @@ function updateElementStyles(element: HTMLElement) {
     height: 200px;
     background-color: blue;
     border: 1px solid black;
-  `
+  `;
 }
 ```
 
-**React example:**
+**React example:
 
 ```tsx
 // Incorrect: changing styles one by one
 function Box({ isHighlighted }: { isHighlighted: boolean }) {
-  const ref = useRef<HTMLDivElement>(null)
-  
+  const ref = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (ref.current && isHighlighted) {
-      ref.current.style.width = '100px'
-      ref.current.style.height = '200px'
-      ref.current.style.backgroundColor = 'blue'
+    if (ref.current) {
+      if (isHighlighted) {
+        ref.current.style.width = "100px";
+        ref.current.style.height = "200px";
+        ref.current.style.backgroundColor = "blue";
+      } else {
+        ref.current.style.width = "";
+        ref.current.style.height = "";
+        ref.current.style.backgroundColor = "";
+      }
     }
-  }, [isHighlighted])
-  
-  return <div ref={ref}>Content</div>
+  }, [isHighlighted]);
+
+  return <div ref={ref}>Content</div>;
 }
 
 // Correct: toggle class
 function Box({ isHighlighted }: { isHighlighted: boolean }) {
-  return (
-    <div className={isHighlighted ? 'highlighted-box' : ''}>
-      Content
-    </div>
-  )
+  return <div className={isHighlighted ? "highlighted-box" : ""}>Content</div>;
 }
 ```
 

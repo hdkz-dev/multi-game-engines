@@ -15,13 +15,12 @@ This skill defines the mandatory workflow for using the GitHub CLI (`gh`) to ens
 
 - ❌ **Don't**: `gh pr create --body "Line 1\nLine 2 with 'quotes' and $symbols"`
 - ✅ **Do**:
-
-  1.  Write raw content to a temporary file.
-  2.  Pass the file path to the command.
+  1. Write raw content to a temporary file.
+  2. Pass the file path to the command.
 
   ```bash
   # Create content safely
-  cat <<EOF > dev_temp/pr_body.md
+  cat <<'EOF' > dev_temp/pr_body.md
   This utilizes "safe" content:
   - No escaping needed
   - Multi-line works perfectly
@@ -40,9 +39,11 @@ This skill defines the mandatory workflow for using the GitHub CLI (`gh`) to ens
 
 - ❌ **Don't**: `gh pr list | grep "My Branch" | awk '{print $1}'`
 - ✅ **Do**: Use `--json` and `jq` (or internal parsing) to extract exact data.
+
   ```bash
   gh pr list --json number,title,headRefName --state open
   ```
+
   - This returns reliable JSON that can be strictly typed and parsed.
 
 ### 3. Verification First
@@ -56,13 +57,15 @@ Always verify the state before performing mutation actions.
 
 ### Creating a Pull Request (Reliable Method)
 
-1.  **Draft the Content**: Create the PR title and body.
-2.  **Write to File**: Save the body to `dev_temp/pr_[timestamp].md`.
-3.  **Execute**:
-    ```bash
-    gh pr create --title "Title" --body-file dev_temp/pr_[timestamp].md --base main --head [current-branch]
-    ```
-4.  **Validate**: Check the output URL to confirm success.
+1. **Draft the Content**: Create the PR title and body.
+2. **Write to File**: Save the body to `dev_temp/pr_[timestamp].md`.
+3. **Execute**:
+
+   ```bash
+   gh pr create --title "Title" --body-file dev_temp/pr_[timestamp].md --base main --head [current-branch]
+   ```
+
+4. **Validate**: Check the output URL to confirm success.
 
 ### Listing/Filtering PRs
 
@@ -75,12 +78,14 @@ gh pr list --head $(git branch --show-current) --json number,url,state --limit 1
 
 ### Reviewing PRs
 
-1.  Fetch details as context:
-    ```bash
-    gh pr view [number] --json title,body,comments,reviews
-    ```
-2.  Perform actions (merge/close/approve):
-    - Always use the PR number, not branch name, for these commands to be unambiguous.
+1. **Fetch details as context**:
+
+   ```bash
+   gh pr view [number] --json title,body,comments,reviews
+   ```
+
+2. **Perform actions (merge/close/approve)**:
+   - Always use the PR number, not branch name, for these commands to be unambiguous.
 
 ## General Shell Safety (Beyond GitHub)
 

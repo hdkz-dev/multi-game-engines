@@ -66,11 +66,13 @@ def main():
             print(f"Starting server {i+1}/{len(servers)}: {server['cmd']}")
 
             # Use shell=True to support commands with cd and &&
+            # Redirect output to file to avoid deadlock
+            log_file = open(f'/tmp/server_{server["port"]}.log', 'w')
             process = subprocess.Popen(
                 server['cmd'],
                 shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stdout=log_file,
+                stderr=log_file
             )
             server_processes.append(process)
 

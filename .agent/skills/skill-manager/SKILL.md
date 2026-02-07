@@ -12,7 +12,7 @@ This skill allows the agent to self-manage its capabilities by installing new sk
 - **Search**: Find new skills by keyword
 - **Browse**: List available skills by category
 - **Install**: Add new skills to the agent's toolkit
-- **Update**: Keep existing skills up to date
+- **Update**: Keep existing skills up-to-date
 - **List**: Show currently installed skills
 
 ## Usage Instructions

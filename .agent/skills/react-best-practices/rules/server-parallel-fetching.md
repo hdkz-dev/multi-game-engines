@@ -9,36 +9,36 @@ tags: server, rsc, parallel-fetching, composition
 
 React Server Components execute sequentially within a tree. Restructure with composition to parallelize data fetching.
 
-**Incorrect (Sidebar waits for Page's fetch to complete):**
+### Incorrect (Sidebar waits for Page's fetch to complete)
 
 ```tsx
 export default async function Page() {
-  const header = await fetchHeader()
+  const header = await fetchHeader();
   return (
     <div>
       <div>{header}</div>
       <Sidebar />
     </div>
-  )
+  );
 }
 
 async function Sidebar() {
-  const items = await fetchSidebarItems()
-  return <nav>{items.map(renderItem)}</nav>
+  const items = await fetchSidebarItems();
+  return <nav>{items.map(renderItem)}</nav>;
 }
 ```
 
-**Correct (both fetch simultaneously):**
+### Correct (both fetch simultaneously)
 
 ```tsx
 async function Header() {
-  const data = await fetchHeader()
-  return <div>{data}</div>
+  const data = await fetchHeader();
+  return <div>{data}</div>;
 }
 
 async function Sidebar() {
-  const items = await fetchSidebarItems()
-  return <nav>{items.map(renderItem)}</nav>
+  const items = await fetchSidebarItems();
+  return <nav>{items.map(renderItem)}</nav>;
 }
 
 export default function Page() {
@@ -47,26 +47,30 @@ export default function Page() {
       <Header />
       <Sidebar />
     </div>
-  )
+  );
 }
 ```
 
-**Alternative with children prop:**
+**Alternative with children prop:
 
 ```tsx
 async function Layout({ children }: { children: ReactNode }) {
-  const header = await fetchHeader()
+  // If we await here, it blocks the children from rendering
+  const headerPromise = fetchHeader();
+
   return (
     <div>
-      <div>{header}</div>
+      <div>{await headerPromise}</div>
       {children}
     </div>
-  )
+  );
 }
+// Note: To truly support parallelism with Suspense, usage might differ,
+// but ensuring the parent doesn't block the child's start is key.
 
 async function Sidebar() {
-  const items = await fetchSidebarItems()
-  return <nav>{items.map(renderItem)}</nav>
+  const items = await fetchSidebarItems();
+  return <nav>{items.map(renderItem)}</nav>;
 }
 
 export default function Page() {
@@ -74,6 +78,6 @@ export default function Page() {
     <Layout>
       <Sidebar />
     </Layout>
-  )
+  );
 }
 ```

@@ -9,7 +9,7 @@ tags: server, cache, react-cache, deduplication
 
 Use `React.cache()` for server-side request deduplication. Authentication and database queries benefit most.
 
-**Usage:**
+**Usage:
 
 ```typescript
 import { cache } from 'react'

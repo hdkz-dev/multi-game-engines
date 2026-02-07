@@ -9,7 +9,7 @@ tags: advanced, hooks, useLatest, refs, optimization
 
 Access latest values in callbacks without adding them to dependency arrays. Prevents effect re-runs while avoiding stale closures.
 
-**Implementation:**
+**Implementation:
 
 ```typescript
 function useLatest<T>(value: T) {
@@ -21,7 +21,7 @@ function useLatest<T>(value: T) {
 }
 ```
 
-**Incorrect (effect re-runs on every callback change):**
+### Incorrect (effect re-runs on every callback change)
 
 ```tsx
 function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
@@ -34,7 +34,7 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
 }
 ```
 
-**Correct (stable effect, fresh callback):**
+### Correct (stable effect, fresh callback)
 
 ```tsx
 function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
