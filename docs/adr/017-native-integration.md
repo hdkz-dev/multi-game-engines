@@ -23,4 +23,4 @@
 
 ## 4. 参照 (References)
 
-- [エンジン統合ロードマップ (Stage 3)](../infrastructure/cdn/ENGINE_ALTERNATIVES.md)
+- [エンジン統合ロードマップ (Stage 3)](../../infrastructure/cdn/ENGINE_ALTERNATIVES.md)

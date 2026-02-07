@@ -11,7 +11,8 @@
     "lint": "npm run lint --workspaces",
     "typecheck": "npm run typecheck --workspaces",
     "build": "npm run build -w packages/*",
-    "clean": "rm -rf node_modules packages/*/node_modules infrastructure/cdn/cloudflare/node_modules",
+    "clean": "find . -name \"dist\" -type d -not -path \"*/node_modules/*\" -exec rm -rf {} +",
+    "clean:deps": "rm -rf node_modules packages/*/node_modules infrastructure/cdn/cloudflare/node_modules",
     "format": "prettier --write ."
   },
   "engines": {

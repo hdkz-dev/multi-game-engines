@@ -114,13 +114,13 @@
 
 #### 2. Lesserkai
 
-| 項目           | 内容                                                                      |
-| -------------- | ------------------------------------------------------------------------- |
-| **リポジトリ** | [johncheetham/lesserkai](http://www.johncheetham.com/projects/lesserkai/) |
-| **特徴**       | 軽量 USI エンジン                                                         |
-| **WASM**       | ⚠️ 要ビルド                                                               |
-| **ライセンス** | OSS                                                                       |
-| **推奨用途**   | リソース制限が厳しいモバイル環境                                          |
+| 項目           | 内容                                                                       |
+| -------------- | -------------------------------------------------------------------------- |
+| **リポジトリ** | [johncheetham/lesserkai](https://www.johncheetham.com/projects/lesserkai/) |
+| **特徴**       | 軽量 USI エンジン                                                          |
+| **WASM**       | ⚠️ 要ビルド                                                                |
+| **ライセンス** | OSS                                                                        |
+| **推奨用途**   | リソース制限が厳しいモバイル環境                                           |
 
 #### 3. Apery
 
@@ -336,9 +336,9 @@
 
 ---
 
-## 🚀 2段階のリリース・ロードマップ
+## 🚀 3段階のリリース・ロードマップ
 
-本プロジェクトは、開発スピードと究極の性能を両立させるため、以下の2段階で各ゲームエンジンを統合します。
+本プロジェクトは、開発スピードと究極の性能を両立させるため、以下の3段階で各ゲームエンジンを統合します。
 
 ### Stage 1: クイックスタート (第1段階リリース)
 
@@ -366,14 +366,14 @@
 
 ## 📜 結論: 各ゲームの選定マトリクス
 
-| ゲーム       | **Stage 1 (即時利用版)**   | **Stage 2 (自前ビルド版目標)** | **Stage 3 (Native Bridge)** |
-| :----------- | :------------------------- | :----------------------------- | :-------------------------- |
-| **Chess**    | `stockfish` (17.1)         | **Stockfish 18+**              | Stockfish Native (NDK/iOS)  |
-| **Shogi**    | `@mizarjp/yaneuraou`       | **YaneuraOu 10+**              | YaneuraOu Native (C++)      |
-| **Reversi**  | `othello-web-app` (Direct) | **Edax 4.4**                   | Edax Native Build           |
-| **Gomoku**   | `@algorithm.ts/gomoku`     | **Rapfi / Yixin**              | Rapfi Native                |
-| **Checkers** | `rapid-draughts`           | **Scan 3.1**                   | Scan Native                 |
-| **Connect4** | `connect-four-ai-wasm`     | **Pascal Pons**                | Custom Native Build         |
+| ゲーム       | **Stage 1 (即時利用版)**        | **Stage 2 (自前ビルド版目標)** | **Stage 3 (Native Bridge)** |
+| :----------- | :------------------------------ | :----------------------------- | :-------------------------- |
+| **Chess**    | `stockfish` (17.1)              | **Stockfish 18+**              | Stockfish Native (NDK/iOS)  |
+| **Shogi**    | `@mizarjp/yaneuraou`            | **YaneuraOu 10+**              | YaneuraOu Native (C++)      |
+| **Reversi**  | `othello-web-app` (GitHub Repo) | **Edax 4.4**                   | Edax Native Build           |
+| **Gomoku**   | `@algorithm.ts/gomoku`          | **Rapfi / Yixin**              | Rapfi Native                |
+| **Checkers** | `rapid-draughts`                | **Scan 3.1**                   | Scan Native                 |
+| **Connect4** | `connect-four-ai-wasm`          | **Pascal Pons**                | Custom Native Build         |
 
 ---
 
