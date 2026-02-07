@@ -14,7 +14,9 @@
     "build": "pnpm -r --if-present build",
     "clean": "find . -name \"dist\" -type d -not -path \"*/node_modules/*\" -exec rm -rf {} +",
     "clean:deps": "rm -rf node_modules **/node_modules pnpm-lock.yaml",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "mcp:mask": "node scripts/sync-mcp-tokens.js mask",
+    "mcp:fill": "node scripts/sync-mcp-tokens.js fill"
   },
   "engines": {
     "node": ">=22.0.0",
