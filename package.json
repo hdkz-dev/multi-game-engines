@@ -7,10 +7,10 @@
     "infrastructure/cdn/cloudflare"
   ],
   "scripts": {
-    "test": "npm run test --workspaces",
-    "lint": "npm run lint --workspaces",
-    "typecheck": "npm run typecheck --workspaces",
-    "build": "npm run build -w packages/*",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
     "clean": "find . -name \"dist\" -type d -not -path \"*/node_modules/*\" -exec rm -rf {} +",
     "clean:deps": "rm -rf node_modules packages/*/node_modules infrastructure/cdn/cloudflare/node_modules",
     "format": "prettier --write ."
@@ -21,6 +21,9 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "eslint": "^10.0.0",
+    "typescript-eslint": "^8.23.0",
+    "@eslint/js": "^10.0.0"
   }
 }

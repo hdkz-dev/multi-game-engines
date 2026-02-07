@@ -46,7 +46,7 @@
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint src"
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=22.0.0"

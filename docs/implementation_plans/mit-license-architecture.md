@@ -175,19 +175,19 @@ export class StockfishAdapter extends BaseAdapter<...> {
 ### 5.2 IEngineBridge のライセンス情報取得
 
 ```typescript
-interface IEngineMetadata {
-  adapterId: string;
-  adapterLicense: string; // MIT (常に)
-  engineName: string;
-  engineVersion: string;
-  engineLicense: string; // GPL, MIT, Apache 等
-  engineLicenseUrl?: string;
+export interface IEngineAdapterMetadata {
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly engineLicense: ILicenseInfo;
+  readonly adapterLicense: ILicenseInfo;
+  readonly sources?: Record<string, IEngineSourceConfig>;
 }
 
 // ユーザーはライセンス情報を取得してUIに表示可能
-const metadata = bridge.getEngineMetadata("stockfish");
-console.log(`Engine: ${metadata.engineName} (${metadata.engineLicense})`);
-console.log(`Adapter: MIT`);
+const metadata = bridge.getEngineMetadata("stockfish"); // 内部的に IEngineAdapterMetadata を返す
+console.log(`Engine: ${metadata.name} (${metadata.engineLicense.name})`);
+console.log(`Adapter: ${metadata.adapterLicense.name}`);
 ```
 
 ---
@@ -223,11 +223,11 @@ console.log(`Adapter: MIT`);
 
 ### 7.1 Core パッケージ
 
-| 変更                   | 内容                                 |
-| ---------------------- | ------------------------------------ |
-| `IEngineMetadata` 追加 | エンジンとアダプターのライセンス情報 |
-| `IEngineSource` 追加   | WASM/Worker の URL と SRI            |
-| ローダー拡張           | 外部 URL からの動的ロード対応        |
+| 変更                          | 内容                                 |
+| ----------------------------- | ------------------------------------ |
+| `IEngineAdapterMetadata` 追加 | エンジンとアダプターのライセンス情報 |
+| `IEngineSourceConfig` 追加    | WASM/Worker の URL と SRI            |
+| ローダー拡張                  | 外部 URL からの動的ロード対応        |
 
 ### 7.2 アダプターパッケージ
 
@@ -303,7 +303,7 @@ packages/
 ## 10. 次のステップ
 
 1. ✅ 本設計提案のレビュー・承認
-2. ⬜ `IEngineSource`, `IEngineMetadata` の型定義追加
+2. ⬜ `IEngineSourceConfig`, `IEngineAdapterMetadata` の型定義追加 (完了済み)
 3. ⬜ `RemoteLoader` の実装
 4. ⬜ アダプターテンプレートの更新
 5. ⬜ ドキュメント更新 (ARCHITECTURE.md, ナレッジベース)

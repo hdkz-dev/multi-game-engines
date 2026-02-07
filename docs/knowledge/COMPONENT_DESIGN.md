@@ -32,14 +32,14 @@ packages/core/src/
 
 **ファイル**: `packages/core/src/bridge/EngineBridge.ts`
 
-### 責務
+### EngineBridge の責務
 
 1. アダプターのレジストリ管理 (`Map<string, IEngineAdapter>`)
 2. IEngine Facade の生成・返却
 3. ミドルウェアチェーンの構築と実行
 4. CapabilityDetector / SecurityAdvisor との連携
 
-### インターフェース
+### EngineBridge のインターフェース
 
 ```typescript
 interface IEngineBridge {
@@ -58,7 +58,7 @@ interface IEngineBridge {
 }
 ```
 
-### 使用例
+### EngineBridge の使用例
 
 ```typescript
 const bridge = new EngineBridge();
@@ -85,7 +85,7 @@ const stockfish = bridge.getEngine("stockfish");
 
 **ファイル**: `packages/core/src/adapters/BaseAdapter.ts`
 
-### 責務
+### BaseAdapter の責務
 
 1. `EngineStatus` と `ILoadProgress` の状態管理
 2. イベントリスナーの登録・解除・発火
@@ -125,7 +125,7 @@ abstract class BaseAdapter<
   T_INFO extends IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult,
 > implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
-  // サブクラスが定義 (IEngineAdapterInfo の実装)
+  // サブクラスが定義 (IEngineAdapterMetadata の実装)
   abstract readonly id: string;
   abstract readonly name: string;
   abstract readonly version: string;
@@ -176,7 +176,7 @@ abstract class BaseAdapter<
 
 **ファイル**: `packages/core/src/capabilities/CapabilityDetector.ts`
 
-### 責務
+### CapabilityDetector の責務
 
 実行環境の機能を診断し、最適なストラテジーを選択可能にする。
 
@@ -191,7 +191,7 @@ abstract class BaseAdapter<
 | WebGPU       | `navigator.gpu?.requestAdapter()`          |
 | WebTransport | `typeof WebTransport !== 'undefined'`      |
 
-### 使用例
+### CapabilityDetector の使用例
 
 ```typescript
 const detector = new CapabilityDetector();
@@ -210,11 +210,11 @@ if (capabilities.wasmThreads) {
 
 **ファイル**: `packages/core/src/storage/FileStorage.ts`
 
-### 責務
+### FileStorage の責務
 
 WASM バイナリや評価関数ファイルの永続化・キャッシュ。
 
-### インターフェース
+### FileStorage のインターフェース
 
 ```typescript
 interface IFileStorage {
@@ -258,7 +258,7 @@ async function createFileStorage(
 | `onInfo`    | 思考状況受信時 | 解析、フィルタリング |
 | `onResult`  | 最終結果受信時 | 後処理、記録         |
 
-### インターフェース
+### ミドルウェアのインターフェース
 
 ```typescript
 interface IMiddleware<T_INFO = unknown, T_RESULT = unknown> {
@@ -282,7 +282,7 @@ interface IMiddlewareContext {
 }
 ```
 
-### 使用例
+### ミドルウェアの使用例
 
 ```typescript
 // ロギングミドルウェア

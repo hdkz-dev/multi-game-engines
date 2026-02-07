@@ -117,6 +117,7 @@ export abstract class BaseAdapter<
   abstract readonly version: string;
   abstract readonly engineLicense: ILicenseInfo;
   abstract readonly adapterLicense: ILicenseInfo;
+  abstract readonly sources?: Record<string, IEngineSourceConfig>;
 
   protected _status: EngineStatus = "idle";
   protected _progress: ILoadProgress = {

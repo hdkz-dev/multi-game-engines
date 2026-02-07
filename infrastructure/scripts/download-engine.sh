@@ -11,9 +11,9 @@
 set -euo pipefail
 
 # 引数
-ENGINE=${1:-}
-VERSION=${2:-latest}
-OUTPUT_DIR=${3:-./engines}
+readonly ENGINE="${1:-}"
+readonly VERSION="${2:-latest}"
+readonly OUTPUT_DIR="${3:-./engines}"
 
 # デフォルト CDN URL
 CDN_BASE_URL=${CDN_BASE_URL:-"https://engines.multi-game-engines.dev"}
@@ -127,8 +127,8 @@ while read -r key url sri size; do
 
     info "Downloading $key ($size bytes)..."
     
-    # ダウンロード
-    curl -sf --connect-timeout 10 -m 300 -o "$OUTPUT_FILE" "$FILE_URL" || error "Failed to download $key"
+    # ダウンロード (タイムアウト: 接続10秒, データ転送300秒)
+    curl -sfL --connect-timeout 10 -m 300 -o "$OUTPUT_FILE" "$FILE_URL" || error "Failed to download $key"
     
     # SRI 検証
     if [[ -n "$sri" && "$sri" != "null" ]]; then
@@ -138,23 +138,20 @@ while read -r key url sri size; do
         ALGO=$(echo "$sri" | cut -d'-' -f1)
         EXPECTED_HASH=$(echo "$sri" | cut -d'-' -f2)
         
-        # ファイルハッシュを計算
-        # openssl dgst は多くの環境で標準的であり、バイナリ出力を直接 base64 に渡せる
+        # ファイルハッシュを計算 (Base64形式)
+        ACTUAL_HASH=""
         case "$ALGO" in
-            sha256) ACTUAL_HASH=$(openssl dgst -sha256 -binary "$OUTPUT_FILE" | openssl base64) ;;
-            sha384) ACTUAL_HASH=$(openssl dgst -sha384 -binary "$OUTPUT_FILE" | openssl base64) ;;
-            sha512) ACTUAL_HASH=$(openssl dgst -sha512 -binary "$OUTPUT_FILE" | openssl base64) ;;
-            *) warn "Unknown hash algorithm: $ALGO, skipping verification" ; ACTUAL_HASH="" ;;
+            sha256) ACTUAL_HASH=$(openssl dgst -sha256 -binary "$OUTPUT_FILE" | openssl enc -base64 | tr -d '\n\r ') ;;
+            sha384) ACTUAL_HASH=$(openssl dgst -sha384 -binary "$OUTPUT_FILE" | openssl enc -base64 | tr -d '\n\r ') ;;
+            sha512) ACTUAL_HASH=$(openssl dgst -sha512 -binary "$OUTPUT_FILE" | openssl enc -base64 | tr -d '\n\r ') ;;
+            *) warn "Unknown hash algorithm: $ALGO, skipping verification" ;;
         esac
         
-        # 空白削除 (openssl の出力には改行が含まれることがある)
-        ACTUAL_HASH=$(echo "$ACTUAL_HASH" | tr -d ' \n\r')
-
         if [[ -n "$ACTUAL_HASH" ]]; then
             if [[ "$ACTUAL_HASH" == "$EXPECTED_HASH" ]]; then
                 success "SRI verification passed for $key"
             else
-                error "SRI verification failed for $key\nExpected: $EXPECTED_HASH\nActual: $ACTUAL_HASH"
+                error "SRI verification failed for $key\n  Expected: $EXPECTED_HASH\n  Actual:   $ACTUAL_HASH"
             fi
         fi
     else

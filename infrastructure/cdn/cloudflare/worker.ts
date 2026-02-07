@@ -60,6 +60,7 @@ export default {
           "Content-Type": "text/plain; charset=utf-8",
           "X-Request-Id": requestId,
           ...CORS_HEADERS,
+          ...SECURITY_HEADERS,
         },
       });
     };
@@ -109,6 +110,8 @@ export default {
       return new Response(object.body, {
         headers: {
           "Content-Type": "application/json",
+          "Content-Length": object.size.toString(),
+          ETag: object.httpEtag,
           ...CORS_HEADERS,
           ...SECURITY_HEADERS,
           "Cache-Control": "public, max-age=3600",

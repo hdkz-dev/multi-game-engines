@@ -11,7 +11,7 @@
 
 ### 1-1: 基本型システムとインターフェース
 
-- [x] `types.ts`: プロジェクト全体のコア型定義
+- [x] `types.ts`: プロジェクト全体のコア型定義 (IEngineAdapterMetadata/State 分離完了)
 - [x] `protocols/types.ts`: エンジン通信プロトコルインターフェース
 - [ ] `index.ts`: 公開 API の整理
 

@@ -55,6 +55,11 @@ compatibility_flags = [ "nodejs_compat" ]
 
 WASM モジュールや SharedArrayBuffer の動作を保証するため、以下の機能が各環境でサポートされている必要があります。
 
-- `SharedArrayBuffer` (COOP/COEP ヘッダー依存)
-- `WebAssembly` (Memory 64-bit / Threads)
-- `crypto.randomUUID()` (Node.js 20+ 標準)
+- **SharedArrayBuffer**: COOP/COEP ヘッダー依存。マルチスレッド探索に必須。
+- **WebAssembly**: Threads (マルチスレッド), SIMD (ベクター演算), Memory 64-bit サポート。
+- **WebGPU**: NNUE (ニューラルネットワーク) の推論加速に使用。
+- **WebNN API**: 機械学習ベースのエンジンのためのハードウェアアクセラレーション。
+- **Origin Private File System (OPFS)**: 大容量の学習データやエンジンの永続化キャッシュ。
+- **AbortSignal (Async)**: 探索のキャンセル処理における標準。
+- **AsyncIterable**: エンジンからの思考状況（info）をストリーミングするための標準。
+- **crypto.randomUUID()**: Node.js 20+ / Browser 標準。

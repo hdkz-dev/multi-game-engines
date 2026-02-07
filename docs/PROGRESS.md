@@ -53,3 +53,23 @@
 
 - **究極の準備完了**: 1ピクセルの隙もないアーキテクチャ設計と、3段階の明確なリリースロードマップ、そして精密なタスクリストが揃いました。
 - **実装フェーズ始動**: 以降、`Core` パッケージの実装を皮切りに、世界最高水準のマルチゲームエンジン・ブリッジを構築します。
+
+---
+
+## 2026-02-07 (アダプターのメタデータと状態の分離)
+
+### 完了した事項 (型定義・ドキュメント同期)
+
+- **IEngineAdapterInfo のリファクタリング**:
+  - 静的な `IEngineAdapterMetadata` と動的な `IEngineAdapterState` を分離。
+  - `packages/core/src/types.ts` および `packages/adapter-stockfish/src/stockfish.ts` を更新。
+- **ADR-018 の作成**:
+  - 意思決定の背景と結果を `docs/adr/018-adapter-metadata-state-separation.md` に記録。
+- **全ドキュメントの同期**:
+  - `COMPONENT_DESIGN.md`, `core-package-implementation.md`, `mit-license-architecture.md`, `TASKS.md` を最新の型定義に合わせて更新。
+- **ビルド・型検証**:
+  - `packages/core` のビルドが正常に完了し、`index.d.ts` に変更が正しく反映されていることを確認。
+
+### 現在のステータス (実装フェーズ: Sprint 1)
+
+- **Sprint 1 (基盤コンポーネント)**: `CapabilityDetector` および `FileStorage` の実装に向けた準備が整いました。アーキテクチャの洗練により、より直感的で型安全な実装が可能になっています。

@@ -214,33 +214,21 @@ server {
 }
 ```
 
-### 6.3 バイナリ取得スクリプト
+### 6.3 バイナリ取得スクリプト (download-engine.sh)
 
 ```bash
 #!/bin/bash
-# scripts/download-engine.sh
+set -euo pipefail
 
-ENGINE=$1
-VERSION=$2
-OUTPUT_DIR=${3:-./engines}
+# 引数
+readonly ENGINE="${1:-}"
+readonly VERSION="${2:-latest}"
+readonly OUTPUT_DIR="${3:-./engines}"
 
-BASE_URL="https://engines.multi-game-engines.dev/v1"
+CDN_BASE_URL="https://engines.multi-game-engines.dev"
 
-mkdir -p "$OUTPUT_DIR/$ENGINE/$VERSION"
-
-# manifest から URL と SRI を取得
-MANIFEST=$(curl -s "$BASE_URL/$ENGINE/$VERSION/manifest.json")
-
-# ダウンロードと検証
-for file in wasm worker; do
-    URL=$(echo $MANIFEST | jq -r ".files.$file.url")
-    SRI=$(echo $MANIFEST | jq -r ".files.$file.sri")
-
-    curl -o "$OUTPUT_DIR/$ENGINE/$VERSION/$URL" "$BASE_URL/$ENGINE/$VERSION/$URL"
-
-    # SRI 検証
-    echo "$SRI  $OUTPUT_DIR/$ENGINE/$VERSION/$URL" | shasum -a 384 -c -
-done
+# manifest.json からファイル一覧と SRI を取得してダウンロード
+# (詳細な実装は infrastructure/scripts/download-engine.sh を参照)
 ```
 
 ---
@@ -270,24 +258,28 @@ done
 
 ---
 
-## 8. 配布ロードマップ: 2段階リリース計画
+## 8. 配布ロードマップ: 3段階リリース計画
 
 ### Stage 1: クイックスタート (第1段階リリース)
 
 **目的**: 既存の資産を最大限活用し、早期リリースを実現。
 
-1. **パブリック CDN 活用**: `stockfish`, `rapid-draughts` 等の既存 npm パッケージや、jsDelivr/unpkg 経由で公開されている WASM バイナリを活用。
-2. **Adapter 実装**: これらの外部リソースを動的にロードする `IEngineAdapter` の完成。
-3. **成果物**: 実用的な強さを備えた全ゲームの統合リリース。
+1. **パブリック CDN 活用**: `stockfish` 等の既存 npm パッケージや、jsDelivr 経由で公開されている WASM バイナリを活用。
+2. **Adapter 実装**: 外部リソースを動的にロードする `IEngineAdapter` の完成。
 
 ### Stage 2: 究極のパワーと制御 (第2段階・ベストプラクティス)
 
 **目的**: 自前ビルドによる最高性能の達成と、独自インフラによる安定供給。
 
-1. **ビルド環境構築**: `/infrastructure/cdn/docker` に Emscripten / Rust 環境を構築し、最新エンジンソースからの最適ビルドを自動化。
-2. **自前 CDN 運用**: Cloudflare R2 + Workers によるプロキシを開設。SRI 検証を統合したマニフェストによる配信。
-3. **究極の最適化**: SIMD128, Multithreading, 巨大評価関数のストリーミングロードなどを実装。
-4. **成果物**: 業界最強の検索性能をブラウザ上で実現し、ライセンス面でも完全にクリーンな環境を確立。
+1. **ビルド環境構築**: `/infrastructure/cdn/docker` に Emscripten 環境を構築し、最適ビルドを自動化。
+2. **自前 CDN 運用**: Cloudflare R2 + Workers による独自配信。SRI 検証を統合したマニフェストによる配信。
+
+### Stage 3: Hybrid/Native Integration (将来の拡張)
+
+**目的**: モバイルアプリ等におけるネイティブ性能の極限追求。
+
+1. **Native Bridge**: ネイティブプラグインを介して、OS ネイティブでビルドされたエンジンを接続。
+2. **メリット**: WASM を超える生の CPU 性能とバックグラウンド実行の実現。
 
 ---
 
