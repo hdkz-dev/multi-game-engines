@@ -1,6 +1,15 @@
 project_name: multi-game-engines
 language: ja
 ignore_patterns:
-  - '**/dist/**'
-  - '**/node_modules/**'
-  - '**/.git/**'
+  - "**/dist/**"
+  - "**/node_modules/**"
+  - "**/.git/**"
+
+code_review:
+  disable: false
+  comment_severity_threshold: MEDIUM
+  max_review_comments: 30
+  pull_request_opened:
+    summary: true
+    code_review: true
+    include_drafts: false
