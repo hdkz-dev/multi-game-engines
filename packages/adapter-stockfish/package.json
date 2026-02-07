@@ -39,7 +39,7 @@
     "tsup": "^8.5.1",
     "vitest": "^4.0.18",
     "eslint": "^10.0.0",
-    "@multi-game-engines/core": "^0.1.0"
+    "@multi-game-engines/core": "workspace:*"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm && tsc --emitDeclarationOnly",

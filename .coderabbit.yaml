@@ -1,0 +1,33 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/configuration/reference/
+
+language: "ja-JP"
+early_access: true
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false # 簡潔さを重視するため無効化
+  auto_review:
+    enabled: true
+    drafts: false
+  tools:
+    shellcheck:
+      enabled: true
+    linters:
+      enabled: false # reviewdogで行うため、CodeRabbit側は無効化して重複を避ける
+
+chat:
+  auto_reply: true
+
+# レビュー用システムプロンプトの拡張
+instructions: |
+  あなたは Node.js, TypeScript のエキスパートレビューアーです。
+  以下のプロジェクト固有の憲法を厳守してください：
+
+  1. **完全日本語化**: レビューコメント、要約、説明はすべて日本語で行うこと。
+  2. **型安全性の徹底**: `any` 型や不必要な型キャスト (`as any`) は厳しく指摘し、Discriminated Union や Zod 等の代替案を提示すること。
+  3. **セキュリティ**: CSP (Content Security Policy) の設定漏れや、`https:` ワイルドカードの使用を指摘すること。
+  4. **i18n**: ユーザー向け文字列のハードコードを禁止し、`locales/` 配下の多言語対応ファイルの使用を求めること。
+  5. **TDD**: ロジックの変更に対し、適切なテストコード (`*.test.ts`) の追加または更新が伴っているか確認すること。

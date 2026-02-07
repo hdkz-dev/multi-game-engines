@@ -11,7 +11,7 @@
     "@cloudflare/workers-types": "^4.20250109.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.63.0",
-    "@multi-game-engines/core": "^0.1.0"
+    "@multi-game-engines/core": "workspace:*"
   },
   "engines": {
     "node": ">=22.0.0"
