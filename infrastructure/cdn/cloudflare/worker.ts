@@ -147,6 +147,8 @@ export default {
       contentType = "application/wasm";
     } else if (file.endsWith(".js")) {
       contentType = "application/javascript";
+    } else if (file.endsWith(".mjs")) {
+      contentType = "text/javascript";
     } else if (file.endsWith(".json")) {
       contentType = "application/json";
     }

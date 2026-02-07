@@ -86,7 +86,8 @@ if [[ "$VERSION" == "latest" ]]; then
     INDEX_URL="$CDN_BASE_URL/manifest.json"
     info "Resolving latest version from $INDEX_URL..."
     
-    INDEX_JSON=$(curl -sf "$INDEX_URL") || error "Failed to fetch root manifest to resolve 'latest'. Please specify a distinct version."
+    # マニフェスト取得 (タイムアウト: 接続10秒, 全体10秒)
+    INDEX_JSON=$(curl -sf --connect-timeout 10 -m 10 "$INDEX_URL") || error "Failed to fetch root manifest to resolve 'latest'. Please specify a distinct version."
     
     # jq で最新バージョンを抽出
     RESOLVED_VERSION=$(echo "$INDEX_JSON" | jq -r ".engines[\"$ENGINE\"].latestVersion")
@@ -107,7 +108,7 @@ info "Output: $OUTPUT_DIR/$ENGINE/$VERSION"
 MANIFEST_URL="$CDN_BASE_URL/v1/$ENGINE/$VERSION/manifest.json"
 info "Fetching manifest from $MANIFEST_URL..."
 
-MANIFEST=$(curl -sf "$MANIFEST_URL") || error "Failed to fetch manifest"
+MANIFEST=$(curl -sf --connect-timeout 10 -m 10 "$MANIFEST_URL") || error "Failed to fetch manifest"
 
 # ファイル一覧を取得してダウンロード
 # パイプではなくプロセス置換を使用することで、ループ内での exit が親プロセスに伝わるようにする
@@ -126,7 +127,7 @@ while read -r key url sri size; do
     info "Downloading $key ($size bytes)..."
     
     # ダウンロード
-    curl -sf -o "$OUTPUT_FILE" "$FILE_URL" || error "Failed to download $key"
+    curl -sf --connect-timeout 10 -m 300 -o "$OUTPUT_FILE" "$FILE_URL" || error "Failed to download $key"
     
     # SRI 検証
     if [[ -n "$sri" && "$sri" != "null" ]]; then
