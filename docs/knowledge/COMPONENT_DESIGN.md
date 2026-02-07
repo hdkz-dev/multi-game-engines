@@ -182,14 +182,14 @@ abstract class BaseAdapter<
 
 ### 検出メソッド
 
-| 機能         | 検出方法                                   |
-| ------------ | ------------------------------------------ |
-| OPFS         | `navigator.storage?.getDirectory?.()`      |
-| WASM Threads | `typeof SharedArrayBuffer !== 'undefined'` |
-| WASM SIMD    | `WebAssembly.validate(simd_bytecode)`      |
-| WebNN        | `navigator.ml?.createContext`              |
-| WebGPU       | `navigator.gpu?.requestAdapter()`          |
-| WebTransport | `typeof WebTransport !== 'undefined'`      |
+| 機能         | 検出方法                                                          |
+| ------------ | ----------------------------------------------------------------- |
+| OPFS         | `navigator.storage?.getDirectory?.()`                             |
+| WASM Threads | `typeof SharedArrayBuffer !== 'undefined' && crossOriginIsolated` |
+| WASM SIMD    | `WebAssembly.validate(simd_bytecode)`                             |
+| WebNN        | `navigator.ml?.createContext`                                     |
+| WebGPU       | `navigator.gpu?.requestAdapter()`                                 |
+| WebTransport | `typeof WebTransport !== 'undefined'`                             |
 
 ### CapabilityDetector の使用例
 

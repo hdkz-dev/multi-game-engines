@@ -217,7 +217,7 @@ export enum EngineErrorCode {
   /** ブラウザのセキュリティ制約によるエラー */
   SECURITY_VIOLATION = "SECURITY_VIOLATION",
   /** 探索中のタイムアウト */
-  SEARCH_TIMEOUT = "TIMEOUT",
+  SEARCH_TIMEOUT = "SEARCH_TIMEOUT",
   /** エンジン内部またはプロトコル外のエラー */
   INTERNAL_ERROR = "INTERNAL_ERROR",
   /** その他の不明なエラー */

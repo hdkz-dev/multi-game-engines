@@ -29,7 +29,7 @@
 | **Oracle Cloud (VM)**        | OS依存 (制限なし)                | `nvm`, `fnm` 等による管理を推奨                           |
 | **Google Cloud Run**         | Dockerイメージに依存 (制限なし)  | `Dockerfile` で定義                                       |
 
-## 3. 指定方法の詳細
+## 4. 指定方法の詳細
 
 ### Root package.json
 
@@ -51,7 +51,7 @@ compatibility_date = "2026-01-01"
 compatibility_flags = [ "nodejs_compat" ]
 ```
 
-## 4. 互換性の維持
+## 5. 互換性の維持
 
 WASM モジュールや SharedArrayBuffer の動作を保証するため、以下の機能が各環境でサポートされている必要があります。
 

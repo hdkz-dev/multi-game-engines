@@ -9,8 +9,9 @@
 | ID          | 決定事項                                                                             | ステータス | 日付       |
 | :---------- | :----------------------------------------------------------------------------------- | :--------- | :--------- |
 | **ADR-001** | [モノリポ構成の採用](./adr/001-monorepo-structure.md)                                | 承認済み   | 2026-01-28 |
-| **ADR-002** | 非同期ストリームに AsyncIterable を採用                                              | 承認済み   | 2026-01-29 |
+| **ADR-002** | [非同期ストリームに AsyncIterable を採用](./adr/002-async-iterable.md)               | 承認済み   | 2026-01-29 |
 | **ADR-014** | [全パッケージ MIT 化の隔離アーキテクチャ](./adr/014-mit-license-architecture.md)     | 承認済み   | 2026-02-06 |
+| **ADR-015** | [CDN 選定とエンジン配信戦略](./adr/015-cdn-selection-strategy.md)                    | 承認済み   | 2026-02-06 |
 | **ADR-016** | [2段階リリース戦略 (Stage 1 & 2)](./adr/016-two-stage-release.md)                    | 承認済み   | 2026-02-06 |
 | **ADR-017** | [Hybrid/Native Integration (Stage 3)](./adr/017-native-integration.md)               | 承認済み   | 2026-02-06 |
 | **ADR-018** | [アダプターのメタデータと状態の分離](./adr/018-adapter-metadata-state-separation.md) | 承認済み   | 2026-02-07 |

@@ -77,7 +77,7 @@
 
 ---
 
-## 4. エンジンバイナリの提供方法 (2段階戦略)
+## 4. エンジンバイナリの提供方法 (3段階戦略)
 
 開発スピードと究極の性能を両立するため、バイナリの供給を以下の2段階で計画します。
 
@@ -303,7 +303,7 @@ packages/
 ## 10. 次のステップ
 
 1. ✅ 本設計提案のレビュー・承認
-2. ⬜ `IEngineSourceConfig`, `IEngineAdapterMetadata` の型定義追加 (完了済み)
+2. ✅ `IEngineSourceConfig`, `IEngineAdapterMetadata` の型定義追加 (完了済み)
 3. ⬜ `RemoteLoader` の実装
 4. ⬜ アダプターテンプレートの更新
 5. ⬜ ドキュメント更新 (ARCHITECTURE.md, ナレッジベース)

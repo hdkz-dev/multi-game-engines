@@ -12,7 +12,7 @@ set -euo pipefail
 
 # 引数
 readonly ENGINE="${1:-}"
-readonly VERSION="${2:-latest}"
+VERSION="${2:-latest}"
 readonly OUTPUT_DIR="${3:-./engines}"
 
 # デフォルト CDN URL
