@@ -110,7 +110,7 @@ export class EngineBridge implements IEngineBridge {
 export abstract class BaseAdapter<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
   T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult = IBaseSearchResult
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
   abstract readonly id: string;
   abstract readonly name: string;
@@ -118,17 +118,29 @@ export abstract class BaseAdapter<
   abstract readonly engineLicense: ILicenseInfo;
   abstract readonly adapterLicense: ILicenseInfo;
 
-  protected _status: EngineStatus = 'idle';
-  protected _progress: ILoadProgress = { phase: 'not-started', percentage: 0, ... };
+  protected _status: EngineStatus = "idle";
+  protected _progress: ILoadProgress = {
+    phase: "not-started",
+    percentage: 0,
+    i18n: { key: "progress.notStarted", defaultMessage: "Not started" },
+  };
 
   // --- 状態管理 ---
-  get status() { return this._status; }
-  get progress() { return this._progress; }
+  get status() {
+    return this._status;
+  }
+  get progress() {
+    return this._progress;
+  }
 
   // --- コールバック管理 ---
   private statusListeners = new Set<(s: EngineStatus) => void>();
-  onStatusChange(cb: (status: EngineStatus) => void): void { /* ... */ }
-  protected emitStatusChange(status: EngineStatus): void { /* ... */ }
+  onStatusChange(cb: (status: EngineStatus) => void): void {
+    /* ... */
+  }
+  protected emitStatusChange(status: EngineStatus): void {
+    /* ... */
+  }
 
   // --- ライフサイクル (サブクラスがオーバーライド) ---
   abstract load(): Promise<void>;
@@ -136,7 +148,9 @@ export abstract class BaseAdapter<
   abstract dispose(): Promise<void>;
 
   // --- 共通ヘルパー (オプショナル) ---
-  async prefetch?(): Promise<void> { /* デフォルトは no-op */ }
+  async prefetch?(): Promise<void> {
+    /* デフォルトは no-op */
+  }
 }
 ```
 
