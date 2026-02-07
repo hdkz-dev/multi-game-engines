@@ -39,11 +39,12 @@
     "tsup": "^8.0.0",
     "vitest": "^3.0.0",
     "eslint": "^9.0.0",
-    "@multi-game-engines/core": "workspace:*"
+    "@multi-game-engines/core": "^0.1.0"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
+    "build": "tsup src/index.ts --format esm && tsc --emitDeclarationOnly",
     "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint src"
   },

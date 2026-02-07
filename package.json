@@ -3,15 +3,16 @@
   "private": true,
   "description": "A bridge library for various game engines with a plugin-based architecture.",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "infrastructure/cdn/cloudflare"
   ],
   "scripts": {
-    "test": "npm run test -w packages/*",
-    "lint": "npm run lint -w packages/*",
-    "typecheck": "npm run typecheck -w packages/*",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
     "build": "npm run build -w packages/*",
-    "clean": "find . -name \"dist\" -type d -exec rm -rf {} +",
-    "format": "prettier --write \"**/*.{ts,js,json,md}\""
+    "clean": "rm -rf node_modules packages/*/node_modules infrastructure/cdn/cloudflare/node_modules",
+    "format": "prettier --write ."
   },
   "engines": {
     "node": ">=22.0.0",

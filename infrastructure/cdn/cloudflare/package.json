@@ -2,6 +2,7 @@
   "name": "@multi-game-engines/cdn-worker",
   "private": true,
   "scripts": {
+    "build": "echo 'No build step'",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "typecheck": "tsc --noEmit"
@@ -9,7 +10,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250109.0",
     "typescript": "^5.7.0",
-    "wrangler": "^3.0.0"
+    "wrangler": "^3.0.0",
+    "@multi-game-engines/core": "^0.1.0"
   },
   "engines": {
     "node": ">=22.0.0"

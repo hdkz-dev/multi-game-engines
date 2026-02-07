@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build outputs
+dist/
+out/
+build/
+.next/
+.wrangler/
+.docusaurus/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Test coverage
+coverage/
+
+# IDEs
+.vscode/
+.idea/
+.cursor/
+*.tsbuildinfo
+
+# Temporary
+tmp/
+
+# Turborepo
+.turbo/

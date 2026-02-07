@@ -8,6 +8,8 @@
  * - アクセスログ
  */
 
+import type { IEngineManifestIndex } from "@multi-game-engines/core";
+
 export interface Env {
   ENGINE_BUCKET: R2Bucket;
 }
