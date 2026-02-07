@@ -243,9 +243,9 @@ export type EngineStatus =
   | "terminated";
 
 /**
- * エンジンアダプターの公開情報 (Facade利用者のための読取専用インターフェース)
+ * エンジンアダプターの静的メタデータ
  */
-export interface IEngineAdapterInfo {
+export interface IEngineAdapterMetadata {
   readonly id: string;
   readonly name: string;
   readonly version: string;
@@ -257,10 +257,21 @@ export interface IEngineAdapterInfo {
 
   /** ロードに使用するリソースの設定 */
   readonly sources?: Record<string, IEngineSourceConfig>;
+}
 
+/**
+ * エンジンアダプターの動的なランタイム状態
+ */
+export interface IEngineAdapterState {
   readonly status: EngineStatus;
   readonly progress: ILoadProgress;
 }
+
+/**
+ * エンジンアダプターの公開情報 (Facade利用者のための読取専用インターフェース)
+ */
+export interface IEngineAdapterInfo
+  extends IEngineAdapterMetadata, IEngineAdapterState {}
 
 /**
  * エンジンアダプターの共通インターフェース

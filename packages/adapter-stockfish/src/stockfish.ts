@@ -1,6 +1,6 @@
-import { IEngineAdapterInfo } from "@multi-game-engines/core";
+import { IEngineAdapterMetadata } from "@multi-game-engines/core";
 
-export const stockfishInfo: IEngineAdapterInfo = {
+export const stockfishMetadata: IEngineAdapterMetadata = {
   id: "stockfish",
   name: "Stockfish via WASM",
   version: "16.1",
@@ -11,14 +11,5 @@ export const stockfishInfo: IEngineAdapterInfo = {
   adapterLicense: {
     name: "MIT",
     url: "https://opensource.org/licenses/MIT",
-  },
-  status: "idle",
-  progress: {
-    phase: "not-started",
-    percentage: 0,
-    i18n: {
-      key: "engine.status.idle",
-      defaultMessage: "Engine is idle",
-    },
   },
 };
