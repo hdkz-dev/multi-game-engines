@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
+const fs = require("fs");
+const path = require("path");
 
 /**
  * sync-mcp-tokens.js
@@ -55,7 +55,7 @@ function main() {
       console.error(
         'mcp_config.json not found. Use "fill" mode to generate it from example first.',
       );
-      return;
+      process.exit(1);
     }
     const config = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
     const masked = processObject(config, "mask");
@@ -66,7 +66,7 @@ function main() {
   if (mode === "fill") {
     if (!fs.existsSync(EXAMPLE_PATH)) {
       console.error("mcp_config.example.json not found.");
-      return;
+      process.exit(1);
     }
     const example = JSON.parse(fs.readFileSync(EXAMPLE_PATH, "utf-8"));
     const filled = processObject(example, "fill");
