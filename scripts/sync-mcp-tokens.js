@@ -37,8 +37,10 @@ function processObject(obj, action) {
       if (action === "mask") {
         newObj[key] = maskValue(key, value);
       } else if (action === "fill") {
-        // Fill from process.env if available
-        newObj[key] = process.env[key] || value;
+        // Fill from process.env only if it's a sensitive key
+        newObj[key] = SENSITIVE_KEYS.includes(key)
+          ? process.env[key] || value
+          : value;
       } else {
         newObj[key] = value;
       }
@@ -61,9 +63,7 @@ function main() {
     const masked = processObject(config, "mask");
     fs.writeFileSync(EXAMPLE_PATH, JSON.stringify(masked, null, 2) + "\n");
     console.log("Generated mcp_config.example.json with masked tokens.");
-  }
-
-  if (mode === "fill") {
+  } else if (mode === "fill") {
     if (!fs.existsSync(EXAMPLE_PATH)) {
       console.error("mcp_config.example.json not found.");
       process.exit(1);
@@ -72,6 +72,9 @@ function main() {
     const filled = processObject(example, "fill");
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(filled, null, 2) + "\n");
     console.log("Synchronized mcp_config.json with environment variables.");
+  } else {
+    console.error(`Unknown mode: ${mode}. Use "mask" or "fill".`);
+    process.exit(1);
   }
 }
 
