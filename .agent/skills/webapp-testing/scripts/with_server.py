@@ -59,6 +59,7 @@ def main():
         servers.append({'cmd': cmd, 'port': port})
 
     server_processes = []
+    log_files = []
 
     try:
         # Start all servers
@@ -68,6 +69,7 @@ def main():
             # Use shell=True to support commands with cd and &&
             # Redirect output to file to avoid deadlock
             log_file = open(f'/tmp/server_{server["port"]}.log', 'w')
+            log_files.append(log_file)
             process = subprocess.Popen(
                 server['cmd'],
                 shell=True,
@@ -101,6 +103,13 @@ def main():
                 process.kill()
                 process.wait()
             print(f"Server {i+1} stopped")
+
+        # Close log files
+        for lf in log_files:
+            try:
+                lf.close()
+            except Exception:
+                pass
         print("All servers stopped")
 
 
