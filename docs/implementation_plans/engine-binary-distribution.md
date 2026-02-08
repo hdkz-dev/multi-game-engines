@@ -256,6 +256,42 @@ CDN_BASE_URL="https://engines.multi-game-engines.dev"
 - manifest.json にライセンス情報を含める
 - CDN のルートにライセンス説明ページを設置
 
+### 7.5 Client-side Loading Example (with SRI)
+
+以下は、ブラウザ上で SRI を検証しながらエンジンをロードするクライアントサイドコードの例です。
+
+```javascript
+/**
+ * SRI付きでエンジンバイナリをロードする関数
+ * @param {string} url - バイナリのURL
+ * @param {string} sri - "sha384-..." 形式のハッシュ
+ */
+async function loadEngineBinary(url, sri) {
+  try {
+    const response = await fetch(url, {
+      integrity: sri,
+      cache: "force-cache", // SRI検証にはCORSキャッシュが重要
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch engine: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const buffer = await response.arrayBuffer();
+    console.log("SRI verification passed, binary loaded.");
+    return buffer;
+  } catch (error) {
+    console.error("Engine load failed:", error);
+    if (error instanceof TypeError) {
+      console.error("Potential SRI mismatch or CORS error.");
+    }
+    throw error;
+  }
+}
+```
+
 ---
 
 ## 8. 配布ロードマップ: 3段階リリース計画

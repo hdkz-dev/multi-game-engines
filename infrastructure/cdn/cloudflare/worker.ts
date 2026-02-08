@@ -1,14 +1,14 @@
 /**
- * エンジンバイナリ CDN 用の Cloudflare Worker
+ * Cloudflare Worker for Engine Binary CDN
  *
- * 機能:
- * - R2 バケットからのファイル配信
- * - CORS ヘッダー追加
- * - キャッシュ制御
- * - アクセスログ
+ * Features:
+ * - File delivery from R2 bucket
+ * - CORS header addition
+ * - Cache control
+ * - Access logging
  */
 
-import type { IEngineManifestIndex } from "@multi-game-engines/core";
+// import type { IEngineManifestIndex } from "@multi-game-engines/core";
 
 export interface Env {
   ENGINE_BUCKET: R2Bucket;
@@ -22,8 +22,8 @@ const CORS_HEADERS = {
 };
 
 /**
- * セキュリティヘッダー (2026年標準)
- * CORS隔離環境 (SharedArrayBuffer) での動作を保証
+ * Security Headers (2026 Standard)
+ * Ensures operation in CORS isolated environments (SharedArrayBuffer)
  */
 const SECURITY_HEADERS = {
   "Cross-Origin-Resource-Policy": "cross-origin",
@@ -40,7 +40,7 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    ctx: ExecutionContext,
+    _ctx: ExecutionContext,
   ): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
@@ -48,7 +48,7 @@ export default {
     const requestId = request.headers.get("cf-ray") || crypto.randomUUID();
 
     /**
-     * 基本的なエラーレスポンス作成ヘルパー (CORSヘッダーを含む)
+     * Helper to create basic error response (including CORS headers)
      */
     const errorResponse = (msg: string, status: number, details?: string) => {
       console.error(
@@ -65,7 +65,7 @@ export default {
       });
     };
 
-    // CORS プリフライト
+    // CORS Preflight
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -73,17 +73,17 @@ export default {
       });
     }
 
-    // GET のみ許可
+    // Allow GET only
     if (request.method !== "GET") {
       return errorResponse("Method Not Allowed", 405);
     }
 
-    // パス・トラバーサルおよび不正なパスの防御
+    // Defense against path traversal and malformed paths
     let normalizedPath: string;
     try {
-      // 正規化されたパスでチェック
+      // Check with normalized path
       normalizedPath = decodeURIComponent(path).replace(/\/+/g, "/");
-    } catch (e) {
+    } catch {
       return errorResponse("Bad Request: Malformed URL encoding", 400);
     }
 
@@ -91,7 +91,7 @@ export default {
       return errorResponse("Forbidden: Invalid path patterns detected", 403);
     }
 
-    // ヘルスチェック
+    // Health check
     if (normalizedPath === "/health") {
       return new Response("OK", {
         headers: {
@@ -101,7 +101,7 @@ export default {
       });
     }
 
-    // ルートマニフェスト
+    // Root manifest
     if (normalizedPath === "/" || normalizedPath === "/manifest.json") {
       const object = await env.ENGINE_BUCKET.get("manifest.json");
       if (!object) {
@@ -119,8 +119,8 @@ export default {
       });
     }
 
-    // /v1/{engine}/{version}/{file} 形式のパスをパース
-    // v1 プレフィックスの強制
+    // Parse path in format /v1/{engine}/{version}/{file}
+    // Enforce v1 prefix
     const match = normalizedPath.match(/^\/v1\/([^/]+)\/([^/]+)\/(.+)$/);
     if (!match) {
       return errorResponse("Invalid API Version or Path Structure", 400);
@@ -128,7 +128,7 @@ export default {
 
     const [, engine, version, file] = match;
 
-    // 個別のパラメータに対するバリデーション (英数字、ハイフン、ドット、アンダースコア、スラッシュを許可)
+    // Validation for individual parameters (allow alphanumeric, hyphen, dot, underscore, slash)
     const safePattern = /^[a-zA-Z0-9.\-_/]+$/;
     if (
       !safePattern.test(engine) ||
@@ -140,13 +140,13 @@ export default {
 
     const objectKey = `${engine}/${version}/${file}`;
 
-    // R2 からオブジェクト取得
+    // Get object from R2
     const object = await env.ENGINE_BUCKET.get(objectKey);
     if (!object) {
       return errorResponse("Engine Binary Not Found", 404);
     }
 
-    // Content-Type 決定
+    // Determine Content-Type
     let contentType = "application/octet-stream";
     if (file.endsWith(".wasm")) {
       contentType = "application/wasm";
@@ -158,7 +158,7 @@ export default {
       contentType = "application/json";
     }
 
-    // レスポンス作成
+    // Create response
     return new Response(object.body, {
       headers: {
         "Content-Type": contentType,

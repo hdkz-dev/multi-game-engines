@@ -108,9 +108,9 @@ export class EngineBridge implements IEngineBridge {
 ```typescript
 // === 設計骨子 ===
 export abstract class BaseAdapter<
-  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+  T_OPTIONS extends IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult,
 > implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
   abstract readonly id: string;
   abstract readonly name: string;
@@ -183,7 +183,7 @@ export class CapabilityDetector {
   }
 
   private async checkOPFS(): Promise<boolean> {
-    if (typeof navigator === "undefined") return false;
+    if (typeof navigator === "undefined" || !navigator.storage) return false;
     try {
       const root = await navigator.storage?.getDirectory?.();
       return root !== undefined;
