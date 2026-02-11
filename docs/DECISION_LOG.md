@@ -1,25 +1,24 @@
 # 意思決定ログ (DECISION_LOG.md)
 
-## ADR-019: エンジンリソースにおける SRI ハッシュの必須化
-- **日付**: 2026-02-11
-- **ステータス**: 承認
-- **背景**: ゲームエンジンバイナリ（WASM）は CDN 経由で配布されるため、改竄リスクがある。
-- **決定**: `EngineLoader` は `sri` ハッシュが提供されない場合、セキュリティ上の理由からリソースのロードを拒否する。開発時であっても例外を認めず、常に整合性を検証する。
+本ドキュメントは、プロジェクトの主要な設計判断を記録した ADR (Architecture Decision Records) へのインデックスです。詳細は各ファイルを参照してください。
 
-## ADR-020: 探索中断時における Promise の挙動
-- **日付**: 2026-02-11
-- **ステータス**: 承認
-- **背景**: `AbortSignal` による中断時、呼び出し側が `search()` の終了をどのように検知すべきかが不明確だった。
-- **決定**: 標準的な Web API (Fetch 等) の挙動に準拠し、中断時は Promise を `reject` する。これにより、ユーザーは `try-catch` で中断をハンドリングできる。
+---
 
-## ADR-021: 思考状況 (info) のリアルタイム配信インターフェース
-- **日付**: 2026-02-11
-- **ステータス**: 承認
-- **背景**: 探索の最終結果（bestmove）だけでなく、途中の評価値や読み筋を表示したいという要求があった。
-- **決定**: `IEngine` に `onInfo` メソッドを追加。`EngineFacade` 内部で非同期イテレータ（Async Iterator）をループさせ、ミドルウェア適用済みのデータをリアルタイムに配信する。
+## 🏗️ 基盤設計 (Architecture)
+- [ADR-001: モノレポ構成の採用](adr/001-monorepo-structure.md)
+- [ADR-002: Async Iterable によるストリーミング通信](adr/002-async-iterable.md)
+- [ADR-014: Core と Adapter の物理的な分離](adr/014-mit-license-architecture.md)
 
-## ADR-022: ミドルウェア追加時のキャッシュ整合性
-- **日付**: 2026-02-11
-- **ステータス**: 承認
-- **背景**: `EngineBridge.use()` でグローバルミドルウェアを追加しても、既に作成済みの Facade インスタンスには反映されない問題があった。
-- **決定**: ミドルウェア追加時に内部の Facade キャッシュを全てクリア（`facades.clear()`）し、次回のエンジン取得時に新しいパイプラインが適用されることを保証する。
+## 📦 リソース管理とセキュリティ (Resources & Security)
+- [ADR-015: CDN 選択戦略とフォールバック](adr/015-cdn-selection-strategy.md)
+- [ADR-019: EngineLoader によるリソース管理の集約（SRI必須化）](adr/019-engine-loader-centralization.md)
+
+## 🔌 インターフェースと通信 (Interfaces & Protocol)
+- [ADR-018: アダプターのメタデータと状態の分離](adr/018-adapter-metadata-state-separation.md)
+- [ADR-020: 双方向ミドルウェアと中断時の Promise 挙動](adr/020-bidirectional-middleware.md)
+- [ADR-021: 思考状況 (info) のリアルタイム配信インターフェース](adr/021-real-time-info-streaming.md)
+- [ADR-022: ミドルウェア追加時のキャッシュ整合性](adr/022-facade-cache-invalidation.md)
+
+## 🚀 リリースと統合 (Release & Integration)
+- [ADR-016: 段階的なリリース戦略](adr/016-two-stage-release.md)
+- [ADR-017: ネイティブブリッジの統合方針](adr/017-native-integration.md)
