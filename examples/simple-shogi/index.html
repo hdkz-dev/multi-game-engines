@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Game Engines - Simple Shogi (YaneuraOu WASM)</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; }
+        #log { background: #f4f4f4; padding: 1rem; height: 300px; overflow-y: auto; border-radius: 4px; font-family: monospace; font-size: 0.9rem; }
+        .controls { margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        button { padding: 0.5rem 1rem; cursor: pointer; }
+        .status { font-weight: bold; margin-bottom: 1rem; }
+        .info { color: #666; font-size: 0.8rem; margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Simple Shogi (YaneuraOu WASM)</h1>
+    
+    <div id="status" class="status">Status: Uninitialized</div>
+
+    <div class="controls">
+        <button id="loadBtn">1. Load Engine</button>
+        <button id="searchBtn" disabled>2. Start Search (5s)</button>
+        <button id="stopBtn" disabled>Stop</button>
+    </div>
+
+    <div id="log"></div>
+
+    <div class="info">
+        Note: このデモはローカル環境でビルドされたパッケージを参照することを想定しています。<br>
+        2026年時点のブラウザ（OPFS, WebWorker, WASM Threads 対応）が必要です。
+    </div>
+
+    <script type="module">
+        // 注意: 実際の開発環境ではパッケージマネージャー経由でインポートしますが、
+        // ここではブラウザで動作させるための簡略化したコードを示します。
+        import { EngineBridge } from '../../packages/core/dist/index.mjs';
+        import { YaneuraOuAdapter } from '../../packages/adapter-yaneuraou/dist/index.js';
+
+        const bridge = new EngineBridge();
+        const adapter = new YaneuraOuAdapter();
+        bridge.registerAdapter(adapter);
+
+        const engine = bridge.getEngine('yaneuraou');
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const loadBtn = document.getElementById('loadBtn');
+        const searchBtn = document.getElementById('searchBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function appendLog(msg) {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        engine.onStatusChange((status) => {
+            statusEl.textContent = `Status: ${status}`;
+            loadBtn.disabled = (status === 'loading' || status === 'ready');
+            searchBtn.disabled = status !== 'ready';
+            stopBtn.disabled = status !== 'busy';
+        });
+
+        engine.onProgress((progress) => {
+            appendLog(`Loading: ${progress.percentage}% (${progress.phase})`);
+        });
+
+        engine.onInfo((info) => {
+            appendLog(`Info: depth=${info.depth} score=${info.score} pv=${info.pv?.join(' ') || ''}`);
+        });
+
+        loadBtn.onclick = async () => {
+            try {
+                appendLog('Loading engine...');
+                await engine.load();
+                appendLog('Engine ready.');
+            } catch (err) {
+                appendLog(`Error: ${err.message}`);
+            }
+        };
+
+        searchBtn.onclick = async () => {
+            try {
+                appendLog('Starting search (startpos)...');
+                // 平手初期局面
+                const result = await engine.search({ 
+                    sfen: 'lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1',
+                    btime: 5000,
+                    wtime: 5000,
+                    byoyomi: 0
+                });
+                appendLog(`Best Move: ${result.bestMove}`);
+            } catch (err) {
+                appendLog(`Search stopped: ${err.message}`);
+            }
+        };
+
+        stopBtn.onclick = async () => {
+            await engine.stop();
+            appendLog('Stop command sent.');
+        };
+    </script>
+</body>
+</html>

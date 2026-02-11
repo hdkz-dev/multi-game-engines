@@ -85,6 +85,9 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
    * 探索開始コマンドを生成します。
    */
   createSearchCommand(options: IBaseSearchOptions): string[] {
+    if (!options.fen) {
+      throw new Error("UCI requires a FEN position");
+    }
     const safeFen = options.fen.replace(/[\r\n\0;]/g, "");
     
     const commands: string[] = [
