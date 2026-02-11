@@ -2,31 +2,37 @@ import { EngineError } from "../errors/EngineError";
 import { EngineErrorCode } from "../types";
 
 /**
+ * expectMessage のオプション。
+ */
+export interface IExpectMessageOptions {
+  /** タイムアウト時間 (ms) */
+  timeoutMs?: number;
+  /** キャンセル用のシグナル */
+  signal?: AbortSignal;
+}
+
+/**
+ * 待機中のメッセージ期待値を管理する内部インターフェース。
+ */
+interface IPendingExpectation {
+  predicate: (data: unknown) => boolean;
+  // 外部のジェネリクス T を解決するため、内部的には any を許容して保持
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  resolve: (data: any) => void;
+  reject: (reason: Error) => void;
+  cleanup: () => void;
+}
+
+/**
  * WebWorker との低レイヤー通信を管理するクラス。
  * 
- * 主な機能:
- * - メッセージの送受信 (postMessage)
- * - 特定のレスポンスを待機する Promise ベースのインターフェース (expectMessage)
- * - Worker 内部エラーの検知と、待機中の Promise への例外伝播
+ * 2026年最新のベストプラクティスに基づき、タイムアウト管理、
+ * キャンセル、および堅牢な例外伝播をサポートします。
  */
 export class WorkerCommunicator {
   private worker: Worker | null = null;
-  /** メッセージ受信時の全リスナー */
   private messageListeners = new Set<(data: unknown) => void>();
-  /** 
-   * expectMessage で待機中のプロミスを管理するためのセット。
-   * エラー発生時に一括で reject するために使用。
-   */
-  private pendingExpectations = new Set<{
-    predicate: (data: unknown) => boolean;
-    /** 
-     * 外部から指定された任意の型 T へ安全に変換するため、
-     * Promise 解決用として意図的に any を使用。
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolve: (data: any) => void;
-    reject: (reason: Error) => void;
-  }>();
+  private pendingExpectations = new Set<IPendingExpectation>();
 
   constructor(private readonly workerUrl: string) {}
 
@@ -38,64 +44,116 @@ export class WorkerCommunicator {
 
     this.worker = new Worker(this.workerUrl);
     
-    // 正常なメッセージの受信
     this.worker.onmessage = (e: MessageEvent) => {
-      // 1. グローバルリスナーへの通知
+      // 1. 全リスナーへの通知
       this.messageListeners.forEach((listener) => listener(e.data));
 
-      // 2. 待機中の expectMessage プロミスの解決チェック
+      // 2. 待機中の expectMessage を処理
       for (const exp of this.pendingExpectations) {
-        if (exp.predicate(e.data)) {
-          this.pendingExpectations.delete(exp);
-          exp.resolve(e.data);
+        try {
+          if (exp.predicate(e.data)) {
+            exp.cleanup();
+            this.pendingExpectations.delete(exp);
+            exp.resolve(e.data);
+            // 同一メッセージで複数の待機を解決させない (2026 Best Practice)
+            break;
+          }
+        } catch (err) {
+          /**
+           * 特定の述語が失敗しても他の待機処理を壊さないよう、
+           * 例外を捕捉してログ出力に留めます。
+           */
+          console.error("WorkerCommunicator: Predicate validation failed", err);
         }
       }
     };
 
-    // Worker 内部でのエラー発生時
     this.worker.onerror = (e: ErrorEvent) => {
       const error = new EngineError(
         EngineErrorCode.INTERNAL_ERROR,
-        `Worker error: ${e.message}`
+        `Worker internal error: ${e.message}`
       );
-      
-      // 待機中の全ての Promise を異常終了させる (ハングアップ防止)
-      this.pendingExpectations.forEach((exp) => exp.reject(error));
-      this.pendingExpectations.clear();
-      
+      this.rejectAll(error);
       console.error("WorkerCommunicator Error:", e);
     };
   }
 
   /**
+   * 全ての待機中のリクエストをエラーとして終了させます。
+   */
+  private rejectAll(error: Error): void {
+    this.pendingExpectations.forEach((exp) => {
+      exp.cleanup();
+      exp.reject(error);
+    });
+    this.pendingExpectations.clear();
+  }
+
+  /**
    * Worker へメッセージを送信します。
-   * 
-   * @param message 送信データ (文字列、バイナリ、または UCI コマンド)
-   * @param transfer ゼロコピー転送を行う ArrayBuffer 等のリスト
    */
   postMessage(message: string | Uint8Array | object, transfer?: Transferable[]): void {
     if (!this.worker) {
-      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Worker has not been spawned yet.");
+      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Worker is not spawned.");
     }
     this.worker.postMessage(message, transfer || []);
   }
 
   /**
-   * 条件に合致するメッセージが Worker から届くまで非同期で待機します。
-   * 
-   * @param predicate 受信データが期待するものか判定する関数
-   * @returns 期待するデータが届いた時に解決される Promise
+   * 条件に合致するメッセージを待機します。
+   * タイムアウトや AbortSignal によるキャンセルが可能です。
    */
-  expectMessage<T>(predicate: (data: unknown) => boolean): Promise<T> {
+  expectMessage<T>(
+    predicate: (data: unknown) => boolean,
+    options: IExpectMessageOptions = {}
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
-      this.pendingExpectations.add({ predicate, resolve, reject });
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      
+      const cleanup = () => {
+        if (timer) clearTimeout(timer);
+        options.signal?.removeEventListener("abort", onAbort);
+      };
+
+      const onAbort = () => {
+        cleanup();
+        this.pendingExpectations.delete(expectation);
+        reject(new EngineError(EngineErrorCode.INTERNAL_ERROR, "Message expectation was aborted"));
+      };
+
+      const expectation: IPendingExpectation = {
+        predicate,
+        resolve,
+        reject,
+        cleanup,
+      };
+
+      // 1. キャンセル信号の初期チェックと登録
+      if (options.signal) {
+        if (options.signal.aborted) {
+          return onAbort();
+        }
+        options.signal.addEventListener("abort", onAbort, { once: true });
+      }
+
+      // 2. タイムアウトタイマーの設定
+      if (options.timeoutMs) {
+        timer = setTimeout(() => {
+          cleanup();
+          this.pendingExpectations.delete(expectation);
+          reject(new EngineError(
+            EngineErrorCode.SEARCH_TIMEOUT, 
+            `Message expectation timed out after ${options.timeoutMs}ms`
+          ));
+        }, options.timeoutMs);
+      }
+
+      this.pendingExpectations.add(expectation);
     });
   }
 
   /**
    * メッセージの購読を開始します。
-   * 
-   * @returns 購読を解除するための関数
    */
   onMessage(callback: (data: unknown) => void): () => void {
     this.messageListeners.add(callback);
@@ -103,14 +161,13 @@ export class WorkerCommunicator {
   }
 
   /**
-   * Worker を即座に終了し、全ての待機状態をクリアします。
+   * Worker を終了し、リソースを解放します。
    */
   terminate(): void {
     if (this.worker) {
       this.worker.terminate();
       this.worker = null;
     }
-    this.messageListeners.clear();
-    this.pendingExpectations.clear();
+    this.rejectAll(new EngineError(EngineErrorCode.INTERNAL_ERROR, "Worker was terminated"));
   }
 }
