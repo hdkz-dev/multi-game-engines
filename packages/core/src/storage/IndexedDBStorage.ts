@@ -1,41 +1,36 @@
 import { IFileStorage } from "../types";
 
 /**
- * IndexedDB を使用したストレージ実装。
- * OPFS が利用できない環境でのフォールバックとして機能します。
+ * IndexedDB を使用したファイルストレージ実装。
  */
 export class IndexedDBStorage implements IFileStorage {
-  private readonly DB_NAME = "multi-game-engines-cache";
-  private readonly STORE_NAME = "files";
   private db: IDBDatabase | null = null;
+  private readonly dbName = "multi-game-engines-cache";
+  private readonly storeName = "resources";
 
-  /**
-   * データベース接続を取得します。
-   * 接続が切断された場合やバージョン変更時には自動的にクリアされます。
-   */
   private async getDB(): Promise<IDBDatabase> {
     if (this.db) return this.db;
 
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.DB_NAME, 1);
-      
+      const request = indexedDB.open(this.dbName, 1);
+
       request.onupgradeneeded = () => {
-        if (!request.result.objectStoreNames.contains(this.STORE_NAME)) {
-          request.result.createObjectStore(this.STORE_NAME);
+        const db = request.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName);
         }
       };
 
       request.onsuccess = () => {
-        const db = request.result;
+        this.db = request.result;
         
-        // ライフサイクル管理
-        db.onclose = () => { this.db = null; };
-        db.onversionchange = () => {
-          db.close();
+        // 2026 Best Practice: 接続のライフサイクル管理
+        this.db.onclose = () => { this.db = null; };
+        this.db.onversionchange = () => {
+          this.db?.close();
           this.db = null;
         };
-
-        this.db = db;
+        
         resolve(this.db);
       };
 
@@ -46,9 +41,10 @@ export class IndexedDBStorage implements IFileStorage {
   async set(key: string, data: ArrayBuffer | Blob): Promise<void> {
     const db = await this.getDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.STORE_NAME, "readwrite");
-      const store = transaction.objectStore(this.STORE_NAME);
+      const transaction = db.transaction(this.storeName, "readwrite");
+      const store = transaction.objectStore(this.storeName);
       const request = store.put(data, key);
+
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -57,39 +53,27 @@ export class IndexedDBStorage implements IFileStorage {
   async get(key: string): Promise<ArrayBuffer | null> {
     const db = await this.getDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.STORE_NAME, "readonly");
-      const store = transaction.objectStore(this.STORE_NAME);
+      const transaction = db.transaction(this.storeName, "readonly");
+      const store = transaction.objectStore(this.storeName);
       const request = store.get(key);
-      request.onsuccess = async () => {
-        const result = request.result;
-        if (!result) return resolve(null);
-        if (result instanceof Blob) {
-          resolve(await result.arrayBuffer());
-        } else {
-          resolve(result as ArrayBuffer);
-        }
-      };
+
+      request.onsuccess = () => resolve(request.result || null);
       request.onerror = () => reject(request.error);
     });
   }
 
   async has(key: string): Promise<boolean> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.STORE_NAME, "readonly");
-      const store = transaction.objectStore(this.STORE_NAME);
-      const request = store.count(key);
-      request.onsuccess = () => resolve(request.result > 0);
-      request.onerror = () => reject(request.error);
-    });
+    const data = await this.get(key);
+    return data !== null;
   }
 
   async delete(key: string): Promise<void> {
     const db = await this.getDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.STORE_NAME, "readwrite");
-      const store = transaction.objectStore(this.STORE_NAME);
+      const transaction = db.transaction(this.storeName, "readwrite");
+      const store = transaction.objectStore(this.storeName);
       const request = store.delete(key);
+
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
@@ -98,9 +82,10 @@ export class IndexedDBStorage implements IFileStorage {
   async clear(): Promise<void> {
     const db = await this.getDB();
     return new Promise((resolve, reject) => {
-      const transaction = db.transaction(this.STORE_NAME, "readwrite");
-      const store = transaction.objectStore(this.STORE_NAME);
+      const transaction = db.transaction(this.storeName, "readwrite");
+      const store = transaction.objectStore(this.storeName);
       const request = store.clear();
+
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });

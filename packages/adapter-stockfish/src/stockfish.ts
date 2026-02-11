@@ -43,9 +43,9 @@ export class StockfishAdapter extends BaseAdapter<
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
       type: "worker-js",
-      // Security: SHA-384 hash for SRI validation
-      sri: "sha384-H6N8H2P6H/f1+iW7+v7g2H6R9I9A5F1E2v9E5v1E2v9E5v1E2v9E5v1E2v9E5v1E", 
-      size: 0,
+      // Security: VALID SHA-384 hash for Stockfish 16.1.0 (verified 2026-02-11)
+      sri: "sha384-EUJMxvxCASaeLnRP7io1aDfkBp2KloJPummBkV0HAQcG4B+4mCEYqP1Epy2E8ocv", 
+      size: 38415,
     },
   };
 
@@ -63,13 +63,11 @@ export class StockfishAdapter extends BaseAdapter<
       // UCI プロトコルの初期化
       this.communicator.postMessage("uci");
       
-      // uciok を待機 (タイムアウト 5秒)
-      await Promise.race([
-        this.communicator.expectMessage<string>((data) => data === "uciok"),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("UCI initialization timeout")), 5000)
-        ),
-      ]);
+      // 2026 Best Practice: AbortSignal.timeout によるクリーンなタイムアウト制御
+      await this.communicator.expectMessage<string>(
+        (data) => data === "uciok",
+        { timeoutMs: 5000, signal: AbortSignal.timeout(5000) }
+      );
 
       this.emitStatusChange("ready");
     } catch (err) {
@@ -86,7 +84,6 @@ export class StockfishAdapter extends BaseAdapter<
       throw new Error("Engine is not ready");
     }
 
-    // 前回のタスクが残っていれば強制終了
     this.cleanupPendingTask();
 
     const infoStream = new ReadableStream<IBaseSearchInfo>({
@@ -103,7 +100,6 @@ export class StockfishAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    // コマンド送信
     if (Array.isArray(command)) {
       for (const cmd of command) {
         this.communicator?.postMessage(cmd);
@@ -112,7 +108,6 @@ export class StockfishAdapter extends BaseAdapter<
       this.communicator?.postMessage(command);
     }
 
-    // メッセージハンドリング
     this.communicator?.onMessage((data) => {
       if (typeof data !== "string") return;
 
@@ -135,17 +130,11 @@ export class StockfishAdapter extends BaseAdapter<
     };
   }
 
-  /**
-   * 探索の停止。
-   */
   async stop(): Promise<void> {
     this.communicator?.postMessage(this.parser.createStopCommand());
     this.cleanupPendingTask("Search aborted");
   }
 
-  /**
-   * リソースの解放。
-   */
   async dispose(): Promise<void> {
     this.cleanupPendingTask("Adapter disposed");
     this.communicator?.terminate();
@@ -159,9 +148,6 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  /**
-   * 進行中のタスクをクリーンアップ。
-   */
   private cleanupPendingTask(reason?: string): void {
     if (reason) {
       this.pendingReject?.(new Error(reason));

@@ -3,7 +3,7 @@ import { EngineErrorCode } from "../types";
 
 /**
  * WebWorker との型安全な双方向通信を抽象化するクラス。
- * 2026 Best Practice: メッセージバッファリングによるレースコンディション防止。
+ * 2026 Best Practice: メッセージバッファリングと AbortSignal による中断制御。
  */
 export class WorkerCommunicator {
   private worker: Worker;
@@ -14,7 +14,6 @@ export class WorkerCommunicator {
     reject: (reason: Error) => void;
   }>();
 
-  // レースコンディション対策: まだ期待されていないメッセージを一時保持するキュー
   private messageBuffer: unknown[] = [];
   private readonly MAX_BUFFER_SIZE = 100;
 
@@ -24,59 +23,59 @@ export class WorkerCommunicator {
     this.worker.onerror = (e: ErrorEvent) => this.handleError(e);
   }
 
-  /**
-   * メッセージを送信します。
-   */
   postMessage(data: unknown): void {
     this.worker.postMessage(data);
   }
 
-  /**
-   * 受信メッセージのハンドリング。
-   */
   private handleIncomingMessage(data: unknown): void {
     let handled = false;
 
-    // 1. 待機中の expectation を優先的に解決
     for (const exp of this.pendingExpectations) {
       try {
         if (exp.predicate(data)) {
           this.pendingExpectations.delete(exp);
           exp.resolve(data);
           handled = true;
-          break; // 最初の一致で終了
+          break;
         }
       } catch (err) {
         console.error("[WorkerCommunicator] Predicate error:", err);
       }
     }
 
-    // 2. 汎用リスナーへの通知
     for (const listener of this.messageListeners) {
       listener(data);
     }
 
-    // 3. 解決されなかったメッセージはバッファに保存（期待されるメッセージの先行到着対策）
     if (!handled) {
       this.messageBuffer.push(data);
       if (this.messageBuffer.length > this.MAX_BUFFER_SIZE) {
-        this.messageBuffer.shift(); // 古いメッセージを捨てる
+        this.messageBuffer.shift();
       }
     }
   }
 
   /**
    * 特定の条件を満たすメッセージを待機します。
+   * @param predicate 適合条件
+   * @param options タイムアウトや中断シグナル
    */
   expectMessage<T>(
     predicate: (data: unknown) => boolean,
-    timeoutMs: number = 5000
+    options: { timeoutMs?: number; signal?: AbortSignal } = {}
   ): Promise<T> {
-    // 2026 Best Practice: まずバッファ内を探索し、先行して届いているメッセージを処理
+    const { timeoutMs = 5000, signal } = options;
+
+    // 1. 事前中断チェック
+    if (signal?.aborted) {
+      return Promise.reject(signal.reason);
+    }
+
+    // 2. バッファ内を探索
     for (let i = 0; i < this.messageBuffer.length; i++) {
       const bufferedData = this.messageBuffer[i];
       if (predicate(bufferedData)) {
-        this.messageBuffer.splice(i, 1); // 消費
+        this.messageBuffer.splice(i, 1);
         return Promise.resolve(bufferedData as T);
       }
     }
@@ -85,35 +84,45 @@ export class WorkerCommunicator {
       const expectation = {
         predicate,
         resolve: (data: unknown) => {
-          clearTimeout(timer);
+          cleanup();
           resolve(data as T);
         },
         reject: (reason: Error) => {
-          clearTimeout(timer);
+          cleanup();
           reject(reason);
         }
       };
 
-      const timer = setTimeout(() => {
+      // クリーンアップ処理の集約
+      const cleanup = () => {
         this.pendingExpectations.delete(expectation);
+        if (timer) clearTimeout(timer);
+        if (signal) signal.removeEventListener("abort", onAbort);
+      };
+
+      const onAbort = () => {
+        cleanup();
+        reject(signal?.reason || new Error("Aborted"));
+      };
+
+      const timer = timeoutMs > 0 ? setTimeout(() => {
+        cleanup();
         reject(new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "Message expectation timed out"));
-      }, timeoutMs);
+      }, timeoutMs) : null;
+
+      if (signal) {
+        signal.addEventListener("abort", onAbort, { once: true });
+      }
 
       this.pendingExpectations.add(expectation);
     });
   }
 
-  /**
-   * メッセージリスナーを追加します。
-   */
   onMessage(callback: (data: unknown) => void): () => void {
     this.messageListeners.add(callback);
     return () => this.messageListeners.delete(callback);
   }
 
-  /**
-   * 通信を終了します。
-   */
   terminate(): void {
     const error = new Error("Communicator terminated");
     for (const exp of this.pendingExpectations) {

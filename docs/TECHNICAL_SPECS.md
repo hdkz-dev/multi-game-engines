@@ -9,45 +9,32 @@ type FEN = string & { readonly __brand: "FEN" };
 type Move = string & { readonly __brand: "Move" };
 ```
 
-### 1-2. 思考状況 (Search Info)
-```typescript
-interface IBaseSearchInfo {
-  depth: number;
-  score: number; // cp または mate (10000倍)
-  pv?: Move[];
-  nps?: number;
-  time?: number;
-}
-```
-
 ## 2. エンジン Facade (IEngine)
 
 利用者が使用するメイン API。
 - `load()`: SRI 検証とキャッシュロードを伴う初期化。
-- `search(options)`: 非同期探索。ミドルウェアを**シーケンシャルに適用**。中断時は `reject` を返す。
+- `search(options)`: 非同期探索。ミドルウェアをシーケンシャルに適用。中断時は `reject` を返す。
 - `onInfo(callback)`: リアルタイムな思考配信の購読。ミドルウェア適用済みデータを配信。
 
 ## 3. セキュリティとインフラ
 
 ### 3-1. EngineLoader
-- **SRI 必須化**: 全てのリソースに対し、`sha256-` または `sha384-` で始まるハッシュ検証を強制。
-- **動的 MIME タイプ**: `config.type` に応じ `application/wasm` 等を適切に設定し、ロード互換性を確保。
-- **OPFS キャッシュ**: `navigator.storage.getDirectory()` を使用した高速なバイナリ保存。
+- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。
+- **動的 MIME タイプ**: リソース種別（wasm/js）に応じた適切な Content-Type 設定。
 
-### 3-2. WorkerCommunicator
-- **メッセージバッファリング**: 未処理のメッセージを一時保持し、期待されるレスポンスの先行到着（レースコンディション）を防止。
-- **タイムアウト**: プロトコル初期化時のハングを防ぐための自動中断。
-- **例外伝播**: Worker 内部のクラッシュをメインスレッドの `EngineError` としてキャッチ。
+### 3-2. ファイルストレージ (2026 Best Practice)
+- **接続の不変性**: `IndexedDBStorage` は、ブラウザによる接続クローズやバージョンアップを検知し、自動的に再接続を試みるライフサイクル管理を実装。
+- **精密な例外分離**: `OPFSStorage` は `NotFoundError` (正常系) とそれ以外の致命的エラー（破損、制限）を厳格に区別。
 
-## 4. ミドルウェアパイプライン (ADR-020, ADR-023)
+### 3-3. WorkerCommunicator
+- **メッセージバッファリング**: レースコンディション防止。
+- **AbortSignal ネイティブ対応**: 低レイヤーでの標準的な中断制御。
 
-`onCommand`, `onInfo`, `onResult` の各フェーズでデータを加工可能。
-- **逐次実行保証**: `for...of` ループにより、前のミドルウェアの出力を確実に次の入力として受け渡すシーケンシャル実行を保証。
-- **優先度順**: `MiddlewarePriority` に基づき実行。
+## 4. エンジン・エコシステム (IEngineBridge)
+
+- **グローバル監視**: `onGlobalStatusChange`, `onGlobalProgress`, `onGlobalTelemetry` を提供。
+- **インスタンス管理**: 同一 ID のエンジンに対する Facade インスタンスのキャッシュと、ミドルウェア追加時の自動パージ。
 
 ## 5. エラーハンドリング (EngineError)
 
-- `WASM_INIT_FAILED`: WASM の読み込みまたはインスタンス化失敗。
-- `SRI_MISMATCH`: リソースの整合性チェック失敗。
-- `SEARCH_TIMEOUT`: 中断またはタイムアウト。
-- `NETWORK_ERROR`: ダウンロード障害（HTTP ステータスを含む）。
+- `WASM_INIT_FAILED`, `NETWORK_ERROR`, `SRI_MISMATCH`, `SEARCH_TIMEOUT`, `INTERNAL_ERROR`.
