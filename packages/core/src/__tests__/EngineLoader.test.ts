@@ -44,11 +44,9 @@ describe("EngineLoader", () => {
   });
 
   it("should fetch and cache resource if not in storage", async () => {
-    const mockResponse = {
-      ok: true,
-      arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
-    };
-    vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response);
+    // 2026 Best Practice: Use real Response object instead of mock
+    const mockResponse = new Response(new ArrayBuffer(8), { status: 200 });
+    vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse);
 
     const loader = new EngineLoader(mockStorage);
     const url = await loader.loadResource("test-engine", mockConfig);

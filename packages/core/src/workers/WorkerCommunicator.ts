@@ -47,6 +47,8 @@ export class WorkerCommunicator {
       listener(data);
     }
 
+    // どの expectation にもマッチしなかったメッセージはバッファに保存。
+    // 非同期通信において、expectMessage を呼び出す前にレスポンスが届くレースコンディションを防止。
     if (!handled) {
       this.messageBuffer.push(data);
       if (this.messageBuffer.length > this.MAX_BUFFER_SIZE) {
@@ -57,6 +59,7 @@ export class WorkerCommunicator {
 
   /**
    * 特定の条件を満たすメッセージを待機します。
+   * バッファ内に既にマッチするメッセージがある場合は即座に解決します。
    * @param predicate 適合条件
    * @param options タイムアウトや中断シグナル
    */

@@ -25,9 +25,10 @@ import { EngineError } from "../errors/EngineError";
  * 全てのエンジンのオーケストレーションと共通基盤（ストレージ、ローダー）を提供します。
  */
 export class EngineBridge implements IEngineBridge {
-  private adapters = new Map<string, IEngineAdapter<any, any, any>>();
-  private facades = new Map<string, EngineFacade<any, any, any>>();
-  private middlewares: IMiddleware<any, any>[] = [];
+  private adapters = new Map<string, IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
+  private facades = new Map<string, EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
+  private adapterUnsubscribers = new Map<string, (() => void)[]>();
+  private middlewares: IMiddleware<unknown, unknown>[] = [];
   
   private statusListeners = new Set<(id: string, status: EngineStatus) => void>();
   private progressListeners = new Set<(id: string, progress: ILoadProgress) => void>();
@@ -43,24 +44,50 @@ export class EngineBridge implements IEngineBridge {
     T_INFO extends IBaseSearchInfo,
     T_RESULT extends IBaseSearchResult,
   >(adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>): void {
-    if (this.adapters.has(adapter.id)) {
-      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, `Adapter with id "${adapter.id}" is already registered.`);
-    }
+    // 既存の同一 ID アダプターがある場合は、購読を解除してから上書き
+    this.unregisterAdapter(adapter.id);
 
-    this.adapters.set(adapter.id, adapter);
+    // Bridge Pattern: Heterogeneous adapters are stored in a common Map.
+    // Casting to base type is safe as it will be re-casted to the requested type in getEngine().
+    this.adapters.set(adapter.id, adapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    const unsubscribers: (() => void)[] = [];
 
     // イベントの委譲 (Global Propagation)
-    adapter.onStatusChange((status) => {
-      for (const listener of this.statusListeners) listener(adapter.id, status);
-    });
+    unsubscribers.push(
+      adapter.onStatusChange((status) => {
+        for (const listener of this.statusListeners) listener(adapter.id, status);
+      })
+    );
 
-    adapter.onProgress((progress) => {
-      for (const listener of this.progressListeners) listener(adapter.id, progress);
-    });
+    unsubscribers.push(
+      adapter.onProgress((progress) => {
+        for (const listener of this.progressListeners) listener(adapter.id, progress);
+      })
+    );
 
-    adapter.onTelemetry?.((event) => {
-      for (const listener of this.telemetryListeners) listener(adapter.id, event);
-    });
+    if (adapter.onTelemetry) {
+      unsubscribers.push(
+        adapter.onTelemetry((event) => {
+          for (const listener of this.telemetryListeners) listener(adapter.id, event);
+        })
+      );
+    }
+
+    this.adapterUnsubscribers.set(adapter.id, unsubscribers);
+  }
+
+  /**
+   * アダプターの登録を解除します。
+   */
+  unregisterAdapter(id: string): void {
+    const unsubscribers = this.adapterUnsubscribers.get(id);
+    if (unsubscribers) {
+      for (const unsub of unsubscribers) unsub();
+      this.adapterUnsubscribers.delete(id);
+    }
+    this.adapters.delete(id);
+    this.facades.delete(id);
   }
 
   /**
@@ -107,8 +134,13 @@ export class EngineBridge implements IEngineBridge {
       (a, b) => (b.priority ?? MiddlewarePriority.NORMAL) - (a.priority ?? MiddlewarePriority.NORMAL)
     );
 
-    const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(adapter, sortedMiddlewares);
-    this.facades.set(id, facade);
+    // Facade Design Pattern: 内部のアダプターとミドルウェアを隠蔽し、型安全なインターフェースを提供。
+    // Internal casts are required to map the heterogeneous storage back to specific generics.
+    const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
+      adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
+      sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[]
+    );
+    this.facades.set(id, facade as unknown as EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
     
     return facade;
   }

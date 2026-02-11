@@ -24,6 +24,7 @@ export class StockfishAdapter extends BaseAdapter<
   readonly parser = new UCIParser();
   private blobUrl: string | null = null;
   private activeLoader: IEngineLoader | null = null;
+  private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
   private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
@@ -86,11 +87,13 @@ export class StockfishAdapter extends BaseAdapter<
 
     this.cleanupPendingTask();
 
+    // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
     const infoStream = new ReadableStream<IBaseSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
       cancel: () => {
+        // 利用者がストリームの購読を中止した場合、エンジンにも停止コマンドを送信。
         void this.stop();
       },
     });
@@ -108,7 +111,11 @@ export class StockfishAdapter extends BaseAdapter<
       this.communicator?.postMessage(command);
     }
 
-    this.communicator?.onMessage((data) => {
+    // 既存のリスナーを解除 (2026 Best Practice: Task-scoped listener management)
+    // 以前の探索タスクのレスポンスが現在のタスクに混入することを防止。
+    this.messageUnsubscriber?.();
+
+    this.messageUnsubscriber = this.communicator?.onMessage((data) => {
       if (typeof data !== "string") return;
 
       const info = this.parser.parseInfo(data);
@@ -121,7 +128,7 @@ export class StockfishAdapter extends BaseAdapter<
         this.pendingResolve?.(result);
         this.cleanupPendingTask();
       }
-    });
+    }) || null;
 
     return {
       info: infoStream,
@@ -137,6 +144,8 @@ export class StockfishAdapter extends BaseAdapter<
 
   async dispose(): Promise<void> {
     this.cleanupPendingTask("Adapter disposed");
+    this.messageUnsubscriber?.();
+    this.messageUnsubscriber = null;
     this.communicator?.terminate();
     this.communicator = null;
     

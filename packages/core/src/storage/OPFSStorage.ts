@@ -63,7 +63,7 @@ export class OPFSStorage implements IFileStorage {
   async clear(): Promise<void> {
     const root = await this.getRoot();
     // 互換性チェック
-    const r = root as any;
+    const r = root as unknown as { keys?: () => AsyncIterable<string> };
     if (typeof r.keys === "function") {
       for await (const name of r.keys()) {
         await root.removeEntry(name, { recursive: true }).catch(() => {});

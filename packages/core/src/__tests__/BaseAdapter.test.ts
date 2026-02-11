@@ -6,6 +6,9 @@ import {
   IBaseSearchResult,
   ISearchTask,
   IProtocolParser,
+  EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
 } from "../types";
 
 // モック用の型定義
@@ -36,15 +39,15 @@ class TestAdapter extends BaseAdapter<
   }
 
   // 内部メソッドの公開
-  public testStatus(status: any) {
+  public testStatus(status: EngineStatus) {
     this.emitStatusChange(status);
   }
 
-  public testProgress(progress: any) {
+  public testProgress(progress: ILoadProgress) {
     this.emitProgress(progress);
   }
 
-  public testTelemetry(event: any) {
+  public testTelemetry(event: ITelemetryEvent) {
     this.emitTelemetry(event);
   }
 }
@@ -65,7 +68,7 @@ describe("BaseAdapter", () => {
     const spy = vi.fn();
     adapter.onProgress(spy);
 
-    const progress = { phase: "downloading", percentage: 50 } as any;
+    const progress: ILoadProgress = { phase: "downloading", percentage: 50 };
     adapter.testProgress(progress);
     expect(spy).toHaveBeenCalledWith(progress);
   });

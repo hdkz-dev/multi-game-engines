@@ -17,10 +17,11 @@ export class EngineError extends Error {
     this.name = "EngineError";
 
     // V8 環境でのスタックトレースの保存
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (typeof (Error as any).captureStackTrace === "function") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (Error as any).captureStackTrace(this, EngineError);
+    const v8Error = Error as unknown as {
+      captureStackTrace?: (target: object, constructor: typeof EngineError) => void;
+    };
+    if (typeof v8Error.captureStackTrace === "function") {
+      v8Error.captureStackTrace(this, EngineError);
     }
   }
 

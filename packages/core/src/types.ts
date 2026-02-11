@@ -182,6 +182,7 @@ export interface IFileStorage {
 /** エンジンブリッジの管理 */
 export interface IEngineBridge {
   registerAdapter<T_O extends IBaseSearchOptions, T_I extends IBaseSearchInfo, T_R extends IBaseSearchResult>(adapter: IEngineAdapter<T_O, T_I, T_R>): void;
+  unregisterAdapter(id: string): void;
   getEngine<T_O extends IBaseSearchOptions, T_I extends IBaseSearchInfo, T_R extends IBaseSearchResult>(id: string): IEngine<T_O, T_I, T_R>;
   use<T_I = unknown, T_R = unknown>(middleware: IMiddleware<T_I, T_R>): void;
   getLoader(): Promise<IEngineLoader>;

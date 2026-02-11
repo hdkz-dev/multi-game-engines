@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator";
-import { EngineError } from "../errors/EngineError";
 
 describe("WorkerCommunicator", () => {
   let currentMockWorker: MockWorker | null = null;
@@ -15,16 +14,15 @@ describe("WorkerCommunicator", () => {
     addEventListener = vi.fn();
     removeEventListener = vi.fn();
     dispatchEvent = vi.fn().mockReturnValue(true);
-
-    constructor() {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      currentMockWorker = this;
-    }
   }
 
   beforeEach(() => {
     currentMockWorker = null;
-    vi.stubGlobal("Worker", MockWorker);
+    vi.stubGlobal("Worker", vi.fn().mockImplementation(function() {
+      const worker = new MockWorker();
+      currentMockWorker = worker;
+      return worker;
+    }));
   });
 
   afterEach(() => {

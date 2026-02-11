@@ -1,5 +1,17 @@
 import { ICapabilities } from "../types";
 
+interface IGlobalCapabilities {
+  navigator?: {
+    storage?: {
+      getDirectory?: unknown;
+    };
+    ml?: unknown;
+    gpu?: unknown;
+  };
+  SharedArrayBuffer?: unknown;
+  WebTransport?: unknown;
+}
+
 /**
  * 実行環境の最新 API サポート状況を診断するクラス。
  */
@@ -8,9 +20,7 @@ export class CapabilityDetector {
    * ブラウザや Node.js 環境の能力を検出し、ICapabilities オブジェクトを返します。
    */
   static async detect(): Promise<ICapabilities> {
-    // globalThis を Record 型にキャストして環境診断を行う
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const g = globalThis as unknown as Record<string, any>;
+    const g = globalThis as unknown as IGlobalCapabilities;
 
     const results = {
       opfs: !!(g.navigator?.storage?.getDirectory),
