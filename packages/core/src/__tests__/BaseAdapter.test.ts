@@ -11,7 +11,8 @@ import {
 } from "../types";
 
 /**
- * BaseAdapter の共通機能を検証するための具象テストクラス。
+ * BaseAdapter の共通機能を検証するためのテストクラス。
+ * 抽象クラスである BaseAdapter を継承し、内部メソッドをテスト用に公開します。
  */
 class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   readonly id = "test-engine";
@@ -21,7 +22,6 @@ class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
   readonly adapterLicense = { name: "MIT", url: "" };
   readonly sources = {};
   
-  // パーサーのモック
   readonly parser = {
     parseInfo: vi.fn(),
     parseResult: vi.fn(),
@@ -43,14 +43,12 @@ class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
 
   async dispose() {}
 
-  /** 
-   * テスト用ヘルパーメソッド。
-   * 基底クラスの内部メソッドを安全に呼び出すためのラッパー。
-   */
+  /** 内部メソッド emitStatusChange をテスト用に公開 */
   public setStatus(status: EngineStatus) {
     this.emitStatusChange(status);
   }
 
+  /** 内部メソッド emitProgress をテスト用に公開 */
   public setProgress(progress: ILoadProgress) {
     this.emitProgress(progress);
   }
@@ -61,13 +59,13 @@ describe("BaseAdapter (Foundation)", () => {
     const adapter = new TestAdapter();
     const listener = vi.fn();
 
-    // 1. 購読時に現在のステータスが取得できることを確認
+    // 1. 初期ステータスが 'uninitialized' であることを確認
     expect(adapter.status).toBe("uninitialized");
 
-    // 2. 購読開始
+    // 2. ステータス変更を購読
     adapter.onStatusChange(listener);
     
-    // 3. 状態遷移後に通知されることを確認
+    // 3. 遷移後に通知が来ること、および status プロパティが更新されることを確認
     adapter.setStatus("ready");
     expect(listener).toHaveBeenCalledWith("ready");
     expect(adapter.status).toBe("ready");
@@ -86,6 +84,7 @@ describe("BaseAdapter (Foundation)", () => {
     };
     adapter.setProgress(mockProgress);
 
+    // 検証: 進捗データがリスナーに渡り、内部状態も更新されていること
     expect(listener).toHaveBeenCalledWith(mockProgress);
     expect(adapter.progress).toEqual(mockProgress);
   });
