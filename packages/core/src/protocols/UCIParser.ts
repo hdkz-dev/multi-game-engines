@@ -11,6 +11,9 @@ import {
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
 const MATE_SCORE_FACTOR = 10000;
 
+/** FEN 文字列に含まれてはいけない文字 (Injection対策) */
+const UNSAFE_FEN_CHARS = /[\r\n\0;]/g;
+
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
@@ -88,7 +91,8 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
     if (!options.fen) {
       throw new Error("UCI requires a FEN position");
     }
-    const safeFen = options.fen.replace(/[\r\n\0;]/g, "");
+    // Optimization: Use pre-compiled regex
+    const safeFen = options.fen.replace(UNSAFE_FEN_CHARS, "");
     
     const commands: string[] = [
       `position fen ${safeFen}`

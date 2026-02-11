@@ -12,6 +12,9 @@ import {
 /** 詰みスコアを cp と区別するための係数 */
 const MATE_SCORE_FACTOR = 100000;
 
+/** SFEN 文字列に含まれてはいけない文字 (Injection対策) */
+const UNSAFE_SFEN_CHARS = /[\r\n\0;]/g;
+
 /** 将棋用の探索オプション拡張 */
 export interface ISHOGISearchOptions extends IBaseSearchOptions {
   sfen: SFEN;
@@ -95,7 +98,8 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
    */
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     // インジェクション対策
-    const safeSfen = options.sfen.replace(/[\r\n\0;]/g, "");
+    // Optimization: Use pre-compiled regex
+    const safeSfen = options.sfen.replace(UNSAFE_SFEN_CHARS, "");
     
     const commands: string[] = [
       `position sfen ${safeSfen}`
