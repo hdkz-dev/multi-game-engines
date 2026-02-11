@@ -449,11 +449,11 @@ export interface IEngineBridge {
   getSecurityStatus(): ISecurityStatus;
 
   /** エンジンのステータス変化を中央で購読します (2026 Best Practice) */
-  onGlobalStatusChange?(callback: (id: string, status: EngineStatus) => void): () => void;
+  onGlobalStatusChange(callback: (id: string, status: EngineStatus) => void): () => void;
   /** エンジンの進捗状況を一括で購読します (2026 Best Practice) */
-  onGlobalProgress?(callback: (id: string, progress: ILoadProgress) => void): () => void;
+  onGlobalProgress(callback: (id: string, progress: ILoadProgress) => void): () => void;
   /** エンジンのテレメトリを一括で購読します (2026 Best Practice) */
-  onGlobalTelemetry?(callback: (id: string, event: ITelemetryEvent) => void): () => void;
+  onGlobalTelemetry(callback: (id: string, event: ITelemetryEvent) => void): () => void;
 }
 
 /**

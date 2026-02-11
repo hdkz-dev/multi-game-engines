@@ -35,11 +35,7 @@ export class StockfishAdapter extends BaseAdapter<
     url: "https://opensource.org/licenses/MIT",
   };
 
-  /** 
-   * エンジンリソースの設定。
-   * TODO: 本番ビルド時にハッシュとサイズを自動生成して埋め込み、改竄を防止すること。
-   * (Stage 1 では空文字列を許容し、バリデーションをスキップします)
-   */
+  /** エンジンリソースの設定 */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
@@ -88,7 +84,7 @@ export class StockfishAdapter extends BaseAdapter<
 
       try {
         await this.communicator.expectMessage<string>(
-          (data) => data === "uciok", 
+          (data) => typeof data === "string" && data === "uciok", 
           { signal: ac.signal }
         );
       } catch (e) {
@@ -101,11 +97,7 @@ export class StockfishAdapter extends BaseAdapter<
       }
 
       this.emitStatusChange("ready");
-      this.emitProgress({ 
-        phase: "ready", 
-        percentage: 100, 
-        i18n: { key: "ready", defaultMessage: "Ready" } 
-      });
+      this.emitProgress({ phase: "ready", percentage: 100, i18n: { key: "ready", defaultMessage: "Ready" } });
       
       this.emitTelemetry({
         event: "load_complete",
@@ -129,7 +121,7 @@ export class StockfishAdapter extends BaseAdapter<
 
     this.emitStatusChange("busy");
 
-    // 古いリクエストのクリーンアップ
+    // 古いリクエストの強制クリーンアップ (consumer 側のハングを防止)
     this.cleanupPendingRequest("New search started");
 
     const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
@@ -192,6 +184,7 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
+  /** 待機中の Promise とストリームを確実に終了させる内部メソッド */
   private cleanupPendingRequest(reason: string): void {
     if (this.pendingReject) {
       this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason));
@@ -202,7 +195,7 @@ export class StockfishAdapter extends BaseAdapter<
       try {
         this.infoController.close();
       } catch {
-        // すでに閉じられている場合は無視
+        // 既に閉じられている場合は無視
       }
       this.infoController = null;
     }
