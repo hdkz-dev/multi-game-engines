@@ -8,6 +8,9 @@ import {
   Move,
 } from "../types";
 
+/** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
+const MATE_SCORE_FACTOR = 10000;
+
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
@@ -37,7 +40,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
         case "score": {
           const scoreType = parts[++i]; // "cp" or "mate"
           const scoreValue = parseInt(parts[++i], 10) || 0;
-          info.score = scoreType === "mate" ? scoreValue * 10000 : scoreValue;
+          info.score = scoreType === "mate" ? scoreValue * MATE_SCORE_FACTOR : scoreValue;
           break;
         }
         case "nps":
@@ -80,11 +83,8 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
 
   /**
    * 探索開始コマンドを生成します。
-   * [セキュリティ: ADR-023 準拠]
-   * FEN 文字列から改行、セミコロン、ヌル文字等の UCI プロトコルを破壊しうる文字を完全に排除します。
    */
   createSearchCommand(options: IBaseSearchOptions): string[] {
-    // 制御文字、改行、UCI コマンド区切り文字（;）を排除
     const safeFen = options.fen.replace(/[\r\n\0;]/g, "");
     
     const commands: string[] = [

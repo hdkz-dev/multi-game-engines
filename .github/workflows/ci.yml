@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/* ]
   pull_request:
     branches: [ main ]
 
@@ -13,26 +13,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Use Node.js 22.x
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        # packageManager in package.json will define the version
+
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 22.x
-
-    - name: Install pnpm
-      uses: pnpm/action-setup@v4
-
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-    - uses: actions/cache@v4
-      name: Setup pnpm cache
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+        node-version: '22'
+        cache: 'pnpm'
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -40,11 +30,8 @@ jobs:
     - name: Lint
       run: pnpm run lint
 
-    - name: Build Core
-      run: pnpm --filter @multi-game-engines/core build
+    - name: Build
+      run: pnpm -r build
 
-    - name: Test Core
-      run: pnpm --filter @multi-game-engines/core test
-
-    - name: Build Adapter Stockfish
-      run: pnpm --filter @multi-game-engines/adapter-stockfish build
+    - name: Test
+      run: pnpm -r test
