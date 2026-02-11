@@ -10,24 +10,21 @@
 > **目的**: 全エンジンの共通基盤となる `@multi-game-engines/core` の完成。
 
 ### 1-1: 基本型システムとインターフェース
-
-- [x] `types.ts`: プロジェクト全体のコア型定義 (IEngineAdapterMetadata/State 分離完了)
-- [x] `protocols/types.ts`: エンジン通信プロトコルインターフェース
-- [x] `index.ts`: 公開 API の整理
+- [x] `types.ts`: Branded Types (FEN, Move) による型安全性の確保。
+- [x] `protocols/types.ts`: 汎用プロトコルパーサーインターフェース。
+- [x] `IEngine`: 思考状況 (onInfo) を含む最新 Facade 定義。
 
 ### 1-2: コアロジック実装
-
-- [x] **EngineBridge**: アダプター管理とミドルウェアチェーン
-- [x] **BaseAdapter**: アダプター共通基盤
-- [x] **EngineFacade**: `IEngine` インターフェースの具象化
-- [x] **CapabilityDetector**: 環境診断 (OPFS, SIMD, Threads)
+- [x] **EngineBridge**: インスタンスキャッシュとグローバルミドルウェア管理。
+- [x] **BaseAdapter**: ライフサイクル・イベント配信の共通化。
+- [x] **EngineFacade**: 2026年基準の AbortSignal 中断制御と排他制御。
+- [x] **CapabilityDetector**: OPFS, SIMD, WebGPU 等の精密な環境診断。
 
 ### 1-3: インフラとストレージ
-
-- [x] **FileStorage**: OPFS/IndexedDB 抽象化
-- [x] **SRI Validator**: サブリソース整合性チェック
-- [x] **WorkerCommunicator**: 型安全な通信ラッパー
-- [x] **EngineLoader**: リソース管理とキャッシュの集約
+- [x] **FileStorage**: OPFS (Primary) / IndexedDB (Fallback) 実装。
+- [x] **SRI Validator**: 必須化されたサブリソース整合性チェック。
+- [x] **WorkerCommunicator**: タイムアウトと例外伝播を備えた型安全ラッパー。
+- [x] **EngineLoader**: 動的 MIME type 対応と SRI 必須化。
 
 ---
 
@@ -37,17 +34,16 @@
 > **目的**: 既存の npm パッケージと公開 WASM を利用した早期統合。
 
 ### 2-1: 業界標準エンジン・アダプター
-
-- [x] **adapter-stockfish**: jsDelivr/unpkg 経由のロード実装
-- [ ] **adapter-yaneuraou**: 公式 WASM または shogi-engine 統合
-- [x] **UCI/USI Parser**: 基本プロトコルのパースロジック完成
+- [x] **adapter-stockfish**: jsDelivr 経由のロードと UCI 16.1 対応。
+- [x] **UCI Parser**: 改行排除によるインジェクション対策済みパーサー。
+- [ ] **adapter-yaneuraou**: 公式 WASM または shogi-engine 統合。
+- [ ] **USI Parser**: 将棋用プロトコルの基本実装。
 
 ### 2-2: メンテナンスとエコシステム
-
-- [x] **ユニットテスト**: 主要コンポーネントのテストカバレッジ 100%
-- [x] **多言語ドキュメント**: 日英バイリンガル対応 (JP/EN)
-- [x] **サンプルアプリ**: `examples/simple-chess` による動作確認
-- [x] **CI/CD**: GitHub Actions による自動検証
+- [x] **ユニットテスト**: 正常系・異常系・中断シナリオを含む 32 ケース。
+- [x] **多言語ドキュメント**: アーキテクチャと技術仕様の日英完全同期。
+- [x] **CI/CD**: GitHub Actions による frozen-lockfile 徹底。
+- [ ] **packages/ui**: エンジン状況可視化コンポーネント (計画中)。
 
 ---
 
@@ -56,4 +52,6 @@
 > **ステータス**: 検討中  
 > **目的**: 自前ビルドによる業界最高速環境の構築。
 
-...（以下、将来計画として維持）...
+- [ ] **Multi-Runtime Bridge**: Node.js Native と WASM の自動切り替え。
+- [ ] **Custom Emscripten Build**: 依存 CDN を排除した最適化バイナリ配布。
+- [ ] **WASI Integration**: WebAssembly System Interface による高度なファイルI/O。

@@ -1,28 +1,41 @@
-# multi-game-engines
+# Multi-Game Engines Bridge
 
-[JP] さまざまなゲームエンジンを統合するための、世界最高水準の TypeScript 疎結合ブリッジライブラリ。  
-[EN] The world-class TypeScript decoupled bridge library for integrating various game engines.
-
----
-
-## 🌟 プロジェクトのビジョン / Project Vision
-
-### [JP]
-「ライセンスの壁」と「実装の複雑さ」を取り払い、あらゆるアプリケーションが最高性能の AI エンジンを自由に利用できるエコシステムを構築します。
-
-### [EN]
-We aim to break down "license barriers" and "implementation complexity," building an ecosystem where any application can freely utilize high-performance AI engines.
+2026年の Web 標準（OPFS, WebNN, WebGPU）をフル活用した、次世代のゲームエンジン・ブリッジライブラリ。
 
 ---
 
-## 🚀 技術スタック / Technical Stack
+## 🌟 特徴 / Features
 
-- **Universal Runtime**: Browser, Node.js, Deno, Bun, VS Code Extensions.
-- **Modern Web APIs**: OPFS, WebNN, WebGPU, WASI, WebTransport.
-- **Zero Copy I/O**: High-speed binary communication via Transferable Objects.
-- **Strict License Isolation**: Physical and logical separation between Core (MIT) and Adapters.
+- **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
+- **Zero-Any Type Safety**: Branded Types とジェネリクスにより、コンパイル時に多くのミスを未然に防止。
+- **Modern Security**: 全リソースへの SRI (Subresource Integrity) 必須化と、COOP/COEP 診断機能の統合。
+- **High Performance Storage**: OPFS (Origin Private File System) を活用した、バイナリの高速永続化キャッシュ。
 
----
+## 📦 サポート状況 / Support Status
+
+- **Chess**: Stockfish 16.1 (WASM) - **Ready**
+- **Shogi**: やねうら王 (WASM) - **Work in Progress**
+
+## 🚀 クイックスタート / Quick Start
+
+```typescript
+import { EngineBridge, StockfishAdapter } from "@multi-game-engines/core";
+
+const bridge = new EngineBridge();
+bridge.registerAdapter(new StockfishAdapter());
+
+const engine = bridge.getEngine("stockfish");
+await engine.load();
+
+// 思考状況の購読
+engine.onInfo((info) => {
+  console.log(`Depth: ${info.depth}, Score: ${info.score}`);
+});
+
+// 探索の実行
+const result = await engine.search({ fen: "startpos" });
+console.log(`Best Move: ${result.bestMove}`);
+```
 
 ## 📖 ドキュメント案内 / Documentation
 
@@ -37,3 +50,12 @@ We aim to break down "license barriers" and "implementation complexity," buildin
 - [Architecture & Design](docs/en/ARCHITECTURE.md)
 - [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)
+
+## 🤝 貢献 / Contributing
+
+詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+
+## 📄 ライセンス / License
+
+- **Core**: MIT License
+- **Adapters**: 各エンジンのライセンスに準拠（例: Stockfish は GPL-3.0-only）

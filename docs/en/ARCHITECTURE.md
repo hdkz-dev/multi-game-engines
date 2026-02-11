@@ -1,64 +1,48 @@
 # Architecture & Design
 
-This document explains the design principles and technical architecture of `multi-game-engines`.
+This document describes the design principles and technical architecture of the `multi-game-engines` project.
 
 ## Design Principles
 
 1.  **Framework Agnostic**:
-    - The core library is built with pure TypeScript and standard Web APIs (AsyncIterable, EventTarget, etc.).
-    - It works in any environment without depending on specific UI frameworks like React, Vue, or Angular.
-2.  **Streaming I/O**:
-    - Engine analysis (candidate moves, scores, etc.) is delivered using `AsyncIterable`. This allows for intuitive real-time updates using `for await...of` loops.
+    - The core library is built with pure TypeScript and standard Web APIs (AsyncIterable, AbortSignal, EventTarget).
+    - It does not depend on any specific UI framework like React, Vue, or Angular, allowing it to run in any environment (Browser, Worker, Node.js).
+2.  **Streaming I/O (Async Iterator)**:
+    - Thinking progress from the engine (moves, evaluations) is delivered via `AsyncIterable`. This enables intuitive real-time updates using `for await...of` loops.
 3.  **Modern Web Standards**:
-    - **OPFS (Origin Private File System)**: Employs a high-speed browser-based filesystem for persisting large WASM and evaluation files (falls back to IndexedDB where unsupported).
-    - **WebAssembly (SIMD/Threads)**: Supports configurations that maximize engine performance.
+    - **OPFS (Origin Private File System)**: High-speed browser file system for persisting large WASM and evaluation data files.
+    - **SRI (Subresource Integrity)**: Mandatory integrity verification for all external resources.
+    - **WebAssembly (SIMD/Threads)**: Native support for optimized engine binaries.
 
 ## Core Concepts
 
-1.  **Bridge (Core)**: The orchestrator that manages engine lifecycles and provides a unified API.
-2.  **Adapter Interface**: Strictly defined interfaces that all engine implementations must follow.
-3.  **Engine Adapter**: Implementation layer that translates unified API calls into engine-specific commands (e.g., Chess UCI, Shogi USI).
-4.  **Engine Loader**: Infrastructure layer that handles downloading external resources (WASM, etc.), SRI verification, and caching to OPFS transparently.
-5.  **Worker Communicator**: Communication layer that abstracts type-safe messaging with WebWorkers.
-
-## Plugin System
-
-The `@multi-game-engines/core` package exports `IEngineAdapter` and `IEngine` interfaces, enabling anyone to create plugins.
-
-### Extensibility
-
-Provides a unified interface for common tasks (search, move, evaluation) while allowing access to engine-specific features. Adapters can expose specialized methods, and users can access them with type safety using TypeScript generics.
-
-```typescript
-// Type-safe access with engine-specific types
-const stockfish = bridge.getEngine<StockfishOptions, StockfishInfo, StockfishResult>('stockfish');
-stockfish.search({ fen: '...' as FEN, depth: 20 }); // Type-safe search
-```
+1.  **EngineBridge (Orchestrator)**: Manages engine lifecycle, adapter registry, and global middleware chains.
+2.  **IEngine (Facade)**: The primary user-facing API that hides implementation details.
+3.  **EngineAdapter**: The implementation layer that translates unified API calls into engine-specific protocols (e.g., UCI for Chess, USI for Shogi).
+4.  **EngineLoader (Infrastructure)**: Handles resource downloading, SRI validation, and OPFS caching.
+5.  **WorkerCommunicator**: Provides type-safe messaging with WebWorkers, including timeout and exception propagation.
 
 ## License Strategy
 
-- **Core**: MIT License. Contains no engine-specific code, making it usable in any project.
-- **Adapters**: Each adapter is a separate npm package. This allows including engines like Stockfish (GPL) in the ecosystem without forcing GPL on the core library or the user's application (unless that specific adapter is explicitly used).
+- **Core**: MIT License. Contains no engine-specific code.
+- **Adapters**: Each adapter is a separate package with its own license. This allows including GPL-licensed engines (like Stockfish) in the ecosystem without forcing GPL on the core library or the user's application.
 
-## Engine Loading Strategy
+## Loading Strategy
 
-Balancing license isolation and user experience, we provide three strategies for loading engines (e.g., downloading WASM), giving developers full control:
+To balance license isolation and user experience, we provide three strategies:
 
-1.  **Manual**:
-    - Starts loading only after an explicit user action (e.g., clicking an "Install Engine" button).
-    - Ideal for saving bandwidth or requiring license agreement.
-2.  **On-demand / Fallback (Default)**:
-    - Primarily manual, but automatically starts loading if an engine function (like search) is called while not ready.
-    - Reduces user friction while preserving resources until needed.
-3.  **Eager**:
-    - Starts loading in the background immediately after application startup or adapter registration.
-    - Provides a seamless experience without perceived wait times.
+1.  **Manual**: Load starts only when the user explicitly triggers it (e.g., clicking an "Install" button).
+2.  **On-demand (Default)**: Automatically triggers loading if an engine feature (like searching) is called before the engine is ready.
+3.  **Eager**: Starts background loading immediately after application startup or adapter registration.
 
-### Progress Visibility & I/O
+---
 
-In all strategies, adapters report detailed progress via `ILoadProgress`. This makes it easy for developers to implement:
-- Management screens for installed engines.
-- Progress bars during initial load.
-- Engine-specific license agreement dialogs.
+## Detailed Implementation: The Pipeline
 
-Engine binaries (WASM, etc.) are persisted using IndexedDB or OPFS in web contexts to speed up subsequent loads.
+When you call `engine.search()`, the following sequence occurs:
+
+1.  **Command Pipeline**: Middleware processing of search options -> UCI command generation.
+2.  **Task Management**: Automated stopping of any previous tasks (Mutual Exclusion).
+3.  **Real-time Feedback**: `info` stream processing with middleware -> `onInfo` event delivery.
+4.  **Final Result**: `bestmove` reception -> Result middleware -> Resolving the `search` Promise.
+5.  **Interruption**: `AbortSignal` monitoring. If aborted, the Promise is immediately rejected and the engine task is stopped.
