@@ -18,6 +18,7 @@ export class WorkerCommunicator {
   private readonly MAX_BUFFER_SIZE = 100;
 
   constructor(workerUrl: string) {
+    this.validateWorkerUrl(workerUrl);
     this.worker = new Worker(workerUrl);
     this.worker.onmessage = (e: MessageEvent) => this.handleIncomingMessage(e.data);
     this.worker.onerror = (e: ErrorEvent) => this.handleError(e);
@@ -143,5 +144,31 @@ export class WorkerCommunicator {
       exp.reject(error);
     }
     this.pendingExpectations.clear();
+  }
+
+  private validateWorkerUrl(url: string): void {
+    if (url.startsWith("blob:")) return;
+
+    if (typeof globalThis.location === "undefined") return;
+
+    try {
+      const baseUrl = globalThis.location.href;
+      const parsedUrl = new URL(url, baseUrl);
+
+      if (parsedUrl.origin !== globalThis.location.origin) {
+        throw new EngineError(
+          EngineErrorCode.SECURITY_VIOLATION,
+          `Worker script must be from the same origin. Blocked: ${url}`
+        );
+      }
+    } catch (e) {
+      if (e instanceof EngineError) throw e;
+      throw new EngineError(
+        EngineErrorCode.SECURITY_VIOLATION,
+        `Invalid worker URL: ${url}`,
+        undefined,
+        e
+      );
+    }
   }
 }
