@@ -14,7 +14,7 @@ import {
 } from "@multi-game-engines/core";
 
 /**
- * Stockfish (WASM) 用のアダプター実装。
+ * Stockfish エンジンの WASM 実装用アダプター。
  */
 export class StockfishAdapter extends BaseAdapter<
   IBaseSearchOptions,
@@ -35,11 +35,11 @@ export class StockfishAdapter extends BaseAdapter<
     url: "https://opensource.org/licenses/MIT",
   };
 
-  /** エンジンリソースの設定 */
+  /** エンジンの供給元設定 */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
-      sri: "", 
+      sri: "", // 実運用時にはハッシュ値を指定
       size: 0, 
       type: "worker-js",
     },
@@ -67,7 +67,7 @@ export class StockfishAdapter extends BaseAdapter<
         this.emitProgress({ 
           phase: "downloading", 
           percentage: 10, 
-          i18n: { key: "loading_resource", defaultMessage: "Loading engine resource..." } 
+          i18n: { key: "loading_resource", defaultMessage: "Fetching engine binary..." } 
         });
         this.blobUrl = await loader.loadResource(this.id, this.sources.main);
         workerUrl = this.blobUrl;
@@ -89,7 +89,7 @@ export class StockfishAdapter extends BaseAdapter<
         );
       } catch (e) {
         if (ac.signal.aborted) {
-          throw new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "UCI initialization timed out");
+          throw new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "UCI protocol initialization timed out");
         }
         throw e;
       } finally {
@@ -116,13 +116,13 @@ export class StockfishAdapter extends BaseAdapter<
 
   searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready. Call load() first.");
+      throw new Error("Engine is not ready.");
     }
 
     this.emitStatusChange("busy");
 
-    // 古いリクエストの強制クリーンアップ (consumer 側のハングを防止)
-    this.cleanupPendingRequest("New search started");
+    // 前回のタスクが残っていれば確実に終了させる (ハングアップ防止)
+    this.abortOngoingRequest("New search started");
 
     const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
@@ -149,7 +149,7 @@ export class StockfishAdapter extends BaseAdapter<
     };
 
     if (!this.communicator) {
-        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
+        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is not available");
     }
 
     if (Array.isArray(command)) {
@@ -170,7 +170,8 @@ export class StockfishAdapter extends BaseAdapter<
   }
 
   async dispose(): Promise<void> {
-    this.cleanupPendingRequest("Adapter disposed");
+    // 待機中の全リクエストを異常終了として処理
+    this.abortOngoingRequest("Adapter disposed");
     
     this.communicator?.terminate();
     this.communicator = null;
@@ -184,8 +185,10 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  /** 待機中の Promise とストリームを確実に終了させる内部メソッド */
-  private cleanupPendingRequest(reason: string): void {
+  /**
+   * 実行中の非同期処理（Promise と Stream）を強制終了します。
+   */
+  private abortOngoingRequest(reason: string): void {
     if (this.pendingReject) {
       this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason));
       this.pendingReject = null;
@@ -195,7 +198,7 @@ export class StockfishAdapter extends BaseAdapter<
       try {
         this.infoController.close();
       } catch {
-        // 既に閉じられている場合は無視
+        // すでに閉じられている場合は何もしない
       }
       this.infoController = null;
     }

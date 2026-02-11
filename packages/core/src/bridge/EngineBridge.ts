@@ -24,30 +24,33 @@ import { EngineError } from "../errors/EngineError";
 
 /**
  * 複数のエンジンアダプターを集中管理するブリッジクラス。
+ * 
+ * 2026年最新のベストプラクティスに基づき、
+ * リソース管理、イベント集約、ミドルウェアチェーンを統合します。
  */
 export class EngineBridge implements IEngineBridge {
   /**
    * 登録されたアダプターのマップ。
-   * 内部管理用として意図的に any を許容するインターフェースで保持します。
+   * ジェネリクスが多様なため内部管理用として any を使用。
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private adapters = new Map<string, IEngineAdapter<any, any, any>>();
   
-  /** ミドルウェアのリスト。内部的には any を許容します。 */
+  /** ミドルウェアのリスト。内部的には any を許容。 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private middlewares: IMiddleware<any, any>[] = [];
   
-  /** 作成済み Facade のキャッシュ（排他制御の状態を維持するため） */
+  /** Facade インスタンスのキャッシュ（排他制御の状態を維持するため） */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private facades = new Map<string, EngineFacade<any, any, any>>();
 
-  /** アダプターごとのイベント購読解除関数リスト */
+  /** アダプターごとのイベント購読解除関数を保持 */
   private adapterUnsubscribers = new Map<string, (() => void)[]>();
 
   /** 非同期で初期化されるリソースローダーの Promise */
   private loaderPromise: Promise<EngineLoader> | null = null;
 
-  // グローバルイベントリスナーのセット
+  // グローバルイベントリスナー
   private statusListeners = new Set<(id: string, status: EngineStatus) => void>();
   private progressListeners = new Set<(id: string, progress: ILoadProgress) => void>();
   private telemetryListeners = new Set<(id: string, event: ITelemetryEvent) => void>();
@@ -63,6 +66,7 @@ export class EngineBridge implements IEngineBridge {
           const storage = createFileStorage(caps);
           return new EngineLoader(storage);
         } catch (err) {
+          // 初期化失敗時はキャッシュをクリアし、次回の呼び出しで再試行を可能にする
           this.loaderPromise = null;
           throw err;
         }
@@ -72,7 +76,7 @@ export class EngineBridge implements IEngineBridge {
   }
 
   /**
-   * エンジンアダプターをブリッジに登録します。
+   * アダプターを登録します。既存の登録がある場合は購読を解除して上書きします。
    */
   registerAdapter<
     T_OPTIONS extends IBaseSearchOptions,
@@ -82,15 +86,18 @@ export class EngineBridge implements IEngineBridge {
     const id = adapter.id;
 
     if (this.adapters.has(id)) {
-      console.warn(`Adapter with ID "${id}" is already registered. Overwriting.`);
+      console.warn(`[EngineBridge] Adapter "${id}" is already registered. Re-registering...`);
+      // 古い購読を解除してリークを防止
       const oldUnsubs = this.adapterUnsubscribers.get(id);
       oldUnsubs?.forEach(unsub => unsub());
       this.adapterUnsubscribers.delete(id);
+      // アダプターが新しくなるためキャッシュされた Facade もクリア
       this.facades.delete(id);
     }
 
     const unsubscribers: (() => void)[] = [];
     
+    // イベントのバブリング（集約）設定
     unsubscribers.push(adapter.onStatusChange((status) => {
       this.statusListeners.forEach(cb => cb(id, status));
     }));
@@ -110,13 +117,14 @@ export class EngineBridge implements IEngineBridge {
   }
 
   /**
-   * 指定されたエンジンIDに対応する利用者向け Facade を取得します。
+   * 指定されたエンジンの Facade を取得します。
    */
   getEngine<
     T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
     T_RESULT extends IBaseSearchResult = IBaseSearchResult,
   >(id: string): IEngine<T_OPTIONS, T_INFO, T_RESULT> {
+    // 同一IDに対しては常に同じインスタンスを返し、タスクの状態を共有する
     if (this.facades.has(id)) {
       return this.facades.get(id) as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
     }
@@ -137,11 +145,11 @@ export class EngineBridge implements IEngineBridge {
   }
 
   /**
-   * ブリッジ全体に適用するミドルウェアを追加します。
+   * ミドルウェアを追加します。既存の Facade キャッシュをクリアして反映を保証します。
    */
   use<T_INFO = unknown, T_RESULT = unknown>(middleware: IMiddleware<T_INFO, T_RESULT>): void {
     this.middlewares.push(middleware);
-    // 新しいミドルウェア構成を反映させるため、既存の Facade キャッシュをクリア
+    // 新しいミドルウェアを適用するため、作成済みの Facade インスタンスを破棄（再生成）
     this.facades.clear();
   }
 
