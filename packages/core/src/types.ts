@@ -7,6 +7,7 @@
  * ブラント型 (Branded Types) によるドメイン知識の保護。
  */
 export type FEN = string & { readonly __brand: "FEN" };
+export type SFEN = string & { readonly __brand: "SFEN" };
 export type Move = string & { readonly __brand: "Move" };
 
 /** エンジンの動作状態 */
@@ -54,11 +55,19 @@ export interface ISecurityStatus {
 
 /** 探索の基本オプション */
 export interface IBaseSearchOptions {
-  fen: FEN;
+  fen?: FEN;
   depth?: number;
   time?: number;
   nodes?: number;
   signal?: AbortSignal;
+}
+
+/** 将棋用の探索オプション拡張 */
+export interface ISHOGISearchOptions extends IBaseSearchOptions {
+  sfen: SFEN;
+  btime?: number;
+  wtime?: number;
+  byoyomi?: number;
 }
 
 /** 思考状況の基本情報 */
