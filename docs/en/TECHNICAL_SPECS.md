@@ -24,30 +24,30 @@ interface IBaseSearchInfo {
 
 The primary API for end-users.
 - `load()`: Initializes with SRI verification and cache lookup.
-- `search(options)`: Asynchronous search task. Rejects if aborted.
-- `onInfo(callback)`: Subscription for real-time thinking progress.
+- `search(options)`: Asynchronous search task. Middleware is applied **sequentially**. Rejects if aborted.
+- `onInfo(callback)`: Subscription for real-time thinking progress. Delivers middleware-processed data.
 
 ## 3. Infrastructure & Security
 
 ### 3-1. EngineLoader
-- **SRI Enforcement**: Mandatory validation using `sha256-` or `sha384-` hashes for all resources.
-- **OPFS Caching**: Persistent storage using `navigator.storage.getDirectory()`.
-- **Blob Management**: Automatic `URL.revokeObjectURL()` after Worker initialization.
+- **SRI Enforcement**: Mandatory validation for all resources.
+- **Dynamic MIME Types**: Sets correct content types (e.g., `application/wasm`) based on `config.type` for maximum compatibility.
+- **OPFS Caching**: High-speed binary persistence.
 
 ### 3-2. WorkerCommunicator
-- **Timeouts**: Automated aborting of protocol initialization to prevent hanging.
-- **Exception Propagation**: Captures Worker-level crashes as `EngineError` in the main thread.
+- **Message Buffering**: Prevents race conditions by temporarily storing unhandled messages, ensuring early responses from fast WASM engines are never missed.
+- **Timeouts**: Automated aborting of protocol initialization.
+- **Exception Propagation**: Captures Worker-level crashes as `EngineError`.
 
-## 4. Error Management (EngineError)
-
-All critical failures are reported via the `EngineError` class.
-- `WASM_INIT_FAILED`: Failed to load or instantiate WASM.
-- `SRI_MISMATCH`: Resource integrity check failed.
-- `SEARCH_TIMEOUT`: Aborted or timed out.
-- `NETWORK_ERROR`: Connection or download failure.
-
-## 5. Middleware Pipeline (ADR-020)
+## 4. Middleware Pipeline (ADR-020, ADR-023)
 
 Processes data during `onCommand`, `onInfo`, and `onResult` phases.
-- Executes in priority order (`MiddlewarePriority`).
-- Supports asynchronous middleware.
+- **Sequential Execution**: Uses `for...of` loops to guarantee data transformation order and pipeline purity.
+- **Priority Order**: Executes based on `MiddlewarePriority`.
+
+## 5. Error Management (EngineError)
+
+- `WASM_INIT_FAILED`: Failed to load/instantiate WASM.
+- `SRI_MISMATCH`: Resource integrity check failed.
+- `SEARCH_TIMEOUT`: Aborted or timed out.
+- `NETWORK_ERROR`: Connection failure (includes HTTP status).

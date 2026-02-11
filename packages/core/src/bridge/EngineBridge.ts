@@ -139,7 +139,7 @@ export class EngineBridge implements IEngineBridge {
       (a, b) => (b.priority ?? MiddlewarePriority.NORMAL) - (a.priority ?? MiddlewarePriority.NORMAL)
     );
 
-    const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(adapter, sortedMiddlewares, this);
+    const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(adapter, sortedMiddlewares);
     this.facades.set(id, facade);
     
     return facade;
