@@ -17,16 +17,16 @@
 
 ### 1-2: コアロジック実装
 
-- [ ] **EngineBridge**: アダプター管理とミドルウェアチェーン
-- [ ] **BaseAdapter**: アダプター共通基盤
-- [ ] **EngineFacade**: `IEngine` インターフェースの具象化
-- [ ] **CapabilityDetector**: 環境診断 (OPFS, SIMD, Threads)
+- [x] **EngineBridge**: アダプター管理とミドルウェアチェーン
+- [x] **BaseAdapter**: アダプター共通基盤
+- [x] **EngineFacade**: `IEngine` インターフェースの具象化
+- [x] **CapabilityDetector**: 環境診断 (OPFS, SIMD, Threads)
 
 ### 1-3: インフラとストレージ
 
-- [ ] **FileStorage**: OPFS/IndexedDB 抽象化
-- [ ] **SRI Validator**: サブリソース整合性チェック
-- [ ] **WorkerCommunicator**: 型安全な通信ラッパー
+- [x] **FileStorage**: OPFS/IndexedDB 抽象化
+- [x] **SRI Validator**: サブリソース整合性チェック
+- [x] **WorkerCommunicator**: 型安全な通信ラッパー
 
 ---
 
@@ -37,9 +37,9 @@
 
 ### 2-1: 業界標準エンジン・アダプター
 
-- [ ] **adapter-stockfish**: jsDelivr/unpkg 経由のロード実装
+- [x] **adapter-stockfish**: jsDelivr/unpkg 経由のロード実装
 - [ ] **adapter-yaneuraou**: 既存パッケージ (if exists) または公式 WASM 統合
-- [ ] **UCI/USI Parser**: 基本プロトコルのパースロジック完成
+- [x] **UCI/USI Parser**: 基本プロトコルのパースロジック完成
 
 ### 2-2: ネイティブ・アルゴリズム・アダプター
 

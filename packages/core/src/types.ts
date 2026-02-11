@@ -32,13 +32,15 @@ export interface ISecurityStatus {
 /**
  * ミドルウェアのコンテキスト
  */
-export interface IMiddlewareContext {
+export interface IMiddlewareContext<T_OPTIONS = unknown> {
   /** 対象のエンジンID */
   engineId: string;
   /** 使用されているアダプター名 */
   adapterName: string;
   /** 発生時のタイムスタンプ */
   timestamp: number;
+  /** 探索開始時のオプション (onInfo/onResult で参照可能) */
+  options?: T_OPTIONS;
   /**
    * ゼロコピー通信のための Transferable オブジェクトのリスト。
    * 大容量の ArrayBuffer をスレッド間で転送する際に使用します。
@@ -336,6 +338,17 @@ export interface IEngineAdapterState {
 export interface IEngineAdapterInfo
   extends IEngineAdapterMetadata, IEngineAdapterState {}
 
+import { IProtocolParser } from "./protocols/types";
+export { IProtocolParser };
+
+/**
+ * エンジンリソースのロードを抽象化するインターフェース。
+ */
+export interface IEngineLoader {
+  loadResource(engineId: string, config: IEngineSourceConfig): Promise<string>;
+  revoke(url: string): void;
+}
+
 /**
  * エンジンアダプターの具象インターフェース。
  * アダプター開発者はこれを実装します。
@@ -345,21 +358,30 @@ export interface IEngineAdapter<
   T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > extends IEngineAdapterInfo {
+  /** プロトコルパーサー。Facade がコマンド生成に使用します。 */
+  readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
   /** 必要に応じてリソースを事前取得します (キャッシュのみ) */
   prefetch?(): Promise<void>;
   /** エンジンをロードし、準備完了 (ready) にします */
-  load(): Promise<void>;
+  load(loader?: IEngineLoader): Promise<void>;
+  /** 
+   * 生成済みのコマンド文字列を使用して探索を実行します。
+   * Facade がミドルウェア適用後にこれを呼び出します。
+   */
+  searchRaw(command: string | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
   /** 探索を実行し、タスクを返します */
   search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
   /** リソースを解放し、終了 (terminated) にします */
   dispose(): Promise<void>;
 
   /** ステータス変更の通知を購読します */
-  onStatusChange(callback: (status: EngineStatus) => void): void;
+  onStatusChange(callback: (status: EngineStatus) => void): () => void;
   /** 進捗状況の通知を購読します */
-  onProgress(callback: (progress: ILoadProgress) => void): void;
+  onProgress(callback: (progress: ILoadProgress) => void): () => void;
   /** テレメトリイベントを購読します */
-  onTelemetry?(callback: (event: ITelemetryEvent) => void): void;
+  onTelemetry?(callback: (event: ITelemetryEvent) => void): () => void;
+  /** テレメトリイベントを発行します (Facade等が使用) */
+  emitTelemetry?(event: ITelemetryEvent): void;
 }
 
 /**
@@ -375,7 +397,7 @@ export interface IEngine<
   readonly adapter: IEngineAdapterInfo;
 
   /** 探索を開始します */
-  search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
+  search(options: T_OPTIONS): Promise<ISearchTask<T_INFO, T_RESULT>>;
   /** エンジンを初期化します。search() の前に呼ぶことが推奨されます。 */
   load(): Promise<void>;
   /** 現在の探索を停止します。アダプターは再利用可能な状態を維持します。 */
@@ -418,10 +440,18 @@ export interface IEngineBridge {
     middleware: IMiddleware<T_INFO, T_RESULT>,
   ): void;
 
+  /** リソースローダーを取得します (2026 Best Practice) */
+  getLoader(): Promise<IEngineLoader>;
+
   /** 実行環境が 2026年最新基準の Web 標準を満たしているか診断します */
   checkCapabilities(): Promise<ICapabilities>;
   /** セキュリティ状態の詳細を取得します */
   getSecurityStatus(): ISecurityStatus;
+
+  /** エンジンのステータス変化を中央で購読します (2026 Best Practice) */
+  onGlobalStatusChange?(callback: (id: string, status: EngineStatus) => void): void;
+  /** エンジンのテレメトリを一括で購読します (2026 Best Practice) */
+  onGlobalTelemetry?(callback: (id: string, event: ITelemetryEvent) => void): void;
 }
 
 /**
@@ -442,6 +472,23 @@ export interface ICapabilities {
   readonly webTransport: boolean;
   /** 詳細な診断メッセージ（デバッグ・警告用） */
   readonly details?: Record<keyof Omit<ICapabilities, "details">, string>;
+}
+
+/**
+ * 永続化ストレージの抽象化インターフェース。
+ * OPFS (Origin Private File System) や IndexedDB を隠蔽します。
+ */
+export interface IFileStorage {
+  /** データを保存します */
+  set(key: string, data: ArrayBuffer | Blob): Promise<void>;
+  /** データを取得します */
+  get(key: string): Promise<ArrayBuffer | null>;
+  /** データが存在するか確認します */
+  has(key: string): Promise<boolean>;
+  /** データを削除します */
+  delete(key: string): Promise<void>;
+  /** すべてのデータを削除します */
+  clear(): Promise<void>;
 }
 
 /**

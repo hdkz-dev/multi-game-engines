@@ -70,6 +70,35 @@
 - **ビルド・型検証**:
   - `packages/core` のビルドが正常に完了し、`index.d.ts` に変更が正しく反映されていることを確認。
 
-### 現在のステータス (実装フェーズ: Sprint 1)
+### 現在のステータス (実装フェーズ: Phase 2 - Stage 1 進行中)
 
-- **Sprint 1 (基盤コンポーネント)**: `CapabilityDetector` および `FileStorage` の実装に向けた準備が整いました。アーキテクチャの洗練により、より直感的で型安全な実装が可能になっています。
+- **Sprint 1 & 2 (Core) 完了**: 基盤コンポーネントおよびコアロジックの実装が完了。
+- **Stage 1 (Adapter) 完了**: `adapter-stockfish` の初期実装が完了。
+- **検証とテスト**: `core` パッケージのユニットテスト整備、および `simple-chess` サンプルアプリの作成。
+  - `UCIParser` および `EngineBridge` のテストをパス。
+  - ブラウザで動作する最小限の GUI デモを作成。
+
+## 2026-02-11 (コアコンポーネント、Stockfish アダプター、テスト、およびドキュメントの整備)
+
+### 完了した事項 (CapabilityDetector, FileStorage, BaseAdapter, EngineBridge, UCIParser, StockfishAdapter, Tests, Example, Documentation)
+
+- **基盤コンポーネント (Sprint 1)**:
+  - `CapabilityDetector` および `FileStorage` (OPFS/IndexedDB) の実装完了。
+- **コアロジック (Sprint 2)**:
+  - `BaseAdapter`, `EngineFacade`, `EngineBridge` の実装完了。
+- **プロトコルとアダプター (Phase 2 - Stage 1)**:
+  - `UCIParser`: 汎用的な UCI プロトコル解析ロジックを `core` に実装。
+  - `StockfishAdapter`: jsDelivr 経由で Stockfish WASM をロードするアダプターを実装。
+- **検証とエコシステム**:
+  - **ユニットテスト**: `vitest` を使用して `UCIParser` と `EngineBridge` の正常動作を検証。
+  - **サンプルアプリ**: `examples/simple-chess` に、ユーザーインターフェースを伴う動作確認用 HTML を作成。
+- **ドキュメントの多言語化**:
+  - `README.md`, `CONTRIBUTING.md` の日英併記化。
+  - `docs/en/ARCHITECTURE.md`, `docs/en/TECHNICAL_SPECS.md` の新規作成。
+- **パッケージ統合**:
+  - `packages/core/src/index.ts` を修正し、`UCIParser` を含むすべての機能を公開。
+  - `adapter-stockfish` が `core` を依存関係として正しくビルドできることを確認。
+- **インフラとセキュリティ**:
+  - `WorkerCommunicator`: WebWorker 通信の抽象化レイヤーを実装。
+  - `SecurityAdvisor`: SRI (Subresource Integrity) およびセキュリティ状態診断機能を実装。
+  - **Stockfish リファクタリング**: `WorkerCommunicator` を使用した、より堅牢な実装に更新。
