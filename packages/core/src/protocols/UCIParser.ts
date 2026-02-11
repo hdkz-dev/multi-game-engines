@@ -13,7 +13,7 @@ import {
  */
 export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   /**
-   * "info depth 10 score cp 50 pv e2e4 ..." 形式の行を解析します。
+   * info 行を解析します。
    */
   parseInfo(line: string): IBaseSearchInfo | null {
     if (!line.startsWith("info ")) return null;
@@ -50,7 +50,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
           break;
         case "pv":
           info.pv = parts.slice(i + 1) as Move[];
-          i = parts.length; // PV は行の最後まで続く
+          i = parts.length;
           break;
       }
     }
@@ -59,7 +59,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
   }
 
   /**
-   * "bestmove e2e4 ponder e7e5" 形式の行を解析します。
+   * bestmove 行を解析します。
    */
   parseResult(line: string): IBaseSearchResult | null {
     if (!line.startsWith("bestmove ")) return null;
@@ -80,12 +80,12 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
 
   /**
    * 探索開始コマンドを生成します。
-   * セキュリティ上の理由から、入力文字列（FEN）のインジェクション対策を行います。
-   * また、各コマンドを個別の配列要素として返します。
+   * [セキュリティ: ADR-023 準拠]
+   * FEN 文字列から改行、セミコロン、ヌル文字等の UCI プロトコルを破壊しうる文字を完全に排除します。
    */
   createSearchCommand(options: IBaseSearchOptions): string[] {
-    // 改行コードを排除してコマンドインジェクションを防止
-    const safeFen = options.fen.replace(/[\r\n]/g, "");
+    // 制御文字、改行、UCI コマンド区切り文字（;）を排除
+    const safeFen = options.fen.replace(/[\r\n\0;]/g, "");
     
     const commands: string[] = [
       `position fen ${safeFen}`

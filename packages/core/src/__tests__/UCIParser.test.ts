@@ -35,12 +35,15 @@ describe("UCIParser", () => {
     expect(cmds[1]).toBe("go depth 15 movetime 1000");
   });
 
-  it("should prevent UCI command injection in FEN", () => {
-    const options = {
-      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\nstop" as FEN,
-    };
-    const cmds = parser.createSearchCommand(options);
+  it("should prevent UCI command injection in FEN by filtering restricted characters", () => {
+    // 改行、セミコロン、ヌル文字を含む悪意のある FEN 文字列
+    const maliciousFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\nquit; \0" as FEN;
+    const cmds = parser.createSearchCommand({ fen: maliciousFen });
+    
+    // 全ての不正な文字が削除されていることを確認
     expect(cmds[0]).not.toContain("\n");
-    expect(cmds[0]).toBe("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1stop");
+    expect(cmds[0]).not.toContain(";");
+    expect(cmds[0]).not.toContain("\0");
+    expect(cmds[0]).toBe("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1quit ");
   });
 });

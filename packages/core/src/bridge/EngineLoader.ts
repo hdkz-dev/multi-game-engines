@@ -16,7 +16,7 @@ export class EngineLoader implements IEngineLoader {
     if (!config.sri) {
       throw new EngineError(
         EngineErrorCode.SRI_MISMATCH,
-        `SRI hash is required for engine resource: ${config.url}. Please provide a valid SRI in the adapter config.`,
+        `SRI hash is required for engine resource: ${config.url}. Content verification is mandatory for security.`,
         engineId
       );
     }
@@ -24,7 +24,7 @@ export class EngineLoader implements IEngineLoader {
     if (!SecurityAdvisor.isValidSRI(config.sri)) {
       throw new EngineError(
         EngineErrorCode.SRI_MISMATCH,
-        `Invalid SRI hash format: ${config.sri}`,
+        `Invalid SRI hash format: ${config.sri}. Resource loading blocked for safety.`,
         engineId
       );
     }
@@ -47,7 +47,7 @@ export class EngineLoader implements IEngineLoader {
         return URL.createObjectURL(new Blob([cached], { type: mimeType }));
       }
     } catch (err) {
-      console.warn(`[EngineLoader] Cache read error for ${engineId}:`, err);
+      console.warn(`[EngineLoader] Optional cache read failed for ${engineId}:`, err);
     }
 
     // 3. キャッシュがない場合はネットワークから取得 (SRI 検証付き)
@@ -55,13 +55,13 @@ export class EngineLoader implements IEngineLoader {
       const options = SecurityAdvisor.getSafeFetchOptions(config.sri);
       const response = await fetch(config.url, {
         ...options,
-        signal: AbortSignal.timeout(30_000), // 30秒タイムアウト
+        signal: AbortSignal.timeout(30_000), // 通信のハング防止
       });
       
       if (!response.ok) {
         throw new EngineError(
           EngineErrorCode.NETWORK_ERROR,
-          `Failed to download resource: ${config.url} (Status: ${response.status})`,
+          `Failed to download engine resource from ${config.url}. (HTTP Status: ${response.status} ${response.statusText})`,
           engineId
         );
       }
@@ -70,7 +70,7 @@ export class EngineLoader implements IEngineLoader {
 
       // 4. ストレージへの保存 (非同期)
       void this.storage.set(cacheKey, data).catch(err => {
-        console.warn(`[EngineLoader] Cache write error for ${engineId}:`, err);
+        console.warn(`[EngineLoader] Background cache write failed for ${engineId}:`, err);
       });
 
       return URL.createObjectURL(new Blob([data], { type: mimeType }));
@@ -79,7 +79,7 @@ export class EngineLoader implements IEngineLoader {
       if (error instanceof EngineError) throw error;
       throw new EngineError(
         EngineErrorCode.NETWORK_ERROR,
-        `Failed to load engine resource from network: ${config.url}`,
+        `An exception occurred while fetching resource: ${config.url}`,
         engineId,
         error
       );
