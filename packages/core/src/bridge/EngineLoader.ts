@@ -16,7 +16,7 @@ export class EngineLoader implements IEngineLoader {
     if (!config.sri) {
       throw new EngineError(
         EngineErrorCode.SRI_MISMATCH,
-        `SRI hash is required for engine resource: ${config.url}. Content verification is mandatory for security.`,
+        `SRI hash is required for engine resource: ${config.url}.`,
         engineId
       );
     }
@@ -24,21 +24,26 @@ export class EngineLoader implements IEngineLoader {
     if (!SecurityAdvisor.isValidSRI(config.sri)) {
       throw new EngineError(
         EngineErrorCode.SRI_MISMATCH,
-        `Invalid SRI hash format: ${config.sri}. Resource loading blocked for safety.`,
+        `Invalid SRI hash format: ${config.sri}`,
         engineId
       );
     }
 
-    /** 
-     * キャッシュキーの生成。
-     */
     const cacheKey = `${engineId}::${config.sri}`;
     
-    // MIME type の決定
+    // リソースのタイプに基づいて適切な MIME type を決定 (2026 Best Practice)
     let mimeType: string;
-    if (config.type === "wasm") mimeType = "application/wasm";
-    else if (config.type === "worker-js" || config.type === "webgpu-compute") mimeType = "application/javascript";
-    else mimeType = "application/octet-stream";
+    switch (config.type) {
+      case "wasm":
+        mimeType = "application/wasm";
+        break;
+      case "worker-js":
+      case "webgpu-compute":
+        mimeType = "application/javascript";
+        break;
+      default:
+        mimeType = "application/octet-stream";
+    }
 
     // 2. 永続ストレージ（キャッシュ）から取得を試みる
     try {
@@ -47,7 +52,7 @@ export class EngineLoader implements IEngineLoader {
         return URL.createObjectURL(new Blob([cached], { type: mimeType }));
       }
     } catch (err) {
-      console.warn(`[EngineLoader] Optional cache read failed for ${engineId}:`, err);
+      console.warn(`[EngineLoader] Cache read failed for ${engineId}:`, err);
     }
 
     // 3. キャッシュがない場合はネットワークから取得 (SRI 検証付き)
@@ -55,13 +60,13 @@ export class EngineLoader implements IEngineLoader {
       const options = SecurityAdvisor.getSafeFetchOptions(config.sri);
       const response = await fetch(config.url, {
         ...options,
-        signal: AbortSignal.timeout(30_000), // 通信のハング防止
+        signal: AbortSignal.timeout(30_000), // 30秒タイムアウト
       });
       
       if (!response.ok) {
         throw new EngineError(
           EngineErrorCode.NETWORK_ERROR,
-          `Failed to download engine resource from ${config.url}. (HTTP Status: ${response.status} ${response.statusText})`,
+          `Failed to download engine resource from ${config.url}. (HTTP Status: ${response.status})`,
           engineId
         );
       }
@@ -70,7 +75,7 @@ export class EngineLoader implements IEngineLoader {
 
       // 4. ストレージへの保存 (非同期)
       void this.storage.set(cacheKey, data).catch(err => {
-        console.warn(`[EngineLoader] Background cache write failed for ${engineId}:`, err);
+        console.warn(`[EngineLoader] Cache write failed for ${engineId}:`, err);
       });
 
       return URL.createObjectURL(new Blob([data], { type: mimeType }));
@@ -79,7 +84,7 @@ export class EngineLoader implements IEngineLoader {
       if (error instanceof EngineError) throw error;
       throw new EngineError(
         EngineErrorCode.NETWORK_ERROR,
-        `An exception occurred while fetching resource: ${config.url}`,
+        `Network error while fetching engine resource: ${config.url}`,
         engineId,
         error
       );

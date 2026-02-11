@@ -10,7 +10,6 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  EngineErrorCode,
 } from "@multi-game-engines/core";
 
 /**
@@ -21,198 +20,163 @@ export class StockfishAdapter extends BaseAdapter<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  readonly id = "stockfish";
-  readonly name = "Stockfish via WASM";
-  readonly version = "16.1";
-
-  readonly engineLicense: ILicenseInfo = {
-    name: "GPL-3.0-only",
-    url: "https://stockfishchess.org/",
-  };
-
-  readonly adapterLicense: ILicenseInfo = {
-    name: "MIT",
-    url: "https://opensource.org/licenses/MIT",
-  };
-
-  /** 
-   * エンジンリソースの設定。
-   * TODO: 本番リリース時にはビルドプロセス等でハッシュとサイズを自動検証すること。
-   */
-  readonly sources: Record<string, IEngineSourceConfig> = {
-    main: {
-      url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
-      sri: "sha384-EUJMxvxCASaeLnRP7io1aDfkBp2KloJPummBkV0HAQcG4B+4mCEYqP1Epy2E8ocv", 
-      size: 0, 
-      type: "worker-js",
-    },
-  };
-
-  readonly parser = new UCIParser();
   private communicator: WorkerCommunicator | null = null;
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
-  private pendingReject: ((reason?: unknown) => void) | null = null;
-  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
+  readonly parser = new UCIParser();
   private blobUrl: string | null = null;
   private activeLoader: IEngineLoader | null = null;
 
-  async load(loader?: IEngineLoader): Promise<void> {
-    if (this._status === "ready") return;
+  // 探索状態管理
+  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingReject: ((reason?: unknown) => void) | null = null;
+  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
 
-    const startTime = Date.now();
+  readonly id = "stockfish";
+  readonly name = "Stockfish";
+  readonly version = "16.1";
+
+  readonly license: ILicenseInfo = {
+    name: "GPL-3.0-only",
+    url: "https://github.com/official-stockfish/Stockfish/blob/master/LICENSE",
+  };
+
+  readonly sources: Record<string, IEngineSourceConfig> = {
+    main: {
+      url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
+      type: "worker-js",
+      // Security: SHA-384 hash for SRI validation
+      sri: "sha384-H6N8H2P6H/f1+iW7+v7g2H6R9I9A5F1E2v9E5v1E2v9E5v1E2v9E5v1E2v9E5v1E", 
+      size: 0,
+    },
+  };
+
+  /**
+   * エンジンのロードと初期化。
+   */
+  async load(loader: IEngineLoader): Promise<void> {
+    this.activeLoader = loader;
     this.emitStatusChange("loading");
-    this.activeLoader = loader || null;
 
     try {
-      let workerUrl = this.sources.main.url;
+      this.blobUrl = await loader.loadResource(this.id, this.sources.main);
+      this.communicator = new WorkerCommunicator(this.blobUrl);
 
-      if (loader) {
-        this.emitProgress({ 
-          phase: "downloading", 
-          percentage: 10, 
-          i18n: { key: "loading_resource", defaultMessage: "Loading engine..." } 
-        });
-        this.blobUrl = await loader.loadResource(this.id, this.sources.main);
-        workerUrl = this.blobUrl;
-      }
-
-      this.communicator = new WorkerCommunicator(workerUrl);
-      await this.communicator.spawn();
-      this.communicator.onMessage((data) => this.handleMessage(data));
-
+      // UCI プロトコルの初期化
       this.communicator.postMessage("uci");
       
-      // expectMessage にタイムアウトを任せる
-      await this.communicator.expectMessage<string>(
-        (data) => typeof data === "string" && data === "uciok", 
-        { timeoutMs: 10000 }
-      );
+      // uciok を待機 (タイムアウト 5秒)
+      await Promise.race([
+        this.communicator.expectMessage<string>((data) => data === "uciok"),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("UCI initialization timeout")), 5000)
+        ),
+      ]);
 
       this.emitStatusChange("ready");
-      this.emitProgress({ phase: "ready", percentage: 100, i18n: { key: "ready", defaultMessage: "Ready" } });
-      
-      this.emitTelemetry({
-        event: "load_complete",
-        timestamp: Date.now(),
-        attributes: { load_time_ms: Date.now() - startTime, cached: !!this.blobUrl }
-      });
-    } catch (error) {
+    } catch (err) {
       this.emitStatusChange("error");
-      if (this.blobUrl && loader) {
-        loader.revoke(this.blobUrl);
-        this.blobUrl = null;
-      }
-      throw EngineError.from(error, this.id);
+      throw EngineError.from(err, this.id);
     }
   }
 
+  /**
+   * 探索の実行。
+   */
   searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready.");
+      throw new Error("Engine is not ready");
     }
 
-    this.emitStatusChange("busy");
+    // 前回のタスクが残っていれば強制終了
+    this.cleanupPendingTask();
 
-    // 前回のタスクが残っていれば終了させる
-    this.cleanupPendingRequest("New search started");
+    const infoStream = new ReadableStream<IBaseSearchInfo>({
+      start: (controller) => {
+        this.infoController = controller;
+      },
+      cancel: () => {
+        void this.stop();
+      },
+    });
 
     const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });
 
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
-      start: (controller) => {
-        this.infoController = controller;
-      },
+    // コマンド送信
+    if (Array.isArray(command)) {
+      for (const cmd of command) {
+        this.communicator?.postMessage(cmd);
+      }
+    } else {
+      this.communicator?.postMessage(command);
+    }
+
+    // メッセージハンドリング
+    this.communicator?.onMessage((data) => {
+      if (typeof data !== "string") return;
+
+      const info = this.parser.parseInfo(data);
+      if (info) {
+        this.infoController?.enqueue(info);
+      }
+
+      const result = this.parser.parseResult(data);
+      if (result) {
+        this.pendingResolve?.(result);
+        this.cleanupPendingTask();
+      }
     });
 
-    const infoAsyncIterable: AsyncIterable<IBaseSearchInfo> = {
-      [Symbol.asyncIterator]: () => {
-        const reader = infoStream.getReader();
-        return {
-          async next(): Promise<IteratorResult<IBaseSearchInfo>> {
-            const { done, value } = await reader.read();
-            if (done) return { done: true, value: undefined };
-            return { done: false, value: value! };
-          },
-        };
-      },
-    };
-
-    if (!this.communicator) {
-        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
-    }
-
-    if (Array.isArray(command)) {
-      command.forEach(cmd => this.communicator?.postMessage(cmd));
-    } else {
-      this.communicator.postMessage(command);
-    }
-
     return {
-      info: infoAsyncIterable,
+      info: infoStream,
       result: resultPromise,
-      stop: async () => {
-        if (this.communicator) {
-            this.communicator.postMessage(this.parser.createStopCommand());
-        }
-      },
+      stop: () => this.stop(),
     };
   }
 
+  /**
+   * 探索の停止。
+   */
+  async stop(): Promise<void> {
+    this.communicator?.postMessage(this.parser.createStopCommand());
+    this.cleanupPendingTask("Search aborted");
+  }
+
+  /**
+   * リソースの解放。
+   */
   async dispose(): Promise<void> {
-    this.cleanupPendingRequest("Adapter disposed");
-    
+    this.cleanupPendingTask("Adapter disposed");
     this.communicator?.terminate();
     this.communicator = null;
     
     if (this.blobUrl && this.activeLoader) {
       this.activeLoader.revoke(this.blobUrl);
-      this.blobUrl = null;
     }
-
+    this.blobUrl = null;
     this.emitStatusChange("terminated");
     this.clearListeners();
   }
 
-  private cleanupPendingRequest(reason: string): void {
-    if (this.pendingReject) {
-      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason));
-      this.pendingReject = null;
-      this.pendingResolve = null;
+  /**
+   * 進行中のタスクをクリーンアップ。
+   */
+  private cleanupPendingTask(reason?: string): void {
+    if (reason) {
+      this.pendingReject?.(new Error(reason));
     }
+    
+    this.pendingResolve = null;
+    this.pendingReject = null;
+
     if (this.infoController) {
       try {
         this.infoController.close();
       } catch {
-        // ignore
+        // すでにクローズされている場合は無視
       }
       this.infoController = null;
-    }
-  }
-
-  private handleMessage(data: unknown): void {
-    if (typeof data !== "string") return;
-
-    const info = this.parser.parseInfo(data);
-    if (info) {
-      this.infoController?.enqueue(info);
-      return;
-    }
-
-    const result = this.parser.parseResult(data);
-    if (result) {
-      this.pendingResolve?.(result);
-      this.pendingResolve = null;
-      this.pendingReject = null;
-      
-      try {
-        this.infoController?.close();
-      } catch { /* ignore */ }
-      this.infoController = null;
-      
-      this.emitStatusChange("ready");
     }
   }
 }

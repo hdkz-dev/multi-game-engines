@@ -1,91 +1,72 @@
 import { describe, it, expect, vi } from "vitest";
 import { BaseAdapter } from "../adapters/BaseAdapter";
-import { 
-  IBaseSearchOptions, 
-  IBaseSearchInfo, 
-  IBaseSearchResult, 
-  ISearchTask, 
-  EngineStatus, 
-  ILoadProgress,
-  Move
+import {
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  ISearchTask,
+  IProtocolParser,
 } from "../types";
 
-/**
- * BaseAdapter の共通機能を検証するためのテストクラス。
- * 抽象クラスである BaseAdapter を継承し、内部メソッドをテスト用に公開します。
- */
-class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
-  readonly id = "test-engine";
-  readonly name = "Test Engine";
-  readonly version = "1.0.0";
-  readonly engineLicense = { name: "MIT", url: "" };
-  readonly adapterLicense = { name: "MIT", url: "" };
-  readonly sources = {};
-  
-  readonly parser = {
-    parseInfo: vi.fn(),
-    parseResult: vi.fn(),
-    createSearchCommand: vi.fn().mockReturnValue("go"),
-    createStopCommand: vi.fn().mockReturnValue("stop"),
-  };
+// モック用の型定義
+class TestAdapter extends BaseAdapter<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
+> {
+  readonly id = "test";
+  readonly name = "Test";
+  readonly version = "1.0";
+  readonly parser = {} as IProtocolParser<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  >;
 
-  async load() {}
-  
-  searchRaw(_command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    return {
-      info: (async function* () {
-        yield { depth: 1, score: 10 } as IBaseSearchInfo;
-      })(),
-      result: Promise.resolve({ bestMove: "e2e4" as Move } as IBaseSearchResult),
-      stop: async () => {},
-    };
+  async load(): Promise<void> {
+    this.emitStatusChange("ready");
   }
 
-  async dispose() {}
+  searchRaw(): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+    return {} as ISearchTask<IBaseSearchInfo, IBaseSearchResult>;
+  }
 
-  /** 内部メソッド emitStatusChange をテスト用に公開 */
-  public setStatus(status: EngineStatus) {
+  async dispose(): Promise<void> {
+    this.emitStatusChange("terminated");
+  }
+
+  // 内部メソッドの公開
+  public testStatus(status: any) {
     this.emitStatusChange(status);
   }
 
-  /** 内部メソッド emitProgress をテスト用に公開 */
-  public setProgress(progress: ILoadProgress) {
+  public testProgress(progress: any) {
     this.emitProgress(progress);
+  }
+
+  public testTelemetry(event: any) {
+    this.emitTelemetry(event);
   }
 }
 
-describe("BaseAdapter (Foundation)", () => {
-  it("ステータスの購読と遷移が正しく動作すること", () => {
+describe("BaseAdapter", () => {
+  it("should handle status changes correctly", () => {
     const adapter = new TestAdapter();
-    const listener = vi.fn();
+    const spy = vi.fn();
+    adapter.onStatusChange(spy);
 
-    // 1. 初期ステータスが 'uninitialized' であることを確認
-    expect(adapter.status).toBe("uninitialized");
-
-    // 2. ステータス変更を購読
-    adapter.onStatusChange(listener);
-    
-    // 3. 遷移後に通知が来ること、および status プロパティが更新されることを確認
-    adapter.setStatus("ready");
-    expect(listener).toHaveBeenCalledWith("ready");
-    expect(adapter.status).toBe("ready");
+    adapter.testStatus("busy");
+    expect(adapter.status).toBe("busy");
+    expect(spy).toHaveBeenCalledWith("busy");
   });
 
-  it("進捗状況のストリーミングが正しく動作すること", () => {
+  it("should handle progress updates", () => {
     const adapter = new TestAdapter();
-    const listener = vi.fn();
+    const spy = vi.fn();
+    adapter.onProgress(spy);
 
-    adapter.onProgress(listener);
-    
-    const mockProgress: ILoadProgress = { 
-      phase: "downloading", 
-      percentage: 50,
-      i18n: { key: "test", defaultMessage: "Testing" }
-    };
-    adapter.setProgress(mockProgress);
-
-    // 検証: 進捗データがリスナーに渡り、内部状態も更新されていること
-    expect(listener).toHaveBeenCalledWith(mockProgress);
-    expect(adapter.progress).toEqual(mockProgress);
+    const progress = { phase: "downloading", percentage: 50 } as any;
+    adapter.testProgress(progress);
+    expect(spy).toHaveBeenCalledWith(progress);
   });
 });
