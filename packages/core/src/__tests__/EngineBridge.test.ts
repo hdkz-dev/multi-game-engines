@@ -7,12 +7,13 @@ import {
   IBaseSearchResult, 
   ISearchTask,
   EngineStatus,
-  FEN
+  FEN,
+  Move
 } from "../types";
 
 /**
- * テスト用のモックアダプター。
- * protected メソッドを公開し、内部状態の変化をシミュレート可能にします。
+ * テスト用の最小限のアダプター実装。
+ * 基底クラス BaseAdapter を継承し、イベント発火を制御します。
  */
 class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   readonly id = "mock-engine";
@@ -36,47 +37,47 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
       info: (async function* () {
         yield { depth: 1, score: 10 } as IBaseSearchInfo;
       })(),
-      result: Promise.resolve({ bestMove: "e2e4" } as IBaseSearchResult),
+      result: Promise.resolve({ bestMove: "e2e4" as Move } as IBaseSearchResult),
       stop: async () => {},
     };
   }
   async dispose() {}
 
-  /** 内部イベントの発火を外部から制御するためのテストヘルパー */
+  /** 内部メソッド emitStatusChange をテストから制御するためのヘルパー */
   public testEmitStatusChange(status: EngineStatus) {
     this.emitStatusChange(status);
   }
 }
 
 describe("EngineBridge", () => {
-  it("アダプター登録時にグローバルなステータス変化が伝播されること", () => {
+  it("アダプター登録時にブリッジがグローバルなステータス変化を転送すること", () => {
     const bridge = new EngineBridge();
     const adapter = new MockAdapter();
     const statusSpy = vi.fn();
 
-    // 購読開始
+    // グローバル購読を開始
     const unsubscribe = bridge.onGlobalStatusChange(statusSpy);
 
     bridge.registerAdapter(adapter);
     
-    // アダプター内部での状態変化をシミュレート
+    // アダプターの状態遷移をシミュレート
     adapter.testEmitStatusChange("ready");
 
     expect(statusSpy).toHaveBeenCalledWith("mock-engine", "ready");
 
-    // 購読解除のテスト
+    // 購読解除後の動作を確認
     unsubscribe();
     adapter.testEmitStatusChange("busy");
-    expect(statusSpy).toHaveBeenCalledTimes(1); // 解除後は呼ばれない
+    expect(statusSpy).toHaveBeenCalledTimes(1); 
   });
 
-  it("ミドルウェアが正しく Facade を通じて実行されること", async () => {
+  it("ブリッジに追加されたミドルウェアが生成された Facade に反映されること", async () => {
     const bridge = new EngineBridge();
     const adapter = new MockAdapter();
     
-    // コマンドを加工するミドルウェア
+    // コマンドを文字列として加工するミドルウェア
     const middleware = {
-      onCommand: vi.fn().mockImplementation((cmd) => `modified_${cmd}`),
+      onCommand: vi.fn().mockImplementation((cmd: string) => `modified_${cmd}`),
     };
 
     bridge.registerAdapter(adapter);
@@ -87,7 +88,7 @@ describe("EngineBridge", () => {
     const options: IBaseSearchOptions = { fen: "startpos" as FEN }; 
     await engine.search(options);
 
-    // ミドルウェアが呼ばれ、引数が渡されていることを確認
-    expect(middleware.onCommand).toHaveBeenCalled();
+    // ミドルウェアが適切な引数で呼ばれたか確認
+    expect(middleware.onCommand).toHaveBeenCalledWith("go", expect.anything());
   });
 });

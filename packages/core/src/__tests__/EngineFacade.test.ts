@@ -9,25 +9,26 @@ import {
   FEN,
   IMiddleware,
   IEngineAdapter,
-  IEngineBridge,
   Move
 } from "../types";
 
 /**
  * EngineFacade の結合テスト。
- * 
- * [テストの意図]
- * 1. ミドルウェアの適用順序が正しいか。
- * 2. 連続した探索リクエストにおいて、先行するタスクが自動停止（排他制御）されるか。
- * 3. AbortSignal による中断が正しく Promise の拒否（reject）に繋がるか。
+ * 2026年のベストプラクティスに基づき、型安全かつ非同期の競合をシミュレートします。
  */
 describe("EngineFacade", () => {
-  // アダプターのモック
-  // インターフェースを明示的に指定し、必要最小限のキャストで構成
-  const mockAdapter = {
+  /**
+   * モックアダプターの構築。
+   * インターフェースを部分的に実装し、不足分をキャストすることで any を最小限に抑えます。
+   */
+  const createMockAdapter = () => ({
     id: "test-engine",
+    name: "Mock Engine",
+    version: "1.0.0",
+    status: "ready",
     parser: {
       createSearchCommand: vi.fn().mockReturnValue("go"),
+      createStopCommand: vi.fn().mockReturnValue("stop"),
     },
     searchRaw: vi.fn().mockImplementation(() => ({
       info: (async function* () { yield { depth: 1, score: 10 } as IBaseSearchInfo; })(),
@@ -38,59 +39,62 @@ describe("EngineFacade", () => {
     dispose: vi.fn().mockResolvedValue(undefined),
     onStatusChange: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),
-  } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+  } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
-  // ブリッジのモック。Facade が内部で getLoader() を呼ぶため定義。
+  /** 
+   * ブリッジのモック。
+   * 具象クラスを継承せずにインターフェースを満たすように構成。
+   */
   const mockBridge = {
-    getLoader: vi.fn(),
-  } as unknown as IEngineBridge;
+    getLoader: vi.fn().mockResolvedValue({}),
+  } as unknown as EngineBridge;
 
   it("探索リクエストが連続した場合、前のタスクを自動的に停止すること", async () => {
-    // 依存関係を注入して Facade を初期化
-    const facade = new EngineFacade(mockAdapter, [], mockBridge as EngineBridge);
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, [], mockBridge);
     const options: IBaseSearchOptions = { fen: "startpos" as FEN };
 
-    // 1回目の探索を開始（完了を待たない）
+    // 1回目の探索を開始
     const search1 = facade.search(options);
     
-    // 内部で生成されたタスクの stop スパイを取得
-    // searchRaw の戻り値を検証するために vitest のモック機能を活用
-    const task1 = vi.mocked(mockAdapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IBaseSearchResult>;
-    const stopSpy = task1.stop;
+    // アダプターが返したタスクの stop スパイを取得。
+    // searchRaw が返したオブジェクトの参照を mock.results から特定する。
+    const task1 = (vi.mocked(adapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IBaseSearchResult>);
+    const stopSpy = vi.mocked(task1.stop);
 
     // 2回目の探索を実行。これにより 1 回目が停止されるはず。
     await facade.search(options);
 
-    // 検証: 1回目の stop が呼ばれ、最終的に両方の Promise が解決/拒否されること
     expect(stopSpy).toHaveBeenCalled();
     await search1; 
   });
 
   it("ミドルウェアが正しい順序でコマンドと結果を加工すること", async () => {
-    // コマンドと結果を加工するテスト用ミドルウェア
+    const adapter = createMockAdapter();
     const middleware: IMiddleware<IBaseSearchInfo, IBaseSearchResult> = {
       onCommand: async (cmd) => `${cmd}_modified`,
       onResult: async (res) => ({ ...res, bestMove: `${res.bestMove}_modified` as Move }),
     };
 
-    const facade = new EngineFacade(mockAdapter, [middleware], mockBridge as EngineBridge);
+    const facade = new EngineFacade(adapter, [middleware], mockBridge);
     const options: IBaseSearchOptions = { fen: "startpos" as FEN };
 
     const result = await facade.search(options);
 
-    // 検証: アダプターには加工後のコマンドが渡り、戻り値も加工されていること
-    expect(mockAdapter.searchRaw).toHaveBeenCalledWith("go_modified");
+    expect(adapter.searchRaw).toHaveBeenCalledWith("go_modified");
     expect(result.bestMove).toBe("e2e4_modified");
   });
 
-  it("AbortSignal が中断されている場合、即座にエラーを投げること", async () => {
-    const facade = new EngineFacade(mockAdapter, [], mockBridge as EngineBridge);
+  it("既に中断されている AbortSignal が渡された場合、即座にエラーを投げること", async () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, [], mockBridge);
     const controller = new AbortController();
-    controller.abort(); // 即時中断
+    controller.abort(); // 事前中断
 
     const options: IBaseSearchOptions = { fen: "startpos" as FEN, signal: controller.signal };
 
-    // 検証: Promise が拒否され、エラーメッセージに 'aborted' が含まれること
+    // 探索メソッドがアダプターを呼ぶ前にエラーを投げることを検証
     await expect(facade.search(options)).rejects.toThrow(/aborted/i);
+    expect(adapter.searchRaw).not.toHaveBeenCalled();
   });
 });
