@@ -15,6 +15,8 @@
 | **ADR-016** | [2段階リリース戦略 (Stage 1 & 2)](./adr/016-two-stage-release.md)                    | 承認済み   | 2026-02-06 |
 | **ADR-017** | [Hybrid/Native Integration (Stage 3)](./adr/017-native-integration.md)               | 承認済み   | 2026-02-06 |
 | **ADR-018** | [アダプターのメタデータと状態の分離](./adr/018-adapter-metadata-state-separation.md) | 承認済み   | 2026-02-07 |
+| **ADR-019** | [EngineLoader によるリソース管理の集約](./adr/019-engine-loader-centralization.md)   | 承認済み   | 2026-02-11 |
+| **ADR-020** | [双方向ミドルウェアと searchRaw の導入](./adr/020-bidirectional-middleware.md)       | 承認済み   | 2026-02-11 |
 
 ---
 

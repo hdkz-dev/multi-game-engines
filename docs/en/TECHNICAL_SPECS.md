@@ -10,33 +10,35 @@ This document defines the technical foundation, design principles, and implement
 
 Decouples the concrete engine implementation (Adapter) from the consumer API (Engine).
 
-- **IEngine**: Minimal API required for game logic, such as starting/stopping analysis and receiving results.
-- **IEngineAdapter**: Handles loading, resource management, low-level communication, and security verification.
-  This allows users to control the engine with the same code, whether the adapter is WASM/Worker or a Native Plugin.
+- **IEngine (Facade)**: The primary interface for users. Manages starting/stopping analysis, receiving results, middleware integration, and task mutual exclusion (automatic cleanup).
+- **IEngineAdapter**: Responsible for loading, communication, and security verification. It executes commands via the `searchRaw` method after middleware processing.
 
-### 1.2 Domain Protection with Branded Types
+### 1.2 Command and Streaming Integration
+
+- **searchRaw(command)**: Accepts and executes raw protocol commands after they have been processed by the middleware chain.
+- **AsyncIterable**: Engine analysis (info) is delivered via `AsyncIterable`, allowing for intuitive real-time updates using `for await...of` loops.
+
+### 1.3 Domain Protection with Branded Types
 
 Ensures semantic safety by avoiding reliance on primitive types like `string` or `number`.
 
 - **FEN**: `string & { readonly __brand: "FEN" }`
 - **Move**: `string & { readonly __brand: "Move" }`
-  This prevents accidental passing of FENs or moves between different game engines, catchable 100% at compile time.
-
-### 1.3 Mandatory Subresource Integrity (SRI)
-
-Requires SRI hash verification when loading binaries from external CDNs to prevent tampering.
-
-- The loader retrieves hashes from `manifest.json` and utilizes the browser's integrity check during fetch.
 
 ---
 
-## 2. Communication and Data Flow (Unified Generics)
+## 2. Infrastructure Responsibilities
 
-The project maintains a consistent generic order to represent engine characteristics:
+### 2.1 EngineLoader (Resource Management)
 
-1. `T_OPTIONS`: Search parameters (e.g., depth, time, multi-threading settings).
-2. `T_INFO`: Sequential information sent during analysis (e.g., NPS, score, PV).
-3. `T_RESULT`: Final search results (e.g., Best Move, Ponder).
+Handles resource acquisition from external CDNs transparently:
+1. **SRI Verification**: Hash validation based on `manifest.json`.
+2. **Persistent Caching**: Storing binaries in OPFS (Origin Private File System) or IndexedDB.
+3. **Blob URL Generation**: Providing and revoking secure temporary URLs for Worker initialization.
+
+### 2.2 WorkerCommunicator (Communication Abstraction)
+
+Encapsulates WebWorker communication, providing type-safe messaging. It ensures that pending Promises are rejected if the Worker crashes, preventing application hangs.
 
 ---
 
@@ -44,35 +46,22 @@ The project maintains a consistent generic order to represent engine characteris
 
 ### 3.1 CapabilityDetector
 
-Diagnoses environment features (browser, app, etc.) at runtime to select the optimal adapter strategy.
-
-- **OPFS (Origin Private File System)**: Prioritized for persisting large engine binaries and training data.
-- **WASM SIMD/Threads**: Selects optimized binaries based on CPU instruction availability.
-- **WebNN / WebGPU**: Detects future neural network (NNUE) acceleration support.
-
-### 3.2 Fallback Strategy
-
-Ensures a functional path in environments where modern APIs are unavailable.
-
-- Missing OPFS → Fallback to IndexedDB.
-- Custom CDN unreachable → Automatic switch to jsDelivr/unpkg.
+Universal diagnostic of environment features via `globalThis`:
+- **OPFS**: Prioritized for large binary persistence.
+- **WASM SIMD/Threads**: Binary selection based on CPU instruction availability.
+- **WebNN / WebGPU**: Detection of machine learning acceleration support.
 
 ---
 
 ## 4. Security and Isolation
 
-### 4.1 Cross-Origin Isolation (COOP/COEP)
+### 4.1 Sandboxing
 
-Diagnoses and requests proper HTTP header settings in the host environment to enable WASM multi-threading (SharedArrayBuffer).
-
-### 4.2 Sandboxing via WebWorker
-
-To physically prevent license infection (GPL/AGPL, etc.), engine executables are always run within WebWorkers (or native processes) isolated from the main thread.
+To prevent license infection (GPL/AGPL, etc.), engine executables always run within WebWorkers isolated from the main thread. Adapters are provided under the MIT license and do not bundle the engine binaries.
 
 ---
 
-## 5. Development Ecosystem
+## 5. Operations and Ecosystem
 
-- **Monorepo (pnpm workspaces)**: Centralized dependency management and fast feedback cycles between packages.
-- **Vitest**: High-speed unit testing.
-- **TypeDoc**: Automatically generated developer documentation.
+- **CI/CD**: Automated Lint, Build, and Test via GitHub Actions on every Pull Request.
+- **Telemetry**: Centralized monitoring of statistics like `search_start`, `search_complete`, and `load_time` via `EngineBridge`.
