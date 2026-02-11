@@ -41,7 +41,10 @@ export class EngineLoader implements IEngineLoader {
 
     // 3. キャッシュがない場合はネットワークから取得 (SRI 検証付き)
     const options = SecurityAdvisor.getSafeFetchOptions(config.sri);
-    const response = await fetch(config.url, options);
+    const response = await fetch(config.url, {
+      ...options,
+      signal: AbortSignal.timeout(30_000), // 30秒タイムアウト
+    });
     
     if (!response.ok) {
       throw new EngineError(

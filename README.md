@@ -33,6 +33,6 @@ We aim to break down "license barriers" and "implementation complexity," buildin
 - [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
 
 ### English (Global)
-- [Architecture & Design](docs/en/ARCHITECTURE.md) (Coming soon)
-- [Technical Specifications](docs/en/TECHNICAL_SPECS.md) (Coming soon)
+- [Architecture & Design](docs/en/ARCHITECTURE.md)
+- [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)

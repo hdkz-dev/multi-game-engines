@@ -9,7 +9,10 @@ export class OPFSStorage implements IFileStorage {
 
   private getRoot(): Promise<FileSystemDirectoryHandle> {
     if (!this.rootPromise) {
-      this.rootPromise = navigator.storage.getDirectory();
+      this.rootPromise = navigator.storage.getDirectory().catch((err) => {
+        this.rootPromise = null;
+        throw err;
+      });
     }
     return this.rootPromise;
   }
@@ -18,8 +21,13 @@ export class OPFSStorage implements IFileStorage {
     const root = await this.getRoot();
     const fileHandle = await root.getFileHandle(key, { create: true });
     const writable = await fileHandle.createWritable();
-    await writable.write(data);
-    await writable.close();
+    try {
+      await writable.write(data);
+      await writable.close();
+    } catch (err) {
+      await writable.abort().catch(() => {}); // エラー時は破棄してロック解放
+      throw err;
+    }
   }
 
   async get(key: string): Promise<ArrayBuffer | null> {

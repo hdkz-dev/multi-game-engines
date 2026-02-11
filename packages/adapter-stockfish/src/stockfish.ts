@@ -10,6 +10,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 
 /**
@@ -37,13 +38,16 @@ export class StockfishAdapter extends BaseAdapter<
     url: "https://opensource.org/licenses/MIT",
   };
 
-  /** エンジンリソースの設定。Stage 1 ではパブリック CDN を参照します。 */
+  /** 
+   * エンジンリソースの設定。
+   * TODO: 本番ビルド時にハッシュとサイズを自動生成して埋め込み、改竄を防止すること。
+   * (Stage 1 では空文字列を許容し、バリデーションをスキップします)
+   */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
-      // 実運用時には正確なハッシュ値を指定して改竄を防止します。
       sri: "", 
-      size: 0,
+      size: 0, 
       type: "worker-js",
     },
   };
@@ -51,6 +55,8 @@ export class StockfishAdapter extends BaseAdapter<
   readonly parser = new UCIParser();
   private communicator: WorkerCommunicator | null = null;
   private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private pendingReject: ((reason?: any) => void) | null = null;
   private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
   private blobUrl: string | null = null;
   private activeLoader: IEngineLoader | null = null;
@@ -88,10 +94,23 @@ export class StockfishAdapter extends BaseAdapter<
       this.communicator.postMessage("uci");
       
       // 'uciok' が返るのを待つ（最大10秒のタイムアウト）
-      await Promise.race([
-        this.communicator.expectMessage<string>((data) => data === "uciok"),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("UCI initialization timeout")), 10000))
-      ]);
+      // AbortController を使用して、タイムアウト時に expectMessage をキャンセルする
+      const ac = new AbortController();
+      const timeoutId = setTimeout(() => ac.abort(), 10000);
+
+      try {
+        await this.communicator.expectMessage<string>(
+          (data) => data === "uciok", 
+          { signal: ac.signal }
+        );
+      } catch (e) {
+        if (ac.signal.aborted) {
+          throw new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "UCI initialization timed out");
+        }
+        throw e;
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       this.emitStatusChange("ready");
       this.emitProgress({ 
@@ -129,19 +148,27 @@ export class StockfishAdapter extends BaseAdapter<
 
     this.emitStatusChange("busy");
 
+    // 古い Promise が残っていたら reject してクリア（リーク防止）
+    if (this.pendingReject) {
+      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, "New search started before previous completed"));
+      this.pendingReject = null;
+      this.pendingResolve = null;
+    }
+
     // 結果返却用の Promise
-    const resultPromise = new Promise<IBaseSearchResult>((resolve) => {
+    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
+      this.pendingReject = reject;
     });
 
     // 思考状況（info）ストリーミング用の ReadableStream
+    // 注意: infoStream は一度だけ消費されることを前提とします（Facade で制御）
     const infoStream = new ReadableStream<IBaseSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
     });
 
-    // AsyncIterable として公開
     const infoAsyncIterable: AsyncIterable<IBaseSearchInfo> = {
       [Symbol.asyncIterator]: () => {
         const reader = infoStream.getReader();
@@ -155,15 +182,19 @@ export class StockfishAdapter extends BaseAdapter<
       },
     };
 
+    if (!this.communicator) {
+        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
+    }
     // エンジンに探索コマンドを送信
-    this.communicator?.postMessage(command);
+    this.communicator.postMessage(command);
 
     return {
       info: infoAsyncIterable,
       result: resultPromise,
       stop: async () => {
-        // 探索停止コマンドを送信
-        this.communicator?.postMessage(this.parser.createStopCommand());
+        if (this.communicator) {
+            this.communicator.postMessage(this.parser.createStopCommand());
+        }
       },
     };
   }
@@ -172,6 +203,10 @@ export class StockfishAdapter extends BaseAdapter<
    * エンジンを完全に停止し、リソースを解放します。
    */
   async dispose(): Promise<void> {
+    if (this.pendingReject) {
+      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, "Adapter disposed"));
+      this.pendingReject = null;
+    }
     this.communicator?.terminate();
     this.communicator = null;
     
@@ -202,7 +237,10 @@ export class StockfishAdapter extends BaseAdapter<
     const result = this.parser.parseResult(data);
     if (result) {
       this.pendingResolve?.(result);
+      // 完了したので参照をクリア
       this.pendingResolve = null;
+      this.pendingReject = null;
+      
       this.infoController?.close();
       this.infoController = null;
       this.emitStatusChange("ready");
