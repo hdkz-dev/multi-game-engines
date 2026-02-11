@@ -1,0 +1,12 @@
+{
+  "ID": "PRRC_kwDORJ0gd86lk2Rg",
+  "Body": "_⚠️ Potential issue_ | _🔴 Critical_\n\n**`mcp:mask` / `mcp:fill` スクリプトは ESM の問題に影響されます。**\n\n`scripts/sync-mcp-tokens.js` で ESM `import` 構文を使用していますが、この `package.json` に `\"type\": \"module\"` が定義されていないため、これらのスクリプトは実行時に `SyntaxError` で失敗します。`sync-mcp-tokens.js` のレビューコメントで詳細を記載しています。\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nIn `@package.json` around lines 18 - 19, The npm scripts \"mcp:mask\" and \"mcp:fill\"\ncall scripts/sync-mcp-tokens.js which uses ESM import syntax but package.json\nlacks \"type\": \"module\", causing a SyntaxError at runtime; fix by adding \"type\":\n\"module\" to package.json (or alternatively convert sync-mcp-tokens.js to\nCommonJS or adjust the scripts to run with node --input-type=module), and ensure\nthe change is applied so the ESM imports in scripts/sync-mcp-tokens.js run\ncorrectly.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:phoenix -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "Path": "package.json",
+  "Line": 19,
+  "Author": {
+    "Login": "coderabbitai"
+  },
+  "CreatedAt": "2026-02-07T18:19:58Z",
+  "UpdatedAt": "2026-02-07T18:19:59Z",
+  "URL": "https://github.com/hdkz-dev/multi-game-engines/pull/7#discussion_r2777900128"
+}

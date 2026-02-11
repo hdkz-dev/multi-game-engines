@@ -1,0 +1,12 @@
+{
+  "ID": "PRRC_kwDORJ0gd86lk2Ro",
+  "Body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**`fill` モードが機密キー以外の全リーフ値も環境変数で上書きしてしまいます。**\n\n`action === \"fill\"` のブランチは、キーが `SENSITIVE_KEYS` に含まれるかどうかを確認せずに `process.env[key] || value` を適用しています。例えば、`command` というキーに対して `process.env.command` が存在すれば、意図せず上書きされます。`SENSITIVE_KEYS` のチェックを追加すべきです。\n\n<details>\n<summary>🛡️ 修正案</summary>\n\n```diff\n       } else if (action === \"fill\") {\n         // Fill from process.env if available\n-        newObj[key] = process.env[key] || value;\n+        newObj[key] = SENSITIVE_KEYS.includes(key) ? (process.env[key] || value) : value;\n       } else {\n```\n</details>\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nIn `@scripts/sync-mcp-tokens.js` around lines 39 - 41, The \"fill\" branch currently\noverwrites all leaf values with process.env[key] regardless of sensitivity;\nupdate the action === \"fill\" logic in scripts/sync-mcp-tokens.js to only use\nprocess.env[key] when the key is in SENSITIVE_KEYS (e.g., check\nSENSITIVE_KEYS.includes(key)), otherwise keep the original value (assign value\nto newObj[key]). Ensure you reference the variables action, key, value, newObj\nand the SENSITIVE_KEYS constant when applying this conditional.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:phoenix -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+  "Path": "scripts/sync-mcp-tokens.js",
+  "Line": 41,
+  "Author": {
+    "Login": "coderabbitai"
+  },
+  "CreatedAt": "2026-02-07T18:19:58Z",
+  "UpdatedAt": "2026-02-07T18:20:00Z",
+  "URL": "https://github.com/hdkz-dev/multi-game-engines/pull/7#discussion_r2777900136"
+}

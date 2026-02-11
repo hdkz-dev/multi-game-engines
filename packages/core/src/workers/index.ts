@@ -1,0 +1,1 @@
+export { WorkerCommunicator } from "./WorkerCommunicator";

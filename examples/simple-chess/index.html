@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Game Engines - Simple Chess Example</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        #log { background: #f4f4f4; border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; }
+        .controls { margin-bottom: 20px; }
+        .status { margin-bottom: 10px; font-weight: bold; }
+        .progress-bar { width: 100%; background: #eee; height: 20px; margin-bottom: 10px; }
+        #progress-fill { width: 0%; background: #4caf50; height: 100%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <h1>Stockfish WASM Demo (2026 Edition)</h1>
+    
+    <div class="status" id="status">Status: Idle</div>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+    
+    <div class="controls">
+        <button id="loadBtn">1. Load Engine</button>
+        <button id="searchBtn" disabled>2. Start Search (startpos)</button>
+        <button id="stopBtn" disabled>Stop</button>
+    </div>
+
+    <div id="log">Logs will appear here...</div>
+
+    <!-- 開発中はビルド済みのファイルを importmap などで解決するか、
+         直接スクリプトタグで読み込む形になりますが、
+         ここでは ESM モジュールとして記述します -->
+    <script type="module">
+        import { EngineBridge } from '../../packages/core/dist/index.mjs';
+        import { StockfishAdapter } from '../../packages/adapter-stockfish/dist/index.js';
+
+        const logEl = document.getElementById('log');
+        const statusEl = document.getElementById('status');
+        const progressFill = document.getElementById('progress-fill');
+        const loadBtn = document.getElementById('loadBtn');
+        const searchBtn = document.getElementById('searchBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        function log(msg) {
+            logEl.textContent += msg + '\n';
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        const bridge = new EngineBridge();
+        const adapter = new StockfishAdapter();
+        bridge.registerAdapter(adapter);
+
+        const engine = bridge.getEngine('stockfish');
+
+        // エンジン Facade を介したイベント購読 (2026 Best Practice)
+        engine.onStatusChange((status) => {
+            statusEl.textContent = `Status: ${status}`;
+            searchBtn.disabled = status !== 'ready';
+        });
+
+        engine.onProgress((p) => {
+            progressFill.style.width = `${p.percentage}%`;
+            if (p.i18n) {
+                log(`[Progress] ${p.phase}: ${p.i18n.defaultMessage}`);
+            }
+        });
+
+        // 思考状況の購読
+        engine.onInfo((info) => {
+            log(`[Info] depth: ${info.depth}, score: ${info.score}, nps: ${info.nps}`);
+        });
+
+        loadBtn.onclick = async () => {
+            log('Loading engine...');
+            try {
+                await engine.load();
+                log('Engine loaded successfully!');
+            } catch (e) {
+                log('Error loading engine: ' + e.message);
+            }
+        };
+
+        searchBtn.onclick = async () => {
+            log('Starting search...');
+            searchBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            try {
+                // 2026 Best Practice: search() は結果を直接 await する
+                const result = await engine.search({
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                    depth: 15
+                });
+                log(`[Result] Best Move: ${result.bestMove}`);
+            } catch (e) {
+                log('Search error: ' + e.message);
+            } finally {
+                searchBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        };
+
+        stopBtn.onclick = async () => {
+            await engine.stop();
+            log('Search stop request sent.');
+        };
+
+        // Capability Check
+        const caps = await bridge.checkCapabilities();
+        log('[Capabilities] OPFS: ' + caps.opfs + ', Threads: ' + caps.wasmThreads);
+        if (!caps.wasmThreads) {
+            log('WARNING: Cross-Origin Isolation is not enabled. WASM Threads may not work.');
+        }
+
+    </script>
+</body>
+</html>

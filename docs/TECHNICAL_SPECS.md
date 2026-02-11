@@ -1,78 +1,40 @@
-# 技術仕様書 (Technical Specifications)
+# 技術仕様書 (TECHNICAL_SPECS.md)
 
-本ドキュメントは、`multi-game-engines` プロジェクトにおける技術的基盤、設計原則、および実装の詳細を定義します。
+## 1. コア型定義 (Core Types)
 
----
+### 1-1. Branded Types
+ドメイン固有の文字列を保護するため、Branded Types を採用しています。
+```typescript
+type FEN = string & { readonly __brand: "FEN" };
+type Move = string & { readonly __brand: "Move" };
+```
 
-## 1. アーキテクチャ原則
+## 2. エンジン Facade (IEngine)
 
-### 1.1 Facade パターンによる I/O 分離
+利用者が使用するメイン API。
+- `load()`: SRI 検証とキャッシュロードを伴う初期化。
+- `search(options)`: 非同期探索。ミドルウェアをシーケンシャルに適用。中断時は `reject` を返す。
+- `onInfo(callback)`: リアルタイムな思考配信の購読。ミドルウェア適用済みデータを配信。
 
-エンジンの具象的な実装（Adapter）と、利用者向けの API（Engine）を完全に分離します。
+## 3. セキュリティとインフラ
 
-- **IEngine**: 思考の開始/停止、結果の受け取りなど、ゲームロジックに必要な最小限の API。
-- **IEngineAdapter**: ロード、リソース管理、低レイヤーの通信、セキュリティ検証を担当。
-  これにより、アダプターが WASM/Worker であっても、ネイティブプラグインであっても、利用者は同じコードで制御可能です。
+### 3-1. EngineLoader
+- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。
+- **動的 MIME タイプ**: リソース種別（wasm/js）に応じた適切な Content-Type 設定。
 
-### 1.2 Branded Types (公称型) によるドメイン保護
+### 3-2. ファイルストレージ (2026 Best Practice)
+- **接続の不変性**: `IndexedDBStorage` は、ブラウザによる接続クローズやバージョンアップを検知し、自動的に再接続を試みるライフサイクル管理を実装。
+- **精密な例外分離**: `OPFSStorage` は `NotFoundError` (正常系) とそれ以外の致命的エラー（破損、制限）を厳格に区別。
 
-`string` や `number` などの基本型への依存を排除し、意味的な安全性を担保します。
+### 3-3. WorkerCommunicator
+- **メッセージバッファリング**: レースコンディション防止。
+- **AbortSignal ネイティブ対応**: 低レイヤーでの標準的な中断制御。
 
-- **FEN**: `string & { readonly __brand: "FEN" }`
-- **Move**: `string & { readonly __brand: "Move" }`
-  これにより、異なるゲームエンジン間で FEN や指し手を誤って渡すミスを、コンパイル時に 100% 防止します。
+## 4. エンジン・エコシステム (IEngineBridge)
 
-### 1.3 サブリソース整合性 (SRI) の強制
+- **グローバル監視**: `onGlobalStatusChange`, `onGlobalProgress`, `onGlobalTelemetry` を提供。
+- **インスタンス管理**: 同一 ID のエンジンに対する Facade インスタンスのキャッシュと、ミドルウェア追加時の自動パージ。
 
-外部 CDN からバイナリをロードする際、改竄防止のため SRI ハッシュの検証を必須とします。
+## 5. エラーハンドリング (EngineError)
 
-- ローダーは `manifest.json` からハッシュを取得し、フェッチ時にブラウザの整合性チェックを利用します。
-
----
-
-## 2. 通信とデータフロー (Unified Generics)
-
-プロジェクト全体で、エンジンの特性（思考、状況報、結果）を表現するために以下のジェネリクス順序を一貫させます。
-
-1. `T_OPTIONS`: エンジンの探索パラメータ (例: 探索深度、時間、マルチスレッド設定)
-2. `T_INFO`: 思考中に逐次送信される情報 (例: NPS, 現在の評価値, 読み筋)
-3. `T_RESULT`: 最終的な探索結果 (例: 最善手, Ponder)
-
----
-
-## 3. ストレージと実行環境の診断
-
-### 3.1 CapabilityDetector
-
-実行環境（ブラウザ、アプリ等）の機能を実行時に診断し、最適なアダプターを自動選択します。
-
-- **OPFS (Origin Private File System)**: 大容量のエンジンバイナリや学習データの永続化に優先的に使用。
-- **WASM SIMD/Threads**: CPU 命令の可用性に基づき、最適化の効いたバイナリを選択。
-- **WebNN / WebGPU**: 将来的なニューラルネットワーク（NNUE）加速の検出。
-
-### 3.2 フォールバック戦略
-
-最新の API が利用できない環境においても、性能を維持しつつ動作できるパスを確保します。
-
-- OPFS 欠如時 → IndexedDB へのフォールバック。
-- 独自 CDN 到達不能時 → jsDelivr/unpkg への自動切り替え。
-
----
-
-## 4. セキュリティと隔離環境
-
-### 4.1 Cross-Origin Isolation (COOP/COEP)
-
-WASM のマルチスレッド機能（SharedArrayBuffer）を有効にするため、ホスト環境における適切な HTTP ヘッダー設定を診断・要求します。
-
-### 4.2 WebWorker によるサンドボックス化
-
-GPL/AGPL 等のライセンス感染を物理的に防ぐため、エンジン実行体は常にメインスレッドから分離された WebWorker (またはネイティブプロセス) 内で実行されます。
-
----
-
-## 5. 開発エコシステム
-
-- **モノリポ (npm workspaces)**: 依存関係の集中管理と、パッケージ間の高速なフィードバックサイクル。
-- **Vitest**: 高速なユニットテスト環境。
-- **TypeDoc**: 自動生成される開発者向けドキュメント。
+- `WASM_INIT_FAILED`, `NETWORK_ERROR`, `SRI_MISMATCH`, `SEARCH_TIMEOUT`, `INTERNAL_ERROR`.

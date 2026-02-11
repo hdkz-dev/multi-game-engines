@@ -1,18 +1,61 @@
-# multi-game-engines
+# Multi-Game Engines Bridge
 
-さまざまなゲームエンジンを統合するための、世界最高水準の TypeScript 疎結合ブリッジライブラリ。
+2026年の Web 標準（OPFS, WebNN, WebGPU）をフル活用した、次世代のゲームエンジン・ブリッジライブラリ。
 
-## 🌟 プロジェクトのビジョン
-「ライセンスの壁」と「実装の複雑さ」を取り払い、あらゆるアプリケーションが最高性能の AI エンジンを自由に利用できるエコシステムを構築します。
+---
 
-## 🚀 究極の技術スタック
-- **Universal Runtime**: ブラウザ, Node.js, Deno, Bun, VS Code 拡張に対応。
-- **Modern Web APIs**: OPFS, WebNN, WebGPU, WASI, WebTransport をフル活用。
-- **Zero Copy I/O**: Transferable Objects による高速なバイナリ通信。
-- **Strict License Isolation**: コア (MIT) とアダプタを物理・論理的に分離。
+## 🌟 特徴 / Features
 
-## 📖 ドキュメント案内
-- **設計思想**: [ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **技術仕様**: [TECHNICAL_SPECS.md](docs/TECHNICAL_SPECS.md)
-- **管理ルール**: [PROJECT_MANAGEMENT.md](docs/PROJECT_MANAGEMENT.md)
-- **進行状況**: [TASKS.md](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
+- **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
+- **Zero-Any Type Safety**: Branded Types とジェネリクスにより、コンパイル時に多くのミスを未然に防止。
+- **Modern Security**: 全リソースへの SRI (Subresource Integrity) 必須化と、COOP/COEP 診断機能の統合。
+- **High Performance Storage**: OPFS (Origin Private File System) を活用した、バイナリの高速永続化キャッシュ。
+
+## 📦 サポート状況 / Support Status
+
+- **Chess**: Stockfish 16.1 (WASM) - **Ready**
+- **Shogi**: やねうら王 (WASM) - **Work in Progress**
+
+## 🚀 クイックスタート / Quick Start
+
+```typescript
+import { EngineBridge, StockfishAdapter } from "@multi-game-engines/core";
+
+const bridge = new EngineBridge();
+bridge.registerAdapter(new StockfishAdapter());
+
+const engine = bridge.getEngine("stockfish");
+await engine.load();
+
+// 思考状況の購読
+engine.onInfo((info) => {
+  console.log(`Depth: ${info.depth}, Score: ${info.score}`);
+});
+
+// 探索の実行
+const result = await engine.search({ fen: "startpos" });
+console.log(`Best Move: ${result.bestMove}`);
+```
+
+## 📖 ドキュメント案内 / Documentation
+
+### Japanese (Primary)
+- [設計思想 (ARCHITECTURE.md)](docs/ARCHITECTURE.md)
+- [技術仕様 (TECHNICAL_SPECS.md)](docs/TECHNICAL_SPECS.md)
+- [管理ルール (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md)
+- [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
+- [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
+
+### English (Global)
+- [Architecture & Design](docs/en/ARCHITECTURE.md)
+- [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
+- [Contributing Guide](CONTRIBUTING.md) (Bilingual)
+
+## 🤝 貢献 / Contributing
+
+詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+
+## 📄 ライセンス / License
+
+- **Core**: MIT License
+- **Adapters**: 各エンジンのライセンスに準拠（例: Stockfish は GPL-3.0-only）

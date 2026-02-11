@@ -1,10 +1,16 @@
-# 貢献ガイド
+# 貢献ガイド / Contributing Guide
 
-## 開発ワークフロー
+## 開発ワークフロー / Development Workflow
 
-1. リポジトリをフォークします。
-2. フィーチャーブランチを作成します。
-3. 変更をコミットします。
-4. ブランチをプッシュし、プルリクエストを送信します。
+1.  [JP] リポジトリをフォークします。  
+    [EN] Fork the repository.
+2.  [JP] フィーチャーブランチを作成します。  
+    [EN] Create a feature branch.
+3.  [JP] 変更をコミットします。  
+    [EN] Commit your changes.
+4.  [JP] ブランチをプッシュし、プルリクエストを送信します。  
+    [EN] Push the branch and submit a Pull Request.
 
-**注意**: `main` ブランチへの直接プッシュは制限されています。すべての変更はプルリクエストを経由し、レビューを受ける必要があります。
+**注意 / Note**:  
+[JP] `main` ブランチへの直接プッシュは制限されています。すべての変更はプルリクエストを経由し、レビューを受ける必要があります。  
+[EN] Direct pushes to the `main` branch are restricted. All changes must be submitted via Pull Request and undergo review.
