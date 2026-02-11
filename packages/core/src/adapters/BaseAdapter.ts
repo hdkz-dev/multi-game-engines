@@ -60,7 +60,7 @@ export abstract class BaseAdapter<
 
   // --- IEngineAdapter の実装 ---
 
-  async prefetch?(): Promise<void> {
+  async prefetch(): Promise<void> {
     // デフォルトでは何もしません。
   }
 

@@ -37,13 +37,12 @@ export class StockfishAdapter extends BaseAdapter<
 
   /** 
    * エンジンリソースの設定。
-   * TODO: 本番リリース時には必ず SRI ハッシュとファイルサイズを指定すること。
+   * TODO: 本番リリース時にはビルドプロセス等でハッシュとサイズを自動検証すること。
    */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
-      // Stage 1 では開発便宜のため一時的に空文字列を許容（Loader側でSRI必須化を一時緩和する必要あり）
-      sri: "sha256-dummy", 
+      sri: "sha384-EUJMxvxCASaeLnRP7io1aDfkBp2KloJPummBkV0HAQcG4B+4mCEYqP1Epy2E8ocv", 
       size: 0, 
       type: "worker-js",
     },

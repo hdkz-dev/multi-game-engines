@@ -13,24 +13,26 @@ export class EngineLoader implements IEngineLoader {
    */
   async loadResource(engineId: string, config: IEngineSourceConfig): Promise<string> {
     // 1. SRI の形式チェック (Fail-fast)
-    if (config.sri) {
-      if (!SecurityAdvisor.isValidSRI(config.sri)) {
-        throw new EngineError(
-          EngineErrorCode.SRI_MISMATCH,
-          `Invalid SRI hash format: ${config.sri}`,
-          engineId
-        );
-      }
-    } else {
-      console.warn(`[EngineLoader] Security Warning: SRI is missing for ${engineId}. Content validation is disabled.`);
+    if (!config.sri) {
+      throw new EngineError(
+        EngineErrorCode.SRI_MISMATCH,
+        `SRI hash is required for engine resource: ${config.url}. Please provide a valid SRI in the adapter config.`,
+        engineId
+      );
+    }
+
+    if (!SecurityAdvisor.isValidSRI(config.sri)) {
+      throw new EngineError(
+        EngineErrorCode.SRI_MISMATCH,
+        `Invalid SRI hash format: ${config.sri}`,
+        engineId
+      );
     }
 
     /** 
      * キャッシュキーの生成。
      */
-    const cacheKey = config.sri
-      ? `${engineId}::${config.sri}`
-      : `${engineId}::${btoa(config.url).replace(/=/g, "")}`;
+    const cacheKey = `${engineId}::${config.sri}`;
     
     // MIME type の決定
     let mimeType: string;
