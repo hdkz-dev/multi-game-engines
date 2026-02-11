@@ -134,9 +134,9 @@ export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown> {
 
   /** コマンドが送信される際に実行されます */
   onCommand?(
-    command: string | Uint8Array,
+    command: string | string[] | Uint8Array,
     context: IMiddlewareContext,
-  ): string | Uint8Array | Promise<string | Uint8Array>;
+  ): string | string[] | Uint8Array | Promise<string | string[] | Uint8Array>;
 
   /** 思考状況が返される際に実行されます */
   onInfo?(info: T_INFO, context: IMiddlewareContext): T_INFO | Promise<T_INFO>;
@@ -368,7 +368,7 @@ export interface IEngineAdapter<
    * 生成済みのコマンド文字列を使用して探索を実行します。
    * Facade がミドルウェア適用後にこれを呼び出します。
    */
-  searchRaw(command: string | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
   /** 探索を実行し、タスクを返します */
   search(options: T_OPTIONS): ISearchTask<T_INFO, T_RESULT>;
   /** リソースを解放し、終了 (terminated) にします */

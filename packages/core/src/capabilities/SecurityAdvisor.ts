@@ -40,7 +40,7 @@ export class SecurityAdvisor {
    * 指定した URL からリソースを SRI 付きで安全に取得するための fetch オプションを生成します。
    */
   static getSafeFetchOptions(sri?: string): RequestInit {
-    if (!sri) return {};
+    if (!sri || !this.isValidSRI(sri)) return {};
     
     return {
       integrity: sri,

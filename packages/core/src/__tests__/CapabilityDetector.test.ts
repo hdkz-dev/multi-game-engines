@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { CapabilityDetector } from "../capabilities/CapabilityDetector";
 
 describe("CapabilityDetector", () => {
@@ -13,6 +13,10 @@ describe("CapabilityDetector", () => {
     });
     vi.stubGlobal("SharedArrayBuffer", {});
     vi.stubGlobal("WebTransport", {});
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("should detect capabilities correctly in a modern browser environment", async () => {

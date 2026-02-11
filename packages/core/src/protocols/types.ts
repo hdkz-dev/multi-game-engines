@@ -15,7 +15,7 @@ export interface IProtocolParser<
   parseInfo(data: string | Uint8Array): T_INFO | null;
   /** 文字列またはバイナリから最終結果を解析 */
   parseResult(data: string | Uint8Array): T_RESULT | null;
-  /** コマンドを生成 */
-  createSearchCommand(options: T_OPTIONS): string | Uint8Array;
+  /** コマンドを生成。複数のコマンドを順次送信する場合は配列を返却。 */
+  createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array;
   createStopCommand(): string | Uint8Array;
 }

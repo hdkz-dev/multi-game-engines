@@ -3,7 +3,7 @@ import { EngineError } from "../errors/EngineError";
 import { EngineErrorCode } from "../types";
 
 describe("EngineError", () => {
-  it("should create an error with correct properties", () => {
+  it("should create an error with correct properties and name", () => {
     const error = new EngineError(
       EngineErrorCode.WASM_INIT_FAILED,
       "Failed to init WASM",
@@ -13,13 +13,28 @@ describe("EngineError", () => {
     expect(error.code).toBe(EngineErrorCode.WASM_INIT_FAILED);
     expect(error.engineId).toBe("stockfish");
     expect(error.message).toBe("Failed to init WASM");
+    expect(error.name).toBe("EngineError");
   });
 
-  it("should create from unknown error", () => {
-    const original = new Error("Original error");
-    const error = EngineError.from(original, "stockfish");
+  it("should return the same instance if already an EngineError", () => {
+    const original = new EngineError(EngineErrorCode.NETWORK_ERROR, "fail");
+    const result = EngineError.from(original);
+    expect(result).toBe(original);
+  });
+
+  it("should wrap regular Error into EngineError", () => {
+    const original = new Error("Regular fail");
+    const error = EngineError.from(original, "test-id");
     
     expect(error.code).toBe(EngineErrorCode.UNKNOWN_ERROR);
+    expect(error.message).toBe("Regular fail");
+    expect(error.engineId).toBe("test-id");
     expect(error.originalError).toBe(original);
+  });
+
+  it("should handle string input in from()", () => {
+    const error = EngineError.from("string error");
+    expect(error.message).toBe("string error");
+    expect(error.code).toBe(EngineErrorCode.UNKNOWN_ERROR);
   });
 });

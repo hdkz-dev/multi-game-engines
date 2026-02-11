@@ -10,7 +10,6 @@ import {
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
- * Stockfish などのチェスエンジン、および派生プロトコルの基底として機能します。
  */
 export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   /**
@@ -27,21 +26,27 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
 
     const parts = line.split(" ");
     for (let i = 1; i < parts.length; i++) {
-      switch (parts[i]) {
+      const key = parts[i];
+      const val = parts[i + 1];
+
+      switch (key) {
         case "depth":
-          info.depth = parseInt(parts[++i], 10);
+          info.depth = parseInt(val, 10) || 0;
+          i++;
           break;
         case "score": {
           const scoreType = parts[++i]; // "cp" or "mate"
-          const scoreValue = parseInt(parts[++i], 10);
+          const scoreValue = parseInt(parts[++i], 10) || 0;
           info.score = scoreType === "mate" ? scoreValue * 10000 : scoreValue;
           break;
         }
         case "nps":
-          info.nps = parseInt(parts[++i], 10);
+          info.nps = parseInt(val, 10) || 0;
+          i++;
           break;
         case "time":
-          info.time = parseInt(parts[++i], 10);
+          info.time = parseInt(val, 10) || 0;
+          i++;
           break;
         case "pv":
           info.pv = parts.slice(i + 1) as Move[];
@@ -61,7 +66,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
 
     const parts = line.split(" ");
     const result: IBaseSearchResult = {
-      bestMove: parts[1] as Move,
+      bestMove: (parts[1] || "") as Move,
       raw: line,
     };
 
@@ -75,14 +80,24 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
 
   /**
    * 探索開始コマンドを生成します。
+   * セキュリティ上の理由から、入力文字列（FEN）のインジェクション対策を行います。
+   * また、各コマンドを個別の配列要素として返します。
    */
-  createSearchCommand(options: IBaseSearchOptions): string {
-    let cmd = `position fen ${options.fen}
-go`;
-    if (options.depth) cmd += ` depth ${options.depth}`;
-    if (options.time) cmd += ` movetime ${options.time}`;
-    if (options.nodes) cmd += ` nodes ${options.nodes}`;
-    return cmd;
+  createSearchCommand(options: IBaseSearchOptions): string[] {
+    // 改行コードを排除してコマンドインジェクションを防止
+    const safeFen = options.fen.replace(/[\r\n]/g, "");
+    
+    const commands: string[] = [
+      `position fen ${safeFen}`
+    ];
+
+    let goCmd = "go";
+    if (options.depth) goCmd += ` depth ${options.depth}`;
+    if (options.time) goCmd += ` movetime ${options.time}`;
+    if (options.nodes) goCmd += ` nodes ${options.nodes}`;
+    
+    commands.push(goCmd);
+    return commands;
   }
 
   /**

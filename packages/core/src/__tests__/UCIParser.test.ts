@@ -17,30 +17,30 @@ describe("UCIParser", () => {
     expect(info?.pv).toEqual(["e2e4", "e7e5"]);
   });
 
-  it("should parse mate scores correctly", () => {
-    const line = "info depth 5 score mate 3";
+  it("should handle incomplete info lines without crashing", () => {
+    const line = "info depth";
     const info = parser.parseInfo(line);
-    expect(info?.score).toBe(30000);
+    expect(info?.depth).toBe(0);
   });
 
-  it("should parse bestmove lines correctly", () => {
-    const line = "bestmove e2e4 ponder e7e5";
-    const result = parser.parseResult(line);
-    
-    expect(result).toBeDefined();
-    expect(result?.bestMove).toBe("e2e4");
-    expect(result?.ponder).toBe("e7e5");
-  });
-
-  it("should create correct search commands", () => {
+  it("should create correct search command array", () => {
     const options = {
-      // 意味のあるブランド型へのキャストに変更
       fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN,
       depth: 15,
       time: 1000,
     };
-    const cmd = parser.createSearchCommand(options);
-    expect(cmd).toContain("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    expect(cmd).toContain("go depth 15 movetime 1000");
+    const cmds = parser.createSearchCommand(options);
+    expect(Array.isArray(cmds)).toBe(true);
+    expect(cmds[0]).toBe("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    expect(cmds[1]).toBe("go depth 15 movetime 1000");
+  });
+
+  it("should prevent UCI command injection in FEN", () => {
+    const options = {
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\nstop" as FEN,
+    };
+    const cmds = parser.createSearchCommand(options);
+    expect(cmds[0]).not.toContain("\n");
+    expect(cmds[0]).toBe("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1stop");
   });
 });

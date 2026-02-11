@@ -9,18 +9,36 @@ export class IndexedDBStorage implements IFileStorage {
   private readonly STORE_NAME = "files";
   private db: IDBDatabase | null = null;
 
+  /**
+   * データベース接続を取得します。
+   * 接続が切断された場合やバージョン変更時には自動的にクリアされます。
+   */
   private async getDB(): Promise<IDBDatabase> {
     if (this.db) return this.db;
 
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.DB_NAME, 1);
+      
       request.onupgradeneeded = () => {
-        request.result.createObjectStore(this.STORE_NAME);
+        if (!request.result.objectStoreNames.contains(this.STORE_NAME)) {
+          request.result.createObjectStore(this.STORE_NAME);
+        }
       };
+
       request.onsuccess = () => {
-        this.db = request.result;
+        const db = request.result;
+        
+        // ライフサイクル管理
+        db.onclose = () => { this.db = null; };
+        db.onversionchange = () => {
+          db.close();
+          this.db = null;
+        };
+
+        this.db = db;
         resolve(this.db);
       };
+
       request.onerror = () => reject(request.error);
     });
   }

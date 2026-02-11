@@ -141,7 +141,7 @@ export class StockfishAdapter extends BaseAdapter<
   /**
    * 未加工のプロトコルコマンドを使用して探索を実行します。
    */
-  searchRaw(command: string | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready. Call load() first.");
     }
@@ -185,8 +185,13 @@ export class StockfishAdapter extends BaseAdapter<
     if (!this.communicator) {
         throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
     }
-    // エンジンに探索コマンドを送信
-    this.communicator.postMessage(command);
+
+    // エンジンに探索コマンドを送信。配列の場合は順次送信。
+    if (Array.isArray(command)) {
+      command.forEach(cmd => this.communicator?.postMessage(cmd));
+    } else {
+      this.communicator.postMessage(command);
+    }
 
     return {
       info: infoAsyncIterable,

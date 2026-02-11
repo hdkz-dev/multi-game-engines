@@ -68,7 +68,7 @@ export abstract class BaseAdapter<
   abstract load(loader?: IEngineLoader): Promise<void>;
   
   /** 生成済みのコマンドを使用して探索を実行します */
-  abstract searchRaw(command: string | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
+  abstract searchRaw(command: string | string[] | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
 
   /** 
    * 簡易呼び出し。オプションをパースして searchRaw を呼び出します。
