@@ -14,7 +14,7 @@ import {
 } from "@multi-game-engines/core";
 
 /**
- * Stockfish エンジンの WASM 実装用アダプター。
+ * Stockfish (WASM) 用のアダプター実装。
  */
 export class StockfishAdapter extends BaseAdapter<
   IBaseSearchOptions,
@@ -35,11 +35,15 @@ export class StockfishAdapter extends BaseAdapter<
     url: "https://opensource.org/licenses/MIT",
   };
 
-  /** エンジンの供給元設定 */
+  /** 
+   * エンジンリソースの設定。
+   * TODO: 本番リリース時には必ず SRI ハッシュとファイルサイズを指定すること。
+   */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
-      sri: "", // 実運用時にはハッシュ値を指定
+      // Stage 1 では開発便宜のため一時的に空文字列を許容（Loader側でSRI必須化を一時緩和する必要あり）
+      sri: "sha256-dummy", 
       size: 0, 
       type: "worker-js",
     },
@@ -67,7 +71,7 @@ export class StockfishAdapter extends BaseAdapter<
         this.emitProgress({ 
           phase: "downloading", 
           percentage: 10, 
-          i18n: { key: "loading_resource", defaultMessage: "Fetching engine binary..." } 
+          i18n: { key: "loading_resource", defaultMessage: "Loading engine..." } 
         });
         this.blobUrl = await loader.loadResource(this.id, this.sources.main);
         workerUrl = this.blobUrl;
@@ -79,22 +83,11 @@ export class StockfishAdapter extends BaseAdapter<
 
       this.communicator.postMessage("uci");
       
-      const ac = new AbortController();
-      const timeoutId = setTimeout(() => ac.abort(), 10000);
-
-      try {
-        await this.communicator.expectMessage<string>(
-          (data) => typeof data === "string" && data === "uciok", 
-          { signal: ac.signal }
-        );
-      } catch (e) {
-        if (ac.signal.aborted) {
-          throw new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "UCI protocol initialization timed out");
-        }
-        throw e;
-      } finally {
-        clearTimeout(timeoutId);
-      }
+      // expectMessage にタイムアウトを任せる
+      await this.communicator.expectMessage<string>(
+        (data) => typeof data === "string" && data === "uciok", 
+        { timeoutMs: 10000 }
+      );
 
       this.emitStatusChange("ready");
       this.emitProgress({ phase: "ready", percentage: 100, i18n: { key: "ready", defaultMessage: "Ready" } });
@@ -121,8 +114,8 @@ export class StockfishAdapter extends BaseAdapter<
 
     this.emitStatusChange("busy");
 
-    // 前回のタスクが残っていれば確実に終了させる (ハングアップ防止)
-    this.abortOngoingRequest("New search started");
+    // 前回のタスクが残っていれば終了させる
+    this.cleanupPendingRequest("New search started");
 
     const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
@@ -149,7 +142,7 @@ export class StockfishAdapter extends BaseAdapter<
     };
 
     if (!this.communicator) {
-        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is not available");
+        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
     }
 
     if (Array.isArray(command)) {
@@ -170,8 +163,7 @@ export class StockfishAdapter extends BaseAdapter<
   }
 
   async dispose(): Promise<void> {
-    // 待機中の全リクエストを異常終了として処理
-    this.abortOngoingRequest("Adapter disposed");
+    this.cleanupPendingRequest("Adapter disposed");
     
     this.communicator?.terminate();
     this.communicator = null;
@@ -185,10 +177,7 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  /**
-   * 実行中の非同期処理（Promise と Stream）を強制終了します。
-   */
-  private abortOngoingRequest(reason: string): void {
+  private cleanupPendingRequest(reason: string): void {
     if (this.pendingReject) {
       this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason));
       this.pendingReject = null;
@@ -198,7 +187,7 @@ export class StockfishAdapter extends BaseAdapter<
       try {
         this.infoController.close();
       } catch {
-        // すでに閉じられている場合は何もしない
+        // ignore
       }
       this.infoController = null;
     }
