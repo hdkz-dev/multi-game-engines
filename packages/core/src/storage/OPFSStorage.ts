@@ -60,6 +60,7 @@ export class OPFSStorage implements IFileStorage {
      * 標準の TypeScript 型定義に keys() が含まれない場合があるため、
      * 実行環境の動的チェックを行った上で意図的に any を使用。
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('keys' in root && typeof (root as any).keys === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for await (const name of (root as any).keys()) {
