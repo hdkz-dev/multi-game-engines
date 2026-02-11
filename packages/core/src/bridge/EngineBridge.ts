@@ -165,6 +165,8 @@ export class EngineBridge implements IEngineBridge {
    */
   use<T_INFO = unknown, T_RESULT = unknown>(middleware: IMiddleware<T_INFO, T_RESULT>): void {
     this.middlewares.push(middleware);
+    // 新しいミドルウェアを反映するため、既存の Facade キャッシュをクリア
+    this.facades.clear();
   }
 
   /**
@@ -174,6 +176,15 @@ export class EngineBridge implements IEngineBridge {
   onGlobalStatusChange(callback: (id: string, status: EngineStatus) => void): () => void {
     this.statusListeners.add(callback);
     return () => this.statusListeners.delete(callback);
+  }
+
+  /**
+   * 全エンジンの進捗状況を一括監視します。
+   * @returns 購読解除関数
+   */
+  onGlobalProgress(callback: (id: string, progress: ILoadProgress) => void): () => void {
+    this.progressListeners.add(callback);
+    return () => this.progressListeners.delete(callback);
   }
 
   /**

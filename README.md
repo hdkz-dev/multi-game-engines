@@ -31,6 +31,7 @@ We aim to break down "license barriers" and "implementation complexity," buildin
 - [技術仕様 (TECHNICAL_SPECS.md)](docs/TECHNICAL_SPECS.md)
 - [管理ルール (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md)
 - [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
+- [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
 
 ### English (Global)
 - [Architecture & Design](docs/en/ARCHITECTURE.md)

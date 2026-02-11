@@ -15,9 +15,6 @@ import {
 
 /**
  * Stockfish (WASM) 用のアダプター実装。
- * 
- * EngineLoader を介して CDN (jsDelivr 等) から WASM エンジンを取得し、
- * WebWorker 内で実行、UCI プロトコルで通信を行います。
  */
 export class StockfishAdapter extends BaseAdapter<
   IBaseSearchOptions,
@@ -55,15 +52,11 @@ export class StockfishAdapter extends BaseAdapter<
   readonly parser = new UCIParser();
   private communicator: WorkerCommunicator | null = null;
   private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private pendingReject: ((reason?: any) => void) | null = null;
+  private pendingReject: ((reason?: unknown) => void) | null = null;
   private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
   private blobUrl: string | null = null;
   private activeLoader: IEngineLoader | null = null;
 
-  /**
-   * エンジンをロードし、準備完了状態にします。
-   */
   async load(loader?: IEngineLoader): Promise<void> {
     if (this._status === "ready") return;
 
@@ -74,7 +67,6 @@ export class StockfishAdapter extends BaseAdapter<
     try {
       let workerUrl = this.sources.main.url;
 
-      // ブリッジからローダーが提供されている場合は、SRI検証とキャッシュを利用する
       if (loader) {
         this.emitProgress({ 
           phase: "downloading", 
@@ -85,16 +77,12 @@ export class StockfishAdapter extends BaseAdapter<
         workerUrl = this.blobUrl;
       }
 
-      // WebWorker を起動し、通信路を確立
       this.communicator = new WorkerCommunicator(workerUrl);
       await this.communicator.spawn();
       this.communicator.onMessage((data) => this.handleMessage(data));
 
-      // エンジンのプロトコル（UCI）初期化
       this.communicator.postMessage("uci");
       
-      // 'uciok' が返るのを待つ（最大10秒のタイムアウト）
-      // AbortController を使用して、タイムアウト時に expectMessage をキャンセルする
       const ac = new AbortController();
       const timeoutId = setTimeout(() => ac.abort(), 10000);
 
@@ -119,7 +107,6 @@ export class StockfishAdapter extends BaseAdapter<
         i18n: { key: "ready", defaultMessage: "Ready" } 
       });
       
-      // 統計情報の収集
       this.emitTelemetry({
         event: "load_complete",
         timestamp: Date.now(),
@@ -127,20 +114,14 @@ export class StockfishAdapter extends BaseAdapter<
       });
     } catch (error) {
       this.emitStatusChange("error");
-      
-      // 途中でエラーが起きた場合、Blob URL がリークしないように確実に解放する
       if (this.blobUrl && loader) {
         loader.revoke(this.blobUrl);
         this.blobUrl = null;
       }
-
       throw EngineError.from(error, this.id);
     }
   }
 
-  /**
-   * 未加工のプロトコルコマンドを使用して探索を実行します。
-   */
   searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready. Call load() first.");
@@ -148,21 +129,14 @@ export class StockfishAdapter extends BaseAdapter<
 
     this.emitStatusChange("busy");
 
-    // 古い Promise が残っていたら reject してクリア（リーク防止）
-    if (this.pendingReject) {
-      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, "New search started before previous completed"));
-      this.pendingReject = null;
-      this.pendingResolve = null;
-    }
+    // 古いリクエストのクリーンアップ
+    this.cleanupPendingRequest("New search started");
 
-    // 結果返却用の Promise
     const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });
 
-    // 思考状況（info）ストリーミング用の ReadableStream
-    // 注意: infoStream は一度だけ消費されることを前提とします（Facade で制御）
     const infoStream = new ReadableStream<IBaseSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
@@ -186,7 +160,6 @@ export class StockfishAdapter extends BaseAdapter<
         throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator is null");
     }
 
-    // エンジンに探索コマンドを送信。配列の場合は順次送信。
     if (Array.isArray(command)) {
       command.forEach(cmd => this.communicator?.postMessage(cmd));
     } else {
@@ -204,18 +177,12 @@ export class StockfishAdapter extends BaseAdapter<
     };
   }
 
-  /**
-   * エンジンを完全に停止し、リソースを解放します。
-   */
   async dispose(): Promise<void> {
-    if (this.pendingReject) {
-      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, "Adapter disposed"));
-      this.pendingReject = null;
-    }
+    this.cleanupPendingRequest("Adapter disposed");
+    
     this.communicator?.terminate();
     this.communicator = null;
     
-    // 生成された Blob URL を解放
     if (this.blobUrl && this.activeLoader) {
       this.activeLoader.revoke(this.blobUrl);
       this.blobUrl = null;
@@ -225,29 +192,42 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  /**
-   * Worker からのメッセージを処理します。
-   */
+  private cleanupPendingRequest(reason: string): void {
+    if (this.pendingReject) {
+      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason));
+      this.pendingReject = null;
+      this.pendingResolve = null;
+    }
+    if (this.infoController) {
+      try {
+        this.infoController.close();
+      } catch {
+        // すでに閉じられている場合は無視
+      }
+      this.infoController = null;
+    }
+  }
+
   private handleMessage(data: unknown): void {
     if (typeof data !== "string") return;
 
-    // 1. info メッセージのパース
     const info = this.parser.parseInfo(data);
     if (info) {
       this.infoController?.enqueue(info);
       return;
     }
 
-    // 2. bestmove メッセージのパース（探索完了）
     const result = this.parser.parseResult(data);
     if (result) {
       this.pendingResolve?.(result);
-      // 完了したので参照をクリア
       this.pendingResolve = null;
       this.pendingReject = null;
       
-      this.infoController?.close();
+      try {
+        this.infoController?.close();
+      } catch { /* ignore */ }
       this.infoController = null;
+      
       this.emitStatusChange("ready");
     }
   }

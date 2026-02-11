@@ -25,7 +25,7 @@ export class OPFSStorage implements IFileStorage {
       await writable.write(data);
       await writable.close();
     } catch (err) {
-      await writable.abort().catch(() => {}); // エラー時は破棄してロック解放
+      await writable.abort().catch(() => {});
       throw err;
     }
   }
@@ -36,9 +36,11 @@ export class OPFSStorage implements IFileStorage {
       const fileHandle = await root.getFileHandle(key);
       const file = await fileHandle.getFile();
       return await file.arrayBuffer();
-    } catch {
-      // ファイルが存在しない場合は null を返す
-      return null;
+    } catch (err) {
+      if ((err as DOMException).name === 'NotFoundError') {
+        return null;
+      }
+      throw err;
     }
   }
 
@@ -47,8 +49,11 @@ export class OPFSStorage implements IFileStorage {
       const root = await this.getRoot();
       await root.getFileHandle(key);
       return true;
-    } catch {
-      return false;
+    } catch (err) {
+      if ((err as DOMException).name === 'NotFoundError') {
+        return false;
+      }
+      throw err;
     }
   }
 
@@ -56,8 +61,11 @@ export class OPFSStorage implements IFileStorage {
     try {
       const root = await this.getRoot();
       await root.removeEntry(key);
-    } catch {
-      // 存在しない場合は無視
+    } catch (err) {
+      if ((err as DOMException).name === 'NotFoundError') {
+        return;
+      }
+      throw err;
     }
   }
 
@@ -72,8 +80,14 @@ export class OPFSStorage implements IFileStorage {
     if ('keys' in root && typeof (root as any).keys === 'function') {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for await (const name of (root as any).keys()) {
-        await root.removeEntry(name, { recursive: true });
+        try {
+          await root.removeEntry(name, { recursive: true });
+        } catch {
+          // 個別の削除失敗は無視して続行
+        }
       }
+    } else {
+      console.warn('[OPFSStorage] clear() is not supported: directory.keys() unavailable');
     }
   }
 }
