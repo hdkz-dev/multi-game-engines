@@ -19,7 +19,10 @@ export class WorkerCommunicator {
    */
   private pendingExpectations = new Set<{
     predicate: (data: unknown) => boolean;
-    // 外部から指定された任意の型 T へ変換するため、意図的に any を使用。
+    /** 
+     * 外部から指定された任意の型 T へ安全に変換するため、
+     * Promise 解決用として意図的に any を使用。
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolve: (data: any) => void;
     reject: (reason: Error) => void;

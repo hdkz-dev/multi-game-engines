@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { UCIParser } from "../protocols/UCIParser";
+import { FEN } from "../types";
 
 describe("UCIParser", () => {
   const parser = new UCIParser();
@@ -33,8 +34,8 @@ describe("UCIParser", () => {
 
   it("should create correct search commands", () => {
     const options = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as any,
+      // 意味のあるブランド型へのキャストに変更
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN,
       depth: 15,
       time: 1000,
     };
