@@ -31,10 +31,6 @@
          直接スクリプトタグで読み込む形になりますが、
          ここでは ESM モジュールとして記述します -->
     <script type="module">
-        // 本来は npm パッケージとして解決されますが、
-        // サンプルとして動作させるために、相対パスでビルド済み成果物を指定するか、
-        // 開発用サーバーを介して実行します。
-        
         import { EngineBridge } from '../../packages/core/dist/index.mjs';
         import { StockfishAdapter } from '../../packages/adapter-stockfish/dist/index.js';
 
@@ -46,8 +42,7 @@
         const stopBtn = document.getElementById('stopBtn');
 
         function log(msg) {
-            logEl.textContent += msg + '
-';
+            logEl.textContent += msg + '\n';
             logEl.scrollTop = logEl.scrollHeight;
         }
 
@@ -57,15 +52,22 @@
 
         const engine = bridge.getEngine('stockfish');
 
-        // イベント購読
-        adapter.onStatusChange((status) => {
+        // エンジン Facade を介したイベント購読 (2026 Best Practice)
+        engine.onStatusChange((status) => {
             statusEl.textContent = `Status: ${status}`;
             searchBtn.disabled = status !== 'ready';
         });
 
-        adapter.onProgress((p) => {
+        engine.onProgress((p) => {
             progressFill.style.width = `${p.percentage}%`;
-            log(`[Progress] ${p.phase}: ${p.i18n.defaultMessage}`);
+            if (p.i18n) {
+                log(`[Progress] ${p.phase}: ${p.i18n.defaultMessage}`);
+            }
+        });
+
+        // 思考状況の購読
+        engine.onInfo((info) => {
+            log(`[Info] depth: ${info.depth}, score: ${info.score}, nps: ${info.nps}`);
         });
 
         loadBtn.onclick = async () => {
@@ -78,32 +80,17 @@
             }
         };
 
-        let currentTask = null;
-
         searchBtn.onclick = async () => {
             log('Starting search...');
             searchBtn.disabled = true;
             stopBtn.disabled = false;
 
-            currentTask = engine.search({
-                fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-                depth: 15
-            });
-
-            // 思考状況の表示
-            (async () => {
-                try {
-                    for await (const info of currentTask.info) {
-                        log(`[Info] depth: ${info.depth}, score: ${info.score}, nps: ${info.nps}`);
-                    }
-                } catch (e) {
-                    log('Info stream error: ' + e.message);
-                }
-            })();
-
-            // 結果の表示
             try {
-                const result = await currentTask.result;
+                // 2026 Best Practice: search() は結果を直接 await する
+                const result = await engine.search({
+                    fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+                    depth: 15
+                });
                 log(`[Result] Best Move: ${result.bestMove}`);
             } catch (e) {
                 log('Search error: ' + e.message);
@@ -114,10 +101,8 @@
         };
 
         stopBtn.onclick = async () => {
-            if (currentTask) {
-                await currentTask.stop();
-                log('Search stopped by user.');
-            }
+            await engine.stop();
+            log('Search stop request sent.');
         };
 
         // Capability Check

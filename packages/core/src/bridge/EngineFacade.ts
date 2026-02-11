@@ -2,6 +2,8 @@ import {
   IEngine,
   IEngineAdapter,
   EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -109,6 +111,27 @@ export class EngineFacade<
     return () => {
       isDisposed = true;
     };
+  }
+
+  /**
+   * エンジンの状態変化を購読します。
+   */
+  onStatusChange(callback: (status: EngineStatus) => void): () => void {
+    return this.adapter.onStatusChange(callback);
+  }
+
+  /**
+   * ロードの進捗状況を購読します。
+   */
+  onProgress(callback: (progress: ILoadProgress) => void): () => void {
+    return this.adapter.onProgress(callback);
+  }
+
+  /**
+   * テレメトリイベントを購読します。
+   */
+  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
+    return this.adapter.onTelemetry?.(callback) || (() => {});
   }
 
   async stop(): Promise<void> {

@@ -121,6 +121,9 @@ export interface IEngine<
   load(): Promise<void>;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   onInfo(callback: (info: T_INFO) => void): () => void;
+  onStatusChange(callback: (status: EngineStatus) => void): () => void;
+  onProgress(callback: (progress: ILoadProgress) => void): () => void;
+  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void;
   stop(): Promise<void>;
   dispose(): Promise<void>;
 }
