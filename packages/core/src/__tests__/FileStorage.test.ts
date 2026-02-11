@@ -1,8 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { IndexedDBStorage } from "../storage/IndexedDBStorage";
 
 describe("IndexedDBStorage", () => {
-  // IndexedDB の詳細なモック
+  // IndexedDB の簡易モックインターフェース
+  // 必要最小限のプロパティのみを定義して any を回避する
+  interface MockIDBRequest {
+    result: unknown;
+    error: Error | null;
+    onsuccess: ((ev: Event) => void) | null;
+    onerror: ((ev: Event) => void) | null;
+    onupgradeneeded: ((ev: Event) => void) | null;
+  }
+
   const mockIDB = {
     open: vi.fn(),
   };
@@ -12,18 +21,20 @@ describe("IndexedDBStorage", () => {
     vi.resetAllMocks();
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("should attempt to open IndexedDB and perform set operation", async () => {
     const storage = new IndexedDBStorage();
     
-    // Mock for put request
-    const mockPutRequest = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onsuccess: null as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onerror: null as any,
+    // Putリクエストのモック
+    const mockPutRequest: Partial<MockIDBRequest> = {
+      onsuccess: null,
+      onerror: null,
     };
 
-    // Mock for transaction and store
+    // StoreとTransactionのモック
     const mockStore = {
       put: vi.fn().mockReturnValue(mockPutRequest),
     };
@@ -31,9 +42,8 @@ describe("IndexedDBStorage", () => {
       objectStore: vi.fn().mockReturnValue(mockStore),
     };
 
-    // Mock for open request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mockOpenRequest: any = {
+    // Openリクエストのモック
+    const mockOpenRequest: Partial<MockIDBRequest> = {
       result: {
         objectStoreNames: { contains: vi.fn().mockReturnValue(true) },
         transaction: vi.fn().mockReturnValue(mockTransaction),
@@ -44,19 +54,25 @@ describe("IndexedDBStorage", () => {
     };
     mockIDB.open.mockReturnValue(mockOpenRequest);
 
-    // setを開始。内部でgetDB()が走り、open()が呼ばれる。
+    // setを実行。内部で open() が呼ばれる。
     const setPromise = storage.set("test", new ArrayBuffer(0));
     
-    // 1. DBオープン成功を通知
-    if (mockOpenRequest.onsuccess) mockOpenRequest.onsuccess();
+    // 1. DBオープン成功をシミュレート
+    // 非同期処理の進行を待つため、イベントループを回す
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    if (mockOpenRequest.onsuccess) {
+      mockOpenRequest.onsuccess(new Event("success"));
+    }
 
-    // 非同期の隙間を埋めるために少し待つ
+    // 2. トランザクションと put が呼ばれた後の成功をシミュレート
     await new Promise(resolve => setTimeout(resolve, 0));
 
-    // 2. この時点で内部的に transaction().objectStore().put() が呼ばれているはず
-    // putRequest.onsuccess を発火させて、setのPromiseを解決させる
-    if (mockPutRequest.onsuccess) mockPutRequest.onsuccess();
+    if (mockPutRequest.onsuccess) {
+      mockPutRequest.onsuccess(new Event("success"));
+    }
 
+    // エラーなく完了することを検証
     await expect(setPromise).resolves.toBeUndefined();
     expect(mockIDB.open).toHaveBeenCalledWith("multi-game-engines-cache", 1);
   });

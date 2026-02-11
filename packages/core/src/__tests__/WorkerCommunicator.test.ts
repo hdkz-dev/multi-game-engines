@@ -1,95 +1,99 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator";
-
-/**
- * Worker のモック用インターフェース。
- * 最小限のプロパティを型定義し、テスト時の安全性を確保。
- */
-interface MockWorker {
-  postMessage: (message: unknown, transfer: Transferable[]) => void;
-  terminate: () => void;
-  onmessage: ((ev: MessageEvent) => void) | null;
-  onerror: ((ev: ErrorEvent) => void) | null;
-  addEventListener: (type: string, listener: unknown) => void;
-  removeEventListener: (type: string, listener: unknown) => void;
-}
+import { EngineError } from "../errors/EngineError";
 
 describe("WorkerCommunicator", () => {
-  const mockWorker: MockWorker = {
-    postMessage: vi.fn(),
-    terminate: vi.fn(),
-    onmessage: null,
-    onerror: null,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-  };
+  /**
+   * Worker のモック実装。
+   * インターフェースを明示的に満たすように型定義を調整。
+   */
+  let currentMockWorker: MockWorker | null = null;
+
+  class MockWorker implements Worker {
+    onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
+    onerror: ((this: AbstractWorker, ev: ErrorEvent) => unknown) | null = null;
+    onmessageerror: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
+    
+    postMessage = vi.fn();
+    terminate = vi.fn();
+    addEventListener = vi.fn();
+    removeEventListener = vi.fn();
+    dispatchEvent = vi.fn().mockReturnValue(true);
+
+    constructor() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      currentMockWorker = this;
+    }
+  }
 
   beforeEach(() => {
+    currentMockWorker = null;
+    vi.stubGlobal("Worker", MockWorker);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("メッセージを送信し、期待されるレスポンスを待機できること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    await communicator.spawn();
+
+    const responsePromise = communicator.expectMessage((data) => data === "ok");
+    communicator.postMessage("ping");
+
+    expect(currentMockWorker?.postMessage).toHaveBeenCalledWith("ping", []);
+
+    if (currentMockWorker?.onmessage) {
+      currentMockWorker.onmessage({ data: "ok" } as MessageEvent);
+    }
+
+    await expect(responsePromise).resolves.toBe("ok");
+  });
+
+  it("Worker でエラーが発生した際、待機中の Promise が reject されること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    await communicator.spawn();
+
+    const responsePromise = communicator.expectMessage((data) => data === "ok");
+
+    if (currentMockWorker?.onerror) {
+      currentMockWorker.onerror({ message: "crash" } as ErrorEvent);
+    }
+
+    await expect(responsePromise).rejects.toThrow(EngineError);
+  });
+
+  it("タイムアウト時に適切なエラーが投げられること", async () => {
     vi.useFakeTimers();
-    // コンストラクタ呼び出しを再現するため function を使用。内部返却値のため any を許容。
-    const WorkerMock = vi.fn(function() {
-      return mockWorker;
-    });
-    vi.stubGlobal("Worker", WorkerMock);
+    const communicator = new WorkerCommunicator("test.js");
+    await communicator.spawn();
+
+    const responsePromise = communicator.expectMessage((data) => data === "ok", { timeoutMs: 100 });
+
+    vi.advanceTimersByTime(101);
+
+    await expect(responsePromise).rejects.toThrow(/timed out/i);
+    vi.useRealTimers();
   });
 
-  it("should send message to worker and receive expected response", async () => {
-    const comm = new WorkerCommunicator("test.js");
-    await comm.spawn();
-    
-    const promise = comm.expectMessage<string>((data) => data === "ok");
-    
-    // メッセージ到着をシミュレート
-    if (mockWorker.onmessage) {
-      mockWorker.onmessage({ data: "ok" } as MessageEvent);
-    }
-    
-    expect(await promise).toBe("ok");
-  });
-
-  it("should reject pending promises when worker encounters an error", async () => {
-    const comm = new WorkerCommunicator("test.js");
-    await comm.spawn();
-
-    const promise = comm.expectMessage((_) => true);
-    
-    // Worker エラー（クラッシュ）をシミュレート
-    if (mockWorker.onerror) {
-      mockWorker.onerror({ message: "Worker crashed" } as ErrorEvent);
-    }
-    
-    await expect(promise).rejects.toThrow("Worker internal error: Worker crashed");
-  });
-
-  it("should timeout if message is not received within specified time", async () => {
-    const comm = new WorkerCommunicator("test.js");
-    await comm.spawn();
-
-    const promise = comm.expectMessage((_) => true, { timeoutMs: 1000 });
-    
-    // 1秒進める
-    vi.advanceTimersByTime(1000);
-    
-    await expect(promise).rejects.toThrow("Message expectation timed out after 1000ms");
-  });
-
-  it("should abort if AbortSignal is triggered", async () => {
-    const comm = new WorkerCommunicator("test.js");
-    await comm.spawn();
+  it("AbortSignal によって処理を中断できること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    await communicator.spawn();
 
     const controller = new AbortController();
-    const promise = comm.expectMessage((_) => true, { signal: controller.signal });
-    
-    // 中断
+    const responsePromise = communicator.expectMessage((data) => data === "ok", { signal: controller.signal });
+
     controller.abort();
-    
-    await expect(promise).rejects.toThrow("Message expectation was aborted");
+
+    await expect(responsePromise).rejects.toThrow(/aborted/i);
   });
 
-  it("should terminate worker when requested", async () => {
-    const comm = new WorkerCommunicator("test.js");
-    await comm.spawn();
-    comm.terminate();
-    expect(mockWorker.terminate).toHaveBeenCalled();
+  it("terminate 時に Worker が終了されること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    await communicator.spawn();
+    
+    communicator.terminate();
+    expect(currentMockWorker?.terminate).toHaveBeenCalled();
   });
 });

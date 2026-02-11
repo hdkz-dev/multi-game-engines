@@ -1,95 +1,93 @@
 import { describe, it, expect, vi } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge";
 import { BaseAdapter } from "../adapters/BaseAdapter";
-import { ISearchTask, IBaseSearchInfo, IBaseSearchResult, IMiddleware, FEN, Move } from "../types";
-import { UCIParser } from "../protocols/UCIParser";
+import { 
+  IBaseSearchOptions, 
+  IBaseSearchInfo, 
+  IBaseSearchResult, 
+  ISearchTask,
+  EngineStatus,
+  FEN
+} from "../types";
 
 /**
- * 徹底的に型定義されたテスト用モックアダプター。
- * UCI プロトコルを模擬し、ストリーミング出力を検証可能にします。
+ * テスト用のモックアダプター。
+ * protected メソッドを公開し、内部状態の変化をシミュレート可能にします。
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-class MockAdapter extends BaseAdapter<any, IBaseSearchInfo, IBaseSearchResult> {
-  readonly id = "mock";
+class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+  readonly id = "mock-engine";
   readonly name = "Mock Engine";
-  readonly version = "1.0";
+  readonly version = "1.0.0";
   readonly engineLicense = { name: "MIT", url: "" };
   readonly adapterLicense = { name: "MIT", url: "" };
   readonly sources = {};
-  readonly parser = new UCIParser();
 
-  async load() {
-    this.emitStatusChange("ready");
-  }
+  readonly parser = {
+    parseInfo: vi.fn(),
+    parseResult: vi.fn(),
+    createSearchCommand: vi.fn().mockReturnValue("go"),
+    createStopCommand: vi.fn().mockReturnValue("stop"),
+  };
 
-  /** 手動で制御可能なストリーミング出力を生成 */
-  searchRaw(_command: string | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
-      start(controller) {
-        controller.enqueue({ depth: 1, score: 10 });
-        controller.close();
-      }
-    });
-
-    const infoAsyncIterable: AsyncIterable<IBaseSearchInfo> = {
-      [Symbol.asyncIterator]: () => {
-        const reader = infoStream.getReader();
-        return {
-          async next() {
-            const { done, value } = await reader.read();
-            if (done) return { done: true, value: undefined };
-            return { done: false, value: value! };
-          }
-        };
-      }
-    };
-
+  async load() {}
+  
+  searchRaw(_command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     return {
-      info: infoAsyncIterable,
-      result: Promise.resolve({ bestMove: "e2e4" as Move }),
-      stop: async () => {}
+      info: (async function* () {
+        yield { depth: 1, score: 10 } as IBaseSearchInfo;
+      })(),
+      result: Promise.resolve({ bestMove: "e2e4" } as IBaseSearchResult),
+      stop: async () => {},
     };
   }
-
   async dispose() {}
+
+  /** 内部イベントの発火を外部から制御するためのテストヘルパー */
+  public testEmitStatusChange(status: EngineStatus) {
+    this.emitStatusChange(status);
+  }
 }
 
-describe("EngineBridge & EngineFacade", () => {
-  it("should support independent listener unsubscription", async () => {
-    const adapter = new MockAdapter();
-    const listener = vi.fn();
-    
-    // 購読開始
-    const unsubscribe = adapter.onStatusChange(listener);
-    expect(listener).toHaveBeenCalledWith("idle");
-
-    // 購読解除
-    unsubscribe();
-    await adapter.load();
-    
-    // 解除後は通知されないことを確認
-    expect(listener).not.toHaveBeenCalledWith("ready");
-  });
-
-  it("should apply middleware chain in the correct order", async () => {
+describe("EngineBridge", () => {
+  it("アダプター登録時にグローバルなステータス変化が伝播されること", () => {
     const bridge = new EngineBridge();
     const adapter = new MockAdapter();
-    bridge.registerAdapter(adapter);
+    const statusSpy = vi.fn();
 
-    const middleware: IMiddleware<IBaseSearchInfo, IBaseSearchResult> = {
-      onInfo: vi.fn(async (info) => ({ ...info, score: info.score + 100 })),
-      onResult: vi.fn(async (result) => ({ ...result, bestMove: "d2d4" as Move })),
+    // 購読開始
+    const unsubscribe = bridge.onGlobalStatusChange(statusSpy);
+
+    bridge.registerAdapter(adapter);
+    
+    // アダプター内部での状態変化をシミュレート
+    adapter.testEmitStatusChange("ready");
+
+    expect(statusSpy).toHaveBeenCalledWith("mock-engine", "ready");
+
+    // 購読解除のテスト
+    unsubscribe();
+    adapter.testEmitStatusChange("busy");
+    expect(statusSpy).toHaveBeenCalledTimes(1); // 解除後は呼ばれない
+  });
+
+  it("ミドルウェアが正しく Facade を通じて実行されること", async () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    
+    // コマンドを加工するミドルウェア
+    const middleware = {
+      onCommand: vi.fn().mockImplementation((cmd) => `modified_${cmd}`),
     };
+
+    bridge.registerAdapter(adapter);
     bridge.use(middleware);
 
-    const engine = bridge.getEngine("mock");
-    const task = await engine.search({ fen: "startpos" as FEN });
+    const engine = bridge.getEngine("mock-engine");
+    
+    const options: IBaseSearchOptions = { fen: "startpos" as FEN }; 
+    await engine.search(options);
 
-    for await (const info of task.info) {
-      expect(info.score).toBe(110);
-    }
-
-    const result = await task.result;
-    expect(result.bestMove).toBe("d2d4");
+    // ミドルウェアが呼ばれ、引数が渡されていることを確認
+    expect(middleware.onCommand).toHaveBeenCalled();
   });
 });

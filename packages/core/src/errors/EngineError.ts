@@ -1,9 +1,12 @@
-import { EngineErrorCode, IEngineError } from "../types";
+import { EngineErrorCode } from "../types";
 
 /**
- * プロジェクト全体で使用する標準エラークラス。
+ * ライブラリ内で発生する全てのエラーを統括するクラス。
+ * 
+ * 標準の Error クラスを拡張し、エンジンの識別子やエラーコード、
+ * 原因となった元の例外を保持します。
  */
-export class EngineError extends Error implements IEngineError {
+export class EngineError extends Error {
   constructor(
     public readonly code: EngineErrorCode,
     message: string,
@@ -12,30 +15,24 @@ export class EngineError extends Error implements IEngineError {
   ) {
     super(message);
     this.name = "EngineError";
-    
-    /**
-     * V8 などの対応環境でスタックトレースを正確に保持するために captureStackTrace を使用。
-     * 標準の Error 型定義に含まれないため any を使用。
-     */
+
+    // V8 環境でのスタックトレースの保存
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((Error as any).captureStackTrace) {
+    if (typeof (Error as any).captureStackTrace === "function") {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (Error as any).captureStackTrace(this, EngineError);
     }
   }
 
   /**
-   * 不明なエラーから EngineError を生成します。
+   * 任意の例外を EngineError へ変換（ラップ）します。
    */
   static from(error: unknown, engineId?: string): EngineError {
-    if (error instanceof EngineError) return error;
-    
+    if (error instanceof EngineError) {
+      return error;
+    }
+
     const message = error instanceof Error ? error.message : String(error);
-    return new EngineError(
-      EngineErrorCode.UNKNOWN_ERROR,
-      message,
-      engineId,
-      error
-    );
+    return new EngineError(EngineErrorCode.UNKNOWN_ERROR, message, engineId, error);
   }
 }

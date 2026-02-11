@@ -1,127 +1,132 @@
 import {
   IEngine,
   IEngineAdapter,
-  IEngineAdapterInfo,
+  IMiddleware,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   ISearchTask,
-  ILicenseInfo,
-  IMiddleware,
+  EngineStatus,
   IMiddlewareContext,
-  IEngineBridge,
+  EngineErrorCode,
 } from "../types";
+import { EngineBridge } from "./EngineBridge";
+import { EngineError } from "../errors/EngineError";
 
 /**
- * 利用者向けの Facade クラス。
+ * エンジン操作の窓口となる Facade クラス。
  * 
- * アダプターの詳細（Worker通信、低レイヤープロトコル）を抽象化し、
- * ミドルウェアの適用やタスク管理（排他制御、統計収集）を一元管理します。
+ * [設計意図]
+ * 1. 複雑な非同期タスク（探索）のライフサイクルを一元管理。
+ * 2. ミドルウェアチェーンによる入出力の透過的な加工。
+ * 3. 2026年基準の AbortSignal による正確な中断制御。
  */
 export class EngineFacade<
-  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-> implements IEngine<T_OPTIONS, T_INFO, T_RESULT>
-{
-  /** 現在進行中の探索タスクを保持 */
+  T_OPTIONS extends IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult,
+> implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
   private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
+  private infoListeners = new Set<(info: T_INFO) => void>();
 
   constructor(
-    private readonly adapterInstance: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    /**
-     * ミドルウェアは多岐にわたるデータ型を扱う可能性があるため、
-     * 内部管理用に any を使用。外部インターフェースでは型安全性が維持される。
-     */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly middlewares: IMiddleware<any, any>[] = [],
-    private readonly bridge?: IEngineBridge,
+    private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
+    private readonly middlewares: IMiddleware<T_INFO, T_RESULT>[],
+    private readonly bridge: EngineBridge,
   ) {}
 
-  /** アダプターの現在状態（読取専用） */
-  get adapter(): IEngineAdapterInfo {
-    return this.adapterInstance;
-  }
-
-  /**
-   * エンジンの初期化。
-   * ブリッジのリソースローダーを使用して WASM 等を準備します。
-   */
   async load(): Promise<void> {
-    const loader = this.bridge ? await this.bridge.getLoader() : undefined;
-    await this.adapterInstance.load(loader);
+    const loader = await this.bridge.getLoader();
+    await this.adapter.load(loader);
   }
 
   /**
-   * 探索を開始します。
-   * 排他制御（前のタスクの自動停止）およびテレメトリの収集を行います。
+   * 探索を実行します。
+   * AbortSignal が中断された場合、プロミスを即座に reject します。
    */
-  async search(options: T_OPTIONS): Promise<ISearchTask<T_INFO, T_RESULT>> {
-    const startTime = Date.now();
-
-    // 1. 既存タスクがあれば停止 (2026 Best Practice: Auto-abort)
+  async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.activeTask) {
       await this.activeTask.stop();
+      this.activeTask = null;
     }
 
     const context: IMiddlewareContext<T_OPTIONS> = {
-      engineId: this.adapterInstance.id,
-      adapterName: this.adapterInstance.name,
-      timestamp: startTime,
-      options: options,
+      engineId: this.adapter.id,
+      options,
     };
 
-    // 探索開始のテレメトリを発行
-    this.adapterInstance.emitTelemetry?.({
-      event: "search_start",
-      timestamp: startTime,
-      attributes: { engineId: this.adapterInstance.id }
-    });
+    let command = this.adapter.parser.createSearchCommand(options);
 
-    // 2. コマンド生成とミドルウェア適用
-    let command = this.adapterInstance.parser.createSearchCommand(options);
+    // Command Middleware 適用
     for (const middleware of this.middlewares) {
       if (middleware.onCommand) {
         command = await middleware.onCommand(command, context);
       }
     }
 
-    // 3. アダプターによる実行
-    const task = this.adapterInstance.searchRaw(command);
+    const task = this.adapter.searchRaw(command);
     this.activeTask = task;
 
-    // 4. AbortSignal との連動
-    if (options.signal) {
-      options.signal.addEventListener("abort", () => {
-        void task.stop();
-      }, { once: true });
-    }
-
-    // 5. ミドルウェア適用のための非同期イテレータと結果ラップ
-    const interceptedInfo = this.interceptInfo(task.info, context);
-    const interceptedResult = this.interceptResult(task.result, context);
-
-    const wrappedTask: ISearchTask<T_INFO, T_RESULT> = {
-      info: interceptedInfo,
-      result: interceptedResult.finally(() => {
-        // 探索終了時の処理
-        if (this.activeTask === task) {
-          this.activeTask = null;
+    // 非同期イテレータによる info の配信 (ミドルウェア適用付き)
+    const consumeInfo = async () => {
+      try {
+        for await (let info of task.info) {
+          // Info Middleware 適用
+          for (const middleware of this.middlewares) {
+            if (middleware.onInfo) {
+              info = await middleware.onInfo(info, context);
+            }
+          }
+          this.infoListeners.forEach(cb => cb(info));
         }
-        // 探索完了のテレメトリを発行
-        this.adapterInstance.emitTelemetry?.({
-          event: "search_complete",
-          timestamp: Date.now(),
-          attributes: { duration_ms: Date.now() - startTime }
-        });
-      }),
-      stop: () => task.stop(),
+      } catch (err) {
+        console.error("[EngineFacade] Info stream error:", err);
+      }
     };
+    void consumeInfo();
 
-    return wrappedTask;
+    // 探索キャンセル (AbortSignal) の監視
+    return new Promise<T_RESULT>((resolve, reject) => {
+      const cleanup = () => {
+        options.signal?.removeEventListener("abort", onAbort);
+        if (this.activeTask === task) this.activeTask = null;
+      };
+
+      const onAbort = () => {
+        cleanup();
+        task.stop().catch(() => {});
+        reject(new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "Search aborted via signal"));
+      };
+
+      if (options.signal) {
+        if (options.signal.aborted) return onAbort();
+        options.signal.addEventListener("abort", onAbort, { once: true });
+      }
+
+      task.result.then((res) => {
+        cleanup();
+        // Result Middleware 適用
+        let finalResult = res;
+        (async () => {
+          for (const middleware of this.middlewares) {
+            if (middleware.onResult) {
+              finalResult = await middleware.onResult(finalResult, context);
+            }
+          }
+          resolve(finalResult);
+        })().catch(reject);
+      }).catch((err) => {
+        cleanup();
+        reject(err);
+      });
+    });
   }
 
-  /** 実行中の探索を停止。アダプターは再利用可能な状態を維持。 */
+  onInfo(callback: (info: T_INFO) => void): () => void {
+    this.infoListeners.add(callback);
+    return () => this.infoListeners.delete(callback);
+  }
+
   async stop(): Promise<void> {
     if (this.activeTask) {
       await this.activeTask.stop();
@@ -129,46 +134,14 @@ export class EngineFacade<
     }
   }
 
-  /** エンジンを完全に終了し、リソースを破棄。 */
-  async quit(): Promise<void> {
+  async dispose(): Promise<void> {
     await this.stop();
-    await this.adapterInstance.dispose();
+    await this.adapter.dispose();
+    this.infoListeners.clear();
   }
 
-  /** 法的な帰属表示用のデータを取得。 */
-  getCredits(): { engine: ILicenseInfo; adapter: ILicenseInfo } {
-    return {
-      engine: this.adapterInstance.engineLicense,
-      adapter: this.adapterInstance.adapterLicense,
-    };
-  }
-
-  /** 出力情報のストリーミング加工。 */
-  private async *interceptInfo(
-    infoIterable: AsyncIterable<T_INFO>,
-    context: IMiddlewareContext<T_OPTIONS>,
-  ): AsyncIterable<T_INFO> {
-    for await (let info of infoIterable) {
-      for (const middleware of this.middlewares) {
-        if (middleware.onInfo) {
-          info = await middleware.onInfo(info, context);
-        }
-      }
-      yield info;
-    }
-  }
-
-  /** 最終結果の加工。 */
-  private async interceptResult(
-    resultPromise: Promise<T_RESULT>,
-    context: IMiddlewareContext<T_OPTIONS>,
-  ): Promise<T_RESULT> {
-    let result = await resultPromise;
-    for (const middleware of this.middlewares) {
-      if (middleware.onResult) {
-        result = await middleware.onResult(result, context);
-      }
-    }
-    return result;
-  }
+  get id(): string { return this.adapter.id; }
+  get name(): string { return this.adapter.name; }
+  get version(): string { return this.adapter.version; }
+  get status(): EngineStatus { return this.adapter.status; }
 }

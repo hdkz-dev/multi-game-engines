@@ -1,71 +1,40 @@
 import { ICapabilities } from "../types";
 
 /**
- * 実行環境（ブラウザ、Node.js、Worker）の能力を診断するクラス。
- * 2026年最新基準の Web API への対応状況をチェックし、最適な実行戦略を選択可能にします。
+ * 実行環境の最新 API サポート状況を診断するクラス。
  */
 export class CapabilityDetector {
   /**
-   * 現在の環境の能力を非同期で診断します。
+   * ブラウザや Node.js 環境の能力を検出し、ICapabilities オブジェクトを返します。
    */
   static async detect(): Promise<ICapabilities> {
-    const details: Record<string, string> = {};
-    /**
-     * ブラウザ、WebWorker、Node.js などの多様な実行環境で共通してグローバルAPI
-     * （navigator, WebTransport 等）にアクセスするため、意図的に any を使用。
-     */
+    // globalThis を Record 型にキャストして環境診断を行う
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const g = globalThis as any;
+    const g = globalThis as unknown as Record<string, any>;
 
-    // 1. OPFS (Origin Private File System) - 大容量バイナリの保存に最適
-    const opfs = !!g.navigator?.storage?.getDirectory;
-    if (!opfs) details.opfs = "Origin Private File System is not supported.";
-
-    // 2. WebAssembly Threads - マルチコア並列処理に必須
-    const wasmThreads = typeof g.SharedArrayBuffer !== "undefined";
-    if (!wasmThreads) details.wasmThreads = "WebAssembly Threads require SharedArrayBuffer.";
-
-    // 3. WebAssembly SIMD - ベクトル演算加速
-    const wasmSimd = await this.checkWasmSimd();
-    if (!wasmSimd) details.wasmSimd = "WebAssembly SIMD is not supported.";
-
-    // 4. Web Neural Network API - NNUE 等の推論加速
-    const webNN = !!g.navigator?.ml;
-    if (!webNN) details.webNN = "Web Neural Network API is not available.";
-
-    // 5. WebGPU - 高度な並列計算加速
-    const webGPU = !!g.navigator?.gpu;
-    if (!webGPU) details.webGPU = "WebGPU is not supported.";
-
-    // 6. WebTransport - 低遅延通信
-    const webTransport = !!g.WebTransport;
-    if (!webTransport) details.webTransport = "WebTransport is not supported.";
+    const results = {
+      opfs: !!(g.navigator?.storage?.getDirectory),
+      wasmThreads: typeof g.SharedArrayBuffer !== "undefined",
+      wasmSimd: await this.checkWasmSimd(),
+      webNN: !!(g.navigator?.ml),
+      webGPU: !!(g.navigator?.gpu),
+      webTransport: typeof g.WebTransport !== "undefined",
+    };
 
     return {
-      opfs,
-      wasmThreads,
-      wasmSimd,
-      webNN,
-      webGPU,
-      webTransport,
-      // 詳細メッセージがあれば付与
-      details: Object.keys(details).length > 0 ? (details as ICapabilities["details"]) : undefined,
+      ...results,
+      details: results,
     };
   }
 
   /**
-   * WASM SIMD のサポートを、実際に小さなバイナリをバリデートすることで確認します。
+   * WASM SIMD のサポート状況を実際に小さなバイナリをロードして確認します。
    */
   private static async checkWasmSimd(): Promise<boolean> {
     try {
-      if (typeof WebAssembly === "undefined" || !WebAssembly.validate) return false;
-      
-      // v128.load 命令を含む最小の有効な SIMD WASM バイナリ
-      const simdBinary = new Uint8Array([
-        0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 96, 0, 1, 123, 3, 2, 1, 0, 10, 10, 1, 
-        8, 0, 65, 0, 253, 3, 0, 11,
-      ]);
-      return WebAssembly.validate(simdBinary);
+      // SIMD 命令を含む最小限の WASM バイナリ (v128.load)
+      const bytes = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 9, 1, 7, 0, 65, 0, 253, 3, 0, 11]);
+      return WebAssembly.validate(bytes);
     } catch {
       return false;
     }
