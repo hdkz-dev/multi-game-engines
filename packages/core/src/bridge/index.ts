@@ -1,3 +1,3 @@
-export * from "./EngineBridge";
-export * from "./EngineFacade";
-export * from "./EngineLoader";
+export { EngineBridge } from "./EngineBridge";
+export { EngineFacade } from "./EngineFacade";
+export { EngineLoader } from "./EngineLoader";

@@ -1,2 +1,1 @@
-export * from "./types";
-export * from "./UCIParser";
+export { UCIParser } from "./UCIParser";

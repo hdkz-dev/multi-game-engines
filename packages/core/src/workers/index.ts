@@ -1,1 +1,1 @@
-export * from "./WorkerCommunicator";
+export { WorkerCommunicator } from "./WorkerCommunicator";

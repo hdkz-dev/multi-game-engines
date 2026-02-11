@@ -1,1 +1,1 @@
-export * from "./BaseAdapter";
+export { BaseAdapter } from "./BaseAdapter";
