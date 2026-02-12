@@ -10,6 +10,7 @@ import {
   IMiddleware,
   ISearchTask,
   IMiddlewareContext,
+  EngineLoadingStrategy,
 } from "../types";
 
 /**

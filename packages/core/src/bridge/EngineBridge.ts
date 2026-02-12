@@ -13,6 +13,7 @@ import {
   IEngine,
   ICapabilities,
   EngineErrorCode,
+  EngineLoadingStrategy,
 } from "../types";
 import { EngineFacade } from "./EngineFacade";
 import { EngineLoader } from "./EngineLoader";

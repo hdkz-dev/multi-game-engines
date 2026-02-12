@@ -2,7 +2,6 @@ import {
   IProtocolParser,
 } from "./types";
 import {
-  IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   ISHOGISearchOptions,
