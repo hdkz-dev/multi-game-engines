@@ -148,7 +148,7 @@ export class StockfishAdapter extends BaseAdapter<
   }
 
   async dispose(): Promise<void> {
-    this.cleanupPendingTask("Adapter disposed");
+    this.cleanupPendingTask("Adapter disposed", true);
     this.messageUnsubscriber?.();
     this.messageUnsubscriber = null;
     this.communicator?.terminate();
@@ -162,7 +162,7 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  private cleanupPendingTask(reason?: string): void {
+  private cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
     if (reason) {
       this.pendingReject?.(new Error(reason));
     }
@@ -180,7 +180,7 @@ export class StockfishAdapter extends BaseAdapter<
     }
 
     // 探索終了後に ready 状態に戻す (dispose 中は除外)
-    if (this._status === "busy") {
+    if (this._status === "busy" && !skipReadyTransition) {
       this.emitStatusChange("ready");
     }
   }
