@@ -30,6 +30,7 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
     parseResult: vi.fn(),
     createSearchCommand: vi.fn().mockReturnValue("go"),
     createStopCommand: vi.fn().mockReturnValue("stop"),
+    createOptionCommand: vi.fn().mockReturnValue("setoption"),
   };
 
   async load() {}
@@ -43,6 +44,9 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
       stop: async () => {},
     };
   }
+
+  protected async sendOptionToWorker() {}
+
   async dispose() {}
 
   /** 内部メソッド emitStatusChange をテストから制御するためのヘルパー */

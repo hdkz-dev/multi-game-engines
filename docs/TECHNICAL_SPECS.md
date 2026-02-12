@@ -21,6 +21,7 @@ type Move = string & { readonly __brand: "Move" };
 ## 2. エンジン Facade (IEngine)
 
 利用者が使用するメイン API。
+- **EngineRegistry による自動型推論**: `bridge.getEngine('stockfish')` のように呼ぶだけで、戻り値の型が自動的に最適なジェネリクスで推論されます。
 - `load()`: SRI 検証とキャッシュロードを伴う初期化。
 - `search(options)`: 非同期探索。ロード戦略に応じて自動ロードを実行。ミドルウェアをシーケンシャルに適用。新しい探索が開始されると前のタスクは自動停止します。
 - `onInfo(callback)`: リアルタイムな思考配信の購読。
@@ -32,6 +33,7 @@ type Move = string & { readonly __brand: "Move" };
 
 ### 3-1. EngineLoader (Modern Security)
 - **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。空の SRI はエラーとなります。W3C 標準のマルチハッシュ（スペース区切り）に対応。
+- **アトミック・マルチロード**: `loadResources()` により、WASM 本体と重みファイルなどの複数リソースを一括で検証・取得し、依存関係の一貫性を保証。
 - **動的 MIME タイプ**: WASM (`application/wasm`) や JS (`application/javascript`) を適切に識別。
 - **Auto-Revocation**: メモリリーク防止のため、リロード時に古い Blob URL を自動的に `revoke`。
 - **30秒タイムアウト**: ネットワークフェッチのハングを防止。`Error Cause API` による詳細なエラー追跡。

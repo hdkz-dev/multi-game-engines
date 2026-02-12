@@ -1,27 +1,28 @@
 import {
   BaseAdapter,
-  IBaseSearchInfo,
   IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  USIParser,
+  MahjongJSONParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  ISHOGISearchOptions,
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
 } from "@multi-game-engines/core";
 
 /**
- * やねうら王 (WASM) 用のアダプター実装。
+ * Mortal (WASM) 用のアダプター実装。
+ * JSON ベースの通信による非完全情報ゲームの探索。
  */
-export class YaneuraOuAdapter extends BaseAdapter<
-  ISHOGISearchOptions,
-  IBaseSearchInfo,
+export class MortalAdapter extends BaseAdapter<
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
   IBaseSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
-  readonly parser = new USIParser();
+  readonly parser = new MahjongJSONParser();
   private blobUrl: string | null = null;
   private activeLoader: IEngineLoader | null = null;
   private messageUnsubscriber: (() => void) | null = null;
@@ -29,25 +30,22 @@ export class YaneuraOuAdapter extends BaseAdapter<
   // 探索状態管理
   private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
-  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
+  private infoController: ReadableStreamDefaultController<IMahjongSearchInfo> | null = null;
 
-  readonly id = "yaneuraou";
-  readonly name = "YaneuraOu";
-  readonly version = "7.5.0";
+  readonly id = "mortal";
+  readonly name = "Mortal";
+  readonly version = "2.0.0";
 
   readonly license: ILicenseInfo = {
-    name: "GPL-3.0-only",
-    url: "https://github.com/yaneurao/YaneuraOu/blob/master/LICENSE",
+    name: "MIT",
+    url: "https://github.com/Equim-00/Mortal/blob/master/LICENSE",
   };
 
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
-      // NOTE: This URL is for a future release (Phase 3).
-      url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/yaneuraou-wasm@0.1.0/dist/yaneuraou.js",
+      url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/mortal-wasm@0.1.0/dist/mortal.js",
       type: "worker-js",
-      // Security: Valid SRI format for validation to pass during development.
-      // MUST be updated to the actual binary hash upon publication.
-      sri: "sha384-DummyHashForValidationToPassDuringDevelopment1234567890abcdefghij", 
+      sri: "sha384-DummyHashForMortalValidationToPassDuringDevelopment1234567890abcdef",
       size: 0,
     },
   };
@@ -63,12 +61,10 @@ export class YaneuraOuAdapter extends BaseAdapter<
       this.blobUrl = await loader.loadResource(this.id, this.sources.main);
       this.communicator = new WorkerCommunicator(this.blobUrl);
 
-      // USI プロトコルの初期化
-      this.communicator.postMessage("usi");
-      
-      await this.communicator.expectMessage<string>(
-        (data) => data === "usiok",
-        { signal: AbortSignal.timeout(5000) }
+      // 初期化完了メッセージを待機
+      await this.communicator.expectMessage<{ type: string }>(
+        (data) => typeof data === "object" && data !== null && (data as Record<string, unknown>).type === "ready",
+        { signal: AbortSignal.timeout(10000) }
       );
 
       this.emitStatusChange("ready");
@@ -78,10 +74,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     }
   }
 
-  /**
-   * 探索の実行。
-   */
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IMahjongSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -89,8 +82,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     this.cleanupPendingTask();
     this.emitStatusChange("busy");
 
-    // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
+    const infoStream = new ReadableStream<IMahjongSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
@@ -104,26 +96,23 @@ export class YaneuraOuAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    if (Array.isArray(command)) {
-      for (const cmd of command) {
-        this.communicator?.postMessage(cmd);
-      }
-    } else {
-      this.communicator?.postMessage(command);
-    }
+    // Mortal は単一の JSON オブジェクトを受け取る。
+    // parser.createSearchCommand は既に文字列を返している想定。
+    const cmd = Array.isArray(command) ? command[0] : command;
+    const message = typeof cmd === "string" ? JSON.parse(cmd) : cmd;
+    this.communicator?.postMessage(message);
 
-    // 既存のリスナーを解除
     this.messageUnsubscriber?.();
 
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
-      if (typeof data !== "string") return;
-
-      const info = this.parser.parseInfo(data);
+      // 2026 Best Practice: オブジェクトを直接処理し、不要な文字列化を避ける。
+      // Parser 側もオブジェクトを受け入れられるように後ほど微調整。
+      const info = this.parser.parseInfo(data as any); // パーサーの修正後にキャストを削除予定
       if (info) {
         this.infoController?.enqueue(info);
       }
 
-      const result = this.parser.parseResult(data);
+      const result = this.parser.parseResult(data as any);
       if (result) {
         this.pendingResolve?.(result);
         this.cleanupPendingTask();
@@ -139,15 +128,12 @@ export class YaneuraOuAdapter extends BaseAdapter<
 
   async stop(): Promise<void> {
     this.cleanupPendingTask("Search aborted");
-    if (!this.communicator) {
-      console.warn(`[${this.id}] Cannot stop: Engine is not loaded.`);
-      return;
-    }
-    this.communicator.postMessage(this.parser.createStopCommand());
+    if (!this.communicator) return;
+    this.communicator.postMessage({ type: "stop" });
   }
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
-    this.communicator?.postMessage(this.parser.createOptionCommand(name, value));
+    this.communicator?.postMessage({ type: "setoption", name, value });
   }
 
   async dispose(): Promise<void> {
@@ -169,20 +155,14 @@ export class YaneuraOuAdapter extends BaseAdapter<
     if (reason) {
       this.pendingReject?.(new Error(reason));
     }
-    
     this.pendingResolve = null;
     this.pendingReject = null;
 
     if (this.infoController) {
-      try {
-        this.infoController.close();
-      } catch {
-        // すでにクローズされている場合は無視
-      }
+      try { this.infoController.close(); } catch {}
       this.infoController = null;
     }
 
-    // 探索終了後に ready 状態に戻す (dispose 中は除外)
     if (this._status === "busy" && !skipReadyTransition) {
       this.emitStatusChange("ready");
     }

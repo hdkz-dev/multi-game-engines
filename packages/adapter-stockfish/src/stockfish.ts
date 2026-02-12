@@ -147,6 +147,10 @@ export class StockfishAdapter extends BaseAdapter<
     this.communicator.postMessage(this.parser.createStopCommand());
   }
 
+  protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
+    this.communicator?.postMessage(this.parser.createOptionCommand(name, value));
+  }
+
   async dispose(): Promise<void> {
     this.cleanupPendingTask("Adapter disposed", true);
     this.messageUnsubscriber?.();

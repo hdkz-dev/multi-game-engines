@@ -120,4 +120,8 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
   createStopCommand(): string {
     return "stop";
   }
+
+  createOptionCommand(name: string, value: string | number | boolean): string {
+    return `setoption name ${name} value ${value}`;
+  }
 }

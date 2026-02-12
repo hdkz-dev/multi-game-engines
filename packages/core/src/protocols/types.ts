@@ -11,10 +11,10 @@ export interface IProtocolParser<
   T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult
 > {
-  /** 文字列またはバイナリから思考状況を解析 */
-  parseInfo(data: string | Uint8Array): T_INFO | null;
-  /** 文字列またはバイナリから最終結果を解析 */
-  parseResult(data: string | Uint8Array): T_RESULT | null;
+  /** 文字列、バイナリ、または構造化オブジェクトから思考状況を解析 */
+  parseInfo(data: string | Uint8Array | unknown): T_INFO | null;
+  /** 文字列、バイナリ、または構造化オブジェクトから最終結果を解析 */
+  parseResult(data: string | Uint8Array | unknown): T_RESULT | null;
   /** コマンドを生成。複数のコマンドを順次送信する場合は配列を返却。 */
   createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array;
   createStopCommand(): string | Uint8Array;

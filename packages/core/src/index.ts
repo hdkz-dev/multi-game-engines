@@ -14,7 +14,7 @@ export { BaseAdapter } from "./adapters";
 export { WorkerCommunicator } from "./workers";
 
 // プロトコルパーサー
-export { UCIParser, USIParser } from "./protocols";
+export { UCIParser, USIParser, GTPParser, EdaxParser, MahjongJSONParser } from "./protocols";
 
 // ユーティリティ (必要に応じて)
 export { CapabilityDetector, SecurityAdvisor } from "./capabilities";

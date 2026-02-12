@@ -117,7 +117,25 @@ export class EngineBridge implements IEngineBridge {
 
   /**
    * 指定された ID のエンジン Facade インスタンスを取得します。
+   * 2026 Best Practice: EngineRegistry に基づく自動型推論。
    */
+  getEngine<K extends keyof import("../types").EngineRegistry>(
+    id: K,
+    strategy?: EngineLoadingStrategy
+  ): IEngine<
+    import("../types").EngineRegistry[K]["options"],
+    import("../types").EngineRegistry[K]["info"],
+    import("../types").EngineRegistry[K]["result"]
+  >;
+  /**
+   * カスタムエンジンを取得します（ジェネリクス指定が必要）。
+   */
+  getEngine<
+    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+    T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+  >(id: string, strategy?: EngineLoadingStrategy): IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+
   getEngine<
     T_OPTIONS extends IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo,
@@ -143,7 +161,6 @@ export class EngineBridge implements IEngineBridge {
     );
 
     // Facade Design Pattern: 内部のアダプターとミドルウェアを隠蔽し、型安全なインターフェースを提供。
-    // Internal casts are required to map the heterogeneous storage back to specific generics.
     const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
       adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
       sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[]
@@ -152,7 +169,6 @@ export class EngineBridge implements IEngineBridge {
     facade.loadingStrategy = strategy;
     this.facades.set(id, facade as unknown as EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
-    // 先行ロードの実行
     if (strategy === "eager") {
       void facade.load();
     }

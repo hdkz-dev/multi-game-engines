@@ -1,74 +1,88 @@
 import {
   BaseAdapter,
-  IBaseSearchInfo,
   IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  USIParser,
+  GTPParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  ISHOGISearchOptions,
+  IGOSearchOptions,
+  IGOSearchInfo,
 } from "@multi-game-engines/core";
 
 /**
- * やねうら王 (WASM) 用のアダプター実装。
+ * KataGo (WASM/WebGPU) 用のアダプター実装。
+ * 巨大なウェイトファイルの並列ロードと WebGPU 加速に対応。
  */
-export class YaneuraOuAdapter extends BaseAdapter<
-  ISHOGISearchOptions,
-  IBaseSearchInfo,
+export class KataGoAdapter extends BaseAdapter<
+  IGOSearchOptions,
+  IGOSearchInfo,
   IBaseSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
-  readonly parser = new USIParser();
-  private blobUrl: string | null = null;
+  readonly parser = new GTPParser();
+  private blobUrls: string[] = [];
   private activeLoader: IEngineLoader | null = null;
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
   private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
-  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
+  private infoController: ReadableStreamDefaultController<IGOSearchInfo> | null = null;
 
-  readonly id = "yaneuraou";
-  readonly name = "YaneuraOu";
-  readonly version = "7.5.0";
+  readonly id = "katago";
+  readonly name = "KataGo";
+  readonly version = "1.15.0";
 
   readonly license: ILicenseInfo = {
-    name: "GPL-3.0-only",
-    url: "https://github.com/yaneurao/YaneuraOu/blob/master/LICENSE",
+    name: "MIT",
+    url: "https://github.com/lightvector/KataGo/blob/master/LICENSE",
   };
 
+  /**
+   * 2026 Best Practice: マルチリソース構成。
+   * WASM バイナリと NN ウェイトを分離して定義。
+   */
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
-      // NOTE: This URL is for a future release (Phase 3).
-      url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/yaneuraou-wasm@0.1.0/dist/yaneuraou.js",
+      url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/katago-wasm@0.1.0/dist/katago.js",
       type: "worker-js",
-      // Security: Valid SRI format for validation to pass during development.
-      // MUST be updated to the actual binary hash upon publication.
-      sri: "sha384-DummyHashForValidationToPassDuringDevelopment1234567890abcdefghij", 
+      sri: "sha384-DummyHashForValidationToPassDuringDevelopment1234567890abcdefghij",
       size: 0,
     },
+    weights: {
+      url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/katago-wasm@0.1.0/dist/katago.bin.gz",
+      type: "wasm", // 汎用バイナリとして扱う
+      sri: "sha384-DummyHashForWeightsValidationToPassDuringDevelopment1234567890",
+      size: 0,
+    }
   };
 
   /**
    * エンジンのロードと初期化。
+   * WASM とウェイトファイルを並列でロード。
    */
   async load(loader: IEngineLoader): Promise<void> {
     this.activeLoader = loader;
     this.emitStatusChange("loading");
 
     try {
-      this.blobUrl = await loader.loadResource(this.id, this.sources.main);
-      this.communicator = new WorkerCommunicator(this.blobUrl);
+      // 2026 Best Practice: アトミック・マルチロードによる一貫性の保証
+      const resources = await loader.loadResources(this.id, this.sources);
+      const mainBlob = resources.main;
+      const weightsBlob = resources.weights;
 
-      // USI プロトコルの初期化
-      this.communicator.postMessage("usi");
+      this.blobUrls = Object.values(resources);
+      
+      // Worker の初期化
+      this.communicator = new WorkerCommunicator(mainBlob);
+      this.communicator.postMessage({ type: "init", weights: weightsBlob });
       
       await this.communicator.expectMessage<string>(
-        (data) => data === "usiok",
-        { signal: AbortSignal.timeout(5000) }
+        (data) => (typeof data === "object" && (data as any).type === "ready") || data === "ready",
+        { signal: AbortSignal.timeout(10000) }
       );
 
       this.emitStatusChange("ready");
@@ -78,10 +92,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     }
   }
 
-  /**
-   * 探索の実行。
-   */
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IGOSearchInfo, IBaseSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -89,8 +100,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     this.cleanupPendingTask();
     this.emitStatusChange("busy");
 
-    // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
+    const infoStream = new ReadableStream<IGOSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
@@ -112,7 +122,6 @@ export class YaneuraOuAdapter extends BaseAdapter<
       this.communicator?.postMessage(command);
     }
 
-    // 既存のリスナーを解除
     this.messageUnsubscriber?.();
 
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
@@ -139,10 +148,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
 
   async stop(): Promise<void> {
     this.cleanupPendingTask("Search aborted");
-    if (!this.communicator) {
-      console.warn(`[${this.id}] Cannot stop: Engine is not loaded.`);
-      return;
-    }
+    if (!this.communicator) return;
     this.communicator.postMessage(this.parser.createStopCommand());
   }
 
@@ -157,10 +163,12 @@ export class YaneuraOuAdapter extends BaseAdapter<
     this.communicator?.terminate();
     this.communicator = null;
     
-    if (this.blobUrl && this.activeLoader) {
-      this.activeLoader.revoke(this.blobUrl);
+    if (this.activeLoader) {
+      for (const url of this.blobUrls) {
+        this.activeLoader.revoke(url);
+      }
     }
-    this.blobUrl = null;
+    this.blobUrls = [];
     this.emitStatusChange("terminated");
     this.clearListeners();
   }
@@ -169,20 +177,14 @@ export class YaneuraOuAdapter extends BaseAdapter<
     if (reason) {
       this.pendingReject?.(new Error(reason));
     }
-    
     this.pendingResolve = null;
     this.pendingReject = null;
 
     if (this.infoController) {
-      try {
-        this.infoController.close();
-      } catch {
-        // すでにクローズされている場合は無視
-      }
+      try { this.infoController.close(); } catch {}
       this.infoController = null;
     }
 
-    // 探索終了後に ready 状態に戻す (dispose 中は除外)
     if (this._status === "busy" && !skipReadyTransition) {
       this.emitStatusChange("ready");
     }

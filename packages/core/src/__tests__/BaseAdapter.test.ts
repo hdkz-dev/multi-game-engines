@@ -34,6 +34,8 @@ class TestAdapter extends BaseAdapter<
     return {} as ISearchTask<IBaseSearchInfo, IBaseSearchResult>;
   }
 
+  protected async sendOptionToWorker(): Promise<void> {}
+
   async dispose(): Promise<void> {
     this.emitStatusChange("terminated");
   }

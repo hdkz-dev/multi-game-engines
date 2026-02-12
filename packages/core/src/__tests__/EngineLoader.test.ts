@@ -60,7 +60,7 @@ describe("EngineLoader", () => {
     const loader = new EngineLoader(mockStorage);
     const configWithoutSRI = { ...mockConfig, sri: "" };
 
-    await expect(loader.loadResource("test", configWithoutSRI)).rejects.toThrow(/SRI hash is required/);
+    await expect(loader.loadResource("test", configWithoutSRI)).rejects.toThrow(/SRI required/);
   });
 
   it("should throw EngineError if network fetch fails", async () => {
@@ -88,5 +88,21 @@ describe("EngineLoader", () => {
     await loader.loadResource("test-engine", mockConfig);
     
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(url1);
+  });
+
+  it("should support loading multiple resources atomically via loadResources", async () => {
+    vi.mocked(mockStorage.get).mockResolvedValue(new ArrayBuffer(8));
+    const loader = new EngineLoader(mockStorage);
+    
+    const configs = {
+      main: mockConfig,
+      extra: { ...mockConfig, url: "https://extra.com", sri: "sha256-another==" }
+    };
+
+    const urls = await loader.loadResources("test-engine", configs);
+    
+    expect(urls.main).toBe("blob:test");
+    expect(urls.extra).toBe("blob:test");
+    expect(mockStorage.get).toHaveBeenCalledTimes(2);
   });
 });

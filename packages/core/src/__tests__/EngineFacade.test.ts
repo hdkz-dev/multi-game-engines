@@ -23,6 +23,7 @@ describe("EngineFacade", () => {
     parser: {
       createSearchCommand: vi.fn().mockReturnValue("go"),
       createStopCommand: vi.fn().mockReturnValue("stop"),
+      createOptionCommand: vi.fn().mockReturnValue("setoption"),
     },
     searchRaw: vi.fn().mockImplementation(() => ({
       info: (async function* () { yield { depth: 1, score: 10 } as IBaseSearchInfo; })(),
@@ -30,6 +31,7 @@ describe("EngineFacade", () => {
       stop: vi.fn().mockResolvedValue(undefined),
     })),
     load: vi.fn().mockResolvedValue(undefined),
+    setOption: vi.fn().mockResolvedValue(undefined),
     dispose: vi.fn().mockResolvedValue(undefined),
     onStatusChange: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),

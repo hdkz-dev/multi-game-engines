@@ -233,6 +233,11 @@ export class EngineFacade<
     }
   }
 
+  async setOption(name: string, value: string | number | boolean): Promise<void> {
+    if (this.isDisposed) throw new Error("Facade is disposed");
+    await this.adapter.setOption(name, value);
+  }
+
   async dispose(): Promise<void> {
     if (this.isDisposed) return;
     this.isDisposed = true;

@@ -1,0 +1,57 @@
+{
+  "name": "@multi-game-engines/adapter-katago",
+  "version": "0.1.0",
+  "description": "KataGo (WASM/WebGPU) adapter for Multi-Game Engines bridge.",
+  "license": "MIT",
+  "author": "multi-game-engines contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/adapter-katago"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "go",
+    "baduk",
+    "katago",
+    "engine",
+    "gtp",
+    "wasm",
+    "webgpu",
+    "multi-game-engines"
+  ],
+  "peerDependencies": {
+    "@multi-game-engines/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsup": "^8.5.1",
+    "vitest": "^4.0.18",
+    "eslint": "^10.0.0",
+    "@multi-game-engines/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm && tsc --emitDeclarationOnly",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

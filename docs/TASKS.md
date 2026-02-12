@@ -26,6 +26,8 @@
 
 ## 🔥 フェーズ 3: 第2段階・究極の最適化 (検討中)
 
-- [ ] **Multi-Runtime Bridge**: Node.js Native / WASM 自動切り替え。
-- [ ] **eval-data 配信**: 巨大な評価関数ファイルの分割ダウンロードと SRI 管理。
-- [ ] **WebNN / WebGPU**: NNUE モデルの演算加速。
+- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
+- [ ] **Cloud Engine Relay**: 低スペック端末向けに外部 GPU サーバーへ演算を委託。
+- [ ] **Engine Registry**: SRI ハッシュとバージョンを中央管理し、URL 指定を不要にする。
+- [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
+- [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。

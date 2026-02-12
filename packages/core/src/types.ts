@@ -10,8 +10,21 @@
 export type FEN = string & { readonly __brand: "FEN" };
 /** 将棋用の局面表記 (Shogi Forsyth-Edwards Notation) */
 export type SFEN = string & { readonly __brand: "SFEN" };
-/** 指し手表記 (例: e2e4, 7g7f) */
+/** 囲碁用の局面表記 (Smart Game Format) */
+export type SGF = string & { readonly __brand: "SGF" };
+/** オセロ用の局面表記 (64文字の文字列等) */
+export type OthelloBoard = string & { readonly __brand: "OthelloBoard" };
+/** 麻雀の牌表記 (1m, 5p, 9s, nan, chun 等) */
+export type MahjongTile = string & { readonly __brand: "MahjongTile" };
+/** 指し手表記 (例: e2e4, 7g7f, q16, c3, 1m) */
 export type Move = string & { readonly __brand: "Move" };
+
+/** 麻雀の鳴き情報 */
+export interface IMahjongMeld {
+  type: "chi" | "pon" | "kan" | "kankan";
+  tiles: MahjongTile[];
+  fromPlayer?: number;
+}
 
 /** エンジンの動作状態 */
 export type EngineStatus = "uninitialized" | "loading" | "ready" | "busy" | "error" | "terminated";
@@ -103,6 +116,20 @@ export interface ISHOGISearchOptions extends IBaseSearchOptions {
   byoyomi?: number;
 }
 
+/** 囲碁用の探索オプション拡張 */
+export interface IGOSearchOptions extends IBaseSearchOptions {
+  /** 局面表記 (SGF) */
+  sgf?: SGF;
+  /** 黒番の持ち時間 (ミリ秒) */
+  btime?: number;
+  /** 白番の持ち時間 (ミリ秒) */
+  wtime?: number;
+  /** 秒読み (ミリ秒) */
+  byoyomi?: number;
+  /** 最大探索数 (Visits) */
+  maxVisits?: number;
+}
+
 /** 思考状況の基本情報 */
 export interface IBaseSearchInfo {
   /** 現在の探索深さ */
@@ -117,6 +144,57 @@ export interface IBaseSearchInfo {
   time?: number;
   /** エンジンからの生のメッセージ */
   raw?: string;
+}
+
+/** 囲碁用の思考情報拡張 */
+export interface IGOSearchInfo extends IBaseSearchInfo {
+  /** 勝率 (0.0 - 1.0) */
+  winrate?: number;
+  /** 探索数 (Visits) */
+  visits?: number;
+  /** 盤面支配率 (19x19 等のフラット配列) */
+  ownerMap?: number[];
+}
+
+/** オセロ用の探索オプション拡張 */
+export interface IOthelloSearchOptions extends IBaseSearchOptions {
+  /** 局面表記 (64文字文字列) */
+  board?: OthelloBoard;
+  /** 手番 (true: 黒, false: 白) */
+  isBlack?: boolean;
+}
+
+/** オセロ用の思考情報拡張 */
+export interface IOthelloSearchInfo extends IBaseSearchInfo {
+  /** 評価値の確信度 (中盤評価 or 終盤完全読み) */
+  isExact?: boolean;
+}
+
+/** 麻雀用の探索オプション拡張 */
+export interface IMahjongSearchOptions extends IBaseSearchOptions {
+  /** 手牌 (13枚または14枚) */
+  hand: MahjongTile[];
+  /** 鳴き副露 */
+  melds?: IMahjongMeld[];
+  /** 河 (捨て牌) */
+  discards?: MahjongTile[][];
+  /** ドラ */
+  dora?: MahjongTile[];
+  /** 自風 / 場風 (0:東, 1:南, 2:西, 3:北) */
+  playerWind?: number;
+  prevalentWind?: number;
+  /** 立直状態 */
+  isRiichi?: boolean[];
+}
+
+/** 麻雀用の思考情報拡張 */
+export interface IMahjongSearchInfo extends IBaseSearchInfo {
+  /** 打牌候補ごとの期待値 (Expected Value) */
+  evaluations?: Array<{
+    move: Move;
+    ev: number;
+    prob?: number; // 選択確率
+  }>;
 }
 
 /** 探索の最終結果 */
@@ -171,6 +249,19 @@ export interface ISearchTask<T_INFO, T_RESULT> {
   stop(): Promise<void>;
 }
 
+/**
+ * エンジンと型のマッピング定義。
+ * 新しいエンジンを追加する際にここを拡張することで、
+ * EngineBridge からの型推論が自動的に行われます。
+ */
+export interface EngineRegistry {
+  stockfish: { options: IBaseSearchOptions; info: IBaseSearchInfo; result: IBaseSearchResult };
+  yaneuraou: { options: ISHOGISearchOptions; info: IBaseSearchInfo; result: IBaseSearchResult };
+  katago: { options: IGOSearchOptions; info: IGOSearchInfo; result: IBaseSearchResult };
+  edax: { options: IOthelloSearchOptions; info: IOthelloSearchInfo; result: IBaseSearchResult };
+  mortal: { options: IMahjongSearchOptions; info: IMahjongSearchInfo; result: IBaseSearchResult };
+}
+
 /** 利用者がエンジンを操作するためのメインインターフェース */
 export interface IEngine<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
@@ -202,6 +293,11 @@ export interface IEngine<
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void;
   /** 現在実行中の探索を停止します。 */
   stop(): Promise<void>;
+  /** 
+   * エンジン固有のオプションを設定します。
+   * 2026 Best Practice: 動的な設定変更（Threads, Hash, Skill Level 等）。
+   */
+  setOption(name: string, value: string | number | boolean): Promise<void>;
   /** リソースを解放し、破棄します。 */
   dispose(): Promise<void>;
 }
@@ -223,6 +319,7 @@ export interface IEngineAdapter<
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
   onTelemetry?(callback: (event: ITelemetryEvent) => void): () => void;
+  setOption(name: string, value: string | number | boolean): Promise<void>;
   dispose(): Promise<void>;
 }
 
@@ -236,12 +333,19 @@ export interface IProtocolParser<T_OPTIONS, T_INFO, T_RESULT> {
   createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array;
   /** 探索停止コマンドを生成します */
   createStopCommand(): string | Uint8Array;
+  /** オプション設定コマンドを生成します */
+  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array;
 }
 
 /** リソースローダー。バイナリの取得とキャッシュを管理します。 */
 export interface IEngineLoader {
   /** 指定されたリソースをロードし、利用可能な Blob URL を返します。 */
   loadResource(engineId: string, config: IEngineSourceConfig): Promise<string>;
+  /** 
+   * 複数のリソースを一括でロードします。 
+   * 2026 Best Practice: アトミックな依存関係解決。
+   */
+  loadResources(engineId: string, configs: Record<string, IEngineSourceConfig>): Promise<Record<string, string>>;
   /** 生成された URL を解放します。 */
   revoke(url: string): void;
 }

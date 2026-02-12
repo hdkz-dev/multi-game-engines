@@ -54,6 +54,7 @@ describe("StockfishAdapter", () => {
     adapter = new StockfishAdapter();
     mockLoader = {
       loadResource: vi.fn().mockResolvedValue("blob:mock-url"),
+      loadResources: vi.fn().mockResolvedValue({ main: "blob:mock-url" }),
       revoke: vi.fn(),
     };
   });

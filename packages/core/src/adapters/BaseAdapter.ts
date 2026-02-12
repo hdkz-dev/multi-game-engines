@@ -36,6 +36,20 @@ export abstract class BaseAdapter<
 
   abstract load(loader?: IEngineLoader): Promise<void>;
   abstract searchRaw(command: string | string[] | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
+  
+  /**
+   * エンジンオプションを設定します。
+   * エンジンがロードされていない場合はエラーを投げます。
+   * 注意: 探索中 (busy) のオプション変更はエンジンによって挙動が異なります。
+   */
+  async setOption(name: string, value: string | number | boolean): Promise<void> {
+    if (this._status !== "ready" && this._status !== "busy") {
+      throw new Error(`Cannot set option: Engine is not ready (current status: ${this._status})`);
+    }
+    await this.sendOptionToWorker(name, value);
+  }
+
+  protected abstract sendOptionToWorker(name: string, value: string | number | boolean): Promise<void>;
 
   onStatusChange(callback: (status: EngineStatus) => void): () => void {
     this.statusListeners.add(callback);
