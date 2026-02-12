@@ -41,7 +41,7 @@ describe("USIParser", () => {
 
   it("時間制御コマンドを正しく生成できること (depthなし)", () => {
     const options = {
-      sfen: "startpos" as unknown as SFEN,
+      sfen: "startpos" as SFEN,
       btime: 1000,
       wtime: 2000,
       byoyomi: 100,

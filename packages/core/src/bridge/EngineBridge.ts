@@ -169,4 +169,26 @@ export class EngineBridge implements IEngineBridge {
     this.telemetryListeners.add(callback);
     return () => this.telemetryListeners.delete(callback);
   }
+
+  /**
+   * ブリッジ全体を破棄し、全てのアダプターのリソースを解放します。
+   */
+  async dispose(): Promise<void> {
+    const disposePromises: Promise<void>[] = [];
+    for (const adapterId of this.adapters.keys()) {
+      const adapter = this.adapters.get(adapterId);
+      if (adapter) {
+        disposePromises.push(adapter.dispose());
+      }
+      this.unregisterAdapter(adapterId);
+    }
+    await Promise.all(disposePromises);
+    
+    this.adapters.clear();
+    this.facades.clear();
+    this.statusListeners.clear();
+    this.progressListeners.clear();
+    this.telemetryListeners.clear();
+    this.loaderPromise = null;
+  }
 }

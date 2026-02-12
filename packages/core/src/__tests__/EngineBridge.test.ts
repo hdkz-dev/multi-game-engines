@@ -91,4 +91,15 @@ describe("EngineBridge", () => {
     // ミドルウェアが適切な引数で呼ばれたか確認
     expect(middleware.onCommand).toHaveBeenCalledWith("go", expect.anything());
   });
+
+  it("dispose() を呼び出すと全てのアダプターが破棄されること", async () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    const disposeSpy = vi.spyOn(adapter, "dispose");
+
+    bridge.registerAdapter(adapter);
+    await bridge.dispose();
+
+    expect(disposeSpy).toHaveBeenCalled();
+  });
 });

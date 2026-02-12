@@ -1,1 +1,1 @@
-export * from "./stockfish.js";
+export { StockfishAdapter } from "./stockfish.js";
