@@ -55,4 +55,18 @@ describe("EngineLoader", () => {
     expect(globalThis.fetch).toHaveBeenCalled();
     expect(mockStorage.set).toHaveBeenCalled();
   });
+
+  it("should throw EngineError if SRI is missing", async () => {
+    const loader = new EngineLoader(mockStorage);
+    const configWithoutSRI = { ...mockConfig, sri: "" };
+
+    await expect(loader.loadResource("test", configWithoutSRI)).rejects.toThrow(/SRI hash is required/);
+  });
+
+  it("should throw EngineError if network fetch fails", async () => {
+    vi.mocked(globalThis.fetch).mockRejectedValueOnce(new Error("Network fail"));
+    const loader = new EngineLoader(mockStorage);
+
+    await expect(loader.loadResource("test", mockConfig)).rejects.toThrow(/Network error/);
+  });
 });

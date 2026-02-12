@@ -71,4 +71,22 @@ describe("EngineFacade", () => {
     expect(adapter.searchRaw).toHaveBeenCalledWith("go_modified");
     expect(result.bestMove).toBe("e2e4_modified");
   });
+
+  it("onInfo が検索を跨いで継続的に動作すること (Persistent Listener)", async () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, []);
+    const infoSpy = vi.fn();
+
+    // 購読を開始
+    facade.onInfo(infoSpy);
+
+    // 1回目の探索
+    await facade.search({ fen: "pos1" as FEN });
+    
+    // 2回目の探索
+    await facade.search({ fen: "pos2" as FEN });
+
+    // 両方の探索から info が届いているはず (mock では各1回)
+    expect(infoSpy).toHaveBeenCalledTimes(2);
+  });
 });
