@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { MahjongJSONParser } from "../MahjongJSONParser.js";
-import { Move } from "@multi-game-engines/core";
+import { MahjongJSONParser, Move } from "../MahjongJSONParser.js";
 
 describe("MahjongJSONParser", () => {
   const parser = new MahjongJSONParser();

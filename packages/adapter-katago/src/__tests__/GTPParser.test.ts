@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { GTPParser } from "../GTPParser.js";
-import { Move } from "@multi-game-engines/core";
+import { GTPParser, Move } from "../GTPParser.js";
 
 describe("GTPParser", () => {
   const parser = new GTPParser();

@@ -77,7 +77,7 @@ export class StockfishAdapter extends BaseAdapter<
   /**
    * 探索の実行。
    */
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IChessSearchInfo, IChessSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -86,7 +86,7 @@ export class StockfishAdapter extends BaseAdapter<
     this.emitStatusChange("busy");
 
     // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
+    const infoStream = new ReadableStream<IChessSearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
@@ -96,7 +96,7 @@ export class StockfishAdapter extends BaseAdapter<
       },
     });
 
-    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+    const resultPromise = new Promise<IChessSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });

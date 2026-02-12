@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MortalAdapter } from "../mortal.js";
-import { IEngineLoader, EngineStatus, MahjongTile, Move, IMahjongSearchOptions, IMahjongSearchInfo } from "@multi-game-engines/core";
+import { IEngineLoader, EngineStatus } from "@multi-game-engines/core";
+import { MahjongTile, Move, IMahjongSearchOptions, IMahjongSearchInfo } from "../MahjongJSONParser.js";
 
 describe("MortalAdapter", () => {
   let currentMockWorker: MockWorker | null = null;

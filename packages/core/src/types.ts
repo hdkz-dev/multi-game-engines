@@ -192,7 +192,7 @@ export interface IFileStorage {
   clear(): Promise<void>;
 }
 
-/** ミドルウェアコンテキスト */
+/** ミドルウェアがアクセスできるコンテキスト情報 */
 export interface IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
   readonly engineId: string;
   readonly options: T_OPTIONS;
@@ -205,9 +205,17 @@ export enum MiddlewarePriority {
   CRITICAL = 1000,
 }
 
-export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown> {
+/** 
+ * ミドルウェアの定義。
+ * 2026 Best Practice: EngineRegistry を用いた高度な型推論をサポート。
+ */
+export interface IMiddleware<
+  T_INFO = unknown, 
+  T_RESULT = unknown,
+  T_OPTIONS = IBaseSearchOptions
+> {
   priority?: MiddlewarePriority;
-  onCommand?(command: string | string[] | Uint8Array, context: IMiddlewareContext): string | string[] | Uint8Array | Promise<string | string[] | Uint8Array>;
-  onInfo?(info: T_INFO, context: IMiddlewareContext): T_INFO | Promise<T_INFO>;
-  onResult?(result: T_RESULT, context: IMiddlewareContext): T_RESULT | Promise<T_RESULT>;
+  onCommand?(command: string | string[] | Uint8Array, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | Promise<string | string[] | Uint8Array>;
+  onInfo?(info: T_INFO, context: IMiddlewareContext<T_OPTIONS>): T_INFO | Promise<T_INFO>;
+  onResult?(result: T_RESULT, context: IMiddlewareContext<T_OPTIONS>): T_RESULT | Promise<T_RESULT>;
 }

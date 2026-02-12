@@ -79,7 +79,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
   /**
    * 探索の実行。
    */
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -88,7 +88,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     this.emitStatusChange("busy");
 
     // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
-    const infoStream = new ReadableStream<IBaseSearchInfo>({
+    const infoStream = new ReadableStream<ISHOGISearchInfo>({
       start: (controller) => {
         this.infoController = controller;
       },
@@ -97,7 +97,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
       },
     });
 
-    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+    const resultPromise = new Promise<ISHOGISearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });

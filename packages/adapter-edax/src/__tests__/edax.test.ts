@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EdaxAdapter } from "../edax.js";
-import { IEngineLoader, EngineStatus, Move, IOthelloSearchInfo } from "@multi-game-engines/core";
+import { IEngineLoader, EngineStatus } from "@multi-game-engines/core";
+import { Move, IOthelloSearchInfo } from "../EdaxParser.js";
 
 describe("EdaxAdapter", () => {
   let currentMockWorker: MockWorker | null = null;

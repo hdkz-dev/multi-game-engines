@@ -45,7 +45,7 @@ export class EngineFacade<
 
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    private readonly middlewares: IMiddleware<T_INFO, T_RESULT>[] = []
+    private readonly middlewares: IMiddleware<T_INFO, T_RESULT, T_OPTIONS>[] = []
   ) {}
 
   get id(): string { return this.adapter.id; }

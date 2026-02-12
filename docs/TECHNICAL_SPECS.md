@@ -2,15 +2,19 @@
 
 ## 1. コア型定義 (Core Types)
 
-### 1-1. Branded Types
-ドメイン固有の文字列を保護するため、Branded Types を採用しています。
+Core パッケージは、特定のゲーム（チェス、将棋等）に依存しない抽象定義のみを提供します。
+
+### 1-1. 抽象基盤定義
+- **Brand<T, K>**: 公称型 (Branded Types) を生成するための共通ヘルパー。
+- **EngineStatus**: エンジンのライフサイクル状態。
+- **EngineErrorCode**: 標準化されたエラーコード。
+
+### 1-2. アダプターによるドメイン拡張
+各ゲーム固有の型（`FEN`, `SFEN`, `Move` 等）は、各アダプターパッケージで個別に定義されます。これにより Core の純粋性が保たれます。
 ```typescript
-/** チェス用の局面表記 */
-type FEN = string & { readonly __brand: "FEN" };
-/** 将棋用の局面表記 */
-type SFEN = string & { readonly __brand: "SFEN" };
-/** 指し手表記 (e2e4, 7g7f 等) */
-type Move = string & { readonly __brand: "Move" };
+/** 各アダプターで定義される例 */
+type FEN = Brand<string, "FEN">;
+type SFEN = Brand<string, "SFEN">;
 ```
 
 ### 1-2. ロード戦略 (Loading Strategy)

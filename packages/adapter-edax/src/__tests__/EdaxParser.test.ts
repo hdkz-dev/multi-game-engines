@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { EdaxParser } from "../EdaxParser.js";
-import { Move } from "@multi-game-engines/core";
+import { EdaxParser, Move } from "../EdaxParser.js";
 
 describe("EdaxParser", () => {
   const parser = new EdaxParser();

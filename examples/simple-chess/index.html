@@ -32,6 +32,7 @@
          ここでは ESM モジュールとして記述します -->
     <script type="module">
         import { EngineBridge } from '../../packages/core/dist/index.mjs';
+        // 2026 Best Practice: アダプターパッケージから型とクラスをインポート
         import { StockfishAdapter } from '../../packages/adapter-stockfish/dist/index.js';
 
         const logEl = document.getElementById('log');
@@ -50,6 +51,7 @@
         const adapter = new StockfishAdapter();
         bridge.registerAdapter(adapter);
 
+        // bridge.getEngine('stockfish') は自動的に IChessSearchOptions 等を推論する
         const engine = bridge.getEngine('stockfish');
 
         // エンジン Facade を介したイベント購読 (2026 Best Practice)

@@ -71,7 +71,7 @@ export class MortalAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IMahjongSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IMahjongSearchInfo, IMahjongSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -88,7 +88,7 @@ export class MortalAdapter extends BaseAdapter<
       },
     });
 
-    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+    const resultPromise = new Promise<IMahjongSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });
