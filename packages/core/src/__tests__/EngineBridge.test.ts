@@ -36,9 +36,9 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
   searchRaw(_command: string | string[] | Uint8Array): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
     return {
       info: (async function* () {
-        yield { depth: 1, score: 10 } as IBaseSearchInfo;
+        yield { raw: "info depth 1 score 10" } as IBaseSearchInfo;
       })(),
-      result: Promise.resolve({ move: "e2e4" } as any),
+      result: Promise.resolve({ raw: "bestmove e2e4" } as IBaseSearchResult),
       stop: async () => {},
     };
   }

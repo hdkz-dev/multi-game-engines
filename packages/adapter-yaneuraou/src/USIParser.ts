@@ -7,6 +7,10 @@ import { ISHOGISearchOptions, SFEN, Move } from "./usi-types.js";
 
 /** 将棋用の思考情報 */
 export interface ISHOGISearchInfo extends IBaseSearchInfo {
+  depth: number;
+  score: number;
+  nps?: number;
+  time?: number;
   pv?: Move[];
 }
 

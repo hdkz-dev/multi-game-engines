@@ -10,7 +10,7 @@ describe("KataGoAdapter", () => {
     postMessage = vi.fn();
     terminate = vi.fn();
     onmessage: ((ev: { data: unknown }) => void) | null = null;
-    onerror: any = null;
+    onerror: ((ev: unknown) => void) | null = null;
     addEventListener = vi.fn();
     removeEventListener = vi.fn();
     constructor() {
@@ -28,9 +28,9 @@ describe("KataGoAdapter", () => {
   });
 
   const mockLoader: IEngineLoader = {
-    loadResource: vi.fn().mockImplementation((id, config) => Promise.resolve(`blob://${config.url}`)),
-    loadResources: vi.fn().mockImplementation((id, configs) => {
-      const results: any = {};
+    loadResource: vi.fn().mockImplementation((_id, config) => Promise.resolve(`blob://${config.url}`)),
+    loadResources: vi.fn().mockImplementation((_id, configs) => {
+      const results: Record<string, string> = {};
       for (const key in configs) {
         results[key] = `blob://${configs[key].url}`;
       }
@@ -59,18 +59,19 @@ describe("KataGoAdapter", () => {
     const adapter = new KataGoAdapter();
     // 擬似的なロード完了 (内部プロパティへのアクセスは型キャストで安全に)
     const privAdapter = adapter as unknown as { 
-      communicator: { postMessage: any; onMessage: any };
+      communicator: { postMessage: (msg: unknown) => void; onMessage: (cb: unknown) => () => void };
       _status: string;
     };
+    const postMessageSpy = vi.fn();
     privAdapter.communicator = {
-      postMessage: vi.fn(),
+      postMessage: postMessageSpy,
       onMessage: vi.fn().mockReturnValue(() => {}),
     };
     privAdapter._status = "ready";
 
-    const task = adapter.searchRaw("lz-analyze 50");
+    adapter.searchRaw("lz-analyze 50");
     expect(adapter.status).toBe("busy" as EngineStatus);
-    expect((adapter as any).communicator.postMessage).toHaveBeenCalledWith("lz-analyze 50");
+    expect(postMessageSpy).toHaveBeenCalledWith("lz-analyze 50");
   });
 
   it("破棄時に複数の Blob URL を全て解放すること", async () => {

@@ -8,10 +8,17 @@ export type Move = Brand<string, "Move">;
 /** チェス用の探索オプション (UCI標準規格) */
 export interface IChessSearchOptions extends IBaseSearchOptions {
   fen?: FEN;
+  depth?: number;
+  time?: number;
+  nodes?: number;
 }
 
 /** チェス用の思考情報 */
 export interface IChessSearchInfo extends IBaseSearchInfo {
+  depth: number;
+  score: number;
+  nps?: number;
+  time?: number;
   pv?: Move[];
 }
 

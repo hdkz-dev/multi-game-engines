@@ -2,6 +2,10 @@ import { describe, it, expect, vi } from "vitest";
 import { EngineFacade } from "../bridge/EngineFacade";
 import { IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineStatus } from "../types.js";
 
+interface IMockResult extends IBaseSearchResult {
+  move: string;
+}
+
 describe("EngineFacade Loading Strategies", () => {
   const createMockAdapter = () => {
     let status: EngineStatus = "uninitialized";
@@ -21,7 +25,7 @@ describe("EngineFacade Loading Strategies", () => {
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () {})(),
-        result: Promise.resolve({ move: "e2e4" }),
+        result: Promise.resolve({ move: "e2e4", raw: "bestmove e2e4" } as IMockResult),
         stop: vi.fn(),
       })),
       onStatusChange: vi.fn().mockImplementation((cb) => {
@@ -32,7 +36,7 @@ describe("EngineFacade Loading Strategies", () => {
       parser: {
         createSearchCommand: vi.fn().mockReturnValue("go"),
       }
-    } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+    } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IMockResult>;
   };
 
   it("Manual Strategy: should throw error if not loaded", async () => {
@@ -51,7 +55,7 @@ describe("EngineFacade Loading Strategies", () => {
     const result = await facade.search({});
     
     expect(adapter.load).toHaveBeenCalled();
-    expect((result as any).move).toBe("e2e4");
+    expect((result as IMockResult).move).toBe("e2e4");
   });
 
   it("Eager Strategy: should load immediately when set", async () => {

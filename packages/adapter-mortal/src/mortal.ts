@@ -93,23 +93,19 @@ export class MortalAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    // Mortal は単一の JSON オブジェクトを受け取る。
-    // parser.createSearchCommand は既に文字列を返している想定。
-    const cmd = Array.isArray(command) ? command[0] : command;
-    const message = typeof cmd === "string" ? JSON.parse(cmd) : cmd;
+    const message = Array.isArray(command) ? command[0] : command;
     this.communicator?.postMessage(message);
 
     this.messageUnsubscriber?.();
 
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
       // 2026 Best Practice: オブジェクトを直接処理し、不要な文字列化を避ける。
-      // Parser 側もオブジェクトを受け入れられるように後ほど微調整。
-      const info = this.parser.parseInfo(data as any); // パーサーの修正後にキャストを削除予定
+      const info = this.parser.parseInfo(data);
       if (info) {
         this.infoController?.enqueue(info);
       }
 
-      const result = this.parser.parseResult(data as any);
+      const result = this.parser.parseResult(data);
       if (result) {
         this.pendingResolve?.(result);
         this.cleanupPendingTask();

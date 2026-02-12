@@ -77,8 +77,8 @@ export class KataGoAdapter extends BaseAdapter<
       this.communicator = new WorkerCommunicator(mainBlob);
       this.communicator.postMessage({ type: "init", weights: weightsBlob });
       
-      await this.communicator.expectMessage<string>(
-        (data) => (typeof data === "object" && (data as any).type === "ready") || data === "ready",
+      await this.communicator.expectMessage<string | { type: string }>(
+        (data) => (typeof data === "object" && data !== null && (data as Record<string, unknown>).type === "ready") || data === "ready",
         { signal: AbortSignal.timeout(10000) }
       );
 
@@ -89,7 +89,7 @@ export class KataGoAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IGOSearchInfo, IGOSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IGOSearchInfo, IGOSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }

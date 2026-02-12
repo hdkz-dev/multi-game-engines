@@ -79,7 +79,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
   /**
    * 探索の実行。
    */
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }

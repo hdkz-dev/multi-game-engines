@@ -18,7 +18,8 @@
 - [x] **adapter-yaneuraou**: USI 7.5.0 対応。
 - [x] **プロトコルパーサー**: 詰みスコア変換、インジェクション対策、および `startpos` キーワード対応。
 - [x] **ユニットテスト**: 計 82 ケースの網羅的検証。
-- [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation）へ昇華。
+- [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation, Handle-based Lifecycle）へ昇華。
+- [x] **ゼロ・エニーの完遂**: Core, Adapter, Test における `any` の完全排除と `unknown` への移行。
 - [ ] **packages/ui**: エンジン状況可視化（検討窓）コンポーネント。
 - [ ] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
 

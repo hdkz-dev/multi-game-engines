@@ -57,4 +57,16 @@ describe("USIParser", () => {
     expect(cmds[0]).toBe("position startpos");
     expect(cmds[1]).toBe("go btime 1000 wtime 2000 byoyomi 100");
   });
+
+  it("should prevent USI command injection in SFEN by filtering restricted characters", () => {
+    // 改行、セミコロン、ヌル文字を含む悪意のある SFEN 文字列
+    const maliciousSfen = "startpos\nquit; \0" as SFEN;
+    const cmds = parser.createSearchCommand({ sfen: maliciousSfen });
+    
+    // 全ての不正な文字が削除されていることを確認
+    expect(cmds[0]).not.toContain("\n");
+    expect(cmds[0]).not.toContain(";");
+    expect(cmds[0]).not.toContain("\0");
+    expect(cmds[0]).toBe("position sfen startposquit ");
+  });
 });

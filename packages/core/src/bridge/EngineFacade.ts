@@ -11,6 +11,7 @@ import {
   ISearchTask,
   IMiddlewareContext,
   EngineLoadingStrategy,
+  IEngineLoader,
 } from "../types";
 
 /**
@@ -23,6 +24,8 @@ export class EngineFacade<
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
   private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
   private infoListeners = new Set<(info: T_INFO) => void>();
+  private telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
+  private loadingPromise: Promise<void> | null = null;
   /** 
    * 2026 Best Practice: Managed cleanup of listeners.
    * Tracks all subscriptions to the adapter to ensure they are cleared when the facade is disposed.
@@ -45,7 +48,10 @@ export class EngineFacade<
 
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    private readonly middlewares: IMiddleware<T_INFO, T_RESULT, T_OPTIONS>[] = []
+    private readonly middlewares: IMiddleware<T_INFO, T_RESULT, T_OPTIONS>[] = [],
+    private readonly loaderProvider?: () => Promise<IEngineLoader>,
+    /** 2026 Best Practice: アダプターの所有権管理 (true の場合のみ dispose を呼び出す) */
+    public readonly ownsAdapter: boolean = true
   ) {}
 
   get id(): string { return this.adapter.id; }
@@ -57,7 +63,18 @@ export class EngineFacade<
   }
 
   async load(): Promise<void> {
-    await this.adapter.load();
+    if (this.loadingPromise) return this.loadingPromise;
+
+    this.loadingPromise = (async () => {
+      try {
+        const loader = this.loaderProvider ? await this.loaderProvider() : undefined;
+        await this.adapter.load(loader);
+      } finally {
+        this.loadingPromise = null;
+      }
+    })();
+
+    return this.loadingPromise;
   }
 
   /**
@@ -173,7 +190,12 @@ export class EngineFacade<
       }
     } catch (err) {
       if (!this.isDisposed && this.activeTask === task) {
-        console.error("[EngineFacade] Info stream error:", err);
+        // 2026 Best Practice: Telemetry を通じたエラー通知
+        this.emitTelemetry({
+          event: "info_stream_error",
+          timestamp: Date.now(),
+          attributes: { error: String(err), engineId: this.id }
+        });
       }
     }
   }
@@ -218,12 +240,28 @@ export class EngineFacade<
    */
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
     if (this.isDisposed) return () => {};
-    const unsub = this.adapter.onTelemetry?.(callback) || (() => {});
+    this.telemetryListeners.add(callback);
+    
+    // アダプターからのイベントもこの Facade のリスナーに流す
+    const unsub = this.adapter.onTelemetry?.((event) => {
+      callback(event);
+    }) || (() => {});
+    
     this.adapterUnsubscribers.add(unsub);
     return () => {
+      this.telemetryListeners.delete(callback);
       unsub();
       this.adapterUnsubscribers.delete(unsub);
     };
+  }
+
+  /**
+   * 独自イベントを発行します。
+   */
+  private emitTelemetry(event: ITelemetryEvent): void {
+    for (const listener of this.telemetryListeners) {
+      listener(event);
+    }
   }
 
   async stop(): Promise<void> {
@@ -250,6 +288,10 @@ export class EngineFacade<
     this.infoListeners.clear();
 
     await this.stop();
-    await this.adapter.dispose();
+
+    // 2026 Best Practice: 所有権を持っている場合のみアダプターを破棄
+    if (this.ownsAdapter) {
+      await this.adapter.dispose();
+    }
   }
 }

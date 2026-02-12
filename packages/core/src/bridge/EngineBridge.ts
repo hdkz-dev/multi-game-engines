@@ -163,7 +163,9 @@ export class EngineBridge implements IEngineBridge {
     // Facade Design Pattern: 内部のアダプターとミドルウェアを隠蔽し、型安全なインターフェースを提供。
     const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
       adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-      sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[]
+      sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[],
+      () => this.getLoader(),
+      false // ownsAdapter: false (Managed by Bridge)
     );
     
     facade.loadingStrategy = strategy;

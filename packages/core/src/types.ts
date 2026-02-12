@@ -61,35 +61,27 @@ export interface ISecurityStatus {
   readonly missingHeaders?: string[];
 }
 
-/** 探索の基本オプション (全ゲーム共通) */
+/** 
+ * 探索の基本オプション (全ゲーム共通) 
+ * 2026 Best Practice: Core はプロパティを定義せず、アダプター側で完全に定義します。
+ */
 export interface IBaseSearchOptions {
-  /** 探索深さの制限 */
-  depth?: number;
-  /** 思考時間の制限 (ミリ秒) */
-  time?: number;
-  /** 探索ノード数の制限 */
-  nodes?: number;
-  /** 中断制御用のシグナル */
+  /** 中断制御用のシグナルのみ、インフラ層の機能として Core で提供します。 */
   signal?: AbortSignal;
 }
 
-/** 思考状況の基本情報 (全ゲーム共通) */
+/** 
+ * 思考状況の基本情報 (全ゲーム共通) 
+ * Core は抽象的な情報のみを保持します。
+ */
 export interface IBaseSearchInfo {
-  /** 探索深さ */
-  depth: number;
-  /** 評価値 */
-  score: number;
-  /** 1秒あたりの探索ノード数 */
-  nps?: number;
-  /** 思考経過時間 */
-  time?: number;
-  /** 生の出力 */
+  /** エンジンからの生の出力。デバッグやログ記録のために保持します。 */
   raw?: string;
 }
 
 /** 探索の最終結果 (全ゲーム共通) */
 export interface IBaseSearchResult {
-  /** 生の出力 */
+  /** エンジンからの生の最終出力 */
   raw?: string;
 }
 
@@ -123,7 +115,14 @@ export interface IEngine<
 export interface IEngineBridge {
   registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(adapter: IEngineAdapter<O, I, R>): void;
   unregisterAdapter(id: string): void;
-  getEngine<K extends keyof EngineRegistry>(id: K, strategy?: EngineLoadingStrategy): IEngine<any, any, any>;
+  getEngine<K extends keyof EngineRegistry>(
+    id: K,
+    strategy?: EngineLoadingStrategy
+  ): IEngine<
+    EngineRegistry[K]["options"],
+    EngineRegistry[K]["info"],
+    EngineRegistry[K]["result"]
+  >;
   getEngine<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(id: string, strategy?: EngineLoadingStrategy): IEngine<O, I, R>;
   use<I, R>(middleware: IMiddleware<I, R>): void;
   checkCapabilities(): Promise<ICapabilities>;
@@ -144,7 +143,7 @@ export interface IEngineAdapter<
   readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
 
   load(loader?: IEngineLoader): Promise<void>;
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<T_INFO, T_RESULT>;
+  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<T_INFO, T_RESULT>;
   setOption(name: string, value: string | number | boolean): Promise<void>;
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
@@ -156,9 +155,10 @@ export interface IEngineAdapter<
 export interface IProtocolParser<T_OPTIONS, T_INFO, T_RESULT> {
   parseInfo(data: string | Uint8Array | unknown): T_INFO | null;
   parseResult(data: string | Uint8Array | unknown): T_RESULT | null;
-  createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array;
-  createStopCommand(): string | Uint8Array;
-  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array;
+  /** 探索コマンドを作成します。2026 Best Practice: オブジェクト (unknown) を直接返せるようにし、Worker への転送効率を最大化します。 */
+  createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array | unknown;
+  createStopCommand(): string | Uint8Array | unknown;
+  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array | unknown;
 }
 
 /** 探索タスク */
@@ -192,7 +192,7 @@ export interface IFileStorage {
   clear(): Promise<void>;
 }
 
-/** ミドルウェアがアクセスできるコンテキスト情報 */
+/** ミドルウェアコンテキスト */
 export interface IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
   readonly engineId: string;
   readonly options: T_OPTIONS;
@@ -205,17 +205,9 @@ export enum MiddlewarePriority {
   CRITICAL = 1000,
 }
 
-/** 
- * ミドルウェアの定義。
- * 2026 Best Practice: EngineRegistry を用いた高度な型推論をサポート。
- */
-export interface IMiddleware<
-  T_INFO = unknown, 
-  T_RESULT = unknown,
-  T_OPTIONS = IBaseSearchOptions
-> {
+export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown, T_OPTIONS = IBaseSearchOptions> {
   priority?: MiddlewarePriority;
-  onCommand?(command: string | string[] | Uint8Array, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | Promise<string | string[] | Uint8Array>;
+  onCommand?(command: string | string[] | Uint8Array | unknown, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | unknown | Promise<string | string[] | Uint8Array | unknown>;
   onInfo?(info: T_INFO, context: IMiddlewareContext<T_OPTIONS>): T_INFO | Promise<T_INFO>;
   onResult?(result: T_RESULT, context: IMiddlewareContext<T_OPTIONS>): T_RESULT | Promise<T_RESULT>;
 }

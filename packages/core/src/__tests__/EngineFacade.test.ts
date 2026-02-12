@@ -9,6 +9,10 @@ import {
   IEngineAdapter
 } from "../types.js";
 
+interface IMockResult extends IBaseSearchResult {
+  move: string;
+}
+
 /**
  * EngineFacade の結合テスト。
  */
@@ -24,8 +28,8 @@ describe("EngineFacade", () => {
       createOptionCommand: vi.fn().mockReturnValue("setoption"),
     },
     searchRaw: vi.fn().mockImplementation(() => ({
-      info: (async function* () { yield { depth: 1, score: 10 } as IBaseSearchInfo; })(),
-      result: new Promise((resolve) => setTimeout(() => resolve({ move: "e2e4" } as any), 50)),
+      info: (async function* () { yield { raw: "info depth 1" } as IBaseSearchInfo; })(),
+      result: new Promise((resolve) => setTimeout(() => resolve({ move: "e2e4", raw: "bestmove e2e4" } as IMockResult), 50)),
       stop: vi.fn().mockResolvedValue(undefined),
     })),
     load: vi.fn().mockResolvedValue(undefined),
@@ -34,7 +38,7 @@ describe("EngineFacade", () => {
     onStatusChange: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),
     onTelemetry: vi.fn().mockReturnValue(() => {}),
-  } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+  } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IMockResult>);
 
   it("探索リクエストが連続した場合、前のタスクを自動的に停止すること", async () => {
     const adapter = createMockAdapter();
@@ -47,7 +51,7 @@ describe("EngineFacade", () => {
     // searchRaw が呼ばれるまで少し待機
     await vi.waitFor(() => expect(adapter.searchRaw).toHaveBeenCalled());
     
-    const task1 = (vi.mocked(adapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IBaseSearchResult>);
+    const task1 = (vi.mocked(adapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IMockResult>);
     const stopSpy = vi.mocked(task1.stop);
 
     // 2回目の探索を実行。これにより 1 回目が停止されるはず。
@@ -59,7 +63,7 @@ describe("EngineFacade", () => {
 
   it("ミドルウェアが正しい順序でコマンドと結果を加工すること", async () => {
     const adapter = createMockAdapter();
-    const middleware: IMiddleware<IBaseSearchInfo, any> = {
+    const middleware: IMiddleware<IBaseSearchInfo, IMockResult> = {
       onCommand: async (cmd) => `${cmd}_modified`,
       onResult: async (res) => ({ ...res, move: `${res.move}_modified` }),
     };
@@ -70,7 +74,7 @@ describe("EngineFacade", () => {
     const result = await facade.search(options);
 
     expect(adapter.searchRaw).toHaveBeenCalledWith("go_modified");
-    expect((result as any).move).toBe("e2e4_modified");
+    expect(result.move).toBe("e2e4_modified");
   });
 
   it("onInfo が検索を跨いで継続的に動作すること (Persistent Listener)", async () => {
@@ -91,11 +95,16 @@ describe("EngineFacade", () => {
     expect(infoSpy).toHaveBeenCalledTimes(2);
   });
 
-  it("load() がアダプターの load を呼び出すこと", async () => {
+  it("load() がプロバイダーから取得したローダーをアダプターの load に渡すこと", async () => {
     const adapter = createMockAdapter();
-    const facade = new EngineFacade(adapter, []);
+    const mockLoader = { loadResource: vi.fn() };
+    const loaderProvider = vi.fn().mockResolvedValue(mockLoader);
+    
+    const facade = new EngineFacade(adapter, [], loaderProvider);
     await facade.load();
-    expect(adapter.load).toHaveBeenCalled();
+    
+    expect(loaderProvider).toHaveBeenCalled();
+    expect(adapter.load).toHaveBeenCalledWith(mockLoader);
   });
 
   it("各イベントの購読がアダプターに委譲されること", () => {
@@ -146,5 +155,38 @@ describe("EngineFacade", () => {
     // アダプターの dispose が呼ばれ、且つ Facade 内部で管理されていた unsub が呼ばれるべき
     expect(adapter.dispose).toHaveBeenCalled();
     expect(unsubSpy).toHaveBeenCalled();
+  });
+
+  it("should dispose adapter only if it owns it", async () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, [], undefined, false);
+    await facade.dispose();
+    expect(adapter.dispose).not.toHaveBeenCalled();
+    
+    const owningFacade = new EngineFacade(adapter, [], undefined, true);
+    await owningFacade.dispose();
+    expect(adapter.dispose).toHaveBeenCalled();
+  });
+
+  it("should atomic load: concurrent load() calls should be shared", async () => {
+    const adapter = createMockAdapter();
+    // load に時間がかかるように調整
+    let loadCount = 0;
+    adapter.load = vi.fn().mockImplementation(async () => {
+      loadCount++;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    });
+
+    const facade = new EngineFacade(adapter, []);
+    
+    // 同時に3回 load を呼び出す
+    const p1 = facade.load();
+    const p2 = facade.load();
+    const p3 = facade.load();
+
+    await Promise.all([p1, p2, p3]);
+
+    // 内部的な adapter.load は1回だけ呼ばれているはず
+    expect(loadCount).toBe(1);
   });
 });

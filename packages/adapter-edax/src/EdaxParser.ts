@@ -49,7 +49,11 @@ export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthel
 
   createSearchCommand(options: IOthelloSearchOptions): string | string[] {
     const commands: string[] = [];
-    if (options.board) commands.push(`setboard ${options.board} ${options.isBlack ? 'B' : 'W'}`);
+    if (options.board) {
+      // 2026 Best Practice: Command Injection Prevention
+      const safeBoard = options.board.replace(/[\r\n\0;]/g, "");
+      commands.push(`setboard ${safeBoard} ${options.isBlack ? 'B' : 'W'}`);
+    }
     commands.push(`go ${options.depth || 20}`);
     return commands;
   }

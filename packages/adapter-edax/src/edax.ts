@@ -74,7 +74,7 @@ export class EdaxAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IOthelloSearchInfo, IOthelloSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IOthelloSearchInfo, IOthelloSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }

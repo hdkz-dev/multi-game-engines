@@ -11,4 +11,6 @@ export interface ISHOGISearchOptions extends IBaseSearchOptions {
   btime?: number;
   wtime?: number;
   byoyomi?: number;
+  depth?: number;
+  nodes?: number;
 }

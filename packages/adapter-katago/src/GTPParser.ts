@@ -56,7 +56,11 @@ export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInf
 
   createSearchCommand(options: IGOSearchOptions): string | string[] {
     const commands: string[] = [];
-    if (options.sgf) commands.push(`loadsgf ${options.sgf}`);
+    if (options.sgf) {
+      // 2026 Best Practice: Command Injection Prevention
+      const safeSgf = options.sgf.replace(/[\r\n\0;]/g, "");
+      commands.push(`loadsgf ${safeSgf}`);
+    }
     if (options.btime !== undefined && options.wtime !== undefined && options.byoyomi !== undefined) {
       commands.push(`time_settings ${Math.floor(options.btime / 1000)} ${Math.floor(options.wtime / 1000)} ${Math.floor(options.byoyomi / 1000)}`);
     }

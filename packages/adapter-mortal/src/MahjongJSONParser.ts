@@ -14,6 +14,8 @@ export interface IMahjongMeld {
 
 /** 麻雀用の思考情報 */
 export interface IMahjongSearchInfo extends IBaseSearchInfo {
+  depth?: number;
+  score?: number;
   evaluations?: Array<{
     move: Move;
     ev: number;
@@ -44,9 +46,9 @@ export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions,
     const json = this.ensureObject(data);
     if (!json || (json.type !== "info" && !json.evaluations)) return null;
     return {
-      depth: json.depth || 0,
-      score: json.score || 0,
-      evaluations: json.evaluations,
+      depth: typeof json.depth === "number" ? json.depth : undefined,
+      score: typeof json.score === "number" ? json.score : undefined,
+      evaluations: json.evaluations as IMahjongSearchInfo["evaluations"],
       raw: typeof data === "string" ? data : JSON.stringify(data),
     };
   }
@@ -61,19 +63,19 @@ export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions,
     };
   }
 
-  createSearchCommand(options: IMahjongSearchOptions): string {
-    return JSON.stringify({ type: "search", ...options });
+  createSearchCommand(options: IMahjongSearchOptions): unknown {
+    return { type: "search", ...options };
   }
 
-  createStopCommand(): string { return JSON.stringify({ type: "stop" }); }
-  createOptionCommand(name: string, value: string | number | boolean): string {
-    return JSON.stringify({ type: "setoption", name, value });
+  createStopCommand(): unknown { return { type: "stop" }; }
+  createOptionCommand(name: string, value: string | number | boolean): unknown {
+    return { type: "setoption", name, value };
   }
 
-  private ensureObject(data: unknown): any {
-    if (typeof data === "object" && data !== null) return data;
+  private ensureObject(data: unknown): Record<string, unknown> | null {
+    if (typeof data === "object" && data !== null) return data as Record<string, unknown>;
     if (typeof data === "string") {
-      try { return JSON.parse(data); } catch { return null; }
+      try { return JSON.parse(data) as Record<string, unknown>; } catch { return null; }
     }
     return null;
   }
