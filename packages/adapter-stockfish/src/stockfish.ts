@@ -139,12 +139,12 @@ export class StockfishAdapter extends BaseAdapter<
   }
 
   async stop(): Promise<void> {
+    this.cleanupPendingTask("Search aborted");
     if (!this.communicator) {
       console.warn(`[${this.id}] Cannot stop: Engine is not loaded.`);
       return;
     }
     this.communicator.postMessage(this.parser.createStopCommand());
-    this.cleanupPendingTask("Search aborted");
   }
 
   async dispose(): Promise<void> {
