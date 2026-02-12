@@ -4,10 +4,12 @@ This document explains the design principles and technical architecture of `mult
 
 ## Design Principles
 
-1.  **Framework Agnostic**:
-    - The core library is built with pure TypeScript and standard Web APIs (AsyncIterable, EventTarget, etc.).
-    - It does not depend on any specific UI framework like React, Vue, or Angular.
-2.  **Streaming I/O**:
+1.  **Pure Core (Pay-as-you-go)**:
+    - The core library has zero knowledge of specific game engines or protocols.
+    - Users only import the adapters they need, ensuring that unused code and types are never bundled.
+2.  **Decentralized Type Inference (Declaration Merging)**:
+    - Leverages TypeScript's declaration merging so that importing an adapter automatically enables type inference for `bridge.getEngine('id')`.
+3.  **Framework Agnostic**:
     - Engine thinking information (candidate moves, scores) is delivered via `AsyncIterable`. This allows for intuitive real-time updates using `for await...of` loops.
 3.  **Modern Web Standards (2026 Ready)**:
     - **OPFS (Origin Private File System)**: Used for high-speed browser-based file persistence of large WASM binaries and evaluation files (falls back to IndexedDB).

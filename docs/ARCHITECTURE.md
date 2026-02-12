@@ -4,10 +4,12 @@
 
 ## 設計原則
 
-1.  **フレームワーク非依存 (Framework Agnostic)**:
-    - コアライブラリは純粋な TypeScript と標準 Web API（AsyncIterable, EventTarget 等）のみで構築します。
-    - React, Vue, Angular 等の特定の UI フレームワークに依存せず、どのような環境でも動作します。
-2.  **ストリーミング I/O**:
+1.  **純粋なコア (Pure Core & Pay-as-you-go)**:
+    - コアライブラリは、特定のエンジンやゲーム種別に対する知識を一切持ちません。
+    - 利用者は、使用するエンジンのアダプターのみをインポートすることで、不要なコードや型定義がバンドルされるのを防ぎます。
+2.  **分散型型推論 (Declaration Merging)**:
+    - TypeScript の宣言併合を活用し、アダプターをインポートするだけで `bridge.getEngine('id')` の戻り値型が自動的に決定される「ゼロ構成型安全性」を実現します。
+3.  **フレームワーク非依存 (Framework Agnostic)**:
     - エンジンの思考状況（検討中の指し手やスコア）は `AsyncIterable` を用いて配信されます。これにより、`for await...of` ループを用いた直感的なリアルタイム更新が可能です。
 3.  **最新の Web 標準 API の活用 (2026 Ready)**:
     - **OPFS (Origin Private File System)**: 巨大な WASM や評価関数ファイルの永続化に、より高速なブラウザ内ファイルシステムを採用します（未サポート環境では IndexedDB へフォールバック）。
