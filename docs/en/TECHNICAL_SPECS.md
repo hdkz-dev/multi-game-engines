@@ -28,9 +28,10 @@ The main API for consumers.
 ## 3. Security & Infrastructure
 
 ### 3-1. EngineLoader (Modern Security)
-- **Mandatory SRI**: Force hash validation for all resources.
+- **Mandatory SRI**: Force hash validation for all resources. Supports W3C standard multi-hash (space-separated) formats.
 - **Dynamic MIME Types**: Identifies WASM (`application/wasm`) and JS (`application/javascript`).
-- **30s Timeout**: Prevents network fetch hangs.
+- **Auto-Revocation**: Proactively `revoke` old Blob URLs on re-load to prevent memory leaks.
+- **30s Timeout**: Prevents network fetch hangs. Advanced error tracking via `Error Cause API`.
 
 ### 3-2. File Storage (2026 Best Practice)
 - **Environment Adaptation**: Auto-switches between `OPFSStorage` (Fast) and `IndexedDBStorage`.
@@ -39,16 +40,16 @@ The main API for consumers.
 
 ### 3-3. WorkerCommunicator (Race-condition Free)
 - **Message Buffering**: Processes messages even if they arrive before `expectMessage` is called.
-- **Error Propagation**: Forwards internal Worker errors correctly.
+- **Error Propagation**: Correctly forwards internal Worker errors and rejects pending tasks on `terminate()`.
 
 ## 4. Protocol Parsing
 
 - **UCIParser**: For Chess. Supports `mate` score conversion (factor 10,000).
-- **USIParser**: For Shogi. Supports time control and `mate` score conversion (factor 100,000).
+- **USIParser**: For Shogi. Supports time control, `mate` score conversion (factor 100,000), and special handling for the `startpos` keyword.
 - **Injection Protection**: Automatically removes illegal characters from FEN/SFEN.
 
 ## 5. Quality Assurance (Testing Philosophy)
 
-- **74 Unit Tests**: 100% logic coverage.
+- **81 Unit Tests**: 100% logic and edge-case coverage.
 - **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
 - **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.
