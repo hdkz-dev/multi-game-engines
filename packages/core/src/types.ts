@@ -13,6 +13,9 @@ export type Move = string & { readonly __brand: "Move" };
 /** エンジンの動作状態 */
 export type EngineStatus = "uninitialized" | "loading" | "ready" | "busy" | "error" | "terminated";
 
+/** エンジンの読み込み戦略 */
+export type EngineLoadingStrategy = "lazy" | "eager";
+
 /** ライセンス情報 */
 export interface ILicenseInfo {
   readonly name: string;

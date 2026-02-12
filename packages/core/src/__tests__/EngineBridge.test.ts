@@ -8,7 +8,9 @@ import {
   ISearchTask,
   EngineStatus,
   FEN,
-  Move
+  Move,
+  ILoadProgress,
+  ITelemetryEvent
 } from "../types";
 
 /**
