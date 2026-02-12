@@ -2,9 +2,19 @@ import {
   IProtocolParser,
   IBaseSearchInfo,
   IBaseSearchResult,
-  Move,
 } from "@multi-game-engines/core";
-import { ISHOGISearchOptions } from "./usi-types.js";
+import { ISHOGISearchOptions, SFEN, Move } from "./usi-types.js";
+
+/** 将棋用の思考情報 */
+export interface ISHOGISearchInfo extends IBaseSearchInfo {
+  pv?: Move[];
+}
+
+/** 将棋用の探索結果 */
+export interface ISHOGISearchResult extends IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
+}
 
 /** 
  * 詰みスコアを cp と区別するための係数 (2026 Best Practice)
@@ -14,16 +24,16 @@ const MATE_SCORE_FACTOR = 100000;
 /**
  * 将棋用 USI (Universal Shogi Interface) プロトコルパーサー。
  */
-export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> {
   /**
    * info 行を解析します。
    */
-  parseInfo(data: string | Uint8Array | unknown): IBaseSearchInfo | null {
+  parseInfo(data: string | Uint8Array | unknown): ISHOGISearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
 
-    const info: IBaseSearchInfo = {
+    const info: ISHOGISearchInfo = {
       depth: 0,
       score: 0,
       raw: line,
@@ -66,13 +76,13 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
   /**
    * bestmove 行を解析します。
    */
-  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): ISHOGISearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
-    const result: IBaseSearchResult = {
+    const result: ISHOGISearchResult = {
       bestMove: (parts[1] || "") as Move,
       raw: line,
     };

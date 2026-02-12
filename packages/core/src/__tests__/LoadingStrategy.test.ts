@@ -21,7 +21,7 @@ describe("EngineFacade Loading Strategies", () => {
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () {})(),
-        result: Promise.resolve({ bestMove: "e2e4" }),
+        result: Promise.resolve({ move: "e2e4" }),
         stop: vi.fn(),
       })),
       onStatusChange: vi.fn().mockImplementation((cb) => {
@@ -51,7 +51,7 @@ describe("EngineFacade Loading Strategies", () => {
     const result = await facade.search({});
     
     expect(adapter.load).toHaveBeenCalled();
-    expect(result.bestMove).toBe("e2e4");
+    expect((result as any).move).toBe("e2e4");
   });
 
   it("Eager Strategy: should load immediately when set", async () => {

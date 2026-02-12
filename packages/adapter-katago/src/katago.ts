@@ -1,16 +1,13 @@
 import {
   BaseAdapter,
-  IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  IGOSearchOptions,
-  IGOSearchInfo,
 } from "@multi-game-engines/core";
-import { GTPParser } from "./GTPParser.js";
+import { GTPParser, IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js";
 
 /**
  * KataGo (WASM/WebGPU) 用のアダプター実装。
@@ -19,7 +16,7 @@ import { GTPParser } from "./GTPParser.js";
 export class KataGoAdapter extends BaseAdapter<
   IGOSearchOptions,
   IGOSearchInfo,
-  IBaseSearchResult
+  IGOSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
   readonly parser = new GTPParser();
@@ -28,7 +25,7 @@ export class KataGoAdapter extends BaseAdapter<
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingResolve: ((result: IGOSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
   private infoController: ReadableStreamDefaultController<IGOSearchInfo> | null = null;
 
@@ -92,7 +89,7 @@ export class KataGoAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IGOSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IGOSearchInfo, IGOSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -109,7 +106,7 @@ export class KataGoAdapter extends BaseAdapter<
       },
     });
 
-    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+    const resultPromise = new Promise<IGOSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });

@@ -1,16 +1,13 @@
 import {
   BaseAdapter,
-  IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  IOthelloSearchOptions,
-  IOthelloSearchInfo,
 } from "@multi-game-engines/core";
-import { EdaxParser } from "./EdaxParser.js";
+import { EdaxParser, IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult } from "./EdaxParser.js";
 
 /**
  * Edax (WASM) 用のアダプター実装。
@@ -18,7 +15,7 @@ import { EdaxParser } from "./EdaxParser.js";
 export class EdaxAdapter extends BaseAdapter<
   IOthelloSearchOptions,
   IOthelloSearchInfo,
-  IBaseSearchResult
+  IOthelloSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
   readonly parser = new EdaxParser();
@@ -27,7 +24,7 @@ export class EdaxAdapter extends BaseAdapter<
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingResolve: ((result: IOthelloSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
   private infoController: ReadableStreamDefaultController<IOthelloSearchInfo> | null = null;
 
@@ -77,7 +74,7 @@ export class EdaxAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IOthelloSearchInfo, IBaseSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IOthelloSearchInfo, IOthelloSearchResult> {
     if (this._status !== "ready") {
       throw new Error("Engine is not ready");
     }
@@ -94,7 +91,7 @@ export class EdaxAdapter extends BaseAdapter<
       },
     });
 
-    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+    const resultPromise = new Promise<IOthelloSearchResult>((resolve, reject) => {
       this.pendingResolve = resolve;
       this.pendingReject = reject;
     });

@@ -1,18 +1,24 @@
-import {
-  IProtocolParser,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  Move,
-  Brand,
-} from "@multi-game-engines/core";
+import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
 
 /** チェス用の局面表記 (Forsyth-Edwards Notation) */
 export type FEN = Brand<string, "FEN">;
+/** チェス用の指し手表記 (e2e4等) */
+export type Move = Brand<string, "Move">;
 
 /** チェス用の探索オプション (UCI標準規格) */
 export interface IChessSearchOptions extends IBaseSearchOptions {
   fen?: FEN;
+}
+
+/** チェス用の思考情報 */
+export interface IChessSearchInfo extends IBaseSearchInfo {
+  pv?: Move[];
+}
+
+/** チェス用の探索結果 */
+export interface IChessSearchResult extends IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
 }
 
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
@@ -21,16 +27,16 @@ const MATE_SCORE_FACTOR = 10000;
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<IChessSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
   /**
    * info 行を解析します。
    */
-  parseInfo(data: string | Uint8Array | unknown): IBaseSearchInfo | null {
+  parseInfo(data: string | Uint8Array | unknown): IChessSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
 
-    const info: IBaseSearchInfo = {
+    const info: IChessSearchInfo = {
       depth: 0,
       score: 0,
       raw: line,
@@ -73,13 +79,13 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IBaseSear
   /**
    * bestmove 行を解析します。
    */
-  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): IChessSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
-    const result: IBaseSearchResult = {
+    const result: IChessSearchResult = {
       bestMove: (parts[1] || "") as Move,
       raw: line,
     };

@@ -1,7 +1,5 @@
 import {
   BaseAdapter,
-  IBaseSearchInfo,
-  IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
@@ -9,7 +7,7 @@ import {
   IEngineLoader,
   EngineError,
 } from "@multi-game-engines/core";
-import { USIParser } from "./USIParser.js";
+import { USIParser, ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
 import { ISHOGISearchOptions } from "./usi-types.js";
 
 /**
@@ -17,8 +15,8 @@ import { ISHOGISearchOptions } from "./usi-types.js";
  */
 export class YaneuraOuAdapter extends BaseAdapter<
   ISHOGISearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult
+  ISHOGISearchInfo,
+  ISHOGISearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
   readonly parser = new USIParser();
@@ -27,9 +25,9 @@ export class YaneuraOuAdapter extends BaseAdapter<
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingResolve: ((result: ISHOGISearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
-  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
+  private infoController: ReadableStreamDefaultController<ISHOGISearchInfo> | null = null;
 
   readonly id = "yaneuraou";
   readonly name = "YaneuraOu";

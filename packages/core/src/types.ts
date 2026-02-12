@@ -1,17 +1,10 @@
 /**
  * エンジンブリッジ全体の共通型定義。
- * Core パッケージは、特定のゲーム（チェス、将棋、囲碁等）や
- * プロトコル（UCI, USI 等）に対する知識を一切持ちません。
+ * Core パッケージは、特定のゲームやプロトコルに対する知識を一切持ちません。
  */
 
 /** ブラント型 (Branded Types) の基底定義 */
 export type Brand<T, K> = T & { readonly __brand: K };
-
-/** 
- * 指し手表記の基底。
- * 多くのエンジンで共通して文字列が使用されるため、共通定義として保持します。
- */
-export type Move = string & { readonly __brand: "Move" };
 
 /** エンジンの動作状態 */
 export type EngineStatus = "uninitialized" | "loading" | "ready" | "busy" | "error" | "terminated";
@@ -82,20 +75,20 @@ export interface IBaseSearchOptions {
 
 /** 思考状況の基本情報 (全ゲーム共通) */
 export interface IBaseSearchInfo {
+  /** 探索深さ */
   depth: number;
+  /** 評価値 */
   score: number;
-  pv?: Move[];
+  /** 1秒あたりの探索ノード数 */
   nps?: number;
+  /** 思考経過時間 */
   time?: number;
+  /** 生の出力 */
   raw?: string;
 }
 
 /** 探索の最終結果 (全ゲーム共通) */
 export interface IBaseSearchResult {
-  /** 最善手 */
-  bestMove: Move;
-  /** 次手の予想 */
-  ponder?: Move;
   /** 生の出力 */
   raw?: string;
 }

@@ -1,7 +1,5 @@
 import {
   BaseAdapter,
-  IBaseSearchInfo,
-  IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
@@ -9,15 +7,15 @@ import {
   IEngineLoader,
   EngineError,
 } from "@multi-game-engines/core";
-import { UCIParser, IChessSearchOptions } from "./UCIParser.js";
+import { UCIParser, IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCIParser.js";
 
 /**
  * Stockfish (WASM) 用のアダプター実装。
  */
 export class StockfishAdapter extends BaseAdapter<
   IChessSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult
+  IChessSearchInfo,
+  IChessSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
   readonly parser = new UCIParser();
@@ -26,9 +24,9 @@ export class StockfishAdapter extends BaseAdapter<
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingResolve: ((result: IChessSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
-  private infoController: ReadableStreamDefaultController<IBaseSearchInfo> | null = null;
+  private infoController: ReadableStreamDefaultController<IChessSearchInfo> | null = null;
 
   readonly id = "stockfish";
   readonly name = "Stockfish";

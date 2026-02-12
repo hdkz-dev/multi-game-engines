@@ -1,16 +1,13 @@
 import {
   BaseAdapter,
-  IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  IMahjongSearchOptions,
-  IMahjongSearchInfo,
 } from "@multi-game-engines/core";
-import { MahjongJSONParser } from "./MahjongJSONParser.js";
+import { MahjongJSONParser, IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult } from "./MahjongJSONParser.js";
 
 /**
  * Mortal (WASM) 用のアダプター実装。
@@ -19,7 +16,7 @@ import { MahjongJSONParser } from "./MahjongJSONParser.js";
 export class MortalAdapter extends BaseAdapter<
   IMahjongSearchOptions,
   IMahjongSearchInfo,
-  IBaseSearchResult
+  IMahjongSearchResult
 > {
   private communicator: WorkerCommunicator | null = null;
   readonly parser = new MahjongJSONParser();
@@ -28,7 +25,7 @@ export class MortalAdapter extends BaseAdapter<
   private messageUnsubscriber: (() => void) | null = null;
 
   // 探索状態管理
-  private pendingResolve: ((result: IBaseSearchResult) => void) | null = null;
+  private pendingResolve: ((result: IMahjongSearchResult) => void) | null = null;
   private pendingReject: ((reason?: unknown) => void) | null = null;
   private infoController: ReadableStreamDefaultController<IMahjongSearchInfo> | null = null;
 

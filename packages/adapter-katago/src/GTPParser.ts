@@ -1,6 +1,33 @@
-import { IProtocolParser, IGOSearchOptions, IGOSearchInfo, IBaseSearchResult, Move } from "@multi-game-engines/core";
+import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
 
-export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInfo, IBaseSearchResult> {
+/** 囲碁用の指し手表記 (q16等) */
+export type Move = Brand<string, "Move">;
+
+/** 囲碁用の思考情報 */
+export interface IGOSearchInfo extends IBaseSearchInfo {
+  winrate?: number;
+  visits?: number;
+  utility?: number;
+  /** 盤面支配率 (0.0 - 1.0 の配列、通常 19x19=361 要素) */
+  ownerMap?: number[];
+  pv?: Move[];
+}
+
+/** 囲碁用の探索結果 */
+export interface IGOSearchResult extends IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
+}
+
+/** 囲碁エンジン用の探索オプション拡張 */
+export interface IGOSearchOptions extends IBaseSearchOptions {
+  sgf?: string; // SGF文字列
+  btime?: number;
+  wtime?: number;
+  byoyomi?: number;
+}
+
+export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInfo, IGOSearchResult> {
   parseInfo(data: string | Uint8Array | unknown): IGOSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
@@ -18,7 +45,7 @@ export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInf
     return info;
   }
 
-  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): IGOSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("= ")) return null;

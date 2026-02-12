@@ -1,6 +1,29 @@
-import { IProtocolParser, IOthelloSearchOptions, IOthelloSearchInfo, IBaseSearchResult, Move } from "@multi-game-engines/core";
+import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
 
-export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthelloSearchInfo, IBaseSearchResult> {
+/** オセロ用の局面表記 (64文字文字列等) */
+export type OthelloBoard = Brand<string, "OthelloBoard">;
+/** オセロ用の指し手表記 (c3等) */
+export type Move = Brand<string, "Move">;
+
+/** オセロ用の思考情報 */
+export interface IOthelloSearchInfo extends IBaseSearchInfo {
+  isExact?: boolean;
+  pv?: Move[];
+}
+
+/** オセロ用の探索結果 */
+export interface IOthelloSearchResult extends IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
+}
+
+/** オセロ用の探索オプション拡張 */
+export interface IOthelloSearchOptions extends IBaseSearchOptions {
+  board?: OthelloBoard;
+  isBlack?: boolean;
+}
+
+export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult> {
   parseInfo(data: string | Uint8Array | unknown): IOthelloSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data.trim();
@@ -16,7 +39,7 @@ export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthel
     return (depthMatch || midMatch || exactMatch) ? info : null;
   }
 
-  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data.trim();
     const moveMatch = line.match(/^(=?\s*)([a-h][1-8])$/i);

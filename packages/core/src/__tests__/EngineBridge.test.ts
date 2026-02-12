@@ -8,8 +8,7 @@ import {
   ISearchTask,
   EngineStatus,
   ILoadProgress,
-  ITelemetryEvent,
-  Move
+  ITelemetryEvent
 } from "../types.js";
 
 /**
@@ -39,7 +38,7 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
       info: (async function* () {
         yield { depth: 1, score: 10 } as IBaseSearchInfo;
       })(),
-      result: Promise.resolve({ bestMove: "e2e4" as Move } as IBaseSearchResult),
+      result: Promise.resolve({ move: "e2e4" } as any),
       stop: async () => {},
     };
   }

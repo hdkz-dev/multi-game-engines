@@ -6,8 +6,7 @@ import {
   IBaseSearchResult, 
   ISearchTask, 
   IMiddleware,
-  IEngineAdapter,
-  Move
+  IEngineAdapter
 } from "../types.js";
 
 /**
@@ -26,7 +25,7 @@ describe("EngineFacade", () => {
     },
     searchRaw: vi.fn().mockImplementation(() => ({
       info: (async function* () { yield { depth: 1, score: 10 } as IBaseSearchInfo; })(),
-      result: new Promise((resolve) => setTimeout(() => resolve({ bestMove: "e2e4" as Move } as IBaseSearchResult), 50)),
+      result: new Promise((resolve) => setTimeout(() => resolve({ move: "e2e4" } as any), 50)),
       stop: vi.fn().mockResolvedValue(undefined),
     })),
     load: vi.fn().mockResolvedValue(undefined),
@@ -60,9 +59,9 @@ describe("EngineFacade", () => {
 
   it("ミドルウェアが正しい順序でコマンドと結果を加工すること", async () => {
     const adapter = createMockAdapter();
-    const middleware: IMiddleware<IBaseSearchInfo, IBaseSearchResult> = {
+    const middleware: IMiddleware<IBaseSearchInfo, any> = {
       onCommand: async (cmd) => `${cmd}_modified`,
-      onResult: async (res) => ({ ...res, bestMove: `${res.bestMove}_modified` as Move }),
+      onResult: async (res) => ({ ...res, move: `${res.move}_modified` }),
     };
 
     const facade = new EngineFacade(adapter, [middleware]);
@@ -71,7 +70,7 @@ describe("EngineFacade", () => {
     const result = await facade.search(options);
 
     expect(adapter.searchRaw).toHaveBeenCalledWith("go_modified");
-    expect(result.bestMove).toBe("e2e4_modified");
+    expect((result as any).move).toBe("e2e4_modified");
   });
 
   it("onInfo が検索を跨いで継続的に動作すること (Persistent Listener)", async () => {
