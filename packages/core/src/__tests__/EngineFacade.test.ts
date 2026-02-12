@@ -130,4 +130,22 @@ describe("EngineFacade", () => {
     const task = (vi.mocked(adapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IBaseSearchResult>);
     expect(task.stop).toHaveBeenCalled();
   });
+
+  it("dispose() 時に全てのリスナーが解除され、アダプターも破棄されること", async () => {
+    const unsubSpy = vi.fn();
+    const adapter = createMockAdapter();
+    vi.mocked(adapter.onStatusChange).mockReturnValue(unsubSpy);
+    
+    const facade = new EngineFacade(adapter, []);
+    
+    // イベント購読
+    facade.onStatusChange(vi.fn());
+    
+    // Facade を破棄
+    await facade.dispose();
+
+    // アダプターの dispose が呼ばれ、且つ Facade 内部で管理されていた unsub が呼ばれるべき
+    expect(adapter.dispose).toHaveBeenCalled();
+    expect(unsubSpy).toHaveBeenCalled();
+  });
 });

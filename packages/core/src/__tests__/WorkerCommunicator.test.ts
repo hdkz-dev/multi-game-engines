@@ -131,4 +131,18 @@ describe("WorkerCommunicator", () => {
 
     await expect(responsePromise).rejects.toThrow("Worker crashed");
   });
+
+  it("terminate() 直後にメッセージが届いても、保留中の Promise が正しく Reject されること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    const responsePromise = communicator.expectMessage((data) => data === "ok");
+
+    // terminate と同時にメッセージが届くシチュエーションを再現
+    communicator.terminate();
+    if (currentMockWorker?.onmessage) {
+      currentMockWorker.onmessage({ data: "ok" } as MessageEvent);
+    }
+
+    // terminate が優先され、Promise は Reject されるべき
+    await expect(responsePromise).rejects.toThrow("Communicator terminated");
+  });
 });
