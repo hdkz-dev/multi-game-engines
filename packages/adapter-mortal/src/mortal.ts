@@ -4,13 +4,13 @@ import {
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  MahjongJSONParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
   IMahjongSearchOptions,
   IMahjongSearchInfo,
 } from "@multi-game-engines/core";
+import { MahjongJSONParser } from "./MahjongJSONParser.js";
 
 /**
  * Mortal (WASM) 用のアダプター実装。

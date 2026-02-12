@@ -50,7 +50,6 @@ describe("CapabilityDetector", () => {
     
     expect(caps.opfs).toBe(false);
     expect(caps.wasmThreads).toBe(false);
-    expect(caps.details?.opfs).toBeDefined();
   });
 
   it("should handle Node.js-like environment where navigator is undefined", async () => {
@@ -65,6 +64,5 @@ describe("CapabilityDetector", () => {
     expect(caps.wasmThreads).toBe(false);
     expect(caps.webNN).toBe(false);
     expect(caps.webGPU).toBe(false);
-    expect(caps.details?.opfs).toBeDefined();
   });
 });

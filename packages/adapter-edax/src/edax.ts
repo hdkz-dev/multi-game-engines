@@ -4,13 +4,13 @@ import {
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  EdaxParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
   IOthelloSearchOptions,
   IOthelloSearchInfo,
 } from "@multi-game-engines/core";
+import { EdaxParser } from "./EdaxParser.js";
 
 /**
  * Edax (WASM) 用のアダプター実装。

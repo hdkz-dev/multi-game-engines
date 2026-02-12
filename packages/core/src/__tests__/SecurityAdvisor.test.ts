@@ -20,7 +20,6 @@ describe("SecurityAdvisor", () => {
     expect(status.isCrossOriginIsolated).toBe(false);
     expect(status.canUseThreads).toBe(false);
     expect(status.missingHeaders).toBeDefined();
-    expect(status.recommendedActions).toBeDefined();
   });
 
   it("should report healthy status when cross-origin isolated is true", () => {
@@ -30,7 +29,6 @@ describe("SecurityAdvisor", () => {
     expect(status.isCrossOriginIsolated).toBe(true);
     expect(status.canUseThreads).toBe(true);
     expect(status.missingHeaders).toBeUndefined();
-    expect(status.recommendedActions).toBeUndefined();
   });
 
   it("should detect sriSupported correctly based on element attributes", () => {

@@ -4,13 +4,13 @@ import {
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  GTPParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
   IGOSearchOptions,
   IGOSearchInfo,
 } from "@multi-game-engines/core";
+import { GTPParser } from "./GTPParser.js";
 
 /**
  * KataGo (WASM/WebGPU) 用のアダプター実装。

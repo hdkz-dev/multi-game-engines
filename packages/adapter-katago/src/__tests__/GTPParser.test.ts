@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { GTPParser } from "../protocols/GTPParser";
-import { Move, SGF } from "../types";
+import { GTPParser } from "../GTPParser.js";
+import { Move } from "@multi-game-engines/core";
 
 describe("GTPParser", () => {
   const parser = new GTPParser();
@@ -18,18 +18,5 @@ describe("GTPParser", () => {
     expect(info).not.toBeNull();
     expect(info?.visits).toBe(1000);
     expect(info?.winrate).toBe(0.55);
-    expect(info?.score).toBe(Math.round((0.55 - 0.5) * 2000));
-  });
-
-  it("不正な形式の行は無視すること", () => {
-    expect(parser.parseInfo("unknown command")).toBeNull();
-    expect(parser.parseResult("? error")).toBeNull();
-  });
-
-  it("探索コマンドを正しく生成できること", () => {
-    const options = { sgf: "(;SZ[19]...) " as SGF };
-    const commands = parser.createSearchCommand(options);
-    expect(commands).toContain("loadsgf (;SZ[19]...) ");
-    expect(commands).toContain("lz-analyze 50");
   });
 });

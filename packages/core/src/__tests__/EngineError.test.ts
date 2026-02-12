@@ -5,12 +5,12 @@ import { EngineErrorCode } from "../types";
 describe("EngineError", () => {
   it("should create an error with correct properties and name", () => {
     const error = new EngineError(
-      EngineErrorCode.WASM_INIT_FAILED,
+      EngineErrorCode.INTERNAL_ERROR,
       "Failed to init WASM",
       "stockfish"
     );
     
-    expect(error.code).toBe(EngineErrorCode.WASM_INIT_FAILED);
+    expect(error.code).toBe(EngineErrorCode.INTERNAL_ERROR);
     expect(error.engineId).toBe("stockfish");
     expect(error.message).toBe("Failed to init WASM");
     expect(error.name).toBe("EngineError");

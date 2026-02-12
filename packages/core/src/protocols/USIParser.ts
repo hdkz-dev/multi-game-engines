@@ -1,12 +1,12 @@
 import {
   IProtocolParser,
-} from "./types";
+} from "./types.js";
 import {
   IBaseSearchInfo,
   IBaseSearchResult,
-  ISHOGISearchOptions,
   Move,
-} from "../types";
+} from "../types.js";
+import { ISHOGISearchOptions } from "./usi-types.js";
 
 /** 
  * 詰みスコアを cp と区別するための係数 (2026 Best Practice)
