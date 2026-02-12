@@ -41,6 +41,13 @@ describe("UCIParser", () => {
     expect(cmds[1]).toBe("go depth 15 movetime 1000");
   });
 
+  it("should parse bestmove and ponder correctly", () => {
+    const line = "bestmove e2e4 ponder e7e5";
+    const result = parser.parseResult(line);
+    expect(result?.bestMove).toBe("e2e4");
+    expect(result?.ponder).toBe("e7e5");
+  });
+
   it("should prevent UCI command injection in FEN by filtering restricted characters", () => {
     // 改行、セミコロン、ヌル文字を含む悪意のある FEN 文字列
     const maliciousFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\nquit; \0" as FEN;

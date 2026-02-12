@@ -69,4 +69,10 @@ describe("EngineLoader", () => {
 
     await expect(loader.loadResource("test", mockConfig)).rejects.toThrow(/Network error/);
   });
+
+  it("should call URL.revokeObjectURL when revoke is called", () => {
+    const loader = new EngineLoader(mockStorage);
+    loader.revoke("blob:test-url");
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:test-url");
+  });
 });
