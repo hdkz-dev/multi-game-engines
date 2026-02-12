@@ -23,9 +23,6 @@ export class SecurityAdvisor {
       canUseThreads: isCrossOriginIsolated,
       missingHeaders: missingHeaders.length > 0 ? missingHeaders : undefined,
       sriSupported: typeof document !== "undefined" && "integrity" in document.createElement("script"),
-      recommendedActions: !isCrossOriginIsolated
-        ? ["Enable COOP/COEP headers to support multi-threading."]
-        : undefined,
     };
   }
 

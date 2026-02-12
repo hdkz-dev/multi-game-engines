@@ -1,22 +1,21 @@
 import {
   BaseAdapter,
-  IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  UCIParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
 } from "@multi-game-engines/core";
+import { UCIParser, IChessSearchOptions } from "./UCIParser.js";
 
 /**
  * Stockfish (WASM) 用のアダプター実装。
  */
 export class StockfishAdapter extends BaseAdapter<
-  IBaseSearchOptions,
+  IChessSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult
 > {

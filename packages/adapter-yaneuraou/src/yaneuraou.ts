@@ -5,12 +5,12 @@ import {
   ILicenseInfo,
   IEngineSourceConfig,
   ISearchTask,
-  USIParser,
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
-  ISHOGISearchOptions,
 } from "@multi-game-engines/core";
+import { USIParser } from "./USIParser.js";
+import { ISHOGISearchOptions } from "./usi-types.js";
 
 /**
  * やねうら王 (WASM) 用のアダプター実装。

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { EngineFacade } from "../bridge/EngineFacade";
-import { IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, FEN, EngineStatus } from "../types";
+import { IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineStatus } from "../types.js";
 
 describe("EngineFacade Loading Strategies", () => {
   const createMockAdapter = () => {
@@ -40,7 +40,7 @@ describe("EngineFacade Loading Strategies", () => {
     const facade = new EngineFacade(adapter, []);
     facade.loadingStrategy = "manual";
 
-    await expect(facade.search({ fen: "startpos" as FEN })).rejects.toThrow(/Call load\(\) first/);
+    await expect(facade.search({})).rejects.toThrow(/Call load\(\) first/);
   });
 
   it("On-demand Strategy: should auto-load on search", async () => {
@@ -48,7 +48,7 @@ describe("EngineFacade Loading Strategies", () => {
     const facade = new EngineFacade(adapter, []);
     facade.loadingStrategy = "on-demand";
 
-    const result = await facade.search({ fen: "startpos" as FEN });
+    const result = await facade.search({});
     
     expect(adapter.load).toHaveBeenCalled();
     expect(result.bestMove).toBe("e2e4");
@@ -69,10 +69,10 @@ describe("EngineFacade Loading Strategies", () => {
     facade.loadingStrategy = "on-demand";
 
     // 1回目の検索（自動ロード開始）
-    const search1 = facade.search({ fen: "pos1" as FEN });
+    const search1 = facade.search({});
     // 少し待ってから2回目の検索（ロード中のはず）
     await new Promise(resolve => setTimeout(resolve, 10));
-    const search2 = facade.search({ fen: "pos2" as FEN });
+    const search2 = facade.search({});
 
     await Promise.all([search1, search2]);
     

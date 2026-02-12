@@ -9,9 +9,8 @@ import {
   EngineStatus,
   ILoadProgress,
   ITelemetryEvent,
-  FEN,
   Move
-} from "../types";
+} from "../types.js";
 
 /**
  * テスト用の最小限のアダプター実装。
@@ -127,7 +126,7 @@ describe("EngineBridge", () => {
 
     const engine = bridge.getEngine("mock-engine");
     
-    const options: IBaseSearchOptions = { fen: "startpos" as FEN }; 
+    const options: IBaseSearchOptions = {}; 
     await engine.search(options);
 
     // ミドルウェアが適切な引数で呼ばれたか確認

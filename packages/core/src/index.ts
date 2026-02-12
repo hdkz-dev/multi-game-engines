@@ -13,10 +13,6 @@ export { EngineBridge } from "./bridge/index.js";
 export { BaseAdapter } from "./adapters/index.js";
 export { WorkerCommunicator } from "./workers/index.js";
 
-// 標準プロトコルパーサー (業界標準のみ)
-export { UCIParser, USIParser } from "./protocols/index.js";
-export type { ISHOGISearchOptions } from "./protocols/usi-types.js";
-
 // ユーティリティ
 export { CapabilityDetector, SecurityAdvisor } from "./capabilities/index.js";
 export { EngineError } from "./errors/index.js";

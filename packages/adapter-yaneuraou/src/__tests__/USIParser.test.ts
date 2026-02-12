@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { USIParser } from "../protocols/USIParser";
-import { SFEN } from "../types";
+import { USIParser } from "../USIParser.js";
+import { SFEN } from "../usi-types.js";
 
 describe("USIParser", () => {
   const parser = new USIParser();

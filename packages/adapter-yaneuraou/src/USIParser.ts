@@ -1,11 +1,9 @@
 import {
   IProtocolParser,
-} from "./types.js";
-import {
   IBaseSearchInfo,
   IBaseSearchResult,
   Move,
-} from "../types.js";
+} from "@multi-game-engines/core";
 import { ISHOGISearchOptions } from "./usi-types.js";
 
 /** 
@@ -20,7 +18,9 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
   /**
    * info 行を解析します。
    */
-  parseInfo(line: string): IBaseSearchInfo | null {
+  parseInfo(data: string | Uint8Array | unknown): IBaseSearchInfo | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("info ")) return null;
 
     const info: IBaseSearchInfo = {
@@ -66,7 +66,9 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
   /**
    * bestmove 行を解析します。
    */
-  parseResult(line: string): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");

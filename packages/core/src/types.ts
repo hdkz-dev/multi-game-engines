@@ -1,11 +1,16 @@
 /**
  * エンジンブリッジ全体の共通型定義。
- * Core は標準化された最小限の定義のみを保持します。
+ * Core パッケージは、特定のゲーム（チェス、将棋、囲碁等）や
+ * プロトコル（UCI, USI 等）に対する知識を一切持ちません。
  */
 
-/** ブラント型 (Branded Types) */
-export type FEN = string & { readonly __brand: "FEN" };
-export type SFEN = string & { readonly __brand: "SFEN" };
+/** ブラント型 (Branded Types) の基底定義 */
+export type Brand<T, K> = T & { readonly __brand: K };
+
+/** 
+ * 指し手表記の基底。
+ * 多くのエンジンで共通して文字列が使用されるため、共通定義として保持します。
+ */
 export type Move = string & { readonly __brand: "Move" };
 
 /** エンジンの動作状態 */
@@ -61,19 +66,21 @@ export interface ISecurityStatus {
   readonly canUseThreads: boolean;
   readonly sriSupported: boolean;
   readonly missingHeaders?: string[];
-  readonly recommendedActions?: string[];
 }
 
-/** 探索の基本オプション */
+/** 探索の基本オプション (全ゲーム共通) */
 export interface IBaseSearchOptions {
-  fen?: FEN;
+  /** 探索深さの制限 */
   depth?: number;
+  /** 思考時間の制限 (ミリ秒) */
   time?: number;
+  /** 探索ノード数の制限 */
   nodes?: number;
+  /** 中断制御用のシグナル */
   signal?: AbortSignal;
 }
 
-/** 思考状況の基本情報 */
+/** 思考状況の基本情報 (全ゲーム共通) */
 export interface IBaseSearchInfo {
   depth: number;
   score: number;
@@ -83,14 +90,17 @@ export interface IBaseSearchInfo {
   raw?: string;
 }
 
-/** 探索の最終結果 */
+/** 探索の最終結果 (全ゲーム共通) */
 export interface IBaseSearchResult {
+  /** 最善手 */
   bestMove: Move;
+  /** 次手の予想 */
   ponder?: Move;
+  /** 生の出力 */
   raw?: string;
 }
 
-/** エンジンと型のマッピング定義 */
+/** エンジンと型のマッピング定義 (Declaration Merging 用) */
 export interface EngineRegistry {}
 
 /** 利用者がエンジンを操作するためのメインインターフェース */
@@ -123,6 +133,8 @@ export interface IEngineBridge {
   getEngine<K extends keyof EngineRegistry>(id: K, strategy?: EngineLoadingStrategy): IEngine<any, any, any>;
   getEngine<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(id: string, strategy?: EngineLoadingStrategy): IEngine<O, I, R>;
   use<I, R>(middleware: IMiddleware<I, R>): void;
+  checkCapabilities(): Promise<ICapabilities>;
+  getLoader(): Promise<IEngineLoader>;
   dispose(): Promise<void>;
 }
 

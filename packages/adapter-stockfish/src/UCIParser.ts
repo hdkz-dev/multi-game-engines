@@ -1,12 +1,19 @@
 import {
   IProtocolParser,
-} from "./types";
-import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   Move,
-} from "../types";
+  Brand,
+} from "@multi-game-engines/core";
+
+/** チェス用の局面表記 (Forsyth-Edwards Notation) */
+export type FEN = Brand<string, "FEN">;
+
+/** チェス用の探索オプション (UCI標準規格) */
+export interface IChessSearchOptions extends IBaseSearchOptions {
+  fen?: FEN;
+}
 
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
 const MATE_SCORE_FACTOR = 10000;
@@ -14,11 +21,13 @@ const MATE_SCORE_FACTOR = 10000;
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+export class UCIParser implements IProtocolParser<IChessSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   /**
    * info 行を解析します。
    */
-  parseInfo(line: string): IBaseSearchInfo | null {
+  parseInfo(data: string | Uint8Array | unknown): IBaseSearchInfo | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("info ")) return null;
 
     const info: IBaseSearchInfo = {
@@ -64,7 +73,9 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
   /**
    * bestmove 行を解析します。
    */
-  parseResult(line: string): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | unknown): IBaseSearchResult | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
@@ -84,7 +95,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
   /**
    * 探索開始コマンドを生成します。
    */
-  createSearchCommand(options: IBaseSearchOptions): string[] {
+  createSearchCommand(options: IChessSearchOptions): string[] {
     if (!options.fen) {
       throw new Error("UCI requires a FEN position");
     }

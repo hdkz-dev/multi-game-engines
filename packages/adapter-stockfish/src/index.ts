@@ -1,10 +1,11 @@
 import "@multi-game-engines/core";
-import { IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import { IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import { IChessSearchOptions } from "./UCIParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
     stockfish: { 
-      options: IBaseSearchOptions; 
+      options: IChessSearchOptions; 
       info: IBaseSearchInfo; 
       result: IBaseSearchResult; 
     };
@@ -12,3 +13,4 @@ declare module "@multi-game-engines/core" {
 }
 
 export * from "./stockfish.js";
+export * from "./UCIParser.js";

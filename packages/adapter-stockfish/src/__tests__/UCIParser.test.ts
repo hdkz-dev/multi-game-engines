@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { UCIParser } from "../protocols/UCIParser";
-import { FEN } from "../types";
+import { UCIParser, FEN, IChessSearchOptions } from "../UCIParser.js";
 
 describe("UCIParser", () => {
   const parser = new UCIParser();
@@ -30,7 +29,7 @@ describe("UCIParser", () => {
   });
 
   it("should create correct search command array", () => {
-    const options = {
+    const options: IChessSearchOptions = {
       fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN,
       depth: 15,
       time: 1000,

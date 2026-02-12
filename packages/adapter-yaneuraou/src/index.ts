@@ -1,5 +1,6 @@
 import "@multi-game-engines/core";
-import { ISHOGISearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import { IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import { ISHOGISearchOptions } from "./usi-types.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {

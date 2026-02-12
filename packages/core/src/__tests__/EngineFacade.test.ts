@@ -5,11 +5,10 @@ import {
   IBaseSearchInfo, 
   IBaseSearchResult, 
   ISearchTask, 
-  FEN,
   IMiddleware,
   IEngineAdapter,
   Move
-} from "../types";
+} from "../types.js";
 
 /**
  * EngineFacade の結合テスト。
@@ -41,7 +40,7 @@ describe("EngineFacade", () => {
   it("探索リクエストが連続した場合、前のタスクを自動的に停止すること", async () => {
     const adapter = createMockAdapter();
     const facade = new EngineFacade(adapter, []);
-    const options: IBaseSearchOptions = { fen: "startpos" as FEN };
+    const options: IBaseSearchOptions = {};
 
     // 1回目の探索を開始
     const search1 = facade.search(options);
@@ -67,7 +66,7 @@ describe("EngineFacade", () => {
     };
 
     const facade = new EngineFacade(adapter, [middleware]);
-    const options: IBaseSearchOptions = { fen: "startpos" as FEN };
+    const options: IBaseSearchOptions = {};
 
     const result = await facade.search(options);
 
@@ -84,10 +83,10 @@ describe("EngineFacade", () => {
     facade.onInfo(infoSpy);
 
     // 1回目の探索
-    await facade.search({ fen: "pos1" as FEN });
+    await facade.search({});
     
     // 2回目の探索
-    await facade.search({ fen: "pos2" as FEN });
+    await facade.search({});
 
     // 両方の探索から info が届いているはず (mock では各1回)
     expect(infoSpy).toHaveBeenCalledTimes(2);
@@ -123,7 +122,6 @@ describe("EngineFacade", () => {
     controller.abort("already aborted");
 
     await facade.search({ 
-      fen: "startpos" as FEN,
       signal: controller.signal 
     });
 
