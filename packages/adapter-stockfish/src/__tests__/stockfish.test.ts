@@ -31,11 +31,6 @@ describe("StockfishAdapter", () => {
     removeEventListener = vi.fn();
     dispatchEvent = vi.fn().mockReturnValue(true);
 
-    constructor() {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
-      currentMockWorker = this;
-    }
-
     triggerMessage(data: unknown) {
       if (this.onmessage) {
         this.onmessage({ data } as MessageEvent);
@@ -45,7 +40,13 @@ describe("StockfishAdapter", () => {
 
   beforeEach(() => {
     currentMockWorker = null;
-    vi.stubGlobal("Worker", MockWorker);
+
+    // 2026 Best Practice: Factory function mock to capture instance without `this` aliasing
+    vi.stubGlobal("Worker", vi.fn().mockImplementation(function() {
+      const worker = new MockWorker();
+      currentMockWorker = worker;
+      return worker;
+    }));
     
     adapter = new StockfishAdapter();
     mockLoader = {
@@ -65,6 +66,7 @@ describe("StockfishAdapter", () => {
   });
 
   it("should initialize correctly with load()", async () => {
+    // load() は内部で UCI プロトコルの初期化ハンドシェイク (uci -> uciok) を行います
     await adapter.load(mockLoader);
     
     expect(mockLoader.loadResource).toHaveBeenCalledWith("stockfish", adapter.sources.main);
@@ -75,14 +77,15 @@ describe("StockfishAdapter", () => {
   it("should perform search correctly", async () => {
     await adapter.load(mockLoader);
 
+    // 探索コマンド送信
     const task = adapter.searchRaw("go depth 1");
     
-    // Verify info stream
+    // Verify info stream: 思考中の情報 (info) がストリーム経由で取得できること
     const infoReader = task.info[Symbol.asyncIterator]();
     const firstInfo = await infoReader.next();
     expect(firstInfo.value).toMatchObject({ depth: 1, score: 10 });
 
-    // Verify result
+    // Verify result: 最終結果 (bestmove) が Promise で解決されること
     const result = await task.result;
     expect(result.bestMove).toBe("e2e4");
   });
@@ -94,6 +97,7 @@ describe("StockfishAdapter", () => {
     await adapter.stop();
 
     expect(currentMockWorker?.postMessage).toHaveBeenCalledWith("stop");
+    // 停止時はタスクが Reject される仕様
     await expect(task.result).rejects.toThrow("Search aborted");
   });
 

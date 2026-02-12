@@ -72,4 +72,18 @@ describe("BaseAdapter", () => {
     adapter.testProgress(progress);
     expect(spy).toHaveBeenCalledWith(progress);
   });
+
+  it("should handle telemetry events", () => {
+    const adapter = new TestAdapter();
+    const spy = vi.fn();
+    adapter.onTelemetry(spy);
+
+    const event: ITelemetryEvent = {
+      event: "search_start",
+      timestamp: Date.now(),
+      attributes: { engine: "test" },
+    };
+    adapter.testTelemetry(event);
+    expect(spy).toHaveBeenCalledWith(event);
+  });
 });

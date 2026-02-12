@@ -3,11 +3,19 @@
  * 2026年 Web 標準準拠のゲームエンジン・ブリッジ・ライブラリ。
  */
 
+// 公開インターフェースと型定義
 export * from "./types";
-export * from "./bridge";
-export * from "./adapters";
-export * from "./protocols";
-export * from "./capabilities";
-export * from "./errors";
-export * from "./storage";
-export * from "./workers";
+
+// メインエントリーポイント
+export { EngineBridge } from "./bridge";
+
+// アダプター開発者向け基盤
+export { BaseAdapter } from "./adapters";
+export { WorkerCommunicator } from "./workers";
+
+// プロトコルパーサー
+export { UCIParser, USIParser } from "./protocols";
+
+// ユーティリティ (必要に応じて)
+export { CapabilityDetector, SecurityAdvisor } from "./capabilities";
+export { EngineError } from "./errors";

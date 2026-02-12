@@ -121,9 +121,16 @@ export class EngineBridge implements IEngineBridge {
     T_OPTIONS extends IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo,
     T_RESULT extends IBaseSearchResult,
-  >(id: string): IEngine<T_OPTIONS, T_INFO, T_RESULT> {
+  >(id: string, strategy: EngineLoadingStrategy = "on-demand"): IEngine<T_OPTIONS, T_INFO, T_RESULT> {
     const cached = this.facades.get(id);
-    if (cached) return cached as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+    if (cached) {
+      const facade = cached as unknown as EngineFacade<T_OPTIONS, T_INFO, T_RESULT>;
+      facade.loadingStrategy = strategy;
+      if (strategy === "eager" && facade.status === "uninitialized") {
+        void facade.load();
+      }
+      return facade as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+    }
 
     const adapter = this.adapters.get(id);
     if (!adapter) {
@@ -140,7 +147,14 @@ export class EngineBridge implements IEngineBridge {
       adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
       sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[]
     );
+
+    facade.loadingStrategy = strategy;
     this.facades.set(id, facade as unknown as EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 先行ロードの実行
+    if (strategy === "eager") {
+      void facade.load();
+    }
     
     return facade;
   }
@@ -168,5 +182,27 @@ export class EngineBridge implements IEngineBridge {
   onGlobalTelemetry(callback: (id: string, event: ITelemetryEvent) => void): () => void {
     this.telemetryListeners.add(callback);
     return () => this.telemetryListeners.delete(callback);
+  }
+
+  /**
+   * ブリッジ全体を破棄し、全てのアダプターのリソースを解放します。
+   */
+  async dispose(): Promise<void> {
+    const disposePromises: Promise<void>[] = [];
+    for (const adapterId of this.adapters.keys()) {
+      const adapter = this.adapters.get(adapterId);
+      if (adapter) {
+        disposePromises.push(adapter.dispose());
+      }
+      this.unregisterAdapter(adapterId);
+    }
+    await Promise.all(disposePromises);
+
+    this.adapters.clear();
+    this.facades.clear();
+    this.statusListeners.clear();
+    this.progressListeners.clear();
+    this.telemetryListeners.clear();
+    this.loaderPromise = null;
   }
 }

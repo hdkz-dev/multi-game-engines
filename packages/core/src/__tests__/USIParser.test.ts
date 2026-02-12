@@ -16,6 +16,12 @@ describe("USIParser", () => {
     expect(info?.pv).toEqual(["7g7f", "3c3d"]);
   });
 
+  it("should parse mate scores correctly", () => {
+    const line = "info depth 5 score mate 2 nodes 100";
+    const info = parser.parseInfo(line);
+    expect(info?.score).toBe(200000); // 2 * 100000
+  });
+
   it("bestmove 行を正しく解析できること", () => {
     const line = "bestmove 7g7f ponder 3c3d";
     const result = parser.parseResult(line);
@@ -41,7 +47,7 @@ describe("USIParser", () => {
 
   it("時間制御コマンドを正しく生成できること (depthなし)", () => {
     const options = {
-      sfen: "startpos" as unknown as SFEN,
+      sfen: "startpos" as SFEN,
       btime: 1000,
       wtime: 2000,
       byoyomi: 100,

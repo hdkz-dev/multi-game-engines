@@ -47,6 +47,14 @@ class MockAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBase
   public testEmitStatusChange(status: EngineStatus) {
     this.emitStatusChange(status);
   }
+
+  public testEmitProgress(progress: ILoadProgress) {
+    this.emitProgress(progress);
+  }
+
+  public testEmitTelemetry(event: ITelemetryEvent) {
+    this.emitTelemetry(event);
+  }
 }
 
 describe("EngineBridge", () => {
@@ -71,6 +79,34 @@ describe("EngineBridge", () => {
     expect(statusSpy).toHaveBeenCalledTimes(1); 
   });
 
+  it("アダプター登録時にブリッジがグローバルな進捗状況を転送すること", () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    const progressSpy = vi.fn();
+
+    bridge.onGlobalProgress(progressSpy);
+    bridge.registerAdapter(adapter);
+
+    const progress: ILoadProgress = { phase: "downloading", percentage: 50 };
+    adapter.testEmitProgress(progress);
+
+    expect(progressSpy).toHaveBeenCalledWith("mock-engine", progress);
+  });
+
+  it("アダプター登録時にブリッジがグローバルなテレメトリを転送すること", () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    const telemetrySpy = vi.fn();
+
+    bridge.onGlobalTelemetry(telemetrySpy);
+    bridge.registerAdapter(adapter);
+
+    const event: ITelemetryEvent = { event: "test", timestamp: Date.now(), attributes: {} };
+    adapter.testEmitTelemetry(event);
+
+    expect(telemetrySpy).toHaveBeenCalledWith("mock-engine", event);
+  });
+
   it("ブリッジに追加されたミドルウェアが生成された Facade に反映されること", async () => {
     const bridge = new EngineBridge();
     const adapter = new MockAdapter();
@@ -90,5 +126,30 @@ describe("EngineBridge", () => {
 
     // ミドルウェアが適切な引数で呼ばれたか確認
     expect(middleware.onCommand).toHaveBeenCalledWith("go", expect.anything());
+  });
+
+  it("dispose() を呼び出すと全てのアダプターが破棄されること", async () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    const disposeSpy = vi.spyOn(adapter, "dispose");
+
+    bridge.registerAdapter(adapter);
+    await bridge.dispose();
+
+    expect(disposeSpy).toHaveBeenCalled();
+  });
+
+  it("unregisterAdapter() を呼び出すとイベントの転送が停止すること", () => {
+    const bridge = new EngineBridge();
+    const adapter = new MockAdapter();
+    const statusSpy = vi.fn();
+
+    bridge.registerAdapter(adapter);
+    bridge.onGlobalStatusChange(statusSpy);
+
+    bridge.unregisterAdapter("mock-engine");
+
+    adapter.testEmitStatusChange("ready");
+    expect(statusSpy).not.toHaveBeenCalled();
   });
 });

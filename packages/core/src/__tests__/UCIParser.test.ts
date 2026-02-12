@@ -17,6 +17,12 @@ describe("UCIParser", () => {
     expect(info?.pv).toEqual(["e2e4", "e7e5"]);
   });
 
+  it("should parse mate scores correctly", () => {
+    const line = "info depth 5 score mate 3 nodes 100";
+    const info = parser.parseInfo(line);
+    expect(info?.score).toBe(30000); // 3 * 10000
+  });
+
   it("should handle incomplete info lines without crashing", () => {
     const line = "info depth";
     const info = parser.parseInfo(line);
@@ -33,6 +39,13 @@ describe("UCIParser", () => {
     expect(Array.isArray(cmds)).toBe(true);
     expect(cmds[0]).toBe("position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     expect(cmds[1]).toBe("go depth 15 movetime 1000");
+  });
+
+  it("should parse bestmove and ponder correctly", () => {
+    const line = "bestmove e2e4 ponder e7e5";
+    const result = parser.parseResult(line);
+    expect(result?.bestMove).toBe("e2e4");
+    expect(result?.ponder).toBe("e7e5");
   });
 
   it("should prevent UCI command injection in FEN by filtering restricted characters", () => {

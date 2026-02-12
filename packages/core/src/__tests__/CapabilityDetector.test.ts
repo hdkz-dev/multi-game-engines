@@ -13,6 +13,9 @@ describe("CapabilityDetector", () => {
     });
     vi.stubGlobal("SharedArrayBuffer", {});
     vi.stubGlobal("WebTransport", {});
+    vi.stubGlobal("WebAssembly", {
+      validate: vi.fn().mockReturnValue(true),
+    });
   });
 
   afterEach(() => {
@@ -24,9 +27,18 @@ describe("CapabilityDetector", () => {
     
     expect(caps.opfs).toBe(true);
     expect(caps.wasmThreads).toBe(true);
+    expect(caps.wasmSimd).toBe(true);
     expect(caps.webNN).toBe(true);
     expect(caps.webGPU).toBe(true);
     expect(caps.webTransport).toBe(true);
+  });
+
+  it("should detect missing WASM SIMD support", async () => {
+    vi.stubGlobal("WebAssembly", {
+      validate: vi.fn().mockReturnValue(false),
+    });
+    const caps = await CapabilityDetector.detect();
+    expect(caps.wasmSimd).toBe(false);
   });
 
   it("should report missing capabilities in a restricted environment", async () => {

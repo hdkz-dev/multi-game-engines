@@ -14,7 +14,7 @@
 ## 📦 サポート状況 / Support Status
 
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
-- **Shogi**: やねうら王 (WASM) - **Work in Progress**
+- **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
 
 ## 🚀 クイックスタート / Quick Start
 

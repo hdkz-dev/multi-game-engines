@@ -1,48 +1,66 @@
 # Architecture & Design
 
-This document describes the design principles and technical architecture of the `multi-game-engines` project.
+This document explains the design principles and technical architecture of `multi-game-engines`.
 
 ## Design Principles
 
 1.  **Framework Agnostic**:
-    - The core library is built with pure TypeScript and standard Web APIs (AsyncIterable, AbortSignal, EventTarget).
-    - It does not depend on any specific UI framework like React, Vue, or Angular, allowing it to run in any environment (Browser, Worker, Node.js).
-2.  **Streaming I/O (Async Iterator)**:
-    - Thinking progress from the engine (moves, evaluations) is delivered via `AsyncIterable`. This enables intuitive real-time updates using `for await...of` loops.
-3.  **Modern Web Standards**:
-    - **OPFS (Origin Private File System)**: High-speed browser file system for persisting large WASM and evaluation data files.
-    - **SRI (Subresource Integrity)**: Mandatory integrity verification for all external resources.
-    - **WebAssembly (SIMD/Threads)**: Native support for optimized engine binaries.
+    - The core library is built with pure TypeScript and standard Web APIs (AsyncIterable, EventTarget, etc.).
+    - It does not depend on any specific UI framework like React, Vue, or Angular.
+2.  **Streaming I/O**:
+    - Engine thinking information (candidate moves, scores) is delivered via `AsyncIterable`. This allows for intuitive real-time updates using `for await...of` loops.
+3.  **Modern Web Standards (2026 Ready)**:
+    - **OPFS (Origin Private File System)**: Used for high-speed browser-based file persistence of large WASM binaries and evaluation files (falls back to IndexedDB).
+    - **WebAssembly (SIMD/Threads)**: Supports configurations that maximize engine performance.
+    - **AbortSignal & ReadableStream**: Standardized cancellation and data streaming.
 
 ## Core Concepts
 
-1.  **EngineBridge (Orchestrator)**: Manages engine lifecycle, adapter registry, and global middleware chains.
-2.  **IEngine (Facade)**: The primary user-facing API that hides implementation details.
-3.  **EngineAdapter**: The implementation layer that translates unified API calls into engine-specific protocols (e.g., UCI for Chess, USI for Shogi).
-4.  **EngineLoader (Infrastructure)**: Handles resource downloading, SRI validation, and OPFS caching.
-5.  **WorkerCommunicator**: Provides type-safe messaging with WebWorkers, including timeout and exception propagation.
+1.  **EngineBridge**: The orchestrator managing engine lifecycles, adapter registration, and global event monitoring.
+2.  **EngineFacade**: The unified interface users interact with directly. It hides implementation details and handles sequential task management.
+3.  **IEngineAdapter**: A strictly defined contract that all engine implementations must follow.
+4.  **EngineLoader**: Infrastructure layer for secure resource fetching (SRI validation) and persistent caching.
+5.  **WorkerCommunicator**: Abstraction for type-safe WebWorker communication with message buffering to prevent race conditions.
+
+## Engine Loading Strategy
+
+To optimize resource consumption and enhance user experience, the library provides three loading strategies:
+
+1.  **manual**:
+    - Resources are not fetched until `engine.load()` is explicitly called.
+    - Ideal for saving bandwidth or deferring loading until after license agreement.
+2.  **on-demand (Default)**:
+    - Similar to manual, but if `search()` is executed before loading, it automatically starts the load and waits for completion.
+    - The most convenient mode for developers, as it handles initialization transparently.
+3.  **eager**:
+    - Starts the background load immediately upon engine instance creation (`getEngine`).
+    - Ensures the engine is ready before the user starts interacting, providing a zero-latency experience.
+
+## Plugin System
+
+Anyone can create a plugin by implementing the `IEngineAdapter` interface exported by `@multi-game-engines/core`.
+
+### Extensibility
+
+The system provides a unified interface for common tasks (search, moves, evaluation) while allowing access to engine-specific features via TypeScript generics.
+
+```typescript
+// Type-safe access to engine-specific features
+const stockfish = bridge.getEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>('stockfish');
+stockfish.search({ fen: '...' as FEN, depth: 20 });
+```
+
+### Multi-Protocol Support
+
+Native support for **UCI (Universal Chess Interface)** and **USI (Universal Shogi Interface)** protocols. Each parser includes sanitization to prevent command injection.
 
 ## License Strategy
 
 - **Core**: MIT License. Contains no engine-specific code.
-- **Adapters**: Each adapter is a separate package with its own license. This allows including GPL-licensed engines (like Stockfish) in the ecosystem without forcing GPL on the core library or the user's application.
+- **Adapters**: Individual npm packages. This allows inclusion of GPL engines (like Stockfish/YaneuraOu) in the ecosystem without forcing GPL on the core library or user applications.
 
-## Loading Strategy
+## Lifecycle & Resource Management
 
-To balance license isolation and user experience, we provide three strategies:
-
-1.  **Manual**: Load starts only when the user explicitly triggers it (e.g., clicking an "Install" button).
-2.  **On-demand (Default)**: Automatically triggers loading if an engine feature (like searching) is called before the engine is ready.
-3.  **Eager**: Starts background loading immediately after application startup or adapter registration.
-
----
-
-## Detailed Implementation: The Pipeline
-
-When you call `engine.search()`, the following sequence occurs:
-
-1.  **Command Pipeline**: Middleware processing of search options -> UCI command generation.
-2.  **Task Management**: Automated stopping of any previous tasks (Mutual Exclusion).
-3.  **Real-time Feedback**: `info` stream processing with middleware -> `onInfo` event delivery.
-4.  **Final Result**: `bestmove` reception -> Result middleware -> Resolving the `search` Promise.
-5.  **Interruption**: `AbortSignal` monitoring. If aborted, the Promise is immediately rejected and the engine task is stopped.
+1.  **Persistent Listeners**: Event registrations like `onInfo` remain valid across consecutive search tasks.
+2.  **Clean Disposal**: `bridge.dispose()` stops all active workers and completely releases memory and resources.
+3.  **Security First**: SRI hash validation is mandatory for all external binaries. Tampered resources are blocked before execution.

@@ -1,3 +1,2 @@
 export { EngineBridge } from "./EngineBridge";
-export { EngineFacade } from "./EngineFacade";
-export { EngineLoader } from "./EngineLoader";
+// EngineFacade and EngineLoader are internal to the bridge and exposed via IEngine and IEngineLoader interfaces.
