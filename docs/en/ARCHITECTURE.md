@@ -22,6 +22,20 @@ This document explains the design principles and technical architecture of `mult
 4.  **EngineLoader**: Infrastructure layer for secure resource fetching (SRI validation) and persistent caching.
 5.  **WorkerCommunicator**: Abstraction for type-safe WebWorker communication with message buffering to prevent race conditions.
 
+## Engine Loading Strategy
+
+To optimize resource consumption and enhance user experience, the library provides three loading strategies:
+
+1.  **manual**:
+    - Resources are not fetched until `engine.load()` is explicitly called.
+    - Ideal for saving bandwidth or deferring loading until after license agreement.
+2.  **on-demand (Default)**:
+    - Similar to manual, but if `search()` is executed before loading, it automatically starts the load and waits for completion.
+    - The most convenient mode for developers, as it handles initialization transparently.
+3.  **eager**:
+    - Starts the background load immediately upon engine instance creation (`getEngine`).
+    - Ensures the engine is ready before the user starts interacting, providing a zero-latency experience.
+
 ## Plugin System
 
 Anyone can create a plugin by implementing the `IEngineAdapter` interface exported by `@multi-game-engines/core`.
