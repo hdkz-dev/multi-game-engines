@@ -112,4 +112,22 @@ describe("EngineFacade", () => {
     // onTelemetry はオプショナル
     expect(adapter.onTelemetry).toHaveBeenCalled();
   });
+
+  it("AbortSignal が既に aborted の場合、即座に探索を停止すること", async () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, []);
+    
+    const controller = new AbortController();
+    controller.abort("already aborted");
+
+    await facade.search({ 
+      fen: "startpos" as FEN,
+      signal: controller.signal 
+    });
+
+    // searchRaw は一度呼ばれるが、その直後に task.stop が呼ばれるはず
+    expect(adapter.searchRaw).toHaveBeenCalled();
+    const task = (vi.mocked(adapter.searchRaw).mock.results[0].value as ISearchTask<IBaseSearchInfo, IBaseSearchResult>);
+    expect(task.stop).toHaveBeenCalled();
+  });
 });

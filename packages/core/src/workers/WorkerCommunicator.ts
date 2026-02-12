@@ -127,9 +127,13 @@ export class WorkerCommunicator {
   }
 
   terminate(): void {
-    const error = new Error("Communicator terminated");
+    const error = new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator terminated");
     for (const exp of this.pendingExpectations) {
-      exp.reject(error);
+      try {
+        exp.reject(error);
+      } catch (err) {
+        console.error("[WorkerCommunicator] Error during expectation rejection:", err);
+      }
     }
     this.pendingExpectations.clear();
     this.messageListeners.clear();
