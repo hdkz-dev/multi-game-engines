@@ -121,9 +121,16 @@ export class EngineBridge implements IEngineBridge {
     T_OPTIONS extends IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo,
     T_RESULT extends IBaseSearchResult,
-  >(id: string): IEngine<T_OPTIONS, T_INFO, T_RESULT> {
+  >(id: string, strategy: EngineLoadingStrategy = "on-demand"): IEngine<T_OPTIONS, T_INFO, T_RESULT> {
     const cached = this.facades.get(id);
-    if (cached) return cached as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+    if (cached) {
+      const facade = cached as unknown as EngineFacade<T_OPTIONS, T_INFO, T_RESULT>;
+      facade.loadingStrategy = strategy;
+      if (strategy === "eager" && facade.status === "uninitialized") {
+        void facade.load();
+      }
+      return facade as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+    }
 
     const adapter = this.adapters.get(id);
     if (!adapter) {
@@ -140,7 +147,14 @@ export class EngineBridge implements IEngineBridge {
       adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
       sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[]
     );
+    
+    facade.loadingStrategy = strategy;
     this.facades.set(id, facade as unknown as EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 先行ロードの実行
+    if (strategy === "eager") {
+      void facade.load();
+    }
     
     return facade;
   }

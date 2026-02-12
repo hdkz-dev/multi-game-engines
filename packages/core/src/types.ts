@@ -16,6 +16,9 @@ export type Move = string & { readonly __brand: "Move" };
 /** エンジンの動作状態 */
 export type EngineStatus = "uninitialized" | "loading" | "ready" | "busy" | "error" | "terminated";
 
+/** エンジンのロード戦略 */
+export type EngineLoadingStrategy = "manual" | "on-demand" | "eager";
+
 /** ライセンス情報 */
 export interface ILicenseInfo {
   readonly name: string;
@@ -182,6 +185,8 @@ export interface IEngine<
   readonly version: string;
   /** 現在の状態 */
   readonly status: EngineStatus;
+  /** 現在のロード戦略 */
+  loadingStrategy: EngineLoadingStrategy;
 
   /** エンジンをロード（ダウンロード・初期化）します。 */
   load(): Promise<void>;
@@ -274,7 +279,10 @@ export interface IEngineBridge {
   /** アダプターの登録を解除します */
   unregisterAdapter(id: string): void;
   /** 指定されたエンジンの Facade インスタンスを取得します */
-  getEngine<T_O extends IBaseSearchOptions, T_I extends IBaseSearchInfo, T_R extends IBaseSearchResult>(id: string): IEngine<T_O, T_I, T_R>;
+  getEngine<T_O extends IBaseSearchOptions, T_I extends IBaseSearchInfo, T_R extends IBaseSearchResult>(
+    id: string, 
+    strategy?: EngineLoadingStrategy
+  ): IEngine<T_O, T_I, T_R>;
   /** グローバルミドルウェアを追加します */
   use<T_I = unknown, T_R = unknown>(middleware: IMiddleware<T_I, T_R>): void;
   /** リソースローダーを取得します */

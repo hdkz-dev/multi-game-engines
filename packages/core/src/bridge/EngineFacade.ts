@@ -23,6 +23,19 @@ export class EngineFacade<
   private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
   private infoListeners = new Set<(info: T_INFO) => void>();
   private isDisposed = false;
+  private _loadingStrategy: EngineLoadingStrategy = "on-demand";
+  
+  /** 2026 Best Practice: ロード戦略の管理 */
+  get loadingStrategy(): EngineLoadingStrategy {
+    return this._loadingStrategy;
+  }
+
+  set loadingStrategy(value: EngineLoadingStrategy) {
+    this._loadingStrategy = value;
+    if (value === "eager" && this.status === "uninitialized") {
+      void this.load();
+    }
+  }
 
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
@@ -46,6 +59,31 @@ export class EngineFacade<
    */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.isDisposed) throw new Error("Facade is disposed");
+
+    // 2026 Best Practice: ロード戦略に基づいた自動ロード処理
+    if (this.status === "uninitialized" || this.status === "error") {
+      if (this.loadingStrategy === "on-demand") {
+        await this.load();
+      } else if (this.loadingStrategy === "manual") {
+        throw new Error("Engine is not initialized. Call load() first or use 'on-demand' strategy.");
+      }
+    }
+
+    // ロード中（loading）の場合は完了を待機
+    if (this.status === "loading") {
+      await new Promise<void>((resolve, reject) => {
+        const unsub = this.onStatusChange((status) => {
+          if (status === "ready") {
+            unsub();
+            resolve();
+          } else if (status === "error" || status === "terminated") {
+            unsub();
+            reject(new Error(`Engine failed to load: ${status}`));
+          }
+        });
+      });
+    }
+
     await this.stop();
 
     const context: IMiddlewareContext<T_OPTIONS> = {
