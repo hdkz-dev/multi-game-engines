@@ -86,4 +86,15 @@ describe("WorkerCommunicator", () => {
 
     await expect(responsePromise).rejects.toThrow("Communicator terminated");
   });
+
+  it("Worker のエラー時に保留中の待機 Promise が Reject されること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
+    const responsePromise = communicator.expectMessage((data) => data === "never");
+
+    if (currentMockWorker?.onerror) {
+      currentMockWorker.onerror({ message: "Worker crashed" } as ErrorEvent);
+    }
+
+    await expect(responsePromise).rejects.toThrow("Worker crashed");
+  });
 });

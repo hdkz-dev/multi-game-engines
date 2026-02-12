@@ -33,6 +33,7 @@ describe("EngineFacade", () => {
     dispose: vi.fn().mockResolvedValue(undefined),
     onStatusChange: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),
+    onTelemetry: vi.fn().mockReturnValue(() => {}),
   } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
   it("探索リクエストが連続した場合、前のタスクを自動的に停止すること", async () => {
@@ -88,5 +89,27 @@ describe("EngineFacade", () => {
 
     // 両方の探索から info が届いているはず (mock では各1回)
     expect(infoSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("load() がアダプターの load を呼び出すこと", async () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, []);
+    await facade.load();
+    expect(adapter.load).toHaveBeenCalled();
+  });
+
+  it("各イベントの購読がアダプターに委譲されること", () => {
+    const adapter = createMockAdapter();
+    const facade = new EngineFacade(adapter, []);
+    
+    const spy = vi.fn();
+    facade.onStatusChange(spy);
+    facade.onProgress(spy);
+    facade.onTelemetry(spy);
+
+    expect(adapter.onStatusChange).toHaveBeenCalled();
+    expect(adapter.onProgress).toHaveBeenCalled();
+    // onTelemetry はオプショナル
+    expect(adapter.onTelemetry).toHaveBeenCalled();
   });
 });

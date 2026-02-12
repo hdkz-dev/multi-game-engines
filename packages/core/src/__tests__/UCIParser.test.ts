@@ -17,6 +17,12 @@ describe("UCIParser", () => {
     expect(info?.pv).toEqual(["e2e4", "e7e5"]);
   });
 
+  it("should parse mate scores correctly", () => {
+    const line = "info depth 5 score mate 3 nodes 100";
+    const info = parser.parseInfo(line);
+    expect(info?.score).toBe(30000); // 3 * 10000
+  });
+
   it("should handle incomplete info lines without crashing", () => {
     const line = "info depth";
     const info = parser.parseInfo(line);

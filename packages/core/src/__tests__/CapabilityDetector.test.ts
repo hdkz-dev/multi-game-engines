@@ -33,6 +33,14 @@ describe("CapabilityDetector", () => {
     expect(caps.webTransport).toBe(true);
   });
 
+  it("should detect missing WASM SIMD support", async () => {
+    vi.stubGlobal("WebAssembly", {
+      validate: vi.fn().mockReturnValue(false),
+    });
+    const caps = await CapabilityDetector.detect();
+    expect(caps.wasmSimd).toBe(false);
+  });
+
   it("should report missing capabilities in a restricted environment", async () => {
     // 一部の API を未定義にして制限環境をシミュレート
     vi.stubGlobal("navigator", {}); 
