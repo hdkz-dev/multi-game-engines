@@ -65,4 +65,5 @@ Native support for **UCI (Universal Chess Interface)** and **USI (Universal Shog
 2.  **Clean Disposal**: `bridge.dispose()` stops all active workers and completely releases memory and resources.
 3.  **Proactive Memory Management (Blob URL)**: `EngineLoader` automatically tracks Blob URL lifecycles and provides "Auto-Revocation" to explicitly `revoke` old resources when the same engine is reloaded.
 4.  **Security First**: SRI hash validation is mandatory for all external binaries. Supports W3C standard multi-hash formats.
-5.  **Modern Error Handling (Error Cause API)**: Low-level network and communication failures are wrapped in `EngineError` using the `Error Cause API` (2026 standard), preserving the original exception for advanced debugging.
+5.  **Managed Subscriptions**: `EngineFacade` tracks all subscriptions to adapters and ensures they are cleared when the facade is disposed.
+6.  **Modern Error Handling (Error Cause API)**: Low-level network and communication failures are wrapped in `EngineError` using the `Error Cause API` (2026 standard), preserving the original exception for advanced debugging.

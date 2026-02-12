@@ -26,7 +26,7 @@ type Move = string & { readonly __brand: "Move" };
 - `onInfo(callback)`: リアルタイムな思考配信の購読。
 - `loadingStrategy`: ロード戦略の動的な変更。
 - `stop()`: 現在の探索を安全に中断。
-- `dispose()`: 個別エンジンのリソース解放。
+- `dispose()`: 個別エンジンのリソース解放。アダプターへの全イベント購読（Managed Subscriptions）を自動解除。
 
 ## 3. セキュリティとインフラ
 
@@ -53,6 +53,6 @@ type Move = string & { readonly __brand: "Move" };
 
 ## 5. 品質保証 (Testing Philosophy)
 
-- **81項目のユニットテスト**: 主要ロジックおよびエッジケースのカバレッジ 100%。
+- **82項目のユニットテスト**: 主要ロジックおよびエッジケースのカバレッジ 100%。
 - **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を禁止。
 - **ライフサイクル検証**: 各ロード戦略や、実際の通信をシミュレートした網羅的な検証。

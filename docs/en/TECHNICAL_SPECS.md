@@ -23,7 +23,7 @@ The main API for consumers.
 - `onInfo(callback)`: Subscription to real-time thinking stream.
 - `loadingStrategy`: Dynamic strategy switching.
 - `stop()`: Safely aborts the current search.
-- `dispose()`: Releases resources for an individual engine.
+- `dispose()`: Releases resources for an individual engine. Automatically unbinds all subscriptions to adapters (Managed Subscriptions).
 
 ## 3. Security & Infrastructure
 
@@ -50,6 +50,6 @@ The main API for consumers.
 
 ## 5. Quality Assurance (Testing Philosophy)
 
-- **81 Unit Tests**: 100% logic and edge-case coverage.
+- **82 Unit Tests**: 100% logic and edge-case coverage.
 - **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
 - **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.
