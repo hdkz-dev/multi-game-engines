@@ -19,8 +19,11 @@ describe("StockfishAdapter", () => {
       } else if (typeof msg === "string" && msg.startsWith("position")) {
         // Prepare for search, no immediate response needed usually
       } else if (typeof msg === "string" && msg.startsWith("go")) {
+        const isLongSearch = msg.includes("depth 100");
         setTimeout(() => this.triggerMessage("info depth 1 score cp 10"), 10);
-        setTimeout(() => this.triggerMessage("bestmove e2e4"), 20);
+        if (!isLongSearch) {
+          setTimeout(() => this.triggerMessage("bestmove e2e4"), 20);
+        }
       } else if (msg === "stop") {
         // handled in logic
       }

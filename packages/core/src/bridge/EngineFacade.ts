@@ -101,6 +101,17 @@ export class EngineFacade<
     const task = this.adapter.searchRaw(command);
     this.activeTask = task;
 
+    // 2026 Best Practice: AbortSignal による外部からの中断制御
+    if (options.signal) {
+      if (options.signal.aborted) {
+        void task.stop();
+      } else {
+        options.signal.addEventListener("abort", () => {
+          void task.stop();
+        }, { once: true });
+      }
+    }
+
     // 非同期で Info ストリームの配信を開始 (2026 Best Practice: Background streaming)
     void this.pipeInfoStream(task, options);
 

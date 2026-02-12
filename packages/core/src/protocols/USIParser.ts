@@ -5,24 +5,14 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  ISHOGISearchOptions,
   Move,
-  SFEN,
 } from "../types";
 
 /** 
- * 詰みスコアを cp と区別するための係数。
- * 将棋エンジンの多くは、mate in N を極端に大きな値（例: 30000以上）で表現しますが、
- * ここでは UCI との一貫性を保ちつつ、十分大きな値として 100,000 を基準とします。
+ * 詰みスコアを cp と区別するための係数 (2026 Best Practice)
  */
 const MATE_SCORE_FACTOR = 100000;
-
-/** 将棋用の探索オプション拡張 */
-export interface ISHOGISearchOptions extends IBaseSearchOptions {
-  sfen: SFEN;
-  btime?: number;
-  wtime?: number;
-  byoyomi?: number;
-}
 
 /**
  * 将棋用 USI (Universal Shogi Interface) プロトコルパーサー。
@@ -101,12 +91,15 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, IBaseSear
     // インジェクション対策
     const safeSfen = options.sfen.replace(/[\r\n\0;]/g, "");
     
-    const commands: string[] = [
-      `position sfen ${safeSfen}`
-    ];
+    // USI プロトコル仕様: 'startpos' は SFEN キーワードなしで送る
+    const positionCmd = safeSfen === "startpos" 
+      ? "position startpos" 
+      : `position sfen ${safeSfen}`;
+
+    const commands: string[] = [positionCmd];
 
     let goCmd = "go";
-    if (options.depth) {
+    if (options.depth !== undefined) {
       goCmd += ` depth ${options.depth}`;
     } else {
       // 時間制御

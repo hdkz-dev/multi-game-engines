@@ -18,8 +18,11 @@ describe("YaneuraOuAdapter", () => {
       } else if (typeof msg === "string" && msg.startsWith("position")) {
         // Prepare
       } else if (typeof msg === "string" && msg.startsWith("go")) {
+        const isLongSearch = msg.includes("depth 100");
         setTimeout(() => this.triggerMessage("info depth 1 score cp 10"), 10);
-        setTimeout(() => this.triggerMessage("bestmove 7g7f"), 20);
+        if (!isLongSearch) {
+          setTimeout(() => this.triggerMessage("bestmove 7g7f"), 20);
+        }
       } else if (msg === "stop") {
         // handled
       }

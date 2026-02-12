@@ -44,11 +44,13 @@ describe("SecurityAdvisor", () => {
     expect(SecurityAdvisor.getStatus().sriSupported).toBe(true);
   });
 
-  it("should validate SRI hash formats including SHA-384 and SHA-512", () => {
+  it("should validate SRI hash formats including multi-hash support", () => {
     expect(SecurityAdvisor.isValidSRI("sha256-abc123==")).toBe(true);
     expect(SecurityAdvisor.isValidSRI("sha384-def456==")).toBe(true);
     expect(SecurityAdvisor.isValidSRI("sha512-ghi789==")).toBe(true);
+    expect(SecurityAdvisor.isValidSRI("sha256-abc123== sha384-def456==")).toBe(true);
     expect(SecurityAdvisor.isValidSRI("invalid-hash")).toBe(false);
+    expect(SecurityAdvisor.isValidSRI("sha256-abc123== invalid")).toBe(false);
     expect(SecurityAdvisor.isValidSRI("")).toBe(false);
   });
 

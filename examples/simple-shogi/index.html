@@ -76,7 +76,8 @@
                 await engine.load();
                 appendLog('Engine ready.');
             } catch (err) {
-                appendLog(`Error: ${err.message}`);
+                const message = err instanceof Error ? err.message : String(err);
+                appendLog(`Error: ${message}`);
             }
         };
 
@@ -92,13 +93,19 @@
                 });
                 appendLog(`Best Move: ${result.bestMove}`);
             } catch (err) {
-                appendLog(`Search stopped: ${err.message}`);
+                const message = err instanceof Error ? err.message : String(err);
+                appendLog(`Search stopped: ${message}`);
             }
         };
 
         stopBtn.onclick = async () => {
-            await engine.stop();
-            appendLog('Stop command sent.');
+            try {
+                await engine.stop();
+                appendLog('Stop command sent.');
+            } catch (err) {
+                const message = err instanceof Error ? err.message : String(err);
+                appendLog(`Stop error: ${message}`);
+            }
         };
     </script>
 </body>

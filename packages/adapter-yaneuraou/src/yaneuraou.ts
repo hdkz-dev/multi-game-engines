@@ -37,12 +37,12 @@ export class YaneuraOuAdapter extends BaseAdapter<
 
   readonly license: ILicenseInfo = {
     name: "GPL-3.0-only",
-    url: "https://github.com/aneurao/YaneuraOu/blob/master/LICENSE",
+    url: "https://github.com/yaneurao/YaneuraOu/blob/master/LICENSE",
   };
 
   readonly sources: Record<string, IEngineSourceConfig> = {
     main: {
-      // TODO: 実際の WASM ビルドの URL を指定
+      // TODO: 実際の WASM ビルドの URL を指定。ビルド時に SRI とサイズを自動生成することを推奨。
       url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/yaneuraou-wasm@0.1.0/dist/yaneuraou.js",
       type: "worker-js",
       sri: "sha384-placeholder", 
@@ -66,7 +66,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
       
       await this.communicator.expectMessage<string>(
         (data) => data === "usiok",
-        { timeoutMs: 5000, signal: AbortSignal.timeout(5000) }
+        { signal: AbortSignal.timeout(5000) }
       );
 
       this.emitStatusChange("ready");
@@ -85,6 +85,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
     }
 
     this.cleanupPendingTask();
+    this.emitStatusChange("busy");
 
     // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
     const infoStream = new ReadableStream<IBaseSearchInfo>({
@@ -135,7 +136,11 @@ export class YaneuraOuAdapter extends BaseAdapter<
   }
 
   async stop(): Promise<void> {
-    this.communicator?.postMessage(this.parser.createStopCommand());
+    if (!this.communicator) {
+      console.warn(`[${this.id}] Cannot stop: Engine is not loaded.`);
+      return;
+    }
+    this.communicator.postMessage(this.parser.createStopCommand());
     this.cleanupPendingTask("Search aborted");
   }
 
@@ -169,6 +174,11 @@ export class YaneuraOuAdapter extends BaseAdapter<
         // すでにクローズされている場合は無視
       }
       this.infoController = null;
+    }
+
+    // 探索終了後に ready 状態に戻す (dispose 中は除外)
+    if (this._status === "busy") {
+      this.emitStatusChange("ready");
     }
   }
 }

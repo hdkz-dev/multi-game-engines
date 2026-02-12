@@ -82,11 +82,16 @@ export class EngineLoader implements IEngineLoader {
 
     } catch (error) {
       if (error instanceof EngineError) throw error;
+      
+      const errorCode = (error instanceof Error && error.name === "AbortError") 
+        ? EngineErrorCode.NETWORK_ERROR 
+        : EngineErrorCode.NETWORK_ERROR; // 2026: More specific codes could be mapped here
+
       throw new EngineError(
-        EngineErrorCode.NETWORK_ERROR,
+        errorCode,
         `Network error while fetching engine resource: ${config.url}`,
         engineId,
-        error
+        { cause: error } // Error Cause API (2026 standard)
       );
     }
   }
