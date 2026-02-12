@@ -7,6 +7,8 @@ import {
   IBaseSearchResult, 
   ISearchTask,
   EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
   FEN,
   Move
 } from "../types";

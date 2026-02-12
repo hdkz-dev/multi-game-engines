@@ -31,16 +31,27 @@ export class SecurityAdvisor {
 
   /**
    * SRI ハッシュが有効な形式かチェックします。
+   * W3C SRI 仕様に準拠し、スペース区切りのマルチハッシュ形式をサポートします。
    */
   static isValidSRI(sri: string): boolean {
-    return /^sha(256|384|512)-[A-Za-z0-9+/=]+$/.test(sri);
+    if (!sri) return false;
+    const parts = sri.split(/\s+/);
+    return parts.every(part => /^sha(256|384|512)-[A-Za-z0-9+/=]+$/.test(part));
   }
 
   /**
    * 指定した URL からリソースを SRI 付きで安全に取得するための fetch オプションを生成します。
+   * SRI が指定されているにもかかわらず形式が不正な場合は、整合性を保証できないため
+   * 空のオプションを返すのではなく、ブラウザのデフォルト挙動に任せるか、呼び出し側でエラーにすべきですが、
+   * ここでは安全なデフォルトを提供し、無効な場合は警告ログを出力します。
    */
   static getSafeFetchOptions(sri?: string): RequestInit {
-    if (!sri || !this.isValidSRI(sri)) return {};
+    if (!sri) return {};
+
+    if (!this.isValidSRI(sri)) {
+      console.warn(`[SecurityAdvisor] Invalid SRI format detected: "${sri}". Integrity check will be skipped.`);
+      return {};
+    }
     
     return {
       integrity: sri,

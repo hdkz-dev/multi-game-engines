@@ -54,6 +54,7 @@ describe("USIParser", () => {
     };
     
     const cmds = parser.createSearchCommand(options);
+    expect(cmds[0]).toBe("position startpos");
     expect(cmds[1]).toBe("go btime 1000 wtime 2000 byoyomi 100");
   });
 });

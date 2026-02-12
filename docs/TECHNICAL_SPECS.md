@@ -26,14 +26,15 @@ type Move = string & { readonly __brand: "Move" };
 - `onInfo(callback)`: リアルタイムな思考配信の購読。
 - `loadingStrategy`: ロード戦略の動的な変更。
 - `stop()`: 現在の探索を安全に中断。
-- `dispose()`: 個別エンジンのリソース解放。
+- `dispose()`: 個別エンジンのリソース解放。アダプターへの全イベント購読（Managed Subscriptions）を自動解除。
 
 ## 3. セキュリティとインフラ
 
 ### 3-1. EngineLoader (Modern Security)
-- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。空の SRI はエラーとなります。
+- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。空の SRI はエラーとなります。W3C 標準のマルチハッシュ（スペース区切り）に対応。
 - **動的 MIME タイプ**: WASM (`application/wasm`) や JS (`application/javascript`) を適切に識別。
-- **30秒タイムアウト**: ネットワークフェッチのハングを防止。
+- **Auto-Revocation**: メモリリーク防止のため、リロード時に古い Blob URL を自動的に `revoke`。
+- **30秒タイムアウト**: ネットワークフェッチのハングを防止。`Error Cause API` による詳細なエラー追跡。
 
 ### 3-2. ファイルストレージ (2026 Best Practice)
 - **環境適応**: `OPFSStorage` (高速) と `IndexedDBStorage` (汎用) を自動切り替え。
@@ -42,16 +43,16 @@ type Move = string & { readonly __brand: "Move" };
 
 ### 3-3. WorkerCommunicator (Race-condition Free)
 - **メッセージバッファリング**: `expectMessage` の呼び出し前に届いたメッセージも逃さず処理。
-- **例外伝播**: Worker 内部のエラーを正確に伝送。
+- **例外伝播**: Worker 内部のエラーや強制終了（terminate）時の保留タスクを正確に伝送。
 
 ## 4. プロトコル解析
 
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
-- **USIParser**: 将棋用。時間制御オプションおよび `mate` スコア変換 (係数 100,000) をサポート。
+- **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
 - **インジェクション対策**: FEN/SFEN に含まれる不正な文字を自動除去。
 
 ## 5. 品質保証 (Testing Philosophy)
 
-- **74項目のユニットテスト**: カバレッジ 100% (主要ロジック)。
+- **82項目のユニットテスト**: 主要ロジックおよびエッジケースのカバレッジ 100%。
 - **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を禁止。
 - **ライフサイクル検証**: 各ロード戦略や、実際の通信をシミュレートした網羅的な検証。

@@ -75,4 +75,18 @@ describe("EngineLoader", () => {
     loader.revoke("blob:test-url");
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:test-url");
   });
+
+  it("should proactively revoke old Blob URL when re-loading the same engine", async () => {
+    vi.mocked(mockStorage.get).mockResolvedValue(new ArrayBuffer(8));
+    const loader = new EngineLoader(mockStorage);
+    
+    // 1回目のロード
+    const url1 = await loader.loadResource("test-engine", mockConfig);
+    expect(url1).toBe("blob:test");
+
+    // 2回目のロード。この時、1回目の URL が revoke されるはず。
+    await loader.loadResource("test-engine", mockConfig);
+    
+    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(url1);
+  });
 });

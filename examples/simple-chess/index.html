@@ -76,7 +76,8 @@
                 await engine.load();
                 log('Engine loaded successfully!');
             } catch (e) {
-                log('Error loading engine: ' + e.message);
+                const message = e instanceof Error ? e.message : String(e);
+                log('Error loading engine: ' + message);
             }
         };
 
@@ -93,7 +94,8 @@
                 });
                 log(`[Result] Best Move: ${result.bestMove}`);
             } catch (e) {
-                log('Search error: ' + e.message);
+                const message = e instanceof Error ? e.message : String(e);
+                log('Search error: ' + message);
             } finally {
                 searchBtn.disabled = false;
                 stopBtn.disabled = true;
@@ -101,8 +103,13 @@
         };
 
         stopBtn.onclick = async () => {
-            await engine.stop();
-            log('Search stop request sent.');
+            try {
+                await engine.stop();
+                log('Search stop request sent.');
+            } catch (e) {
+                const message = e instanceof Error ? e.message : String(e);
+                log('Stop error: ' + message);
+            }
         };
 
         // Capability Check

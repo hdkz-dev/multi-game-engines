@@ -10,6 +10,7 @@ import {
   IMiddleware,
   ISearchTask,
   IMiddlewareContext,
+  EngineLoadingStrategy,
 } from "../types";
 
 /**
@@ -22,6 +23,11 @@ export class EngineFacade<
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
   private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
   private infoListeners = new Set<(info: T_INFO) => void>();
+  /** 
+   * 2026 Best Practice: Managed cleanup of listeners.
+   * Tracks all subscriptions to the adapter to ensure they are cleared when the facade is disposed.
+   */
+  private adapterUnsubscribers = new Set<() => void>();
   private isDisposed = false;
   private _loadingStrategy: EngineLoadingStrategy = "on-demand";
   
@@ -101,6 +107,20 @@ export class EngineFacade<
     const task = this.adapter.searchRaw(command);
     this.activeTask = task;
 
+    // 2026 Best Practice: AbortSignal management with proper cleanup to avoid listener leaks.
+    let abortCleanup: (() => void) | undefined;
+    if (options.signal) {
+      if (options.signal.aborted) {
+        void task.stop();
+      } else {
+        const onAbort = () => {
+          void task.stop();
+        };
+        options.signal.addEventListener("abort", onAbort, { once: true });
+        abortCleanup = () => options.signal?.removeEventListener("abort", onAbort);
+      }
+    }
+
     // 非同期で Info ストリームの配信を開始 (2026 Best Practice: Background streaming)
     void this.pipeInfoStream(task, options);
 
@@ -113,6 +133,7 @@ export class EngineFacade<
       }
       return result;
     } finally {
+      abortCleanup?.();
       if (this.activeTask === task) {
         this.activeTask = null;
       }
@@ -161,6 +182,7 @@ export class EngineFacade<
    * 思考状況を購読します。
    */
   onInfo(callback: (info: T_INFO) => void): () => void {
+    if (this.isDisposed) return () => {};
     this.infoListeners.add(callback);
     return () => this.infoListeners.delete(callback);
   }
@@ -169,21 +191,39 @@ export class EngineFacade<
    * エンジンの状態変化を購読します。
    */
   onStatusChange(callback: (status: EngineStatus) => void): () => void {
-    return this.adapter.onStatusChange(callback);
+    if (this.isDisposed) return () => {};
+    const unsub = this.adapter.onStatusChange(callback);
+    this.adapterUnsubscribers.add(unsub);
+    return () => {
+      unsub();
+      this.adapterUnsubscribers.delete(unsub);
+    };
   }
 
   /**
    * ロードの進捗状況を購読します。
    */
   onProgress(callback: (progress: ILoadProgress) => void): () => void {
-    return this.adapter.onProgress(callback);
+    if (this.isDisposed) return () => {};
+    const unsub = this.adapter.onProgress(callback);
+    this.adapterUnsubscribers.add(unsub);
+    return () => {
+      unsub();
+      this.adapterUnsubscribers.delete(unsub);
+    };
   }
 
   /**
    * テレメトリイベントを購読します。
    */
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
-    return this.adapter.onTelemetry?.(callback) || (() => {});
+    if (this.isDisposed) return () => {};
+    const unsub = this.adapter.onTelemetry?.(callback) || (() => {});
+    this.adapterUnsubscribers.add(unsub);
+    return () => {
+      unsub();
+      this.adapterUnsubscribers.delete(unsub);
+    };
   }
 
   async stop(): Promise<void> {
@@ -194,8 +234,16 @@ export class EngineFacade<
   }
 
   async dispose(): Promise<void> {
+    if (this.isDisposed) return;
     this.isDisposed = true;
+
+    // 解除されていないリスナーを全て一括解除
+    for (const unsub of this.adapterUnsubscribers) {
+      unsub();
+    }
+    this.adapterUnsubscribers.clear();
     this.infoListeners.clear();
+
     await this.stop();
     await this.adapter.dispose();
   }

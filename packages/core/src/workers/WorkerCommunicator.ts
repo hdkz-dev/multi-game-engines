@@ -48,10 +48,10 @@ export class WorkerCommunicator {
     }
 
     // どの expectation にもマッチしなかったメッセージはバッファに保存。
-    // 非同期通信において、expectMessage を呼び出す前にレスポンスが届くレースコンディションを防止。
     if (!handled) {
       this.messageBuffer.push(data);
       if (this.messageBuffer.length > this.MAX_BUFFER_SIZE) {
+        console.warn(`[WorkerCommunicator] Message buffer overflow (>${this.MAX_BUFFER_SIZE}). Dropping oldest message.`);
         this.messageBuffer.shift();
       }
     }
@@ -127,9 +127,13 @@ export class WorkerCommunicator {
   }
 
   terminate(): void {
-    const error = new Error("Communicator terminated");
+    const error = new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator terminated");
     for (const exp of this.pendingExpectations) {
-      exp.reject(error);
+      try {
+        exp.reject(error);
+      } catch (err) {
+        console.error("[WorkerCommunicator] Error during expectation rejection:", err);
+      }
     }
     this.pendingExpectations.clear();
     this.messageListeners.clear();

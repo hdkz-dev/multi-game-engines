@@ -67,7 +67,7 @@ export class StockfishAdapter extends BaseAdapter<
       // 2026 Best Practice: AbortSignal.timeout によるクリーンなタイムアウト制御
       await this.communicator.expectMessage<string>(
         (data) => data === "uciok",
-        { timeoutMs: 5000, signal: AbortSignal.timeout(5000) }
+        { signal: AbortSignal.timeout(5000) }
       );
 
       this.emitStatusChange("ready");
@@ -86,6 +86,7 @@ export class StockfishAdapter extends BaseAdapter<
     }
 
     this.cleanupPendingTask();
+    this.emitStatusChange("busy");
 
     // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
     const infoStream = new ReadableStream<IBaseSearchInfo>({
@@ -138,12 +139,16 @@ export class StockfishAdapter extends BaseAdapter<
   }
 
   async stop(): Promise<void> {
-    this.communicator?.postMessage(this.parser.createStopCommand());
     this.cleanupPendingTask("Search aborted");
+    if (!this.communicator) {
+      console.warn(`[${this.id}] Cannot stop: Engine is not loaded.`);
+      return;
+    }
+    this.communicator.postMessage(this.parser.createStopCommand());
   }
 
   async dispose(): Promise<void> {
-    this.cleanupPendingTask("Adapter disposed");
+    this.cleanupPendingTask("Adapter disposed", true);
     this.messageUnsubscriber?.();
     this.messageUnsubscriber = null;
     this.communicator?.terminate();
@@ -157,7 +162,7 @@ export class StockfishAdapter extends BaseAdapter<
     this.clearListeners();
   }
 
-  private cleanupPendingTask(reason?: string): void {
+  private cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
     if (reason) {
       this.pendingReject?.(new Error(reason));
     }
@@ -172,6 +177,11 @@ export class StockfishAdapter extends BaseAdapter<
         // すでにクローズされている場合は無視
       }
       this.infoController = null;
+    }
+
+    // 探索終了後に ready 状態に戻す (dispose 中は除外)
+    if (this._status === "busy" && !skipReadyTransition) {
+      this.emitStatusChange("ready");
     }
   }
 }
