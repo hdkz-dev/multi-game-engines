@@ -3,12 +3,12 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
 } from "@multi-game-engines/core";
-import { ISHOGISearchOptions, SFEN, Move } from "./usi-types.js";
+import { ISHOGISearchOptions, Move } from "./usi-types.js";
 
 /** 将棋用の思考情報 */
 export interface ISHOGISearchInfo extends IBaseSearchInfo {
-  depth: number;
-  score: number;
+  depth?: number;
+  score?: number;
   nps?: number;
   time?: number;
   pv?: Move[];

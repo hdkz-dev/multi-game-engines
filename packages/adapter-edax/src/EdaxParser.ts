@@ -7,6 +7,8 @@ export type Move = Brand<string, "Move">;
 
 /** オセロ用の思考情報 */
 export interface IOthelloSearchInfo extends IBaseSearchInfo {
+  depth?: number;
+  score?: number;
   isExact?: boolean;
   pv?: Move[];
 }
@@ -21,6 +23,7 @@ export interface IOthelloSearchResult extends IBaseSearchResult {
 export interface IOthelloSearchOptions extends IBaseSearchOptions {
   board?: OthelloBoard;
   isBlack?: boolean;
+  depth?: number;
 }
 
 export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult> {

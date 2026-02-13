@@ -48,8 +48,11 @@
 
 ```typescript
 // エンジン固有の型を指定して型安全にアクセス
-const stockfish = bridge.getEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>('stockfish');
-stockfish.search({ fen: '...' as FEN, depth: 20 }); // 型安全な探索
+import { IChessSearchOptions, FEN } from "@multi-game-engines/adapter-stockfish";
+
+const stockfish = bridge.getEngine('stockfish');
+// アダプターをインポートしていれば、EngineRegistry を通じて自動的に型が推論されます
+stockfish.search({ fen: '...' as FEN, depth: 20 }); 
 ```
 
 ### 多言語・多プロトコル対応

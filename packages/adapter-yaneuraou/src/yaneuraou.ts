@@ -6,6 +6,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import { USIParser, ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
 import { ISHOGISearchOptions } from "./usi-types.js";
@@ -81,7 +82,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
    */
   searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready");
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
     this.cleanupPendingTask();

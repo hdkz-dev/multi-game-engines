@@ -6,6 +6,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import { EdaxParser, IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult } from "./EdaxParser.js";
 
@@ -76,7 +77,7 @@ export class EdaxAdapter extends BaseAdapter<
 
   searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IOthelloSearchInfo, IOthelloSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready");
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
     this.cleanupPendingTask();
@@ -161,7 +162,11 @@ export class EdaxAdapter extends BaseAdapter<
     this.pendingReject = null;
 
     if (this.infoController) {
-      try { this.infoController.close(); } catch {}
+      try {
+        this.infoController.close();
+      } catch {
+        // Ignore error
+      }
       this.infoController = null;
     }
 

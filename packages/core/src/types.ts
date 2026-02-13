@@ -86,6 +86,7 @@ export interface IBaseSearchResult {
 }
 
 /** エンジンと型のマッピング定義 (Declaration Merging 用) */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EngineRegistry {}
 
 /** 利用者がエンジンを操作するためのメインインターフェース */

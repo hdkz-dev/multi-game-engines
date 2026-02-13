@@ -6,6 +6,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import { UCIParser, IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCIParser.js";
 
@@ -79,7 +80,7 @@ export class StockfishAdapter extends BaseAdapter<
    */
   searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IChessSearchInfo, IChessSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready");
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
     this.cleanupPendingTask();

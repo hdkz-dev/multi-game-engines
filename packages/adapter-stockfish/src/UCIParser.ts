@@ -15,8 +15,8 @@ export interface IChessSearchOptions extends IBaseSearchOptions {
 
 /** チェス用の思考情報 */
 export interface IChessSearchInfo extends IBaseSearchInfo {
-  depth: number;
-  score: number;
+  depth?: number;
+  score?: number;
   nps?: number;
   time?: number;
   pv?: Move[];

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { KataGoAdapter } from "../katago.js";
 import { IEngineLoader, EngineStatus } from "@multi-game-engines/core";
-import { Move } from "../GTPParser.js";
 
 describe("KataGoAdapter", () => {
   let currentMockWorker: MockWorker | null = null;
@@ -14,6 +13,7 @@ describe("KataGoAdapter", () => {
     addEventListener = vi.fn();
     removeEventListener = vi.fn();
     constructor() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       currentMockWorker = this;
     }
   }

@@ -6,6 +6,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import { GTPParser, IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js";
 
@@ -91,7 +92,7 @@ export class KataGoAdapter extends BaseAdapter<
 
   searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IGOSearchInfo, IGOSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready");
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
     this.cleanupPendingTask();
@@ -178,7 +179,11 @@ export class KataGoAdapter extends BaseAdapter<
     this.pendingReject = null;
 
     if (this.infoController) {
-      try { this.infoController.close(); } catch {}
+      try {
+        this.infoController.close();
+      } catch {
+        // Ignore error
+      }
       this.infoController = null;
     }
 

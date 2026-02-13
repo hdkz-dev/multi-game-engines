@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { EdaxParser, Move } from "../EdaxParser.js";
+import { EdaxParser } from "../EdaxParser.js";
 
 describe("EdaxParser", () => {
   const parser = new EdaxParser();

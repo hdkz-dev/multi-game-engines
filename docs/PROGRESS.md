@@ -3,6 +3,9 @@
 ## 📅 更新日: 2026年2月13日
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 最終洗練完了)
+- **IBaseSearchInfo の抽象化**: `depth` や `score` を Core から排除し、各アダプター固有の型定義へ移行。これにより Core の汎用性と各ゲームエンジンの型表現力を両立。
+- **全アダプターの整合性修正**: Stockfish, Katago, Mortal, Yaneuraou, Edax の全アダプターにおいて、Core の型変更に伴う不整合を解消し、型安全性を再構築。
+- **Lint 警告の徹底排除**: Declaration Merging 用の空インターフェースやテスト用の特殊な `this` 参照など、全ての Lint エラーと警告を解決。
 - **EngineFacade 修正**: `loaderProvider` を注入し、`load()` 時にアダプターへ正しい `IEngineLoader` を渡すよう修正。
 - **Zero-Any Architecture 完遂**: `getEngine` のジェネリクス改善、KataGo/Mortal アダプターの型安全な実装、テストコードからの `any` 排除を全て完了。
 - **ハンドルベースのライフサイクル**: 共有アダプターを安全に管理するための `ownsAdapter` 方式（ADR-024）を導入。

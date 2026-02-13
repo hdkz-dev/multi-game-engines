@@ -17,5 +17,7 @@ describe("GTPParser", () => {
     expect(info).not.toBeNull();
     expect(info?.visits).toBe(1000);
     expect(info?.winrate).toBe(0.55);
+    expect(info?.score).toBe(100); // (0.55 - 0.5) * 2000
+    expect(info?.depth).toBe(0);
   });
 });

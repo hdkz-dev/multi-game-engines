@@ -6,6 +6,7 @@ import {
   WorkerCommunicator,
   IEngineLoader,
   EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import { MahjongJSONParser, IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult } from "./MahjongJSONParser.js";
 
@@ -71,9 +72,9 @@ export class MortalAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array): ISearchTask<IMahjongSearchInfo, IMahjongSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IMahjongSearchInfo, IMahjongSearchResult> {
     if (this._status !== "ready") {
-      throw new Error("Engine is not ready");
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
     this.cleanupPendingTask();
@@ -152,7 +153,11 @@ export class MortalAdapter extends BaseAdapter<
     this.pendingReject = null;
 
     if (this.infoController) {
-      try { this.infoController.close(); } catch {}
+      try {
+        this.infoController.close();
+      } catch {
+        // Ignore error
+      }
       this.infoController = null;
     }
 

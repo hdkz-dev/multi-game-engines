@@ -11,6 +11,7 @@ describe("EdaxAdapter", () => {
     terminate = vi.fn();
     onmessage: ((ev: { data: unknown }) => void) | null = null;
     constructor() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       currentMockWorker = this;
     }
   }

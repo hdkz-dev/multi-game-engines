@@ -5,6 +5,8 @@ export type Move = Brand<string, "Move">;
 
 /** 囲碁用の思考情報 */
 export interface IGOSearchInfo extends IBaseSearchInfo {
+  depth?: number;
+  score?: number;
   winrate?: number;
   visits?: number;
   utility?: number;
