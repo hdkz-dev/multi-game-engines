@@ -12,7 +12,7 @@ import {
 } from "../types.js";
 
 describe("EngineFacade", () => {
-  let adapter: IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+  let adapter: any;
   let middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[];
 
   beforeEach(() => {
@@ -27,9 +27,9 @@ describe("EngineFacade", () => {
         parseResult: vi.fn(),
         createStopCommand: vi.fn().mockReturnValue("stop-command"),
         createOptionCommand: vi.fn(),
-      } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      },
       load: vi.fn().mockImplementation(async () => {
-        (adapter as { status: EngineStatus }).status = "ready";
+        adapter.status = "ready";
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () { 

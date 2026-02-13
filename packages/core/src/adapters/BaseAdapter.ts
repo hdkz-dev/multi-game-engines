@@ -52,11 +52,19 @@ export abstract class BaseAdapter<
    */
   searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready") {
-      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is not ready",
+        engineId: this.id
+      });
     }
 
     if (!this.communicator) {
-      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator not initialized", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "Communicator not initialized",
+        engineId: this.id
+      });
     }
 
     this.cleanupPendingTask("Replaced by new search");
@@ -158,14 +166,22 @@ export abstract class BaseAdapter<
    */
   async setOption(name: string, value: string | number | boolean): Promise<void> {
     if (this._status !== "ready" && this._status !== "busy") {
-      throw new EngineError(EngineErrorCode.NOT_READY, `Cannot set option: Engine is not ready (current status: ${this._status})`, this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: `Cannot set option: Engine is not ready (current status: ${this._status})`,
+        engineId: this.id
+      });
     }
     await this.sendOptionToWorker(name, value);
   }
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
     if (!this.communicator) {
-      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is not loaded",
+        engineId: this.id
+      });
     }
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
@@ -189,7 +205,11 @@ export abstract class BaseAdapter<
    */
   protected cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
     if (this.pendingReject) {
-      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason ?? "Task cleaned up", this.id));
+      this.pendingReject(new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: reason ?? "Task cleaned up",
+        engineId: this.id
+      }));
     }
     
     this.pendingResolve = null;

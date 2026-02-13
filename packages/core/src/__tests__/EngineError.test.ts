@@ -4,11 +4,11 @@ import { EngineErrorCode } from "../types.js";
 
 describe("EngineError", () => {
   it("should create an error with correct properties and name", () => {
-    const error = new EngineError(
-      EngineErrorCode.NETWORK_ERROR,
-      "test message",
-      "test-engine"
-    );
+    const error = new EngineError({
+      code: EngineErrorCode.NETWORK_ERROR,
+      message: "test message",
+      engineId: "test-engine"
+    });
 
     expect(error.message).toBe("test message");
     expect(error.code).toBe(EngineErrorCode.NETWORK_ERROR);
@@ -26,13 +26,13 @@ describe("EngineError", () => {
   });
 
   it("should return the same error if already an EngineError", () => {
-    const error = new EngineError(EngineErrorCode.INTERNAL_ERROR, "test");
+    const error = new EngineError({ code: EngineErrorCode.INTERNAL_ERROR, message: "test" });
     const result = EngineError.from(error);
     expect(result).toBe(error);
   });
 
   it("should capture stack trace if supported", () => {
-    const error = new EngineError(EngineErrorCode.UNKNOWN_ERROR, "test");
+    const error = new EngineError({ code: EngineErrorCode.UNKNOWN_ERROR, message: "test" });
     expect(error.stack).toBeDefined();
   });
 });

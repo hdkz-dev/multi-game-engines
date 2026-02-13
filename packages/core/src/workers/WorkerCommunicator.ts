@@ -125,7 +125,10 @@ export class WorkerCommunicator {
 
       if (options.timeoutMs) {
         timerId = setTimeout(() => {
-          wrappedReject(new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "Message expectation timed out"));
+          wrappedReject(new EngineError({
+            code: EngineErrorCode.SEARCH_TIMEOUT,
+            message: "Message expectation timed out"
+          }));
         }, options.timeoutMs);
       }
 

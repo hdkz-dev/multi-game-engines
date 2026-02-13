@@ -50,7 +50,11 @@ export class MortalAdapter extends BaseAdapter<
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
     if (!this.communicator) {
-      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is not loaded",
+        engineId: this.id
+      });
     }
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }

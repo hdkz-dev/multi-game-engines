@@ -92,9 +92,9 @@ describe("EngineBridge", () => {
       supportedEngines: ["engine1", "engine2"]
     };
 
-    bridge.use(mwSpecific as unknown as IMiddleware);
-    bridge.use(mwGlobal as unknown as IMiddleware);
-    bridge.use(mwMulti as unknown as IMiddleware);
+    bridge.use(mwSpecific as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+    bridge.use(mwGlobal as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+    bridge.use(mwMulti as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
     const engine1 = bridge.getEngine("engine1");
     const engine2 = bridge.getEngine("engine2");
