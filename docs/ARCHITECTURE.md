@@ -11,7 +11,7 @@
     - TypeScript の宣言併合を活用し、アダプターをインポートするだけで `bridge.getEngine('id')` の戻り値型が自動的に決定される「ゼロ構成型安全性」を実現します。
 3.  **フレームワーク非依存 (Framework Agnostic)**:
     - エンジンの思考状況（検討中の指し手やスコア）は `AsyncIterable` を用いて配信されます。これにより、`for await...of` ループを用いた直感的なリアルタイム更新が可能です。
-3.  **最新の Web 標準 API の活用 (2026 Ready)**:
+4.  **最新の Web 標準 API の活用 (2026 Ready)**:
     - **OPFS (Origin Private File System)**: 巨大な WASM や評価関数ファイルの永続化に、より高速なブラウザ内ファイルシステムを採用します（未サポート環境では IndexedDB へフォールバック）。
     - **WebAssembly (SIMD/Threads)**: エンジンの性能を最大限引き出すためのロード構成をサポートします。
     - **AbortSignal & ReadableStream**: 標準的な中断制御とデータストリーミング。

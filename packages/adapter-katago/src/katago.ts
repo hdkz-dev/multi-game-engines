@@ -63,6 +63,9 @@ export class KataGoAdapter extends BaseAdapter<
    * WASM とウェイトファイルを並列でロード。
    */
   async load(loader: IEngineLoader): Promise<void> {
+    if (!loader) {
+      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Loader is required for KataGoAdapter", this.id);
+    }
     this.activeLoader = loader;
     this.emitStatusChange("loading");
 
@@ -90,12 +93,12 @@ export class KataGoAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IGOSearchInfo, IGOSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<IGOSearchInfo, IGOSearchResult> {
     if (this._status !== "ready") {
       throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
-    this.cleanupPendingTask();
+    this.cleanupPendingTask("Replaced by new search");
     this.emitStatusChange("busy");
 
     const infoStream = new ReadableStream<IGOSearchInfo>({
@@ -112,16 +115,9 @@ export class KataGoAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    if (Array.isArray(command)) {
-      for (const cmd of command) {
-        this.communicator?.postMessage(cmd);
-      }
-    } else {
-      this.communicator?.postMessage(command);
-    }
-
     this.messageUnsubscriber?.();
 
+    // 2026 Best Practice: 応答の取りこぼしを防ぐため、送信前にリスナーを登録
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
       if (typeof data !== "string") return;
 
@@ -137,6 +133,14 @@ export class KataGoAdapter extends BaseAdapter<
       }
     }) || null;
 
+    if (Array.isArray(command)) {
+      for (const cmd of command) {
+        this.communicator?.postMessage(cmd);
+      }
+    } else {
+      this.communicator?.postMessage(command);
+    }
+
     return {
       info: infoStream,
       result: resultPromise,
@@ -151,7 +155,10 @@ export class KataGoAdapter extends BaseAdapter<
   }
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
-    this.communicator?.postMessage(this.parser.createOptionCommand(name, value));
+    if (!this.communicator) {
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+    }
+    this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
 
   async dispose(): Promise<void> {
@@ -172,8 +179,8 @@ export class KataGoAdapter extends BaseAdapter<
   }
 
   private cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
-    if (reason) {
-      this.pendingReject?.(new Error(reason));
+    if (this.pendingReject) {
+      this.pendingReject(new Error(reason ?? "Task cleaned up"));
     }
     this.pendingResolve = null;
     this.pendingReject = null;

@@ -35,7 +35,7 @@ export abstract class BaseAdapter<
   }
 
   abstract load(loader?: IEngineLoader): Promise<void>;
-  abstract searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<T_INFO, T_RESULT>;
+  abstract searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<T_INFO, T_RESULT>;
   
   /**
    * エンジンオプションを設定します。

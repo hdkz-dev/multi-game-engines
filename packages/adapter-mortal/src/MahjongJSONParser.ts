@@ -42,7 +42,7 @@ export interface IMahjongSearchOptions extends IBaseSearchOptions {
 }
 
 export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
-  parseInfo(data: string | Uint8Array | unknown): IMahjongSearchInfo | null {
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): IMahjongSearchInfo | null {
     const json = this.ensureObject(data);
     if (!json || (json.type !== "info" && !json.evaluations)) return null;
     return {
@@ -53,7 +53,7 @@ export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions,
     };
   }
 
-  parseResult(data: string | Uint8Array | unknown): IMahjongSearchResult | null {
+  parseResult(data: string | Uint8Array | Record<string, unknown>): IMahjongSearchResult | null {
     const json = this.ensureObject(data);
     if (!json || (json.type !== "result" && !json.bestMove)) return null;
     return {
@@ -63,12 +63,12 @@ export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions,
     };
   }
 
-  createSearchCommand(options: IMahjongSearchOptions): unknown {
+  createSearchCommand(options: IMahjongSearchOptions): string | string[] | Uint8Array | Record<string, unknown> {
     return { type: "search", ...options };
   }
 
-  createStopCommand(): unknown { return { type: "stop" }; }
-  createOptionCommand(name: string, value: string | number | boolean): unknown {
+  createStopCommand(): string | Uint8Array | Record<string, unknown> { return { type: "stop" }; }
+  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array | Record<string, unknown> {
     return { type: "setoption", name, value };
   }
 

@@ -72,7 +72,7 @@ export interface IBaseSearchOptions {
 
 /** 
  * 思考状況の基本情報 (全ゲーム共通) 
- * Core は抽象的な情報のみを保持します。
+ * Core は、全アダプターで共通して利用可能な最も抽象的な情報（インフラ層の共通情報）のみを保持します。
  */
 export interface IBaseSearchInfo {
   /** エンジンからの生の出力。デバッグやログ記録のために保持します。 */
@@ -80,7 +80,7 @@ export interface IBaseSearchInfo {
 }
 
 /** 探索の最終結果 (全ゲーム共通) */
-export interface IBaseSearchResult {
+export interface IBaseSearchResult extends Record<string, unknown> {
   /** エンジンからの生の最終出力 */
   raw?: string;
 }
@@ -144,7 +144,7 @@ export interface IEngineAdapter<
   readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
 
   load(loader?: IEngineLoader): Promise<void>;
-  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<T_INFO, T_RESULT>;
+  searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<T_INFO, T_RESULT>;
   setOption(name: string, value: string | number | boolean): Promise<void>;
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
@@ -154,12 +154,12 @@ export interface IEngineAdapter<
 
 /** パーサーインターフェース */
 export interface IProtocolParser<T_OPTIONS, T_INFO, T_RESULT> {
-  parseInfo(data: string | Uint8Array | unknown): T_INFO | null;
-  parseResult(data: string | Uint8Array | unknown): T_RESULT | null;
-  /** 探索コマンドを作成します。2026 Best Practice: オブジェクト (unknown) を直接返せるようにし、Worker への転送効率を最大化します。 */
-  createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array | unknown;
-  createStopCommand(): string | Uint8Array | unknown;
-  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array | unknown;
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): T_INFO | null;
+  parseResult(data: string | Uint8Array | Record<string, unknown>): T_RESULT | null;
+  /** 探索コマンドを作成します。2026 Best Practice: オブジェクトを直接返せるようにし、Worker への転送効率を最大化します。 */
+  createSearchCommand(options: T_OPTIONS): string | string[] | Uint8Array | Record<string, unknown>;
+  createStopCommand(): string | Uint8Array | Record<string, unknown>;
+  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array | Record<string, unknown>;
 }
 
 /** 探索タスク */
@@ -206,9 +206,9 @@ export enum MiddlewarePriority {
   CRITICAL = 1000,
 }
 
-export interface IMiddleware<T_INFO = unknown, T_RESULT = unknown, T_OPTIONS = IBaseSearchOptions> {
+export interface IMiddleware<T_OPTIONS = IBaseSearchOptions, T_INFO = unknown, T_RESULT = unknown> {
   priority?: MiddlewarePriority;
-  onCommand?(command: string | string[] | Uint8Array | unknown, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | unknown | Promise<string | string[] | Uint8Array | unknown>;
+  onCommand?(command: string | string[] | Uint8Array | Record<string, unknown>, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | Record<string, unknown> | Promise<string | string[] | Uint8Array | Record<string, unknown>>;
   onInfo?(info: T_INFO, context: IMiddlewareContext<T_OPTIONS>): T_INFO | Promise<T_INFO>;
   onResult?(result: T_RESULT, context: IMiddlewareContext<T_OPTIONS>): T_RESULT | Promise<T_RESULT>;
 }

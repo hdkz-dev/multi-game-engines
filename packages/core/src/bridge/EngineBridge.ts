@@ -29,7 +29,8 @@ export class EngineBridge implements IEngineBridge {
   private adapters = new Map<string, IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
   private facades = new Map<string, EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
   private adapterUnsubscribers = new Map<string, (() => void)[]>();
-  private middlewares: IMiddleware<unknown, unknown>[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private middlewares: IMiddleware<IBaseSearchOptions, any, any>[] = [];
   
   private statusListeners = new Set<(id: string, status: EngineStatus) => void>();
   private progressListeners = new Set<(id: string, progress: ILoadProgress) => void>();
@@ -163,7 +164,7 @@ export class EngineBridge implements IEngineBridge {
     // Facade Design Pattern: 内部のアダプターとミドルウェアを隠蔽し、型安全なインターフェースを提供。
     const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
       adapter as unknown as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-      sortedMiddlewares as unknown as IMiddleware<T_INFO, T_RESULT>[],
+      sortedMiddlewares as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[],
       () => this.getLoader(),
       false // ownsAdapter: false (Managed by Bridge)
     );
@@ -181,8 +182,9 @@ export class EngineBridge implements IEngineBridge {
   /**
    * グローバルに適用されるミドルウェアを追加します。
    */
-  use<T_INFO = unknown, T_RESULT = unknown>(middleware: IMiddleware<T_INFO, T_RESULT>): void {
-    this.middlewares.push(middleware);
+  use<T_OPTIONS = IBaseSearchOptions, T_INFO = unknown, T_RESULT = unknown>(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): void {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.middlewares.push(middleware as any);
     this.facades.clear();
   }
 

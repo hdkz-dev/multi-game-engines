@@ -30,7 +30,7 @@ export interface IGOSearchOptions extends IBaseSearchOptions {
 }
 
 export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInfo, IGOSearchResult> {
-  parseInfo(data: string | Uint8Array | unknown): IGOSearchInfo | null {
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): IGOSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
@@ -47,7 +47,7 @@ export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInf
     return info;
   }
 
-  parseResult(data: string | Uint8Array | unknown): IGOSearchResult | null {
+  parseResult(data: string | Uint8Array | Record<string, unknown>): IGOSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("= ")) return null;
@@ -59,8 +59,8 @@ export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInf
   createSearchCommand(options: IGOSearchOptions): string | string[] {
     const commands: string[] = [];
     if (options.sgf) {
-      // 2026 Best Practice: Command Injection Prevention
-      const safeSgf = options.sgf.replace(/[\r\n\0;]/g, "");
+      // 2026 Best Practice: Command Injection Prevention (Keep semicolons for SGF nodes)
+      const safeSgf = options.sgf.replace(/[\r\n\0]/g, "");
       commands.push(`loadsgf ${safeSgf}`);
     }
     if (options.btime !== undefined && options.wtime !== undefined && options.byoyomi !== undefined) {
@@ -71,5 +71,10 @@ export class GTPParser implements IProtocolParser<IGOSearchOptions, IGOSearchInf
   }
 
   createStopCommand(): string { return "stop"; }
-  createOptionCommand(name: string, value: string | number | boolean): string { return `set ${name} ${value}`; }
+  createOptionCommand(name: string, value: string | number | boolean): string {
+    // 2026 Best Practice: Command Injection Prevention
+    const safeName = String(name).replace(/[\r\n\0;]/g, "");
+    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
+    return `set ${safeName} ${safeValue}`;
+  }
 }

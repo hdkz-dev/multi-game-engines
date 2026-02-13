@@ -55,6 +55,9 @@ export class YaneuraOuAdapter extends BaseAdapter<
    * エンジンのロードと初期化。
    */
   async load(loader: IEngineLoader): Promise<void> {
+    if (!loader) {
+      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Loader is required for YaneuraOuAdapter", this.id);
+    }
     this.activeLoader = loader;
     this.emitStatusChange("loading");
 
@@ -80,12 +83,12 @@ export class YaneuraOuAdapter extends BaseAdapter<
   /**
    * 探索の実行。
    */
-  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<ISHOGISearchInfo, ISHOGISearchResult> {
     if (this._status !== "ready") {
       throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
-    this.cleanupPendingTask();
+    this.cleanupPendingTask("Replaced by new search");
     this.emitStatusChange("busy");
 
     // 2026 Best Practice: Async Iterable (Stream) によるリアルタイムな思考状況の配信。
@@ -103,17 +106,10 @@ export class YaneuraOuAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    if (Array.isArray(command)) {
-      for (const cmd of command) {
-        this.communicator?.postMessage(cmd);
-      }
-    } else {
-      this.communicator?.postMessage(command);
-    }
-
     // 既存のリスナーを解除
     this.messageUnsubscriber?.();
 
+    // 2026 Best Practice: 応答の取りこぼしを防ぐため、送信前にリスナーを登録
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
       if (typeof data !== "string") return;
 
@@ -128,6 +124,14 @@ export class YaneuraOuAdapter extends BaseAdapter<
         this.cleanupPendingTask();
       }
     }) || null;
+
+    if (Array.isArray(command)) {
+      for (const cmd of command) {
+        this.communicator?.postMessage(cmd);
+      }
+    } else {
+      this.communicator?.postMessage(command);
+    }
 
     return {
       info: infoStream,
@@ -146,7 +150,10 @@ export class YaneuraOuAdapter extends BaseAdapter<
   }
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
-    this.communicator?.postMessage(this.parser.createOptionCommand(name, value));
+    if (!this.communicator) {
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+    }
+    this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
 
   async dispose(): Promise<void> {
@@ -165,8 +172,8 @@ export class YaneuraOuAdapter extends BaseAdapter<
   }
 
   private cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
-    if (reason) {
-      this.pendingReject?.(new Error(reason));
+    if (this.pendingReject) {
+      this.pendingReject(new Error(reason ?? "Task cleaned up"));
     }
     
     this.pendingResolve = null;

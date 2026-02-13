@@ -52,6 +52,9 @@ export class MortalAdapter extends BaseAdapter<
    * エンジンのロードと初期化。
    */
   async load(loader: IEngineLoader): Promise<void> {
+    if (!loader) {
+      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Loader is required for MortalAdapter", this.id);
+    }
     this.activeLoader = loader;
     this.emitStatusChange("loading");
 
@@ -72,12 +75,12 @@ export class MortalAdapter extends BaseAdapter<
     }
   }
 
-  searchRaw(command: string | string[] | Uint8Array | unknown): ISearchTask<IMahjongSearchInfo, IMahjongSearchResult> {
+  searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<IMahjongSearchInfo, IMahjongSearchResult> {
     if (this._status !== "ready") {
       throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
     }
 
-    this.cleanupPendingTask();
+    this.cleanupPendingTask("Replaced by new search");
     this.emitStatusChange("busy");
 
     const infoStream = new ReadableStream<IMahjongSearchInfo>({
@@ -94,24 +97,30 @@ export class MortalAdapter extends BaseAdapter<
       this.pendingReject = reject;
     });
 
-    const message = Array.isArray(command) ? command[0] : command;
-    this.communicator?.postMessage(message);
-
     this.messageUnsubscriber?.();
 
+    // 2026 Best Practice: 応答の取りこぼしを防ぐため、送信前にリスナーを登録
     this.messageUnsubscriber = this.communicator?.onMessage((data) => {
       // 2026 Best Practice: オブジェクトを直接処理し、不要な文字列化を避ける。
-      const info = this.parser.parseInfo(data);
+      const info = this.parser.parseInfo(data as Record<string, unknown>);
       if (info) {
         this.infoController?.enqueue(info);
       }
 
-      const result = this.parser.parseResult(data);
+      const result = this.parser.parseResult(data as Record<string, unknown>);
       if (result) {
         this.pendingResolve?.(result);
         this.cleanupPendingTask();
       }
     }) || null;
+
+    if (Array.isArray(command)) {
+      for (const cmd of command) {
+        this.communicator?.postMessage(cmd);
+      }
+    } else {
+      this.communicator?.postMessage(command);
+    }
 
     return {
       info: infoStream,
@@ -127,7 +136,10 @@ export class MortalAdapter extends BaseAdapter<
   }
 
   protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
-    this.communicator?.postMessage({ type: "setoption", name, value });
+    if (!this.communicator) {
+      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+    }
+    this.communicator.postMessage({ type: "setoption", name, value });
   }
 
   async dispose(): Promise<void> {
@@ -146,8 +158,8 @@ export class MortalAdapter extends BaseAdapter<
   }
 
   private cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
-    if (reason) {
-      this.pendingReject?.(new Error(reason));
+    if (this.pendingReject) {
+      this.pendingReject(new Error(reason ?? "Task cleaned up"));
     }
     this.pendingResolve = null;
     this.pendingReject = null;

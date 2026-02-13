@@ -21,6 +21,7 @@ describe("KataGoAdapter", () => {
   beforeEach(() => {
     currentMockWorker = null;
     vi.stubGlobal("Worker", MockWorker);
+    vi.clearAllMocks();
   });
 
   afterEach(() => {

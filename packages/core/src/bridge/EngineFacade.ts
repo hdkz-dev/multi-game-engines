@@ -48,7 +48,7 @@ export class EngineFacade<
 
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    private readonly middlewares: IMiddleware<T_INFO, T_RESULT, T_OPTIONS>[] = [],
+    private readonly middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
     private readonly loaderProvider?: () => Promise<IEngineLoader>,
     /** 2026 Best Practice: アダプターの所有権管理 (true の場合のみ dispose を呼び出す) */
     public readonly ownsAdapter: boolean = true

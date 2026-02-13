@@ -63,9 +63,9 @@ describe("EngineFacade", () => {
 
   it("ミドルウェアが正しい順序でコマンドと結果を加工すること", async () => {
     const adapter = createMockAdapter();
-    const middleware: IMiddleware<IBaseSearchInfo, IMockResult> = {
+    const middleware: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IMockResult> = {
       onCommand: async (cmd) => `${cmd}_modified`,
-      onResult: async (res) => ({ ...res, move: `${res.move}_modified` }),
+      onResult: async (res) => ({ ...(res as Record<string, unknown>), move: `${(res as IMockResult).move}_modified` } as IMockResult),
     };
 
     const facade = new EngineFacade(adapter, [middleware]);

@@ -27,7 +27,7 @@ export interface IOthelloSearchOptions extends IBaseSearchOptions {
 }
 
 export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult> {
-  parseInfo(data: string | Uint8Array | unknown): IOthelloSearchInfo | null {
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): IOthelloSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data.trim();
     const info: IOthelloSearchInfo = { depth: 0, score: 0, raw: line };
@@ -42,7 +42,7 @@ export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthel
     return (depthMatch || midMatch || exactMatch) ? info : null;
   }
 
-  parseResult(data: string | Uint8Array | unknown): IOthelloSearchResult | null {
+  parseResult(data: string | Uint8Array | Record<string, unknown>): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data.trim();
     const moveMatch = line.match(/^(=?\s*)([a-h][1-8])$/i);
@@ -62,5 +62,10 @@ export class EdaxParser implements IProtocolParser<IOthelloSearchOptions, IOthel
   }
 
   createStopCommand(): string { return "stop"; }
-  createOptionCommand(name: string, value: string | number | boolean): string { return `${name} ${value}`; }
+  createOptionCommand(name: string, value: string | number | boolean): string {
+    // 2026 Best Practice: Command Injection Prevention
+    const safeName = String(name).replace(/[\r\n\0;]/g, "");
+    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
+    return `${safeName} ${safeValue}`;
+  }
 }

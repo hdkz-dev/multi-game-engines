@@ -7,6 +7,8 @@ import { EngineError } from "../errors/EngineError";
  */
 export class EngineLoader implements IEngineLoader {
   private activeBlobs = new Map<string, string>(); // blobKey -> blobUrl
+  /** 2026 Best Practice: 同一エンジンの並列ロードを防止するためのロック管理 */
+  private inflightLoads = new Map<string, Promise<Record<string, string>>>();
 
   constructor(private readonly storage: IFileStorage) {}
 
@@ -23,6 +25,21 @@ export class EngineLoader implements IEngineLoader {
    * 全てのリソースが正常に取得できた場合のみ解決されます。
    */
   async loadResources(
+    engineId: string,
+    configs: Record<string, IEngineSourceConfig>
+  ): Promise<Record<string, string>> {
+    const existing = this.inflightLoads.get(engineId);
+    if (existing) return existing;
+
+    const promise = this._loadResourcesImpl(engineId, configs).finally(() => {
+      this.inflightLoads.delete(engineId);
+    });
+
+    this.inflightLoads.set(engineId, promise);
+    return promise;
+  }
+
+  private async _loadResourcesImpl(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>
   ): Promise<Record<string, string>> {
@@ -54,6 +71,12 @@ export class EngineLoader implements IEngineLoader {
         let data: ArrayBuffer | null = null;
         try {
           data = await this.storage.get(cacheKey);
+          
+          // 2026 Best Practice: キャッシュデータの SRI 検証
+          if (data && !(await this.verifySRI(data, config.sri))) {
+            console.warn(`[EngineLoader] SRI mismatch for cached resource: ${blobKey}. Refetching...`);
+            data = null;
+          }
         } catch (err) {
           console.warn(`[EngineLoader] Cache read failed for ${blobKey}:`, err);
         }
@@ -73,6 +96,25 @@ export class EngineLoader implements IEngineLoader {
     );
 
     return results;
+  }
+
+  /**
+   * データのハッシュ値が SRI と一致するか検証します。
+   */
+  private async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
+    try {
+      // sha384-xxxx 形式を想定
+      const [algo, hashBase64] = sri.split("-");
+      if (algo !== "sha384") return true; // 未対応のアルゴリズムはスキップ（現状は sha384 必須）
+
+      const hashBuffer = await crypto.subtle.digest("SHA-384", data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashBase64Actual = btoa(String.fromCharCode(...hashArray));
+
+      return hashBase64Actual === hashBase64;
+    } catch {
+      return false;
+    }
   }
 
   private async fetchResource(url: string, sri: string, engineId: string): Promise<ArrayBuffer> {
@@ -98,7 +140,7 @@ export class EngineLoader implements IEngineLoader {
         EngineErrorCode.NETWORK_ERROR,
         `Network error while fetching resource: ${url}`,
         engineId,
-        { cause: error }
+        error
       );
     }
   }

@@ -32,7 +32,7 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   /**
    * info 行を解析します。
    */
-  parseInfo(data: string | Uint8Array | unknown): ISHOGISearchInfo | null {
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
@@ -80,7 +80,7 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   /**
    * bestmove 行を解析します。
    */
-  parseResult(data: string | Uint8Array | unknown): ISHOGISearchResult | null {
+  parseResult(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("bestmove ")) return null;
@@ -138,6 +138,9 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    return `setoption name ${name} value ${value}`;
+    // 2026 Best Practice: Command Injection Prevention
+    const safeName = String(name).replace(/[\r\n\0;]/g, "");
+    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
+    return `setoption name ${safeName} value ${safeValue}`;
   }
 }
