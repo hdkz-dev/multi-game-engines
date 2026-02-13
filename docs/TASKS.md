@@ -21,9 +21,18 @@
 - [x] **ユニットテスト**: 計 82 ケースの網羅的検証。
 - [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation, Handle-based Lifecycle）へ昇華。
 - [x] **ゼロ・エニーの完遂**: Core, Adapter, Test における `any` の完全排除と `unknown` への移行。
+- [x] **PR #18 監査対応**: 再帰的 JSON 検証、テレメトリ統合、テストの疎結合化などの最終洗練。
 - [ ] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
 - [ ] **packages/ui**: エンジン状況可視化（検討窓）コンポーネント。
 - [ ] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
+
+---
+
+## 🛠️ 技術的負債・個別課題 (Pending Issues)
+
+- [ ] **adapter-edax**: ダミー SRI ハッシュ (`sha256-dummy`) を本番用バイナリのハッシュ値へ置換。
+- [ ] **多言語対応**: `EngineError` の `remediation` 文字列を `locales/` 配下の定義へ移行検討。
+- [ ] **テレメトリ拡張**: 長時間稼働時の `DefaultTelemetryMiddleware.startTimes` キャッシュパージ機構の検討。
 
 ---
 
