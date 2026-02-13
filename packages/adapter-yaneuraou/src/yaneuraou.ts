@@ -46,6 +46,7 @@ export class YaneuraOuAdapter extends BaseAdapter<
       type: "worker-js",
       // Security: Valid SRI format for validation to pass during development.
       // MUST be updated to the actual binary hash upon publication.
+      // TODO: Replace with actual SRI hash before production release
       sri: "sha384-DummyHashForValidationToPassDuringDevelopment1234567890abcdefghij", 
       size: 0,
     },

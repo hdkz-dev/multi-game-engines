@@ -43,6 +43,7 @@ export class EdaxAdapter extends BaseAdapter<
       // NOTE: 2026年時点の公開 WASM バイナリを想定
       url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/edax-wasm@0.1.0/dist/edax.js",
       type: "worker-js",
+      // TODO: Replace with actual SRI hash before production release
       sri: "sha384-DummyHashForEdaxValidationToPassDuringDevelopment1234567890abcdef",
       size: 0,
     },

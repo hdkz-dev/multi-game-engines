@@ -47,12 +47,14 @@ export class KataGoAdapter extends BaseAdapter<
     main: {
       url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/katago-wasm@0.1.0/dist/katago.js",
       type: "worker-js",
+      // TODO: Replace with actual SRI hash before production release
       sri: "sha384-DummyHashForValidationToPassDuringDevelopment1234567890abcdefghij",
       size: 0,
     },
     weights: {
       url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/katago-wasm@0.1.0/dist/katago.bin.gz",
       type: "wasm", // 汎用バイナリとして扱う
+      // TODO: Replace with actual SRI hash before production release
       sri: "sha384-DummyHashForWeightsValidationToPassDuringDevelopment1234567890",
       size: 0,
     }

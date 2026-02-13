@@ -43,6 +43,7 @@ export class MortalAdapter extends BaseAdapter<
     main: {
       url: "https://cdn.jsdelivr.net/npm/@multi-game-engines/mortal-wasm@0.1.0/dist/mortal.js",
       type: "worker-js",
+      // TODO: Replace with actual SRI hash before production release
       sri: "sha384-DummyHashForMortalValidationToPassDuringDevelopment1234567890abcdef",
       size: 0,
     },

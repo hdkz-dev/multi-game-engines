@@ -43,6 +43,7 @@ export class StockfishAdapter extends BaseAdapter<
       url: "https://cdn.jsdelivr.net/npm/stockfish@16.1.0/src/stockfish.js",
       type: "worker-js",
       // Security: VALID SHA-384 hash for Stockfish 16.1.0 (verified 2026-02-11)
+      // TODO: Re-verify SRI hash before production release
       sri: "sha384-EUJMxvxCASaeLnRP7io1aDfkBp2KloJPummBkV0HAQcG4B+4mCEYqP1Epy2E8ocv", 
       size: 38415,
     },
