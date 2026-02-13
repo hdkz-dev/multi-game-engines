@@ -1,8 +1,13 @@
 import { 
   IProtocolParser,
-  EngineError,
-  EngineErrorCode 
+  ProtocolValidator,
+  Brand
 } from "@multi-game-engines/core";
+
+/** 囲碁の盤面データ */
+export type GOBoard = Brand<string, "GOBoard">;
+/** 囲碁の指し手 */
+export type GOMove = Brand<string, "GOMove">;
 
 export class GTPParser implements IProtocolParser<
   IGOSearchOptions,
@@ -34,7 +39,7 @@ export class GTPParser implements IProtocolParser<
     if (move) {
       return {
         raw: data,
-        bestMove: move,
+        bestMove: move as GOMove,
       };
     }
     return null;
@@ -45,27 +50,15 @@ export class GTPParser implements IProtocolParser<
     const sBoard = String(options.board);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    // GTP allows ; for SGF, but rejects newlines
-    if (/[\r\n\0]/.test(sBoard)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in board data.",
-        remediation: "Remove control characters (\\r, \\n, \\0) from board input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sBoard, "board data", true);
 
     commands.push(`loadboard ${sBoard}`);
-
-    const sColor = String(options.color);
-    if (/[\r\n\0]/.test(sColor)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in color.",
-        remediation: "Remove control characters (\\r, \\n, \\0) from color."
-      });
-    }
     
-    const color = (sColor === "white" || sColor === "W") ? "white" : "black";
+    const sColor = String(options.color);
+    ProtocolValidator.assertNoInjection(sColor, "color", true);
+    
+    const normalized = sColor.toLowerCase();
+    const color = (normalized === "white" || normalized === "w") ? "white" : "black";
     
     commands.push(`genmove ${color}`);
     return commands;
@@ -83,22 +76,16 @@ export class GTPParser implements IProtocolParser<
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    // GTP allows ; for SGF, but rejects newlines
-    if (/[\r\n\0]/.test(sName) || /[\r\n\0]/.test(sValue)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in option name or value.",
-        remediation: "Remove control characters (\\r, \\n, \\0) from input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sName, "option name", true);
+    ProtocolValidator.assertNoInjection(sValue, "option value", true);
 
     return `set_option ${sName} ${sValue}`;
   }
 }
 
 export interface IGOSearchOptions {
-  board: string;
-  color: "black" | "white";
+  board: GOBoard;
+  color: "black" | "white" | "B" | "W";
   signal?: AbortSignal;
 }
 
@@ -110,5 +97,5 @@ export interface IGOSearchInfo {
 
 export interface IGOSearchResult {
   raw: string;
-  bestMove: string;
+  bestMove: GOMove;
 }

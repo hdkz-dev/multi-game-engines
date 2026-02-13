@@ -1,8 +1,11 @@
 import { 
   IProtocolParser,
-  EngineError,
-  EngineErrorCode 
+  ProtocolValidator,
+  Brand
 } from "@multi-game-engines/core";
+
+/** オセロの盤面データ */
+export type OthelloBoard = Brand<string, "OthelloBoard">;
 
 export class EdaxParser implements IProtocolParser<
   IOthelloSearchOptions,
@@ -42,13 +45,7 @@ export class EdaxParser implements IProtocolParser<
     const sBoard = String(options.board);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    if (/[\r\n\0;]/.test(sBoard)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in board data.",
-        remediation: "Remove control characters (\\r, \\n, \\0, ;) from board input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sBoard, "board data");
 
     commands.push(`setboard ${sBoard}`);
     commands.push(`go ${options.depth ?? 20}`);
@@ -67,20 +64,15 @@ export class EdaxParser implements IProtocolParser<
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in option name or value.",
-        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sName, "option name");
+    ProtocolValidator.assertNoInjection(sValue, "option value");
 
     return `set ${sName} ${sValue}`;
   }
 }
 
 export interface IOthelloSearchOptions {
-  board: string;
+  board: OthelloBoard;
   depth?: number;
   signal?: AbortSignal;
 }

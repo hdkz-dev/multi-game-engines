@@ -2,8 +2,7 @@ import {
   IProtocolParser, 
   IBaseSearchInfo, 
   IBaseSearchResult,
-  EngineError,
-  EngineErrorCode 
+  ProtocolValidator 
 } from "@multi-game-engines/core";
 import { ISHOGISearchOptions, Move } from "./usi-types.js";
 
@@ -97,13 +96,7 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
     const commands: string[] = [];
     if (options.sfen) {
       // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-      if (/[\r\n\0;]/.test(options.sfen)) {
-        throw new EngineError({
-          code: EngineErrorCode.SECURITY_ERROR,
-          message: "Potential command injection detected in SFEN string.",
-          remediation: "Remove control characters (\\r, \\n, \\0, ;) from SFEN."
-        });
-      }
+      ProtocolValidator.assertNoInjection(options.sfen, "SFEN string");
       commands.push(`position sfen ${options.sfen}`);
     }
     
@@ -130,13 +123,8 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in option name or value.",
-        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sName, "option name");
+    ProtocolValidator.assertNoInjection(sValue, "option value");
 
     return `setoption name ${sName} value ${sValue}`;
   }

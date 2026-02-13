@@ -16,6 +16,8 @@ export class EngineLoader implements IEngineLoader {
       case "wasm":
         return "application/wasm";
       case "eval-data":
+      case "native":
+      case "webgpu-compute":
         return "application/octet-stream";
       case "worker-js":
       default:
@@ -35,9 +37,10 @@ export class EngineLoader implements IEngineLoader {
         // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
         if (config.url.startsWith("http://")) {
           throw new EngineError({
-            code: EngineErrorCode.INTERNAL_ERROR,
+            code: EngineErrorCode.SECURITY_ERROR,
             message: "Insecure connection (HTTP) is not allowed for sensitive engine files.",
-            engineId
+            engineId,
+            remediation: "Use HTTPS for all engine resource URLs."
           });
         }
 

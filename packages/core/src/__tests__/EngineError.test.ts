@@ -35,4 +35,21 @@ describe("EngineError", () => {
     const error = new EngineError({ code: EngineErrorCode.UNKNOWN_ERROR, message: "test" });
     expect(error.stack).toBeDefined();
   });
+
+  it("should set remediation when provided", () => {
+    const error = new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "test",
+      remediation: "Fix COOP/COEP headers"
+    });
+    expect(error.remediation).toBe("Fix COOP/COEP headers");
+  });
+
+  it("should set remediation for SecurityError via from()", () => {
+    const secErr = new Error("blocked");
+    secErr.name = "SecurityError";
+    const wrapped = EngineError.from(secErr);
+    expect(wrapped.code).toBe(EngineErrorCode.SECURITY_ERROR);
+    expect(wrapped.remediation).toBeDefined();
+  });
 });

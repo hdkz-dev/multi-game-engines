@@ -4,8 +4,7 @@ import {
   IBaseSearchInfo, 
   IBaseSearchResult, 
   Brand,
-  EngineError,
-  EngineErrorCode 
+  ProtocolValidator 
 } from "@multi-game-engines/core";
 
 /** チェス用の局面表記 (Forsyth-Edwards Notation) */
@@ -122,13 +121,7 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
     }
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    if (/[\r\n\0;]/.test(options.fen)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in FEN string.",
-        remediation: "Remove control characters (\\r, \\n, \\0, ;) from FEN."
-      });
-    }
+    ProtocolValidator.assertNoInjection(options.fen, "FEN string");
     
     const commands: string[] = [
       `position fen ${options.fen}`
@@ -155,13 +148,8 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Potential command injection detected in option name or value.",
-        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
-      });
-    }
+    ProtocolValidator.assertNoInjection(sName, "option name");
+    ProtocolValidator.assertNoInjection(sValue, "option value");
 
     return `setoption name ${sName} value ${sValue}`;
   }

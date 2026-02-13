@@ -152,5 +152,8 @@ export class EngineBridge implements IEngineBridge {
     this.adapters.clear();
     this.engineInstances.clear();
     this.middlewares = [];
+    this.activeEngines.clear();
+    this.loader = null;
+    this.loaderPromise = null;
   }
 }

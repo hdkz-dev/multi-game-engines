@@ -206,7 +206,7 @@ export abstract class BaseAdapter<
   protected cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
     if (this.pendingReject) {
       this.pendingReject(new EngineError({
-        code: EngineErrorCode.INTERNAL_ERROR,
+        code: EngineErrorCode.SEARCH_ABORTED,
         message: reason ?? "Task cleaned up",
         engineId: this.id
       }));

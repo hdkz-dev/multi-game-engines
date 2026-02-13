@@ -20,6 +20,7 @@ export enum EngineErrorCode {
   NOT_READY = "NOT_READY",
   SECURITY_ERROR = "SECURITY_ERROR",
   LIFECYCLE_ERROR = "LIFECYCLE_ERROR",
+  SEARCH_ABORTED = "SEARCH_ABORTED",
   UNKNOWN_ERROR = "UNKNOWN_ERROR"
 }
 
@@ -209,6 +210,11 @@ export interface IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
    * ミドルウェアはこのメソッドを通じて、システムのテレメトリパイプラインにイベントを送信できます。
    */
   readonly emitTelemetry: (event: ITelemetryEvent) => void;
+  /** 
+   * 探索ごとに生成される一意の ID。
+   * テレメトリの計測などで、並行する探索を区別するために使用されます。
+   */
+  readonly telemetryId?: string;
 }
 
 export enum MiddlewarePriority {

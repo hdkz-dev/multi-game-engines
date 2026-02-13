@@ -100,7 +100,9 @@ export class EngineFacade<
       options,
       emitTelemetry: (event) => {
         this.adapter.emitTelemetry?.(event);
-      }
+      },
+      // 2026 Best Practice: 並行探索時のテレメトリ識別のための ID 生成
+      telemetryId: crypto.randomUUID?.() ?? Math.random().toString(36).substring(2)
     };
 
     // 1. コマンド生成
@@ -131,7 +133,8 @@ export class EngineFacade<
           for (const l of this.infoListeners) l(info);
         }
       } catch (err) {
-        // 2026 Best Practice: アダプターの emitTelemetry を呼び出す
+        // 2026 Best Practice: テレメトリ発行と同時に、開発者向けにエラーを可視化する
+        console.error(`[EngineFacade] Info stream processing error (${this.id}):`, err);
         this.adapter.emitTelemetry?.({
           type: "error",
           timestamp: Date.now(),

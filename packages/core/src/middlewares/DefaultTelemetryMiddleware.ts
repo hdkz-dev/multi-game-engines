@@ -15,7 +15,8 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
     command: string | string[] | Uint8Array | Record<string, unknown>,
     context: IMiddlewareContext
   ): Promise<string | string[] | Uint8Array | Record<string, unknown>> {
-    this.startTimes.set(context.engineId, performance.now());
+    const key = this.getLookupKey(context);
+    this.startTimes.set(key, performance.now());
     return command;
   }
 
@@ -23,10 +24,11 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
    * 探索結果受信時のフック。所要時間を計測しテレメトリを発行します。
    */
   async onResult<T>(result: T, context: IMiddlewareContext): Promise<T> {
-    const startTime = this.startTimes.get(context.engineId);
+    const key = this.getLookupKey(context);
+    const startTime = this.startTimes.get(key);
     if (startTime !== undefined) {
       const duration = performance.now() - startTime;
-      this.startTimes.delete(context.engineId);
+      this.startTimes.delete(key);
 
       // テレメトリイベントの構築 (2026 Standard)
       const event: ITelemetryEvent = {
@@ -36,6 +38,7 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
         metadata: {
           action: "search",
           engineId: context.engineId,
+          telemetryId: context.telemetryId,
         }
       };
 
@@ -43,5 +46,9 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
       context.emitTelemetry(event);
     }
     return result;
+  }
+
+  private getLookupKey(context: IMiddlewareContext): string {
+    return `${context.engineId}:${context.telemetryId ?? "default"}`;
   }
 }
