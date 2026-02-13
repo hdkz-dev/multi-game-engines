@@ -9,6 +9,7 @@
 - **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
 - **Zero-Any Type Safety**: Branded Types とジェネリクスにより、コンパイル時に多くのミスを未然に防止。
 - **Modern Security**: 全リソースへの SRI (Subresource Integrity) 必須化と、COOP/COEP 診断機能の統合。
+- **Strict Input Validation**: プロトコルレベルでの不正な制御文字を「例外スロー」により即座に拒否し、コマンドインジェクションを未然に防止。
 - **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤を提供。
 - **High Performance Storage**: OPFS (Origin Private File System) を活用した、バイナリの高速永続化キャッシュ。
 
