@@ -4,7 +4,12 @@
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 最終洗練完了)
 
+- **究極の自動メモリ管理**: `WeakMap` を活用し、中断やエラー時でもミドルウェアの内部状態が自動的に解放される仕組みを `DefaultTelemetryMiddleware` へ導入。
+
+- **ローカル Quality Gate の確立**: Husky, lint-staged, および強化版 `pre-commit-check.sh` により、コミット時のセキュリティ、型、ビルド、テストの強制パスを実現。
+
 - **セキュリティポリシー (SECURITY.md) の策定**: GitHub の非公開報告機能を活用した脆弱性報告フローを確立。
+
 - **IBaseSearchInfo の抽象化**: `depth` や `score` を Core から排除し、各アダプター固有の型定義へ移行。これにより Core の汎用性と各ゲームエンジンの型表現力を両立。
 - **全アダプターの整合性修正**: Stockfish, Katago, Mortal, Yaneuraou, Edax の全アダプターにおいて、Core の型変更に伴う不整合を解消し、型安全性を再構築。
 - **Lint 警告の徹底排除**: Declaration Merging 用の空インターフェースやテスト用の特殊な `this` 参照など、全ての Lint エラーと警告を解決。

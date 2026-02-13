@@ -16,7 +16,8 @@
     "clean:deps": "rm -rf node_modules **/node_modules pnpm-lock.yaml",
     "format": "prettier --write .",
     "mcp:mask": "node scripts/sync-mcp-tokens.js mask",
-    "mcp:fill": "node scripts/sync-mcp-tokens.js fill"
+    "mcp:fill": "node scripts/sync-mcp-tokens.js fill",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=22.0.0",
@@ -30,10 +31,21 @@
     ]
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "prettier": "^3.8.1",
+    "@eslint/js": "^10.0.0",
     "eslint": "^10.0.0",
-    "typescript-eslint": "^8.54.0",
-    "@eslint/js": "^10.0.0"
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,html}": [
+      "prettier --write"
+    ]
   }
 }

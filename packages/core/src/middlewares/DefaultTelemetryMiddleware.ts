@@ -11,7 +11,9 @@ import {
 export class DefaultTelemetryMiddleware implements IMiddleware {
   readonly priority = MiddlewarePriority.LOW; // 他のミドルウェアの邪魔をしないよう低優先度
 
-  private startTimes = new Map<string, number>();
+  // 2026 Best Practice: WeakMap による自動クリーンアップ
+  // コンテキストが破棄されると、対応する開始時間も自動的にメモリから解放されます。
+  private startTimes = new WeakMap<IMiddlewareContext, number>();
 
   /**
    * 探索コマンド送信時のフック。開始時間を記録します。
@@ -20,8 +22,7 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
     command: string | string[] | Uint8Array | Record<string, unknown>,
     context: IMiddlewareContext,
   ): Promise<string | string[] | Uint8Array | Record<string, unknown>> {
-    const key = this.getLookupKey(context);
-    this.startTimes.set(key, performance.now());
+    this.startTimes.set(context, performance.now());
     return command;
   }
 
@@ -29,11 +30,11 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
    * 探索結果受信時のフック。所要時間を計測しテレメトリを発行します。
    */
   async onResult<T>(result: T, context: IMiddlewareContext): Promise<T> {
-    const key = this.getLookupKey(context);
-    const startTime = this.startTimes.get(key);
+    const startTime = this.startTimes.get(context);
     if (startTime !== undefined) {
       const duration = performance.now() - startTime;
-      this.startTimes.delete(key);
+      // 明示的に削除（GC を待たずに即時解放）
+      this.startTimes.delete(context);
 
       // テレメトリイベントの構築 (2026 Standard)
       const event: ITelemetryEvent = {
@@ -51,9 +52,5 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
       context.emitTelemetry(event);
     }
     return result;
-  }
-
-  private getLookupKey(context: IMiddlewareContext): string {
-    return `${context.engineId}:${context.telemetryId ?? "default"}`;
   }
 }
