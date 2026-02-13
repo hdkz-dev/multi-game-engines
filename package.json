@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "mcp:mask": "node scripts/sync-mcp-tokens.js mask",
     "mcp:fill": "node scripts/sync-mcp-tokens.js fill",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "pnpm build && changeset publish"
   },
   "engines": {
     "node": ">=22.0.0",
