@@ -6,7 +6,7 @@ import { ICapabilities } from "../types.js";
 export class CapabilityDetector {
   static async detect(): Promise<ICapabilities> {
     const nav = typeof navigator !== "undefined" ? navigator : null;
-    
+
     return {
       opfs: !!nav?.storage?.getDirectory,
       wasmThreads: this.checkWasmThreads(),
@@ -31,6 +31,6 @@ export class CapabilityDetector {
 
   private static checkWasmSimd(): boolean {
     // 2026: WASM SIMD は主要ブラウザで標準
-    return true; 
+    return true;
   }
 }

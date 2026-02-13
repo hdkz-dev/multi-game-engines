@@ -1,7 +1,7 @@
-import { 
+import {
   IProtocolParser,
   ProtocolValidator,
-  Brand
+  Brand,
 } from "@multi-game-engines/core";
 
 /** オセロの盤面データ */
@@ -28,7 +28,9 @@ export class EdaxParser implements IProtocolParser<
     return null;
   }
 
-  parseResult(data: string | Record<string, unknown>): IOthelloSearchResult | null {
+  parseResult(
+    data: string | Record<string, unknown>,
+  ): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("move")) return null;
 

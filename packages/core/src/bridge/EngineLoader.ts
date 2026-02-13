@@ -1,4 +1,9 @@
-import { IEngineLoader, IEngineSourceConfig, IFileStorage, EngineErrorCode } from "../types.js";
+import {
+  IEngineLoader,
+  IEngineSourceConfig,
+  IFileStorage,
+  EngineErrorCode,
+} from "../types.js";
 import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 import { EngineError } from "../errors/EngineError.js";
 
@@ -25,9 +30,12 @@ export class EngineLoader implements IEngineLoader {
     }
   }
 
-  async loadResource(engineId: string, config: IEngineSourceConfig): Promise<string> {
+  async loadResource(
+    engineId: string,
+    config: IEngineSourceConfig,
+  ): Promise<string> {
     const cacheKey = `${engineId}_${config.url}`;
-    
+
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     const existing = this.inflightLoads.get(cacheKey);
     if (existing) return existing;
@@ -38,9 +46,10 @@ export class EngineLoader implements IEngineLoader {
         if (config.url.startsWith("http://")) {
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
-            message: "Insecure connection (HTTP) is not allowed for sensitive engine files.",
+            message:
+              "Insecure connection (HTTP) is not allowed for sensitive engine files.",
             engineId,
-            remediation: "Use HTTPS for all engine resource URLs."
+            remediation: "Use HTTPS for all engine resource URLs.",
           });
         }
 
@@ -48,7 +57,7 @@ export class EngineLoader implements IEngineLoader {
           throw new EngineError({
             code: EngineErrorCode.SRI_MISMATCH,
             message: "SRI required for security verification.",
-            engineId
+            engineId,
           });
         }
 
@@ -56,7 +65,9 @@ export class EngineLoader implements IEngineLoader {
         if (cached) {
           const isValid = await SecurityAdvisor.verifySRI(cached, config.sri);
           if (isValid) {
-            const url = URL.createObjectURL(new Blob([cached], { type: this.getMimeType(config) }));
+            const url = URL.createObjectURL(
+              new Blob([cached], { type: this.getMimeType(config) }),
+            );
             this.updateBlobUrl(cacheKey, url);
             return url;
           }
@@ -70,7 +81,7 @@ export class EngineLoader implements IEngineLoader {
             throw new EngineError({
               code: EngineErrorCode.NETWORK_ERROR,
               message: `Failed to fetch engine: ${response.statusText} (${response.status})`,
-              engineId
+              engineId,
             });
           }
           data = await response.arrayBuffer();
@@ -80,21 +91,23 @@ export class EngineLoader implements IEngineLoader {
             code: EngineErrorCode.NETWORK_ERROR,
             message: `Network error while fetching engine resource: ${config.url}`,
             engineId,
-            originalError: err
+            originalError: err,
           });
         }
-        
+
         const isValid = await SecurityAdvisor.verifySRI(data, config.sri);
         if (!isValid) {
           throw new EngineError({
             code: EngineErrorCode.SRI_MISMATCH,
             message: "SRI Mismatch",
-            engineId
+            engineId,
           });
         }
 
         await this.storage.set(cacheKey, data);
-        const url = URL.createObjectURL(new Blob([data], { type: this.getMimeType(config) }));
+        const url = URL.createObjectURL(
+          new Blob([data], { type: this.getMimeType(config) }),
+        );
         this.updateBlobUrl(cacheKey, url);
         return url;
       } finally {
@@ -115,19 +128,24 @@ export class EngineLoader implements IEngineLoader {
     this.activeBlobs.set(cacheKey, newUrl);
   }
 
-  async loadResources(engineId: string, configs: Record<string, IEngineSourceConfig>): Promise<Record<string, string>> {
+  async loadResources(
+    engineId: string,
+    configs: Record<string, IEngineSourceConfig>,
+  ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
     const entries = Object.entries(configs);
-    
+
     // 2026 Best Practice: Promise.allSettled を使用して部分的な失敗時のリークを防止
     const settledResults = await Promise.allSettled(
       entries.map(async ([key, config]) => {
         const url = await this.loadResource(engineId, config);
         return { key, url };
-      })
+      }),
     );
 
-    const failures = settledResults.filter(r => r.status === "rejected") as PromiseRejectedResult[];
+    const failures = settledResults.filter(
+      (r) => r.status === "rejected",
+    ) as PromiseRejectedResult[];
     if (failures.length > 0) {
       // ロールバック: 成功した分の URL を revoke する
       for (const res of settledResults) {
@@ -143,7 +161,7 @@ export class EngineLoader implements IEngineLoader {
         results[res.value.key] = res.value.url;
       }
     }
-    
+
     return results;
   }
 

@@ -16,7 +16,7 @@ describe("EngineLoader", () => {
       clear: vi.fn(),
     };
     loader = new EngineLoader(storage);
-    
+
     // globalThis fetch mock
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -30,10 +30,14 @@ describe("EngineLoader", () => {
 
   it("should fetch and cache if not in storage", async () => {
     vi.mocked(storage.get).mockResolvedValue(null);
-    const config: IEngineSourceConfig = { url: "https://test.com/engine.js", sri: dummySRI, size: 100 };
-    
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      sri: dummySRI,
+      size: 100,
+    };
+
     const url = await loader.loadResource("test", config);
-    
+
     expect(url).toBe("blob:test");
     expect(storage.set).toHaveBeenCalled();
   });
@@ -41,10 +45,14 @@ describe("EngineLoader", () => {
   it("should return cached version if SRI matches", async () => {
     const data = new TextEncoder().encode("test").buffer;
     vi.mocked(storage.get).mockResolvedValue(data);
-    const config: IEngineSourceConfig = { url: "https://test.com/engine.js", sri: dummySRI, size: 100 };
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      sri: dummySRI,
+      size: 100,
+    };
 
     const url = await loader.loadResource("test", config);
-    
+
     expect(url).toBe("blob:test");
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -52,24 +60,32 @@ describe("EngineLoader", () => {
   it("should atomic multi-resource load", async () => {
     const configs: Record<string, IEngineSourceConfig> = {
       main: { url: "https://test.com/main.js", sri: dummySRI, size: 100 },
-      weights: { url: "https://test.com/weights.bin", sri: dummySRI, size: 200 },
+      weights: {
+        url: "https://test.com/weights.bin",
+        sri: dummySRI,
+        size: 200,
+      },
     };
 
     const urls = await loader.loadResources("test", configs);
-    
+
     expect(urls.main).toBe("blob:test");
     expect(urls.weights).toBe("blob:test");
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it("should allow retry after failure (inflight removal)", async () => {
-    const config: IEngineSourceConfig = { url: "https://fail.js", sri: dummySRI, size: 100 };
+    const config: IEngineSourceConfig = {
+      url: "https://fail.js",
+      sri: dummySRI,
+      size: 100,
+    };
 
     // 1回目: 失敗させる
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       status: 500,
-      statusText: "Internal Server Error"
+      statusText: "Internal Server Error",
     } as Response);
 
     await expect(loader.loadResource("test", config)).rejects.toThrow();

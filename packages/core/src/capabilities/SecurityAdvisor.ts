@@ -10,17 +10,17 @@ export class SecurityAdvisor {
    */
   static async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
     const hashes = sri.split(/\s+/);
-    
+
     const algoPriority: Record<string, number> = {
-      "sha256": 1,
-      "sha384": 2,
-      "sha512": 3
+      sha256: 1,
+      sha384: 2,
+      sha512: 3,
     };
 
     const algoMap: Record<string, string> = {
-      "sha256": "SHA-256",
-      "sha384": "SHA-384",
-      "sha512": "SHA-512"
+      sha256: "SHA-256",
+      sha384: "SHA-384",
+      sha512: "SHA-512",
     };
 
     // 2026 Best Practice: 最強アルゴリズムを特定し、それのみを検証対象とする (Algorithm Agility)
@@ -51,7 +51,8 @@ export class SecurityAdvisor {
    * COOP/COEPヘッダーの存在を確認します。
    */
   static async checkStatus(): Promise<ISecurityStatus> {
-    const isCrossOriginIsolated = typeof crossOriginIsolated !== "undefined" && crossOriginIsolated;
+    const isCrossOriginIsolated =
+      typeof crossOriginIsolated !== "undefined" && crossOriginIsolated;
     const missingHeaders: string[] = [];
 
     // 2026 Best Practice: ブラウザ環境でのみヘッダー診断を試行 (CORS/Node.js 考慮)

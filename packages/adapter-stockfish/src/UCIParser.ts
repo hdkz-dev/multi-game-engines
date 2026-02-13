@@ -1,12 +1,12 @@
-import { 
-  IProtocolParser, 
-  IBaseSearchOptions, 
-  IBaseSearchInfo, 
-  IBaseSearchResult, 
+import {
+  IProtocolParser,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
   Brand,
   ProtocolValidator,
   EngineError,
-  EngineErrorCode
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 
 /** チェス用の局面表記 (Forsyth-Edwards Notation) */
@@ -43,11 +43,17 @@ const MATE_SCORE_FACTOR = 10000;
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
+export class UCIParser implements IProtocolParser<
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult
+> {
   /**
    * info 行を解析します。
    */
-  parseInfo(data: string | Uint8Array | Record<string, unknown>): IChessSearchInfo | null {
+  parseInfo(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): IChessSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
@@ -71,7 +77,8 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
         case "score": {
           const scoreType = parts[++i]; // "cp" or "mate"
           const scoreValue = parseInt(parts[++i], 10) || 0;
-          info.score = scoreType === "mate" ? scoreValue * MATE_SCORE_FACTOR : scoreValue;
+          info.score =
+            scoreType === "mate" ? scoreValue * MATE_SCORE_FACTOR : scoreValue;
           break;
         }
         case "nps":
@@ -95,7 +102,9 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
   /**
    * bestmove 行を解析します。
    */
-  parseResult(data: string | Uint8Array | Record<string, unknown>): IChessSearchResult | null {
+  parseResult(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): IChessSearchResult | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("bestmove ")) return null;
@@ -122,22 +131,20 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "UCI requires a FEN position.",
-        remediation: "Provide a valid FEN string in search options."
+        remediation: "Provide a valid FEN string in search options.",
       });
     }
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
     ProtocolValidator.assertNoInjection(options.fen, "FEN string");
-    
-    const commands: string[] = [
-      `position fen ${options.fen}`
-    ];
+
+    const commands: string[] = [`position fen ${options.fen}`];
 
     let goCmd = "go";
     if (options.depth) goCmd += ` depth ${options.depth}`;
     if (options.time) goCmd += ` movetime ${options.time}`;
     if (options.nodes) goCmd += ` nodes ${options.nodes}`;
-    
+
     commands.push(goCmd);
     return commands;
   }

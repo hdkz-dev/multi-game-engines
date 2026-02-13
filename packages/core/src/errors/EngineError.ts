@@ -6,8 +6,8 @@ export interface IEngineErrorOptions {
   message: string;
   engineId?: string;
   originalError?: unknown;
-  /** 
-   * 解決策の提示 (開発者向けデバッグ情報) 
+  /**
+   * 解決策の提示 (開発者向けデバッグ情報)
    * 将来的にユーザーへ表示する場合は i18n キーへの置き換えを検討してください。
    */
   remediation?: string;
@@ -38,22 +38,31 @@ export class EngineError extends Error {
 
   static from(error: unknown, engineId?: string): EngineError {
     if (error instanceof EngineError) return error;
-    
+
     let code = EngineErrorCode.INTERNAL_ERROR;
     let remediation: string | undefined;
 
     if (error instanceof Error) {
       if (error.name === "SecurityError") {
         code = EngineErrorCode.SECURITY_ERROR;
-        remediation = "Ensure COOP/COEP headers are correctly set for cross-origin isolation.";
+        remediation =
+          "Ensure COOP/COEP headers are correctly set for cross-origin isolation.";
       } else if (error instanceof TypeError) {
-        remediation = "Check search options and engine configuration for invalid values.";
+        remediation =
+          "Check search options and engine configuration for invalid values.";
       } else if (error instanceof RangeError) {
-        remediation = "Adjust search depth or parameters to be within allowed limits.";
+        remediation =
+          "Adjust search depth or parameters to be within allowed limits.";
       }
     }
 
     const message = error instanceof Error ? error.message : String(error);
-    return new EngineError({ code, message, engineId, originalError: error, remediation });
+    return new EngineError({
+      code,
+      message,
+      engineId,
+      originalError: error,
+      remediation,
+    });
   }
 }

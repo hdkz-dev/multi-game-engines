@@ -11,7 +11,7 @@ This document explains the design principles and technical architecture of `mult
     - Leverages TypeScript's declaration merging so that importing an adapter automatically enables type inference for `bridge.getEngine('id')`.
 3.  **Framework Agnostic**:
     - Engine thinking information (candidate moves, scores) is delivered via `AsyncIterable`. This allows for intuitive real-time updates using `for await...of` loops.
-3.  **Modern Web Standards (2026 Ready)**:
+4.  **Modern Web Standards (2026 Ready)**:
     - **OPFS (Origin Private File System)**: Used for high-speed browser-based file persistence of large WASM binaries and evaluation files (falls back to IndexedDB).
     - **WebAssembly (SIMD/Threads)**: Supports configurations that maximize engine performance.
     - **AbortSignal & ReadableStream**: Standardized cancellation and data streaming.
@@ -48,8 +48,12 @@ The system provides a unified interface for common tasks (search, moves, evaluat
 
 ```typescript
 // Type-safe access to engine-specific features
-const stockfish = bridge.getEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>('stockfish');
-stockfish.search({ fen: '...' as FEN, depth: 20 });
+const stockfish = bridge.getEngine<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
+>("stockfish");
+stockfish.search({ fen: "..." as FEN, depth: 20 });
 ```
 
 ### Multi-Protocol Support

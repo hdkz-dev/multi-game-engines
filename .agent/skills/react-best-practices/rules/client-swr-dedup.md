@@ -34,7 +34,7 @@ function UserList() {
 }
 ```
 
-**For immutable data:
+\*\*For immutable data:
 
 ```tsx
 import { useImmutableSWR } from "@/lib/swr";
@@ -45,7 +45,7 @@ function StaticContent() {
 }
 ```
 
-**For mutations:
+\*\*For mutations:
 
 ```tsx
 import { useSWRMutation } from "swr/mutation";

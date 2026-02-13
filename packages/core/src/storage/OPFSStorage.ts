@@ -7,6 +7,8 @@ export class OPFSStorage implements IFileStorage {
   }
   async set(_key: string, _data: ArrayBuffer): Promise<void> {}
   async delete(_key: string): Promise<void> {}
-  async has(_key: string): Promise<boolean> { return false; }
+  async has(_key: string): Promise<boolean> {
+    return false;
+  }
   async clear(): Promise<void> {}
 }

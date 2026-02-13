@@ -1,23 +1,28 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { DefaultTelemetryMiddleware } from "../middlewares/DefaultTelemetryMiddleware.js";
-import { IMiddlewareContext, ITelemetryEvent, MiddlewarePriority } from "../types.js";
+import {
+  IMiddlewareContext,
+  ITelemetryEvent,
+  MiddlewarePriority,
+} from "../types.js";
 
 describe("DefaultTelemetryMiddleware", () => {
   let middleware: DefaultTelemetryMiddleware;
   let context: IMiddlewareContext;
   let emitTelemetrySpy: ReturnType<typeof vi.fn>;
 
+  // Test control variables
+  let currentTime = 1000;
+
+  const advanceTime = (ms: number) => {
+    currentTime += ms;
+    vi.advanceTimersByTime(ms);
+  };
+
   beforeEach(() => {
     vi.useFakeTimers();
-    // performance.now をモックして制御可能な値を返すようにする
-    let now = 1000;
-    vi.spyOn(performance, "now").mockImplementation(() => now);
-    
-    // 時間を進めるヘルパー
-    const advanceTime = (ms: number) => {
-      now += ms;
-      vi.advanceTimersByTime(ms); // Date.now() も同期させる
-    };
+    currentTime = 1000;
+    vi.spyOn(performance, "now").mockImplementation(() => currentTime);
 
     middleware = new DefaultTelemetryMiddleware();
     emitTelemetrySpy = vi.fn();
@@ -27,17 +32,11 @@ describe("DefaultTelemetryMiddleware", () => {
       options: {},
       emitTelemetry: emitTelemetrySpy,
     };
-
-    // テストケース内で advanceTime を使えるようにコンテキスト拡張はできないので
-    // ローカル関数として利用する形に修正します。
-    // そのため、テストケースごとにロジックを微修正します。
-    (globalThis as any).advanceTime = advanceTime;
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    delete (globalThis as any).advanceTime;
   });
 
   it("should have LOW priority", () => {
@@ -45,8 +44,6 @@ describe("DefaultTelemetryMiddleware", () => {
   });
 
   it("should measure duration between onCommand and onResult", async () => {
-    const advanceTime = (globalThis as any).advanceTime;
-    
     // 1. Send Command
     await middleware.onCommand("go", context);
 
@@ -70,34 +67,37 @@ describe("DefaultTelemetryMiddleware", () => {
   });
 
   it("should handle multiple concurrent contexts correctly", async () => {
-    const advanceTime = (globalThis as any).advanceTime;
     const context1 = { ...context, telemetryId: "id-1" };
     const context2 = { ...context, telemetryId: "id-2" };
 
     // Start 1
     await middleware.onCommand("go 1", context1);
     advanceTime(50);
-    
+
     // Start 2
     await middleware.onCommand("go 2", context2);
     advanceTime(50);
 
     // Finish 1 (Total 100ms)
     await middleware.onResult({}, context1);
-    expect(emitTelemetrySpy).toHaveBeenLastCalledWith(expect.objectContaining({
-      duration: 100,
-      metadata: expect.objectContaining({ telemetryId: "id-1" })
-    }));
+    expect(emitTelemetrySpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        duration: 100,
+        metadata: expect.objectContaining({ telemetryId: "id-1" }),
+      }),
+    );
 
     advanceTime(50);
 
     // Finish 2 (Total 100ms since Start 2)
     // Start 2 was at T+50, Current is T+150 -> Duration 100
     await middleware.onResult({}, context2);
-    expect(emitTelemetrySpy).toHaveBeenLastCalledWith(expect.objectContaining({
-      duration: 100,
-      metadata: expect.objectContaining({ telemetryId: "id-2" })
-    }));
+    expect(emitTelemetrySpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        duration: 100,
+        metadata: expect.objectContaining({ telemetryId: "id-2" }),
+      }),
+    );
   });
 
   it("should not emit telemetry if start time is missing (e.g. unexpected result flow)", async () => {

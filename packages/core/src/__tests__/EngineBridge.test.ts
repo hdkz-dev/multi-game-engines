@@ -1,18 +1,24 @@
 import { describe, it, expect, vi } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge.js";
-import { 
-  IEngineAdapter, 
-  IBaseSearchOptions, 
-  IBaseSearchInfo, 
+import {
+  IEngineAdapter,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
   IBaseSearchResult,
   IProtocolParser,
   IMiddleware,
   EngineStatus,
-  MiddlewarePriority
+  MiddlewarePriority,
 } from "../types.js";
 
 describe("EngineBridge", () => {
-  const createMockAdapter = (id: string): IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> => ({
+  const createMockAdapter = (
+    id: string,
+  ): IEngineAdapter<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  > => ({
     id,
     name: `Mock ${id}`,
     version: "1.0.0",
@@ -23,10 +29,16 @@ describe("EngineBridge", () => {
       createOptionCommand: vi.fn().mockReturnValue("setoption"),
       parseInfo: vi.fn(),
       parseResult: vi.fn(),
-    } satisfies IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+    } satisfies IProtocolParser<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >,
     load: vi.fn().mockResolvedValue(undefined),
     searchRaw: vi.fn().mockImplementation(() => ({
-      info: (async function* () { yield { raw: "info depth 1 score 10" } as IBaseSearchInfo; })(),
+      info: (async function* () {
+        yield { raw: "info depth 1 score 10" } as IBaseSearchInfo;
+      })(),
       result: Promise.resolve({ raw: "bestmove e2e4" } as IBaseSearchResult),
       stop: vi.fn(),
     })),
@@ -41,10 +53,10 @@ describe("EngineBridge", () => {
   it("アダプターを登録し、getEngine で取得できること", async () => {
     const bridge = new EngineBridge();
     const adapter = createMockAdapter("test");
-    
+
     await bridge.registerAdapter(adapter);
     const engine = bridge.getEngine("test");
-    
+
     expect(engine.id).toBe("test");
     expect(engine.name).toBe("Mock test");
   });
@@ -57,10 +69,10 @@ describe("EngineBridge", () => {
   it("アダプターの登録解除ができること", async () => {
     const bridge = new EngineBridge();
     const adapter = createMockAdapter("test");
-    
+
     await bridge.registerAdapter(adapter);
     await bridge.unregisterAdapter("test");
-    
+
     expect(adapter.dispose).toHaveBeenCalled(); // 確実に dispose されていること
     expect(() => bridge.getEngine("test")).toThrow();
   });
@@ -69,13 +81,13 @@ describe("EngineBridge", () => {
     const bridge = new EngineBridge();
     const adapter1 = createMockAdapter("engine1");
     const adapter2 = createMockAdapter("engine1"); // 同じ ID
-    
+
     await bridge.registerAdapter(adapter1);
     await bridge.registerAdapter(adapter2);
-    
+
     expect(adapter1.dispose).toHaveBeenCalled(); // 古い方が破棄されていること
     expect(adapter2.dispose).not.toHaveBeenCalled(); // 新しい方は生きている
-    
+
     const engine = bridge.getEngine("engine1");
     expect(engine.name).toBe("Mock engine1");
   });
@@ -84,12 +96,12 @@ describe("EngineBridge", () => {
     const bridge = new EngineBridge();
     const adapter1 = createMockAdapter("engine1");
     const adapter2 = createMockAdapter("engine2");
-    
+
     await bridge.registerAdapter(adapter1);
     await bridge.registerAdapter(adapter2);
-    
+
     await bridge.dispose();
-    
+
     expect(adapter1.dispose).toHaveBeenCalled();
     expect(adapter2.dispose).toHaveBeenCalled();
   });
@@ -105,8 +117,8 @@ describe("EngineBridge", () => {
     expect(instance1).toBe(instance2);
 
     // ミドルウェアを追加
-    bridge.use({ 
-      onCommand: async (c) => c 
+    bridge.use({
+      onCommand: async (c) => c,
     } as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
     // キャッシュがクリアされ、新しいインスタンスが返されるはず
@@ -127,10 +139,12 @@ describe("EngineBridge", () => {
 
     // 注意: 実際の GC を待つ代わりに内部の WeakRef をモックして purge を検証
     // プライベートプロパティへのアクセスのため unknown キャストを使用 (テスト用)
-    const engineInstances = (bridge as unknown as { 
-      engineInstances: Map<string, { deref: () => unknown }> 
-    }).engineInstances;
-    
+    const engineInstances = (
+      bridge as unknown as {
+        engineInstances: Map<string, { deref: () => unknown }>;
+      }
+    ).engineInstances;
+
     const ref = engineInstances.get("leak-test");
     if (ref) {
       vi.spyOn(ref, "deref").mockReturnValue(undefined);
@@ -142,20 +156,28 @@ describe("EngineBridge", () => {
 
   it("should filter middlewares based on supportedEngines", async () => {
     const bridge = new EngineBridge();
-    
+
     await bridge.registerAdapter(createMockAdapter("engine-a"));
     await bridge.registerAdapter(createMockAdapter("engine-b"));
     await bridge.registerAdapter(createMockAdapter("engine-c"));
 
     // 1. 全エンジン対象のミドルウェア
-    const mwGlobal: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> = {
+    const mwGlobal: IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
       priority: MiddlewarePriority.HIGH,
       onCommand: vi.fn().mockImplementation(async (c) => c),
     };
     bridge.use(mwGlobal);
 
     // 2. engine-a のみ対象のミドルウェア
-    const mwSpecificA: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> = {
+    const mwSpecificA: IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
       priority: MiddlewarePriority.NORMAL,
       supportedEngines: ["engine-a"],
       onCommand: vi.fn().mockImplementation(async (c) => c),
@@ -163,7 +185,11 @@ describe("EngineBridge", () => {
     bridge.use(mwSpecificA);
 
     // 3. engine-a と engine-b 対象のミドルウェア
-    const mwMultiAB: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> = {
+    const mwMultiAB: IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
       priority: MiddlewarePriority.LOW,
       supportedEngines: ["engine-a", "engine-b"],
       onCommand: vi.fn().mockImplementation(async (c) => c),

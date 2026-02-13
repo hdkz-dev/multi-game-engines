@@ -51,7 +51,7 @@ export default function Page() {
 }
 ```
 
-**Alternative with children prop:
+\*\*Alternative with children prop:
 
 ```tsx
 async function Layout({ children }: { children: ReactNode }) {

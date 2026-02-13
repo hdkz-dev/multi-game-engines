@@ -12,52 +12,53 @@ Use Next.js's `after()` to schedule work that should execute after a response is
 ### Incorrect (blocks response)
 
 ```tsx
-import { logUserAction } from '@/app/utils'
+import { logUserAction } from "@/app/utils";
 
 export async function POST(request: Request) {
   // Perform mutation
-  await updateDatabase(request)
-  
+  await updateDatabase(request);
+
   // Logging blocks the response
-  const userAgent = request.headers.get('user-agent') || 'unknown'
-  await logUserAction({ userAgent })
-  
-  return new Response(JSON.stringify({ status: 'success' }), {
+  const userAgent = request.headers.get("user-agent") || "unknown";
+  await logUserAction({ userAgent });
+
+  return new Response(JSON.stringify({ status: "success" }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  })
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
 ### Correct (non-blocking)
 
 ```tsx
-import { after } from 'next/server'
-import { headers, cookies } from 'next/headers'
-import { logUserAction } from '@/app/utils'
+import { after } from "next/server";
+import { headers, cookies } from "next/headers";
+import { logUserAction } from "@/app/utils";
 
 export async function POST(request: Request) {
   // Perform mutation
-  await updateDatabase(request)
-  
+  await updateDatabase(request);
+
   // Log after response is sent
   after(async () => {
-    const userAgent = (await headers()).get('user-agent') || 'unknown'
-    const sessionCookie = (await cookies()).get('session-id')?.value || 'anonymous'
-    
-    logUserAction({ sessionCookie, userAgent })
-  })
-  
-  return new Response(JSON.stringify({ status: 'success' }), {
+    const userAgent = (await headers()).get("user-agent") || "unknown";
+    const sessionCookie =
+      (await cookies()).get("session-id")?.value || "anonymous";
+
+    logUserAction({ sessionCookie, userAgent });
+  });
+
+  return new Response(JSON.stringify({ status: "success" }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  })
+    headers: { "Content-Type": "application/json" },
+  });
 }
 ```
 
 The response is sent immediately while logging happens in the background.
 
-**Common use cases:
+\*\*Common use cases:
 
 - Analytics tracking
 - Audit logging
@@ -65,7 +66,7 @@ The response is sent immediately while logging happens in the background.
 - Cache invalidation
 - Cleanup tasks
 
-**Important notes:
+\*\*Important notes:
 
 - `after()` runs even if the response fails or redirects
 - Works in Server Actions, Route Handlers, and Server Components

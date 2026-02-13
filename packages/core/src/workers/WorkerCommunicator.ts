@@ -53,14 +53,19 @@ export class WorkerCommunicator {
     this.buffer.push(data);
     if (this.buffer.length > this.maxBufferSize) {
       this.buffer.shift();
-      console.warn("WorkerCommunicator buffer overflow. Oldest message dropped.");
+      console.warn(
+        "WorkerCommunicator buffer overflow. Oldest message dropped.",
+      );
     }
   }
 
   private handleError(ev: ErrorEvent | { message: string }): void {
-    const message = (ev as ErrorEvent).message || (ev as { message: string }).message || "Unknown worker error";
+    const message =
+      (ev as ErrorEvent).message ||
+      (ev as { message: string }).message ||
+      "Unknown worker error";
     console.error("Worker error:", message);
-    
+
     const error = new EngineError({
       code: EngineErrorCode.INTERNAL_ERROR,
       message: `Worker execution error: ${message}`,
@@ -79,7 +84,7 @@ export class WorkerCommunicator {
 
   async expectMessage<T>(
     predicate: (data: unknown) => boolean,
-    options: { timeoutMs?: number; signal?: AbortSignal } = {}
+    options: { timeoutMs?: number; signal?: AbortSignal } = {},
   ): Promise<T> {
     // まずバッファをチェック
     const bufferedIndex = this.buffer.findIndex(predicate);
@@ -90,7 +95,7 @@ export class WorkerCommunicator {
 
     return new Promise<T>((resolve, reject) => {
       let timerId: ReturnType<typeof setTimeout> | undefined;
-      
+
       // 2026 Best Practice: リスナーとタイマーの確実な解除 (Memory Leak 防止)
       const cleanup = () => {
         this.expectations.delete(expectation);
@@ -114,22 +119,25 @@ export class WorkerCommunicator {
         wrappedReject(options.signal?.reason);
       };
 
-      const expectation = { 
-        predicate, 
+      const expectation = {
+        predicate,
         resolve: wrappedResolve,
         reject: wrappedReject,
-        cleanup
+        cleanup,
       };
-      
+
       this.expectations.add(expectation);
 
       if (options.timeoutMs) {
         timerId = setTimeout(() => {
-          wrappedReject(new EngineError({
-            code: EngineErrorCode.SEARCH_TIMEOUT,
-            message: "Message expectation timed out",
-            remediation: "Check if the engine worker is hanging or if the command sequence is correct."
-          }));
+          wrappedReject(
+            new EngineError({
+              code: EngineErrorCode.SEARCH_TIMEOUT,
+              message: "Message expectation timed out",
+              remediation:
+                "Check if the engine worker is hanging or if the command sequence is correct.",
+            }),
+          );
         }, options.timeoutMs);
       }
 
@@ -144,7 +152,8 @@ export class WorkerCommunicator {
     const error = new EngineError({
       code: EngineErrorCode.LIFECYCLE_ERROR,
       message: "Worker terminated",
-      remediation: "This occurs during engine disposal or forced reset. If unexpected, check for resource exhaustion."
+      remediation:
+        "This occurs during engine disposal or forced reset. If unexpected, check for resource exhaustion.",
     });
     for (const exp of this.expectations) {
       exp.reject(error);

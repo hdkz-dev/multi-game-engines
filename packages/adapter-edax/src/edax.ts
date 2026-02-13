@@ -1,6 +1,14 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError } from "@multi-game-engines/core";
-import { IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult } from "./EdaxParser.js";
+import {
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+} from "@multi-game-engines/core";
+import {
+  IOthelloSearchOptions,
+  IOthelloSearchInfo,
+  IOthelloSearchResult,
+} from "./EdaxParser.js";
 import { EdaxParser } from "./EdaxParser.js";
 
 export class EdaxAdapter extends BaseAdapter<
@@ -26,12 +34,12 @@ export class EdaxAdapter extends BaseAdapter<
         type: "worker-js" as const,
       };
 
-      const scriptUrl = loader 
+      const scriptUrl = loader
         ? await loader.loadResource(this.id, config)
         : url;
 
       this.communicator = new WorkerCommunicator(scriptUrl);
-      
+
       this.messageUnsubscriber = this.communicator.onMessage((data) => {
         this.handleIncomingMessage(data);
       });

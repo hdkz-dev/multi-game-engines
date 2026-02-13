@@ -55,7 +55,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
 }
 ```
 
-**Simpler pattern for single-value functions:
+\*\*Simpler pattern for single-value functions:
 
 ```typescript
 let isLoggedInCache: boolean | null = null;

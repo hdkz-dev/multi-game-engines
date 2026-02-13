@@ -5,18 +5,19 @@
 
 ## 1. 採用エンジン一覧
 
-| ゲーム (Game) | エンジン (Engine) | プロトコル (Protocol) | ライセンス (License) | 特記事項 |
-| :--- | :--- | :--- | :--- | :--- |
-| **将棋 (Shogi)** | **YaneuraOu (やねうら王)** | USI (Universal Shogi Interface) | GPLv3 | 世界最強クラスの将棋エンジン。NNUE評価関数を使用。 |
-| **チェス (Chess)** | **Stockfish** | UCI (Universal Chess Interface) | GPLv3 | 圧倒的な強さを誇るチェスエンジン。Wasm化実績豊富。 |
-| **リバーシ (Reversi)** | **Edax (4.4)** | GGS / NBoard / GTP-like | GPL | リバーシ解析のデファクトスタンダード。ビットボード最適化。 |
-| **五目並べ (Gomoku)** | **Rapfi / Yixin (Clone)** | Piskvork Protocol | GPL / MIT | 連珠ルールに対応した強力な探索エンジン。 |
-| **チェッカー (Checkers)** | **Scan / Cake** | CheckerBoard Protocol | GPL | エンドゲームDBと連携可能な高精度エンジン。 |
-| **コネクト4 (Connect 4)** | **Pascal Pons' Solver** | Standard I/O | MIT | 完全解析済みの強力なソルバー。 |
+| ゲーム (Game)             | エンジン (Engine)          | プロトコル (Protocol)           | ライセンス (License) | 特記事項                                                   |
+| :------------------------ | :------------------------- | :------------------------------ | :------------------- | :--------------------------------------------------------- |
+| **将棋 (Shogi)**          | **YaneuraOu (やねうら王)** | USI (Universal Shogi Interface) | GPLv3                | 世界最強クラスの将棋エンジン。NNUE評価関数を使用。         |
+| **チェス (Chess)**        | **Stockfish**              | UCI (Universal Chess Interface) | GPLv3                | 圧倒的な強さを誇るチェスエンジン。Wasm化実績豊富。         |
+| **リバーシ (Reversi)**    | **Edax (4.4)**             | GGS / NBoard / GTP-like         | GPL                  | リバーシ解析のデファクトスタンダード。ビットボード最適化。 |
+| **五目並べ (Gomoku)**     | **Rapfi / Yixin (Clone)**  | Piskvork Protocol               | GPL / MIT            | 連珠ルールに対応した強力な探索エンジン。                   |
+| **チェッカー (Checkers)** | **Scan / Cake**            | CheckerBoard Protocol           | GPL                  | エンドゲームDBと連携可能な高精度エンジン。                 |
+| **コネクト4 (Connect 4)** | **Pascal Pons' Solver**    | Standard I/O                    | MIT                  | 完全解析済みの強力なソルバー。                             |
 
 ## 2. 共通アーキテクチャ (Architecture)
 
 ### 2.1 Web Worker 隔離パターン (Isolation Pattern)
+
 メインスレッドのUI描画を阻害せず、かつGPL汚染のリスクを最小限に抑えるため、すべてのゲームエンジンは **Web Worker** 内で動作させます。
 
 - **Main Thread**: UIイベント処理、盤面描画。
@@ -24,7 +25,9 @@
 - **Communication**: `postMessage` を使用し、文字列ベースのプロトコル (USI, UCI等) で通信します。
 
 ### 2.2 WebAssembly (Wasm) 化
+
 C++等で記述されたエンジンを Emscripten 等を用いて WebAssembly にコンパイルします。
+
 - **SIMD**: 可能であれば SIMD 対応ビルドを使用し、高速化を図ります（ブラウザ互換性に注意）。
 - **Multi-threading**: `SharedArrayBuffer` を利用したマルチスレッド対応を検討しますが、まずはシングルスレッド版の安定動作を優先します。
 - **File System**: 評価関数ファイルや定石ファイルは、Emscripten の `FS` (Virtual File System) を介して読み込みます。大きなファイルは `IndexedDB` へのキャッシュ推奨。

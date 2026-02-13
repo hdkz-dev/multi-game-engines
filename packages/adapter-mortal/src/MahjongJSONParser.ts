@@ -16,7 +16,9 @@ export class MahjongJSONParser implements IProtocolParser<
     return null;
   }
 
-  parseResult(data: string | Record<string, unknown>): IMahjongSearchResult | null {
+  parseResult(
+    data: string | Record<string, unknown>,
+  ): IMahjongSearchResult | null {
     const record = typeof data === "string" ? JSON.parse(data) : data;
     if (record.type === "result") {
       return {
@@ -32,7 +34,11 @@ export class MahjongJSONParser implements IProtocolParser<
     // オブジェクト内の全ての文字列値を再帰的に検証します
     const validateValue = (value: unknown, path: string = "board"): void => {
       if (typeof value === "string") {
-        ProtocolValidator.assertNoInjection(value, `mahjong board data: ${path}`, true);
+        ProtocolValidator.assertNoInjection(
+          value,
+          `mahjong board data: ${path}`,
+          true,
+        );
         return;
       }
       if (Array.isArray(value)) {
@@ -57,7 +63,10 @@ export class MahjongJSONParser implements IProtocolParser<
     return { type: "stop" };
   }
 
-  createOptionCommand(name: string, value: string | number | boolean): Record<string, unknown> {
+  createOptionCommand(
+    name: string,
+    value: string | number | boolean,
+  ): Record<string, unknown> {
     return {
       type: "option",
       name,

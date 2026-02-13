@@ -19,15 +19,21 @@ export class ProtocolValidator {
    * @param context エラーメッセージに使用するコンテキスト名
    * @param allowSemicolon セミコロンを許可するかどうか (GTP/SGF 用)
    */
-  static assertNoInjection(input: string, context: string, allowSemicolon = false): void {
-    const regex = allowSemicolon ? ProtocolValidator.LOOSE_REGEX : ProtocolValidator.STRICT_REGEX;
+  static assertNoInjection(
+    input: string,
+    context: string,
+    allowSemicolon = false,
+  ): void {
+    const regex = allowSemicolon
+      ? ProtocolValidator.LOOSE_REGEX
+      : ProtocolValidator.STRICT_REGEX;
     if (regex.test(input)) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Potential command injection detected in ${context}.`,
-        remediation: allowSemicolon 
+        remediation: allowSemicolon
           ? "Remove control characters (\\r, \\n, \\0, etc.) from input."
-          : "Remove control characters (\\r, \\n, \\0, ;, etc.) from input."
+          : "Remove control characters (\\r, \\n, \\0, ;, etc.) from input.",
       });
     }
   }

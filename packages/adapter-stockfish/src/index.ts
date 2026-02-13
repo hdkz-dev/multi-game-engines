@@ -1,5 +1,9 @@
 import "@multi-game-engines/core";
-import { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCIParser.js";
+import {
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "./UCIParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {

@@ -1,4 +1,9 @@
-import { IMiddleware, IMiddlewareContext, ITelemetryEvent, MiddlewarePriority } from "../types.js";
+import {
+  IMiddleware,
+  IMiddlewareContext,
+  ITelemetryEvent,
+  MiddlewarePriority,
+} from "../types.js";
 
 /**
  * エンジンのパフォーマンスを自動計測する標準テレメトリ・ミドルウェア。
@@ -13,7 +18,7 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
    */
   async onCommand(
     command: string | string[] | Uint8Array | Record<string, unknown>,
-    context: IMiddlewareContext
+    context: IMiddlewareContext,
   ): Promise<string | string[] | Uint8Array | Record<string, unknown>> {
     const key = this.getLookupKey(context);
     this.startTimes.set(key, performance.now());
@@ -39,7 +44,7 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
           action: "search",
           engineId: context.engineId,
           telemetryId: context.telemetryId,
-        }
+        },
       };
 
       // コンテキスト経由でテレメトリを発行

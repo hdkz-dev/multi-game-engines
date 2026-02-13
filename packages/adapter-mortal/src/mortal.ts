@@ -1,6 +1,15 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode } from "@multi-game-engines/core";
-import { IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult } from "./MahjongJSONParser.js";
+import {
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+} from "@multi-game-engines/core";
+import {
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
+  IMahjongSearchResult,
+} from "./MahjongJSONParser.js";
 import { MahjongJSONParser } from "./MahjongJSONParser.js";
 
 export class MortalAdapter extends BaseAdapter<
@@ -25,12 +34,12 @@ export class MortalAdapter extends BaseAdapter<
         type: "worker-js" as const,
       };
 
-      const scriptUrl = loader 
+      const scriptUrl = loader
         ? await loader.loadResource(this.id, config)
         : url;
 
       this.communicator = new WorkerCommunicator(scriptUrl);
-      
+
       this.messageUnsubscriber = this.communicator.onMessage((data) => {
         this.handleIncomingMessage(data);
       });
@@ -48,12 +57,15 @@ export class MortalAdapter extends BaseAdapter<
     this.communicator.postMessage(this.parser.createStopCommand());
   }
 
-  protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
+  protected async sendOptionToWorker(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
     if (!this.communicator) {
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not loaded",
-        engineId: this.id
+        engineId: this.id,
       });
     }
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));

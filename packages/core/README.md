@@ -5,9 +5,10 @@ multi-game-engines エコシステムのコアライブラリです。インタ�
 ## 使い方
 
 ```typescript
-import { IEngine } from '@multi-game-engines/core';
+import { IEngine } from "@multi-game-engines/core";
 // ...
 ```
 
 ## ライセンス
+
 MIT

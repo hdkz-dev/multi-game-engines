@@ -1,8 +1,8 @@
-import { 
-  IProtocolParser, 
-  IBaseSearchInfo, 
+import {
+  IProtocolParser,
+  IBaseSearchInfo,
   IBaseSearchResult,
-  ProtocolValidator 
+  ProtocolValidator,
 } from "@multi-game-engines/core";
 import { ISHOGISearchOptions, Move } from "./usi-types.js";
 
@@ -26,8 +26,14 @@ export interface ISHOGISearchResult extends IBaseSearchResult {
 /**
  * 将棋エンジン向けの USI (Universal Shogi Interface) プロトコルパーサー。
  */
-export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> {
-  parseInfo(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchInfo | null {
+export class USIParser implements IProtocolParser<
+  ISHOGISearchOptions,
+  ISHOGISearchInfo,
+  ISHOGISearchResult
+> {
+  parseInfo(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): ISHOGISearchInfo | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("info ")) return null;
 
@@ -74,7 +80,9 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
     return info;
   }
 
-  parseResult(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchResult | null {
+  parseResult(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): ISHOGISearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("bestmove ")) return null;
 
@@ -99,14 +107,14 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
       ProtocolValidator.assertNoInjection(options.sfen, "SFEN string");
       commands.push(`position sfen ${options.sfen}`);
     }
-    
+
     let goCmd = "go";
     if (options.btime !== undefined) goCmd += ` btime ${options.btime}`;
     if (options.wtime !== undefined) goCmd += ` wtime ${options.wtime}`;
     if (options.byoyomi !== undefined) goCmd += ` byoyomi ${options.byoyomi}`;
     if (options.depth !== undefined) goCmd += ` depth ${options.depth}`;
     if (options.nodes !== undefined) goCmd += ` nodes ${options.nodes}`;
-    
+
     commands.push(goCmd);
     return commands;
   }

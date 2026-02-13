@@ -11,7 +11,9 @@ describe("UCIParser", () => {
   });
 
   it("should parse info with score and pv", () => {
-    const info = parser.parseInfo("info depth 15 score cp 30 nps 1000000 time 500 pv e2e4 e7e5");
+    const info = parser.parseInfo(
+      "info depth 15 score cp 30 nps 1000000 time 500 pv e2e4 e7e5",
+    );
     expect(info?.depth).toBe(15);
     expect(info?.score).toBe(30);
     expect(info?.nps).toBe(1000000);

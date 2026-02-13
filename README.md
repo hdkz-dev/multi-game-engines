@@ -41,6 +41,7 @@ console.log(`Best Move: ${result.bestMove}`);
 ## 📖 ドキュメント案内 / Documentation
 
 ### Japanese (Primary)
+
 - [設計思想 (ARCHITECTURE.md)](docs/ARCHITECTURE.md)
 - [技術仕様 (TECHNICAL_SPECS.md)](docs/TECHNICAL_SPECS.md)
 - [管理ルール (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md)
@@ -48,6 +49,7 @@ console.log(`Best Move: ${result.bestMove}`);
 - [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
 
 ### English (Global)
+
 - [Architecture & Design](docs/en/ARCHITECTURE.md)
 - [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)

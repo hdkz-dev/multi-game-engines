@@ -38,7 +38,7 @@ import TextField from "@mui/material/TextField";
 // Loads only what you use
 ```
 
-**Alternative (Next.js 13.5+):
+\*\*Alternative (Next.js 13.5+):
 
 ```js
 // next.config.js - use optimizePackageImports

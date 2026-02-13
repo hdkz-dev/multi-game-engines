@@ -12,18 +12,21 @@ Create visually striking static designs using HTML Canvas or Python imaging libr
 ## Design Principles
 
 ### Composition
+
 - **Rule of Thirds**: Place key elements along grid lines
 - **Visual Hierarchy**: Size, color, and position indicate importance
 - **White Space**: Embrace negative space for elegance
 - **Balance**: Symmetrical for formal, asymmetrical for dynamic
 
 ### Color Theory
+
 - **Complementary**: Colors opposite on wheel (high contrast)
 - **Analogous**: Adjacent colors (harmonious)
 - **Triadic**: Three equidistant colors (vibrant)
 - Limit palette to 3-5 colors
 
 ### Typography
+
 - Pair one display font with one body font
 - Maintain consistent hierarchy
 - Ensure readability (contrast, size)
@@ -65,22 +68,22 @@ surface.write_to_png("design.png")
 ## HTML Canvas to Image
 
 ```javascript
-const canvas = document.createElement('canvas');
+const canvas = document.createElement("canvas");
 canvas.width = 1200;
 canvas.height = 800;
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext("2d");
 
 // Draw
-ctx.fillStyle = '#1a1a2e';
+ctx.fillStyle = "#1a1a2e";
 ctx.fillRect(0, 0, 1200, 800);
 
-ctx.fillStyle = '#e94560';
+ctx.fillStyle = "#e94560";
 ctx.beginPath();
 ctx.arc(600, 400, 150, 0, Math.PI * 2);
 ctx.fill();
 
 // Export
-const dataUrl = canvas.toDataURL('image/png');
+const dataUrl = canvas.toDataURL("image/png");
 ```
 
 ## Design Styles

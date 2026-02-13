@@ -1,22 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineFacade } from "../bridge/EngineFacade.js";
-import { 
-  IMiddleware, 
-  IEngineLoader, 
-  EngineStatus, 
-  IBaseSearchOptions, 
-  IBaseSearchInfo, 
+import {
+  IMiddleware,
+  IEngineLoader,
+  EngineStatus,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
   IBaseSearchResult,
   IEngineAdapter,
-  IProtocolParser
+  IProtocolParser,
 } from "../types.js";
 
 describe("EngineFacade", () => {
-  let adapter: IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> & {
+  let adapter: IEngineAdapter<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  > & {
     searchRaw: ReturnType<typeof vi.fn>;
     load: ReturnType<typeof vi.fn>;
   };
-  let middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[];
+  let middlewares: IMiddleware<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  >[];
 
   beforeEach(() => {
     // 2026 Best Practice: 用途に応じた正確なモック定義（any を使用しない）
@@ -31,13 +39,17 @@ describe("EngineFacade", () => {
         parseResult: vi.fn(),
         createStopCommand: vi.fn().mockReturnValue("stop-command"),
         createOptionCommand: vi.fn(),
-      } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      } as unknown as IProtocolParser<
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
       load: vi.fn().mockImplementation(async () => {
         mockAdapter.status = "ready";
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
-        info: (async function* () { 
-          yield { raw: "info" }; 
+        info: (async function* () {
+          yield { raw: "info" };
         })(),
         result: Promise.resolve({ raw: "result" }),
         stop: vi.fn(),
@@ -48,7 +60,11 @@ describe("EngineFacade", () => {
       setOption: vi.fn(),
       dispose: vi.fn(),
     };
-    adapter = mockAdapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> & {
+    adapter = mockAdapter as unknown as IEngineAdapter<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > & {
       searchRaw: ReturnType<typeof vi.fn>;
       load: ReturnType<typeof vi.fn>;
     };
@@ -59,8 +75,8 @@ describe("EngineFacade", () => {
     const facade = new EngineFacade(adapter, middlewares);
     const task1Stop = vi.fn();
     adapter.searchRaw.mockReturnValueOnce({
-      info: (async function* () { 
-        await new Promise(r => setTimeout(r, 100));
+      info: (async function* () {
+        await new Promise((r) => setTimeout(r, 100));
         yield { raw: "info" };
       })(),
       result: new Promise(() => {}), // 終わらない
@@ -68,8 +84,8 @@ describe("EngineFacade", () => {
     });
 
     void facade.search({ board: "..." } as IBaseSearchOptions);
-    await new Promise(r => setTimeout(r, 10));
-    
+    await new Promise((r) => setTimeout(r, 10));
+
     // 次の検索
     await facade.search({ board: "..." } as IBaseSearchOptions);
 
@@ -77,14 +93,23 @@ describe("EngineFacade", () => {
   });
 
   it("ミドルウェアが正しい順序でコマンドと結果を加工すること", async () => {
-    const mw: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> = {
+    const mw: IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
       onCommand: vi.fn().mockImplementation((cmd) => `${cmd}-modified`),
-      onResult: vi.fn().mockImplementation((res) => ({ ...res, modified: true })),
+      onResult: vi
+        .fn()
+        .mockImplementation((res) => ({ ...res, modified: true })),
     };
     const facade = new EngineFacade(adapter, [mw]);
     const result = await facade.search({ board: "..." } as IBaseSearchOptions);
 
-    expect(mw.onCommand).toHaveBeenCalledWith("search-command", expect.anything());
+    expect(mw.onCommand).toHaveBeenCalledWith(
+      "search-command",
+      expect.anything(),
+    );
     expect(adapter.searchRaw).toHaveBeenCalledWith("search-command-modified");
     expect(result).toEqual({ raw: "result", modified: true });
   });
@@ -107,9 +132,9 @@ describe("EngineFacade", () => {
     const mockLoader = {} as IEngineLoader;
     const loaderProvider = vi.fn().mockResolvedValue(mockLoader);
     const facade = new EngineFacade(adapter, [], loaderProvider);
-    
+
     await facade.load();
-    
+
     expect(loaderProvider).toHaveBeenCalled();
     expect(adapter.load).toHaveBeenCalledWith(mockLoader);
   });
@@ -124,7 +149,9 @@ describe("EngineFacade", () => {
     const facade = new EngineFacade(adapter);
     const stopSpy = vi.fn();
     adapter.searchRaw.mockReturnValue({
-      info: (async function* () { yield { raw: "info" }; })(),
+      info: (async function* () {
+        yield { raw: "info" };
+      })(),
       result: Promise.resolve({ raw: "result" }),
       stop: stopSpy,
     });
@@ -152,16 +179,16 @@ describe("EngineFacade", () => {
     let loadCount = 0;
     adapter.load = vi.fn().mockImplementation(async () => {
       loadCount++;
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 50));
       (adapter as unknown as { status: EngineStatus }).status = "ready";
     });
 
     const facade = new EngineFacade(adapter);
-    
+
     // 同時に2回叩く
     const p1 = facade.load();
     const p2 = facade.load();
-    
+
     await Promise.all([p1, p2]);
 
     expect(loadCount).toBe(1);

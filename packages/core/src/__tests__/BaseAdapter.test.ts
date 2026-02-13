@@ -23,7 +23,11 @@ class TestAdapter extends BaseAdapter<
     createOptionCommand: vi.fn(),
     parseInfo: vi.fn(),
     parseResult: vi.fn(),
-  } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+  } as unknown as IProtocolParser<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  >;
 
   async load() {}
   async dispose() {}

@@ -58,7 +58,9 @@ describe("MahjongJSONParser", () => {
   });
 
   it("should detect injection in deep nested object", () => {
-    const options = { board: { players: [{ name: "p1", history: ["good", "bad\0"] }] } };
+    const options = {
+      board: { players: [{ name: "p1", history: ["good", "bad\0"] }] },
+    };
     expect(() => parser.createSearchCommand(options)).toThrow(EngineError);
   });
 });

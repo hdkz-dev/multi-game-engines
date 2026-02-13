@@ -9,18 +9,18 @@ tags: server, cache, react-cache, deduplication
 
 Use `React.cache()` for server-side request deduplication. Authentication and database queries benefit most.
 
-**Usage:
+\*\*Usage:
 
 ```typescript
-import { cache } from 'react'
+import { cache } from "react";
 
 export const getCurrentUser = cache(async () => {
-  const session = await auth()
-  if (!session?.user?.id) return null
+  const session = await auth();
+  if (!session?.user?.id) return null;
   return await db.user.findUnique({
-    where: { id: session.user.id }
-  })
-})
+    where: { id: session.user.id },
+  });
+});
 ```
 
 Within a single request, multiple calls to `getCurrentUser()` execute the query only once.

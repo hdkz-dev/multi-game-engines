@@ -1,7 +1,7 @@
-import { 
+import {
   IProtocolParser,
   ProtocolValidator,
-  Brand
+  Brand,
 } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
@@ -53,13 +53,14 @@ export class GTPParser implements IProtocolParser<
     ProtocolValidator.assertNoInjection(sBoard, "board data", true);
 
     commands.push(`loadboard ${sBoard}`);
-    
+
     const sColor = String(options.color);
     ProtocolValidator.assertNoInjection(sColor, "color", true);
-    
+
     const normalized = sColor.toLowerCase();
-    const color = (normalized === "white" || normalized === "w") ? "white" : "black";
-    
+    const color =
+      normalized === "white" || normalized === "w" ? "white" : "black";
+
     commands.push(`genmove ${color}`);
     return commands;
   }

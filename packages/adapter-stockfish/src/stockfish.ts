@@ -1,6 +1,14 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError } from "@multi-game-engines/core";
-import { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCIParser.js";
+import {
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+} from "@multi-game-engines/core";
+import {
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "./UCIParser.js";
 import { UCIParser } from "./UCIParser.js";
 
 export class StockfishAdapter extends BaseAdapter<
@@ -25,12 +33,12 @@ export class StockfishAdapter extends BaseAdapter<
         type: "worker-js" as const,
       };
 
-      const scriptUrl = loader 
+      const scriptUrl = loader
         ? await loader.loadResource(this.id, config)
         : url;
 
       this.communicator = new WorkerCommunicator(scriptUrl);
-      
+
       this.messageUnsubscriber = this.communicator.onMessage((data) => {
         this.handleIncomingMessage(data);
       });

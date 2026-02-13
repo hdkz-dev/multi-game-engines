@@ -18,6 +18,7 @@ We currently provide security updates for the following versions:
 If you discover a security vulnerability, please do **NOT** create a public issue. Instead, use the **GitHub Private Vulnerability Reporting** feature to report it.
 
 ### 手順 / Steps:
+
 1. リポジトリの **[Security]** タブをクリックします。  
    Click the **[Security]** tab of the repository.
 2. サイドバーの **[Advisories]** を選択します。  

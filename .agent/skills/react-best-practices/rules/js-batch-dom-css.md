@@ -51,7 +51,7 @@ function updateElementStyles(element: HTMLElement) {
 }
 ```
 
-**React example:
+\*\*React example:
 
 ```tsx
 // Incorrect: changing styles one by one
