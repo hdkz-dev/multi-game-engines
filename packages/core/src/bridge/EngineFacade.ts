@@ -7,38 +7,56 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  IMiddleware,
   ISearchTask,
+  IMiddleware,
   IMiddlewareContext,
   EngineLoadingStrategy,
   IEngineLoader,
 } from "../types.js";
+import { BaseAdapter } from "../adapters/BaseAdapter.js";
 
 /**
  * 利用者がエンジンを操作するための Facade 実装。
+ * ミドルウェアの適用、ライフサイクル管理、自動ロードなどを抽象化します。
  */
 export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions,
   T_INFO extends IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult,
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
-  private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
-  private infoListeners = new Set<(info: T_INFO) => void>();
+  private statusListeners = new Set<(status: EngineStatus) => void>();
+  private progressListeners = new Set<(progress: ILoadProgress) => void>();
   private telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
-  private loadingPromise: Promise<void> | null = null;
-  /** 
-   * 2026 Best Practice: Managed cleanup of listeners.
-   * Tracks all subscriptions to the adapter to ensure they are cleared when the facade is disposed.
-   */
-  private adapterUnsubscribers = new Set<() => void>();
-  private isDisposed = false;
+  private infoListeners = new Set<(info: T_INFO) => void>();
+
   private _loadingStrategy: EngineLoadingStrategy = "on-demand";
-  
-  /** 2026 Best Practice: ロード戦略の管理 */
-  get loadingStrategy(): EngineLoadingStrategy {
-    return this._loadingStrategy;
+  private loadingPromise: Promise<void> | null = null;
+  private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
+
+  constructor(
+    private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
+    private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
+    private loaderProvider?: () => Promise<IEngineLoader>,
+    private ownsAdapter: boolean = true
+  ) {
+    // アダプターからのイベントを委譲
+    this.adapter.onStatusChange((s) => {
+      for (const l of this.statusListeners) l(s);
+    });
+    this.adapter.onProgress((p) => {
+      for (const l of this.progressListeners) l(p);
+    });
+    this.adapter.onTelemetry?.((e) => {
+      for (const l of this.telemetryListeners) l(e);
+    });
   }
 
+  get id(): string { return this.adapter.id; }
+  get name(): string { return this.adapter.name; }
+  get version(): string { return this.adapter.version; }
+  get status(): EngineStatus { return this.adapter.status; }
+
+  get loadingStrategy(): EngineLoadingStrategy { return this._loadingStrategy; }
   set loadingStrategy(value: EngineLoadingStrategy) {
     this._loadingStrategy = value;
     if (value === "eager" && this.status === "uninitialized") {
@@ -46,222 +64,125 @@ export class EngineFacade<
     }
   }
 
-  constructor(
-    private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    private readonly middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
-    private readonly loaderProvider?: () => Promise<IEngineLoader>,
-    /** 2026 Best Practice: アダプターの所有権管理 (true の場合のみ dispose を呼び出す) */
-    public readonly ownsAdapter: boolean = true
-  ) {}
-
-  get id(): string { return this.adapter.id; }
-  get name(): string { return this.adapter.name; }
-  get version(): string { return this.adapter.version; }
-
-  get status(): EngineStatus {
-    return this.adapter.status;
-  }
-
   async load(): Promise<void> {
+    // 2026 Best Practice: 冪等性の確保 (既にロード済みまたはロード中の場合は何もしない)
+    if (this.status === "ready" || this.status === "busy") return;
     if (this.loadingPromise) return this.loadingPromise;
 
     this.loadingPromise = (async () => {
-      try {
-        const loader = this.loaderProvider ? await this.loaderProvider() : undefined;
-        await this.adapter.load(loader);
-      } finally {
-        this.loadingPromise = null;
-      }
+      const loader = this.loaderProvider ? await this.loaderProvider() : undefined;
+      await this.adapter.load(loader);
     })();
 
-    return this.loadingPromise;
+    try {
+      await this.loadingPromise;
+    } finally {
+      this.loadingPromise = null;
+    }
   }
 
-  /**
-   * 探索を実行します。
-   */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
-    if (this.isDisposed) throw new Error("Facade is disposed");
-
-    // 2026 Best Practice: ロード戦略に基づいた自動ロード処理
-    if (this.status === "uninitialized" || this.status === "error") {
-      if (this.loadingStrategy === "on-demand") {
-        await this.load();
-      } else if (this.loadingStrategy === "manual") {
-        throw new Error("Engine is not initialized. Call load() first or use 'on-demand' strategy.");
-      }
+    // 自動ロード
+    if (this._loadingStrategy === "on-demand" && this.status === "uninitialized") {
+      await this.load();
     }
 
-    // ロード中（loading）の場合は完了を待機
-    if (this.status === "loading") {
-      await new Promise<void>((resolve, reject) => {
-        const unsub = this.onStatusChange((status) => {
-          if (status === "ready") {
-            unsub();
-            resolve();
-          } else if (status === "error" || status === "terminated") {
-            unsub();
-            reject(new Error(`Engine failed to load: ${status}`));
-          }
-        });
-      });
+    if (this.status !== "ready" && this.status !== "busy") {
+      throw new Error(`Engine is not initialized (current status: ${this.status})`);
     }
 
-    await this.stop();
+    // 既存タスクがあれば停止
+    if (this.activeTask) {
+      await this.activeTask.stop();
+    }
 
     const context: IMiddlewareContext<T_OPTIONS> = {
       engineId: this.id,
       options,
     };
 
+    // 1. コマンド生成
     let command = this.adapter.parser.createSearchCommand(options);
+
+    // 2. onCommand ミドルウェアの適用
     for (const mw of this.middlewares) {
       if (mw.onCommand) {
         command = await mw.onCommand(command, context);
       }
     }
 
+    // 3. 探索実行
     const task = this.adapter.searchRaw(command);
     this.activeTask = task;
 
-    // 2026 Best Practice: AbortSignal management with proper cleanup to avoid listener leaks.
-    let abortCleanup: (() => void) | undefined;
-    if (options.signal) {
-      if (options.signal.aborted) {
-        void task.stop();
-      } else {
-        const onAbort = () => {
-          void task.stop();
-        };
-        options.signal.addEventListener("abort", onAbort, { once: true });
-        abortCleanup = () => options.signal?.removeEventListener("abort", onAbort);
+    // 4. 思考情報のストリーミング (Persistent Listener + Middleware)
+    const infoProcessing = (async () => {
+      try {
+        for await (let info of task.info) {
+          // onInfo ミドルウェアの適用
+          for (const mw of this.middlewares) {
+            if (mw.onInfo) {
+              info = await mw.onInfo(info, context);
+            }
+          }
+          // 購読者に通知
+          for (const l of this.infoListeners) l(info);
+        }
+      } catch (err) {
+        // 2026 Best Practice: アダプターの emitTelemetry を呼び出す
+        if (this.adapter instanceof BaseAdapter) {
+          this.adapter.emitTelemetry({
+            event: "info_stream_error",
+            timestamp: Date.now(),
+            attributes: { error: String(err) }
+          });
+        }
       }
-    }
+    })();
 
-    // 非同期で Info ストリームの配信を開始 (2026 Best Practice: Background streaming)
-    void this.pipeInfoStream(task, options);
-
+    // 5. 結果の待機と onResult ミドルウェアの適用
     try {
+      if (options.signal?.aborted) {
+        await task.stop();
+      }
+      
+      options.signal?.addEventListener("abort", () => {
+        void task.stop();
+      });
+
       let result = await task.result;
       for (const mw of this.middlewares) {
         if (mw.onResult) {
           result = await mw.onResult(result, context);
         }
       }
+      await infoProcessing;
       return result;
     } finally {
-      abortCleanup?.();
       if (this.activeTask === task) {
         this.activeTask = null;
       }
     }
   }
 
-  /**
-   * Info ストリームを登録済みのリスナーに配信します。
-   * 
-   * 2026 Best Practice: Persistent Listener Pattern.
-   * 利用者は一度 onInfo を登録すれば、探索（search）が新しく実行されても
-   * 継続して最新の思考状況を受け取ることができます。
-   */
-  private async pipeInfoStream(task: ISearchTask<T_INFO, T_RESULT>, options: T_OPTIONS): Promise<void> {
-    const context: IMiddlewareContext<T_OPTIONS> = {
-      engineId: this.id,
-      options,
-    };
-
-    try {
-      // Async Iterator を使用して、アダプターからの info を順次処理
-      for await (let info of task.info) {
-        // Facade が破棄されたか、別の新しいタスクが開始された場合はループを終了
-        if (this.isDisposed || this.activeTask !== task) break;
-
-        // ミドルウェアの適用 (Bidirectional Middleware)
-        for (const mw of this.middlewares) {
-          if (mw.onInfo) {
-            info = await mw.onInfo(info, context);
-          }
-        }
-
-        // 登録済みの全リスナーへ通知
-        for (const listener of this.infoListeners) {
-          listener(info);
-        }
-      }
-    } catch (err) {
-      if (!this.isDisposed && this.activeTask === task) {
-        // 2026 Best Practice: Telemetry を通じたエラー通知
-        this.emitTelemetry({
-          event: "info_stream_error",
-          timestamp: Date.now(),
-          attributes: { error: String(err), engineId: this.id }
-        });
-      }
-    }
-  }
-
-  /**
-   * 思考状況を購読します。
-   */
   onInfo(callback: (info: T_INFO) => void): () => void {
-    if (this.isDisposed) return () => {};
     this.infoListeners.add(callback);
     return () => this.infoListeners.delete(callback);
   }
 
-  /**
-   * エンジンの状態変化を購読します。
-   */
   onStatusChange(callback: (status: EngineStatus) => void): () => void {
-    if (this.isDisposed) return () => {};
-    const unsub = this.adapter.onStatusChange(callback);
-    this.adapterUnsubscribers.add(unsub);
-    return () => {
-      unsub();
-      this.adapterUnsubscribers.delete(unsub);
-    };
+    this.statusListeners.add(callback);
+    return () => this.statusListeners.delete(callback);
   }
 
-  /**
-   * ロードの進捗状況を購読します。
-   */
   onProgress(callback: (progress: ILoadProgress) => void): () => void {
-    if (this.isDisposed) return () => {};
-    const unsub = this.adapter.onProgress(callback);
-    this.adapterUnsubscribers.add(unsub);
-    return () => {
-      unsub();
-      this.adapterUnsubscribers.delete(unsub);
-    };
+    this.progressListeners.add(callback);
+    return () => this.progressListeners.delete(callback);
   }
 
-  /**
-   * テレメトリイベントを購読します。
-   */
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
-    if (this.isDisposed) return () => {};
     this.telemetryListeners.add(callback);
-    
-    // アダプターからのイベントもこの Facade のリスナーに流す
-    const unsub = this.adapter.onTelemetry?.((event) => {
-      callback(event);
-    }) || (() => {});
-    
-    this.adapterUnsubscribers.add(unsub);
-    return () => {
-      this.telemetryListeners.delete(callback);
-      unsub();
-      this.adapterUnsubscribers.delete(unsub);
-    };
-  }
-
-  /**
-   * 独自イベントを発行します。
-   */
-  private emitTelemetry(event: ITelemetryEvent): void {
-    for (const listener of this.telemetryListeners) {
-      listener(event);
-    }
+    return () => this.telemetryListeners.delete(callback);
   }
 
   async stop(): Promise<void> {
@@ -272,24 +193,16 @@ export class EngineFacade<
   }
 
   async setOption(name: string, value: string | number | boolean): Promise<void> {
-    if (this.isDisposed) throw new Error("Facade is disposed");
     await this.adapter.setOption(name, value);
   }
 
   async dispose(): Promise<void> {
-    if (this.isDisposed) return;
-    this.isDisposed = true;
-
-    // 解除されていないリスナーを全て一括解除
-    for (const unsub of this.adapterUnsubscribers) {
-      unsub();
-    }
-    this.adapterUnsubscribers.clear();
-    this.infoListeners.clear();
-
     await this.stop();
-
-    // 2026 Best Practice: 所有権を持っている場合のみアダプターを破棄
+    this.statusListeners.clear();
+    this.progressListeners.clear();
+    this.telemetryListeners.clear();
+    this.infoListeners.clear();
+    
     if (this.ownsAdapter) {
       await this.adapter.dispose();
     }

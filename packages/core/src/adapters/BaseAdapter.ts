@@ -49,7 +49,6 @@ export abstract class BaseAdapter<
 
   /**
    * 共通の探索実行ロジック。
-   * 大半のアダプターで共通のライフサイクル（リスナー登録、コマンド送信、ストリーム配信）を実装します。
    */
   searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready") {
@@ -63,14 +62,30 @@ export abstract class BaseAdapter<
     this.cleanupPendingTask("Replaced by new search");
     this.emitStatusChange("busy");
 
-    const infoStream = new ReadableStream<T_INFO>({
+    // 2026 Best Practice: Safari 互換性のため ReadableStream を AsyncGenerator でラップ
+    const readableStream = new ReadableStream<T_INFO>({
       start: (controller) => {
         this.infoController = controller;
       },
       cancel: () => {
         void this.stop();
       },
-    }) as unknown as AsyncIterable<T_INFO>;
+    });
+
+    const infoStream: AsyncIterable<T_INFO> = {
+      [Symbol.asyncIterator]: async function* () {
+        const reader = readableStream.getReader();
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            yield value;
+          }
+        } finally {
+          reader.releaseLock();
+        }
+      },
+    };
 
     const resultPromise = new Promise<T_RESULT>((resolve, reject) => {
       this.pendingResolve = resolve;
@@ -107,8 +122,11 @@ export abstract class BaseAdapter<
 
     const result = this.parser.parseResult(record);
     if (result) {
-      this.pendingResolve?.(result);
-      this.pendingReject = null; // 解決済みなので reject をクリア
+      // 2026 Best Practice: 即座に参照をクリアして二重解決を防止
+      const resolve = this.pendingResolve;
+      this.pendingResolve = null;
+      this.pendingReject = null;
+      resolve?.(result);
       this.cleanupPendingTask();
     }
   }
@@ -228,7 +246,7 @@ export abstract class BaseAdapter<
   /**
    * テレメトリイベントを通知します。
    */
-  protected emitTelemetry(event: ITelemetryEvent): void {
+  public emitTelemetry(event: ITelemetryEvent): void {
     for (const listener of this.telemetryListeners) {
       listener(event);
     }

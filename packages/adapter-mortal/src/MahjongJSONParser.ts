@@ -1,82 +1,63 @@
-import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
+import { IProtocolParser } from "@multi-game-engines/core";
 
-/** 麻雀の牌表記 (1m, chun等) */
-export type MahjongTile = Brand<string, "MahjongTile">;
-/** 麻雀の指し手表記 (打牌選択等) */
-export type Move = Brand<string, "Move">;
-
-/** 麻雀の鳴き情報 */
-export interface IMahjongMeld {
-  type: "chi" | "pon" | "kan" | "kankan";
-  tiles: MahjongTile[];
-  fromPlayer?: number;
-}
-
-/** 麻雀用の思考情報 */
-export interface IMahjongSearchInfo extends IBaseSearchInfo {
-  depth?: number;
-  score?: number;
-  evaluations?: Array<{
-    move: Move;
-    ev: number;
-    prob?: number;
-  }>;
-  pv?: Move[];
-}
-
-/** 麻雀用の探索結果 */
-export interface IMahjongSearchResult extends IBaseSearchResult {
-  bestMove: Move;
-  ponder?: Move;
-}
-
-/** 麻雀用の探索オプション拡張 */
-export interface IMahjongSearchOptions extends IBaseSearchOptions {
-  hand: MahjongTile[];
-  melds?: IMahjongMeld[];
-  discards?: MahjongTile[][];
-  dora?: MahjongTile[];
-  playerWind?: number;
-  prevalentWind?: number;
-  isRiichi?: boolean[];
-}
-
-export class MahjongJSONParser implements IProtocolParser<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
-  parseInfo(data: string | Uint8Array | Record<string, unknown>): IMahjongSearchInfo | null {
-    const json = this.ensureObject(data);
-    if (!json || (json.type !== "info" && !json.evaluations)) return null;
-    return {
-      depth: typeof json.depth === "number" ? json.depth : undefined,
-      score: typeof json.score === "number" ? json.score : undefined,
-      evaluations: json.evaluations as IMahjongSearchInfo["evaluations"],
-      raw: typeof data === "string" ? data : JSON.stringify(data),
-    };
-  }
-
-  parseResult(data: string | Uint8Array | Record<string, unknown>): IMahjongSearchResult | null {
-    const json = this.ensureObject(data);
-    if (!json || (json.type !== "result" && !json.bestMove)) return null;
-    return {
-      bestMove: json.bestMove as Move,
-      ponder: json.ponder as Move,
-      raw: typeof data === "string" ? data : JSON.stringify(data),
-    };
-  }
-
-  createSearchCommand(options: IMahjongSearchOptions): string | string[] | Uint8Array | Record<string, unknown> {
-    return { type: "search", ...options };
-  }
-
-  createStopCommand(): string | Uint8Array | Record<string, unknown> { return { type: "stop" }; }
-  createOptionCommand(name: string, value: string | number | boolean): string | Uint8Array | Record<string, unknown> {
-    return { type: "setoption", name, value };
-  }
-
-  private ensureObject(data: unknown): Record<string, unknown> | null {
-    if (typeof data === "object" && data !== null) return data as Record<string, unknown>;
-    if (typeof data === "string") {
-      try { return JSON.parse(data) as Record<string, unknown>; } catch { return null; }
+export class MahjongJSONParser implements IProtocolParser<
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
+  IMahjongSearchResult
+> {
+  parseInfo(data: string | Record<string, unknown>): IMahjongSearchInfo | null {
+    const record = typeof data === "string" ? JSON.parse(data) : data;
+    if (record.type === "info") {
+      return {
+        raw: typeof data === "string" ? data : JSON.stringify(data),
+        thinking: record.thinking,
+      };
     }
     return null;
   }
+
+  parseResult(data: string | Record<string, unknown>): IMahjongSearchResult | null {
+    const record = typeof data === "string" ? JSON.parse(data) : data;
+    if (record.type === "result") {
+      return {
+        raw: typeof data === "string" ? data : JSON.stringify(data),
+        bestMove: record.bestMove,
+      };
+    }
+    return null;
+  }
+
+  createSearchCommand(options: IMahjongSearchOptions): Record<string, unknown> {
+    return {
+      type: "search",
+      board: options.board,
+    };
+  }
+
+  createStopCommand(): Record<string, unknown> {
+    return { type: "stop" };
+  }
+
+  createOptionCommand(name: string, value: string | number | boolean): Record<string, unknown> {
+    return {
+      type: "option",
+      name,
+      value,
+    };
+  }
+}
+
+export interface IMahjongSearchOptions {
+  board: unknown;
+  signal?: AbortSignal;
+}
+
+export interface IMahjongSearchInfo {
+  raw: string;
+  thinking: string;
+}
+
+export interface IMahjongSearchResult {
+  raw: string;
+  bestMove: string;
 }

@@ -5,12 +5,14 @@ import { ICapabilities } from "../types.js";
  */
 export class CapabilityDetector {
   static async detect(): Promise<ICapabilities> {
+    const nav = typeof navigator !== "undefined" ? navigator : null;
+    
     return {
-      opfs: typeof navigator !== "undefined" && !!navigator.storage?.getDirectory,
+      opfs: !!nav?.storage?.getDirectory,
       wasmThreads: this.checkWasmThreads(),
       wasmSimd: this.checkWasmSimd(),
-      webNN: "ml" in navigator,
-      webGPU: "gpu" in navigator,
+      webNN: !!nav && "ml" in nav,
+      webGPU: !!nav && "gpu" in nav,
       webTransport: "WebTransport" in globalThis,
     };
   }

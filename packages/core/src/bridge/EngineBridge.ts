@@ -52,7 +52,8 @@ export class EngineBridge implements IEngineBridge {
     const facade = new EngineFacade(
       adapter, 
       this.middlewares, 
-      async () => this.getLoader()
+      async () => this.getLoader(),
+      false // EngineBridge がアダプターのライフサイクルを管理するため
     );
     facade.loadingStrategy = strategy;
     return facade as unknown as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;

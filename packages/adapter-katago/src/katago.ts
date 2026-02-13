@@ -1,5 +1,5 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator } from "@multi-game-engines/core";
+import { IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode } from "@multi-game-engines/core";
 import { IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js";
 import { GTPParser } from "./GTPParser.js";
 
@@ -15,25 +15,29 @@ export class KatagoAdapter extends BaseAdapter<
 
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
-    
-    const url = "https://example.com/katago.js";
-    const config = {
-      url,
-      // TODO: Replace with actual SRI hash before production release
-      sri: "sha256-dummy",
-      size: 0,
-    };
+    try {
+      const url = "https://example.com/katago.js";
+      const config = {
+        url,
+        // TODO: Replace with actual SRI hash before production release
+        sri: "sha256-dummy",
+        size: 0,
+      };
 
-    const scriptUrl = loader 
-      ? await loader.loadResource(this.id, config)
-      : url;
+      const scriptUrl = loader 
+        ? await loader.loadResource(this.id, config)
+        : url;
 
-    this.communicator = new WorkerCommunicator(scriptUrl);
-    
-    this.messageUnsubscriber = this.communicator.onMessage((data) => {
-      this.handleIncomingMessage(data);
-    });
+      this.communicator = new WorkerCommunicator(scriptUrl);
+      
+      this.messageUnsubscriber = this.communicator.onMessage((data) => {
+        this.handleIncomingMessage(data);
+      });
 
-    this.emitStatusChange("ready");
+      this.emitStatusChange("ready");
+    } catch (error) {
+      this.emitStatusChange("error");
+      throw EngineError.from(error, this.id);
+    }
   }
 }

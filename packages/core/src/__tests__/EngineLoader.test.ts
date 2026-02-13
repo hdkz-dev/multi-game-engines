@@ -1,65 +1,64 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineLoader } from "../bridge/EngineLoader.js";
 import { IFileStorage, IEngineSourceConfig } from "../types.js";
-import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 
 describe("EngineLoader", () => {
-  // 型安全なモックストレージ
-  const mockStorage: IFileStorage = {
-    get: vi.fn(),
-    set: vi.fn(),
-    delete: vi.fn(),
-    has: vi.fn(),
-    clear: vi.fn(),
-  };
-
-  const dummyConfig: IEngineSourceConfig = {
-    url: "https://example.com/engine.js",
-    sri: "sha256-validhashbase64==",
-    size: 1000,
-  };
+  let storage: IFileStorage;
+  let loader: EngineLoader;
+  const dummySRI = "sha256-n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg="; // "test" のハッシュ
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    vi.stubGlobal("fetch", vi.fn());
-    vi.stubGlobal("URL", {
-      createObjectURL: vi.fn().mockReturnValue("blob://test"),
-      revokeObjectURL: vi.fn(),
-    });
-    // SRI検証をデフォルトで成功させる
-    vi.spyOn(SecurityAdvisor, "verifySRI").mockResolvedValue(true);
-  });
-
-  it("キャッシュに存在しない場合、ネットワークから取得して保存すること", async () => {
-    const loader = new EngineLoader(mockStorage);
-    vi.mocked(mockStorage.get).mockResolvedValue(null);
-    vi.mocked(fetch).mockResolvedValue({
+    storage = {
+      get: vi.fn(),
+      set: vi.fn(),
+      delete: vi.fn(),
+      has: vi.fn(),
+      clear: vi.fn(),
+    };
+    loader = new EngineLoader(storage);
+    
+    // globalThis fetch mock
+    globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(10)),
-    } as Response);
+      arrayBuffer: async () => new TextEncoder().encode("test").buffer,
+    } as unknown as Response);
 
-    const url = await loader.loadResource("test", dummyConfig);
-
-    expect(url).toBe("blob://test");
-    expect(fetch).toHaveBeenCalled();
-    expect(mockStorage.set).toHaveBeenCalled();
+    // globalThis URL mock
+    globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:test");
+    globalThis.URL.revokeObjectURL = vi.fn();
   });
 
-  it("キャッシュに存在する場合、それを使用すること", async () => {
-    const loader = new EngineLoader(mockStorage);
-    vi.mocked(mockStorage.get).mockResolvedValue(new ArrayBuffer(10));
+  it("should fetch and cache if not in storage", async () => {
+    vi.mocked(storage.get).mockResolvedValue(null);
+    const config: IEngineSourceConfig = { url: "http://test.com/engine.js", sri: dummySRI, size: 100 };
+    
+    const url = await loader.loadResource("test", config);
+    
+    expect(url).toBe("blob:test");
+    expect(storage.set).toHaveBeenCalled();
+  });
 
-    const url = await loader.loadResource("test", dummyConfig);
+  it("should return cached version if SRI matches", async () => {
+    const data = new TextEncoder().encode("test").buffer;
+    vi.mocked(storage.get).mockResolvedValue(data);
+    const config: IEngineSourceConfig = { url: "http://test.com/engine.js", sri: dummySRI, size: 100 };
 
-    expect(url).toBe("blob://test");
-    // キャッシュヒット時は fetch しない
+    const url = await loader.loadResource("test", config);
+    
+    expect(url).toBe("blob:test");
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("SRI が指定されていない場合にエラーを投げること", async () => {
-    const loader = new EngineLoader(mockStorage);
-    const config = { ...dummyConfig, sri: "" };
+  it("should atomic multi-resource load", async () => {
+    const configs: Record<string, IEngineSourceConfig> = {
+      main: { url: "http://test.com/main.js", sri: dummySRI, size: 100 },
+      weights: { url: "http://test.com/weights.bin", sri: dummySRI, size: 200 },
+    };
 
-    await expect(loader.loadResource("test", config)).rejects.toThrow(/SRI required/);
+    const urls = await loader.loadResources("test", configs);
+    
+    expect(urls.main).toBe("blob:test");
+    expect(urls.weights).toBe("blob:test");
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });

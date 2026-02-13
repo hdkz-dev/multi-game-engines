@@ -13,6 +13,7 @@ export class WorkerCommunicator {
     predicate: (data: unknown) => boolean;
     resolve: (data: unknown) => void;
     reject: (reason: unknown) => void;
+    cleanup?: () => void;
   }>();
 
   constructor(scriptUrl: string) {
@@ -34,7 +35,6 @@ export class WorkerCommunicator {
     for (const exp of this.expectations) {
       try {
         if (exp.predicate(data)) {
-          this.expectations.delete(exp);
           exp.resolve(data);
           return;
         }
@@ -84,33 +84,47 @@ export class WorkerCommunicator {
     }
 
     return new Promise<T>((resolve, reject) => {
-      const expectation = { 
-        predicate, 
-        resolve: resolve as (data: unknown) => void,
-        reject: reject as (reason: unknown) => void
-      };
-      this.expectations.add(expectation);
-
+      let timerId: ReturnType<typeof setTimeout> | undefined;
+      
       const cleanup = () => {
         this.expectations.delete(expectation);
+        if (timerId !== undefined) clearTimeout(timerId);
+        if (options.signal) {
+          options.signal.removeEventListener("abort", onAbort);
+        }
       };
 
+      const wrappedResolve = (data: unknown) => {
+        cleanup();
+        resolve(data as T);
+      };
+
+      const wrappedReject = (reason: unknown) => {
+        cleanup();
+        reject(reason);
+      };
+
+      const onAbort = () => {
+        wrappedReject(options.signal?.reason);
+      };
+
+      const expectation = { 
+        predicate, 
+        resolve: wrappedResolve,
+        reject: wrappedReject,
+        cleanup
+      };
+      
+      this.expectations.add(expectation);
+
       if (options.timeoutMs) {
-        setTimeout(() => {
-          if (this.expectations.has(expectation)) {
-            cleanup();
-            reject(new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "Message expectation timed out"));
-          }
+        timerId = setTimeout(() => {
+          wrappedReject(new EngineError(EngineErrorCode.SEARCH_TIMEOUT, "Message expectation timed out"));
         }, options.timeoutMs);
       }
 
       if (options.signal) {
-        options.signal.addEventListener("abort", () => {
-          if (this.expectations.has(expectation)) {
-            cleanup();
-            reject(options.signal?.reason);
-          }
-        });
+        options.signal.addEventListener("abort", onAbort);
       }
     });
   }

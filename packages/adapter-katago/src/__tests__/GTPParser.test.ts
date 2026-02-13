@@ -5,12 +5,15 @@ describe("GTPParser", () => {
   const parser = new GTPParser();
 
   it("should parse info correctly", () => {
-    const info = parser.parseInfo("= info depth 10");
-    expect(info).toBeDefined();
+    const info = parser.parseInfo("info visits 100 winrate 0.55");
+    expect(info).not.toBeNull();
+    expect(info!.visits).toBe(100);
+    expect(info!.winrate).toBe(0.55);
   });
 
   it("should parse result correctly", () => {
-    const result = parser.parseResult("= bestmove D4");
-    expect(result).toBeDefined();
+    const result = parser.parseResult("= D4");
+    expect(result).not.toBeNull();
+    expect(result!.bestMove).toBe("D4");
   });
 });
