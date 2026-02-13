@@ -2,7 +2,6 @@
 # https://docs.coderabbit.ai/configuration/reference/
 
 language: "ja-JP"
-early_access: true
 
 reviews:
   profile: "chill"
@@ -15,17 +14,6 @@ reviews:
   tools:
     shellcheck:
       enabled: true
-    linters:
-      enabled: false
-    eslint:
-      enabled: false
-    biome:
-      enabled: false
-    oxc:
-      enabled: false
-
-chat:
-  auto_reply: true
 
 # レビュー用システムプロンプトの拡張
 instructions: |
