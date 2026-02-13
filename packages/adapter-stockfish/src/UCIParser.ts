@@ -4,7 +4,9 @@ import {
   IBaseSearchInfo, 
   IBaseSearchResult, 
   Brand,
-  ProtocolValidator 
+  ProtocolValidator,
+  EngineError,
+  EngineErrorCode
 } from "@multi-game-engines/core";
 
 /** チェス用の局面表記 (Forsyth-Edwards Notation) */
@@ -117,7 +119,11 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
    */
   createSearchCommand(options: IChessSearchOptions): string[] {
     if (!options.fen) {
-      throw new Error("UCI requires a FEN position");
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "UCI requires a FEN position.",
+        remediation: "Provide a valid FEN string in search options."
+      });
     }
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)

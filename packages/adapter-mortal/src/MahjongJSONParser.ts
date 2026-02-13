@@ -29,8 +29,23 @@ export class MahjongJSONParser implements IProtocolParser<
 
   createSearchCommand(options: IMahjongSearchOptions): Record<string, unknown> {
     // 2026 Best Practice: JSON 形式であっても制御文字インジェクションを警戒
-    const sBoard = JSON.stringify(options.board);
-    ProtocolValidator.assertNoInjection(sBoard, "mahjong board data", true);
+    // オブジェクト内の全ての文字列値を再帰的に検証します
+    const validateValue = (value: unknown, path: string = "board"): void => {
+      if (typeof value === "string") {
+        ProtocolValidator.assertNoInjection(value, `mahjong board data: ${path}`, true);
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach((v, i) => validateValue(v, `${path}[${i}]`));
+        return;
+      }
+      if (value && typeof value === "object") {
+        for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+          validateValue(v, `${path}.${k}`);
+        }
+      }
+    };
+    validateValue(options.board);
 
     return {
       type: "search",

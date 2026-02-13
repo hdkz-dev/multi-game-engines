@@ -57,6 +57,7 @@ describe("EngineLoader", () => {
 
     const urls = await loader.loadResources("test", configs);
     
+    expect(urls.main).toBe("blob:test");
     expect(urls.weights).toBe("blob:test");
     expect(fetch).toHaveBeenCalledTimes(2);
   });

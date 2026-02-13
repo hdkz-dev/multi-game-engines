@@ -1,0 +1,16 @@
+{"id":3281026999,"number":18,"state":"open","title":"refactor: reach 2026 ultimate standards","body":"## Summary
+This PR elevates the architecture to the 2026 ultimate standards by implementing advanced reliability, observability, and safety patterns.
+
+### Key Enhancements
+- **Declarative Error Handling**: Added 'remediation' field to 'EngineError' for actionable user guidance.
+- **Standardized Telemetry**: Introduced 'DefaultTelemetryMiddleware' for automatic performance tracking across all engines.
+- **Lifecycle Transparency**: Implemented 'WeakRef'-based instance tracking in 'EngineBridge' to monitor resource health and leaks.
+- **Atomic Initialization**: Refined 'EngineBridge' with a 'loaderPromise' pattern to prevent redundant resource loading.
+- **Protocol Security Refinement**: Tailored sanitization for USI/GTP protocols (e.g., preserving SGF semicolons in Go).
+- **Zero-Any Completeness**: Fully adhered to the Zero-Any policy across core and all adapters.
+
+### Verification
+- All packages built successfully.
+- 0 Lint errors (including strict any-checks).
+- 66/66 tests passed.
+","user":"hdkz-dev","created_at":"2026-02-13T13:59:56Z","updated_at":"2026-02-13T17:26:44Z","comments":3,"review_comments":21,"changed_files":33,"additions":854,"deletions":139}

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "PRRT_kwDORJ0gd85ufIeF",
+    "path": "packages/core/src/middlewares/DefaultTelemetryMiddleware.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "gemini-code-assist",
+        "body": "DefaultTelemetryMiddleware currently only logs to console. Suggest adding emitTelemetry to IMiddlewareContext."
+      }
+    ]
+  },
+  {
+    "id": "PRRT_kwDORJ0gd85uf_13",
+    "path": "packages/core/src/middlewares/DefaultTelemetryMiddleware.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "coderabbitai",
+        "body": "startTimes keyed by engineId might be overwritten in concurrent searches. Suggest unique requestId/telemetryId."
+      }
+    ]
+  },
+  {
+    "id": "PRRT_kwDORJ0gd85ugvOS",
+    "path": "packages/core/src/bridge/EngineFacade.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "coderabbitai",
+        "body": "Telemetry event missing engineId in some error paths."
+      }
+    ]
+  },
+  {
+    "id": "PRRT_kwDORJ0gd85uhvnE",
+    "path": "packages/core/src/__tests__/EngineLoader.test.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "gemini-code-assist",
+        "body": "Suggest restoring urls.main validation in tests."
+      }
+    ]
+  },
+  {
+    "id": "PRRT_kwDORJ0gd85uhv3r",
+    "path": "packages/adapter-mortal/src/MahjongJSONParser.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "coderabbitai",
+        "body": "JSON.stringify hides control characters from ProtocolValidator. Suggest recursive validation of object values."
+      }
+    ]
+  },
+  {
+    "id": "PRRT_kwDORJ0gd85uhv3w",
+    "path": "packages/core/src/__tests__/EngineBridge.test.ts",
+    "resolved": false,
+    "comments": [
+      {
+        "author": "coderabbitai",
+        "body": "EngineFacade internal middlewares direct access violates facade. Suggest public API or test-only accessor."
+      }
+    ]
+  }
+]
