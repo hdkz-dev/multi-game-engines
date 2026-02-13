@@ -20,6 +20,7 @@
 - [x] **ユニットテスト**: 計 82 ケースの網羅的検証。
 - [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation, Handle-based Lifecycle）へ昇華。
 - [x] **ゼロ・エニーの完遂**: Core, Adapter, Test における `any` の完全排除と `unknown` への移行。
+- [ ] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
 - [ ] **packages/ui**: エンジン状況可視化（検討窓）コンポーネント。
 - [ ] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
 

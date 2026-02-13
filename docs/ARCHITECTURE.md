@@ -80,4 +80,8 @@ stockfish.search({ fen: '...' as FEN, depth: 20 });
 
 6.  **モダンな例外処理 (Error Cause API)**: ネットワークエラーや通信障害などの低レイヤーの例外は、`Error Cause API` を用いて元の例外を保持したまま `EngineError` にラップされます。これにより、高度なデバッグ性が確保されています。
 
+7.  **WASM & バイナリリソース戦略 (WASM & Binary Strategy)**:
+    *   **Blob URL の制約**: セキュリティとキャッシュのために `Blob URL` を使用するため、Worker 内からの**相対パスによる追加リソース（.wasm, .nnue）のフェッチは原則禁止**です（Blob の Origin は不透明であるため）。
+    *   **依存性注入 (Dependency Injection)**: アダプターは、JS ローダーだけでなく WASM/NNUE バイナリも `EngineLoader` 経由で個別にロードし、その Blob URL を Worker の初期化パラメータ（`Module.wasmBinaryFile` や `postMessage`）として注入する設計を必須とします。
+
 
