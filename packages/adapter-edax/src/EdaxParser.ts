@@ -6,6 +6,8 @@ import {
 
 /** オセロの盤面データ */
 export type OthelloBoard = Brand<string, "OthelloBoard">;
+/** オセロの指し手 */
+export type OthelloMove = Brand<string, "OthelloMove">;
 
 export class EdaxParser implements IProtocolParser<
   IOthelloSearchOptions,
@@ -34,7 +36,7 @@ export class EdaxParser implements IProtocolParser<
     if (move) {
       return {
         raw: data,
-        bestMove: move,
+        bestMove: move as OthelloMove,
       };
     }
     return null;
@@ -84,5 +86,5 @@ export interface IOthelloSearchInfo {
 
 export interface IOthelloSearchResult {
   raw: string;
-  bestMove: string;
+  bestMove: OthelloMove;
 }

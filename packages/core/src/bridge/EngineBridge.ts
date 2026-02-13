@@ -18,16 +18,16 @@ import { EngineFacade } from "./EngineFacade.js";
  */
 export class EngineBridge implements IEngineBridge {
   private adapters = new Map<string, IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
-  private engineInstances = new Map<string, IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
+  private engineInstances = new Map<string, WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>>();
   private middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[] = [];
   private loader: IEngineLoader | null = null;
   private loaderPromise: Promise<IEngineLoader> | null = null;
-  /** アクティブなエンジンの追跡 (Memory Leak 監視用) */
-  private activeEngines = new Set<WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>>();
+  private disposed = false;
 
   async registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
     adapter: IEngineAdapter<O, I, R>
   ): Promise<void> {
+    if (this.disposed) return;
     // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
     const old = this.adapters.get(adapter.id);
     if (old) {
@@ -59,8 +59,9 @@ export class EngineBridge implements IEngineBridge {
     strategy?: EngineLoadingStrategy
   ): IEngine<O, I, R>;
   getEngine(id: string, strategy: EngineLoadingStrategy = "on-demand"): IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
-    // 2026 Best Practice: インスタンスのキャッシュ (Singleton per Bridge)
-    const cached = this.engineInstances.get(id);
+    // 2026 Best Practice: インスタンスのキャッシュ (WeakRef ベース)
+    const ref = this.engineInstances.get(id);
+    const cached = ref?.deref();
     if (cached) {
       cached.loadingStrategy = strategy;
       return cached;
@@ -84,25 +85,22 @@ export class EngineBridge implements IEngineBridge {
     );
     facade.loadingStrategy = strategy;
 
-    const engine = facade as unknown as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
-    this.engineInstances.set(id, engine);
-
-    // 2026 Best Practice: ライフサイクル追跡 (WeakRef)
-    this.activeEngines.add(new WeakRef(engine));
+    const engine = facade as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+    this.engineInstances.set(id, new WeakRef(engine));
 
     return engine;
   }
 
   /**
-   * 現在稼働中のエンジンインスタンス数を取得します。
+   * 現在稼働中の（メモリ上に存在する）エンジンインスタンス数を取得します。
    */
   getActiveEngineCount(): number {
     let count = 0;
-    for (const ref of this.activeEngines) {
+    for (const [id, ref] of this.engineInstances.entries()) {
       if (ref.deref()) {
         count++;
       } else {
-        this.activeEngines.delete(ref);
+        this.engineInstances.delete(id);
       }
     }
     return count;
@@ -114,8 +112,7 @@ export class EngineBridge implements IEngineBridge {
     this.middlewares.push(middleware as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
     this.middlewares.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-    // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリアし、
-    // 次回の getEngine で新しいミドルウェアスタックが適用されるようにする
+    // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア
     this.engineInstances.clear();
   }
 
@@ -125,7 +122,7 @@ export class EngineBridge implements IEngineBridge {
   }
 
   /**
-   * 2026 Best Practice: アトミック初期化 (loaderPromise)
+   * 2026 Best Practice: アトミック初期化と Dispose ガード
    */
   async getLoader(): Promise<IEngineLoader> {
     if (this.loader) return this.loader;
@@ -136,8 +133,14 @@ export class EngineBridge implements IEngineBridge {
         const { EngineLoader } = await import("./EngineLoader.js");
         const { createFileStorage } = await import("../storage/index.js");
         const caps = await this.checkCapabilities();
-        this.loader = new EngineLoader(createFileStorage(caps));
-        return this.loader;
+        
+        if (this.disposed) {
+          throw new Error("EngineBridge already disposed");
+        }
+
+        const loader = new EngineLoader(createFileStorage(caps));
+        this.loader = loader;
+        return loader;
       } finally {
         this.loaderPromise = null;
       }
@@ -147,12 +150,12 @@ export class EngineBridge implements IEngineBridge {
   }
 
   async dispose(): Promise<void> {
+    this.disposed = true;
     const promises = Array.from(this.adapters.values()).map(a => a.dispose());
     await Promise.all(promises);
     this.adapters.clear();
     this.engineInstances.clear();
     this.middlewares = [];
-    this.activeEngines.clear();
     this.loader = null;
     this.loaderPromise = null;
   }

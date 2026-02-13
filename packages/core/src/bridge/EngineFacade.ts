@@ -139,6 +139,7 @@ export class EngineFacade<
           type: "error",
           timestamp: Date.now(),
           metadata: { 
+            engineId: this.id,
             action: "info_stream",
             error: String(err) 
           }
