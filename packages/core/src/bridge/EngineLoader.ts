@@ -31,73 +31,76 @@ export class EngineLoader implements IEngineLoader {
     if (existing) return existing;
 
     const promise = (async () => {
-      // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
-      if (config.url.startsWith("http://")) {
-        throw new EngineError({
-          code: EngineErrorCode.INTERNAL_ERROR,
-          message: "Insecure connection (HTTP) is not allowed for sensitive engine files.",
-          engineId
-        });
-      }
-
-      if (!config.sri) {
-        throw new EngineError({
-          code: EngineErrorCode.SRI_MISMATCH,
-          message: "SRI required for security verification.",
-          engineId
-        });
-      }
-
-      const cached = await this.storage.get(cacheKey);
-      if (cached) {
-        const isValid = await SecurityAdvisor.verifySRI(cached, config.sri);
-        if (isValid) {
-          const url = URL.createObjectURL(new Blob([cached], { type: this.getMimeType(config) }));
-          this.updateBlobUrl(cacheKey, url);
-          return url;
-        }
-        await this.storage.delete(cacheKey);
-      }
-
-      let data: ArrayBuffer;
       try {
-        const response = await fetch(config.url);
-        if (!response.ok) {
+        // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
+        if (config.url.startsWith("http://")) {
           throw new EngineError({
-            code: EngineErrorCode.NETWORK_ERROR,
-            message: `Failed to fetch engine: ${response.statusText} (${response.status})`,
+            code: EngineErrorCode.INTERNAL_ERROR,
+            message: "Insecure connection (HTTP) is not allowed for sensitive engine files.",
             engineId
           });
         }
-        data = await response.arrayBuffer();
-      } catch (err) {
-        if (err instanceof EngineError) throw err;
-        throw new EngineError({
-          code: EngineErrorCode.NETWORK_ERROR,
-          message: `Network error while fetching engine resource: ${config.url}`,
-          engineId,
-          originalError: err
-        });
-      }
-      
-      const isValid = await SecurityAdvisor.verifySRI(data, config.sri);
-      if (!isValid) {
-        throw new EngineError({
-          code: EngineErrorCode.SRI_MISMATCH,
-          message: "SRI Mismatch",
-          engineId
-        });
-      }
 
-      await this.storage.set(cacheKey, data);
-      const url = URL.createObjectURL(new Blob([data], { type: this.getMimeType(config) }));
-      this.updateBlobUrl(cacheKey, url);
-      return url;
+        if (!config.sri) {
+          throw new EngineError({
+            code: EngineErrorCode.SRI_MISMATCH,
+            message: "SRI required for security verification.",
+            engineId
+          });
+        }
+
+        const cached = await this.storage.get(cacheKey);
+        if (cached) {
+          const isValid = await SecurityAdvisor.verifySRI(cached, config.sri);
+          if (isValid) {
+            const url = URL.createObjectURL(new Blob([cached], { type: this.getMimeType(config) }));
+            this.updateBlobUrl(cacheKey, url);
+            return url;
+          }
+          await this.storage.delete(cacheKey);
+        }
+
+        let data: ArrayBuffer;
+        try {
+          const response = await fetch(config.url);
+          if (!response.ok) {
+            throw new EngineError({
+              code: EngineErrorCode.NETWORK_ERROR,
+              message: `Failed to fetch engine: ${response.statusText} (${response.status})`,
+              engineId
+            });
+          }
+          data = await response.arrayBuffer();
+        } catch (err) {
+          if (err instanceof EngineError) throw err;
+          throw new EngineError({
+            code: EngineErrorCode.NETWORK_ERROR,
+            message: `Network error while fetching engine resource: ${config.url}`,
+            engineId,
+            originalError: err
+          });
+        }
+        
+        const isValid = await SecurityAdvisor.verifySRI(data, config.sri);
+        if (!isValid) {
+          throw new EngineError({
+            code: EngineErrorCode.SRI_MISMATCH,
+            message: "SRI Mismatch",
+            engineId
+          });
+        }
+
+        await this.storage.set(cacheKey, data);
+        const url = URL.createObjectURL(new Blob([data], { type: this.getMimeType(config) }));
+        this.updateBlobUrl(cacheKey, url);
+        return url;
+      } finally {
+        // 2026 Best Practice: 完了または失敗時に Map から除去し、再試行を可能にする
+        this.inflightLoads.delete(cacheKey);
+      }
     })();
 
     this.inflightLoads.set(cacheKey, promise);
-    // 2026 Best Practice: 同期 throw 時にも確実に Map から削除
-    void promise.finally(() => this.inflightLoads.delete(cacheKey));
     return promise;
   }
 

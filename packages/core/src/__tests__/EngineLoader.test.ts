@@ -57,8 +57,29 @@ describe("EngineLoader", () => {
 
     const urls = await loader.loadResources("test", configs);
     
-    expect(urls.main).toBe("blob:test");
     expect(urls.weights).toBe("blob:test");
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("should allow retry after failure (inflight removal)", async () => {
+    const config: IEngineSourceConfig = { url: "https://fail.js", sri: dummySRI, size: 100 };
+
+    // 1回目: 失敗させる
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      statusText: "Internal Server Error"
+    } as Response);
+
+    await expect(loader.loadResource("test", config)).rejects.toThrow();
+
+    // 2回目: 成功させる
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      arrayBuffer: async () => new TextEncoder().encode("test").buffer,
+    } as Response);
+
+    const url = await loader.loadResource("test", config);
+    expect(url).toBe("blob:test");
   });
 });

@@ -119,9 +119,10 @@ export interface IEngine<
 
 /** ブリッジ全体のインターフェース */
 export interface IEngineBridge {
-  registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(adapter: IEngineAdapter<O, I, R>): void;
-  unregisterAdapter(id: string): void;
-  getEngine<K extends keyof EngineRegistry>(
+  registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
+    adapter: IEngineAdapter<O, I, R>
+  ): Promise<void>;
+  unregisterAdapter(id: string): Promise<void>;  getEngine<K extends keyof EngineRegistry>(
     id: K,
     strategy?: EngineLoadingStrategy
   ): IEngine<

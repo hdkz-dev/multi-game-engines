@@ -12,11 +12,15 @@ import {
 } from "../types.js";
 
 describe("EngineFacade", () => {
-  let adapter: any;
+  let adapter: IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> & {
+    searchRaw: ReturnType<typeof vi.fn>;
+    load: ReturnType<typeof vi.fn>;
+  };
   let middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[];
 
   beforeEach(() => {
-    adapter = {
+    // 2026 Best Practice: 用途に応じた正確なモック定義（any を使用しない）
+    const mockAdapter = {
       id: "test-engine",
       name: "Test Engine",
       version: "1.0.0",
@@ -27,9 +31,9 @@ describe("EngineFacade", () => {
         parseResult: vi.fn(),
         createStopCommand: vi.fn().mockReturnValue("stop-command"),
         createOptionCommand: vi.fn(),
-      },
+      } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
       load: vi.fn().mockImplementation(async () => {
-        adapter.status = "ready";
+        mockAdapter.status = "ready";
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () { 
@@ -43,6 +47,10 @@ describe("EngineFacade", () => {
       onTelemetry: vi.fn().mockReturnValue(() => {}),
       setOption: vi.fn(),
       dispose: vi.fn(),
+    };
+    adapter = mockAdapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> & {
+      searchRaw: ReturnType<typeof vi.fn>;
+      load: ReturnType<typeof vi.fn>;
     };
     middlewares = [];
   });
@@ -145,7 +153,7 @@ describe("EngineFacade", () => {
     adapter.load = vi.fn().mockImplementation(async () => {
       loadCount++;
       await new Promise(r => setTimeout(r, 50));
-      adapter.status = "ready";
+      (adapter as unknown as { status: EngineStatus }).status = "ready";
     });
 
     const facade = new EngineFacade(adapter);

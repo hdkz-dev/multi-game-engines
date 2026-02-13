@@ -140,7 +140,10 @@ export class WorkerCommunicator {
 
   terminate(): void {
     this.worker.terminate();
-    const error = new Error("Worker terminated");
+    const error = new EngineError({
+      code: EngineErrorCode.INTERNAL_ERROR,
+      message: "Worker terminated"
+    });
     for (const exp of this.expectations) {
       exp.reject(error);
     }

@@ -6,7 +6,8 @@ import {
   IBaseSearchInfo, 
   IBaseSearchResult,
   IProtocolParser,
-  IMiddleware
+  IMiddleware,
+  EngineStatus
 } from "../types.js";
 
 describe("EngineBridge", () => {
@@ -14,7 +15,7 @@ describe("EngineBridge", () => {
     id,
     name: `Mock ${id}`,
     version: "1.0.0",
-    status: "ready",
+    status: "ready" as EngineStatus,
     parser: {
       createSearchCommand: vi.fn(),
       createStopCommand: vi.fn(),
@@ -33,11 +34,11 @@ describe("EngineBridge", () => {
     dispose: vi.fn().mockResolvedValue(undefined),
   } as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
 
-  it("アダプターを登録し、getEngine で取得できること", () => {
+  it("アダプターを登録し、getEngine で取得できること", async () => {
     const bridge = new EngineBridge();
     const adapter = createMockAdapter("test");
     
-    bridge.registerAdapter(adapter);
+    await bridge.registerAdapter(adapter);
     const engine = bridge.getEngine("test");
     
     expect(engine.id).toBe("test");
@@ -49,14 +50,30 @@ describe("EngineBridge", () => {
     expect(() => bridge.getEngine("invalid")).toThrow();
   });
 
-  it("アダプターの登録解除ができること", () => {
+  it("アダプターの登録解除ができること", async () => {
     const bridge = new EngineBridge();
     const adapter = createMockAdapter("test");
     
-    bridge.registerAdapter(adapter);
-    bridge.unregisterAdapter("test");
+    await bridge.registerAdapter(adapter);
+    await bridge.unregisterAdapter("test");
     
+    expect(adapter.dispose).toHaveBeenCalled(); // 確実に dispose されていること
     expect(() => bridge.getEngine("test")).toThrow();
+  });
+
+  it("同一 ID でアダプターを登録した際、古い方が破棄されること (Leak Prevention)", async () => {
+    const bridge = new EngineBridge();
+    const adapter1 = createMockAdapter("engine1");
+    const adapter2 = createMockAdapter("engine1"); // 同じ ID
+    
+    await bridge.registerAdapter(adapter1);
+    await bridge.registerAdapter(adapter2);
+    
+    expect(adapter1.dispose).toHaveBeenCalled(); // 古い方が破棄されていること
+    expect(adapter2.dispose).not.toHaveBeenCalled(); // 新しい方は生きている
+    
+    const engine = bridge.getEngine("engine1");
+    expect(engine.name).toBe("Mock engine1");
   });
 
   it("dispose 時に全てのアダプターが破棄されること", async () => {
@@ -64,8 +81,8 @@ describe("EngineBridge", () => {
     const adapter1 = createMockAdapter("engine1");
     const adapter2 = createMockAdapter("engine2");
     
-    bridge.registerAdapter(adapter1);
-    bridge.registerAdapter(adapter2);
+    await bridge.registerAdapter(adapter1);
+    await bridge.registerAdapter(adapter2);
     
     await bridge.dispose();
     
@@ -77,8 +94,8 @@ describe("EngineBridge", () => {
     const bridge = new EngineBridge();
     const adapter1 = createMockAdapter("engine1");
     const adapter2 = createMockAdapter("engine2");
-    bridge.registerAdapter(adapter1);
-    bridge.registerAdapter(adapter2);
+    await bridge.registerAdapter(adapter1);
+    await bridge.registerAdapter(adapter2);
 
     const mwSpecific = {
       onCommand: vi.fn().mockImplementation((cmd) => cmd),
@@ -112,5 +129,33 @@ describe("EngineBridge", () => {
     expect(mwGlobal.onCommand).toHaveBeenCalledTimes(2);
     // mwMulti は両方で呼ばれる
     expect(mwMulti.onCommand).toHaveBeenCalledTimes(2);
+  });
+
+  it("getEngine が同じ ID に対して同じインスタンスを返すこと (Caching)", async () => {
+    const bridge = new EngineBridge();
+    const adapter = {
+      id: "engine1",
+      name: "Engine 1",
+      version: "1.0.0",
+      status: "ready" as EngineStatus,
+      parser: {} as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      onStatusChange: vi.fn().mockReturnValue(() => {}),
+      onProgress: vi.fn().mockReturnValue(() => {}),
+      onTelemetry: vi.fn().mockReturnValue(() => {}),
+      dispose: vi.fn().mockResolvedValue(undefined),
+    };
+    await bridge.registerAdapter(adapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    const instance1 = bridge.getEngine("engine1");
+    const instance2 = bridge.getEngine("engine1");
+
+    expect(instance1).toBe(instance2);
+
+    // ミドルウェアを追加
+    bridge.use({ onCommand: (c: unknown) => c } as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // キャッシュがクリアされ、新しいインスタンスが返されるはず
+    const instance3 = bridge.getEngine("engine1");
+    expect(instance3).not.toBe(instance1);
   });
 });

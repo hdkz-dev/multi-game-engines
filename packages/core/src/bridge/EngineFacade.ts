@@ -13,7 +13,6 @@ import {
   EngineLoadingStrategy,
   IEngineLoader,
 } from "../types.js";
-import { BaseAdapter } from "../adapters/BaseAdapter.js";
 
 /**
  * 利用者がエンジンを操作するための Facade 実装。

@@ -18,20 +18,32 @@ import { EngineFacade } from "./EngineFacade.js";
  */
 export class EngineBridge implements IEngineBridge {
   private adapters = new Map<string, IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
+  private engineInstances = new Map<string, IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
   private middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[] = [];
   private loader: IEngineLoader | null = null;
   private loaderPromise: Promise<IEngineLoader> | null = null;
   /** アクティブなエンジンの追跡 (Memory Leak 監視用) */
   private activeEngines = new Set<WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>>();
 
-  registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
+  async registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
     adapter: IEngineAdapter<O, I, R>
-  ): void {
+  ): Promise<void> {
+    // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
+    const old = this.adapters.get(adapter.id);
+    if (old) {
+      await old.dispose();
+    }
     this.adapters.set(adapter.id, adapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+    this.engineInstances.delete(adapter.id);
   }
 
-  unregisterAdapter(id: string): void {
+  async unregisterAdapter(id: string): Promise<void> {
+    const adapter = this.adapters.get(id);
+    if (adapter) {
+      await adapter.dispose();
+    }
     this.adapters.delete(id);
+    this.engineInstances.delete(id);
   }
 
   getEngine<K extends keyof EngineRegistry>(
@@ -47,6 +59,13 @@ export class EngineBridge implements IEngineBridge {
     strategy?: EngineLoadingStrategy
   ): IEngine<O, I, R>;
   getEngine(id: string, strategy: EngineLoadingStrategy = "on-demand"): IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+    // 2026 Best Practice: インスタンスのキャッシュ (Singleton per Bridge)
+    const cached = this.engineInstances.get(id);
+    if (cached) {
+      cached.loadingStrategy = strategy;
+      return cached;
+    }
+
     const adapter = this.adapters.get(id);
     if (!adapter) {
       throw new Error(`Engine adapter not found: ${id}`);
@@ -65,8 +84,10 @@ export class EngineBridge implements IEngineBridge {
     );
     facade.loadingStrategy = strategy;
 
-    // 2026 Best Practice: ライフサイクル追跡 (WeakRef)
     const engine = facade as unknown as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+    this.engineInstances.set(id, engine);
+
+    // 2026 Best Practice: ライフサイクル追跡 (WeakRef)
     this.activeEngines.add(new WeakRef(engine));
 
     return engine;
@@ -92,6 +113,10 @@ export class EngineBridge implements IEngineBridge {
   ): void {
     this.middlewares.push(middleware as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
     this.middlewares.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+    // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリアし、
+    // 次回の getEngine で新しいミドルウェアスタックが適用されるようにする
+    this.engineInstances.clear();
   }
 
   async checkCapabilities(): Promise<ICapabilities> {
@@ -125,6 +150,7 @@ export class EngineBridge implements IEngineBridge {
     const promises = Array.from(this.adapters.values()).map(a => a.dispose());
     await Promise.all(promises);
     this.adapters.clear();
+    this.engineInstances.clear();
     this.middlewares = [];
   }
 }
