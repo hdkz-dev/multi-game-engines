@@ -1,5 +1,5 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode } from "@multi-game-engines/core";
+import { IEngineLoader, WorkerCommunicator, EngineError } from "@multi-game-engines/core";
 import { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCIParser.js";
 import { UCIParser } from "./UCIParser.js";
 

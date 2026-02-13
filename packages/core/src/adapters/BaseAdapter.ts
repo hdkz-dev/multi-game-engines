@@ -207,8 +207,9 @@ export abstract class BaseAdapter<
     if (this.pendingReject) {
       this.pendingReject(new EngineError({
         code: EngineErrorCode.SEARCH_ABORTED,
-        message: reason ?? "Task cleaned up",
-        engineId: this.id
+        message: reason ?? "Search aborted: Replaced by new command or engine reset.",
+        engineId: this.id,
+        remediation: "This is a normal operational event. No action required unless search is unexpectedly stopping."
       }));
     }
     

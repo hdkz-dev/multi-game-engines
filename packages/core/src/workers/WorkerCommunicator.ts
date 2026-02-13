@@ -127,7 +127,8 @@ export class WorkerCommunicator {
         timerId = setTimeout(() => {
           wrappedReject(new EngineError({
             code: EngineErrorCode.SEARCH_TIMEOUT,
-            message: "Message expectation timed out"
+            message: "Message expectation timed out",
+            remediation: "Check if the engine worker is hanging or if the command sequence is correct."
           }));
         }, options.timeoutMs);
       }
@@ -141,8 +142,9 @@ export class WorkerCommunicator {
   terminate(): void {
     this.worker.terminate();
     const error = new EngineError({
-      code: EngineErrorCode.INTERNAL_ERROR,
-      message: "Worker terminated"
+      code: EngineErrorCode.LIFECYCLE_ERROR,
+      message: "Worker terminated",
+      remediation: "This occurs during engine disposal or forced reset. If unexpected, check for resource exhaustion."
     });
     for (const exp of this.expectations) {
       exp.reject(error);

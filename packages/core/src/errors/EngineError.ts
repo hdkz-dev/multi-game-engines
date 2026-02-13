@@ -30,9 +30,9 @@ export class EngineError extends Error {
     this.originalError = opts.originalError;
     this.remediation = opts.remediation;
 
-    // 2026 Best Practice: Error.captureStackTrace (if available)
-    if ("captureStackTrace" in Error) {
-      (Error as unknown as { captureStackTrace: (target: object, constructor: unknown) => void }).captureStackTrace(this, EngineError);
+    // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, EngineError);
     }
   }
 

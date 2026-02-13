@@ -1,4 +1,4 @@
-import { IProtocolParser } from "@multi-game-engines/core";
+import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
 
 export class MahjongJSONParser implements IProtocolParser<
   IMahjongSearchOptions,
@@ -28,6 +28,10 @@ export class MahjongJSONParser implements IProtocolParser<
   }
 
   createSearchCommand(options: IMahjongSearchOptions): Record<string, unknown> {
+    // 2026 Best Practice: JSON 形式であっても制御文字インジェクションを警戒
+    const sBoard = JSON.stringify(options.board);
+    ProtocolValidator.assertNoInjection(sBoard, "mahjong board data", true);
+
     return {
       type: "search",
       board: options.board,

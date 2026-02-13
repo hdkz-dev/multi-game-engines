@@ -1,5 +1,5 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode } from "@multi-game-engines/core";
+import { IEngineLoader, WorkerCommunicator, EngineError } from "@multi-game-engines/core";
 import { IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js";
 import { GTPParser } from "./GTPParser.js";
 

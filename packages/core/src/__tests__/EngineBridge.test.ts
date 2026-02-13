@@ -158,4 +158,96 @@ describe("EngineBridge", () => {
     const instance3 = bridge.getEngine("engine1");
     expect(instance3).not.toBe(instance1);
   });
+
+  it("should purge garbage collected engine instances from count", async () => {
+    const bridge = new EngineBridge();
+    const adapter = {
+      id: "leak-test",
+      name: "Leak Test",
+      version: "1.0.0",
+      status: "ready" as EngineStatus,
+      parser: {} as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      onStatusChange: vi.fn().mockReturnValue(() => {}),
+      onProgress: vi.fn().mockReturnValue(() => {}),
+      onTelemetry: vi.fn().mockReturnValue(() => {}),
+      dispose: vi.fn().mockResolvedValue(undefined),
+    };
+    await bridge.registerAdapter(adapter as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // インスタンスを生成
+    bridge.getEngine("leak-test");
+
+    // この時点で count は 1
+    expect(bridge.getActiveEngineCount()).toBe(1);
+
+    // 注意: 実際の GC を待つ代わりに内部の WeakRef をモックして purge を検証
+    // プライベートプロパティへのアクセスのため unknown キャストを使用 (テスト用)
+    const engineInstances = (bridge as unknown as { 
+      engineInstances: Map<string, { deref: () => unknown }> 
+    }).engineInstances;
+    
+    const ref = engineInstances.get("leak-test");
+    if (ref) {
+      vi.spyOn(ref, "deref").mockReturnValue(undefined);
+    }
+
+    expect(bridge.getActiveEngineCount()).toBe(0);
+    expect(engineInstances.has("leak-test")).toBe(false);
+  });
+
+  it("should filter middlewares based on supportedEngines", async () => {
+    const bridge = new EngineBridge();
+    
+    // モックアダプターの登録
+    const createMock = (id: string) => ({
+      id,
+      name: id,
+      version: "1.0.0",
+      status: "ready" as EngineStatus,
+      parser: {} as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      onStatusChange: vi.fn().mockReturnValue(() => {}),
+      onProgress: vi.fn().mockReturnValue(() => {}),
+      onTelemetry: vi.fn().mockReturnValue(() => {}),
+      dispose: vi.fn().mockResolvedValue(undefined),
+    });
+    
+    await bridge.registerAdapter(createMock("engine-a") as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+    await bridge.registerAdapter(createMock("engine-b") as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+    await bridge.registerAdapter(createMock("engine-c") as unknown as IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 1. 全エンジン対象のミドルウェア
+    bridge.use({
+      priority: 10,
+      onCommand: async (c: unknown) => c,
+    } as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 2. engine-a のみ対象のミドルウェア
+    bridge.use({
+      priority: 5,
+      supportedEngines: ["engine-a"],
+      onCommand: async (c: unknown) => c,
+    } as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 3. engine-a と engine-b 対象のミドルウェア
+    bridge.use({
+      priority: 1,
+      supportedEngines: ["engine-a", "engine-b"],
+      onCommand: async (c: unknown) => c,
+    } as unknown as IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>);
+
+    // 検証: engine-a には 3 つすべて適用される
+    const engineA = bridge.getEngine("engine-a");
+    const mwsA = (engineA as unknown as { middlewares: IMiddleware[] }).middlewares;
+    expect(mwsA.length).toBe(3);
+
+    // 検証: engine-b には 2 つ適用される (all + a-and-b)
+    const engineB = bridge.getEngine("engine-b");
+    const mwsB = (engineB as unknown as { middlewares: IMiddleware[] }).middlewares;
+    expect(mwsB.length).toBe(2);
+
+    // 検証: engine-c には 1 つのみ適用される (all)
+    const engineC = bridge.getEngine("engine-c");
+    const mwsC = (engineC as unknown as { middlewares: IMiddleware[] }).middlewares;
+    expect(mwsC.length).toBe(1);
+  });
 });

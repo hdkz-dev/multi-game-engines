@@ -1,5 +1,5 @@
 import { BaseAdapter } from "@multi-game-engines/core";
-import { IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode } from "@multi-game-engines/core";
+import { IEngineLoader, WorkerCommunicator, EngineError } from "@multi-game-engines/core";
 import { ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
 import { ISHOGISearchOptions } from "./usi-types.js";
 import { USIParser } from "./USIParser.js";

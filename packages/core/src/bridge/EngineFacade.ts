@@ -101,8 +101,8 @@ export class EngineFacade<
       emitTelemetry: (event) => {
         this.adapter.emitTelemetry?.(event);
       },
-      // 2026 Best Practice: 並行探索時のテレメトリ識別のための ID 生成
-      telemetryId: crypto.randomUUID?.() ?? Math.random().toString(36).substring(2)
+      // 2026 Best Practice: 高エントロピーな ID 生成 (並行探索の完全な識別)
+      telemetryId: crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`
     };
 
     // 1. コマンド生成
