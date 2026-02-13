@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { createFileStorage } from "../storage";
-import { OPFSStorage } from "../storage/OPFSStorage";
-import { IndexedDBStorage } from "../storage/IndexedDBStorage";
-import { ICapabilities } from "../types";
+import { createFileStorage } from "../storage/index.js";
+import { OPFSStorage } from "../storage/OPFSStorage.js";
+import { IndexedDBStorage } from "../storage/IndexedDBStorage.js";
+import { ICapabilities } from "../types.js";
 
 describe("createFileStorage factory", () => {
   it("should return OPFSStorage when OPFS is available", () => {
@@ -14,7 +14,6 @@ describe("createFileStorage factory", () => {
       webGPU: false,
       webTransport: false,
     };
-    
     const storage = createFileStorage(caps);
     expect(storage).toBeInstanceOf(OPFSStorage);
   });
@@ -28,7 +27,6 @@ describe("createFileStorage factory", () => {
       webGPU: false,
       webTransport: false,
     };
-    
     const storage = createFileStorage(caps);
     expect(storage).toBeInstanceOf(IndexedDBStorage);
   });

@@ -1,1 +1,1 @@
-export { WorkerCommunicator } from "./WorkerCommunicator";
+export { WorkerCommunicator } from "./WorkerCommunicator.js";

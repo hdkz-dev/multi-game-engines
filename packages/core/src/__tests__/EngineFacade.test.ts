@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { EngineFacade } from "../bridge/EngineFacade";
+import { EngineFacade } from "../bridge/EngineFacade.js";
 import { 
   IBaseSearchOptions, 
   IBaseSearchInfo, 
@@ -65,7 +65,7 @@ describe("EngineFacade", () => {
     const adapter = createMockAdapter();
     const middleware: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IMockResult> = {
       onCommand: async (cmd) => `${cmd}_modified`,
-      onResult: async (res) => ({ ...(res as Record<string, unknown>), move: `${(res as IMockResult).move}_modified` } as IMockResult),
+      onResult: async (res) => ({ ...(res as unknown as Record<string, unknown>), move: `${(res as IMockResult).move}_modified` } as IMockResult),
     };
 
     const facade = new EngineFacade(adapter, [middleware]);

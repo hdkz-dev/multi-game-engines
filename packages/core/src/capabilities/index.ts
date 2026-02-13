@@ -1,2 +1,2 @@
-export * from "./CapabilityDetector";
-export * from "./SecurityAdvisor";
+export * from "./CapabilityDetector.js";
+export * from "./SecurityAdvisor.js";

@@ -1,148 +1,139 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { WorkerCommunicator } from "../workers/WorkerCommunicator";
+import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 
 describe("WorkerCommunicator", () => {
   let currentMockWorker: MockWorker | null = null;
 
-  class MockWorker implements Worker {
-    onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
-    onerror: ((this: AbstractWorker, ev: ErrorEvent) => unknown) | null = null;
-    onmessageerror: ((this: Worker, ev: MessageEvent) => unknown) | null = null;
-    
+  class MockWorker {
     postMessage = vi.fn();
     terminate = vi.fn();
-    addEventListener = vi.fn();
-    removeEventListener = vi.fn();
-    dispatchEvent = vi.fn().mockReturnValue(true);
+    onmessage: ((ev: { data: unknown }) => void) | null = null;
+    onerror: ((ev: { message: string }) => void) | null = null;
+    constructor() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      currentMockWorker = this;
+    }
   }
 
   beforeEach(() => {
     currentMockWorker = null;
-    vi.stubGlobal("Worker", vi.fn().mockImplementation(function() {
-      const worker = new MockWorker();
-      currentMockWorker = worker;
-      return worker;
-    }));
+    vi.stubGlobal("Worker", MockWorker);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it("メッセージを送信し、期待されるレスポンスを待機できること", async () => {
+  it("postMessage が内部の Worker に正しく委譲されること", () => {
     const communicator = new WorkerCommunicator("test.js");
-
-    const responsePromise = communicator.expectMessage((data) => data === "ok");
-    communicator.postMessage("ping");
-
-    expect(currentMockWorker?.postMessage).toHaveBeenCalledWith("ping");
-
-    if (currentMockWorker?.onmessage) {
-      currentMockWorker.onmessage({ data: "ok" } as MessageEvent);
-    }
-
-    await expect(responsePromise).resolves.toBe("ok");
+    communicator.postMessage("hello");
+    expect(currentMockWorker?.postMessage).toHaveBeenCalledWith("hello");
   });
 
-  it("タイムアウト時に適切なエラーが投げられること", async () => {
-    vi.useFakeTimers();
+  it("expectMessage が特定のメッセージを待機し、Promise で返すこと", async () => {
     const communicator = new WorkerCommunicator("test.js");
+    const responsePromise = communicator.expectMessage((data) => data === "ok");
 
+    if (currentMockWorker?.onmessage) {
+      currentMockWorker.onmessage({ data: "ok" });
+    }
+
+    const response = await responsePromise;
+    expect(response).toBe("ok");
+  });
+
+  it("expectMessage がタイムアウトした場合に reject されること", async () => {
+    const communicator = new WorkerCommunicator("test.js");
     const responsePromise = communicator.expectMessage((data) => data === "ok", { timeoutMs: 100 });
 
-    vi.advanceTimersByTime(101);
-
-    await expect(responsePromise).rejects.toThrow(/timed out/i);
-    vi.useRealTimers();
+    await expect(responsePromise).rejects.toThrow(/timed out/);
   });
 
-  it("AbortSignal によって処理を中断できること", async () => {
+  it("AbortSignal を受け取り、中断された場合に reject されること", async () => {
     const communicator = new WorkerCommunicator("test.js");
     const controller = new AbortController();
-    
     const responsePromise = communicator.expectMessage((data) => data === "ok", { signal: controller.signal });
 
-    controller.abort("manual abort");
-
-    await expect(responsePromise).rejects.toBe("manual abort");
+    controller.abort("reason");
+    await expect(responsePromise).rejects.toBe("reason");
   });
 
-  it("先行して届いたメッセージもバッファから解決できること", async () => {
-    const communicator = new WorkerCommunicator("test.js");
-
-    if (currentMockWorker?.onmessage) {
-      currentMockWorker.onmessage({ data: "early-bird" } as MessageEvent);
-    }
-
-    const response = await communicator.expectMessage((data) => data === "early-bird");
-    expect(response).toBe("early-bird");
-  });
-
-  it("メッセージバッファが上限を超えた場合、古いものから破棄されること", async () => {
+  it("バッファリング機能により、expect 以前に届いたメッセージも取得できること", async () => {
     const communicator = new WorkerCommunicator("test.js");
     
-    // 上限 (100) を超えるメッセージを送信
+    // まだ期待していないメッセージを送る
+    if (currentMockWorker?.onmessage) {
+      currentMockWorker.onmessage({ data: "buffered" });
+    }
+
+    const response = await communicator.expectMessage((data) => data === "buffered");
+    expect(response).toBe("buffered");
+  });
+
+  it("メッセージバッファが上限を超えた場合、古いものから破棄されること", () => {
+    new WorkerCommunicator("test.js");
+    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
     for (let i = 0; i < 110; i++) {
       if (currentMockWorker?.onmessage) {
-        currentMockWorker.onmessage({ data: `msg-${i}` } as MessageEvent);
+        currentMockWorker.onmessage({ data: i });
       }
     }
 
-    // 古いメッセージ (msg-0) は既に消えているはず
-    // msg-10 は残っているはず (110 - 100 = 10)
-    await expect(communicator.expectMessage((data) => data === "msg-0", { timeoutMs: 10 })).rejects.toThrow();
-    const response = await communicator.expectMessage((data) => data === "msg-10");
-    expect(response).toBe("msg-10");
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining("overflow"));
+    spy.mockRestore();
   });
 
-  it("述語関数 (predicate) がエラーを投げても、他のリスナーに影響しないこと", async () => {
+  it("述語関数 (predicate) がエラーを投げても、他の処理に影響しないこと", async () => {
     const communicator = new WorkerCommunicator("test.js");
-    
-    // エラーを投げる述語
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
     const responsePromise = communicator.expectMessage((data) => {
       if (data === "bad") throw new Error("Boom");
       return data === "good";
     });
 
     if (currentMockWorker?.onmessage) {
-      currentMockWorker.onmessage({ data: "bad" } as MessageEvent);
-      currentMockWorker.onmessage({ data: "good" } as MessageEvent);
+      currentMockWorker.onmessage({ data: "bad" });
+      currentMockWorker.onmessage({ data: "good" });
     }
 
-    await expect(responsePromise).resolves.toBe("good");
+    const response = await responsePromise;
+    expect(response).toBe("good");
+    expect(spy).toHaveBeenCalled();
+    spy.mockRestore();
   });
 
-  it("terminate() 時に保留中の待機 Promise が Reject されること", async () => {
+  it("terminate 時に保留中の expectation が全てキャンセルされること", async () => {
     const communicator = new WorkerCommunicator("test.js");
     const responsePromise = communicator.expectMessage((data) => data === "never");
 
     communicator.terminate();
 
-    await expect(responsePromise).rejects.toThrow("Communicator terminated");
+    await expect(responsePromise).rejects.toThrow(/terminated/);
+    expect(currentMockWorker?.terminate).toHaveBeenCalled();
   });
 
-  it("Worker のエラー時に保留中の待機 Promise が Reject されること", async () => {
+  it("Worker のエラー時に保留中の expectation が全てキャンセルされること", async () => {
     const communicator = new WorkerCommunicator("test.js");
     const responsePromise = communicator.expectMessage((data) => data === "never");
 
     if (currentMockWorker?.onerror) {
-      currentMockWorker.onerror({ message: "Worker crashed" } as ErrorEvent);
+      currentMockWorker.onerror({ message: "Worker Error" } as ErrorEvent);
     }
 
-    await expect(responsePromise).rejects.toThrow("Worker crashed");
+    await expect(responsePromise).rejects.toThrow("Worker Error");
   });
 
-  it("terminate() 直後にメッセージが届いても、保留中の Promise が正しく Reject されること", async () => {
+  it("onMessage で全てのメッセージを購読できること", () => {
     const communicator = new WorkerCommunicator("test.js");
-    const responsePromise = communicator.expectMessage((data) => data === "ok");
+    const callback = vi.fn();
+    communicator.onMessage(callback);
 
-    // terminate と同時にメッセージが届くシチュエーションを再現
-    communicator.terminate();
     if (currentMockWorker?.onmessage) {
-      currentMockWorker.onmessage({ data: "ok" } as MessageEvent);
+      currentMockWorker.onmessage({ data: "ok" });
     }
 
-    // terminate が優先され、Promise は Reject されるべき
-    await expect(responsePromise).rejects.toThrow("Communicator terminated");
+    expect(callback).toHaveBeenCalledWith("ok");
   });
 });

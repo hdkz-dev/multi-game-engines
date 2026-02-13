@@ -1,2 +1,3 @@
-export { EngineBridge } from "./EngineBridge";
-// EngineFacade and EngineLoader are internal to the bridge and exposed via IEngine and IEngineLoader interfaces.
+export { EngineBridge } from "./EngineBridge.js";
+export { EngineFacade } from "./EngineFacade.js";
+export { EngineLoader } from "./EngineLoader.js";

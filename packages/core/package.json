@@ -1,6 +1,7 @@
 {
   "name": "@multi-game-engines/core",
   "version": "0.1.0",
+  "type": "module",
   "description": "Core interfaces and bridge for multi-game-engines",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -17,7 +18,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

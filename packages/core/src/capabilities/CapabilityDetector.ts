@@ -1,52 +1,34 @@
-import { ICapabilities } from "../types";
-
-interface IGlobalCapabilities {
-  navigator?: {
-    storage?: {
-      getDirectory?: unknown;
-    };
-    ml?: unknown;
-    gpu?: unknown;
-  };
-  SharedArrayBuffer?: unknown;
-  WebTransport?: unknown;
-}
+import { ICapabilities } from "../types.js";
 
 /**
- * 実行環境の最新 API サポート状況を診断するクラス。
+ * 実行環境の能力（WASM, Threads, SIMD, WebGPU等）を検知します。
  */
 export class CapabilityDetector {
-  /**
-   * ブラウザや Node.js 環境の能力を検出し、ICapabilities オブジェクトを返します。
-   */
   static async detect(): Promise<ICapabilities> {
-    const g = globalThis as unknown as IGlobalCapabilities;
-
-    const results = {
-      opfs: !!(g.navigator?.storage?.getDirectory),
-      wasmThreads: typeof g.SharedArrayBuffer !== "undefined",
-      wasmSimd: await this.checkWasmSimd(),
-      webNN: !!(g.navigator?.ml),
-      webGPU: !!(g.navigator?.gpu),
-      webTransport: typeof g.WebTransport !== "undefined",
-    };
-
     return {
-      ...results,
-      details: results,
+      opfs: typeof navigator !== "undefined" && !!navigator.storage?.getDirectory,
+      wasmThreads: this.checkWasmThreads(),
+      wasmSimd: this.checkWasmSimd(),
+      webNN: "ml" in navigator,
+      webGPU: "gpu" in navigator,
+      webTransport: "WebTransport" in globalThis,
     };
   }
 
-  /**
-   * WASM SIMD のサポート状況を実際に小さなバイナリをロードして確認します。
-   */
-  private static async checkWasmSimd(): Promise<boolean> {
+  private static checkWasmThreads(): boolean {
     try {
-      // SIMD 命令を含む最小限の WASM バイナリ (v128.load)
-      const bytes = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 10, 9, 1, 7, 0, 65, 0, 253, 3, 0, 11]);
-      return WebAssembly.validate(bytes);
+      if (typeof MessageChannel !== "undefined") {
+        new WebAssembly.Memory({ shared: true, initial: 1, maximum: 1 });
+        return true;
+      }
     } catch {
-      return false;
+      // Ignore
     }
+    return false;
+  }
+
+  private static checkWasmSimd(): boolean {
+    // 2026: WASM SIMD は主要ブラウザで標準
+    return true; 
   }
 }

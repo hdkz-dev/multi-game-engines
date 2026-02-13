@@ -3,10 +3,10 @@ import { IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult } from 
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
-    mortal: { 
-      options: IMahjongSearchOptions; 
-      info: IMahjongSearchInfo; 
-      result: IMahjongSearchResult; 
+    mortal: {
+      options: IMahjongSearchOptions;
+      info: IMahjongSearchInfo;
+      result: IMahjongSearchResult;
     };
   }
 }

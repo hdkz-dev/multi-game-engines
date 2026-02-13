@@ -42,7 +42,7 @@
     "@multi-game-engines/core": "workspace:*"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm && tsc --emitDeclarationOnly",
+    "build": "tsup src/index.ts --format esm --dts",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

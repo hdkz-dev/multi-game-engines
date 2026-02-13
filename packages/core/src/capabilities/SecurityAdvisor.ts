@@ -1,59 +1,41 @@
-import { ISecurityStatus } from "../types";
+import { ISecurityStatus } from "../types.js";
 
 /**
- * アプリケーションのセキュリティ状態を診断し、
- * SRI (Subresource Integrity) などの検証を支援するクラス。
+ * SRI検証やCOOP/COEPヘッダーの診断を提供します。
  */
 export class SecurityAdvisor {
   /**
-   * 現在の環境におけるセキュリティ診断レポートを取得します。
+   * W3C勧告に基づいたマルチハッシュSRI検証。
    */
-  static getStatus(): ISecurityStatus {
-    const isCrossOriginIsolated =
-      typeof crossOriginIsolated !== "undefined" ? crossOriginIsolated : false;
+  static async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
+    const hashes = sri.split(/\s+/);
+    for (const hash of hashes) {
+      const [algo, expectedBase64] = hash.split("-");
+      if (!algo || !expectedBase64) continue;
 
-    const missingHeaders: string[] = [];
-    if (!isCrossOriginIsolated) {
-      missingHeaders.push("Cross-Origin-Opener-Policy: same-origin");
-      missingHeaders.push("Cross-Origin-Embedder-Policy: require-corp");
+      const algoMap: Record<string, string> = {
+        "sha256": "SHA-256",
+        "sha384": "SHA-384",
+        "sha512": "SHA-512"
+      };
+
+      const webCryptoAlgo = algoMap[algo];
+      if (!webCryptoAlgo) continue;
+
+      const digest = await crypto.subtle.digest(webCryptoAlgo, data);
+      const actualBase64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
+
+      if (actualBase64 === expectedBase64) return true;
     }
+    return false;
+  }
 
+  static async checkStatus(): Promise<ISecurityStatus> {
+    const isCrossOriginIsolated = typeof crossOriginIsolated !== "undefined" && crossOriginIsolated;
     return {
       isCrossOriginIsolated,
       canUseThreads: isCrossOriginIsolated,
-      missingHeaders: missingHeaders.length > 0 ? missingHeaders : undefined,
-      sriSupported: typeof document !== "undefined" && "integrity" in document.createElement("script"),
-    };
-  }
-
-  /**
-   * SRI ハッシュが有効な形式かチェックします。
-   * W3C SRI 仕様に準拠し、スペース区切りのマルチハッシュ形式をサポートします。
-   */
-  static isValidSRI(sri: string): boolean {
-    if (!sri) return false;
-    const parts = sri.split(/\s+/);
-    return parts.every(part => /^sha(256|384|512)-[A-Za-z0-9+/=]+$/.test(part));
-  }
-
-  /**
-   * 指定した URL からリソースを SRI 付きで安全に取得するための fetch オプションを生成します。
-   * SRI が指定されているにもかかわらず形式が不正な場合は、整合性を保証できないため
-   * 空のオプションを返すのではなく、ブラウザのデフォルト挙動に任せるか、呼び出し側でエラーにすべきですが、
-   * ここでは安全なデフォルトを提供し、無効な場合は警告ログを出力します。
-   */
-  static getSafeFetchOptions(sri?: string): RequestInit {
-    if (!sri) return {};
-
-    if (!this.isValidSRI(sri)) {
-      console.warn(`[SecurityAdvisor] Invalid SRI format detected: "${sri}". Integrity check will be skipped.`);
-      return {};
-    }
-    
-    return {
-      integrity: sri,
-      mode: "cors",
-      credentials: "omit",
+      sriSupported: !!crypto.subtle,
     };
   }
 }

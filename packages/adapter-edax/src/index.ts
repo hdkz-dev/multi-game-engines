@@ -3,10 +3,10 @@ import { IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult } from 
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
-    edax: { 
-      options: IOthelloSearchOptions; 
-      info: IOthelloSearchInfo; 
-      result: IOthelloSearchResult; 
+    edax: {
+      options: IOthelloSearchOptions;
+      info: IOthelloSearchInfo;
+      result: IOthelloSearchResult;
     };
   }
 }

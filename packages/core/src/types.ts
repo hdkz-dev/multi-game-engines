@@ -80,7 +80,7 @@ export interface IBaseSearchInfo {
 }
 
 /** 探索の最終結果 (全ゲーム共通) */
-export interface IBaseSearchResult extends Record<string, unknown> {
+export interface IBaseSearchResult {
   /** エンジンからの生の最終出力 */
   raw?: string;
 }
@@ -125,7 +125,7 @@ export interface IEngineBridge {
     EngineRegistry[K]["result"]
   >;
   getEngine<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(id: string, strategy?: EngineLoadingStrategy): IEngine<O, I, R>;
-  use<I, R>(middleware: IMiddleware<I, R>): void;
+  use<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(middleware: IMiddleware<O, I, R>): void;
   checkCapabilities(): Promise<ICapabilities>;
   getLoader(): Promise<IEngineLoader>;
   dispose(): Promise<void>;

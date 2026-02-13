@@ -12,7 +12,7 @@ import {
   IMiddlewareContext,
   EngineLoadingStrategy,
   IEngineLoader,
-} from "../types";
+} from "../types.js";
 
 /**
  * 利用者がエンジンを操作するための Facade 実装。

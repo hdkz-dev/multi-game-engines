@@ -4,10 +4,10 @@ import { ISHOGISearchOptions } from "./usi-types.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
-    yaneuraou: { 
-      options: ISHOGISearchOptions; 
-      info: ISHOGISearchInfo; 
-      result: ISHOGISearchResult; 
+    yaneuraou: {
+      options: ISHOGISearchOptions;
+      info: ISHOGISearchInfo;
+      result: ISHOGISearchResult;
     };
   }
 }

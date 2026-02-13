@@ -3,10 +3,10 @@ import { IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
-    katago: { 
-      options: IGOSearchOptions; 
-      info: IGOSearchInfo; 
-      result: IGOSearchResult; 
+    katago: {
+      options: IGOSearchOptions;
+      info: IGOSearchInfo;
+      result: IGOSearchResult;
     };
   }
 }

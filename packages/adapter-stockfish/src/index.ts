@@ -3,10 +3,10 @@ import { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "./UCI
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
-    stockfish: { 
-      options: IChessSearchOptions; 
-      info: IChessSearchInfo; 
-      result: IChessSearchResult; 
+    stockfish: {
+      options: IChessSearchOptions;
+      info: IChessSearchInfo;
+      result: IChessSearchResult;
     };
   }
 }
