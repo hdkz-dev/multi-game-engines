@@ -1,127 +1,110 @@
-import { IFileStorage, IEngineSourceConfig, IEngineLoader, EngineErrorCode } from "../types";
-import { SecurityAdvisor } from "../capabilities/SecurityAdvisor";
-import { EngineError } from "../errors/EngineError";
+import { IEngineLoader, IEngineSourceConfig, IFileStorage, EngineErrorCode } from "../types.js";
+import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
+import { EngineError } from "../errors/EngineError.js";
 
 /**
- * エンジンのバイナリやスクリプトを安全かつ効率的にロードするためのサービス。
+ * エンジンバイナリのダウンロード、SRI検証、ストレージ保存を管理するローダー。
  */
 export class EngineLoader implements IEngineLoader {
-  private activeBlobs = new Map<string, string>(); // engineId -> blobUrl
+  private inflightLoads = new Map<string, Promise<string>>();
+  private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
 
-  constructor(private readonly storage: IFileStorage) {}
+  constructor(private storage: IFileStorage) {}
 
-  /**
-   * 指定された設定に基づいてリソースを取得します。
-   */
   async loadResource(engineId: string, config: IEngineSourceConfig): Promise<string> {
-    // 既存の Blob URL があれば事前に破棄 (2026 Best Practice: Proactive memory management)
-    const existingBlob = this.activeBlobs.get(engineId);
-    if (existingBlob) {
-      this.revoke(existingBlob);
-      this.activeBlobs.delete(engineId);
-    }
-
-    // 1. SRI の形式チェック (Fail-fast)
-    if (!config.sri) {
-      throw new EngineError(
-        EngineErrorCode.SRI_MISMATCH,
-        `SRI hash is required for engine resource: ${config.url}.`,
-        engineId
-      );
-    }
-
-    if (!SecurityAdvisor.isValidSRI(config.sri)) {
-      throw new EngineError(
-        EngineErrorCode.SRI_MISMATCH,
-        `Invalid SRI hash format: ${config.sri}`,
-        engineId
-      );
-    }
-
-    const cacheKey = `${engineId}::${config.sri}`;
+    const cacheKey = `${engineId}_${config.url}`;
     
-    // リソースのタイプに基づいて適切な MIME type を決定 (2026 Best Practice)
-    let mimeType: string;
-    switch (config.type) {
-      case "wasm":
-        mimeType = "application/wasm";
-        break;
-      case "worker-js":
-      case "webgpu-compute":
-        mimeType = "application/javascript";
-        break;
-      default:
-        mimeType = "application/octet-stream";
-    }
+    // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
+    const existing = this.inflightLoads.get(cacheKey);
+    if (existing) return existing;
 
-    // 2. 永続ストレージ（キャッシュ）から取得を試みる
-    try {
+    const promise = (async () => {
+      // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
+      if (config.url.startsWith("http://")) {
+        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Insecure connection (HTTP) is not allowed for sensitive engine files.", engineId);
+      }
+
+      if (!config.sri) {
+        throw new EngineError(EngineErrorCode.SRI_MISMATCH, "SRI required for security verification.", engineId);
+      }
+
       const cached = await this.storage.get(cacheKey);
       if (cached) {
-        const url = URL.createObjectURL(new Blob([cached], { type: mimeType }));
-        this.activeBlobs.set(engineId, url);
-        return url;
+        const isValid = await SecurityAdvisor.verifySRI(cached, config.sri);
+        if (isValid) {
+          const url = URL.createObjectURL(new Blob([cached], { type: "application/javascript" }));
+          this.updateBlobUrl(cacheKey, url);
+          return url;
+        }
+        await this.storage.delete(cacheKey);
       }
-    } catch (err) {
-      console.warn(`[EngineLoader] Cache read failed for ${engineId}:`, err);
-    }
 
-    // 3. キャッシュがない場合はネットワークから取得 (SRI 検証付き)
-    try {
-      const options = SecurityAdvisor.getSafeFetchOptions(config.sri);
-      const response = await fetch(config.url, {
-        ...options,
-        signal: AbortSignal.timeout(30_000), // 30秒タイムアウト
-      });
+      const response = await fetch(config.url);
+      if (!response.ok) throw new EngineError(EngineErrorCode.NETWORK_ERROR, `Failed to fetch engine: ${response.statusText}`, engineId);
       
-      if (!response.ok) {
-        throw new EngineError(
-          EngineErrorCode.NETWORK_ERROR,
-          `Failed to download engine resource from ${config.url}. (HTTP Status: ${response.status})`,
-          engineId
-        );
-      }
-
       const data = await response.arrayBuffer();
+      const isValid = await SecurityAdvisor.verifySRI(data, config.sri);
+      if (!isValid) throw new EngineError(EngineErrorCode.SRI_MISMATCH, "SRI Mismatch", engineId);
 
-      // 4. ストレージへの保存 (非同期)
-      void this.storage.set(cacheKey, data).catch(err => {
-        console.warn(`[EngineLoader] Cache write failed for ${engineId}:`, err);
-      });
-
-      const url = URL.createObjectURL(new Blob([data], { type: mimeType }));
-      this.activeBlobs.set(engineId, url);
+      await this.storage.set(cacheKey, data);
+      const url = URL.createObjectURL(new Blob([data], { type: "application/javascript" }));
+      this.updateBlobUrl(cacheKey, url);
       return url;
+    })();
 
-    } catch (error) {
-      if (error instanceof EngineError) throw error;
-      
-      const errorCode = (error instanceof Error && error.name === "AbortError") 
-        ? EngineErrorCode.NETWORK_ERROR 
-        : EngineErrorCode.NETWORK_ERROR; // 2026: More specific codes could be mapped here
-
-      throw new EngineError(
-        errorCode,
-        `Network error while fetching engine resource: ${config.url}`,
-        engineId,
-        { cause: error } // Error Cause API (2026 standard)
-      );
-    }
+    this.inflightLoads.set(cacheKey, promise);
+    // 2026 Best Practice: 同期 throw 時にも確実に Map から削除
+    void promise.finally(() => this.inflightLoads.delete(cacheKey));
+    return promise;
   }
 
-  /**
-   * 生成された Blob URL を解放します。
-   */
-  revoke(url: string): void {
-    if (url.startsWith("blob:")) {
-      URL.revokeObjectURL(url);
-      
-      // 逆引きして Map から削除
-      for (const [id, blobUrl] of this.activeBlobs.entries()) {
-        if (blobUrl === url) {
-          this.activeBlobs.delete(id);
-          break;
+  private updateBlobUrl(cacheKey: string, newUrl: string): void {
+    const oldUrl = this.activeBlobs.get(cacheKey);
+    if (oldUrl) {
+      URL.revokeObjectURL(oldUrl);
+    }
+    this.activeBlobs.set(cacheKey, newUrl);
+  }
+
+  async loadResources(engineId: string, configs: Record<string, IEngineSourceConfig>): Promise<Record<string, string>> {
+    const results: Record<string, string> = {};
+    const entries = Object.entries(configs);
+    
+    // 2026 Best Practice: Promise.allSettled を使用して部分的な失敗時のリークを防止
+    const settledResults = await Promise.allSettled(
+      entries.map(async ([key, config]) => {
+        const url = await this.loadResource(engineId, config);
+        return { key, url };
+      })
+    );
+
+    const failures = settledResults.filter(r => r.status === "rejected") as PromiseRejectedResult[];
+    if (failures.length > 0) {
+      // ロールバック: 成功した分の URL を revoke する
+      for (const res of settledResults) {
+        if (res.status === "fulfilled") {
+          this.revoke(res.value.url);
         }
+      }
+      throw failures[0].reason;
+    }
+
+    for (const res of settledResults) {
+      if (res.status === "fulfilled") {
+        results[res.value.key] = res.value.url;
+      }
+    }
+    
+    return results;
+  }
+
+  revoke(url: string): void {
+    URL.revokeObjectURL(url);
+    // マップからも削除
+    for (const [key, val] of this.activeBlobs.entries()) {
+      if (val === url) {
+        this.activeBlobs.delete(key);
+        break;
       }
     }
   }

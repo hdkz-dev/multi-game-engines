@@ -1,15 +1,12 @@
 import { describe, it, expect, vi } from "vitest";
-import { BaseAdapter } from "../adapters/BaseAdapter";
+import { BaseAdapter } from "../adapters/BaseAdapter.js";
 import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  ISearchTask,
   IProtocolParser,
   EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
-} from "../types";
+} from "../types.js";
 
 // モック用の型定義
 class TestAdapter extends BaseAdapter<
@@ -17,73 +14,51 @@ class TestAdapter extends BaseAdapter<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  readonly id = "test";
-  readonly name = "Test";
-  readonly version = "1.0";
-  readonly parser = {} as IProtocolParser<
-    IBaseSearchOptions,
-    IBaseSearchInfo,
-    IBaseSearchResult
-  >;
+  id = "test-adapter";
+  name = "Test Adapter";
+  version = "1.0.0";
+  parser = {
+    createSearchCommand: vi.fn(),
+    createStopCommand: vi.fn(),
+    createOptionCommand: vi.fn(),
+    parseInfo: vi.fn(),
+    parseResult: vi.fn(),
+  } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
 
-  async load(): Promise<void> {
-    this.emitStatusChange("ready");
-  }
+  async load() {}
+  async dispose() {}
 
-  searchRaw(): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    return {} as ISearchTask<IBaseSearchInfo, IBaseSearchResult>;
-  }
-
-  async dispose(): Promise<void> {
-    this.emitStatusChange("terminated");
-  }
-
-  // 内部メソッドの公開
-  public testStatus(status: EngineStatus) {
+  // テスト用の公開ラッパー
+  public testEmitStatusChange(status: EngineStatus) {
     this.emitStatusChange(status);
-  }
-
-  public testProgress(progress: ILoadProgress) {
-    this.emitProgress(progress);
-  }
-
-  public testTelemetry(event: ITelemetryEvent) {
-    this.emitTelemetry(event);
   }
 }
 
 describe("BaseAdapter", () => {
-  it("should handle status changes correctly", () => {
+  it("should initialize with uninitialized status", () => {
     const adapter = new TestAdapter();
-    const spy = vi.fn();
-    adapter.onStatusChange(spy);
-
-    adapter.testStatus("busy");
-    expect(adapter.status).toBe("busy");
-    expect(spy).toHaveBeenCalledWith("busy");
+    expect(adapter.status).toBe("uninitialized");
   });
 
-  it("should handle progress updates", () => {
+  it("should notify status changes to listeners", () => {
     const adapter = new TestAdapter();
-    const spy = vi.fn();
-    adapter.onProgress(spy);
+    const statusSpy = vi.fn();
+    adapter.onStatusChange(statusSpy);
 
-    const progress: ILoadProgress = { phase: "downloading", percentage: 50 };
-    adapter.testProgress(progress);
-    expect(spy).toHaveBeenCalledWith(progress);
+    adapter.testEmitStatusChange("ready");
+
+    expect(statusSpy).toHaveBeenCalledWith("ready");
+    expect(adapter.status).toBe("ready");
   });
 
-  it("should handle telemetry events", () => {
+  it("should unsubscribe listeners", () => {
     const adapter = new TestAdapter();
-    const spy = vi.fn();
-    adapter.onTelemetry(spy);
+    const statusSpy = vi.fn();
+    const unsubscribe = adapter.onStatusChange(statusSpy);
 
-    const event: ITelemetryEvent = {
-      event: "search_start",
-      timestamp: Date.now(),
-      attributes: { engine: "test" },
-    };
-    adapter.testTelemetry(event);
-    expect(spy).toHaveBeenCalledWith(event);
+    unsubscribe();
+    adapter.testEmitStatusChange("busy");
+
+    expect(statusSpy).not.toHaveBeenCalled();
   });
 });

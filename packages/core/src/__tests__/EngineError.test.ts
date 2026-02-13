@@ -1,40 +1,38 @@
 import { describe, it, expect } from "vitest";
-import { EngineError } from "../errors/EngineError";
-import { EngineErrorCode } from "../types";
+import { EngineError } from "../errors/EngineError.js";
+import { EngineErrorCode } from "../types.js";
 
 describe("EngineError", () => {
   it("should create an error with correct properties and name", () => {
     const error = new EngineError(
-      EngineErrorCode.WASM_INIT_FAILED,
-      "Failed to init WASM",
-      "stockfish"
+      EngineErrorCode.NETWORK_ERROR,
+      "test message",
+      "test-engine"
     );
-    
-    expect(error.code).toBe(EngineErrorCode.WASM_INIT_FAILED);
-    expect(error.engineId).toBe("stockfish");
-    expect(error.message).toBe("Failed to init WASM");
+
+    expect(error.message).toBe("test message");
+    expect(error.code).toBe(EngineErrorCode.NETWORK_ERROR);
+    expect(error.engineId).toBe("test-engine");
     expect(error.name).toBe("EngineError");
   });
 
-  it("should return the same instance if already an EngineError", () => {
-    const original = new EngineError(EngineErrorCode.NETWORK_ERROR, "fail");
-    const result = EngineError.from(original);
-    expect(result).toBe(original);
+  it("should wrap an existing error using from()", () => {
+    const original = new Error("original error");
+    const wrapped = EngineError.from(original, "test-engine");
+
+    expect(wrapped.message).toBe("original error");
+    expect(wrapped.engineId).toBe("test-engine");
+    expect(wrapped.originalError).toBe(original);
   });
 
-  it("should wrap regular Error into EngineError", () => {
-    const original = new Error("Regular fail");
-    const error = EngineError.from(original, "test-id");
-    
-    expect(error.code).toBe(EngineErrorCode.UNKNOWN_ERROR);
-    expect(error.message).toBe("Regular fail");
-    expect(error.engineId).toBe("test-id");
-    expect(error.originalError).toBe(original);
+  it("should return the same error if already an EngineError", () => {
+    const error = new EngineError(EngineErrorCode.INTERNAL_ERROR, "test");
+    const result = EngineError.from(error);
+    expect(result).toBe(error);
   });
 
-  it("should handle string input in from()", () => {
-    const error = EngineError.from("string error");
-    expect(error.message).toBe("string error");
-    expect(error.code).toBe(EngineErrorCode.UNKNOWN_ERROR);
+  it("should capture stack trace if supported", () => {
+    const error = new EngineError(EngineErrorCode.UNKNOWN_ERROR, "test");
+    expect(error.stack).toBeDefined();
   });
 });

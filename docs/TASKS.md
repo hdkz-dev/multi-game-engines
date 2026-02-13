@@ -18,7 +18,8 @@
 - [x] **adapter-yaneuraou**: USI 7.5.0 対応。
 - [x] **プロトコルパーサー**: 詰みスコア変換、インジェクション対策、および `startpos` キーワード対応。
 - [x] **ユニットテスト**: 計 82 ケースの網羅的検証。
-- [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation）へ昇華。
+- [x] **品質保証 & 監査**: PR #1〜#13 の全 197 コメントを超深層監査し、ベストプラクティス（Managed Subscriptions, Auto-Revocation, Handle-based Lifecycle）へ昇華。
+- [x] **ゼロ・エニーの完遂**: Core, Adapter, Test における `any` の完全排除と `unknown` への移行。
 - [ ] **packages/ui**: エンジン状況可視化（検討窓）コンポーネント。
 - [ ] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
 
@@ -26,6 +27,8 @@
 
 ## 🔥 フェーズ 3: 第2段階・究極の最適化 (検討中)
 
-- [ ] **Multi-Runtime Bridge**: Node.js Native / WASM 自動切り替え。
-- [ ] **eval-data 配信**: 巨大な評価関数ファイルの分割ダウンロードと SRI 管理。
-- [ ] **WebNN / WebGPU**: NNUE モデルの演算加速。
+- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
+- [ ] **Cloud Engine Relay**: 低スペック端末向けに外部 GPU サーバーへ演算を委託。
+- [ ] **Engine Registry**: SRI ハッシュとバージョンを中央管理し、URL 指定を不要にする。
+- [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
+- [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。

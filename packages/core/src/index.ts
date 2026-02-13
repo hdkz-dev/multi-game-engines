@@ -4,18 +4,15 @@
  */
 
 // 公開インターフェースと型定義
-export * from "./types";
+export * from "./types.js";
 
 // メインエントリーポイント
-export { EngineBridge } from "./bridge";
+export { EngineBridge } from "./bridge/index.js";
 
 // アダプター開発者向け基盤
-export { BaseAdapter } from "./adapters";
-export { WorkerCommunicator } from "./workers";
+export { BaseAdapter } from "./adapters/index.js";
+export { WorkerCommunicator } from "./workers/index.js";
 
-// プロトコルパーサー
-export { UCIParser, USIParser } from "./protocols";
-
-// ユーティリティ (必要に応じて)
-export { CapabilityDetector, SecurityAdvisor } from "./capabilities";
-export { EngineError } from "./errors";
+// ユーティリティ
+export { CapabilityDetector, SecurityAdvisor } from "./capabilities/index.js";
+export { EngineError } from "./errors/index.js";

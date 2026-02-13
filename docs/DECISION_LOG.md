@@ -19,6 +19,8 @@
 - [ADR-021: 思考状況 (info) のリアルタイム配信インターフェース](adr/021-real-time-info-streaming.md)
 - [ADR-022: ミドルウェア追加時のキャッシュ整合性](adr/022-facade-cache-invalidation.md)
 - [ADR-023: Worker 通信におけるメッセージバッファリング](adr/023-worker-message-buffering.md)
+- [ADR-024: ハンドルベースのライフサイクル管理と共有アダプターの保護](adr/024-handle-based-lifecycle.md)
+- [ADR-025: Core とアダプターのドメイン情報の分離 (Pure Domain Info)](adr/025-pure-domain-info.md)
 
 ## 🚀 リリースと統合 (Release & Integration)
 - [ADR-016: 段階的なリリース戦略](adr/016-two-stage-release.md)

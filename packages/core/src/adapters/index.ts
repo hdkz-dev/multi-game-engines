@@ -1,1 +1,1 @@
-export { BaseAdapter } from "./BaseAdapter";
+export { BaseAdapter } from "./BaseAdapter.js";

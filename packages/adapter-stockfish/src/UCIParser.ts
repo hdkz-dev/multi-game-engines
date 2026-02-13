@@ -1,12 +1,32 @@
-import {
-  IProtocolParser,
-} from "./types";
-import {
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  Move,
-} from "../types";
+import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
+
+/** チェス用の局面表記 (Forsyth-Edwards Notation) */
+export type FEN = Brand<string, "FEN">;
+/** チェス用の指し手表記 (e2e4等) */
+export type Move = Brand<string, "Move">;
+
+/** チェス用の探索オプション (UCI標準規格) */
+export interface IChessSearchOptions extends IBaseSearchOptions {
+  fen?: FEN;
+  depth?: number;
+  time?: number;
+  nodes?: number;
+}
+
+/** チェス用の思考情報 */
+export interface IChessSearchInfo extends IBaseSearchInfo {
+  depth?: number;
+  score?: number;
+  nps?: number;
+  time?: number;
+  pv?: Move[];
+}
+
+/** チェス用の探索結果 */
+export interface IChessSearchResult extends IBaseSearchResult {
+  bestMove: Move;
+  ponder?: Move;
+}
 
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
 const MATE_SCORE_FACTOR = 10000;
@@ -14,14 +34,16 @@ const MATE_SCORE_FACTOR = 10000;
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
   /**
    * info 行を解析します。
    */
-  parseInfo(line: string): IBaseSearchInfo | null {
+  parseInfo(data: string | Uint8Array | Record<string, unknown>): IChessSearchInfo | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("info ")) return null;
 
-    const info: IBaseSearchInfo = {
+    const info: IChessSearchInfo = {
       depth: 0,
       score: 0,
       raw: line,
@@ -64,11 +86,13 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
   /**
    * bestmove 行を解析します。
    */
-  parseResult(line: string): IBaseSearchResult | null {
+  parseResult(data: string | Uint8Array | Record<string, unknown>): IChessSearchResult | null {
+    if (typeof data !== "string") return null;
+    const line = data;
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
-    const result: IBaseSearchResult = {
+    const result: IChessSearchResult = {
       bestMove: (parts[1] || "") as Move,
       raw: line,
     };
@@ -84,7 +108,7 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
   /**
    * 探索開始コマンドを生成します。
    */
-  createSearchCommand(options: IBaseSearchOptions): string[] {
+  createSearchCommand(options: IChessSearchOptions): string[] {
     if (!options.fen) {
       throw new Error("UCI requires a FEN position");
     }
@@ -108,5 +132,12 @@ export class UCIParser implements IProtocolParser<IBaseSearchOptions, IBaseSearc
    */
   createStopCommand(): string {
     return "stop";
+  }
+
+  createOptionCommand(name: string, value: string | number | boolean): string {
+    // 2026 Best Practice: Command Injection Prevention
+    const safeName = String(name).replace(/[\r\n\0;]/g, "");
+    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
+    return `setoption name ${safeName} value ${safeValue}`;
   }
 }

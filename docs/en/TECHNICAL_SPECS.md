@@ -2,12 +2,19 @@
 
 ## 1. Core Types
 
-### 1-1. Branded Types
-Used to protect domain-specific strings.
+The Core package provides only abstract definitions independent of specific games or protocols.
+
+### 1-1. Abstract Foundation
+- **Brand<T, K>**: Common helper for creating Branded Types.
+- **EngineStatus**: Lifecycle states of an engine.
+- **EngineErrorCode**: Standardized error codes.
+
+### 1-2. Domain Extension via Adapters
+Game-specific types (e.g., `FEN`, `SFEN`, `Move`) are defined within their respective adapter packages to maintain core purity.
 ```typescript
-type FEN = string & { readonly __brand: "FEN" };
-type SFEN = string & { readonly __brand: "SFEN" };
-type Move = string & { readonly __brand: "Move" };
+/** Examples of types defined by adapters */
+type FEN = Brand<string, "FEN">;
+type SFEN = Brand<string, "SFEN">;
 ```
 
 ### 1-2. Loading Strategy

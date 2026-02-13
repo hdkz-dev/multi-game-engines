@@ -1,12 +1,12 @@
-import { ICapabilities, IFileStorage } from "../types";
-import { OPFSStorage } from "./OPFSStorage";
-import { IndexedDBStorage } from "./IndexedDBStorage";
+import { ICapabilities, IFileStorage } from "../types.js";
+import { OPFSStorage } from "./OPFSStorage.js";
+import { IndexedDBStorage } from "./IndexedDBStorage.js";
 
 /**
- * 環境に応じた最適なストレージ実装を生成します。
+ * 実行環境に最適なストレージ実装を作成します。
  */
-export function createFileStorage(caps: ICapabilities): IFileStorage {
-  if (caps.opfs) {
+export function createFileStorage(capabilities: ICapabilities): IFileStorage {
+  if (capabilities.opfs) {
     return new OPFSStorage();
   }
   return new IndexedDBStorage();
