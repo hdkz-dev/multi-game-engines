@@ -154,6 +154,7 @@ export interface IEngineAdapter<
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
   onTelemetry?(callback: (event: ITelemetryEvent) => void): () => void;
+  emitTelemetry?(event: ITelemetryEvent): void;
   dispose(): Promise<void>;
 }
 

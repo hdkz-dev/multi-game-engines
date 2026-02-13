@@ -1,4 +1,8 @@
-import { IProtocolParser } from "@multi-game-engines/core";
+import { 
+  IProtocolParser,
+  EngineError,
+  EngineErrorCode 
+} from "@multi-game-engines/core";
 
 export class GTPParser implements IProtocolParser<
   IGOSearchOptions,
@@ -38,24 +42,56 @@ export class GTPParser implements IProtocolParser<
 
   createSearchCommand(options: IGOSearchOptions): string[] {
     const commands: string[] = [];
-    const board = String(options.board).replace(/[\r\n\0]/g, "");
-    commands.push(`loadboard ${board}`);
+    const sBoard = String(options.board);
 
-    // 2026 Best Practice: Runtime sanitization and validation
-    const safeColor = String(options.color).replace(/[\r\n\0]/g, "");
-    const color = (safeColor === "white" || safeColor === "W") ? "white" : "black";
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    // GTP allows ; for SGF, but rejects newlines
+    if (/[\r\n\0]/.test(sBoard)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in board data.",
+        remediation: "Remove control characters (\\r, \\n, \\0) from board input."
+      });
+    }
+
+    commands.push(`loadboard ${sBoard}`);
+
+    const sColor = String(options.color);
+    if (/[\r\n\0]/.test(sColor)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in color.",
+        remediation: "Remove control characters (\\r, \\n, \\0) from color."
+      });
+    }
+    
+    const color = (sColor === "white" || sColor === "W") ? "white" : "black";
     
     commands.push(`genmove ${color}`);
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "quit";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name).replace(/[\r\n\0;]/g, "");
-    const sValue = String(value).replace(/[\r\n\0;]/g, "");
+    const sName = String(name);
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    // GTP allows ; for SGF, but rejects newlines
+    if (/[\r\n\0]/.test(sName) || /[\r\n\0]/.test(sValue)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in option name or value.",
+        remediation: "Remove control characters (\\r, \\n, \\0) from input."
+      });
+    }
+
     return `set_option ${sName} ${sValue}`;
   }
 }

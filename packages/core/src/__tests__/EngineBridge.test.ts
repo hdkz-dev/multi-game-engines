@@ -5,7 +5,8 @@ import {
   IBaseSearchOptions, 
   IBaseSearchInfo, 
   IBaseSearchResult,
-  IProtocolParser
+  IProtocolParser,
+  IMiddleware
 } from "../types.js";
 
 describe("EngineBridge", () => {
@@ -86,9 +87,14 @@ describe("EngineBridge", () => {
     const mwGlobal = {
       onCommand: vi.fn().mockImplementation((cmd) => cmd)
     };
+    const mwMulti = {
+      onCommand: vi.fn().mockImplementation((cmd) => cmd),
+      supportedEngines: ["engine1", "engine2"]
+    };
 
     bridge.use(mwSpecific as unknown as IMiddleware);
     bridge.use(mwGlobal as unknown as IMiddleware);
+    bridge.use(mwMulti as unknown as IMiddleware);
 
     const engine1 = bridge.getEngine("engine1");
     const engine2 = bridge.getEngine("engine2");
@@ -104,5 +110,7 @@ describe("EngineBridge", () => {
     expect(mwSpecific.onCommand).toHaveBeenCalledTimes(1);
     // mwGlobal は両方で呼ばれる
     expect(mwGlobal.onCommand).toHaveBeenCalledTimes(2);
+    // mwMulti は両方で呼ばれる
+    expect(mwMulti.onCommand).toHaveBeenCalledTimes(2);
   });
 });

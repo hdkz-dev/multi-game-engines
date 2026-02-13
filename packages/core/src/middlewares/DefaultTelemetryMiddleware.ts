@@ -41,9 +41,6 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
 
       // コンテキスト経由でテレメトリを発行
       context.emitTelemetry(event);
-
-      // デバッグ出力
-      console.debug(`[Telemetry] ${context.engineId} search took ${duration.toFixed(2)}ms`, event);
     }
     return result;
   }

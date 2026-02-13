@@ -1,4 +1,10 @@
-import { IProtocolParser, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import { 
+  IProtocolParser, 
+  IBaseSearchInfo, 
+  IBaseSearchResult,
+  EngineError,
+  EngineErrorCode 
+} from "@multi-game-engines/core";
 import { ISHOGISearchOptions, Move } from "./usi-types.js";
 
 /** 将棋用の思考情報 (USI規格) */
@@ -90,8 +96,15 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {
-      const safeSfen = options.sfen.replace(/[\r\n\0;]/g, "");
-      commands.push(`position sfen ${safeSfen}`);
+      // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+      if (/[\r\n\0;]/.test(options.sfen)) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: "Potential command injection detected in SFEN string.",
+          remediation: "Remove control characters (\\r, \\n, \\0, ;) from SFEN."
+        });
+      }
+      commands.push(`position sfen ${options.sfen}`);
     }
     
     let goCmd = "go";
@@ -105,13 +118,26 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "stop";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const safeName = String(name).replace(/[\r\n\0;]/g, "");
-    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
-    return `setoption name ${safeName} value ${safeValue}`;
+    const sName = String(name);
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in option name or value.",
+        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
+      });
+    }
+
+    return `setoption name ${sName} value ${sValue}`;
   }
 }

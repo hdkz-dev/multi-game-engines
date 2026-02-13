@@ -22,6 +22,7 @@ export class MortalAdapter extends BaseAdapter<
         // TODO: Replace with actual SRI hash before production release
         sri: "sha256-dummy",
         size: 0,
+        type: "worker-js" as const,
       };
 
       const scriptUrl = loader 

@@ -1,4 +1,12 @@
-import { IProtocolParser, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, Brand } from "@multi-game-engines/core";
+import { 
+  IProtocolParser, 
+  IBaseSearchOptions, 
+  IBaseSearchInfo, 
+  IBaseSearchResult, 
+  Brand,
+  EngineError,
+  EngineErrorCode 
+} from "@multi-game-engines/core";
 
 /** チェス用の局面表記 (Forsyth-Edwards Notation) */
 export type FEN = Brand<string, "FEN">;
@@ -112,10 +120,18 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
     if (!options.fen) {
       throw new Error("UCI requires a FEN position");
     }
-    const safeFen = options.fen.replace(/[\r\n\0;]/g, "");
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    if (/[\r\n\0;]/.test(options.fen)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in FEN string.",
+        remediation: "Remove control characters (\\r, \\n, \\0, ;) from FEN."
+      });
+    }
     
     const commands: string[] = [
-      `position fen ${safeFen}`
+      `position fen ${options.fen}`
     ];
 
     let goCmd = "go";
@@ -135,9 +151,18 @@ export class UCIParser implements IProtocolParser<IChessSearchOptions, IChessSea
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    // 2026 Best Practice: Command Injection Prevention
-    const safeName = String(name).replace(/[\r\n\0;]/g, "");
-    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
-    return `setoption name ${safeName} value ${safeValue}`;
+    const sName = String(name);
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in option name or value.",
+        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
+      });
+    }
+
+    return `setoption name ${sName} value ${sValue}`;
   }
 }

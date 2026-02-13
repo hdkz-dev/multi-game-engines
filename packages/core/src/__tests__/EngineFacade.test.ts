@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineFacade } from "../bridge/EngineFacade.js";
-import { IMiddleware, IEngineLoader, EngineStatus, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "../types.js";
+import { 
+  IMiddleware, 
+  IEngineLoader, 
+  EngineStatus, 
+  IBaseSearchOptions, 
+  IBaseSearchInfo, 
+  IBaseSearchResult,
+  IEngineAdapter,
+  IProtocolParser
+} from "../types.js";
 
 describe("EngineFacade", () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let adapter: any;
+  let adapter: IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
   let middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[];
 
   beforeEach(() => {
@@ -18,9 +26,10 @@ describe("EngineFacade", () => {
         parseInfo: vi.fn(),
         parseResult: vi.fn(),
         createStopCommand: vi.fn().mockReturnValue("stop-command"),
-      },
+        createOptionCommand: vi.fn(),
+      } as unknown as IProtocolParser<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
       load: vi.fn().mockImplementation(async () => {
-        adapter.status = "ready";
+        (adapter as { status: EngineStatus }).status = "ready";
       }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () { 

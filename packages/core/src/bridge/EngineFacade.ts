@@ -100,9 +100,7 @@ export class EngineFacade<
       engineId: this.id,
       options,
       emitTelemetry: (event) => {
-        if (this.adapter instanceof BaseAdapter) {
-          this.adapter.emitTelemetry(event);
-        }
+        this.adapter.emitTelemetry?.(event);
       }
     };
 
@@ -135,16 +133,14 @@ export class EngineFacade<
         }
       } catch (err) {
         // 2026 Best Practice: アダプターの emitTelemetry を呼び出す
-        if (this.adapter instanceof BaseAdapter) {
-          this.adapter.emitTelemetry({
-            type: "error",
-            timestamp: Date.now(),
-            metadata: { 
-              action: "info_stream",
-              error: String(err) 
-            }
-          });
-        }
+        this.adapter.emitTelemetry?.({
+          type: "error",
+          timestamp: Date.now(),
+          metadata: { 
+            action: "info_stream",
+            error: String(err) 
+          }
+        });
       }
     })();
 

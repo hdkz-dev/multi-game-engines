@@ -1,4 +1,8 @@
-import { IProtocolParser } from "@multi-game-engines/core";
+import { 
+  IProtocolParser,
+  EngineError,
+  EngineErrorCode 
+} from "@multi-game-engines/core";
 
 export class EdaxParser implements IProtocolParser<
   IOthelloSearchOptions,
@@ -35,19 +39,42 @@ export class EdaxParser implements IProtocolParser<
 
   createSearchCommand(options: IOthelloSearchOptions): string[] {
     const commands: string[] = [];
-    const board = String(options.board).replace(/[\r\n\0;]/g, "");
-    commands.push(`setboard ${board}`);
+    const sBoard = String(options.board);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    if (/[\r\n\0;]/.test(sBoard)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in board data.",
+        remediation: "Remove control characters (\\r, \\n, \\0, ;) from board input."
+      });
+    }
+
+    commands.push(`setboard ${sBoard}`);
     commands.push(`go ${options.depth ?? 20}`);
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "stop";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name).replace(/[\r\n\0;]/g, "");
-    const sValue = String(value).replace(/[\r\n\0;]/g, "");
+    const sName = String(name);
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    if (/[\r\n\0;]/.test(sName) || /[\r\n\0;]/.test(sValue)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Potential command injection detected in option name or value.",
+        remediation: "Remove control characters (\\r, \\n, \\0, ;) from input."
+      });
+    }
+
     return `set ${sName} ${sValue}`;
   }
 }

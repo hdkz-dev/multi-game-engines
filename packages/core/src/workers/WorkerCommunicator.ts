@@ -61,7 +61,11 @@ export class WorkerCommunicator {
     const message = (ev as ErrorEvent).message || (ev as { message: string }).message || "Unknown worker error";
     console.error("Worker error:", message);
     
-    const error = new Error(message);
+    const error = new EngineError({
+      code: EngineErrorCode.INTERNAL_ERROR,
+      message: `Worker execution error: ${message}`,
+    });
+
     for (const exp of this.expectations) {
       exp.reject(error);
     }
