@@ -103,16 +103,21 @@ export class EngineLoader implements IEngineLoader {
    */
   private async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
     try {
-      // sha384-xxxx 形式を想定
-      const [algo, hashBase64] = sri.split("-");
-      if (algo !== "sha384") return true; // 未対応のアルゴリズムはスキップ（現状は sha384 必須）
-
-      const hashBuffer = await crypto.subtle.digest("SHA-384", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashBase64Actual = btoa(String.fromCharCode(...hashArray));
-
-      return hashBase64Actual === hashBase64;
-    } catch {
+      // 2026 Best Practice: W3C マルチハッシュ (スペース区切り) に対応
+      const requirements = sri.split(/\s+/).filter(Boolean);
+      
+      for (const req of requirements) {
+        const [algo, hashBase64] = req.split("-");
+        if (algo === "sha384") {
+          const hashBuffer = await crypto.subtle.digest("SHA-384", data);
+          const hashBase64Actual = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
+          if (hashBase64Actual !== hashBase64) return false;
+        }
+        // 他のアルゴリズム (sha256, sha512) は必要に応じて追加可能
+      }
+      return true;
+    } catch (err) {
+      console.error("[EngineLoader] SRI Verification Error:", err);
       return false;
     }
   }
