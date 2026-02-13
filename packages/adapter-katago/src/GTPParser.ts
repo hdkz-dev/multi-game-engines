@@ -38,9 +38,14 @@ export class GTPParser implements IProtocolParser<
 
   createSearchCommand(options: IGOSearchOptions): string[] {
     const commands: string[] = [];
-    const board = String(options.board).replace(/[\r\n\0;]/g, "");
+    const board = String(options.board).replace(/[\r\n\0]/g, "");
     commands.push(`loadboard ${board}`);
-    commands.push(`genmove ${options.color}`);
+
+    // 2026 Best Practice: Runtime sanitization and validation
+    const safeColor = String(options.color).replace(/[\r\n\0]/g, "");
+    const color = (safeColor === "white" || safeColor === "W") ? "white" : "black";
+    
+    commands.push(`genmove ${color}`);
     return commands;
   }
 

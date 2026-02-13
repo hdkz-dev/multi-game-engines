@@ -20,6 +20,9 @@ export class EngineBridge implements IEngineBridge {
   private adapters = new Map<string, IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>();
   private middlewares: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>[] = [];
   private loader: IEngineLoader | null = null;
+  private loaderPromise: Promise<IEngineLoader> | null = null;
+  /** アクティブなエンジンの追跡 (Memory Leak 監視用) */
+  private activeEngines = new Set<WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>>();
 
   registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
     adapter: IEngineAdapter<O, I, R>
@@ -49,14 +52,39 @@ export class EngineBridge implements IEngineBridge {
       throw new Error(`Engine adapter not found: ${id}`);
     }
 
+    // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
+    const filteredMiddlewares = this.middlewares.filter(mw => 
+      !mw.supportedEngines || mw.supportedEngines.includes(id)
+    );
+
     const facade = new EngineFacade(
       adapter, 
-      this.middlewares, 
+      filteredMiddlewares, 
       async () => this.getLoader(),
       false // EngineBridge がアダプターのライフサイクルを管理するため
     );
     facade.loadingStrategy = strategy;
-    return facade as unknown as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+
+    // 2026 Best Practice: ライフサイクル追跡 (WeakRef)
+    const engine = facade as unknown as IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
+    this.activeEngines.add(new WeakRef(engine));
+
+    return engine;
+  }
+
+  /**
+   * 現在稼働中のエンジンインスタンス数を取得します。
+   */
+  getActiveEngineCount(): number {
+    let count = 0;
+    for (const ref of this.activeEngines) {
+      if (ref.deref()) {
+        count++;
+      } else {
+        this.activeEngines.delete(ref);
+      }
+    }
+    return count;
   }
 
   use<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
@@ -71,14 +99,26 @@ export class EngineBridge implements IEngineBridge {
     return CapabilityDetector.detect();
   }
 
+  /**
+   * 2026 Best Practice: アトミック初期化 (loaderPromise)
+   */
   async getLoader(): Promise<IEngineLoader> {
-    if (!this.loader) {
-      const { EngineLoader } = await import("./EngineLoader.js");
-      const { createFileStorage } = await import("../storage/index.js");
-      const caps = await this.checkCapabilities();
-      this.loader = new EngineLoader(createFileStorage(caps));
-    }
-    return this.loader;
+    if (this.loader) return this.loader;
+    if (this.loaderPromise) return this.loaderPromise;
+
+    this.loaderPromise = (async () => {
+      try {
+        const { EngineLoader } = await import("./EngineLoader.js");
+        const { createFileStorage } = await import("../storage/index.js");
+        const caps = await this.checkCapabilities();
+        this.loader = new EngineLoader(createFileStorage(caps));
+        return this.loader;
+      } finally {
+        this.loaderPromise = null;
+      }
+    })();
+
+    return this.loaderPromise;
   }
 
   async dispose(): Promise<void> {

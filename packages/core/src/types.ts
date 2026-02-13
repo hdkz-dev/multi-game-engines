@@ -11,11 +11,15 @@ export type EngineStatus = "uninitialized" | "loading" | "ready" | "busy" | "err
 
 /** エラーコードの定義 */
 export enum EngineErrorCode {
+  INITIALIZATION_ERROR = "INITIALIZATION_ERROR",
   NETWORK_ERROR = "NETWORK_ERROR",
   SRI_MISMATCH = "SRI_MISMATCH",
   SEARCH_TIMEOUT = "SEARCH_TIMEOUT",
+  COMMAND_TIMEOUT = "COMMAND_TIMEOUT",
   INTERNAL_ERROR = "INTERNAL_ERROR",
   NOT_READY = "NOT_READY",
+  SECURITY_ERROR = "SECURITY_ERROR",
+  LIFECYCLE_ERROR = "LIFECYCLE_ERROR",
   UNKNOWN_ERROR = "UNKNOWN_ERROR"
 }
 
@@ -35,11 +39,12 @@ export interface ILoadProgress {
   i18n?: { key: string; defaultMessage: string };
 }
 
-/** テレメトリイベント */
+/** テレメトリイベント (2026 Standard) */
 export interface ITelemetryEvent {
-  event: string;
-  timestamp: number;
-  attributes: Record<string, unknown>;
+  readonly type: "performance" | "error" | "lifecycle" | "resource";
+  readonly timestamp: number;
+  readonly duration?: number;
+  readonly metadata?: Record<string, unknown>;
 }
 
 /** 実行環境の能力診断 */
@@ -197,6 +202,11 @@ export interface IFileStorage {
 export interface IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
   readonly engineId: string;
   readonly options: T_OPTIONS;
+  /**
+   * テレメトリイベントを発行します。
+   * ミドルウェアはこのメソッドを通じて、システムのテレメトリパイプラインにイベントを送信できます。
+   */
+  readonly emitTelemetry: (event: ITelemetryEvent) => void;
 }
 
 export enum MiddlewarePriority {
@@ -208,6 +218,11 @@ export enum MiddlewarePriority {
 
 export interface IMiddleware<T_OPTIONS = IBaseSearchOptions, T_INFO = unknown, T_RESULT = unknown> {
   priority?: MiddlewarePriority;
+  /**
+   * このミドルウェアを適用するエンジンIDのリスト。
+   * 未定義の場合はすべてのエンジンに適用されます。
+   */
+  supportedEngines?: string[];
   onCommand?(command: string | string[] | Uint8Array | Record<string, unknown>, context: IMiddlewareContext<T_OPTIONS>): string | string[] | Uint8Array | Record<string, unknown> | Promise<string | string[] | Uint8Array | Record<string, unknown>>;
   onInfo?(info: T_INFO, context: IMiddlewareContext<T_OPTIONS>): T_INFO | Promise<T_INFO>;
   onResult?(result: T_RESULT, context: IMiddlewareContext<T_OPTIONS>): T_RESULT | Promise<T_RESULT>;

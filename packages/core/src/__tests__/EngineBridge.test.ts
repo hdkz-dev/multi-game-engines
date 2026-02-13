@@ -71,4 +71,38 @@ describe("EngineBridge", () => {
     expect(adapter1.dispose).toHaveBeenCalled();
     expect(adapter2.dispose).toHaveBeenCalled();
   });
+
+  it("supportedEngines に基づいてミドルウェアがフィルタリングされること", async () => {
+    const bridge = new EngineBridge();
+    const adapter1 = createMockAdapter("engine1");
+    const adapter2 = createMockAdapter("engine2");
+    bridge.registerAdapter(adapter1);
+    bridge.registerAdapter(adapter2);
+
+    const mwSpecific = {
+      onCommand: vi.fn().mockImplementation((cmd) => cmd),
+      supportedEngines: ["engine1"]
+    };
+    const mwGlobal = {
+      onCommand: vi.fn().mockImplementation((cmd) => cmd)
+    };
+
+    bridge.use(mwSpecific as unknown as IMiddleware);
+    bridge.use(mwGlobal as unknown as IMiddleware);
+
+    const engine1 = bridge.getEngine("engine1");
+    const engine2 = bridge.getEngine("engine2");
+
+    // 探索を実行してミドルウェアをトリガー
+    adapter1.parser.createSearchCommand = vi.fn().mockReturnValue("go");
+    adapter2.parser.createSearchCommand = vi.fn().mockReturnValue("go");
+
+    await engine1.search({} as IBaseSearchOptions);
+    await engine2.search({} as IBaseSearchOptions);
+
+    // mwSpecific は engine1 でのみ呼ばれる
+    expect(mwSpecific.onCommand).toHaveBeenCalledTimes(1);
+    // mwGlobal は両方で呼ばれる
+    expect(mwGlobal.onCommand).toHaveBeenCalledTimes(2);
+  });
 });

@@ -35,6 +35,7 @@ export class WorkerCommunicator {
     for (const exp of this.expectations) {
       try {
         if (exp.predicate(data)) {
+          this.expectations.delete(exp); // 解決前に削除 (Atomic Resolution)
           exp.resolve(data);
           return;
         }

@@ -99,6 +99,11 @@ export class EngineFacade<
     const context: IMiddlewareContext<T_OPTIONS> = {
       engineId: this.id,
       options,
+      emitTelemetry: (event) => {
+        if (this.adapter instanceof BaseAdapter) {
+          this.adapter.emitTelemetry(event);
+        }
+      }
     };
 
     // 1. コマンド生成
@@ -132,9 +137,12 @@ export class EngineFacade<
         // 2026 Best Practice: アダプターの emitTelemetry を呼び出す
         if (this.adapter instanceof BaseAdapter) {
           this.adapter.emitTelemetry({
-            event: "info_stream_error",
+            type: "error",
             timestamp: Date.now(),
-            attributes: { error: String(err) }
+            metadata: { 
+              action: "info_stream",
+              error: String(err) 
+            }
           });
         }
       }

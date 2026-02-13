@@ -90,7 +90,8 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {
-      commands.push(`position sfen ${options.sfen}`);
+      const safeSfen = options.sfen.replace(/[\r\n\0;]/g, "");
+      commands.push(`position sfen ${safeSfen}`);
     }
     
     let goCmd = "go";
