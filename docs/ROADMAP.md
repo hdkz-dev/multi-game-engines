@@ -4,24 +4,25 @@
 
 ---
 
-## 🚀 フェーズ 1: 基盤構築と設計の極致 (現在)
+## 🚀 フェーズ 1: 基盤構築と設計の極致 (完了)
 
 **目的**: 10年後も古くならない、堅牢なアーキテクチャと型システムの確立。
 
 - [x] **モノリポ構成の定義**: npm workspaces による `core` と `adapters` の分離。
-- [x] **究極の型安全性**: `any` の完全排除、Branded Types (FEN, Move) によるドメイン保護。
+- [x] **究極の型安全性**: `any` の完全排除、Branded Types によるドメイン保護。
 - [x] **Facade パターン設計**: `IEngine` と `IEngineAdapter` の分離による利用者 API の洗練。
 - [x] **ライセンス隔離戦略**: アダプターを MIT 化し、バイナリを動的ロードする法的クリーン環境の設計。
-- [ ] **EngineBridge & BaseAdapter Implementation**: コアロジックの完成。
-- [ ] **CapabilityDetector**: OPFS, WebNN, WASM SIMD/Threads の自動診断。
+- [x] **EngineBridge & BaseAdapter Implementation**: コアロジックの完成。
+- [x] **CapabilityDetector**: OPFS, WebNN, WASM SIMD/Threads の自動診断。
 
 ---
 
-## 🏁 フェーズ 2: 早期リリース戦略 (Stage 1)
+## 🏁 フェーズ 2: 早期リリース戦略 (Stage 1) (進行中)
 
 **目的**: 既存の npm/CDN 資産を統合し、実用的なツールとしての価値を早期に証明。
 
-- [ ] **Chess/Shogi 統合**: Stockfish / やねうら王のパブリック CDN ローダー実装。
+- [x] **Chess/Shogi 統合**: Stockfish / やねうら王のパブリック CDN ローダー実装。
+- [x] **セキュリティ監査**: 「Refuse by Exception」ポリシーの確立と再帰的検証。
 - [ ] **Native Games 集結**: Gomoku, Checkers, Connect4 等の既存 MIT パッケージ統合。
 - [ ] **Core-UI 連携**: 主要フレームワーク（React/Next.js）向け React Hooks 等の提供。
 
