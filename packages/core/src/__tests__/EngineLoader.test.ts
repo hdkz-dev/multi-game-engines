@@ -30,7 +30,7 @@ describe("EngineLoader", () => {
 
   it("should fetch and cache if not in storage", async () => {
     vi.mocked(storage.get).mockResolvedValue(null);
-    const config: IEngineSourceConfig = { url: "http://test.com/engine.js", sri: dummySRI, size: 100 };
+    const config: IEngineSourceConfig = { url: "https://test.com/engine.js", sri: dummySRI, size: 100 };
     
     const url = await loader.loadResource("test", config);
     
@@ -41,7 +41,7 @@ describe("EngineLoader", () => {
   it("should return cached version if SRI matches", async () => {
     const data = new TextEncoder().encode("test").buffer;
     vi.mocked(storage.get).mockResolvedValue(data);
-    const config: IEngineSourceConfig = { url: "http://test.com/engine.js", sri: dummySRI, size: 100 };
+    const config: IEngineSourceConfig = { url: "https://test.com/engine.js", sri: dummySRI, size: 100 };
 
     const url = await loader.loadResource("test", config);
     
@@ -51,8 +51,8 @@ describe("EngineLoader", () => {
 
   it("should atomic multi-resource load", async () => {
     const configs: Record<string, IEngineSourceConfig> = {
-      main: { url: "http://test.com/main.js", sri: dummySRI, size: 100 },
-      weights: { url: "http://test.com/weights.bin", sri: dummySRI, size: 200 },
+      main: { url: "https://test.com/main.js", sri: dummySRI, size: 100 },
+      weights: { url: "https://test.com/weights.bin", sri: dummySRI, size: 200 },
     };
 
     const urls = await loader.loadResources("test", configs);

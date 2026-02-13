@@ -86,6 +86,7 @@ export class WorkerCommunicator {
     return new Promise<T>((resolve, reject) => {
       let timerId: ReturnType<typeof setTimeout> | undefined;
       
+      // 2026 Best Practice: リスナーとタイマーの確実な解除 (Memory Leak 防止)
       const cleanup = () => {
         this.expectations.delete(expectation);
         if (timerId !== undefined) clearTimeout(timerId);

@@ -14,11 +14,16 @@ export class EngineLoader implements IEngineLoader {
   async loadResource(engineId: string, config: IEngineSourceConfig): Promise<string> {
     const cacheKey = `${engineId}_${config.url}`;
     
-    // アトミックロック: 同時に同じリソースをロードしない
+    // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     const existing = this.inflightLoads.get(cacheKey);
     if (existing) return existing;
 
     const promise = (async () => {
+      // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
+      if (config.url.startsWith("http://")) {
+        throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Insecure connection (HTTP) is not allowed for sensitive engine files.", engineId);
+      }
+
       if (!config.sri) {
         throw new EngineError(EngineErrorCode.SRI_MISMATCH, "SRI required for security verification.", engineId);
       }
@@ -48,6 +53,7 @@ export class EngineLoader implements IEngineLoader {
     })();
 
     this.inflightLoads.set(cacheKey, promise);
+    // 2026 Best Practice: 同期 throw 時にも確実に Map から削除
     void promise.finally(() => this.inflightLoads.delete(cacheKey));
     return promise;
   }
@@ -74,8 +80,12 @@ export class EngineLoader implements IEngineLoader {
 
     const failures = settledResults.filter(r => r.status === "rejected") as PromiseRejectedResult[];
     if (failures.length > 0) {
-      // ロールバック: 成功した分の URL を収集して呼び出し元に例外を投げる
-      // 注意: 個別の loadResource 内で revoke 管理しているため、ここでは単純に rethrow
+      // ロールバック: 成功した分の URL を revoke する
+      for (const res of settledResults) {
+        if (res.status === "fulfilled") {
+          this.revoke(res.value.url);
+        }
+      }
       throw failures[0].reason;
     }
 

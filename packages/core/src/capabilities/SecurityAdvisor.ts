@@ -23,7 +23,7 @@ export class SecurityAdvisor {
       "sha512": "SHA-512"
     };
 
-    // 最強アルゴリズムを特定
+    // 2026 Best Practice: 最強アルゴリズムを特定し、それのみを検証対象とする (Algorithm Agility)
     let strongestLevel = 0;
     for (const hash of hashes) {
       const [algo] = hash.split("-");
@@ -54,7 +54,7 @@ export class SecurityAdvisor {
     const isCrossOriginIsolated = typeof crossOriginIsolated !== "undefined" && crossOriginIsolated;
     const missingHeaders: string[] = [];
 
-    // ブラウザ環境でのみヘッダー診断を試行
+    // 2026 Best Practice: ブラウザ環境でのみヘッダー診断を試行 (CORS/Node.js 考慮)
     if (typeof window !== "undefined" && typeof fetch !== "undefined") {
       try {
         const response = await fetch(window.location.href, { method: "HEAD" });
@@ -64,7 +64,7 @@ export class SecurityAdvisor {
         if (!coop) missingHeaders.push("cross-origin-opener-policy");
         if (!coep) missingHeaders.push("cross-origin-embedder-policy");
       } catch {
-        // HEADリクエスト失敗時は無視（CORS等の制限）
+        // HEADリクエスト失敗時は無視
       }
     }
 
