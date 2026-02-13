@@ -148,14 +148,13 @@ export class EngineFacade<
     })();
 
     // 5. 結果の待機と onResult ミドルウェアの適用
+    const onAbort = () => { void task.stop(); };
     try {
       if (options.signal?.aborted) {
         await task.stop();
       }
       
-      options.signal?.addEventListener("abort", () => {
-        void task.stop();
-      });
+      options.signal?.addEventListener("abort", onAbort);
 
       let result = await task.result;
       for (const mw of this.middlewares) {
@@ -166,6 +165,7 @@ export class EngineFacade<
       await infoProcessing;
       return result;
     } finally {
+      options.signal?.removeEventListener("abort", onAbort);
       if (this.activeTask === task) {
         this.activeTask = null;
       }

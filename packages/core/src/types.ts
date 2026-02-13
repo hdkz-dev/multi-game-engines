@@ -123,7 +123,8 @@ export interface IEngineBridge {
   registerAdapter<O extends IBaseSearchOptions, I extends IBaseSearchInfo, R extends IBaseSearchResult>(
     adapter: IEngineAdapter<O, I, R>
   ): Promise<void>;
-  unregisterAdapter(id: string): Promise<void>;  getEngine<K extends keyof EngineRegistry>(
+  unregisterAdapter(id: string): Promise<void>;
+  getEngine<K extends keyof EngineRegistry>(
     id: K,
     strategy?: EngineLoadingStrategy
   ): IEngine<

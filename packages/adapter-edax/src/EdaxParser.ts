@@ -62,14 +62,13 @@ export class EdaxParser implements IProtocolParser<
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name);
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(sName, "option name");
+    ProtocolValidator.assertNoInjection(name, "option name");
     ProtocolValidator.assertNoInjection(sValue, "option value");
 
-    return `set ${sName} ${sValue}`;
+    return `set ${name} ${sValue}`;
   }
 }
 

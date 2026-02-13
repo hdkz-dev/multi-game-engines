@@ -100,6 +100,7 @@ export class EngineBridge implements IEngineBridge {
       if (ref.deref()) {
         count++;
       } else {
+        // 2026 Best Practice: 参照が切れたエントリを明示的にパージ
         this.engineInstances.delete(id);
       }
     }
@@ -151,8 +152,15 @@ export class EngineBridge implements IEngineBridge {
 
   async dispose(): Promise<void> {
     this.disposed = true;
+    const pendingLoader = this.loaderPromise;
     const promises = Array.from(this.adapters.values()).map(a => a.dispose());
     await Promise.all(promises);
+
+    // 2026 Best Practice: 実行中のロード処理の完了を待機（または例外吸収）
+    if (pendingLoader) {
+      await pendingLoader.catch(() => { /* disposed 時の意図的な例外を吸収 */ });
+    }
+
     this.adapters.clear();
     this.engineInstances.clear();
     this.middlewares = [];

@@ -39,13 +39,17 @@ export class EngineError extends Error {
   static from(error: unknown, engineId?: string): EngineError {
     if (error instanceof EngineError) return error;
     
-    let code = EngineErrorCode.UNKNOWN_ERROR;
+    let code = EngineErrorCode.INTERNAL_ERROR;
     let remediation: string | undefined;
 
     if (error instanceof Error) {
       if (error.name === "SecurityError") {
         code = EngineErrorCode.SECURITY_ERROR;
         remediation = "Ensure COOP/COEP headers are correctly set for cross-origin isolation.";
+      } else if (error instanceof TypeError) {
+        remediation = "Check search options and engine configuration for invalid values.";
+      } else if (error instanceof RangeError) {
+        remediation = "Adjust search depth or parameters to be within allowed limits.";
       }
     }
 
