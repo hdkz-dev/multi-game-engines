@@ -72,7 +72,7 @@ export interface IBaseSearchOptions {
 
 /** 
  * 思考状況の基本情報 (全ゲーム共通) 
- * Core は、全アダプターで共通して利用可能な最も抽象的な情報（インフラ層の共通情報）のみを保持します。
+ * Core は、全アダプターで共通して利用可能な最も抽象的な情報のみを保持します。
  */
 export interface IBaseSearchInfo {
   /** エンジンからの生の出力。デバッグやログ記録のために保持します。 */

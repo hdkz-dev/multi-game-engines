@@ -109,6 +109,8 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    return `setoption name ${name} value ${value}`;
+    const safeName = String(name).replace(/[\r\n\0;]/g, "");
+    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
+    return `setoption name ${safeName} value ${safeValue}`;
   }
 }
