@@ -21,21 +21,24 @@
 ## 🚀 クイックスタート / Quick Start
 
 ```typescript
-import { EngineBridge, StockfishAdapter } from "@multi-game-engines/core";
+import { EngineBridge } from "@multi-game-engines/core";
+import { StockfishAdapter, FEN } from "@multi-game-engines/adapter-stockfish";
 
 const bridge = new EngineBridge();
-bridge.registerAdapter(new StockfishAdapter());
+// registerAdapter は非同期メソッドです
+await bridge.registerAdapter(new StockfishAdapter());
 
+// アダプターをインポートしていれば、EngineRegistry により型推論が自動的に働きます
 const engine = bridge.getEngine("stockfish");
 await engine.load();
 
-// 思考状況の購読
+// 思考状況の購読 (アダプター固有の型が適用されます)
 engine.onInfo((info) => {
   console.log(`Depth: ${info.depth}, Score: ${info.score}`);
 });
 
-// 探索の実行
-const result = await engine.search({ fen: "startpos" });
+// 探索の実行 (startpos キーワードもサポート)
+const result = await engine.search({ fen: "startpos" as FEN });
 console.log(`Best Move: ${result.bestMove}`);
 ```
 

@@ -138,7 +138,10 @@ export class UCIParser implements IProtocolParser<
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
     ProtocolValidator.assertNoInjection(options.fen, "FEN string");
 
-    const commands: string[] = [`position fen ${options.fen}`];
+    const isStartPos = options.fen.toLowerCase() === "startpos";
+    const commands: string[] = [
+      isStartPos ? "position startpos" : `position fen ${options.fen}`,
+    ];
 
     let goCmd = "go";
     if (options.depth) goCmd += ` depth ${options.depth}`;

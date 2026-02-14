@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { UCIParser } from "../UCIParser.js";
+import { UCIParser, FEN } from "../UCIParser.js";
 
 describe("UCIParser", () => {
   const parser = new UCIParser();
@@ -39,5 +39,24 @@ describe("UCIParser", () => {
 
   it("should return null for non-bestmove lines", () => {
     expect(parser.parseResult("info depth 20")).toBeNull();
+  });
+
+  it("should create valid search command with FEN", () => {
+    const commands = parser.createSearchCommand({
+      fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN,
+      depth: 20,
+    });
+    expect(commands).toEqual([
+      "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "go depth 20",
+    ]);
+  });
+
+  it("should create valid search command with startpos", () => {
+    const commands = parser.createSearchCommand({
+      fen: "startpos" as FEN,
+      nodes: 1000,
+    });
+    expect(commands).toEqual(["position startpos", "go nodes 1000"]);
   });
 });
