@@ -49,7 +49,29 @@ export class UCIParser implements IProtocolParser<
   IChessSearchResult
 > {
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
-  private static readonly MOVE_REGEX = /^[a-h][1-8][a-h][1-8][nbrq]?$/;
+  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
+  private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
+
+  // 2026 Best Practice: Set の定数化による GC 負荷の軽減
+  private static readonly UCI_INFO_TOKENS = new Set([
+    "depth",
+    "seldepth",
+    "time",
+    "nodes",
+    "pv",
+    "multipv",
+    "score",
+    "currmove",
+    "currmovenumber",
+    "hashfull",
+    "nps",
+    "tbhits",
+    "sbhits",
+    "cpuload",
+    "string",
+    "refutation",
+    "currline",
+  ]);
 
   /**
    * 文字列を Move へ変換します。
@@ -76,25 +98,6 @@ export class UCIParser implements IProtocolParser<
     };
 
     const parts = line.split(" ");
-    const uciTokens = new Set([
-      "depth",
-      "seldepth",
-      "time",
-      "nodes",
-      "pv",
-      "multipv",
-      "score",
-      "currmove",
-      "currmovenumber",
-      "hashfull",
-      "nps",
-      "tbhits",
-      "sbhits",
-      "cpuload",
-      "string",
-      "refutation",
-      "currline",
-    ]);
 
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
@@ -122,7 +125,10 @@ export class UCIParser implements IProtocolParser<
           break;
         case "pv": {
           const moves: Move[] = [];
-          while (i + 1 < parts.length && !uciTokens.has(parts[i + 1])) {
+          while (
+            i + 1 < parts.length &&
+            !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1])
+          ) {
             const m = this.createMove(parts[++i]);
             if (m) moves.push(m);
           }
