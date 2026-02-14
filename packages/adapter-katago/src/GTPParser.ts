@@ -1,4 +1,13 @@
-import { IProtocolParser } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  ProtocolValidator,
+  Brand,
+} from "@multi-game-engines/core";
+
+/** 囲碁の盤面データ */
+export type GOBoard = Brand<string, "GOBoard">;
+/** 囲碁の指し手 */
+export type GOMove = Brand<string, "GOMove">;
 
 export class GTPParser implements IProtocolParser<
   IGOSearchOptions,
@@ -30,7 +39,7 @@ export class GTPParser implements IProtocolParser<
     if (move) {
       return {
         raw: data,
-        bestMove: move,
+        bestMove: move as GOMove,
       };
     }
     return null;
@@ -38,26 +47,45 @@ export class GTPParser implements IProtocolParser<
 
   createSearchCommand(options: IGOSearchOptions): string[] {
     const commands: string[] = [];
-    const board = String(options.board).replace(/[\r\n\0;]/g, "");
-    commands.push(`loadboard ${board}`);
-    commands.push(`genmove ${options.color}`);
+    const sBoard = String(options.board);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    ProtocolValidator.assertNoInjection(sBoard, "board data", true);
+
+    commands.push(`loadboard ${sBoard}`);
+
+    const sColor = String(options.color);
+    ProtocolValidator.assertNoInjection(sColor, "color", true);
+
+    const normalized = sColor.toLowerCase();
+    const color =
+      normalized === "white" || normalized === "w" ? "white" : "black";
+
+    commands.push(`genmove ${color}`);
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "quit";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name).replace(/[\r\n\0;]/g, "");
-    const sValue = String(value).replace(/[\r\n\0;]/g, "");
-    return `set_option ${sName} ${sValue}`;
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    ProtocolValidator.assertNoInjection(name, "option name", true);
+    ProtocolValidator.assertNoInjection(sValue, "option value", true);
+
+    return `set_option ${name} ${sValue}`;
   }
 }
 
 export interface IGOSearchOptions {
-  board: string;
-  color: "black" | "white";
+  board: GOBoard;
+  color: "black" | "white" | "B" | "W";
   signal?: AbortSignal;
 }
 
@@ -69,5 +97,5 @@ export interface IGOSearchInfo {
 
 export interface IGOSearchResult {
   raw: string;
-  bestMove: string;
+  bestMove: GOMove;
 }

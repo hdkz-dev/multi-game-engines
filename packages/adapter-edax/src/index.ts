@@ -1,5 +1,9 @@
 import "@multi-game-engines/core";
-import { IOthelloSearchOptions, IOthelloSearchInfo, IOthelloSearchResult } from "./EdaxParser.js";
+import {
+  IOthelloSearchOptions,
+  IOthelloSearchInfo,
+  IOthelloSearchResult,
+} from "./EdaxParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {

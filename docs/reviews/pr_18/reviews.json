@@ -1,0 +1,50 @@
+[
+  {
+    "id": 3797458983,
+    "user": "gemini-code-assist[bot]",
+    "body": "...Highly praising refactoring... Pointed out integration issues with DefaultTelemetryMiddleware...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3797465806,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 3... Nitpicks: WeakRef, startTimes, remediation hardcoded, constructor args...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3797779113,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 5... Outside diff: unused import, EngineError test, Error vs EngineError in UCI, dispose() clear, Branded Types in KataGo...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3797810400,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 1... ARCHITECTURE.md remediation field, control char rules, Blob URL constraints...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3798074110,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 6... ADR regex formatting, dispose guard, WeakRef tracking defeat, redundant casts, telemetry missing engineId, method signatures merge...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3798182882,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 2... abort listener removal, dispose() wait for loaderPromise...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3798486729,
+    "user": "gemini-code-assist[bot]",
+    "body": "...Excellent refactoring... Inconsistency in Mahjong adapter... Minor suggestion for test code...",
+    "state": "COMMENTED"
+  },
+  {
+    "id": 3798488724,
+    "user": "coderabbitai[bot]",
+    "body": "...Actionable comments posted: 2... dummy SRI hash, satisfies operator, recursive validation in Mahjong, facade violation in tests...",
+    "state": "COMMENTED"
+  }
+]

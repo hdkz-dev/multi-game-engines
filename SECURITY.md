@@ -1,0 +1,36 @@
+# セキュリティポリシー / Security Policy
+
+## サポート対象のバージョン / Supported Versions
+
+現在、以下のバージョンに対してセキュリティアップデートを提供しています。
+
+We currently provide security updates for the following versions:
+
+| バージョン / Version | サポート状況 / Supported |
+| -------------------- | ------------------------ |
+| Latest (main)        | ✅ Yes                   |
+| < Latest             | ❌ No                    |
+
+## 脆弱性の報告方法 / Reporting a Vulnerability
+
+セキュリティ上の脆弱性を発見した場合は、パブリックな Issue を作成せず、**GitHub の「非公開報告機能（Private Vulnerability Reporting）」** を使用して報告してください。
+
+If you discover a security vulnerability, please do **NOT** create a public issue. Instead, use the **GitHub Private Vulnerability Reporting** feature to report it.
+
+### 手順 / Steps:
+
+1. リポジトリの **[Security]** タブをクリックします。  
+   Click the **[Security]** tab of the repository.
+2. サイドバーの **[Advisories]** を選択します。  
+   Select **[Advisories]** in the sidebar.
+3. **[Report a vulnerability]** をクリックして報告を送信してください。  
+   Click **[Report a vulnerability]** to submit your report.
+
+報告を受けた後、3営業日以内に確認の返信を行い、修正のスケジュールを調整します。  
+After receiving a report, we will respond within 3 business days and coordinate the fix schedule.
+
+## 公開ポリシー / Disclosure Policy
+
+脆弱性の修正が完了し、新しいバージョンがリリースされるまで、詳細は非公開として扱われます。修正完了後、GitHub Security Advisory を通じて情報を公開します。
+
+Details of the vulnerability will be kept private until a fix is completed and a new version is released. Information will be disclosed via GitHub Security Advisory once the fix is available.

@@ -1,7 +1,9 @@
 # PR #7 Review Comments
 
 ## Review Summary
+
 ### Review 3767304218 by coderabbitai[bot]
+
 **State:** COMMENTED
 **Submitted At:** 2026-02-07T15:31:29Z
 
@@ -136,7 +138,7 @@ script instead of erroring.
 
 **表現の冗長さを削減してください。**
 
-“Originally created by” は “created by” で十分です。  
+“Originally created by” は “created by” で十分です。
 
 <details>
 <summary>📝 修正案</summary>
@@ -145,6 +147,7 @@ script instead of erroring.
 -*Originally created by [`@thsottiaux`](https://x.com/thsottiaux)*
 +*Created by [`@thsottiaux`](https://x.com/thsottiaux)*
 ```
+
 </details>
 
 </blockquote></details>
@@ -155,8 +158,7 @@ script instead of erroring.
 
 **「up to date」は形容詞用法なので「up-to-date」に修正を推奨。**
 
-見出し内の複合形容詞なのでハイフン付きが自然です。  
-
+見出し内の複合形容詞なのでハイフン付きが自然です。
 
 <details>
 <summary>✏️ 提案修正</summary>
@@ -165,6 +167,7 @@ script instead of erroring.
 -- **Update**: Keep existing skills up to date
 +- **Update**: Keep existing skills up-to-date
 ```
+
 </details>
 
 </blockquote></details>
@@ -175,8 +178,7 @@ script instead of erroring.
 
 **例のコンポーネントが return を持たず、コピー時に無効なコードになりやすいです。**
 
-ドキュメントのサンプルなので、最低限の `return` を入れておくと誤解が減ります。  
-
+ドキュメントのサンプルなので、最低限の `return` を入れておくと誤解が減ります。
 
 <details>
 <summary>✍️ 修正案</summary>
@@ -213,6 +215,7 @@ script instead of erroring.
    return <button onClick={() => trigger()}>Update</button>
  }
 ```
+
 </details>
 
 </blockquote></details>
@@ -222,8 +225,7 @@ script instead of erroring.
 `163-165`: _⚠️ Potential issue_ | _🟡 Minor_
 
 **見出しの重複でMD024に引っかかる可能性**  
-「## Proposed Structure」が複数回出てくるため、Markdown lintで重複見出し警告になる可能性があります。用途が異なるので、片方に補足語を付けるのが無難です。  
-
+「## Proposed Structure」が複数回出てくるため、Markdown lintで重複見出し警告になる可能性があります。用途が異なるので、片方に補足語を付けるのが無難です。
 
 <details>
 <summary>🛠️ 修正案</summary>
@@ -235,8 +237,8 @@ script instead of erroring.
 -## Proposed Structure
 +## Proposed Structure (Example)
 ```
-</details>
 
+</details>
 
 Also applies to: 315-315
 
@@ -250,8 +252,6 @@ Also applies to: 315-315
 
 Apache License 2.0 テンプレートのプレースホルダー `[yyyy]` と `[name of copyright owner]` が残っています。適切な著作権表示を行うために、実際の年と著作権所有者名に置き換える必要があります。
 
-
-
 <details>
 <summary>📝 修正案</summary>
 
@@ -261,6 +261,7 @@ Apache License 2.0 テンプレートのプレースホルダー `[yyyy]` と `[
 ```
 
 注：実際のプロジェクト所有者名と適切な年に置き換えてください。
+
 </details>
 
 </blockquote></details>
@@ -273,17 +274,16 @@ Apache License 2.0 テンプレートのプレースホルダー `[yyyy]` と `[
 
 markdownlint が指摘しているように、コードブロックに言語識別子が指定されていません。URL を含むブロックなので `text` または `url` を指定することを推奨します。
 
-
-
 <details>
 <summary>📝 修正案</summary>
 
-```diff
+````diff
 -```
 +```text
  https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
- ```
-```
+````
+
+````
 </details>
 
 </blockquote></details>
@@ -305,7 +305,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
  // Incorrect: changing styles one by one
  function Box({ isHighlighted }: { isHighlighted: boolean }) {
    const ref = useRef<HTMLDivElement>(null)
-   
+
    useEffect(() => {
 -    if (ref.current && isHighlighted) {
 +    if (ref.current) {
@@ -323,7 +323,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
 +      }
      }
    }, [isHighlighted])
-```
+````
 
 </details>
 
@@ -335,7 +335,6 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 **タイポ: "abslutely" → "absolutely"**
 
-
 <details>
 <summary>📝 修正案</summary>
 
@@ -343,6 +342,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
 -**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 +**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is absolutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 ```
+
 </details>
 
 </blockquote></details>
@@ -355,7 +355,6 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 この文字列にはプレースホルダーがないため、`f` プレフィックスは不要です（Ruff F541）。
 
-
 <details>
 <summary>📝 修正案</summary>
 
@@ -363,6 +362,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
 -print(f"Logs saved to: /mnt/user-data/outputs/console.log")
 +print("Logs saved to: /mnt/user-data/outputs/console.log")
 ```
+
 </details>
 
 </blockquote></details>
@@ -385,24 +385,22 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 `document.cookie`に直接アクセスしていますが、SSR（サーバーサイドレンダリング）やNode.js環境では`document`が未定義のため、`ReferenceError`が発生します。
 
-
-
 <details>
 <summary>🛡️ 環境チェックを追加する修正案</summary>
 
 ```diff
  let isLoggedInCache: boolean | null = null
- 
+
  function isLoggedIn(): boolean {
    if (isLoggedInCache !== null) {
      return isLoggedInCache
    }
-   
+
 +  // SSR環境での安全性確保
 +  if (typeof document === 'undefined') {
 +    return false
 +  }
-+  
++
    isLoggedInCache = document.cookie.includes('auth=')
    return isLoggedInCache
  }
@@ -430,8 +428,6 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 「欠落チェック」機能の説明はありますが、実際にこのチェックを実行する方法（コマンド、スクリプト、または自動実行の有無など）が記載されていません。ユーザーがこの機能をどのように利用できるのか不明確です。
 
-
-
 <details>
 <summary>📝 改善案：実行方法の追加</summary>
 
@@ -454,20 +450,20 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 このドキュメントは「3 Big Requirements」という用語を参照していますが、その定義や詳細へのリンクが提供されていません。プロジェクトの新規参加者や、このスキルのみを参照する読者にとって理解が難しくなる可能性があります。
 
-
-
 <details>
 <summary>📚 改善案：定義または参照リンクの追加</summary>
 
 以下のいずれかの対応を推奨します：
 
 **オプション1: 簡潔な定義を追加**
+
 ```diff
 -このプロジェクトの "Strict Rule" である「3 Big Requirements」を遵守するため、コンポーネント開発において「実装・テスト・Storybook」の 3 点セットを常に同時に扱うことを支援します。
 +このプロジェクトの "Strict Rule" である「3 Big Requirements」（実装・テスト・Storybook の必須セット開発）を遵守するため、コンポーネント開発において「実装・テスト・Storybook」の 3 点セットを常に同時に扱うことを支援します。
 ```
 
 **オプション2: ドキュメントへのリンクを追加**
+
 ```diff
 -このプロジェクトの "Strict Rule" である「3 Big Requirements」を遵守するため、コンポーネント開発において「実装・テスト・Storybook」の 3 点セットを常に同時に扱うことを支援します。
 +このプロジェクトの "Strict Rule" である「[3 Big Requirements](../../CODING_CONVENTIONS.md#3-big-requirements)」を遵守するため、コンポーネント開発において「実装・テスト・Storybook」の 3 点セットを常に同時に扱うことを支援します。
@@ -487,12 +483,11 @@ markdownlint が指摘しているように、コードブロックに言語識�
 
 各アプローチのステップ見出しを明確に区別することを推奨します。
 
-
-
 <details>
 <summary>🔧 見出しを明確にするための提案修正</summary>
 
 サブエージェントアプローチのセクション：
+
 ```diff
 -### Step 1: Predict Reader Questions
 +### Step 1 (Sub-Agent): Predict Reader Questions
@@ -514,6 +509,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
 ```
 
 マニュアルアプローチのセクション：
+
 ```diff
 -### Step 1: Predict Reader Questions
 +### Step 1 (Manual): Predict Reader Questions
@@ -533,6 +529,7 @@ markdownlint が指摘しているように、コードブロックに言語識�
 -### Step 4: Iterate Based on Results
 +### Step 4 (Manual): Iterate Based on Results
 ```
+
 </details>
 
 </blockquote></details>
@@ -546,7 +543,6 @@ markdownlint が指摘しているように、コードブロックに言語識�
 "Don't" の例で使用されている `\n` は、多くのシェルでは単なる文字列リテラル `\n` として扱われ、実際の改行として展開されません。bash で改行を含む文字列を使用する場合は `$'Line 1\nLine 2'` の形式が必要です。
 
 この例は「やるべきでない」例なので実害は少ないですが、読者が混乱しないよう、より正確な例を示すことを推奨します。
-
 
 <details>
 <summary>📝 より正確な例の提案</summary>
@@ -607,11 +603,10 @@ Line 84 の `Reference: [Link]...` の後にコードブロックの終了マー
 
 Line 58 の ` ```markdown ` ブロック内に ` ```typescript ` ブロック（Line 72, 78）が含まれていますが、内側の ` ``` ` が外側のフェンスを閉じてしまい、Markdown の表示が崩れます。外側のフェンスに 4 つのバッククォート（` ```` `）を使用してください。
 
-
 <details>
 <summary>🔧 修正案</summary>
 
-```diff
+`````diff
 -```markdown
 +````markdown
  ---
@@ -620,9 +615,10 @@ Line 58 の ` ```markdown ` ブロック内に ` ```typescript ` ブロック（
 ...
  Reference: [Link](https://example.com)
 +````
-```
+`````
 
-外側のフェンスを `````markdown` ... ````` に変更することで、内側の ` ``` ` ブロックが正しくネストされます。
+外側のフェンスを ``markdown` ... `` に変更することで、内側の ` ``` ` ブロックが正しくネストされます。
+
 </details>
 
 </blockquote></details>
@@ -648,6 +644,7 @@ TypeScript の公式ガイダンス（TypeScript 4.7）では、`exports` に `"
      }
    },
 ```
+
 </details>
 
 </blockquote></details>
@@ -673,6 +670,7 @@ Line 428 の `.catch(() => setEnabled(false))` は存在しない `setEnabled` �
 ```
 
 あるいは、`enabled` もステート管理する意図であれば `useState` を追加してください。
+
 </details>
 
 </blockquote></details>
@@ -700,6 +698,7 @@ Line 428 の `.catch(() => setEnabled(false))` は存在しない `setEnabled` �
      return () => window.removeEventListener('keydown', handler)
    })
 ```
+
 </details>
 
 </blockquote></details>
@@ -729,8 +728,7 @@ Line 428 の `.catch(() => setEnabled(false))` は存在しない `setEnabled` �
 
 `12-13`: **“~300KB”のサイズ断定は将来ズレる可能性あり。**
 
-Monaco のバンドルサイズは環境やバージョンで変動します。数値断定ではなく「数百KBになり得る」などの表現にしておくとドキュメントの鮮度が保てます。  
-
+Monaco のバンドルサイズは環境やバージョンで変動します。数値断定ではなく「数百KBになり得る」などの表現にしておくとドキュメントの鮮度が保てます。
 
 <details>
 <summary>🔧 提案例</summary>
@@ -739,6 +737,7 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 -**Incorrect (Monaco bundles with main chunk ~300KB):**
 +**Incorrect (Monaco bundles with main chunk, often adding hundreds of KB):**
 ```
+
 </details>
 
 </blockquote></details>
@@ -746,8 +745,7 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 <summary>.agent/skills/file-organizer/SKILL.md (1)</summary><blockquote>
 
 `125-128`: **表現の微調整（任意）**  
-「Very old」はやや曖昧なので、例えば「Older (archive candidates)」などにするとトーンが整います。  
-
+「Very old」はやや曖昧なので、例えば「Older (archive candidates)」などにするとトーンが整います。
 
 <details>
 <summary>✍️ 修正案</summary>
@@ -756,6 +754,7 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 -  - Very old (archive candidates)
 +  - Older (archive candidates)
 ```
+
 </details>
 
 </blockquote></details>
@@ -765,8 +764,6 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 `25-25`: **未使用の定数を削除するか、使用例を追加してください。**
 
 `EMAIL_REGEX` 定数が定義されていますが、`Highlighter` コンポーネントの例では使用されていません。これは読者を混乱させる可能性があります。定数を削除するか、別の使用例を追加することを検討してください。
-
-
 
 <details>
 <summary>♻️ 定数を削除する修正案</summary>
@@ -785,8 +782,6 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 
 不適切な例では、`query` に正規表現の特殊文字が含まれている場合、正規表現インジェクションの脆弱性が発生する可能性があります。ドキュメントではパフォーマンスの問題のみに言及していますが、セキュリティリスクについても警告を追加することを推奨します。
 
-
-
 <details>
 <summary>📋 セキュリティ警告を追加する提案</summary>
 
@@ -794,12 +789,13 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 
 ```diff
  }
- ```
- 
-+> **Security Note:** In addition to performance issues, the unescaped `query` parameter can cause regex injection vulnerabilities if it contains special regex characters (e.g., `.*`, `+`, `?`). Always escape user input before using it in RegExp patterns.
-+
- **Correct (memoize or hoist):**
 ```
+
++> **Security Note:** In addition to performance issues, the unescaped `query` parameter can cause regex injection vulnerabilities if it contains special regex characters (e.g., `.*`, `+`, `?`). Always escape user input before using it in RegExp patterns.
+
+- **Correct (memoize or hoist):**
+
+````
 
 </details>
 
@@ -837,7 +833,7 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 
 ```diff
  **Alternative (Math.min/Math.max for small arrays):**
- 
+
 +Note: This approach only works for primitive values. For object arrays like `Project[]`, use `.map()` to extract values first.
 +
  ```typescript
@@ -848,11 +844,12 @@ Monaco のバンドルサイズは環境やバージョンで変動します。�
 +
 +// Object arrays (extract field first)
 +const latestTimestamp = Math.max(...projects.map(p => p.updatedAt))
- ```
- 
+````
+
 -This works for small arrays but can be slower for very large arrays due to spread operator limitations. Use the loop approach for reliability.
 +This works for small to medium-sized arrays (typically under ~100k elements) but can fail or be slower for larger arrays due to spread operator call stack limitations. Use the loop approach for reliability with large datasets.
-```
+
+````
 </details>
 
 </blockquote></details>
@@ -882,21 +879,21 @@ function processOrders(orders: Order[], users: User[]) {
     user: userById.get(order.userId) ?? null // または適切なデフォルト値
   }))
 }
-```
+````
 
 または、型安全性を高める場合：
 
 ```typescript
 function processOrders(orders: Order[], users: User[]) {
-  const userById = new Map(users.map(u => [u.id, u]))
+  const userById = new Map(users.map((u) => [u.id, u]));
 
   return orders
-    .map(order => {
-      const user = userById.get(order.userId)
-      if (!user) return null // または警告ログを出力
-      return { ...order, user }
+    .map((order) => {
+      const user = userById.get(order.userId);
+      if (!user) return null; // または警告ログを出力
+      return { ...order, user };
     })
-    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 ```
 
@@ -959,8 +956,6 @@ Line 10 と Line 16 で同じ `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` プレース�
 
 パフォーマンス最適化のベストプラクティスに対して `CRITICAL` は過大評価の可能性があります。`CRITICAL` は通常、バグ、セキュリティ問題、または破壊的変更に使用されます。並列化による性能向上は価値がありますが、`HIGH` または `MAJOR` レベルの方が適切です。
 
-
-
 <details>
 <summary>📝 提案される修正</summary>
 
@@ -977,24 +972,21 @@ Line 10 と Line 16 で同じ `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN` プレース�
 
 `Promise.all()` は最初のプロミスが拒否された時点で即座に失敗します（fail-fast 動作）。独立した非同期操作で個別のエラーハンドリングが必要な場合は、`Promise.allSettled()` の使用を推奨する説明を追加すると、より包括的なガイドになります。
 
-
-
 <details>
 <summary>📚 提案される追加内容</summary>
 
 正しい例の後に以下のセクションを追加：
 
 ```markdown
-
 **注意: エラーハンドリング**
 
 `Promise.all()` はいずれか 1 つのプロミスが拒否されると即座に失敗します。各操作を独立してエラーハンドリングしたい場合は `Promise.allSettled()` を使用してください：
 
 \`\`\`typescript
 const results = await Promise.allSettled([
-  fetchUser(),
-  fetchPosts(),
-  fetchComments()
+fetchUser(),
+fetchPosts(),
+fetchComments()
 ])
 
 // 各結果の status を確認: 'fulfilled' | 'rejected'
@@ -1013,6 +1005,7 @@ const user = results[0].status === 'fulfilled' ? results[0].value : null
 このガイドは `react-best-practices` ディレクトリに配置されていますが、内容は React 固有ではなく一般的な JavaScript 配列最適化のベストプラクティスです。タグにも "react" が含まれていません。
 
 以下のいずれかを検討してください：
+
 - より汎用的なディレクトリ構造に移動する（例：`.agent/skills/javascript-best-practices/`）
 - React コンポーネント内での具体的なユースケースを追加して React 固有の文脈を明確にする
 
@@ -1023,11 +1016,10 @@ const user = results[0].status === 'fulfilled' ? results[0].value : null
 最適化アドバイスは技術的に正しいですが、いつこのパターンを適用すべきかのコンテキストが不足しています。小規模な配列では可読性とのトレードオフが発生する可能性があります。
 
 以下の追加を検討してください：
+
 - 大規模な配列やパフォーマンスクリティカルな処理で適用することを推奨する注記
 - 小規模な配列では `.filter()` チェーンの方が可読性が高い場合があることへの言及
 - 関数型アプローチとして `.reduce()` を使った代替実装の提示（オプション）
-
-
 
 <details>
 <summary>📝 `.reduce()` を使った代替実装例</summary>
@@ -1035,13 +1027,13 @@ const user = results[0].status === 'fulfilled' ? results[0].value : null
 ```typescript
 const { admins, testers, inactive } = users.reduce(
   (acc, user) => {
-    if (user.isAdmin) acc.admins.push(user)
-    if (user.isTester) acc.testers.push(user)
-    if (!user.isActive) acc.inactive.push(user)
-    return acc
+    if (user.isAdmin) acc.admins.push(user);
+    if (user.isTester) acc.testers.push(user);
+    if (!user.isActive) acc.inactive.push(user);
+    return acc;
   },
-  { admins: [] as User[], testers: [] as User[], inactive: [] as User[] }
-)
+  { admins: [] as User[], testers: [] as User[], inactive: [] as User[] },
+);
 ```
 
 </details>
@@ -1053,8 +1045,6 @@ const { admins, testers, inactive } = users.reduce(
 `82-82`: **「クラスはブラウザにキャッシュされる」という表現が不正確です**
 
 この表現は誤解を招く可能性があります。実際の利点は、CSS クラスの変更が単一のスタイル再計算をトリガーするのに対し、複数のインラインスタイル変更は複数回の再計算を引き起こすことです。CSSOM は最適化されていますが、「キャッシュ」という用語は正確ではありません。
-
-
 
 <details>
 <summary>📝 より正確な表現への修正案</summary>
@@ -1076,13 +1066,12 @@ const { admins, testers, inactive } = users.reduce(
 
 キーと値のペアを扱うケース（例：IDから名前へのマッピング）で Map を使用する例を追加することを推奨します。
 
-
 <details>
 <summary>📚 Map を使用した例の追加案</summary>
 
 ````diff
  **Correct (O(1) per check):**
- 
+
  ```typescript
  const allowedIds = new Set(['a', 'b', 'c', ...])
  items.filter(item => allowedIds.has(item.id))
@@ -1103,6 +1092,7 @@ const { admins, testers, inactive } = users.reduce(
 `1-24`: **オプション：トレードオフに関するガイダンスの追加を検討**
 
 このパターンは有用ですが、いつ適用すべきかのガイダンスがあるとより実用的になります。例えば：
+
 - Set/Map の生成コストと lookup 回数のバランス（1〜2回の検索なら配列のままでも許容範囲）
 - 小規模配列（<10要素）では最適化の効果が限定的
 - メモリオーバーヘッドの考慮
@@ -1125,7 +1115,6 @@ const { admins, testers, inactive } = users.reduce(
 
 Line 53 で長さチェック済みなので実害はありませんが、`strict=True` を付けると防御的になります（Ruff B905）。
 
-
 <details>
 <summary>♻️ 修正案</summary>
 
@@ -1133,6 +1122,7 @@ Line 53 で長さチェック済みなので実害はありませんが、`stric
 -    for cmd, port in zip(args.servers, args.ports):
 +    for cmd, port in zip(args.servers, args.ports, strict=True):
 ```
+
 </details>
 
 </blockquote></details>
@@ -1157,6 +1147,7 @@ Line 53 で長さチェック済みなので実害はありませんが、`stric
 +
 +> **重要:** `cache()` は**リクエスト内でのみ有効**です。リクエスト間で共有されず、クライアントコンポーネントでは使用できません。また、**同じメモ化関数インスタンスを再利用することが必須**です。`cache()` を複数回呼び出すと、それぞれ異なるキャッシュが作成されます。
 ```
+
 </details>
 
 Also applies to: 26-26
@@ -1169,30 +1160,28 @@ Also applies to: 26-26
 
 提示されたパターンは正しく機能しますが、`slugifyCache`は無制限に成長します。実運用では、キャッシュサイズ制限やLRU（Least Recently Used）戦略の導入を検討してください。
 
-
-
 <details>
 <summary>💡 LRU戦略を追加する場合の例</summary>
 
 ```typescript
 // キャッシュサイズ制限の追加（オプション）
-const slugifyCache = new Map<string, string>()
-const MAX_CACHE_SIZE = 1000
+const slugifyCache = new Map<string, string>();
+const MAX_CACHE_SIZE = 1000;
 
 function cachedSlugify(text: string): string {
   if (slugifyCache.has(text)) {
-    return slugifyCache.get(text)!
+    return slugifyCache.get(text)!;
   }
-  
+
   // キャッシュサイズ制限
   if (slugifyCache.size >= MAX_CACHE_SIZE) {
-    const firstKey = slugifyCache.keys().next().value
-    slugifyCache.delete(firstKey)
+    const firstKey = slugifyCache.keys().next().value;
+    slugifyCache.delete(firstKey);
   }
-  
-  const result = slugify(text)
-  slugifyCache.set(text, result)
-  return result
+
+  const result = slugify(text);
+  slugifyCache.set(text, result);
+  return result;
 }
 ```
 
@@ -1205,8 +1194,6 @@ function cachedSlugify(text: string): string {
 `17-17`: **型安全性のために`any`型の使用を避けてください。**
 
 キャッシュ値に`any`型を使用すると、型安全性が失われます。Based on learnings: このプロジェクトは「maximum type safety」を重視しています。
-
-
 
 <details>
 <summary>♻️ 型安全な実装の提案</summary>
@@ -1224,6 +1211,7 @@ function cachedSlugify(text: string): string {
    ttl: 5 * 60 * 1000  // 5 minutes
  })
 ```
+
 </details>
 
 ---
@@ -1232,8 +1220,6 @@ function cachedSlugify(text: string): string {
 
 `db.user.findUnique`が失敗した場合のエラーハンドリングが実装されていません。DB接続エラーやクエリ失敗時に、エラーがキャッシュされないようにする必要があります。
 
-
-
 <details>
 <summary>🛡️ エラーハンドリングの追加提案</summary>
 
@@ -1241,7 +1227,7 @@ function cachedSlugify(text: string): string {
  export async function getUser(id: string) {
    const cached = cache.get(id)
    if (cached) return cached
- 
+
 +  try {
      const user = await db.user.findUnique({ where: { id } })
 +    if (!user) {
@@ -1256,6 +1242,7 @@ function cachedSlugify(text: string): string {
 +  }
  }
 ```
+
 </details>
 
 ---
@@ -1276,17 +1263,15 @@ function cachedSlugify(text: string): string {
 
 両方の例で`return`文とレンダリングロジックが欠けているため、`startTransition`がUIの応答性をどのように維持するのかが明確に示されていません。`scrollY`の値を実際に使用してレンダリングする部分を追加することで、トランジションの利点がより明確になります。
 
-
-
 <details>
 <summary>📝 より完全な例の提案</summary>
 
-```diff
+````diff
  **Correct (non-blocking updates):**
- 
+
  ```tsx
  import { startTransition } from 'react'
- 
+
  function ScrollTracker() {
    const [scrollY, setScrollY] = useState(0)
    useEffect(() => {
@@ -1296,14 +1281,15 @@ function cachedSlugify(text: string): string {
      window.addEventListener('scroll', handler, { passive: true })
      return () => window.removeEventListener('scroll', handler)
    }, [])
-+  
++
 +  return (
 +    <div className="scroll-indicator">
 +      Scrolled: {scrollY}px
 +    </div>
 +  )
  }
- ```
+````
+
 </details>
 
 </blockquote></details>
@@ -1313,8 +1299,6 @@ function cachedSlugify(text: string): string {
 `36-36`: **`as any` 禁止の代替案を補足すると、より実践的になります**
 
 `as any` の禁止は良い方針ですが、代わりに何をすべきかの指針があると、開発者にとってより実用的なガイドラインになります。
-
-
 
 <details>
 <summary>💡 改善案：代替手段の追記</summary>
@@ -1334,10 +1318,6 @@ function cachedSlugify(text: string): string {
 
 トーン、逸脱への対応、コンテキスト管理、アーティファクト管理に関する実践的なアドバイスが含まれています。ワークフローの実行を支援する有用なガイドラインです。
 
-
-
-
-
 102行目と358行目で「want to」というフレーズが繰り返されています。文章のバリエーションを追加するために、いずれかを言い換えることを検討してください（例：「wishes to」、「would like to」など）。これは非常に軽微なスタイルの改善です。
 
 </blockquote></details>
@@ -1350,18 +1330,17 @@ function cachedSlugify(text: string): string {
 
 ユーザーが確実に実行できるよう、ディレクトリ作成手順を明示することを推奨します。
 
-
 <details>
 <summary>📁 ディレクトリ作成手順の追加提案</summary>
 
-```diff
+````diff
    ```bash
 +  # Ensure temp directory exists
 +  mkdir -p dev_temp
-+  
++
    # Create content safely
    cat <<EOF > dev_temp/pr_body.md
-```
+````
 
 </details>
 
@@ -1371,23 +1350,30 @@ function cachedSlugify(text: string): string {
 
 Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説明していますが、実際の `jq` コマンド使用例が含まれていません。JSON を取得した後、どのように `jq` でデータを抽出するかの実例があると、読者の理解が深まります。
 
-
 <details>
 <summary>🔍 jq 使用例の追加提案</summary>
 
-```diff
+````diff
    ```bash
    gh pr list --json number,title,headRefName --state open
-   ```
--  - This returns reliable JSON that can be strictly typed and parsed.
-+  - This returns reliable JSON that can be strictly typed and parsed.
-+  
-+  **Example**: Extract PR numbers for a specific branch:
-+  ```bash
-+  gh pr list --json number,headRefName --state open | \
-+    jq -r '.[] | select(.headRefName == "feature/my-branch") | .number'
-+  ```
-```
+````
+
+- - This returns reliable JSON that can be strictly typed and parsed.
+
+* - This returns reliable JSON that can be strictly typed and parsed.
+*
+* **Example**: Extract PR numbers for a specific branch:
+* ```bash
+
+  ```
+
+* gh pr list --json number,headRefName --state open | \
+* jq -r '.[] | select(.headRefName == "feature/my-branch") | .number'
+* ```
+
+  ```
+
+````
 
 </details>
 
@@ -1403,7 +1389,7 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
 
 ```diff
  ### Creating a Pull Request (Reliable Method)
- 
+
  1.  **Draft the Content**: Create the PR title and body.
 -2.  **Write to File**: Save the body to `dev_temp/pr_[timestamp].md`.
 +2.  **Write to File**: Save the body to a temporary file (e.g., `dev_temp/pr_$(date +%s).md`).
@@ -1417,7 +1403,7 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
 +    gh pr create --title "Title" --body-file "$BODY_FILE" --base main --head $(git branch --show-current)
 +    rm "$BODY_FILE"
      ```
-```
+````
 
 </details>
 
@@ -1428,14 +1414,13 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
 `12-56`: **例の一貫性を向上させることを検討してください**
 
 「正しくない」例と「正しい」例の間で、ヘッダーへのアクセス方法が異なっています：
+
 - 正しくない例：`request.headers.get('user-agent')`
 - 正しい例：`(await headers()).get('user-agent')`
 
 さらに、正しい例では cookies も追加されていますが、正しくない例には存在しません。
 
 これにより、主な違いが `after()` の使用であることが分かりにくくなっています。両方の例で同じデータアクセスパターンを使用すると、`after()` による非ブロッキングの利点がより明確になります。
-
-
 
 <details>
 <summary>📝 一貫性を向上させる提案</summary>
@@ -1446,14 +1431,14 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
  export async function POST(request: Request) {
    // Perform mutation
    await updateDatabase(request)
-   
+
    // Logging blocks the response
 -  const userAgent = request.headers.get('user-agent') || 'unknown'
 -  await logUserAction({ userAgent })
 +  const userAgent = (await headers()).get('user-agent') || 'unknown'
 +  const sessionCookie = (await cookies()).get('session-id')?.value || 'anonymous'
 +  await logUserAction({ sessionCookie, userAgent })
-   
+
    return new Response(JSON.stringify({ status: 'success' }), {
 ```
 
@@ -1491,19 +1476,16 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
 
 すべてのコード例で必要なReact importsが省略されています。読者が完全なコンテキストを理解できるよう、import文を追加することを推奨します。
 
-
 <details>
 <summary>📝 提案：import文の追加</summary>
 
 各コードブロックの冒頭に以下を追加：
 
 ```typescript
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from "react";
 ```
 
 </details>
-
-
 
 Also applies to: 26-35, 39-49
 
@@ -1515,7 +1497,6 @@ Also applies to: 26-35, 39-49
 
 このスキル定義は AI エージェント全般で使用される可能性がありますが、Line 42 で "Claude" を名指ししています。他の AI モデルやシステムでも活用できるよう、モデル非依存の表現にすることを推奨します。
 
-
 <details>
 <summary>♻️ 修正案</summary>
 
@@ -1523,6 +1504,7 @@ Also applies to: 26-35, 39-49
 -Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
 +Remember: You are capable of extraordinary creative work. Don't hold back — show what can truly be created when pushing beyond conventions and committing fully to a distinctive vision.
 ```
+
 </details>
 
 </blockquote></details>
@@ -1532,4 +1514,5 @@ Also applies to: 26-35, 39-49
 <!-- This is an auto-generated comment by CodeRabbit for review status -->
 
 ## Detailed Comments
+
 No matching detailed comments found.

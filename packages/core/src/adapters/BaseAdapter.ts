@@ -34,7 +34,8 @@ export abstract class BaseAdapter<
   protected messageUnsubscriber: (() => void) | null = null;
   protected pendingResolve: ((result: T_RESULT) => void) | null = null;
   protected pendingReject: ((reason?: unknown) => void) | null = null;
-  protected infoController: ReadableStreamDefaultController<T_INFO> | null = null;
+  protected infoController: ReadableStreamDefaultController<T_INFO> | null =
+    null;
 
   abstract readonly id: string;
   abstract readonly name: string;
@@ -50,13 +51,23 @@ export abstract class BaseAdapter<
   /**
    * 共通の探索実行ロジック。
    */
-  searchRaw(command: string | string[] | Uint8Array | Record<string, unknown>): ISearchTask<T_INFO, T_RESULT> {
+  searchRaw(
+    command: string | string[] | Uint8Array | Record<string, unknown>,
+  ): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready") {
-      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not ready", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is not ready",
+        engineId: this.id,
+      });
     }
 
     if (!this.communicator) {
-      throw new EngineError(EngineErrorCode.INTERNAL_ERROR, "Communicator not initialized", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "Communicator not initialized",
+        engineId: this.id,
+      });
     }
 
     this.cleanupPendingTask("Replaced by new search");
@@ -134,7 +145,9 @@ export abstract class BaseAdapter<
   /**
    * 探索コマンドを Worker に送信します。
    */
-  protected sendSearchCommand(command: string | string[] | Uint8Array | Record<string, unknown>): void {
+  protected sendSearchCommand(
+    command: string | string[] | Uint8Array | Record<string, unknown>,
+  ): void {
     if (Array.isArray(command)) {
       for (const cmd of command) {
         this.communicator?.postMessage(cmd);
@@ -156,16 +169,30 @@ export abstract class BaseAdapter<
   /**
    * エンジンオプションを設定します。
    */
-  async setOption(name: string, value: string | number | boolean): Promise<void> {
+  async setOption(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
     if (this._status !== "ready" && this._status !== "busy") {
-      throw new EngineError(EngineErrorCode.NOT_READY, `Cannot set option: Engine is not ready (current status: ${this._status})`, this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: `Cannot set option: Engine is not ready (current status: ${this._status})`,
+        engineId: this.id,
+      });
     }
     await this.sendOptionToWorker(name, value);
   }
 
-  protected async sendOptionToWorker(name: string, value: string | number | boolean): Promise<void> {
+  protected async sendOptionToWorker(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
     if (!this.communicator) {
-      throw new EngineError(EngineErrorCode.NOT_READY, "Engine is not loaded", this.id);
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is not loaded",
+        engineId: this.id,
+      });
     }
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
@@ -187,11 +214,24 @@ export abstract class BaseAdapter<
   /**
    * 進行中のタスクをクリーンアップします。
    */
-  protected cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
+  protected cleanupPendingTask(
+    reason?: string,
+    skipReadyTransition = false,
+  ): void {
     if (this.pendingReject) {
-      this.pendingReject(new EngineError(EngineErrorCode.INTERNAL_ERROR, reason ?? "Task cleaned up", this.id));
+      this.pendingReject(
+        new EngineError({
+          code: EngineErrorCode.SEARCH_ABORTED,
+          message:
+            reason ??
+            "Search aborted: Replaced by new command or engine reset.",
+          engineId: this.id,
+          remediation:
+            "This is a normal operational event. No action required unless search is unexpectedly stopping.",
+        }),
+      );
     }
-    
+
     this.pendingResolve = null;
     this.pendingReject = null;
 

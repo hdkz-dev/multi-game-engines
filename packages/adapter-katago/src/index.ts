@@ -1,5 +1,9 @@
 import "@multi-game-engines/core";
-import { IGOSearchOptions, IGOSearchInfo, IGOSearchResult } from "./GTPParser.js";
+import {
+  IGOSearchOptions,
+  IGOSearchInfo,
+  IGOSearchResult,
+} from "./GTPParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {

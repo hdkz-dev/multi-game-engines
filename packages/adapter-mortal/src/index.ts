@@ -1,5 +1,9 @@
 import "@multi-game-engines/core";
-import { IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult } from "./MahjongJSONParser.js";
+import {
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
+  IMahjongSearchResult,
+} from "./MahjongJSONParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {

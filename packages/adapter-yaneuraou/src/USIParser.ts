@@ -1,4 +1,9 @@
-import { IProtocolParser, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  ProtocolValidator,
+} from "@multi-game-engines/core";
 import { ISHOGISearchOptions, Move } from "./usi-types.js";
 
 /** 将棋用の思考情報 (USI規格) */
@@ -21,8 +26,14 @@ export interface ISHOGISearchResult extends IBaseSearchResult {
 /**
  * 将棋エンジン向けの USI (Universal Shogi Interface) プロトコルパーサー。
  */
-export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> {
-  parseInfo(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchInfo | null {
+export class USIParser implements IProtocolParser<
+  ISHOGISearchOptions,
+  ISHOGISearchInfo,
+  ISHOGISearchResult
+> {
+  parseInfo(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): ISHOGISearchInfo | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("info ")) return null;
 
@@ -69,7 +80,9 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
     return info;
   }
 
-  parseResult(data: string | Uint8Array | Record<string, unknown>): ISHOGISearchResult | null {
+  parseResult(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): ISHOGISearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("bestmove ")) return null;
 
@@ -90,27 +103,36 @@ export class USIParser implements IProtocolParser<ISHOGISearchOptions, ISHOGISea
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {
+      // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+      ProtocolValidator.assertNoInjection(options.sfen, "SFEN string");
       commands.push(`position sfen ${options.sfen}`);
     }
-    
+
     let goCmd = "go";
     if (options.btime !== undefined) goCmd += ` btime ${options.btime}`;
     if (options.wtime !== undefined) goCmd += ` wtime ${options.wtime}`;
     if (options.byoyomi !== undefined) goCmd += ` byoyomi ${options.byoyomi}`;
     if (options.depth !== undefined) goCmd += ` depth ${options.depth}`;
     if (options.nodes !== undefined) goCmd += ` nodes ${options.nodes}`;
-    
+
     commands.push(goCmd);
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "stop";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const safeName = String(name).replace(/[\r\n\0;]/g, "");
-    const safeValue = String(value).replace(/[\r\n\0;]/g, "");
-    return `setoption name ${safeName} value ${safeValue}`;
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    ProtocolValidator.assertNoInjection(name, "option name");
+    ProtocolValidator.assertNoInjection(sValue, "option value");
+
+    return `setoption name ${name} value ${sValue}`;
   }
 }

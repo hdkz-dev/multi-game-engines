@@ -1,58 +1,89 @@
 #!/bin/bash
 
 # pre-commit-check.sh
-# Checks for accidental token leaks in staged files.
+# 2026 Ultimate Pre-commit Pipeline
 
+EXIT_CODE=0
+
+echo "🚀 Starting Pre-commit Quality Gate..."
+
+# 1. Check for sensitive tokens (Security)
+echo "🔍 Checking for sensitive tokens..."
 SENSITIVE_PATTERNS=(
     "GITHUB_PERSONAL_ACCESS_TOKEN"
     "VERCEL_TOKEN"
     "BRAVE_API_KEY"
     "GOOGLE_API_KEY"
-    "ghp_[a-zA-Z0-9]{36}" # GitHub PAT format
+    "ghp_[a-zA-Z0-9]{36}"
 )
 
-EXIT_CODE=0
-
-echo "🔍 Checking for sensitive tokens in staged files..."
-
-# List staged files (excluding deletions)
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=d)
 
 for FILE in $STAGED_FILES; do
-    # Skip binary files
-    if [[ $(file --mime "$FILE") == *"binary"* ]]; then
-        continue
-    fi
-
-    # Skip the scripts themselves to avoid false positives on variable names
-    if [[ "$FILE" == scripts/* ]]; then
-        continue
-    fi
+    if [[ $(file --mime "$FILE") == *"binary"* ]]; then continue; fi
+    if [[ "$FILE" == scripts/* ]]; then continue; fi
 
     for PATTERN in "${SENSITIVE_PATTERNS[@]}"; do
-        # Search for pattern in staged changes of the file
         MATCHES=$(git diff --cached "$FILE" | grep -E "$PATTERN")
-        
         if [ ! -z "$MATCHES" ]; then
             echo "❌ ERROR: Potential secret leak detected in '$FILE' (Pattern: $PATTERN)"
-            echo "Matches found:"
-            echo "$MATCHES"
             EXIT_CODE=1
         fi
     done
 done
 
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "⚠️ Secret check failed. Commit aborted."
+    exit $EXIT_CODE
+fi
+
+# 2. Automated Formatting and Linting (Style)
+echo "🧹 Running lint-staged (Format & Lint)..."
+pnpm exec lint-staged
+if [ $? -ne 0 ]; then EXIT_CODE=1; fi
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "⚠️ Lint/Format failed. Commit aborted."
+    exit $EXIT_CODE
+fi
+
+# 3. Type Consistency Check (Reliability)
+# 全パッケージの整合性を確認するため、変更ファイルだけでなく全体をチェックします
+echo "⌨️  Running typecheck..."
+pnpm typecheck
+if [ $? -ne 0 ]; then EXIT_CODE=1; fi
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "⚠️ Typecheck failed. Commit aborted."
+    exit $EXIT_CODE
+fi
+
+# 4. Build Verification (Correctness)
+echo "🏗️  Running build verification..."
+pnpm build
+if [ $? -ne 0 ]; then EXIT_CODE=1; fi
+
+if [ $EXIT_CODE -ne 0 ]; then
+    echo "⚠️ Build failed. Commit aborted."
+    exit $EXIT_CODE
+fi
+
+# 5. Unit Tests (Functionality)
+echo "🧪 Running unit tests..."
+pnpm test
+if [ $? -ne 0 ]; then EXIT_CODE=1; fi
+
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "✅ No sensitive tokens detected in staged files."
+    echo "✅ All checks passed! Proceeding with commit."
     
-    # Auto-generate masked example config
+    # Auto-generate masked example config if needed
     if [[ "$STAGED_FILES" == *"mcp_config.json"* ]]; then
-        echo "💡 mcp_config.json changed. Updating example config..."
-        npm run mcp:mask
+        echo "💡 Updating mcp_config.example.json..."
+        pnpm mcp:mask
         git add mcp_config.example.json
     fi
 else
-    echo "⚠️ Commit aborted. Please remove the secrets and try again."
+    echo "⚠️ Quality gate failed. Please fix the issues and try again."
 fi
 
 exit $EXIT_CODE

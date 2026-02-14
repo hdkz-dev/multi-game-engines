@@ -21,7 +21,7 @@ Reduce SVG coordinate precision to decrease file size. The optimal precision dep
 <path d="M 10.3 20.8 L 30.9 40.2" />
 ```
 
-**Automate with SVGO:
+\*\*Automate with SVGO:
 
 ```bash
 npx svgo --precision=1 --multipass icon.svg

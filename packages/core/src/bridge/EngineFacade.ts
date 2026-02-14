@@ -13,7 +13,6 @@ import {
   EngineLoadingStrategy,
   IEngineLoader,
 } from "../types.js";
-import { BaseAdapter } from "../adapters/BaseAdapter.js";
 
 /**
  * 利用者がエンジンを操作するための Facade 実装。
@@ -37,7 +36,7 @@ export class EngineFacade<
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
     private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
     private loaderProvider?: () => Promise<IEngineLoader>,
-    private ownsAdapter: boolean = true
+    private ownsAdapter: boolean = true,
   ) {
     // アダプターからのイベントを委譲
     this.adapter.onStatusChange((s) => {
@@ -51,12 +50,22 @@ export class EngineFacade<
     });
   }
 
-  get id(): string { return this.adapter.id; }
-  get name(): string { return this.adapter.name; }
-  get version(): string { return this.adapter.version; }
-  get status(): EngineStatus { return this.adapter.status; }
+  get id(): string {
+    return this.adapter.id;
+  }
+  get name(): string {
+    return this.adapter.name;
+  }
+  get version(): string {
+    return this.adapter.version;
+  }
+  get status(): EngineStatus {
+    return this.adapter.status;
+  }
 
-  get loadingStrategy(): EngineLoadingStrategy { return this._loadingStrategy; }
+  get loadingStrategy(): EngineLoadingStrategy {
+    return this._loadingStrategy;
+  }
   set loadingStrategy(value: EngineLoadingStrategy) {
     this._loadingStrategy = value;
     if (value === "eager" && this.status === "uninitialized") {
@@ -70,7 +79,9 @@ export class EngineFacade<
     if (this.loadingPromise) return this.loadingPromise;
 
     this.loadingPromise = (async () => {
-      const loader = this.loaderProvider ? await this.loaderProvider() : undefined;
+      const loader = this.loaderProvider
+        ? await this.loaderProvider()
+        : undefined;
       await this.adapter.load(loader);
     })();
 
@@ -83,12 +94,17 @@ export class EngineFacade<
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     // 自動ロード
-    if (this._loadingStrategy === "on-demand" && this.status === "uninitialized") {
+    if (
+      this._loadingStrategy === "on-demand" &&
+      this.status === "uninitialized"
+    ) {
       await this.load();
     }
 
     if (this.status !== "ready" && this.status !== "busy") {
-      throw new Error(`Engine is not initialized (current status: ${this.status})`);
+      throw new Error(
+        `Engine is not initialized (current status: ${this.status})`,
+      );
     }
 
     // 既存タスクがあれば停止
@@ -99,6 +115,13 @@ export class EngineFacade<
     const context: IMiddlewareContext<T_OPTIONS> = {
       engineId: this.id,
       options,
+      emitTelemetry: (event) => {
+        this.adapter.emitTelemetry?.(event);
+      },
+      // 2026 Best Practice: 高エントロピーな ID 生成 (並行探索の完全な識別)
+      telemetryId:
+        crypto.randomUUID?.() ??
+        `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`,
     };
 
     // 1. コマンド生成
@@ -129,26 +152,33 @@ export class EngineFacade<
           for (const l of this.infoListeners) l(info);
         }
       } catch (err) {
-        // 2026 Best Practice: アダプターの emitTelemetry を呼び出す
-        if (this.adapter instanceof BaseAdapter) {
-          this.adapter.emitTelemetry({
-            event: "info_stream_error",
-            timestamp: Date.now(),
-            attributes: { error: String(err) }
-          });
-        }
+        // 2026 Best Practice: テレメトリ発行と同時に、開発者向けにエラーを可視化する
+        console.error(
+          `[EngineFacade] Info stream processing error (${this.id}):`,
+          err,
+        );
+        this.adapter.emitTelemetry?.({
+          type: "error",
+          timestamp: Date.now(),
+          metadata: {
+            engineId: this.id,
+            action: "info_stream",
+            error: String(err),
+          },
+        });
       }
     })();
 
     // 5. 結果の待機と onResult ミドルウェアの適用
+    const onAbort = () => {
+      void task.stop();
+    };
     try {
       if (options.signal?.aborted) {
         await task.stop();
       }
-      
-      options.signal?.addEventListener("abort", () => {
-        void task.stop();
-      });
+
+      options.signal?.addEventListener("abort", onAbort);
 
       let result = await task.result;
       for (const mw of this.middlewares) {
@@ -159,6 +189,7 @@ export class EngineFacade<
       await infoProcessing;
       return result;
     } finally {
+      options.signal?.removeEventListener("abort", onAbort);
       if (this.activeTask === task) {
         this.activeTask = null;
       }
@@ -192,7 +223,10 @@ export class EngineFacade<
     }
   }
 
-  async setOption(name: string, value: string | number | boolean): Promise<void> {
+  async setOption(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
     await this.adapter.setOption(name, value);
   }
 
@@ -202,7 +236,7 @@ export class EngineFacade<
     this.progressListeners.clear();
     this.telemetryListeners.clear();
     this.infoListeners.clear();
-    
+
     if (this.ownsAdapter) {
       await this.adapter.dispose();
     }

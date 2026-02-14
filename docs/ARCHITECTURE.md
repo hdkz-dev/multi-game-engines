@@ -48,11 +48,14 @@
 
 ```typescript
 // エンジン固有の型を指定して型安全にアクセス
-import { IChessSearchOptions, FEN } from "@multi-game-engines/adapter-stockfish";
+import {
+  IChessSearchOptions,
+  FEN,
+} from "@multi-game-engines/adapter-stockfish";
 
-const stockfish = bridge.getEngine('stockfish');
+const stockfish = bridge.getEngine("stockfish");
 // アダプターをインポートしていれば、EngineRegistry を通じて自動的に型が推論されます
-stockfish.search({ fen: '...' as FEN, depth: 20 }); 
+stockfish.search({ fen: "..." as FEN, depth: 20 });
 ```
 
 ### 多言語・多プロトコル対応
@@ -66,8 +69,6 @@ stockfish.search({ fen: '...' as FEN, depth: 20 });
 
 ## ライフサイクルとリソース管理
 
-
-
 1.  **永続リスナー (Persistent Listener)**: `onInfo` 等のイベント登録は、検索タスクの切り替わりを跨いで有効 です。一度の登録で継続的な監視が可能です。
 
 2.  **クリーンな破棄 (Clean Disposal)**: `bridge.dispose()` を呼び出すことで、登録された全エンジンの Worker を停止し、メモリとリソースを完全に解放します。
@@ -76,6 +77,10 @@ stockfish.search({ fen: '...' as FEN, depth: 20 });
 
 4.  **セキュリティ第一 (SRI & Integrity)**: 全ての外部バイナリは SRI ハッシュ検証が必須です。改竄されたリソ ースのロードは、実行前にブロックされます。W3C 標準のマルチハッシュ形式をサポートしています。
 
-5.  **モダンな例外処理 (Error Cause API)**: ネットワークエラーや通信障害などの低レイヤーの例外は、`Error Cause API` を用いて元の例外を保持したまま `EngineError` にラップされます。これにより、高度なデバッグ性が確保されています。
+5.  **厳格な入力検証 (Strict Input Validation)**: プロトコルレベルでのコマンドインジェクションを防ぐため、サニタイズではなく「例外スローによる拒否」を徹底しています。不正な制御文字を含む入力は、エンジンに到達する前に遮断されます（※USI/GTP/SGF で許可される記号は許可リストに明示）。
 
+6.  **モダンな例外処理 (Error Cause API)**: ネットワークエラーや通信障害などの低レイヤーの例外は、`Error Cause API` を用いて元の例外を保持したまま `EngineError` にラップされます。加えて `remediation` フィールドにより、開発者やユーザーに対して「制御文字を除去してください」といった具体的な復旧ガイダンスを提示できます。これにより、高度なデバッグ性とユーザー体験の両立が確保されています。
 
+7.  **WASM & バイナリリソース戦略 (WASM & Binary Strategy)**:
+    - **Blob URL の制約**: セキュリティとキャッシュのために `Blob URL` を使用するため、Worker 内からの**相対パスによる追加リソース（.wasm, .nnue）のフェッチは原則禁止**です（Blob の Origin は不透明であるため）。
+    - **依存性注入 (Dependency Injection)**: アダプターは、JS ローダーだけでなく WASM/NNUE バイナリも `EngineLoader` 経由で個別にロードし、その Blob URL を Worker の初期化パラメータ（`Module.wasmBinaryFile` や `postMessage`）として注入する設計を必須とします。許容されるロード経路は EngineLoader 経由で注入された URL のみです。

@@ -1,6 +1,7 @@
 # L4 エンジン疎結合化・外部プロジェクト移行計画
 
 ## 概要
+
 ライセンス上の理由、および再利用性を高めるため、L4 エンジン（Stockfish, ShogiEngine等）を現在の `multi-board-games` プロジェクトから分離し、独立したオープンソースプロジェクトとして再構築します。
 
 ## プロジェクト構成の雛形
@@ -11,7 +12,7 @@ board-game-engines/
 ├── engines/                # 各ゲームの思考エンジン
 │   ├── chess/              # Stockfish (WASM)
 │   ├── shogi/              # Shogi68k / LessFish (WASM)
-│   ├── checkers/           
+│   ├── checkers/
 │   └── common/             # 共通インターフェース
 ├── packages/               # npmパッケージとして公開する場合
 │   ├── core/               # 通信ブリッジ、型定義
@@ -27,6 +28,7 @@ board-game-engines/
 以下を AI（Cursor, Gemini等）に渡すことで、外部エンジンプロジェクトのベースを生成できます。
 
 ---
+
 **Prompt:**
 あなたは、ボードゲーム思考エンジンの専門エンジニアです。以下の要件を満たす独立したプロジェクト `board-game-engines` のベース構造を作成してください。
 
@@ -43,9 +45,9 @@ board-game-engines/
    - `./engines` 配下に各ゲームごとのディレクトリを作成し、サンプルとしてチェスの Stockfish インターフェースのスケルトンを作成してください。
 5. **ライセンス**: GPL-3.0 または MIT (エンジンに依存) を想定。
 
-この構造を、すぐに `npm init` して開発を始められる状態で出力してください。
----
+## この構造を、すぐに `npm init` して開発を始められる状態で出力してください。
 
 ## 連携方法
+
 1. 外部プロジェクトでビルドされた `[game].worker.js` および `.wasm` を CDN (GitHub Pages / JSDelivr等) または npm 経由で取得します。
 2. `multi-board-games` 側では、`src/lib/games/[game]/use[Game]AI.ts` の `Worker` インスタンス化パスを、ローカルファイルから外部 URL へ変更します。

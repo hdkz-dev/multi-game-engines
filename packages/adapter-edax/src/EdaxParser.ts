@@ -1,4 +1,13 @@
-import { IProtocolParser } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  ProtocolValidator,
+  Brand,
+} from "@multi-game-engines/core";
+
+/** オセロの盤面データ */
+export type OthelloBoard = Brand<string, "OthelloBoard">;
+/** オセロの指し手 */
+export type OthelloMove = Brand<string, "OthelloMove">;
 
 export class EdaxParser implements IProtocolParser<
   IOthelloSearchOptions,
@@ -19,7 +28,9 @@ export class EdaxParser implements IProtocolParser<
     return null;
   }
 
-  parseResult(data: string | Record<string, unknown>): IOthelloSearchResult | null {
+  parseResult(
+    data: string | Record<string, unknown>,
+  ): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("move")) return null;
 
@@ -27,7 +38,7 @@ export class EdaxParser implements IProtocolParser<
     if (move) {
       return {
         raw: data,
-        bestMove: move,
+        bestMove: move as OthelloMove,
       };
     }
     return null;
@@ -35,25 +46,36 @@ export class EdaxParser implements IProtocolParser<
 
   createSearchCommand(options: IOthelloSearchOptions): string[] {
     const commands: string[] = [];
-    const board = String(options.board).replace(/[\r\n\0;]/g, "");
-    commands.push(`setboard ${board}`);
+    const sBoard = String(options.board);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    ProtocolValidator.assertNoInjection(sBoard, "board data");
+
+    commands.push(`setboard ${sBoard}`);
     commands.push(`go ${options.depth ?? 20}`);
     return commands;
   }
 
+  /**
+   * 探索停止コマンドを生成します。
+   */
   createStopCommand(): string {
     return "stop";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name).replace(/[\r\n\0;]/g, "");
-    const sValue = String(value).replace(/[\r\n\0;]/g, "");
-    return `set ${sName} ${sValue}`;
+    const sValue = String(value);
+
+    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
+    ProtocolValidator.assertNoInjection(name, "option name");
+    ProtocolValidator.assertNoInjection(sValue, "option value");
+
+    return `set ${name} ${sValue}`;
   }
 }
 
 export interface IOthelloSearchOptions {
-  board: string;
+  board: OthelloBoard;
   depth?: number;
   signal?: AbortSignal;
 }
@@ -65,5 +87,5 @@ export interface IOthelloSearchInfo {
 
 export interface IOthelloSearchResult {
   raw: string;
-  bestMove: string;
+  bestMove: OthelloMove;
 }

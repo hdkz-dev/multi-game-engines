@@ -11,7 +11,7 @@ Use React's `<Activity>` (Experimental/Canary, React 19.2+) to preserve state/DO
 
 > **Warning:** This is an **experimental** API available in React Canary/19.2+. Do not use in Stable builds without checking support.
 
-**Usage:
+\*\*Usage:
 
 ```tsx
 import { Activity } from "react";

@@ -25,7 +25,7 @@ describe("EdaxAdapter", () => {
     adapter.onStatusChange(statusSpy);
 
     await adapter.load();
-    
+
     expect(statusSpy).toHaveBeenCalledWith("loading");
     expect(statusSpy).toHaveBeenCalledWith("ready");
     expect(adapter.status).toBe("ready");
