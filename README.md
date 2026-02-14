@@ -8,10 +8,20 @@
 
 - **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
 - **Zero-Any Type Safety**: Branded Types とジェネリクスにより、コンパイル時に多くのミスを未然に防止。
-- **Modern Security**: 全リソースへの SRI (Subresource Integrity) 必須化と、COOP/COEP 診断機能の統合。
-- **Strict Input Validation**: プロトコルレベルでの不正な制御文字を「例外スロー」により即座に拒否し、コマンドインジェクションを未然に防止。
-- **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤を提供。
-- **High Performance Storage**: OPFS (Origin Private File System) を活用した、バイナリの高速永続化キャッシュ。
+- **AI Ensemble 開発**: Gemini, CodeRabbit, DeepSource, Snyk 等の AI ツールが相互に監査を行う自律的品質保証。
+- **Modern Security**: SRI 必須化と「Refuse by Exception」ポリシーによる、プロトコルレベルの堅牢なインジェクション対策。
+- **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤。
+- **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
+
+## 🤖 AI 開発ワークフロー / AI Workflow
+
+本プロジェクトは AI エージェントとの共創を前提として設計されています。詳細は [docs/AI_WORKFLOW.md](./docs/AI_WORKFLOW.md) を参照してください。
+
+- **実装担当**: Gemini CLI (Jules)
+- **論理監査**: CodeRabbit
+- **静的解析**: DeepSource
+- **セキュリティ**: Snyk
+- **可視化**: Mermaid.js によるアーキテクチャ自動図解
 
 ## 📦 サポート状況 / Support Status
 
