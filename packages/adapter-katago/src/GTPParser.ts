@@ -73,14 +73,13 @@ export class GTPParser implements IProtocolParser<
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name);
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(sName, "option name", true);
+    ProtocolValidator.assertNoInjection(name, "option name", true);
     ProtocolValidator.assertNoInjection(sValue, "option value", true);
 
-    return `set_option ${sName} ${sValue}`;
+    return `set_option ${name} ${sValue}`;
   }
 }
 

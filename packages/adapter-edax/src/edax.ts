@@ -1,5 +1,5 @@
-import { BaseAdapter } from "@multi-game-engines/core";
 import {
+  BaseAdapter,
   IEngineLoader,
   WorkerCommunicator,
   EngineError,

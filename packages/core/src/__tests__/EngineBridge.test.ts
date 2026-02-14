@@ -126,7 +126,7 @@ describe("EngineBridge", () => {
     expect(instance3).not.toBe(instance1);
   });
 
-  it("should purge garbage collected engine instances from count", async () => {
+  it("GC されたエンジンインスタンスがカウントからパージされること", async () => {
     const bridge = new EngineBridge();
     const adapter = createMockAdapter("leak-test");
     await bridge.registerAdapter(adapter);

@@ -157,13 +157,12 @@ export class UCIParser implements IProtocolParser<
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sName = String(name);
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(sName, "option name");
+    ProtocolValidator.assertNoInjection(name, "option name");
     ProtocolValidator.assertNoInjection(sValue, "option value");
 
-    return `setoption name ${sName} value ${sValue}`;
+    return `setoption name ${name} value ${sValue}`;
   }
 }

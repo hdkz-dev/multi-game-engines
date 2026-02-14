@@ -1366,6 +1366,7 @@ Rule `#2` で `--json` と `jq` を使用した構造化出力の重要性を説
 * ```bash
 
   ```
+
 * gh pr list --json number,headRefName --state open | \
 * jq -r '.[] | select(.headRefName == "feature/my-branch") | .number'
 * ```

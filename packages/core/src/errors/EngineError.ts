@@ -37,7 +37,19 @@ export class EngineError extends Error {
   }
 
   static from(error: unknown, engineId?: string): EngineError {
-    if (error instanceof EngineError) return error;
+    if (error instanceof EngineError) {
+      // engineId が指定されており、エラーにまだ ID がない場合は補完する
+      if (engineId && !error.engineId) {
+        return new EngineError({
+          code: error.code,
+          message: error.message,
+          engineId,
+          originalError: error.originalError,
+          remediation: error.remediation,
+        });
+      }
+      return error;
+    }
 
     let code = EngineErrorCode.INTERNAL_ERROR;
     let remediation: string | undefined;
