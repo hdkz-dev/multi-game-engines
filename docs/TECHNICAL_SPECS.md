@@ -65,6 +65,8 @@ type SFEN = Brand<string, "SFEN">;
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
 - **インジェクション対策 (Refuse by Exception)**: 不正な制御文字（`\r`, `\n`, `\0`, `;` 等）を検出した場合、サニタイズせず即座に `SECURITY_ERROR` をスローし、入力を拒否します。
 - **再帰的オブジェクト検証**: JSON 形式のアダプター（Mahjong 等）では、オブジェクトツリーを再帰的に走査して全ての文字列値に対してインジェクション検証を適用します。
+- **Strict Regex Validation (出力検証)**: エンジンからの出力（UCI 指し手など）は、正規表現によって厳格に検証し、形式に適合しないデータは `null` として破棄します。正規表現は `static readonly` として事前コンパイルし、NPS (Nodes Per Second) への影響を最小化します。
+- **Exception-Safe Parsing (例外安全性)**: JSON ベースのエンジンプロトコル（Mortal 等）では、`JSON.parse` を `try-catch` でラップし、不正な JSON データを受信してもストリーム処理全体がクラッシュしないよう保護します。
 
 ## 5. テレメトリと可観測性
 

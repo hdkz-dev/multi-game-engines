@@ -4,6 +4,9 @@
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 最終洗練完了)
 
+- **パーサー堅牢性の極致**:
+  - `UCIParser` において、`pv` フィールドが最後以外に配置された場合でも後続のトークン（score, nps等）を正しく認識し、解析を継続できるロジックへ刷新。
+  - `MahjongJSONParser` に `JSON.parse` の例外トラップを導入し、エンジンからの不正な JSON 入力によるシステムクラッシュを防止。
 - **究極の自動メモリ管理**: `WeakMap` を活用し、中断やエラー時でもミドルウェアの内部状態が自動的に解放される仕組みを `DefaultTelemetryMiddleware` へ導入。
 
 - **ローカル Quality Gate の確立**: Husky, lint-staged, および強化版 `pre-commit-check.sh` により、コミット時のセキュリティ、型、ビルド、テストの強制パスを実現。

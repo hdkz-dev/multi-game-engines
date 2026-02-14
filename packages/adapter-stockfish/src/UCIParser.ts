@@ -48,6 +48,17 @@ export class UCIParser implements IProtocolParser<
   IChessSearchInfo,
   IChessSearchResult
 > {
+  // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
+  private static readonly MOVE_REGEX = /^[a-h][1-8][a-h][1-8][nbrq]?$/;
+
+  /**
+   * 文字列を Move へ変換します。
+   */
+  private createMove(value: string): Move | null {
+    if (!UCIParser.MOVE_REGEX.test(value)) return null;
+    return value as Move;
+  }
+
   /**
    * info 行を解析します。
    */
@@ -65,6 +76,26 @@ export class UCIParser implements IProtocolParser<
     };
 
     const parts = line.split(" ");
+    const uciTokens = new Set([
+      "depth",
+      "seldepth",
+      "time",
+      "nodes",
+      "pv",
+      "multipv",
+      "score",
+      "currmove",
+      "currmovenumber",
+      "hashfull",
+      "nps",
+      "tbhits",
+      "sbhits",
+      "cpuload",
+      "string",
+      "refutation",
+      "currline",
+    ]);
+
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
       const val = parts[i + 1];
@@ -89,10 +120,15 @@ export class UCIParser implements IProtocolParser<
           info.time = parseInt(val, 10) || 0;
           i++;
           break;
-        case "pv":
-          info.pv = parts.slice(i + 1) as Move[];
-          i = parts.length;
+        case "pv": {
+          const moves: Move[] = [];
+          while (i + 1 < parts.length && !uciTokens.has(parts[i + 1])) {
+            const m = this.createMove(parts[++i]);
+            if (m) moves.push(m);
+          }
+          info.pv = moves;
           break;
+        }
       }
     }
 
@@ -110,14 +146,18 @@ export class UCIParser implements IProtocolParser<
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
+    const bestMove = this.createMove(parts[1] || "");
+    if (!bestMove) return null;
+
     const result: IChessSearchResult = {
-      bestMove: (parts[1] || "") as Move,
+      bestMove,
       raw: line,
     };
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      result.ponder = parts[ponderIndex + 1] as Move;
+      const ponder = this.createMove(parts[ponderIndex + 1]);
+      if (ponder) result.ponder = ponder;
     }
 
     return result;

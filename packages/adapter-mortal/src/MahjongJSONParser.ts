@@ -7,21 +7,40 @@ import {
 /** 麻雀の指し手（打牌、副露等） */
 export type MahjongMove = Brand<string, "MahjongMove">;
 
+/**
+ * 文字列を MahjongMove へ変換します。
+ * 2026 Best Practice: Branded Type へのキャスト前にバリデーションを実施します。
+ */
+function createMahjongMove(value: unknown): MahjongMove | null {
+  if (typeof value !== "string" || value.length === 0) return null;
+  // 必要に応じて詳細な指し手バリデーションをここに追加可能
+  return value as MahjongMove;
+}
+
 export class MahjongJSONParser implements IProtocolParser<
   IMahjongSearchOptions,
   IMahjongSearchInfo,
   IMahjongSearchResult
 > {
+  private isObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   parseInfo(data: string | Record<string, unknown>): IMahjongSearchInfo | null {
-    const record: Record<string, unknown> =
-      typeof data === "string"
-        ? (JSON.parse(data) as Record<string, unknown>)
-        : data;
-    if (record.type === "info") {
-      return {
-        raw: typeof data === "string" ? data : JSON.stringify(data),
-        thinking: String(record.thinking ?? ""),
-      };
+    try {
+      const parsed: unknown =
+        typeof data === "string" ? JSON.parse(data) : data;
+
+      if (!this.isObject(parsed)) return null;
+
+      if (parsed.type === "info") {
+        return {
+          raw: typeof data === "string" ? data : JSON.stringify(data),
+          thinking: String(parsed.thinking ?? ""),
+        };
+      }
+    } catch (_e) {
+      return null;
     }
     return null;
   }
@@ -29,15 +48,23 @@ export class MahjongJSONParser implements IProtocolParser<
   parseResult(
     data: string | Record<string, unknown>,
   ): IMahjongSearchResult | null {
-    const record: Record<string, unknown> =
-      typeof data === "string"
-        ? (JSON.parse(data) as Record<string, unknown>)
-        : data;
-    if (record.type === "result") {
-      return {
-        raw: typeof data === "string" ? data : JSON.stringify(data),
-        bestMove: String(record.bestMove ?? "") as MahjongMove,
-      };
+    try {
+      const parsed: unknown =
+        typeof data === "string" ? JSON.parse(data) : data;
+
+      if (!this.isObject(parsed)) return null;
+
+      if (parsed.type === "result") {
+        const bestMove = createMahjongMove(parsed.bestMove);
+        if (!bestMove) return null;
+
+        return {
+          raw: typeof data === "string" ? data : JSON.stringify(data),
+          bestMove,
+        };
+      }
+    } catch (_e) {
+      return null;
     }
     return null;
   }
