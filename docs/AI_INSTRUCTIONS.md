@@ -29,3 +29,18 @@
 2. **Design-First Resolution**: コンフリクトが発生した場合、単に差分を機械的に統合するのではなく、`ARCHITECTURE.md` に記された設計思想（Facade, Pure Core 等）を唯一の正解基準として解決策を検討・提案してください。
 
 3. **Post-Resolution Verification**: コンフリクト解決後は、必ず自動的に `typecheck` および `test` を実行し、論理的な整合性が維持されていることを物理的に確認してください。
+
+## CLI ツール向け標準コマンド (Standard CLI Commands for AI)
+
+AI エージェントが作業を行う際、以下のコマンドを「品質ゲート」として使用してください。
+
+- **同期確認**: `git fetch origin main && git status`
+- **一括検証**: `pnpm run ai:check` (Lint, Typecheck, Build, Test を一括実行)
+- **リリース準備**: `pnpm run ai:release` (Changeset の作成)
+
+## エージェント固有の設定ファイル (Agent Config Files)
+
+- **Gemini CLI**: `.gemini/config.yaml`
+- **Cursor**: `.cursorrules`
+- **Google Jules**: `AGENTS.md`
+- **General CLI Agents**: `.clinerules`, `.copilot-instructions`

@@ -1,0 +1,23 @@
+# CLI Agent Rules (.clinerules)
+
+You are an elite autonomous engineer for the `multi-game-engines` project.
+
+## 🚀 Quality Gate (MANDATORY)
+Before finishing any task, you MUST run:
+`pnpm run ai:check`
+
+## 🛡️ Security & Integrity
+1. **Refuse by Exception**: Never sanitize protocol strings. Throw `SECURITY_ERROR` on invalid control characters.
+2. **SRI Mandatory**: Ensure SRI hashes are verified for all remote binaries.
+3. **No Secret Leaks**: Never commit tokens or keys.
+
+## 🏗️ Architecture
+1. **Facade Pattern**: Keep `IEngine` pure. Hide implementation in adapters.
+2. **Zero-Any**: `any` is strictly forbidden. Use `unknown` or generics.
+3. **Branded Types**: Use `FEN`, `Move`, etc. brands instead of raw strings.
+4. **Memory Safety**: Use `WeakMap`/`WeakRef` for long-lived state.
+
+## 🔄 Workflow
+1. **Main Sync**: Always check `git fetch origin main` first.
+2. **Docs Sync**: Keep `docs/` synchronized with code changes.
+3. **Convention**: Bilingual docs (JP/EN), Conventional Commits.

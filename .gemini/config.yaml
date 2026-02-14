@@ -1,9 +1,11 @@
 project_name: multi-game-engines
 language: ja
+instructions: "docs/AI_INSTRUCTIONS.md"
 ignore_patterns:
   - "**/dist/**"
   - "**/node_modules/**"
   - "**/.git/**"
+  - "**/tmp/**"
 
 code_review:
   disable: false
@@ -13,3 +15,7 @@ code_review:
     summary: true
     code_review: true
     include_drafts: false
+
+quality_gate:
+  check_command: "pnpm run ai:check"
+

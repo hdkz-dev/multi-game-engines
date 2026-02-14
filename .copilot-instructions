@@ -1,0 +1,20 @@
+# GitHub Copilot Instructions
+
+## Project Coding Standards
+- Language: TypeScript (NodeNext)
+- Monorepo: pnpm workspaces
+- Principle: Pure Core + Specialized Adapters
+- Casing: CamelCase for variables, PascalCase for classes/interfaces.
+
+## Prohibited Patterns
+- **NO `any`**: Strictly use `unknown`.
+- **NO Generic Error**: Use `EngineError` from `@multi-game-engines/core`.
+- **NO Sanitization**: Use "Refuse by Exception" for protocol commands.
+
+## Architecture Context
+- `IEngine` is the public facade.
+- `IEngineAdapter` is the internal implementation.
+- Domain types (`FEN`, `Move`) are branded types.
+
+## Verification
+Ensure all code passes `pnpm run ai:check`.
