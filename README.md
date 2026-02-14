@@ -46,6 +46,7 @@ console.log(`Best Move: ${result.bestMove}`);
 - [設計思想 (ARCHITECTURE.md)](docs/ARCHITECTURE.md)
 - [技術仕様 (TECHNICAL_SPECS.md)](docs/TECHNICAL_SPECS.md)
 - [管理ルール (PROJECT_MANAGEMENT.md)](docs/PROJECT_MANAGEMENT.md)
+- [セキュリティポリシー (SECURITY.md)](SECURITY.md)
 - [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
 - [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
 
@@ -54,10 +55,17 @@ console.log(`Best Move: ${result.bestMove}`);
 - [Architecture & Design](docs/en/ARCHITECTURE.md)
 - [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)
+- [Security Policy](SECURITY.md)
+
+## 🛡️ セキュリティ / Security
+
+脆弱性の報告については [SECURITY.md](SECURITY.md) をご覧ください。  
+Please refer to [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 ## 🤝 貢献 / Contributing
 
 詳細は [CONTRIBUTING.md](CONTRIBUTING.md) をご覧ください。
+本プロジェクトでは **Husky** と **lint-staged** による厳格なコミット前チェックを導入しており、品質基準を満たさないコードの混入を未然に防いでいます。
 
 ## 📄 ライセンス / License
 
