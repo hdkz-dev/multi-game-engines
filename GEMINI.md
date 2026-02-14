@@ -15,7 +15,9 @@
 
 ## 運用ワークフロー
 
-1. 思考・計画（`implementation_plans`）
-2. 実装（TypeScript, Monorepo）
-3. 記録（`PROGRESS.md`, `DECISION_LOG.md`）
-4. 整理（`TASKS.md`）
+1. **同期・確認**: 各タスクの開始時に必ず `main` ブランチとの同期を確認する。
+2. **思考・計画**: `implementation_plans` の作成。
+3. **実装**: TypeScript, Monorepo による実装。
+4. **検証**: コンフリクト解決後や実装後の `typecheck`, `test` の徹底。
+5. **記録**: `PROGRESS.md`, `DECISION_LOG.md` への反映。
+6. **整理**: `TASKS.md` の更新。
