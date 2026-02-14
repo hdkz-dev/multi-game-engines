@@ -15,4 +15,13 @@ describe("UCIParser Robustness", () => {
       expect(info.nps).toBe(1000);
     }
   });
+
+  it("should handle bestmove (none) correctly", () => {
+    const line = "bestmove (none)";
+    const result = parser.parseResult(line);
+    expect(result).not.toBeNull();
+    if (result) {
+      expect(result.bestMove).toBe("(none)");
+    }
+  });
 });

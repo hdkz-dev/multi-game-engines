@@ -1,23 +1,18 @@
-# CLI Agent Rules (.clinerules)
+# AI Agent Instructions for multi-game-engines
 
-You are an elite autonomous engineer for the `multi-game-engines` project.
+## 🛠 Strategic Context
+This project utilizes an "AI Ensemble" development model. You are part of a coordinated team of AI tools.
 
-## 🚀 Quality Gate (MANDATORY)
-Before finishing any task, you MUST run:
-`pnpm run ai:check`
+## ⚖️ Rules of Engagement
+1. **Never use `any`**. Strict type safety is mandatory.
+2. **Use Branded Types**. Wrap domain strings (FEN, SFEN, Move) in branded types. Always validate via factories.
+3. **Pre-compile Regex**. Store Regex as `static readonly` for performance.
+4. **SRI Integrity**. All resource loads must have SRI hashes.
+5. **AI Workflow**. Follow `docs/AI_WORKFLOW.md`. Use CodeRabbit for self-audit.
+6. **Graceful Degradation**. If rate-limited, fallback to high-intensity local analysis (`pnpm lint && pnpm typecheck && pnpm test`).
 
-## 🛡️ Security & Integrity
-1. **Refuse by Exception**: Never sanitize protocol strings. Throw `SECURITY_ERROR` on invalid control characters.
-2. **SRI Mandatory**: Ensure SRI hashes are verified for all remote binaries.
-3. **No Secret Leaks**: Never commit tokens or keys.
-
-## 🏗️ Architecture
-1. **Facade Pattern**: Keep `IEngine` pure. Hide implementation in adapters.
-2. **Zero-Any**: `any` is strictly forbidden. Use `unknown` or generics.
-3. **Branded Types**: Use `FEN`, `Move`, etc. brands instead of raw strings.
-4. **Memory Safety**: Use `WeakMap`/`WeakRef` for long-lived state.
-
-## 🔄 Workflow
-1. **Main Sync**: Always check `git fetch origin main` first.
-2. **Docs Sync**: Keep `docs/` synchronized with code changes.
-3. **Convention**: Bilingual docs (JP/EN), Conventional Commits.
+## 📚 Reference Docs
+- `docs/ARCHITECTURE.md`: Design principles.
+- `docs/TECHNICAL_SPECS.md`: Implementation details.
+- `docs/AI_TOOLS_STRATEGY.md`: Tool ecosystem.
+- `docs/AI_WORKFLOW.md`: How we work together.

@@ -49,8 +49,9 @@ export class UCIParser implements IProtocolParser<
   IChessSearchResult
 > {
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
-  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
-  private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
+  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000, (none)) をサポート。
+  private static readonly MOVE_REGEX =
+    /^([a-h][1-8][a-h][1-8][nbrq]?|0000|\(none\))$/;
 
   // 2026 Best Practice: Set の定数化による GC 負荷の軽減
   private static readonly UCI_INFO_TOKENS = new Set([
@@ -71,6 +72,9 @@ export class UCIParser implements IProtocolParser<
     "string",
     "refutation",
     "currline",
+    "wdl",
+    "lowerbound",
+    "upperbound",
   ]);
 
   /**

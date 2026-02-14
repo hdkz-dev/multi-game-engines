@@ -120,6 +120,18 @@ cr review --prompt-only --base main
 cr review --prompt-only --base-commit abc123
 ```
 
+## 🆘 Graceful Degradation (Fallback)
+
+If `coderabbit` CLI is unavailable, rate-limited, or fails:
+
+1. **Tool Swap**: Attempt to use `claude -p "Review these changes..."` or another available AI CLI for a second opinion.
+2. **Specialized Skills**: Use internal skills like `security-auditor` or `codebase_investigator` to perform deep analysis.
+3. **Strict Local Audit**: Run the full Quality Gate:
+   ```bash
+   pnpm lint && pnpm typecheck && pnpm test
+   ```
+4. **Manual Report**: Summarize the fallback actions taken and report the final status to the human developer.
+
 ## Documentation
 
 For more details: <https://docs.coderabbit.ai/cli>

@@ -1,31 +1,25 @@
-# Cursor AI ルール (.cursorrules)
+# Multi-Game Engines Bridge - AI Agent Rules
 
-あなたは TypeScript とモノリポアーキテクチャの最高峰エンジニアです。本プロジェクト「multi-game-engines」を世界最高水準のライブラリに導く責任があります。
+You are an expert engineer working on the `multi-game-engines` project.
+Always adhere to the "Zenith Tier" best practices defined in this project.
 
-## 🚨 厳格な品質管理と運用ルール (必須)
+## 🏛 Core Principles (Non-negotiable)
+- **Zero-Any Policy**: Never use `any`. Use `unknown` with type guards or Discriminated Unions.
+- **Branded Types**: Use `FEN`, `SFEN`, `Move` branded types for domain safety. Never cast raw strings directly to these types; use validator factories (e.g., `createMove`).
+- **Performance First**: Pre-compile Regex and static Sets as `static readonly` members. Avoid allocations in hot paths like `parseInfo`.
+- **Security First**: 
+  - Follow "Refuse by Exception". Throw `SECURITY_ERROR` for any invalid control characters in protocol input.
+  - Ensure SRI (Subresource Integrity) for all external resource loads.
 
-### 0. 開発のガバナンス
-1. **ブランチ同期の強制**: 作業を開始する際、必ず `main` ブランチの最新状態を確認し、未取り込みの変更があればユーザーに同期を提案すること。
-2. **ドキュメント駆動開発**: コードを書く前に必ず `docs/implementation_plans/` に計画書を作成すること。
-3. **管理ドキュメントの更新**: 実装完了時に `docs/PROGRESS.md` と `docs/TASKS.md` を自律的に更新すること。
-4. **意思決定の記録**: 重要な設計変更は `docs/DECISION_LOG.md` に ADR として記録すること。
+## 🤖 AI Workflow Compliance
+- **Mutual Review**: Before proposing a fix, cross-check with existing architecture in `docs/ARCHITECTURE.md` and `docs/adr/*.md`.
+- **Audit Loop**: Use CodeRabbit (`coderabbit review --prompt-only -t uncommitted`) to validate your changes before committing.
+- **Graceful Degradation**: If an AI tool is rate-limited, fallback to specialized internal skills or high-intensity local testing as per `docs/AI_WORKFLOW.md`.
 
-### 1. 技術的品質原則 (究極版)
-1. **any の完全排除**: `any` の使用は例外なく禁止。`unknown` と型ガード、または境界付きジェネリクスを使用すること。
-2. **Facade パターンの遵守**: 利用者向けの `IEngine` と、内部実装用の `IEngineAdapter` を厳格に分け、意図しない内部メソッドへのアクセスを防ぐこと。
-3. **Branded Types の徹底**: `FEN`, `Move` 等のドメイン固有型を `string` と混用しないこと。
-4. **セキュリティ (SRI)**: 動的ロードを行う際は、必ず SRI ハッシュの検証ロジックを組み込むこと。
-5. **最新 Web 標準**: WASI, WebGPU, WebNN, OPFS, AbortSignal, AsyncIterable を最優先で採用すること。
+## 📜 Documentation Sync
+- Keep `docs/PROGRESS.md`, `docs/TASKS.md`, and `docs/TECHNICAL_SPECS.md` updated with every significant change.
+- Generate architecture diagrams using Mermaid.js if design changes.
 
-### 2. コンフリクト解決方針 (2026 Ready)
-1. **設計思想第一**: コンフリクト発生時、単なる機械的なマージではなく、`ARCHITECTURE.md` の原則（Facade, Pure Core 等）に最も合致する解決策を提案すること。
-2. **論理整合性の保証**: 解決後は `typecheck` と `test` を自動実行し、品質を物理的に証明すること。
-
-## 🗣️ 言語とコミュニケーション
-**全てのやり取りは日本語で行ってください。**
-(ただし、Git コミットメッセージのプレフィックス等は Conventional Commits の英語規約に従ってください)
-
-## 📂 参照優先度
-1. `GEMINI.md`: あなた自身の役割定義。
-2. `docs/CODING_CONVENTIONS.md`: 命名・構造・Branded Types 等の規約。
-3. `docs/TECHNICAL_SPECS.md`: 究極の技術仕様。
+## 🧪 Testing Strategy
+- Ensure tests are deterministic (mock `performance.now()`).
+- Add robustness tests for parser edge cases (e.g., UCI `bestmove (none)`).
