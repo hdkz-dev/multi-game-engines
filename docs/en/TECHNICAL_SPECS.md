@@ -20,7 +20,7 @@ type FEN = Brand<string, "FEN">;
 type SFEN = Brand<string, "SFEN">;
 ```
 
-### 1-2. Loading Strategy
+### 1-3. Loading Strategy
 
 - `manual`: Requires explicit `load()` call.
 - `on-demand`: Auto-loads if not ready when `search()` is called.
@@ -65,6 +65,6 @@ The main API for consumers.
 
 ## 5. Quality Assurance (Testing Philosophy)
 
-- **82 Unit Tests**: 100% logic and edge-case coverage.
+- **107 Unit Tests**: 100% logic and edge-case coverage.
 - **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
 - **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.

@@ -51,7 +51,12 @@ export class GTPParser implements IProtocolParser<
     if (typeof data !== "string") return null;
     if (!data.startsWith("=")) return null;
 
-    const moveStr = data.slice(2).trim();
+    // GTP レスポンス形式: "= <id> <move>" または "= <move>"
+    // ID は省略可能。
+    const match = data.match(/^=\s*(\d+)?\s*(.*)$/);
+    if (!match) return null;
+
+    const moveStr = match[2].trim();
     const bestMove = this.createMove(moveStr);
     if (!bestMove) return null;
 

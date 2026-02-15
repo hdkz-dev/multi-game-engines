@@ -20,7 +20,7 @@ type FEN = Brand<string, "FEN">;
 type SFEN = Brand<string, "SFEN">;
 ```
 
-### 1-2. ロード戦略 (Loading Strategy)
+### 1-3. ロード戦略 (Loading Strategy)
 
 - `manual`: 手動ロード。`load()` 呼び出しが必要。
 - `on-demand`: 自動ロード。`search()` 時に未ロードなら開始。
@@ -76,7 +76,7 @@ type SFEN = Brand<string, "SFEN">;
 
 ## 6. 品質保証 (Testing Philosophy)
 
-- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 80 項目以上のテスト（Core + Adapters）。
+- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 107 項目のテスト（Core + Adapters）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。
 - **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を禁止。`satisfies` 演算子による厳格な型推論。
 - **ライフサイクル検証**: インスタンスキャッシュ、`WeakRef` によるメモリ管理、アトミックな初期化の網羅的な検証。

@@ -133,8 +133,15 @@ export class UCIParser implements IProtocolParser<
             i + 1 < parts.length &&
             !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1])
           ) {
-            const m = this.createMove(parts[++i]);
-            if (m) moves.push(m);
+            const token = parts[++i];
+            const m = this.createMove(token);
+            if (m) {
+              moves.push(m);
+            } else {
+              console.warn(
+                `[UCIParser] Skipping invalid PV move token: "${token}"`,
+              );
+            }
           }
           info.pv = moves;
           break;

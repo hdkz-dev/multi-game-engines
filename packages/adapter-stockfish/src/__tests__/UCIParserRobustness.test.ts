@@ -24,4 +24,29 @@ describe("UCIParser Robustness", () => {
       expect(result.bestMove).toBe("(none)");
     }
   });
+
+  it("should skip invalid moves in PV", () => {
+    const line = "info pv e2e4 invalid e7e5";
+    const info = parser.parseInfo(line);
+    expect(info).not.toBeNull();
+    expect(info!.pv).toEqual(["e2e4", "e7e5"]);
+  });
+
+  it("should handle mate score conversion", () => {
+    const line = "info score mate 5";
+    const info = parser.parseInfo(line);
+    expect(info).not.toBeNull();
+    expect(info!.score).toBe(50000); // 5 * 10000
+  });
+
+  it("should return null for non-string inputs", () => {
+    expect(
+      parser.parseInfo(new Uint8Array([1, 2, 3]) as unknown as string),
+    ).toBeNull();
+    expect(parser.parseResult({} as unknown as string)).toBeNull();
+  });
+
+  it("should return null for invalid bestmove format", () => {
+    expect(parser.parseResult("bestmove invalid_format")).toBeNull();
+  });
 });

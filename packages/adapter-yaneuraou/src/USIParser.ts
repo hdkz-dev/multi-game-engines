@@ -34,7 +34,7 @@ export class USIParser implements IProtocolParser<
   // 2026 Best Practice: 正規表現の事前コンパイル
   // USI 指し手形式 (7g7f, 8h2b+ 等) および nullmove (resign, win 等)
   private static readonly MOVE_REGEX =
-    /^[1-9][a-i][1-9][a-i][+＊]?$|^[PLNSGKRB]\*[1-9][a-i]$|^resign$|^win$/i;
+    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGKRB]\*[1-9][a-i]$|^resign$|^win$/i;
 
   // 2026 Best Practice: Set の定数化による効率化
   private static readonly USI_INFO_TOKENS = new Set([

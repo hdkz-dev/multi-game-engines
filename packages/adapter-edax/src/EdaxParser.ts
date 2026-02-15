@@ -45,7 +45,7 @@ export class EdaxParser implements IProtocolParser<
     data: string | Record<string, unknown>,
   ): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
-    if (!data.startsWith("move")) return null;
+    if (!data.startsWith("move ")) return null;
 
     const moveStr = data.slice(5).trim();
     const bestMove = this.createMove(moveStr);

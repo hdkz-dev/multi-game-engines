@@ -8,12 +8,18 @@ import {
 export type MahjongMove = Brand<string, "MahjongMove">;
 
 /**
+ * 麻雀の指し手形式（例: 1m, tsumo, riichi 等）を検証する正規表現。
+ */
+const MAHJONG_MOVE_REGEX =
+  /^([1-9][mpsz]|tsumo|ron|riichi|chi|pon|kan|kakan|nuki|none)$/;
+
+/**
  * 文字列を MahjongMove へ変換します。
  * 2026 Best Practice: Branded Type へのキャスト前にバリデーションを実施します。
  */
 function createMahjongMove(value: unknown): MahjongMove | null {
   if (typeof value !== "string" || value.length === 0) return null;
-  // 必要に応じて詳細な指し手バリデーションをここに追加可能
+  if (!MAHJONG_MOVE_REGEX.test(value)) return null;
   return value as MahjongMove;
 }
 
@@ -39,7 +45,11 @@ export class MahjongJSONParser implements IProtocolParser<
           thinking: String(parsed.thinking ?? ""),
         };
       }
-    } catch (_e) {
+    } catch (e) {
+      console.warn("[MahjongJSONParser] Failed to parse info:", {
+        error: e,
+        data,
+      });
       return null;
     }
     return null;
@@ -63,7 +73,11 @@ export class MahjongJSONParser implements IProtocolParser<
           bestMove,
         };
       }
-    } catch (_e) {
+    } catch (e) {
+      console.warn("[MahjongJSONParser] Failed to parse result:", {
+        error: e,
+        data,
+      });
       return null;
     }
     return null;
@@ -72,7 +86,15 @@ export class MahjongJSONParser implements IProtocolParser<
   createSearchCommand(options: IMahjongSearchOptions): Record<string, unknown> {
     // 2026 Best Practice: JSON 形式であっても制御文字インジェクションを警戒
     // オブジェクト内の全ての文字列値を再帰的に検証します
-    const validateValue = (value: unknown, path: string = "board"): void => {
+    const MAX_DEPTH = 10;
+    const validateValue = (
+      value: unknown,
+      path: string = "board",
+      depth: number = 0,
+    ): void => {
+      if (depth > MAX_DEPTH) {
+        throw new Error(`Mahjong board data is too deeply nested at: ${path}`);
+      }
       if (typeof value === "string") {
         ProtocolValidator.assertNoInjection(
           value,
@@ -83,13 +105,13 @@ export class MahjongJSONParser implements IProtocolParser<
       }
       if (Array.isArray(value)) {
         value.forEach((v, i) => {
-          validateValue(v, `${path}[${i}]`);
+          validateValue(v, `${path}[${i}]`, depth + 1);
         });
         return;
       }
       if (value && typeof value === "object") {
         for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-          validateValue(v, `${path}.${k}`);
+          validateValue(v, `${path}.${k}`, depth + 1);
         }
       }
     };
