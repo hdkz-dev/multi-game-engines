@@ -31,6 +31,39 @@ export class USIParser implements IProtocolParser<
   ISHOGISearchInfo,
   ISHOGISearchResult
 > {
+  // 2026 Best Practice: 正規表現の事前コンパイル
+  // USI 指し手形式 (7g7f, 8h2b+ 等) および nullmove (resign, win 等)
+  // 玉 (K) のドロップはルール上存在しないため除外
+  private static readonly MOVE_REGEX =
+    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$/i;
+
+  // 2026 Best Practice: Set の定数化による効率化
+  private static readonly USI_INFO_TOKENS = new Set([
+    "depth",
+    "seldepth",
+    "time",
+    "nodes",
+    "nps",
+    "score",
+    "hashfull",
+    "cpuload",
+    "multipv",
+    "pv",
+    "string",
+    "currline",
+  ]);
+
+  // 詰みスコアの係数
+  private static readonly MATE_SCORE_FACTOR = 100000;
+
+  /**
+   * 文字列を Move へ変換します。
+   */
+  private createMove(value: string): Move | null {
+    if (!USIParser.MOVE_REGEX.test(value)) return null;
+    return value as Move;
+  }
+
   parseInfo(
     data: string | Uint8Array | Record<string, unknown>,
   ): ISHOGISearchInfo | null {
@@ -54,8 +87,13 @@ export class USIParser implements IProtocolParser<
           i++;
           break;
         case "score":
-          // cp or mate
-          info.score = parseInt(parts[i + 2], 10);
+          if (parts[i + 1] === "cp") {
+            info.score = parseInt(parts[i + 2], 10);
+          } else if (parts[i + 1] === "mate") {
+            // USI mate スコアを係数倍して正規化
+            info.score =
+              parseInt(parts[i + 2], 10) * USIParser.MATE_SCORE_FACTOR;
+          }
           i += 2;
           break;
         case "nodes":
@@ -70,10 +108,18 @@ export class USIParser implements IProtocolParser<
           info.time = parseInt(val, 10);
           i++;
           break;
-        case "pv":
-          info.pv = parts.slice(i + 1) as Move[];
-          i = parts.length;
+        case "pv": {
+          const moves: Move[] = [];
+          while (
+            i + 1 < parts.length &&
+            !USIParser.USI_INFO_TOKENS.has(parts[i + 1])
+          ) {
+            const m = this.createMove(parts[++i]);
+            if (m) moves.push(m);
+          }
+          info.pv = moves;
           break;
+        }
       }
     }
 
@@ -87,14 +133,18 @@ export class USIParser implements IProtocolParser<
     if (!data.startsWith("bestmove ")) return null;
 
     const parts = data.split(" ");
+    const bestMove = this.createMove(parts[1] || "");
+    if (!bestMove) return null;
+
     const result: ISHOGISearchResult = {
-      bestMove: parts[1] as Move,
+      bestMove,
       raw: data,
     };
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      result.ponder = parts[ponderIndex + 1] as Move;
+      const ponder = this.createMove(parts[ponderIndex + 1]);
+      if (ponder) result.ponder = ponder;
     }
 
     return result;

@@ -14,15 +14,28 @@ export class EdaxParser implements IProtocolParser<
   IOthelloSearchInfo,
   IOthelloSearchResult
 > {
+  // 2026 Best Practice: 正規表現の事前コンパイル
+  private static readonly DEPTH_REGEX = /depth (\d+)/;
+  // Edax 指し手形式 (a1-h8, PS (Pass) 等)。
+  private static readonly MOVE_REGEX = /^([a-h][1-8]|PS)$/i;
+
+  /**
+   * 文字列を OthelloMove へ変換します。
+   */
+  private createMove(value: string): OthelloMove | null {
+    if (!EdaxParser.MOVE_REGEX.test(value)) return null;
+    return value as OthelloMove;
+  }
+
   parseInfo(data: string | Record<string, unknown>): IOthelloSearchInfo | null {
     if (typeof data !== "string") return null;
     if (!data.includes("depth")) return null;
 
-    const depth = data.match(/depth (\d+)/)?.[1];
-    if (depth) {
+    const match = data.match(EdaxParser.DEPTH_REGEX);
+    if (match) {
       return {
         raw: data,
-        depth: parseInt(depth, 10),
+        depth: parseInt(match[1], 10),
       };
     }
     return null;
@@ -32,16 +45,16 @@ export class EdaxParser implements IProtocolParser<
     data: string | Record<string, unknown>,
   ): IOthelloSearchResult | null {
     if (typeof data !== "string") return null;
-    if (!data.startsWith("move")) return null;
+    if (!data.startsWith("move ")) return null;
 
-    const move = data.slice(5).trim();
-    if (move) {
-      return {
-        raw: data,
-        bestMove: move as OthelloMove,
-      };
-    }
-    return null;
+    const moveStr = data.slice(5).trim();
+    const bestMove = this.createMove(moveStr);
+    if (!bestMove) return null;
+
+    return {
+      raw: data,
+      bestMove,
+    };
   }
 
   createSearchCommand(options: IOthelloSearchOptions): string[] {

@@ -1,20 +1,17 @@
-# GitHub Copilot Instructions
+# GitHub Copilot Instructions for multi-game-engines
 
-## Project Coding Standards
-- Language: TypeScript (NodeNext)
-- Monorepo: pnpm workspaces
-- Principle: Pure Core + Specialized Adapters
-- Casing: CamelCase for variables, PascalCase for classes/interfaces.
+## Coding Standards
+- Prohibit the use of `any`. Use specific types or `unknown`.
+- Ensure all domain strings (e.g., FEN, Move) are handled through Branded Types and validated by factory functions.
+- Optimize for high NPS (Nodes Per Second) by pre-compiling Regular Expressions as `static readonly` class members.
+- Implement "Refuse by Exception" for security validation.
 
-## Prohibited Patterns
-- **NO `any`**: Strictly use `unknown`.
-- **NO Generic Error**: Use `EngineError` from `@multi-game-engines/core`.
-- **NO Sanitization**: Use "Refuse by Exception" for protocol commands.
+## Architectural Context
+- Follow the Facade/Adapter pattern.
+- Refer to `docs/ARCHITECTURE.md` for overall design.
+- Sync changes with `docs/PROGRESS.md` and `docs/TECHNICAL_SPECS.md`.
 
-## Architecture Context
-- `IEngine` is the public facade.
-- `IEngineAdapter` is the internal implementation.
-- Domain types (`FEN`, `Move`) are branded types.
-
-## Verification
-Ensure all code passes `pnpm run ai:check`.
+## Quality Assurance
+- Use the AI Ensemble workflow defined in `docs/AI_WORKFLOW.md`.
+- Prefer `vitest` for unit testing.
+- Ensure all new features have corresponding tests in `src/__tests__`.

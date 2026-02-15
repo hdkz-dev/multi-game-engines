@@ -84,3 +84,14 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 7.  **WASM & バイナリリソース戦略 (WASM & Binary Strategy)**:
     - **Blob URL の制約**: セキュリティとキャッシュのために `Blob URL` を使用するため、Worker 内からの**相対パスによる追加リソース（.wasm, .nnue）のフェッチは原則禁止**です（Blob の Origin は不透明であるため）。
     - **依存性注入 (Dependency Injection)**: アダプターは、JS ローダーだけでなく WASM/NNUE バイナリも `EngineLoader` 経由で個別にロードし、その Blob URL を Worker の初期化パラメータ（`Module.wasmBinaryFile` や `postMessage`）として注入する設計を必須とします。許容されるロード経路は EngineLoader 経由で注入された URL のみです。
+
+## AI 開発アーキテクチャ (AI Ensemble)
+
+本プロジェクトのコード品質とアーキテクチャの整合性は、複数の AI ツールが相互に監視・補完し合う「AI Ensemble」体制によって維持されています。
+
+1.  **相互レビュー・プロトコル**: 設計（Gemini） ⇔ 監査（CodeRabbit）という異なる AI モデル間の牽制により、ハルシネーションを抑制し論理的整合性を担保します。詳細は [AI相互レビューワークフロー](./AI_WORKFLOW.md) を参照してください。
+2.  **多層監査ガードレール**:
+    - **論理・意図**: CodeRabbit による文脈依存のレビュー。
+    - **静的解析**: DeepSource による TypeScript アンチパターンとバグの自動修正。
+    - **セキュリティ**: Snyk による依存関係とコードの脆弱性スキャン。
+3.  **仕様の自己修復**: 実装の変更に合わせて API ドキュメントやアーキテクチャ図（Mermaid.js）を AI が自動生成し、ドキュメントの陳腐化を物理的に防ぎます。

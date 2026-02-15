@@ -38,7 +38,7 @@ export interface IChessSearchResult extends IBaseSearchResult {
 }
 
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
-const MATE_SCORE_FACTOR = 10000;
+const MATE_SCORE_FACTOR = 100000;
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
@@ -48,6 +48,43 @@ export class UCIParser implements IProtocolParser<
   IChessSearchInfo,
   IChessSearchResult
 > {
+  // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
+  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000, (none)) をサポート。
+  private static readonly MOVE_REGEX =
+    /^([a-h][1-8][a-h][1-8][nbrq]?|0000|\(none\))$/;
+
+  // 2026 Best Practice: Set の定数化による GC 負荷の軽減
+  private static readonly UCI_INFO_TOKENS = new Set([
+    "depth",
+    "seldepth",
+    "time",
+    "nodes",
+    "pv",
+    "multipv",
+    "score",
+    "currmove",
+    "currmovenumber",
+    "hashfull",
+    "nps",
+    "tbhits",
+    "sbhits",
+    "cpuload",
+    "string",
+    "refutation",
+    "currline",
+    "wdl",
+    "lowerbound",
+    "upperbound",
+  ]);
+
+  /**
+   * 文字列を Move へ変換します。
+   */
+  private createMove(value: string): Move | null {
+    if (!UCIParser.MOVE_REGEX.test(value)) return null;
+    return value as Move;
+  }
+
   /**
    * info 行を解析します。
    */
@@ -65,6 +102,7 @@ export class UCIParser implements IProtocolParser<
     };
 
     const parts = line.split(" ");
+
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
       const val = parts[i + 1];
@@ -89,10 +127,25 @@ export class UCIParser implements IProtocolParser<
           info.time = parseInt(val, 10) || 0;
           i++;
           break;
-        case "pv":
-          info.pv = parts.slice(i + 1) as Move[];
-          i = parts.length;
+        case "pv": {
+          const moves: Move[] = [];
+          while (
+            i + 1 < parts.length &&
+            !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1])
+          ) {
+            const token = parts[++i];
+            const m = this.createMove(token);
+            if (m) {
+              moves.push(m);
+            } else {
+              console.warn(
+                `[UCIParser] Skipping invalid PV move token: "${token}"`,
+              );
+            }
+          }
+          info.pv = moves;
           break;
+        }
       }
     }
 
@@ -110,14 +163,18 @@ export class UCIParser implements IProtocolParser<
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
+    const bestMove = this.createMove(parts[1] || "");
+    if (!bestMove) return null;
+
     const result: IChessSearchResult = {
-      bestMove: (parts[1] || "") as Move,
+      bestMove,
       raw: line,
     };
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      result.ponder = parts[ponderIndex + 1] as Move;
+      const ponder = this.createMove(parts[ponderIndex + 1]);
+      if (ponder) result.ponder = ponder;
     }
 
     return result;

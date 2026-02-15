@@ -20,7 +20,7 @@ type FEN = Brand<string, "FEN">;
 type SFEN = Brand<string, "SFEN">;
 ```
 
-### 1-2. Loading Strategy
+### 1-3. Loading Strategy
 
 - `manual`: Requires explicit `load()` call.
 - `on-demand`: Auto-loads if not ready when `search()` is called.
@@ -61,10 +61,10 @@ The main API for consumers.
 
 - **UCIParser**: For Chess. Supports `mate` score conversion (factor 10,000).
 - **USIParser**: For Shogi. Supports time control, `mate` score conversion (factor 100,000), and special handling for the `startpos` keyword.
-- **Injection Protection**: Automatically removes illegal characters from FEN/SFEN.
+- **Injection Protection (Refuse by Exception)**: Immediately throws a `SECURITY_ERROR` when illegal control characters (`\r`, `\n`, `\0`, `;`, etc.) are detected, rather than attempting to sanitize.
 
 ## 5. Quality Assurance (Testing Philosophy)
 
-- **82 Unit Tests**: 100% logic and edge-case coverage.
+- **117 Unit Tests**: 100% logic and edge-case coverage.
 - **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
 - **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.

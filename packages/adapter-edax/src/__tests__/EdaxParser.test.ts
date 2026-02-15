@@ -18,4 +18,32 @@ describe("EdaxParser", () => {
     expect(result).not.toBeNull();
     expect(result?.bestMove).toBe("c4");
   });
+
+  it("should require a space after 'move' prefix", () => {
+    expect(parser.parseResult("movec4")).toBeNull();
+    expect(parser.parseResult("movement c4")).toBeNull();
+  });
+
+  it("should throw error for injection in board data", () => {
+    expect(() =>
+      parser.createSearchCommand({
+        board:
+          "start\nquit" as unknown as import("../EdaxParser.js").OthelloBoard,
+        depth: 10,
+      }),
+    ).toThrow(/command injection/);
+  });
+
+  it("should create valid option command", () => {
+    expect(parser.createOptionCommand("level", 10)).toBe("set level 10");
+  });
+
+  it("should throw error for injection in option name or value", () => {
+    expect(() => parser.createOptionCommand("level\nquit", 10)).toThrow(
+      /command injection/,
+    );
+    expect(() => parser.createOptionCommand("level", "10\nquit")).toThrow(
+      /command injection/,
+    );
+  });
 });

@@ -59,4 +59,25 @@ describe("UCIParser", () => {
     });
     expect(commands).toEqual(["position startpos", "go nodes 1000"]);
   });
+
+  it("should throw error for injection in FEN", () => {
+    expect(() =>
+      parser.createSearchCommand({ fen: "startpos\nquit" as FEN }),
+    ).toThrow(/command injection/);
+  });
+
+  it("should create valid option command", () => {
+    expect(parser.createOptionCommand("Threads", 4)).toBe(
+      "setoption name Threads value 4",
+    );
+  });
+
+  it("should throw error for injection in option name or value", () => {
+    expect(() => parser.createOptionCommand("Threads\nquit", 4)).toThrow(
+      /command injection/,
+    );
+    expect(() => parser.createOptionCommand("Threads", "4\nquit")).toThrow(
+      /command injection/,
+    );
+  });
 });
