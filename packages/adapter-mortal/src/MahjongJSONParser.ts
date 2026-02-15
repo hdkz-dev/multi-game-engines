@@ -48,7 +48,7 @@ export class MahjongJSONParser implements IProtocolParser<
     } catch (e) {
       console.warn("[MahjongJSONParser] Failed to parse info:", {
         error: e,
-        data,
+        data: typeof data === "string" ? data.slice(0, 1000) : data,
       });
       return null;
     }
@@ -76,7 +76,7 @@ export class MahjongJSONParser implements IProtocolParser<
     } catch (e) {
       console.warn("[MahjongJSONParser] Failed to parse result:", {
         error: e,
-        data,
+        data: typeof data === "string" ? data.slice(0, 1000) : data,
       });
       return null;
     }

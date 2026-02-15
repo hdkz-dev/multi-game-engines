@@ -17,6 +17,8 @@ export class GTPParser implements IProtocolParser<
   // 2026 Best Practice: 正規表現の事前コンパイル
   private static readonly VISITS_REGEX = /visits (\d+)/;
   private static readonly WINRATE_REGEX = /winrate ([\d.]+)/;
+  private static readonly WHITESPACE_REGEX = /\s+/;
+  private static readonly DIGITS_ONLY_REGEX = /^\d+$/;
   // GTP 指し手形式 (A1, B19, pass, resign 等)。
   // 座標は I を除く A-T 1-19
   private static readonly MOVE_REGEX =
@@ -54,13 +56,13 @@ export class GTPParser implements IProtocolParser<
     // GTP レスポンス形式: "= <id> <move>" または "= <move>"
     // ID は省略可能。
     // ReDoS 回避のため正規表現ではなく split を使用
-    const tokens = data.substring(1).trim().split(/\s+/);
+    const tokens = data.substring(1).trim().split(GTPParser.WHITESPACE_REGEX);
     if (tokens.length === 0 || (tokens.length === 1 && tokens[0] === ""))
       return null;
 
     let moveStr = tokens[0];
     // 先頭が数字のみの場合は ID として読み飛ばす
-    if (/^\d+$/.test(moveStr)) {
+    if (GTPParser.DIGITS_ONLY_REGEX.test(moveStr)) {
       if (tokens.length < 2) return null; // IDのみで指し手がない場合は無効
       moveStr = tokens[1];
     }

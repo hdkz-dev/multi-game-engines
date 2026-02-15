@@ -10,8 +10,8 @@
 
 ## Endpoint Pattern
 
-```
-/{version}/{resource}[/{id}][/{sub-resource}]
+```text
+ /{version}/{resource}[/{id}][/{sub-resource}]
 ```
 
 Examples:

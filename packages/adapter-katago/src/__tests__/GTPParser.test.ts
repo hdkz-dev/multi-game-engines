@@ -25,6 +25,12 @@ describe("GTPParser", () => {
     expect(info!.winrate).toBe(0.55);
   });
 
+  it("should return null for non-info strings", () => {
+    expect(parser.parseInfo("random text")).toBeNull();
+    expect(parser.parseInfo("")).toBeNull();
+    expect(parser.parseInfo({} as unknown as string)).toBeNull();
+  });
+
   it("should parse result correctly", () => {
     const result = parser.parseResult("= D4");
     expect(result).not.toBeNull();

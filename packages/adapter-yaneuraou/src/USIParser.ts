@@ -33,8 +33,9 @@ export class USIParser implements IProtocolParser<
 > {
   // 2026 Best Practice: 正規表現の事前コンパイル
   // USI 指し手形式 (7g7f, 8h2b+ 等) および nullmove (resign, win 等)
+  // 玉 (K) のドロップはルール上存在しないため除外
   private static readonly MOVE_REGEX =
-    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGKRB]\*[1-9][a-i]$|^resign$|^win$/i;
+    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$/i;
 
   // 2026 Best Practice: Set の定数化による効率化
   private static readonly USI_INFO_TOKENS = new Set([
@@ -51,6 +52,9 @@ export class USIParser implements IProtocolParser<
     "string",
     "currline",
   ]);
+
+  // 詰みスコアの係数
+  private static readonly MATE_SCORE_FACTOR = 100000;
 
   /**
    * 文字列を Move へ変換します。
@@ -83,8 +87,13 @@ export class USIParser implements IProtocolParser<
           i++;
           break;
         case "score":
-          // cp or mate
-          info.score = parseInt(parts[i + 2], 10);
+          if (parts[i + 1] === "cp") {
+            info.score = parseInt(parts[i + 2], 10);
+          } else if (parts[i + 1] === "mate") {
+            // USI mate スコアを係数倍して正規化
+            info.score =
+              parseInt(parts[i + 2], 10) * USIParser.MATE_SCORE_FACTOR;
+          }
           i += 2;
           break;
         case "nodes":

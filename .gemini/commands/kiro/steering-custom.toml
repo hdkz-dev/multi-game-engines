@@ -2,7 +2,7 @@ description = "Create custom steering documents for specialized project contexts
 prompt = """
 <meta>
 description: Create custom steering documents for specialized project contexts
-argument-hint: <what-to-create-custom-steering:$ARGUMENTS>
+argument-hint: <what-to-create-custom-steering:$1>
 arguments: {{args}}
 </meta>
 

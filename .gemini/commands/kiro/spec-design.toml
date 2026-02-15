@@ -161,12 +161,13 @@ Provide brief summary in the language specified in spec.json:
 - **Warning**: "Steering directory empty or missing - design may not align with project standards"
 - **Proceed**: Continue with generation but note limitation in output
 
- **Discovery Complexity Unclear**:
- - **Default**: Use full discovery process (`.kiro/settings/rules/design-discovery-full.md`)
- - **Rationale**: Better to over-research than miss critical context
+**Discovery Complexity Unclear**:
+- **Default**: Use full discovery process (`.kiro/settings/rules/design-discovery-full.md`)
+- **Rationale**: Better to over-research than miss critical context
 
 **Invalid Requirement IDs**:
 - **Stop Execution**: If requirements.md is missing numeric IDs or uses non-numeric headings (for example, "Requirement A"), stop and instruct the user to fix requirements.md before continuing.
+
 ### Next Phase: Task Generation
 
 **If Design Approved**:

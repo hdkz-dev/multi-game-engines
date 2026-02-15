@@ -25,7 +25,7 @@ Steering files are **project memory**, not exhaustive specifications.
 - All dependencies
 - Implementation details
 - Agent-specific tooling directories (e.g. `.cursor/`, `.gemini/`, `.claude/`)
-- Detailed documentation of `.kiro/` metadata directories (settings, automation)
+- Exhaustive documentation of `.kiro/` internal structure (exception: light references to `.kiro/specs/` and `.kiro/steering/` are acceptable per line 88)
 
 ### Example Comparison
 

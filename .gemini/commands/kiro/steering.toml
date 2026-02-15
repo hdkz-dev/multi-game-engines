@@ -2,6 +2,7 @@ description = "Manage .kiro/steering/ as persistent project knowledge"
 prompt = """
 <meta>
 description: Manage .kiro/steering/ as persistent project knowledge
+arguments: {{args}}
 </meta>
 
 # Kiro Steering Management
