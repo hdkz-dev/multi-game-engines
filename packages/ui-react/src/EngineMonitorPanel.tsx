@@ -52,25 +52,17 @@ export function EngineMonitorPanel<
   const bestPV = state.pvs[0];
   const displayTitle = title ?? strings.title;
 
-  // テレメトリ送信用のヘルパー
+  // 2026 Best Practice: IEngine インターフェースの公式 API を使用して型安全にイベント発行
   const emitUIInteraction = (action: string) => {
-    // 2026 Best Practice: IEngine インターフェースの onTelemetry 購読を利用して
-    // メインシステムに操作イベントを通知。
-    // (実際には IEngineAdapter.emitTelemetry が内部で呼ばれることを期待)
-    // 暫定的に engine インスタンスの内部的な発行メソッドを型安全に探る
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const anyEngine = engine as any;
-    if (typeof anyEngine.emitTelemetry === "function") {
-      anyEngine.emitTelemetry({
-        type: "lifecycle",
-        timestamp: Date.now(),
-        metadata: {
-          component: "EngineMonitorPanel",
-          action,
-          engineId: engine.id,
-        },
-      });
-    }
+    engine.emitTelemetry({
+      type: "lifecycle",
+      timestamp: Date.now(),
+      metadata: {
+        component: "EngineMonitorPanel",
+        action,
+        engineId: engine.id,
+      },
+    });
   };
 
   const handleStart = () => {

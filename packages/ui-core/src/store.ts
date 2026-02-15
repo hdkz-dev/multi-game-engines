@@ -20,10 +20,6 @@ export interface StoreOptions {
 
 /**
  * フレームワーク非依存のリアクティブ・ストア。
- *
- * 2026 Best Practice:
- * React の useSyncExternalStore や Vue の customRef 等と親和性の高い
- * 決定論的なサブスクリプションモデルを提供。
  */
 export class EngineStore<
   T_STATE,
@@ -46,7 +42,6 @@ export class EngineStore<
 
   /**
    * 現在の状態を取得 (読み取り専用)
-   * useSyncExternalStore の getSnapshot 用。
    */
   getState = (): T_STATE => {
     return this.state;
@@ -62,7 +57,6 @@ export class EngineStore<
 
   /**
    * 変更通知の購読。
-   * 引数なしの listener は React の useSyncExternalStore の要件。
    */
   subscribe = (listener: () => void): Unsubscribe => {
     this.listeners.add(listener);
@@ -76,11 +70,17 @@ export class EngineStore<
     if (this.options.throttleMs && this.options.throttleMs > 0) {
       if (this.throttleTimeout) return;
       this.throttleTimeout = setTimeout(() => {
-        this.notify();
         this.throttleTimeout = null;
+        this.notify();
       }, this.options.throttleMs);
     } else {
-      requestAnimationFrame(() => this.notify());
+      // 2026 Best Practice: SSR (Node.js) 環境を考慮した安全なスケジューリング
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(() => this.notify());
+      } else {
+        // Node.js 等の非ブラウザ環境用フォールバック
+        queueMicrotask(() => this.notify());
+      }
     }
   }
 

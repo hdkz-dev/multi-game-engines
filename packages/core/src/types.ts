@@ -130,6 +130,8 @@ export interface IEngine<
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void;
+  /** テレメトリイベントをシステムに発行します。 */
+  emitTelemetry(event: ITelemetryEvent): void;
   /** エンジン個別にミドルウェアを追加します。 */
   use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): void;
   stop(): Promise<void>;

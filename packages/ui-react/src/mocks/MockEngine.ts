@@ -33,6 +33,7 @@ export class MockEngine implements IEngine<
 
   private infoListeners: Set<(info: ExtendedSearchInfo) => void> = new Set();
   private statusListeners: Set<(status: EngineStatus) => void> = new Set();
+  private telemetryListeners: Set<(event: ITelemetryEvent) => void> = new Set();
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor(private readonly options: MockEngineOptions = { latency: 0 }) {}
@@ -105,9 +106,16 @@ export class MockEngine implements IEngine<
   onProgress(_callback: (progress: ILoadProgress) => void): () => void {
     return () => {};
   }
-  onTelemetry(_callback: (event: ITelemetryEvent) => void): () => void {
-    return () => {};
+
+  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
+    this.telemetryListeners.add(callback);
+    return () => this.telemetryListeners.delete(callback);
   }
+
+  emitTelemetry(event: ITelemetryEvent): void {
+    this.telemetryListeners.forEach((l) => l(event));
+  }
+
   async setOption(
     _name: string,
     _value: string | number | boolean,

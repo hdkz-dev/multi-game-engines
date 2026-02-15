@@ -211,6 +211,12 @@ export class EngineFacade<
     return () => this.telemetryListeners.delete(callback);
   }
 
+  emitTelemetry(event: ITelemetryEvent): void {
+    this.adapter.emitTelemetry?.(event);
+    // 自身の購読者にも即座に反映
+    for (const l of this.telemetryListeners) l(event);
+  }
+
   /* eslint-disable @typescript-eslint/no-explicit-any */
   use(middleware: IMiddleware<T_OPTIONS, any, any, any, any>): void {
     this.middlewares.push(middleware);
