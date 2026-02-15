@@ -1,0 +1,25 @@
+{
+  "engine": {
+    "title": "エンジン解析",
+    "status": "状態",
+    "depth": "深さ",
+    "nodes": "局面数",
+    "nps": "探索速度",
+    "time": "時間",
+    "topCandidate": "最善手候補",
+    "principalVariations": "読み筋一覧",
+    "start": "開始",
+    "stop": "停止",
+    "searching": "解析中...",
+    "ready": "待機中",
+    "mateIn": "詰みまで {n} 手",
+    "advantage": "{side}有利 {v} 点",
+    "retry": "再試行",
+    "reloadResources": "リソースを再読み込み",
+    "errorTitle": "エンジンエラー",
+    "errorDefaultRemediation": "接続を確認して、もう一度お試しください。",
+    "timeUnitSeconds": "秒",
+    "noMove": "---",
+    "standard": "2026 Engine Bridge Standard"
+  }
+}

@@ -4,7 +4,6 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,8 +12,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "rootDir": "./src",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["src/**/*", ".storybook/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

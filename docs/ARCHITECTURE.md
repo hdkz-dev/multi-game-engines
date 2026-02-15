@@ -89,19 +89,21 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 
 本プロジェクトは、エンジンの演算結果をユーザーに届けるための、高性能かつアクセシブルな UI 構築基盤を提供します。
 
-### 1. 二層構造の UI アーキテクチャ
+### 1. レイヤード・アーキテクチャ
 
-特定のフレームワークへのロックインを避けつつ、2026 年の最新フロントエンド標準に対応するため、UI 層を以下の 2 つに分離しています。
+特定のフレームワークへのロックインを避けつつ、2026 年の最新フロントエンド標準に対応するため、UI 層を以下の構成に分離しています。
 
 1.  **Reactive Core (`ui-core`)**:
     - **役割**: フレームワーク非依存のビジネスロジック。
     - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。
-    - **利点**: 過剰な描画更新による負荷を抑え、UI の応答性を改善します。ただし、メインスレッド自体の過負荷を防ぐには、Web Worker への処理委譲や `scheduler.yield()` 等のタスク分割戦略を併用する必要があります。
+2.  **Localization Layer (`i18n`)**:
+    - **役割**: 純粋な言語リソースの提供。
+    - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。
 
-2.  **Framework Adapters (`ui-react`, etc.)**:
-    - **役割**: 各フロントエンドフレームワークに最適化された表現層。
-    - **機能**: React の `useSyncExternalStore` や Vue の Composables を通じた、外部状態の安全な同期。
-    - **アクセシビリティ**: WAI-ARIA 準拠のプリミティブ（Radix UI 等）を統合し、スクリーンリーダーやキーボード操作に対して「標準で」最適化されたコンポーネントを提供します。
+3.  **Framework Adapters**:
+    - **`ui-react`**: React Hooks (`useSyncExternalStore`) と Context DI を活用したアダプター。
+    - **`ui-vue`**: Vue 3 Composition API (`ref`, `computed`) を活用したリアクティブ・アダプター。
+    - **`ui-elements`**: Lit ベースの Web Components。あらゆる HTML 環境で動作する究極のポータビリティを提供。
 
 ### 2. 契約駆動 UI (Contract-driven UI)
 

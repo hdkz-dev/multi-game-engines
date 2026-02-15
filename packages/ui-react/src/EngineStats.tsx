@@ -2,8 +2,9 @@ import React from "react";
 import {
   SearchStatistics,
   EngineUIStrings,
-  jaStrings,
+  createUIStrings,
 } from "@multi-game-engines/ui-core";
+import { locales } from "@multi-game-engines/i18n";
 import { Gauge, Cpu, Layers, Timer } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -11,6 +12,8 @@ import { twMerge } from "tailwind-merge";
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+const jaStrings = createUIStrings(locales.ja);
 
 interface EngineStatsProps {
   stats: SearchStatistics;

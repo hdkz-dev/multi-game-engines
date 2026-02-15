@@ -1,5 +1,8 @@
 import React, { createContext, useContext, useMemo } from "react";
-import { EngineUIStrings, jaStrings } from "@multi-game-engines/ui-core";
+import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
+import { locales } from "@multi-game-engines/i18n";
+
+const jaStrings = createUIStrings(locales.ja);
 
 interface EngineUIContextValue {
   strings: EngineUIStrings;

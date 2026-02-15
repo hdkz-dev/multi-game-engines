@@ -4,17 +4,17 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "jsx": "react-jsx",
     "strict": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "outDir": "./dist"
   },
-  "include": ["src/**/*", ".storybook/**/*"],
+  "include": ["src/**/*", "env.d.ts", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }
