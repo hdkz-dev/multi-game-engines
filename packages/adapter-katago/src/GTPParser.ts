@@ -61,7 +61,7 @@ export class GTPParser implements IProtocolParser<
     let moveStr = tokens[0];
     // 先頭が数字のみの場合は ID として読み飛ばす
     if (/^\d+$/.test(moveStr)) {
-      if (tokens.length < 2) return null; // IDのみで指し手がない
+      if (tokens.length < 2) return null; // IDのみで指し手がない場合は無効
       moveStr = tokens[1];
     }
 

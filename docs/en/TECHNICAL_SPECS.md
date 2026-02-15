@@ -65,6 +65,6 @@ The main API for consumers.
 
 ## 5. Quality Assurance (Testing Philosophy)
 
-- **107 Unit Tests**: 100% logic and edge-case coverage.
+- **116 Unit Tests**: 100% logic and edge-case coverage.
 - **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
 - **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.
