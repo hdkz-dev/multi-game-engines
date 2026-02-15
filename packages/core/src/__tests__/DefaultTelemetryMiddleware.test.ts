@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from "vitest";
 import { DefaultTelemetryMiddleware } from "../middlewares/DefaultTelemetryMiddleware.js";
 import {
   IMiddlewareContext,
@@ -9,7 +17,7 @@ import {
 describe("DefaultTelemetryMiddleware", () => {
   let middleware: DefaultTelemetryMiddleware;
   let context: IMiddlewareContext;
-  let emitTelemetrySpy: ReturnType<typeof vi.fn>;
+  let emitTelemetrySpy: Mock<(event: ITelemetryEvent) => void>;
 
   // Test control variables
   let currentTime = 1000;
