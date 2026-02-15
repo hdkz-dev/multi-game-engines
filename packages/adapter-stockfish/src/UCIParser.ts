@@ -38,7 +38,7 @@ export interface IChessSearchResult extends IBaseSearchResult {
 }
 
 /** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
-const MATE_SCORE_FACTOR = 10000;
+const MATE_SCORE_FACTOR = 100000;
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
