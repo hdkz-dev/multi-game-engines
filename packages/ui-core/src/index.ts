@@ -7,3 +7,4 @@ export * from "./i18n.js";
 export * from "./schema.js";
 export * from "./middleware.js";
 export * from "./MonitorRegistry.js";
+export * from "./CommandDispatcher.js";

@@ -16,6 +16,12 @@ export interface EngineUIStrings {
   ready: string;
   mateIn: (moves: number) => string;
   advantage: (side: "plus" | "minus", value: number) => string;
+  retry: string;
+  reloadResources: string;
+  // 開発者/ログ用
+  validationFailed: string;
+  errorTitle: string;
+  errorDefaultRemediation: string;
 }
 
 /**
@@ -36,6 +42,11 @@ export const jaStrings: EngineUIStrings = {
   ready: "待機中",
   mateIn: (n) => `詰みまで ${n} 手`,
   advantage: (side, v) => `${side === "plus" ? "先手" : "後手"}有利 ${v} 点`,
+  retry: "再試行",
+  reloadResources: "リソースを再読み込み",
+  validationFailed: "[UINormalizerMiddleware] バリデーション失敗:",
+  errorTitle: "エンジンエラー",
+  errorDefaultRemediation: "接続を確認して、もう一度お試しください。",
 };
 
 /**
@@ -55,5 +66,10 @@ export const enStrings: EngineUIStrings = {
   searching: "Searching",
   ready: "Ready",
   mateIn: (n) => `Mate in ${n}`,
-  advantage: (side, v) => `${side === "plus" ? "Plus" : "Minus"} +${v}`,
+  advantage: (side, v) => `${side === "plus" ? "+" : "-"}${v}`,
+  retry: "Retry",
+  reloadResources: "Reload Resources",
+  validationFailed: "[UINormalizerMiddleware] Validation failed:",
+  errorTitle: "Engine Error",
+  errorDefaultRemediation: "Please check the connection and try again.",
 };

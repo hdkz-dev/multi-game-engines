@@ -1,9 +1,16 @@
-import { useCallback, useSyncExternalStore, useEffect, useMemo } from "react";
+import {
+  useCallback,
+  useSyncExternalStore,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   IMiddleware,
+  EngineStatus,
 } from "@multi-game-engines/core";
 import {
   MonitorRegistry,
@@ -11,14 +18,15 @@ import {
   EngineSearchState,
   ExtendedSearchInfo,
   UINormalizerMiddleware,
+  CommandDispatcher,
 } from "@multi-game-engines/ui-core";
 
 /**
- * エンジンの思考状況をリアクティブに監視するカスタムフック。
+ * エンジンの思考状況を監視し、楽観的更新を伴うコマンド実行を提供するカスタムフック。
  *
- * 2026 Best Practice:
- * - MonitorRegistry による購読の重複排除 (Deduplication)。
- * - 宣言的なミドルウェア登録と自動ライフサイクル管理。
+ * 2026 Zenith Practice:
+ * - CommandDispatcher による Optimistic UI 制御。
+ * - システム全体のテレメトリと連動した状態同期。
  */
 export function useEngineMonitor<
   T_STATE extends EngineSearchState = EngineSearchState,
@@ -42,17 +50,14 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  // 根本的な改善: レジストリから共有モニターを取得
+  // 1. Monitor の共有取得
   const monitor = useMemo(() => {
-    // UIミドルウェアの動的注入 (初回のみ)
     if (autoMiddleware && typeof engine.use === "function") {
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
         unknown,
         T_RESULT
       >();
-
-      // 内部実装の詳細としてキャストを許容
       engine.use(
         normalizer as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>,
       );
@@ -66,28 +71,45 @@ export function useEngineMonitor<
     >(engine, initialPosition, transformer);
   }, [engine, initialPosition, transformer, autoMiddleware]);
 
-  useEffect(() => {
-    monitor.startMonitoring();
-    return () => {
-      // 共有モニターのため、ここでは何もしない
-    };
-  }, [monitor]);
-
+  // 2. 状態同期
   const state = useSyncExternalStore(
     monitor.subscribe,
     monitor.getSnapshot,
     monitor.getSnapshot,
   );
 
-  const search = useCallback(
-    (searchOptions: T_OPTIONS) => monitor.search(searchOptions),
+  // 3. 楽観的ステータス管理
+  const [optimisticStatus, setOptimisticStatus] = useState<EngineStatus | null>(
+    null,
+  );
+  const currentStatus = optimisticStatus ?? engine.status;
+
+  // 4. コマンド・ディスパッチャーの統合
+  const dispatcher = useMemo(
+    () =>
+      new CommandDispatcher(monitor, (s: EngineStatus) =>
+        setOptimisticStatus(s),
+      ),
     [monitor],
   );
-  const stop = useCallback(() => monitor.stop(), [monitor]);
+
+  useEffect(() => {
+    monitor.startMonitoring();
+    // エンジンの実状態が変化したら楽観的状態をクリア
+    const unsub = engine.onStatusChange(() => setOptimisticStatus(null));
+    return () => unsub();
+  }, [monitor, engine]);
+
+  const search = useCallback(
+    (searchOptions: T_OPTIONS) => dispatcher.dispatchSearch(searchOptions),
+    [dispatcher],
+  );
+
+  const stop = useCallback(() => dispatcher.dispatchStop(), [dispatcher]);
 
   return {
     state,
-    status: engine.status,
+    status: currentStatus,
     search,
     stop,
     monitor,

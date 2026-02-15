@@ -1,3 +1,12 @@
+import { FEN, Move } from "@multi-game-engines/core";
+
+/**
+ * 局面表記の型（FEN またはアダプター定義の局面文字列）
+ */
+export type PositionString =
+  | FEN
+  | (string & { readonly __brand: "PositionString" });
+
 /**
  * 評価値の種類
  */
@@ -31,7 +40,7 @@ export interface SearchStatistics {
 export interface PrincipalVariation {
   multipv: number;
   score: EvaluationScore;
-  moves: string[]; // UI層では汎用的な文字列配列として保持
+  moves: Move[];
 }
 
 /**
@@ -39,17 +48,19 @@ export interface PrincipalVariation {
  */
 export interface EngineSearchState {
   isSearching: boolean;
-  position: string; // 局面（FEN等）を保持
+  position: PositionString;
   stats: SearchStatistics;
   pvs: PrincipalVariation[];
-  currentMove?: string;
+  currentMove?: Move;
   currentMoveNumber?: number;
 }
 
 /**
  * 初期状態の定義
  */
-export const createInitialState = (position: string): EngineSearchState => ({
+export const createInitialState = (
+  position: PositionString,
+): EngineSearchState => ({
   isSearching: false,
   position,
   stats: {

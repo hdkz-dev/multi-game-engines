@@ -6,6 +6,12 @@
 /** ブラント型 (Branded Types) の基底定義 */
 export type Brand<T, K> = T & { readonly __brand: K };
 
+/** 局面情報の抽象ブランド型 (FEN, SFEN等) */
+export type FEN = Brand<string, "FEN">;
+
+/** 指し手情報の抽象ブランド型 (UCI, USI等) */
+export type Move = Brand<string, "Move">;
+
 /** エンジンの動作状態 */
 export type EngineStatus =
   | "uninitialized"
@@ -111,6 +117,11 @@ export interface IEngine<
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
+  readonly lastError?: {
+    message: string;
+    code?: EngineErrorCode;
+    remediation?: string;
+  };
   loadingStrategy: EngineLoadingStrategy;
 
   load(): Promise<void>;

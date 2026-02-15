@@ -52,18 +52,25 @@ export function EngineMonitorPanel<
   const bestPV = state.pvs[0];
   const displayTitle = title ?? strings.title;
 
-  // 2026 Best Practice: UI操作を第一級のテレメトリイベントとして送出
+  // テレメトリ送信用のヘルパー
   const emitUIInteraction = (action: string) => {
+    // 2026 Best Practice: IEngine インターフェースの onTelemetry 購読を利用して
+    // メインシステムに操作イベントを通知。
+    // (実際には IEngineAdapter.emitTelemetry が内部で呼ばれることを期待)
+    // 暫定的に engine インスタンスの内部的な発行メソッドを型安全に探る
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (engine as any).onTelemetry?.({
-      type: "lifecycle",
-      timestamp: Date.now(),
-      metadata: {
-        component: "EngineMonitorPanel",
-        action,
-        engineId: engine.id,
-      },
-    });
+    const anyEngine = engine as any;
+    if (typeof anyEngine.emitTelemetry === "function") {
+      anyEngine.emitTelemetry({
+        type: "lifecycle",
+        timestamp: Date.now(),
+        metadata: {
+          component: "EngineMonitorPanel",
+          action,
+          engineId: engine.id,
+        },
+      });
+    }
   };
 
   const handleStart = () => {
@@ -78,7 +85,7 @@ export function EngineMonitorPanel<
 
   // アクセシビリティ用：重要なステータス変更のアナウンス
   const announcement = useMemo(() => {
-    if (status === "error") return "Engine Error occurred.";
+    if (status === "error") return strings.errorTitle;
     if (bestPV?.score.type === "mate")
       return strings.mateIn(bestPV.score.value);
     return "";
@@ -92,7 +99,6 @@ export function EngineMonitorPanel<
       )}
       aria-labelledby="engine-monitor-title"
     >
-      {/* スクリーンリーダー用のアナウンス領域 */}
       <div className="sr-only" aria-live="assertive" role="alert">
         {announcement}
       </div>
@@ -111,7 +117,7 @@ export function EngineMonitorPanel<
             className={cn(
               "w-2 h-2 rounded-full ml-1",
               status === "busy" ? "bg-red-500 animate-pulse" : "bg-green-500",
-              "motion-reduce:animate-none", // アニメーション抑制対応
+              "motion-reduce:animate-none",
             )}
             role="presentation"
           />
@@ -148,17 +154,13 @@ export function EngineMonitorPanel<
         {status === "error" ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-red-500 bg-red-50/30">
             <AlertCircle className="w-12 h-12 mb-4 animate-bounce" />
-            <h3 className="font-bold mb-1">Engine Error</h3>
+            <h3 className="font-bold mb-1">{strings.errorTitle}</h3>
             <p className="text-xs text-red-400 max-w-[240px]">
-              {/* 根本的な改善: Coreが提供する具体的な解決策を表示 */}
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {(engine as any).lastError?.remediation ||
-                "Please check the connection and try again."}
+              {engine.lastError?.remediation || strings.errorDefaultRemediation}
             </p>
           </div>
         ) : (
           <>
-            {/* Current Best Summary */}
             <section className="p-4 bg-gradient-to-br from-white to-gray-50/50">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
@@ -178,7 +180,6 @@ export function EngineMonitorPanel<
 
             <Separator.Root className="h-[1px] bg-gray-100" />
 
-            {/* Stats */}
             <EngineStats
               stats={state.stats}
               className="rounded-none bg-white border-none py-3"
@@ -186,7 +187,6 @@ export function EngineMonitorPanel<
 
             <Separator.Root className="h-[1px] bg-gray-100" />
 
-            {/* PV List with Scroll Area */}
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="px-4 py-2 bg-gray-50/50 flex items-center justify-between border-b border-gray-100">
                 <h3 className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
@@ -215,7 +215,6 @@ export function EngineMonitorPanel<
         )}
       </div>
 
-      {/* Footer / Engine Info */}
       <footer className="px-4 py-2 bg-gray-50/80 border-t border-gray-200 text-[9px] text-gray-400 flex justify-between font-medium">
         <span className="truncate mr-4">
           {engine.name} v{engine.version}

@@ -5,7 +5,24 @@ import {
   IBaseSearchResult,
 } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
-import { createInitialState, EngineSearchState } from "./types.js";
+import {
+  createInitialState,
+  EngineSearchState,
+  PositionString,
+} from "./types.js";
+
+/**
+ * モニターのエントリを型安全に管理するための内部インターフェース。
+ */
+interface MonitorEntry<
+  T_STATE,
+  T_OPTIONS extends IBaseSearchOptions,
+  T_INFO extends IBaseSearchInfo,
+  T_RESULT extends IBaseSearchResult,
+> {
+  monitor: SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>;
+  readonly typeTag: symbol;
+}
 
 /**
  * エンジンインスタンスとモニターを一対一で管理するレジストリ。
@@ -14,12 +31,11 @@ export class MonitorRegistry {
   private static instance: MonitorRegistry;
 
   /**
-   * 内部的には最も抽象的な型で保持。
-   * 2026 Best Practice: WeakMap を使用し、GCを妨げない設計にする。
+   * 2026 Best Practice: any を排除し、最も抽象的な IBase 型でエントリを管理。
    */
   private monitors = new WeakMap<
     IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
-    SearchMonitor<
+    MonitorEntry<
       unknown,
       IBaseSearchOptions,
       IBaseSearchInfo,
@@ -40,7 +56,7 @@ export class MonitorRegistry {
    * エンジンに対応するモニターを取得、または新規作成する。
    */
   getOrCreateMonitor<
-    T_STATE = EngineSearchState,
+    T_STATE extends EngineSearchState = EngineSearchState,
     T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
     T_RESULT extends IBaseSearchResult = IBaseSearchResult,
@@ -49,41 +65,47 @@ export class MonitorRegistry {
     initialPosition: string,
     transformer: (state: T_STATE, info: T_INFO) => T_STATE,
   ): SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
-    // ジェネリクスの抽象化レベルを合わせて WeakMap にアクセス
     const abstractEngine = engine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
     >;
+    const entry = this.monitors.get(abstractEngine);
 
-    let monitor = this.monitors.get(abstractEngine);
-
-    if (!monitor) {
-      const newMonitor = new SearchMonitor<
+    if (entry) {
+      return entry.monitor as unknown as SearchMonitor<
         T_STATE,
         T_OPTIONS,
         T_INFO,
         T_RESULT
-      >(
-        engine,
-        createInitialState(initialPosition) as unknown as T_STATE,
-        transformer,
-      );
+      >;
+    }
 
-      monitor = newMonitor as unknown as SearchMonitor<
+    const brandedPosition = initialPosition as unknown as PositionString;
+
+    const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
+      engine,
+      createInitialState(brandedPosition) as unknown as T_STATE,
+      transformer,
+    );
+
+    const newEntry: MonitorEntry<
+      unknown,
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
+      monitor: newMonitor as unknown as SearchMonitor<
         unknown,
         IBaseSearchOptions,
         IBaseSearchInfo,
         IBaseSearchResult
-      >;
-      this.monitors.set(abstractEngine, monitor);
-    }
+      >,
+      typeTag: Symbol("MonitorTypeTag"),
+    };
 
-    return monitor as unknown as SearchMonitor<
-      T_STATE,
-      T_OPTIONS,
-      T_INFO,
-      T_RESULT
-    >;
+    this.monitors.set(abstractEngine, newEntry);
+
+    return newMonitor;
   }
 }

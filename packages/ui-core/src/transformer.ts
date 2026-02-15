@@ -1,5 +1,6 @@
 import { EngineSearchState, PrincipalVariation } from "./types.js";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
+import { Move } from "@multi-game-engines/core";
 
 /**
  * 思考状態の変換ロジック
@@ -53,7 +54,7 @@ export class SearchStateTransformer {
       );
       const newPV: PrincipalVariation = {
         multipv: validatedInfo.multipv,
-        moves: validatedInfo.pv,
+        moves: validatedInfo.pv as Move[],
         score: {
           type: validatedInfo.score?.mate !== undefined ? "mate" : "cp",
           value: validatedInfo.score?.mate ?? validatedInfo.score?.cp ?? 0,

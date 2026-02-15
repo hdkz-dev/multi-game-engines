@@ -4,11 +4,10 @@ import {
   IBaseSearchOptions,
 } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
+import { jaStrings } from "./i18n.js";
 
 /**
  * エンジンの出力を UI 向けに正規化するミドルウェア。
- *
- * 入力型を unknown から ExtendedSearchInfo へ変換する。
  */
 export class UINormalizerMiddleware<
   T_OPTIONS = IBaseSearchOptions,
@@ -31,7 +30,8 @@ export class UINormalizerMiddleware<
     const result = SearchInfoSchema.safeParse(info);
 
     if (!result.success) {
-      console.warn("[UINormalizerMiddleware] Validation failed:", result.error);
+      // 2026 Best Practice: ローカライズされたログメッセージを使用
+      console.warn(jaStrings.validationFailed, result.error);
 
       const rawText =
         typeof info === "object" && info !== null && "raw" in info

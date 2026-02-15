@@ -74,9 +74,9 @@ type SFEN = Brand<string, "SFEN">;
 - **並行探索の識別**: `telemetryId` による、同一エンジン内での並行リクエストの完全なトラッキング。
 - **解決策の提示 (Remediation)**: 全てのエラーに `remediation` フィールドを設け、開発者やユーザーへの具体的なアクション（「HTTPS を使用してください」等）を提示します。
 
-## 7. UI 層と表現基盤 (UI & Presentation Layer)
+## 6. UI 層と表現基盤 (UI & Presentation Layer)
 
-### 7-1. Reactive Engine Store (`ui-core`)
+### 6-1. Reactive Engine Store (`ui-core`)
 
 高頻度なエンジンデータ（毎秒数百回の `info`）を効率的に扱うための状態管理基盤です。
 

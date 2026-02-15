@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { SearchStateTransformer } from "../transformer.js";
-import { createInitialState } from "../types.js";
+import { createInitialState, PositionString } from "../types.js";
 import { ExtendedSearchInfo } from "../schema.js";
 
 describe("SearchStateTransformer", () => {
-  const initialState = createInitialState("startpos");
+  const initialState = createInitialState(
+    "startpos" as unknown as PositionString,
+  );
 
   it("should update basic statistics", () => {
     const info: ExtendedSearchInfo = {

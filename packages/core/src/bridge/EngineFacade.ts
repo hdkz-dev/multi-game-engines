@@ -12,6 +12,7 @@ import {
   IMiddlewareContext,
   EngineLoadingStrategy,
   IEngineLoader,
+  EngineErrorCode,
 } from "../types.js";
 
 /**
@@ -30,6 +31,11 @@ export class EngineFacade<
   private _loadingStrategy: EngineLoadingStrategy = "on-demand";
   private loadingPromise: Promise<void> | null = null;
   private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
+  private _lastError?: {
+    message: string;
+    code?: EngineErrorCode;
+    remediation?: string;
+  };
 
   constructor(
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
@@ -64,6 +70,9 @@ export class EngineFacade<
   }
   get status(): EngineStatus {
     return this.adapter.status;
+  }
+  get lastError() {
+    return this._lastError;
   }
   get loadingStrategy(): EngineLoadingStrategy {
     return this._loadingStrategy;
@@ -165,6 +174,7 @@ export class EngineFacade<
       }
       options.signal?.addEventListener("abort", onAbort);
       let result = await task.result;
+      this._lastError = undefined; // 成功時はクリア
       for (const mw of this.middlewares) {
         if (mw.onResult) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

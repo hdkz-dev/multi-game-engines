@@ -1,6 +1,7 @@
 import React from "react";
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import { ScoreBadge } from "./ScoreBadge.js";
+import { useEngineUI } from "./EngineUIProvider.js";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -16,10 +17,11 @@ interface PVListProps {
 
 /**
  * エンジンの読み筋（Principal Variations）を一覧表示するコンポーネント。
- * MultiPV 設定時は複数の候補を表示します。
  */
 export const PVList: React.FC<PVListProps> = React.memo(
   ({ pvs, onMoveClick, className }) => {
+    const { strings } = useEngineUI();
+
     return (
       <div className={cn("space-y-2", className)}>
         {pvs.map((pv) => (
@@ -55,7 +57,7 @@ export const PVList: React.FC<PVListProps> = React.memo(
 
         {pvs.length === 0 && (
           <div className="py-8 text-center text-gray-400 italic text-sm">
-            探索中...
+            {strings.searching}...
           </div>
         )}
       </div>
