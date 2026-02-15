@@ -12,6 +12,16 @@ export type FEN = Brand<string, "FEN">;
 /** 指し手情報の抽象ブランド型 (UCI, USI等) */
 export type Move = Brand<string, "Move">;
 
+/** 局面情報のバリデータファクトリ (暫定的に型を確定させるためのもの) */
+export function createFEN(pos: string): FEN {
+  return pos as FEN;
+}
+
+/** 指し手のバリデータファクトリ */
+export function createMove(move: string): Move {
+  return move as Move;
+}
+
 /** エンジンの動作状態 */
 export type EngineStatus =
   | "uninitialized"

@@ -57,7 +57,7 @@ export const PVList: React.FC<PVListProps> = React.memo(
 
         {pvs.length === 0 && (
           <div className="py-8 text-center text-gray-400 italic text-sm">
-            {strings.searching}...
+            {strings.searching}
           </div>
         )}
       </div>

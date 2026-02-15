@@ -14,7 +14,7 @@ const config: StorybookConfig = {
     options: {},
   },
   docs: {
-    autodocs: "tag",
+    // 2026: Storybook 10 style autodocs
   },
 };
 export default config;

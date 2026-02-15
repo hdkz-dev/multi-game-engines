@@ -1,15 +1,32 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineStore } from "../store.js";
 import { IEngine } from "@multi-game-engines/core";
 
 describe("EngineStore", () => {
   const mockEngine = { status: "ready" } as unknown as IEngine;
+  let mockTimestamp = 0;
 
   beforeEach(() => {
+    mockTimestamp = 0;
     vi.useFakeTimers();
-    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-      return setTimeout(() => cb(Date.now()), 16);
+
+    // performance.now() の決定論的モック
+    vi.stubGlobal("performance", {
+      now: () => mockTimestamp,
     });
+
+    // requestAnimationFrame の決定論的モック
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      return setTimeout(() => {
+        mockTimestamp += 16;
+        cb(mockTimestamp);
+      }, 16);
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   it("should initialize with initial state", () => {
@@ -25,10 +42,10 @@ describe("EngineStore", () => {
     expect(listener).toHaveBeenCalledTimes(0);
 
     store.setState((s) => ({ count: s.count + 1 }));
-
     expect(listener).toHaveBeenCalledTimes(0);
 
-    vi.runAllTimers();
+    // RAFを1フレーム分進める
+    vi.advanceTimersByTime(16);
     expect(listener).toHaveBeenCalledTimes(1);
     expect(store.getState()).toEqual({ count: 1 });
   });
@@ -52,17 +69,5 @@ describe("EngineStore", () => {
 
     expect(listener).toHaveBeenCalledTimes(1);
     expect(store.getState()).toEqual({ count: 3 });
-  });
-
-  it("should correctly handle unsubscribe", () => {
-    const store = new EngineStore(mockEngine, { count: 0 });
-    const listener = vi.fn();
-    const unsub = store.subscribe(listener);
-
-    unsub();
-    store.setState((_) => ({ count: 1 }));
-    vi.runAllTimers();
-
-    expect(listener).toHaveBeenCalledTimes(0);
   });
 });

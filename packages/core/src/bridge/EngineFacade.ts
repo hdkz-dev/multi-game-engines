@@ -15,12 +15,11 @@ import {
   EngineErrorCode,
 } from "../types.js";
 
+/** 内部ミドルウェアの型定義 ( Zenith Tier ) */
+type SafeMiddleware<O> = IMiddleware<O, unknown, unknown, unknown, unknown>;
+
 /**
  * 利用者がエンジンを操作するための Facade 実装。
- *
- * 2026 Zenith Practice:
- * ミドルウェアパイプラインにおける型安全な変換を実現し、
- * 不安全な any キャストを徹底排除。
  */
 export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions,
@@ -42,13 +41,11 @@ export class EngineFacade<
   };
 
   /** 内部ミドルウェアスタック */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private middlewares: IMiddleware<T_OPTIONS, any, any, any, any>[] = [];
+  private middlewares: SafeMiddleware<T_OPTIONS>[] = [];
 
   constructor(
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    middlewares: IMiddleware<T_OPTIONS, any, any, any, any>[] = [],
+    middlewares: SafeMiddleware<T_OPTIONS>[] = [],
     private loaderProvider?: () => Promise<IEngineLoader>,
     private ownsAdapter: boolean = true,
   ) {
@@ -132,29 +129,29 @@ export class EngineFacade<
         `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`,
     };
 
-    let command = this.adapter.parser.createSearchCommand(options);
+    let command: unknown = this.adapter.parser.createSearchCommand(options);
     for (const mw of this.middlewares) {
       if (mw.onCommand) {
-        command = await mw.onCommand(command, context);
+        const next = await mw.onCommand(command as string, context);
+        if (next !== undefined) command = next;
       }
     }
 
-    const task = this.adapter.searchRaw(command);
+    const task = this.adapter.searchRaw(command as string);
     this.activeTask = task;
 
     const infoProcessing = (async () => {
       try {
         for await (let info of task.info) {
-          // 型安全な変換パイプラインの実行
           for (const mw of this.middlewares) {
             if (mw.onInfo) {
-              const processed = await mw.onInfo(info, context);
+              const processed = await mw.onInfo(info as unknown, context);
               if (processed !== undefined) {
-                info = processed;
+                info = processed as unknown as T_INFO;
               }
             }
           }
-          for (const l of this.infoListeners) l(info as T_INFO);
+          for (const l of this.infoListeners) l(info);
         }
       } catch (err) {
         console.error(
@@ -182,7 +179,7 @@ export class EngineFacade<
       }
       options.signal?.addEventListener("abort", onAbort);
 
-      let result = await task.result;
+      let result: unknown = await task.result;
       this._lastError = undefined;
 
       for (const mw of this.middlewares) {
@@ -234,8 +231,7 @@ export class EngineFacade<
     for (const l of this.telemetryListeners) l(event);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  use(middleware: IMiddleware<T_OPTIONS, any, any, any, any>): void {
+  use(middleware: SafeMiddleware<T_OPTIONS>): void {
     this.middlewares.push(middleware);
     this.middlewares.sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100));
   }

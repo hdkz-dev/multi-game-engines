@@ -1,32 +1,53 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { IEngine, IBaseSearchOptions } from "@multi-game-engines/core";
 
 describe("useEngineMonitor", () => {
-  const mockEngine = {
+  // 2026 Zenith Practice: 型安全なモック定義
+  const mockEngine: Partial<IEngine> = {
     id: "test",
-    status: "ready",
+    status: "ready" as const,
     onInfo: vi.fn(() => () => {}),
     onStatusChange: vi.fn(() => () => {}),
+    onTelemetry: vi.fn(() => () => {}),
+    emitTelemetry: vi.fn(),
     search: vi.fn(),
     stop: vi.fn(),
-  } as unknown as IEngine;
+    use: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
   it("should initialize with default state", () => {
-    const { result } = renderHook(() => useEngineMonitor(mockEngine));
+    const { result } = renderHook(() =>
+      useEngineMonitor(mockEngine as IEngine),
+    );
 
     expect(result.current.state.stats.depth).toBe(0);
     expect(result.current.status).toBe("ready");
   });
 
-  it("should call engine.search when search is called", async () => {
-    const { result } = renderHook(() => useEngineMonitor(mockEngine));
+  it("should call engine.search with correct options", async () => {
+    const { result } = renderHook(() =>
+      useEngineMonitor(mockEngine as IEngine),
+    );
+    const options: IBaseSearchOptions = {
+      signal: new AbortController().signal,
+    };
 
     await act(async () => {
-      await result.current.search({} as IBaseSearchOptions);
+      await result.current.search(options);
     });
 
-    expect(mockEngine.search).toHaveBeenCalled();
+    expect(mockEngine.search).toHaveBeenCalledWith(options);
   });
 });

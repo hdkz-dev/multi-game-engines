@@ -12,7 +12,7 @@ export interface EngineUIStrings {
   principalVariations: string;
   start: string;
   stop: string;
-  searching: string;
+  searching: string; // "解析中..." など、記号を含む
   ready: string;
   mateIn: (moves: number) => string;
   advantage: (side: "plus" | "minus", value: number) => string;
