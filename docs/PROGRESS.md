@@ -31,7 +31,11 @@
 - [x] **Stockfish / やねうら王 統合**: 主要エンジン対応完了。
 - [x] **品質保証 (AI Audit)**: 3回の反復 CodeRabbit ループにより、指摘事項ゼロを達成。
 - [x] **AI 相互レビュー体制**: `AI_WORKFLOW.md` および `AI_TOOLS_STRATEGY.md` の整備完了。
-- [ ] **UI プロトタイプ**: `packages/ui` の新設。
+- [x] **UI 基盤の構築 (ui-core & ui-react)**:
+  - フレームワーク非依存のコアロジック (`ui-core`) と React 用アダプター (`ui-react`) を分離実装。
+  - `requestAnimationFrame` 同期による高頻度更新の最適化を導入。
+  - Storybook による開発環境とモックエンジンをセットアップ。
+- [ ] **UI プロトタイプ**: `packages/ui` の新設。 (※ packages/ui-react 等へ昇華)
 
 ---
 

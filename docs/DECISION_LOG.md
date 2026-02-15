@@ -30,3 +30,7 @@
 
 - [ADR-016: 段階的なリリース戦略](adr/016-two-stage-release.md)
 - [ADR-017: ネイティブブリッジの統合方針](adr/017-native-integration.md)
+
+## 🎨 UI と表現層 (UI & Presentation)
+
+- [ADR-027: UI 層のフレームワーク分離と Reactive Core の導入](adr/027-framework-agnostic-ui.md)

@@ -1,0 +1,32 @@
+{
+  "name": "@multi-game-engines/storybook",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@multi-game-engines/ui-core": "workspace:*",
+    "@storybook/addon-a11y": "^10.2.8",
+    "@storybook/addon-essentials": "^8.5.0",
+    "@storybook/addon-interactions": "^8.5.0",
+    "@storybook/addon-links": "^8.5.0",
+    "@storybook/blocks": "^8.5.0",
+    "@storybook/react": "^8.5.0",
+    "@storybook/react-vite": "^8.5.0",
+    "@storybook/test": "^8.5.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "lucide-react": "^0.564.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^8.5.0",
+    "storybook-dark-mode": "^4.0.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "@multi-game-engines/ui-react": "workspace:*"
+  }
+}

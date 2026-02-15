@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  /* セマンティックなテーマ定義 */
+  --color-engine-busy: #ef4444;
+  --color-engine-ready: #22c55e;
+  
+  --color-score-plus: #2563eb;
+  --color-score-minus: #dc2626;
+  --color-score-mate: #9333ea;
+  --color-score-neutral: #e5e7eb;
+
+  --font-mono: "Fira Code", "JetBrains Mono", monospace;
+}

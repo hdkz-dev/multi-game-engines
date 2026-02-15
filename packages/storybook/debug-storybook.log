@@ -1,0 +1,84 @@
+[21:43:39.500] [INFO] [36mInitializing Storybook[39m
+[21:43:39.775] [DEBUG] Getting package.json info for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:43:39.775] [DEBUG] Getting CLI versions from NPM for storybook...
+[21:43:39.775] [DEBUG] Executing command: pnpm info storybook version
+[21:43:40.262] [INFO] Adding Storybook version 10.2.8 to your project
+[21:43:40.262] [INFO] Installing Storybook for user specified project type: react
+[21:43:40.264] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:43:40.264] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/package.json...
+[21:47:24.199] [PROMPT] We were not able to detect the right builder for your project. Please select one: {"choice":"vite"}
+[21:47:24.201] [INFO] Framework detected: react-vite
+[21:47:24.210] [DEBUG] Getting installed version for vitest...
+[21:47:24.210] [DEBUG] Executing command: pnpm list "vitest" --json --depth=99
+[21:47:24.639] [DEBUG] Installed version for vitest: null
+[21:47:24.639] [DEBUG] Getting installed version for msw...
+[21:47:24.639] [DEBUG] Executing command: pnpm list "msw" --json --depth=99
+[21:47:24.844] [DEBUG] Installed version for msw: null
+[21:47:24.853] [INFO] base-generator-task-start: Generating Storybook configuration
+[21:47:24.854] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:24.854] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:24.854] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/package.json...
+[21:47:24.854] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:24.855] [INFO] base-generator-task: - Configuring ESLint plugin
+[21:47:24.855] [DEBUG] Detected flat config at /Users/todahide/dev-wk/oss/multi-game-engines/eslint.config.mjs
+[21:47:24.878] [DEBUG] Using cached version for storybook...
+[21:47:24.878] [DEBUG] Getting CLI versions from NPM for @storybook/react-vite...
+[21:47:24.878] [DEBUG] Executing command: pnpm info @storybook/react-vite version
+[21:47:24.880] [DEBUG] Getting CLI versions from NPM for @chromatic-com/storybook...
+[21:47:24.880] [DEBUG] Executing command: pnpm info @chromatic-com/storybook version
+[21:47:24.883] [DEBUG] Getting CLI versions from NPM for @storybook/addon-vitest...
+[21:47:24.883] [DEBUG] Executing command: pnpm info @storybook/addon-vitest version
+[21:47:24.885] [DEBUG] Getting CLI versions from NPM for @storybook/addon-a11y...
+[21:47:24.885] [DEBUG] Executing command: pnpm info @storybook/addon-a11y version
+[21:47:24.888] [DEBUG] Getting CLI versions from NPM for @storybook/addon-docs...
+[21:47:24.888] [DEBUG] Executing command: pnpm info @storybook/addon-docs version
+[21:47:24.892] [DEBUG] Getting CLI versions from NPM for @storybook/addon-onboarding...
+[21:47:24.892] [DEBUG] Executing command: pnpm info @storybook/addon-onboarding version
+[21:47:24.894] [DEBUG] Getting CLI versions from NPM for eslint-plugin-storybook...
+[21:47:24.894] [DEBUG] Executing command: pnpm info eslint-plugin-storybook version
+[21:47:26.732] [INFO] base-generator-task: - Configuring main.ts
+[21:47:26.733] [INFO] base-generator-task: - Configuring preview.ts
+[21:47:26.733] [INFO] base-generator-task: - Adding Storybook command to package.json
+[21:47:26.733] [DEBUG] Getting package.json info for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:26.733] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:26.733] [DEBUG] Using cached package.json for /Users/todahide/dev-wk/oss/multi-game-engines/packages/storybook/package.json...
+[21:47:26.734] [INFO] base-generator-task: - Copying framework templates
+[21:47:26.752] [DEBUG] Executing command: pnpm config get registry
+[21:47:27.045] [ERROR] [38;2;241;97;97mError: Cannot find @storybook/react-vite/package.json, Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@storybook/react-vite' imported from /Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-C6KVY6VB.js
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:316:9)
+    at packageResolve (node:internal/modules/esm/resolve:768:81)
+    at moduleResolve (node:internal/modules/esm/resolve:858:18)
+    at defaultResolve (node:internal/modules/esm/resolve:990:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:718:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:735:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:764:52)
+    at Object.resolve (node:internal/modules/esm/initialize_import_meta:37:25)
+    at importMetaResolve (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-C6KVY6VB.js:717:48)
+    at resolvePackageDir (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-C6KVY6VB.js:721:35)
+
+ExecaError: Command failed with exit code 1: pnpm config get registry
+
+npm error code ENOWORKSPACES
+npm error This command does not support workspaces.
+npm error A complete log of this run can be found in: /Users/todahide/.npm/_logs/2026-02-15T12_47_26_984Z-debug-0.log
+    at getFinalError (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-WF46L34H.js:13109:10)
+    at makeError (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-WF46L34H.js:14645:15)
+    at getAsyncResult (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-WF46L34H.js:17291:158)
+    at handlePromise (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-WF46L34H.js:17277:162)
+    at async PNPMProxy.getRegistryURL (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-WF46L34H.js:17898:24)
+    at async resolveUsingBranchInstall (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5383:15)
+    at async getRendererDir (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5406:12)
+    at async templatePath (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5484:19)
+    at async copyTemplateFiles (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5499:17)
+    at async baseGenerator (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:1296:152)[39m
+    at getRendererDir (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5410:9)
+    at async templatePath (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5484:19)
+    at async copyTemplateFiles (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-SD77JQJM.js:5499:17)
+    at async baseGenerator (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:1296:152)
+    at async GeneratorExecutionCommand.executeProjectGenerator (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:1364:101)
+    at async GeneratorExecutionCommand.execute (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:1386:27)
+    at async doInitiate (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:2840:68)
+    at async file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:2882:20
+    at async withTelemetry (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/storybook/dist/_node-chunks/chunk-KIOKJLL5.js:218:12)
+    at async initiate (file:///Users/todahide/.npm/_npx/c98dac484ac87b2f/node_modules/create-storybook/dist/_node-chunks/chunk-M7TYML2Y.js:2875:24)
+[21:47:27.046] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry
