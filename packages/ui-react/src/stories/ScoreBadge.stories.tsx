@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { ScoreBadge } from "@multi-game-engines/ui-react";
+import type { Meta, StoryObj } from "@storybook/react";
+import { ScoreBadge } from "../ScoreBadge.js";
 
 const meta: Meta<typeof ScoreBadge> = {
   title: "Atoms/ScoreBadge",

@@ -5,6 +5,9 @@ import {
   ITelemetryEvent,
   IBaseSearchOptions,
   IBaseSearchResult,
+  IMiddleware,
+  EngineErrorCode,
+  Move,
 } from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 
@@ -26,6 +29,7 @@ export class MockEngine implements IEngine<
   version = "1.0.0";
   status: EngineStatus = "ready";
   loadingStrategy: "manual" | "on-demand" | "eager" = "eager";
+  lastError?: { message: string; code?: EngineErrorCode; remediation?: string };
 
   private infoListeners: Set<(info: ExtendedSearchInfo) => void> = new Set();
   private statusListeners: Set<(status: EngineStatus) => void> = new Set();
@@ -41,6 +45,11 @@ export class MockEngine implements IEngine<
 
   async search(_options: IBaseSearchOptions): Promise<IBaseSearchResult> {
     if (this.options.failOnSearch) {
+      this.lastError = {
+        message: "Simulated failure",
+        code: EngineErrorCode.INTERNAL_ERROR,
+        remediation: "Check mock settings.",
+      };
       this.updateStatus("error");
       throw new Error("Simulated search failure");
     }
@@ -58,7 +67,7 @@ export class MockEngine implements IEngine<
           time: depth * 100,
           multipv: 1,
           score: { cp: depth * 5 },
-          pv: ["e2e4", "e7e5", "g1f3", "b8c6"].slice(0, (depth % 4) + 1),
+          pv: ["e2e4", "e7e5", "g1f3", "b8c6"] as unknown as Move[],
         };
 
         this.infoListeners.forEach((l) => l(info));
@@ -76,6 +85,11 @@ export class MockEngine implements IEngine<
       this.intervalId = null;
     }
     this.updateStatus("ready");
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  use(_middleware: IMiddleware<IBaseSearchOptions, any, any, any, any>): void {
+    // モックではミドルウェアを無視
   }
 
   onInfo(callback: (info: ExtendedSearchInfo) => void): () => void {

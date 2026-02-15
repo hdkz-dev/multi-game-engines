@@ -1,7 +1,7 @@
 import React from "react";
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { EngineMonitorPanel } from "@multi-game-engines/ui-react";
-import { MockEngine } from "../mocks/MockEngine";
+import type { Meta, StoryObj } from "@storybook/react";
+import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
+import { MockEngine } from "../mocks/MockEngine.js";
 import { within, userEvent, expect, waitFor } from "@storybook/test";
 
 const meta: Meta<typeof EngineMonitorPanel> = {
