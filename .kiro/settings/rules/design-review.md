@@ -57,13 +57,13 @@ Analyze design against all review criteria, focusing on critical issues impactin
 
 For each issue:
 
-```
-🔴 **Critical Issue [1-3]**: [Brief title]
-**Concern**: [Specific problem]
-**Impact**: [Why it matters]
-**Suggestion**: [Concrete improvement]
-**Traceability**: [Requirement ID/section from requirements.md]
-**Evidence**: [Design doc section/heading]
+```text
+ 🔴 **Critical Issue [1-3]**: [Brief title]
+ **Concern**: [Specific problem]
+ **Impact**: [Why it matters]
+ **Suggestion**: [Concrete improvement]
+ **Traceability**: [Requirement ID/section from requirements.md]
+ **Evidence**: [Design doc section/heading]
 ```
 
 ### Step 3: Recognize Strengths

@@ -2,7 +2,7 @@ description = "Show specification status and progress"
 prompt = """
 <meta>
 description: Show specification status and progress
-argument-hint: <feature-name:$1>
+argument-hint: [feature-name:$1]
 arguments: {{args}}
 </meta>
 

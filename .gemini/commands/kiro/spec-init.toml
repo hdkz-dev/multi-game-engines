@@ -46,7 +46,7 @@ Generate a unique feature name from the project description ($ARGUMENTS) and ini
 - Perform validation before any file write operation
 
 ## Output Description
-Provide output in the language specified in `spec.json` with the following structure:
+Provide output in the language specified in `.kiro/settings/templates/specs/init.json` (fallback to "English" if not found) with the following structure:
 
 1. **Generated Feature Name**: `feature-name` format with 1-2 sentence rationale
 2. **Project Summary**: Brief summary (1 sentence)
@@ -58,7 +58,7 @@ Provide output in the language specified in `spec.json` with the following struc
 - Use Markdown headings (##, ###)
 - Wrap commands in code blocks
 - Keep total output concise (under 250 words)
-- Use clear, professional language per `spec.json.language`
+- Use clear, professional language (match `init.json` language setting)
 
 ## Safety & Fallback
 - **Ambiguous Feature Name**: If feature name generation is unclear, propose 2-3 options and ask user to select

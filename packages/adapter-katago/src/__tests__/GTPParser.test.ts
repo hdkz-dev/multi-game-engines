@@ -43,6 +43,20 @@ describe("GTPParser", () => {
     expect(result!.bestMove).toBe("pass");
   });
 
+  it("should validate move coordinates edge cases", () => {
+    // Valid cases
+    expect(parser.parseResult("= T19")).not.toBeNull();
+    expect(parser.parseResult("= A1")).not.toBeNull();
+    expect(parser.parseResult("= pass")).not.toBeNull();
+    expect(parser.parseResult("= resign")).not.toBeNull();
+
+    // Invalid cases
+    expect(parser.parseResult("= I1")).toBeNull(); // 'I' is skipped
+    expect(parser.parseResult("= A0")).toBeNull();
+    expect(parser.parseResult("= A20")).toBeNull();
+    expect(parser.parseResult("= @1")).toBeNull();
+  });
+
   it("should throw error for injection in board data", () => {
     expect(() =>
       parser.createSearchCommand({

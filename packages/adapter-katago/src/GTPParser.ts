@@ -53,10 +53,18 @@ export class GTPParser implements IProtocolParser<
 
     // GTP レスポンス形式: "= <id> <move>" または "= <move>"
     // ID は省略可能。
-    const match = data.match(/^=\s*(\d+)?\s*(.*)$/);
-    if (!match) return null;
+    // ReDoS 回避のため正規表現ではなく split を使用
+    const tokens = data.substring(1).trim().split(/\s+/);
+    if (tokens.length === 0 || (tokens.length === 1 && tokens[0] === ""))
+      return null;
 
-    const moveStr = match[2].trim();
+    let moveStr = tokens[0];
+    // 先頭が数字のみの場合は ID として読み飛ばす
+    if (/^\d+$/.test(moveStr)) {
+      if (tokens.length < 2) return null; // IDのみで指し手がない
+      moveStr = tokens[1];
+    }
+
     const bestMove = this.createMove(moveStr);
     if (!bestMove) return null;
 

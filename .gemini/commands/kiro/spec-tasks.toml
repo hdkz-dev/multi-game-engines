@@ -115,8 +115,9 @@ Provide brief summary in the language specified in spec.json:
 - **User Message**: "Template or rules files missing in `.kiro/settings/`"
 - **Fallback**: Use inline basic structure with warning
 - **Suggested Action**: "Check repository setup or restore template files"
-- **Missing Numeric Requirement IDs**:
-  - **Stop Execution**: All requirements in requirements.md MUST have numeric IDs. If any requirement lacks a numeric ID, stop and request that requirements.md be fixed before generating tasks.
+
+**Missing Numeric Requirement IDs**:
+- **Stop Execution**: All requirements in requirements.md MUST have numeric IDs. If any requirement lacks a numeric ID, stop and request that requirements.md be fixed before generating tasks.
 
 ### Next Phase: Implementation
 

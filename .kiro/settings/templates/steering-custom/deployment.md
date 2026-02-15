@@ -16,8 +16,8 @@
 
 ## CI/CD Flow
 
-```
-Code → Test → Build → Scan → Deploy (staged) → Verify
+```text
+ Code → Test → Build → Scan → Deploy (staged) → Verify
 ```
 
 Principles:

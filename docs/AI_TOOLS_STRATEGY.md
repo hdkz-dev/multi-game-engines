@@ -48,15 +48,15 @@
 
 実装完了時、AI はテキストだけでなく **`audit_report.json`** を出力。これを CI が読み込み、重大なリスク（`Critical`）が含まれる場合はマージを物理的にブロック。
 
-### 2. 自己修復型ドキュメント (Self-Healing Docs)
+### 3. 自己修復型ドキュメント (Self-Healing Docs)
 
 TSDoc から API サイトを自動生成し、GitHub Pages へ公開。「ドキュメントと実装の不一致」を物理的に排除。
 
-### 3. ブラウザ・マトリクス検証 (Browser Matrix Testing)
+### 4. ブラウザ・マトリクス検証 (Browser Matrix Testing)
 
 Chromium, Firefox, WebKit の各エンジン上で WASM 動作を自動検証。ブラウザ固有のストレージ制約や命令セットの差異を事前に把握。
 
-### 4. Contract-driven Safety (実行時契約の強制)
+### 5. Contract-driven Safety (実行時契約の強制)
 
 `Zod` 等を用い、Worker 通信境界で「値の正当性」をランタイムで保証。コンパイル後の型消去による脆弱性を排除。
 
