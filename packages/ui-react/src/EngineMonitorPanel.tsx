@@ -52,6 +52,30 @@ export function EngineMonitorPanel<
   const bestPV = state.pvs[0];
   const displayTitle = title ?? strings.title;
 
+  // 2026 Best Practice: UI操作を第一級のテレメトリイベントとして送出
+  const emitUIInteraction = (action: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (engine as any).onTelemetry?.({
+      type: "lifecycle",
+      timestamp: Date.now(),
+      metadata: {
+        component: "EngineMonitorPanel",
+        action,
+        engineId: engine.id,
+      },
+    });
+  };
+
+  const handleStart = () => {
+    emitUIInteraction("start_click");
+    void search(searchOptions);
+  };
+
+  const handleStop = () => {
+    emitUIInteraction("stop_click");
+    void stop();
+  };
+
   // アクセシビリティ用：重要なステータス変更のアナウンス
   const announcement = useMemo(() => {
     if (status === "error") return "Engine Error occurred.";
@@ -99,7 +123,7 @@ export function EngineMonitorPanel<
         <div className="flex items-center gap-2">
           {status === "busy" ? (
             <button
-              onClick={() => stop()}
+              onClick={handleStop}
               className="group flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-md text-xs font-bold hover:bg-red-600 hover:text-white transition-all focus:ring-2 focus:ring-red-500 focus:ring-offset-2 outline-none active:scale-95"
               aria-label={strings.stop}
             >
@@ -108,7 +132,7 @@ export function EngineMonitorPanel<
             </button>
           ) : (
             <button
-              onClick={() => search(searchOptions)}
+              onClick={handleStart}
               className="group flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md text-xs font-bold hover:bg-blue-600 hover:text-white transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none active:scale-95"
               aria-label={strings.start}
             >
@@ -125,8 +149,11 @@ export function EngineMonitorPanel<
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-red-500 bg-red-50/30">
             <AlertCircle className="w-12 h-12 mb-4 animate-bounce" />
             <h3 className="font-bold mb-1">Engine Error</h3>
-            <p className="text-xs text-red-400">
-              Please check the connection and try again.
+            <p className="text-xs text-red-400 max-w-[240px]">
+              {/* 根本的な改善: Coreが提供する具体的な解決策を表示 */}
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {(engine as any).lastError?.remediation ||
+                "Please check the connection and try again."}
             </p>
           </div>
         ) : (

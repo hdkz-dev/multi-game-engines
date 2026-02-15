@@ -1,4 +1,4 @@
-import { useRef, useCallback, useSyncExternalStore, useEffect } from "react";
+import { useCallback, useSyncExternalStore, useEffect, useMemo } from "react";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -6,9 +6,8 @@ import {
   IMiddleware,
 } from "@multi-game-engines/core";
 import {
-  SearchMonitor,
+  MonitorRegistry,
   SearchStateTransformer,
-  createInitialState,
   EngineSearchState,
   ExtendedSearchInfo,
   UINormalizerMiddleware,
@@ -18,10 +17,11 @@ import {
  * エンジンの思考状況をリアクティブに監視するカスタムフック。
  *
  * 2026 Best Practice:
- * - UINormalizerMiddleware を自動適用し、データの正規化をミドルウェア層へ移譲。
+ * - MonitorRegistry による購読の重複排除 (Deduplication)。
+ * - 宣言的なミドルウェア登録と自動ライフサイクル管理。
  */
 export function useEngineMonitor<
-  T_STATE = EngineSearchState,
+  T_STATE extends EngineSearchState = EngineSearchState,
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
   T_INFO extends ExtendedSearchInfo = ExtendedSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
@@ -42,47 +42,34 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  const monitorRef = useRef<SearchMonitor<
-    T_STATE,
-    T_OPTIONS,
-    T_INFO,
-    T_RESULT
-  > | null>(null);
-
-  if (!monitorRef.current) {
+  // 根本的な改善: レジストリから共有モニターを取得
+  const monitor = useMemo(() => {
+    // UIミドルウェアの動的注入 (初回のみ)
     if (autoMiddleware && typeof engine.use === "function") {
-      // 2026 Best Practice:
-      // ミドルウェアによる型変換（unknown -> ExtendedSearchInfo）を明示的にキャストして適用。
-      // エンジンインスタンスの T_INFO が ExtendedSearchInfo を継承しているため、この操作は安全。
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
         unknown,
         T_RESULT
       >();
 
+      // 内部実装の詳細としてキャストを許容
       engine.use(
         normalizer as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>,
       );
     }
 
-    monitorRef.current = new SearchMonitor<
+    return MonitorRegistry.getInstance().getOrCreateMonitor<
       T_STATE,
       T_OPTIONS,
       T_INFO,
       T_RESULT
-    >(
-      engine,
-      createInitialState(initialPosition) as unknown as T_STATE,
-      transformer,
-    );
-  }
-
-  const monitor = monitorRef.current;
+    >(engine, initialPosition, transformer);
+  }, [engine, initialPosition, transformer, autoMiddleware]);
 
   useEffect(() => {
     monitor.startMonitoring();
     return () => {
-      monitor.stopMonitoring();
+      // 共有モニターのため、ここでは何もしない
     };
   }, [monitor]);
 
