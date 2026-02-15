@@ -33,17 +33,13 @@ export class CommandDispatcher<
     const previousStatus = this.monitor.getStatus();
 
     try {
-      // 1. 楽観的に状態を遷移
       this.updateStatus("busy");
-
       const result = await this.monitor.search(options);
 
-      // 2. 根本修正: 成功時にも状態を確定させる
+      // 成功時は実状態（または待機状態）へ確定
       this.updateStatus("ready");
-
       return result;
     } catch (error: unknown) {
-      // 3. 根本修正: エラー変数を unknown として扱い安全にロールバック
       console.error("[CommandDispatcher] Search failed:", error);
       this.updateStatus(previousStatus);
       throw error;
@@ -52,13 +48,21 @@ export class CommandDispatcher<
 
   /**
    * 探索を停止する
+   *
+   * 2026 Zenith Practice:
+   * 停止処理自体が失敗するエッジケースも考慮し、
+   * 常に以前の状態への復帰経路を確保。
    */
   async dispatchStop(): Promise<void> {
+    const previousStatus = this.monitor.getStatus();
+
     try {
       await this.monitor.stop();
       this.updateStatus("ready");
     } catch (error: unknown) {
       console.error("[CommandDispatcher] Failed to stop engine:", error);
+      // 停止失敗時は元の状態（恐らく busy）に戻す
+      this.updateStatus(previousStatus);
       throw error;
     }
   }

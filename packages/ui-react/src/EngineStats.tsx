@@ -57,7 +57,7 @@ export const EngineStats: React.FC<EngineStatsProps> = React.memo(
         <StatBox
           icon={<Timer className="w-4 h-4" />}
           label={strings.time}
-          value={`${(stats.time / 1000).toFixed(1)}s`}
+          value={`${(stats.time / 1000).toFixed(1)}${strings.timeUnitSeconds}`}
         />
       </div>
     );

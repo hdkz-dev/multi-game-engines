@@ -43,7 +43,7 @@ type SFEN = Brand<string, "SFEN">;
 ### 3-1. EngineLoader (Modern Security)
 
 - **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。空の SRI はエラーとなります。W3C 標準のマルチハッシュ（スペース区切り）に対応。
-- **アトミック・マルチロード**: `loadResources()` により、WASM 本体と重みファイルなどの複数リソースを一括で検証・取得し、依存関係の一貫性を保証。
+- **アトミック・マルチロード**: `loadResources()`により、WASM 本体と重みファイルなどの複数リソースを一括で検証・取得し、依存関係の一貫性を保証。
 - **動的 MIME タイプ**: WASM (`application/wasm`) や JS (`application/javascript`) を適切に識別。
 - **Auto-Revocation**: メモリリーク防止のため、リロード時に古い Blob URL を自動的に `revoke`。
 - **30秒タイムアウト**: ネットワークフェッチのハングを防止。`Error Cause API` による詳細なエラー追跡。
@@ -86,18 +86,18 @@ type SFEN = Brand<string, "SFEN">;
 - **決定論的スナップショット**: React の `useSyncExternalStore` に完全対応した `getSnapshot` / `subscribe` インターフェースを実装。レンダリングの「引き裂き（Tearing）」を構造的に防止します。
 - **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
 
-### 7-2. React アダプター (`ui-react`)
+### 6-2. React アダプター (`ui-react`)
 
 - **決定論的ライフサイクル**: `useRef` によるモニターインスタンスの永続化と、`useEffect` による厳格な購読解除を徹底。React 18 以降の Strict Mode および Concurrent Rendering 下でも安全に動作します。
 - **UI 依存性注入 (EngineUIProvider)**: コンテキストを通じて i18n 文字列やデザインテーマを一括管理。
 - **アクセシビリティ (WCAG 2.2 AA)**:
   - **Landmark Roles**: `EngineMonitorPanel` は `section` ランドマークとして機能。
-  - **Intelligent Live Regions**: 重大な状態変化（詰みの発見、エラー等）のみを `aria-live="assertive"` で通知し、通常の更新は `polite` で処理。
+  - **Intelligent Live Regions**: 重大な状態変化（詰みの発見、エラー等）のみを `aria-live=\"assertive\"` で通知し、通常の更新は `polite` で処理。
   - **Focus Trap & Management**: Radix UI プリミティブによるキーボードフォーカス制御。
 
-## 8. 品質保証 (Testing Philosophy)
+## 7. 品質保証 (Testing Philosophy)
 
-- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 117 項目のテスト（Core + Adapters）。
+- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 121 項目のテスト（Core + Adapters + UI）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。
 - **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を禁止。`satisfies` 演算子による厳格な型推論。
 - **ライフサイクル検証**: インスタンスキャッシュ、`WeakRef` によるメモリ管理、アトミックな初期化の網羅的な検証。

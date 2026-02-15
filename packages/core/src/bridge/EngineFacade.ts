@@ -17,6 +17,10 @@ import {
 
 /**
  * 利用者がエンジンを操作するための Facade 実装。
+ *
+ * 2026 Zenith Practice:
+ * ミドルウェアパイプラインにおける型安全な変換を実現し、
+ * 不安全な any キャストを徹底排除。
  */
 export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions,
@@ -37,15 +41,18 @@ export class EngineFacade<
     remediation?: string;
   };
 
+  /** 内部ミドルウェアスタック */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private middlewares: IMiddleware<T_OPTIONS, any, any, any, any>[] = [];
+
   constructor(
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    // 2026 Best Practice: ミドルウェアチェーンは内部的に型変換を許容するため any を使用
-    private middlewares: IMiddleware<T_OPTIONS, any, any, any, any>[] = [],
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    middlewares: IMiddleware<T_OPTIONS, any, any, any, any>[] = [],
     private loaderProvider?: () => Promise<IEngineLoader>,
     private ownsAdapter: boolean = true,
   ) {
+    this.middlewares = [...middlewares];
     this.adapter.onStatusChange((s) => {
       for (const l of this.statusListeners) l(s);
     });
@@ -56,8 +63,6 @@ export class EngineFacade<
       for (const l of this.telemetryListeners) l(e);
     });
   }
-
-  // ... (中間部分は変更なし)
 
   get id(): string {
     return this.adapter.id;
@@ -120,7 +125,7 @@ export class EngineFacade<
       engineId: this.id,
       options,
       emitTelemetry: (event) => {
-        this.adapter.emitTelemetry?.(event);
+        this.emitTelemetry(event);
       },
       telemetryId:
         crypto.randomUUID?.() ??
@@ -140,10 +145,13 @@ export class EngineFacade<
     const infoProcessing = (async () => {
       try {
         for await (let info of task.info) {
+          // 型安全な変換パイプラインの実行
           for (const mw of this.middlewares) {
             if (mw.onInfo) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              info = (await mw.onInfo(info as any, context)) as any;
+              const processed = await mw.onInfo(info, context);
+              if (processed !== undefined) {
+                info = processed;
+              }
             }
           }
           for (const l of this.infoListeners) l(info as T_INFO);
@@ -153,7 +161,7 @@ export class EngineFacade<
           `[EngineFacade] Info stream processing error (${this.id}):`,
           err,
         );
-        this.adapter.emitTelemetry?.({
+        this.emitTelemetry({
           type: "error",
           timestamp: Date.now(),
           metadata: {
@@ -173,16 +181,26 @@ export class EngineFacade<
         await task.stop();
       }
       options.signal?.addEventListener("abort", onAbort);
+
       let result = await task.result;
-      this._lastError = undefined; // 成功時はクリア
+      this._lastError = undefined;
+
       for (const mw of this.middlewares) {
         if (mw.onResult) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          result = (await mw.onResult(result as any, context)) as any;
+          const processed = await mw.onResult(result, context);
+          if (processed !== undefined) {
+            result = processed;
+          }
         }
       }
       await infoProcessing;
       return result as T_RESULT;
+    } catch (err: unknown) {
+      this._lastError = {
+        message: err instanceof Error ? err.message : String(err),
+        code: EngineErrorCode.INTERNAL_ERROR,
+      };
+      throw err;
     } finally {
       options.signal?.removeEventListener("abort", onAbort);
       if (this.activeTask === task) {
@@ -213,16 +231,14 @@ export class EngineFacade<
 
   emitTelemetry(event: ITelemetryEvent): void {
     this.adapter.emitTelemetry?.(event);
-    // 自身の購読者にも即座に反映
     for (const l of this.telemetryListeners) l(event);
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   use(middleware: IMiddleware<T_OPTIONS, any, any, any, any>): void {
     this.middlewares.push(middleware);
     this.middlewares.sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100));
   }
-  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   async stop(): Promise<void> {
     if (this.activeTask) {

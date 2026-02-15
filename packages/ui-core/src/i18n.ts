@@ -22,6 +22,10 @@ export interface EngineUIStrings {
   validationFailed: string;
   errorTitle: string;
   errorDefaultRemediation: string;
+  // 単位とフォールバック
+  timeUnitSeconds: string;
+  noMove: string;
+  engineBridgeStandard: (year: number) => string;
 }
 
 /**
@@ -38,7 +42,7 @@ export const jaStrings: EngineUIStrings = {
   principalVariations: "読み筋一覧",
   start: "開始",
   stop: "停止",
-  searching: "解析中",
+  searching: "解析中...",
   ready: "待機中",
   mateIn: (n) => `詰みまで ${n} 手`,
   advantage: (side, v) => `${side === "plus" ? "先手" : "後手"}有利 ${v} 点`,
@@ -47,6 +51,9 @@ export const jaStrings: EngineUIStrings = {
   validationFailed: "[UINormalizerMiddleware] バリデーション失敗:",
   errorTitle: "エンジンエラー",
   errorDefaultRemediation: "接続を確認して、もう一度お試しください。",
+  timeUnitSeconds: "秒",
+  noMove: "---",
+  engineBridgeStandard: (y) => `${y} Engine Bridge Standard`,
 };
 
 /**
@@ -63,7 +70,7 @@ export const enStrings: EngineUIStrings = {
   principalVariations: "Principal Variations",
   start: "START",
   stop: "STOP",
-  searching: "Searching",
+  searching: "Searching...",
   ready: "Ready",
   mateIn: (n) => `Mate in ${n}`,
   advantage: (side, v) => `${side === "plus" ? "+" : "-"}${v}`,
@@ -72,4 +79,7 @@ export const enStrings: EngineUIStrings = {
   validationFailed: "[UINormalizerMiddleware] Validation failed:",
   errorTitle: "Engine Error",
   errorDefaultRemediation: "Please check the connection and try again.",
+  timeUnitSeconds: "s",
+  noMove: "---",
+  engineBridgeStandard: (y) => `${y} Engine Bridge Standard`,
 };

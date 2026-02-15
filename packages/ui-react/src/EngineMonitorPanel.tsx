@@ -166,7 +166,7 @@ export function EngineMonitorPanel<
                 )}
               </div>
               <div className="text-xl font-mono font-black text-gray-900 truncate leading-tight tracking-tighter">
-                {bestPV?.moves[0]?.toString() || "---"}
+                {bestPV?.moves[0]?.toString() || strings.noMove}
               </div>
             </section>
 
@@ -211,7 +211,9 @@ export function EngineMonitorPanel<
         <span className="truncate mr-4">
           {engine.name} v{engine.version}
         </span>
-        <span className="flex-shrink-0">2026 Engine Bridge Standard</span>
+        <span className="flex-shrink-0">
+          {strings.engineBridgeStandard(2026)}
+        </span>
       </footer>
     </section>
   );
