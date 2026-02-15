@@ -74,7 +74,28 @@ type SFEN = Brand<string, "SFEN">;
 - **並行探索の識別**: `telemetryId` による、同一エンジン内での並行リクエストの完全なトラッキング。
 - **解決策の提示 (Remediation)**: 全てのエラーに `remediation` フィールドを設け、開発者やユーザーへの具体的なアクション（「HTTPS を使用してください」等）を提示します。
 
-## 6. 品質保証 (Testing Philosophy)
+## 7. UI 層と表現基盤 (UI & Presentation Layer)
+
+### 7-1. Reactive Engine Store (`ui-core`)
+
+高頻度なエンジンデータ（毎秒数百回の `info`）を効率的に扱うための状態管理基盤です。
+
+- **Adaptive Throttling**:
+  - **RAF 同期モード**: デフォルトで `requestAnimationFrame` に同期し、ブラウザの再描画周期（通常 60fps）を超えた無駄な通知を自動的に破棄します。
+  - **時間ベース Throttling**: `throttleMs` オプションにより、特定のミリ秒間隔での更新強制も可能です。
+- **決定論的スナップショット**: React の `useSyncExternalStore` に完全対応した `getSnapshot` / `subscribe` インターフェースを実装。レンダリングの「引き裂き（Tearing）」を構造的に防止します。
+- **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
+
+### 7-2. React アダプター (`ui-react`)
+
+- **決定論的ライフサイクル**: `useRef` によるモニターインスタンスの永続化と、`useEffect` による厳格な購読解除を徹底。React 18 以降の Strict Mode および Concurrent Rendering 下でも安全に動作します。
+- **UI 依存性注入 (EngineUIProvider)**: コンテキストを通じて i18n 文字列やデザインテーマを一括管理。
+- **アクセシビリティ (WCAG 2.2 AA)**:
+  - **Landmark Roles**: `EngineMonitorPanel` は `section` ランドマークとして機能。
+  - **Intelligent Live Regions**: 重大な状態変化（詰みの発見、エラー等）のみを `aria-live="assertive"` で通知し、通常の更新は `polite` で処理。
+  - **Focus Trap & Management**: Radix UI プリミティブによるキーボードフォーカス制御。
+
+## 8. 品質保証 (Testing Philosophy)
 
 - **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 117 項目のテスト（Core + Adapters）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。

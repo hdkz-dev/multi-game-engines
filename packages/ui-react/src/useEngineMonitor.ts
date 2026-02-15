@@ -3,6 +3,7 @@ import {
   IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
+  IMiddleware,
 } from "@multi-game-engines/core";
 import {
   SearchMonitor,
@@ -10,14 +11,14 @@ import {
   createInitialState,
   EngineSearchState,
   ExtendedSearchInfo,
+  UINormalizerMiddleware,
 } from "@multi-game-engines/ui-core";
 
 /**
  * エンジンの思考状況をリアクティブに監視するカスタムフック。
  *
  * 2026 Best Practice:
- * - useSyncExternalStore による Concurrent Rendering 対応。
- * - useRef + useEffect によるリークのない厳格な購読管理。
+ * - UINormalizerMiddleware を自動適用し、データの正規化をミドルウェア層へ移譲。
  */
 export function useEngineMonitor<
   T_STATE = EngineSearchState,
@@ -29,6 +30,7 @@ export function useEngineMonitor<
   options: {
     initialPosition?: string;
     transformer?: (state: T_STATE, info: T_INFO) => T_STATE;
+    autoMiddleware?: boolean;
   } = {},
 ) {
   const {
@@ -37,10 +39,9 @@ export function useEngineMonitor<
       state: T_STATE,
       info: T_INFO,
     ) => T_STATE,
+    autoMiddleware = true,
   } = options;
 
-  // モニターインスタンスを ref で管理し、ライフサイクル中一つだけ存在することを保証。
-  // 注意: 初期化は lazy initialization パターンを使用
   const monitorRef = useRef<SearchMonitor<
     T_STATE,
     T_OPTIONS,
@@ -49,6 +50,21 @@ export function useEngineMonitor<
   > | null>(null);
 
   if (!monitorRef.current) {
+    if (autoMiddleware && typeof engine.use === "function") {
+      // 2026 Best Practice:
+      // ミドルウェアによる型変換（unknown -> ExtendedSearchInfo）を明示的にキャストして適用。
+      // エンジンインスタンスの T_INFO が ExtendedSearchInfo を継承しているため、この操作は安全。
+      const normalizer = new UINormalizerMiddleware<
+        T_OPTIONS,
+        unknown,
+        T_RESULT
+      >();
+
+      engine.use(
+        normalizer as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>,
+      );
+    }
+
     monitorRef.current = new SearchMonitor<
       T_STATE,
       T_OPTIONS,
@@ -63,7 +79,6 @@ export function useEngineMonitor<
 
   const monitor = monitorRef.current;
 
-  // 購読のライフサイクル管理
   useEffect(() => {
     monitor.startMonitoring();
     return () => {
@@ -71,7 +86,6 @@ export function useEngineMonitor<
     };
   }, [monitor]);
 
-  // 最新の状態を同期
   const state = useSyncExternalStore(
     monitor.subscribe,
     monitor.getSnapshot,

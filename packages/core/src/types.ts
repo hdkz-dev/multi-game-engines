@@ -119,6 +119,8 @@ export interface IEngine<
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void;
+  /** エンジン個別にミドルウェアを追加します。 */
+  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): void;
   stop(): Promise<void>;
   setOption(name: string, value: string | number | boolean): Promise<void>;
   dispose(): Promise<void>;
@@ -267,8 +269,10 @@ export enum MiddlewarePriority {
 
 export interface IMiddleware<
   T_OPTIONS = IBaseSearchOptions,
-  T_INFO = unknown,
-  T_RESULT = unknown,
+  T_INFO_IN = unknown,
+  T_RESULT_IN = unknown,
+  T_INFO_OUT = T_INFO_IN,
+  T_RESULT_OUT = T_RESULT_IN,
 > {
   priority?: MiddlewarePriority;
   /**
@@ -286,11 +290,11 @@ export interface IMiddleware<
     | Record<string, unknown>
     | Promise<string | string[] | Uint8Array | Record<string, unknown>>;
   onInfo?(
-    info: T_INFO,
+    info: T_INFO_IN,
     context: IMiddlewareContext<T_OPTIONS>,
-  ): T_INFO | Promise<T_INFO>;
+  ): T_INFO_OUT | Promise<T_INFO_OUT>;
   onResult?(
-    result: T_RESULT,
+    result: T_RESULT_IN,
     context: IMiddlewareContext<T_OPTIONS>,
-  ): T_RESULT | Promise<T_RESULT>;
+  ): T_RESULT_OUT | Promise<T_RESULT_OUT>;
 }
