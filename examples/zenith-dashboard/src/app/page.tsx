@@ -58,9 +58,13 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <nav className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+        <nav
+          className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg"
+          aria-label="Engine selector"
+        >
           <button
             onClick={() => setActiveEngine("chess")}
+            aria-pressed={activeEngine === "chess"}
             className={`flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all ${
               activeEngine === "chess"
                 ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600"
@@ -72,6 +76,7 @@ export default function Dashboard() {
           </button>
           <button
             onClick={() => setActiveEngine("shogi")}
+            aria-pressed={activeEngine === "shogi"}
             className={`flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all ${
               activeEngine === "shogi"
                 ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600"

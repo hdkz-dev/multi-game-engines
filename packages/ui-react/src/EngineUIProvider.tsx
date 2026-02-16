@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useMemo } from "react";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { locales, LocaleData } from "@multi-game-engines/i18n";
 
 const defaultStrings = createUIStrings(locales.ja);
 
@@ -19,7 +19,7 @@ export interface EngineUIProviderProps {
    * Raw locale data object (e.g. from @multi-game-engines/i18n).
    * Must be serializable (no functions) to pass from Server Components.
    */
-  localeData?: unknown;
+  localeData?: LocaleData;
   children: React.ReactNode;
 }
 

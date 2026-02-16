@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -51,32 +51,37 @@ export function EngineMonitorPanel<
 }: EngineMonitorPanelProps<T_OPTIONS, T_INFO, T_RESULT>) {
   const { strings } = useEngineUI();
   const { state, status, search, stop } = useEngineMonitor(engine);
+  const panelId = useId();
+  const titleId = `engine-monitor-title-${panelId}`;
 
   const bestPV = state.pvs[0];
   const displayTitle = title ?? strings.title;
 
   // 2026 Best Practice: IEngine インターフェースの公式 API を使用して型安全にイベント発行
-  const emitUIInteraction = (action: string) => {
-    engine.emitTelemetry({
-      type: "lifecycle",
-      timestamp: Date.now(),
-      metadata: {
-        component: "EngineMonitorPanel",
-        action,
-        engineId: engine.id,
-      },
-    });
-  };
+  const emitUIInteraction = useCallback(
+    (action: string) => {
+      engine.emitTelemetry({
+        type: "lifecycle",
+        timestamp: Date.now(),
+        metadata: {
+          component: "EngineMonitorPanel",
+          action,
+          engineId: engine.id,
+        },
+      });
+    },
+    [engine],
+  );
 
-  const handleStart = () => {
+  const handleStart = useCallback(() => {
     emitUIInteraction("start_click");
     void search(searchOptions);
-  };
+  }, [emitUIInteraction, search, searchOptions]);
 
-  const handleStop = () => {
+  const handleStop = useCallback(() => {
     emitUIInteraction("stop_click");
     void stop();
-  };
+  }, [emitUIInteraction, stop]);
 
   // アクセシビリティ用：重要なステータス変更のアナウンス
   const announcement = useMemo(() => {
@@ -92,7 +97,7 @@ export function EngineMonitorPanel<
         "flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg focus-within:ring-2 focus-within:ring-blue-500/20 transition-shadow",
         className,
       )}
-      aria-labelledby="engine-monitor-title"
+      aria-labelledby={titleId}
     >
       <div className="sr-only" aria-live="assertive" role="alert">
         {announcement}
@@ -106,10 +111,7 @@ export function EngineMonitorPanel<
           aria-live="polite"
         >
           <Settings2 className="w-4 h-4 text-gray-500" aria-hidden="true" />
-          <h2
-            id="engine-monitor-title"
-            className="font-bold text-gray-700 text-sm"
-          >
+          <h2 id={titleId} className="font-bold text-gray-700 text-sm">
             {displayTitle}
           </h2>
           <span
@@ -152,7 +154,7 @@ export function EngineMonitorPanel<
       <div className="flex-1 flex flex-col min-h-0">
         {status === "error" ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-red-500 bg-red-50/30">
-            <AlertCircle className="w-12 h-12 mb-4 animate-bounce" />
+            <AlertCircle className="w-12 h-12 mb-4 animate-bounce motion-reduce:animate-none" />
             <h3 className="font-bold mb-1">{strings.errorTitle}</h3>
             <p className="text-xs text-red-400 max-w-[240px]">
               {engine.lastError?.remediation || strings.errorDefaultRemediation}
@@ -206,10 +208,7 @@ export function EngineMonitorPanel<
               </div>
               <ScrollArea.Root className="flex-1 overflow-hidden">
                 <ScrollArea.Viewport className="h-full w-full p-4">
-                  <PVList
-                    pvs={state.pvs}
-                    onMoveClick={(m) => onMoveClick?.(m)}
-                  />
+                  <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
                 </ScrollArea.Viewport>
                 <ScrollArea.Scrollbar
                   className="flex select-none touch-none p-0.5 bg-gray-100/50 transition-colors duration-150 ease-out hover:bg-gray-200 data-[orientation=vertical]:w-2"
