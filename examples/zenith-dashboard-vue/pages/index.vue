@@ -144,39 +144,20 @@ const protocolLabel = computed(() =>
     </div>
 
     <!-- Main Analysis Area -->
-    <div
-      v-if="bridge"
-      class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
-    >
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <div class="lg:col-span-4 xl:col-span-3">
-        <ClientOnly>
-          <EngineMonitorPanel
-            v-if="activeEngine === 'chess' && chessEngine"
-            :engine="(chessEngine as any)"
-            :search-options="chessOptions"
-            title="Stockfish 16.1"
-          />
-          <EngineMonitorPanel
-            v-if="activeEngine === 'shogi' && shogiEngine"
-            :engine="(shogiEngine as any)"
-            :search-options="shogiOptions"
-            title="Yaneuraou 7.5.0"
-          />
-          <template #fallback>
-            <div
-              class="flex items-center justify-center h-64 bg-white rounded-xl border border-gray-200 shadow-lg"
-            >
-              <div class="text-center">
-                <div
-                  class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"
-                />
-                <p class="text-sm text-gray-400 font-medium">
-                  Loading Engine...
-                </p>
-              </div>
-            </div>
-          </template>
-        </ClientOnly>
+        <EngineMonitorPanel
+          v-if="activeEngine === 'chess' && chessEngine"
+          :engine="(chessEngine as any)"
+          :search-options="chessOptions"
+          title="Stockfish 16.1"
+        />
+        <EngineMonitorPanel
+          v-if="activeEngine === 'shogi' && shogiEngine"
+          :engine="(shogiEngine as any)"
+          :search-options="shogiOptions"
+          title="Yaneuraou 7.5.0"
+        />
       </div>
 
       <div class="lg:col-span-8 xl:col-span-9 space-y-4">

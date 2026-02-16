@@ -4,9 +4,11 @@ import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
 
 let bridge: EngineBridge | null = null;
 
-export function getBridge(): EngineBridge | null {
-  if (import.meta.server) return null;
-
+/**
+ * Returns a singleton EngineBridge instance.
+ * Safe to call unconditionally — ssr: false ensures this only runs on the client.
+ */
+export function getBridge(): EngineBridge {
   if (!bridge) {
     bridge = new EngineBridge();
     void bridge.registerAdapter(new StockfishAdapter());
