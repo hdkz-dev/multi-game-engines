@@ -1,5 +1,16 @@
 import { ResourceMap } from "../types.js";
 
+interface MessagePayload {
+  type: string;
+  resources?: ResourceMap;
+  [key: string]: unknown;
+}
+
+interface WorkerGlobalScope {
+  postMessage: (message: unknown) => void;
+  onmessage: ((ev: MessageEvent) => void) | null;
+}
+
 /**
  * Worker 側でリソースの注入とパス解決を管理するユーティリティ。
  */
@@ -14,15 +25,32 @@ export class ResourceInjector {
    */
   static listen(onMessage?: (ev: MessageEvent) => void): void {
     const handler = (ev: MessageEvent) => {
-      if (ev.data && ev.data.type === "MG_INJECT_RESOURCES") {
-        this.resources = { ...this.resources, ...ev.data.resources };
+      const data = ev.data;
+
+      // 1. 最小限の構造チェック（パッシブ・フィルタリング）
+      if (!data || typeof data !== "object") return;
+
+      const payload = data as MessagePayload;
+
+      // 2. アクティブなコマンド処理
+      if (payload.type === "MG_INJECT_RESOURCES") {
+        // ADR-026: Refuse by Exception (厳格なランタイム検証)
+        if (!payload.resources || typeof payload.resources !== "object") {
+          throw new Error(
+            "[ResourceInjector] Protocol Error: Invalid or missing resources in MG_INJECT_RESOURCES",
+          );
+        }
+
+        this.resources = { ...this.resources, ...payload.resources };
         this.isReady = true;
 
         // 注入完了をホストに通知（ハンドシェイク）
-        if (typeof self !== "undefined") {
-          (
-            self as unknown as { postMessage: (msg: unknown) => void }
-          ).postMessage({
+        if (
+          typeof self !== "undefined" &&
+          typeof (self as unknown as WorkerGlobalScope).postMessage ===
+            "function"
+        ) {
+          (self as unknown as WorkerGlobalScope).postMessage({
             type: "MG_RESOURCES_READY",
           });
         }
@@ -32,15 +60,19 @@ export class ResourceInjector {
         callbacks.forEach((cb) => cb());
         return;
       }
+
       if (onMessage) {
         onMessage(ev);
       }
     };
 
-    if (typeof addEventListener !== "undefined") {
-      addEventListener("message", handler);
-    } else if (typeof self !== "undefined") {
-      (self as unknown as { onmessage: unknown }).onmessage = handler;
+    if (typeof globalThis.addEventListener === "function") {
+      globalThis.addEventListener("message", handler);
+    } else if (
+      typeof self !== "undefined" &&
+      "onmessage" in (self as unknown as object)
+    ) {
+      (self as unknown as WorkerGlobalScope).onmessage = handler;
     }
   }
 
