@@ -71,7 +71,6 @@ const protocolLabel = computed(() =>
         aria-label="Engine selector"
       >
         <button
-          @click="activeEngine = 'chess'"
           :aria-pressed="activeEngine === 'chess'"
           :class="[
             'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
@@ -79,12 +78,12 @@ const protocolLabel = computed(() =>
               ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
               : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
           ]"
+          @click="activeEngine = 'chess'"
         >
           <Trophy class="w-4 h-4" />
           CHESS
         </button>
         <button
-          @click="activeEngine = 'shogi'"
           :aria-pressed="activeEngine === 'shogi'"
           :class="[
             'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
@@ -92,6 +91,7 @@ const protocolLabel = computed(() =>
               ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
               : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
           ]"
+          @click="activeEngine = 'shogi'"
         >
           <Sword class="w-4 h-4" />
           SHOGI
