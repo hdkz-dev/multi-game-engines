@@ -1,5 +1,5 @@
 import type { Preview } from "@storybook/web-components-vite";
-import "../../ui-core/src/theme.css";
+import "@multi-game-engines/ui-core/theme.css";
 
 const preview: Preview = {
   parameters: {

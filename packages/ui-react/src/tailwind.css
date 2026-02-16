@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../../ui-core/src/theme.css";
+@import "@multi-game-engines/ui-core/theme.css";
 
 @theme {
   /* グローバルトークンを Tailwind テーマにマッピング */
