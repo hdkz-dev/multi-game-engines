@@ -4,7 +4,7 @@ import {
   EvaluationScore,
   EvaluationPresenter,
 } from "@multi-game-engines/ui-core";
-import { useEngineUI } from "./useEngineUI"; // 後ほど作成
+import { useEngineUI } from "./useEngineUI.js"; // 後ほど作成
 
 interface Props {
   score: EvaluationScore;

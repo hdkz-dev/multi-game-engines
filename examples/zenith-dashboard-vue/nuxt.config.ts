@@ -11,7 +11,8 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   vite: {
-    plugins: [tailwindcss()],
+    // @tailwindcss/vite returns Plugin[], but we use 'any' to bypass version mismatches in monorepo
+    plugins: [tailwindcss() as any],
   },
 
   // Monorepo パッケージをトランスパイル対象に含める

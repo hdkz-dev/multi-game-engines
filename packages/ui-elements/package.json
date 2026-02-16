@@ -24,8 +24,8 @@
   "license": "MIT",
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*",
     "lit": "^3.2.1"
   },
   "devDependencies": {
@@ -38,7 +38,7 @@
     "jsdom": "^28.1.0",
     "storybook": "10.2.8",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.5"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

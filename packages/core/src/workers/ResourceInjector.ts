@@ -11,6 +11,17 @@ interface WorkerGlobalScope {
   onmessage: ((ev: MessageEvent) => void) | null;
 }
 
+interface EmscriptenFS {
+  mkdir: (path: string) => void;
+  writeFile: (path: string, data: Uint8Array) => void;
+}
+
+interface EmscriptenModule {
+  FS?: EmscriptenFS;
+  locateFile?: (path: string, prefix: string) => string;
+  [key: string]: unknown;
+}
+
 /**
  * Worker 側でリソースの注入とパス解決を管理するユーティリティ。
  */
@@ -47,10 +58,11 @@ export class ResourceInjector {
         // 注入完了をホストに通知（ハンドシェイク）
         if (
           typeof self !== "undefined" &&
-          typeof (self as unknown as WorkerGlobalScope).postMessage ===
-            "function"
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          typeof (self as any).postMessage === "function"
         ) {
-          (self as unknown as WorkerGlobalScope).postMessage({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (self as any).postMessage({
             type: "MG_RESOURCES_READY",
           });
         }
@@ -111,11 +123,8 @@ export class ResourceInjector {
    * Emscripten 等の WASM ローダーが外部ファイルを fetch しようとする際に有効です。
    */
   static interceptFetch(): void {
-    const originalFetch = fetch;
-    (globalThis as unknown as { fetch: unknown }).fetch = async (
-      input: RequestInfo | URL,
-      init?: RequestInit,
-    ) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       const url =
         typeof input === "string"
           ? input
@@ -141,11 +150,9 @@ export class ResourceInjector {
    *
    * @param moduleParams Emscripten の Module オブジェクト（初期化前パラメータ）
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static adaptEmscriptenModule(moduleParams: any): void {
+  static adaptEmscriptenModule(moduleParams: EmscriptenModule): void {
     if (!moduleParams) return;
 
-     
     const originalLocateFile = moduleParams.locateFile;
 
     moduleParams.locateFile = (path: string, prefix: string) => {
@@ -174,9 +181,8 @@ export class ResourceInjector {
    * @param vfsPath VFS 上の配置パス (例: "/eval.nnue")
    * @param resourceKey ResourceMap のキー (例: "eval.nnue")
    */
-   
   static async mountToVFS(
-    moduleInstance: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    moduleInstance: EmscriptenModule,
     vfsPath: string,
     resourceKey: string,
   ): Promise<void> {
@@ -193,7 +199,7 @@ export class ResourceInjector {
     }
 
     try {
-      const response = await fetch(blobUrl);
+      const response = await globalThis.fetch(blobUrl);
       if (!response.ok)
         throw new Error(`Failed to fetch resource: ${response.statusText}`);
 
@@ -210,8 +216,8 @@ export class ResourceInjector {
             moduleInstance.FS.mkdir(currentPath);
           } catch (e: unknown) {
             // ディレクトリが既にある場合は無視 (EEXIST)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((e as any).code !== "EEXIST") throw e;
+            const error = e as { code?: string };
+            if (error.code !== "EEXIST") throw e;
           }
         }
       }
@@ -220,7 +226,9 @@ export class ResourceInjector {
     } catch (error: unknown) {
       throw new Error(
         `[ResourceInjector] Failed to mount "${resourceKey}" to "${vfsPath}": ${error}`,
-        { cause: error },
+        {
+          cause: error,
+        },
       );
     }
   }

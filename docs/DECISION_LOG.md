@@ -10,6 +10,7 @@
 - [ADR-002: Async Iterable によるストリーミング通信](adr/002-async-iterable.md)
 - [ADR-014: Core と Adapter の物理的な分離](adr/014-mit-license-architecture.md)
 - [ADR-031: 厳格な TypeScript モノレポ構成とプロジェクト参照の導入](adr/031-strict-typescript-monorepo.md)
+- [ADR-032: 2026年Q1最新技術スタック (Zenith Tier) への移行](adr/032-zenith-tech-stack-2026.md)
 
 ## 📦 リソース管理とセキュリティ (Resources & Security)
 

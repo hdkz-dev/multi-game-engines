@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import ScoreBadge from "./ScoreBadge.vue";
-import { useEngineUI } from "./useEngineUI";
+import { useEngineUI } from "./useEngineUI.js";
 
 interface Props {
   pvs: PrincipalVariation[];

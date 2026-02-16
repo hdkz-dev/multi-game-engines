@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SearchStatistics } from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
-import { useEngineUI } from "./useEngineUI";
+import { useEngineUI } from "./useEngineUI.js";
 
 interface Props {
   stats: SearchStatistics;

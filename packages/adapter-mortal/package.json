@@ -35,11 +35,11 @@
     "@multi-game-engines/core": "^0.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "@multi-game-engines/core": "workspace:*",
+    "eslint": "^9.39.2",
     "tsup": "^8.5.1",
-    "vitest": "^4.0.18",
-    "eslint": "^10.0.0",
-    "@multi-game-engines/core": "workspace:*"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts",
@@ -49,6 +49,6 @@
     "lint": "eslint ."
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   }
 }

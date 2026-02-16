@@ -56,14 +56,14 @@ describe("ResourceInjector", () => {
       const mockModule = { FS: mockFS };
 
       // Mock fetch
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });
 
       await ResourceInjector.mountToVFS(mockModule, "/eval.nnue", "eval.nnue");
 
-      expect(global.fetch).toHaveBeenCalledWith("blob:eval-url");
+      expect(globalThis.fetch).toHaveBeenCalledWith("blob:eval-url");
       expect(mockFS.writeFile).toHaveBeenCalledWith(
         "/eval.nnue",
         expect.any(Uint8Array),
@@ -82,7 +82,7 @@ describe("ResourceInjector", () => {
       };
       const mockModule = { FS: mockFS };
 
-      global.fetch = vi.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });

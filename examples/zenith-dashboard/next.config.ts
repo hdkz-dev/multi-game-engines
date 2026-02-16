@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     "@multi-game-engines/ui-react",
     "@multi-game-engines/i18n",
   ],
+  reactCompiler: true,
 };
 
 export default nextConfig;

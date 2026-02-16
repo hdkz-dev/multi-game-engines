@@ -18,12 +18,12 @@
     "@multi-game-engines/i18n": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-vue": "workspace:*",
-    "lucide-vue-next": "^0.475.0",
-    "nuxt": "^3.17.0",
+    "lucide-vue-next": "^0.564.0",
+    "nuxt": "^4.3.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.0.7",
     "@typescript-eslint/eslint-plugin": "^8.55.0",
     "@typescript-eslint/parser": "^8.55.0",
@@ -32,8 +32,9 @@
     "eslint-plugin-vue": "^10.8.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4.0.7",
-    "typescript": "^5.7.3",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vue-eslint-parser": "^10.4.0",
-    "vue-tsc": "^2.2.0"
+    "vue-tsc": "^3.2.4"
   }
 }
