@@ -33,7 +33,7 @@ describe("SearchStateTransformer", () => {
     let state = SearchStateTransformer.mergeInfo(initialState, info1);
 
     expect(state.pvs).toHaveLength(1);
-    expect(state.pvs[0].multipv).toBe(2);
+    expect(state.pvs[0]?.multipv).toBe(2);
 
     const info2: ExtendedSearchInfo = {
       multipv: 1,
@@ -43,8 +43,8 @@ describe("SearchStateTransformer", () => {
     state = SearchStateTransformer.mergeInfo(state, info2);
 
     expect(state.pvs).toHaveLength(2);
-    expect(state.pvs[0].multipv).toBe(1);
-    expect(state.pvs[1].multipv).toBe(2);
+    expect(state.pvs[0]?.multipv).toBe(1);
+    expect(state.pvs[1]?.multipv).toBe(2);
   });
 
   it("should update existing PV", () => {
@@ -63,8 +63,8 @@ describe("SearchStateTransformer", () => {
     state = SearchStateTransformer.mergeInfo(state, info2);
 
     expect(state.pvs).toHaveLength(1);
-    expect(state.pvs[0].score.value).toBe(20);
-    expect(state.pvs[0].moves).toEqual(["e2e4", "e7e5"]);
+    expect(state.pvs[0]?.score.value).toBe(20);
+    expect(state.pvs[0]?.moves).toEqual(["e2e4", "e7e5"]);
   });
 
   it("should handle mate scores", () => {
@@ -75,8 +75,8 @@ describe("SearchStateTransformer", () => {
     };
     const state = SearchStateTransformer.mergeInfo(initialState, info);
 
-    expect(state.pvs[0].score.type).toBe("mate");
-    expect(state.pvs[0].score.value).toBe(5);
+    expect(state.pvs[0]?.score.type).toBe("mate");
+    expect(state.pvs[0]?.score.value).toBe(5);
   });
 
   it("should handle negative mate scores (opponent winning)", () => {
@@ -87,8 +87,8 @@ describe("SearchStateTransformer", () => {
     };
     const state = SearchStateTransformer.mergeInfo(initialState, info);
 
-    expect(state.pvs[0].score.type).toBe("mate");
-    expect(state.pvs[0].score.value).toBe(-3);
+    expect(state.pvs[0]?.score.type).toBe("mate");
+    expect(state.pvs[0]?.score.value).toBe(-3);
   });
 
   it("should handle missing score gracefully (defaults to cp: 0)", () => {
@@ -99,8 +99,8 @@ describe("SearchStateTransformer", () => {
     };
     const state = SearchStateTransformer.mergeInfo(initialState, info);
 
-    expect(state.pvs[0].score.type).toBe("cp");
-    expect(state.pvs[0].score.value).toBe(0);
+    expect(state.pvs[0]?.score.type).toBe("cp");
+    expect(state.pvs[0]?.score.value).toBe(0);
   });
 
   it("should prioritize mate over cp when both are present", () => {
@@ -112,7 +112,7 @@ describe("SearchStateTransformer", () => {
     const state = SearchStateTransformer.mergeInfo(initialState, info);
 
     // mate takes priority in the transformer logic
-    expect(state.pvs[0].score.type).toBe("mate");
-    expect(state.pvs[0].score.value).toBe(2);
+    expect(state.pvs[0]?.score.type).toBe("mate");
+    expect(state.pvs[0]?.score.value).toBe(2);
   });
 });

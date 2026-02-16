@@ -67,10 +67,10 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
         />
 
         {/* 最新のポイント */}
-        {points.length > 0 && (
+        {points.length > 0 && points[points.length - 1] && (
           <circle
-            cx={points[points.length - 1].x}
-            cy={points[points.length - 1].y}
+            cx={points[points.length - 1]!.x}
+            cy={points[points.length - 1]!.y}
             r="3"
             className="fill-blue-500 dark:fill-blue-400"
           />

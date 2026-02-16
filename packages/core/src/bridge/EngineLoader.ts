@@ -154,7 +154,11 @@ export class EngineLoader implements IEngineLoader {
           this.revoke(res.value.url);
         }
       }
-      throw failures[0].reason;
+      const firstFailure = failures[0];
+      if (firstFailure) {
+        throw firstFailure.reason;
+      }
+      throw new Error("Unknown error during resource loading");
     }
 
     for (const res of settledResults) {

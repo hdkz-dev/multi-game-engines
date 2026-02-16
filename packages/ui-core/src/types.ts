@@ -27,12 +27,12 @@ export interface EvaluationScore {
  */
 export interface SearchStatistics {
   depth: number;
-  seldepth?: number;
+  seldepth?: number | undefined;
   nodes: number;
   nps: number;
   time: number;
-  visits?: number;
-  hashfull?: number;
+  visits?: number | undefined;
+  hashfull?: number | undefined;
 }
 
 /**
@@ -60,17 +60,14 @@ export interface IEvaluationHistory {
   maxEntries: number;
 }
 
-/**
- * UIが表示すべきエンジン思考の全体状態
- */
 export interface EngineSearchState {
   isSearching: boolean;
   position: PositionString;
   stats: SearchStatistics;
   pvs: PrincipalVariation[];
   evaluationHistory: IEvaluationHistory;
-  currentMove?: Move;
-  currentMoveNumber?: number;
+  currentMove?: Move | undefined;
+  currentMoveNumber?: number | undefined;
 }
 
 /**

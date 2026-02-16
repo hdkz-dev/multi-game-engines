@@ -11,4 +11,5 @@ export default defineConfig({
   },
   external: ["react", "react-dom"],
   injectStyle: false, // CSS は別途書き出す
+  tsconfig: "tsconfig.build.json",
 });

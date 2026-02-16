@@ -123,13 +123,13 @@ describe("EvaluationPresenter", () => {
       );
       expect(points).toHaveLength(4);
       // y=50 (center) for 0 score
-      expect(points[0].y).toBe(50);
+      expect(points[0]?.y).toBe(50);
       // y=25 for +500 score (halfway to top)
-      expect(points[1].y).toBe(25);
+      expect(points[1]?.y).toBe(25);
       // y=100 for -1000 score (bottom)
-      expect(points[2].y).toBe(100);
+      expect(points[2]?.y).toBe(100);
       // y=0 for mate > 0 (top)
-      expect(points[3].y).toBe(0);
+      expect(points[3]?.y).toBe(0);
     });
 
     it("should return empty array for no entries", () => {

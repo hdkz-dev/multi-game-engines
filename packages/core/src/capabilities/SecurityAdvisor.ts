@@ -26,18 +26,29 @@ export class SecurityAdvisor {
     // 2026 Best Practice: 最強アルゴリズムを特定し、それのみを検証対象とする (Algorithm Agility)
     let strongestLevel = 0;
     for (const hash of hashes) {
-      const [algo] = hash.split("-");
-      const priority = algoPriority[algo];
-      if (priority > strongestLevel) strongestLevel = priority;
+      const parts = hash.split("-");
+      const algo = parts[0];
+      if (algo) {
+        const priority = algoPriority[algo];
+        if (priority !== undefined && priority > strongestLevel) {
+          strongestLevel = priority;
+        }
+      }
     }
 
     if (strongestLevel === 0) return false;
 
     for (const hash of hashes) {
-      const [algo, expectedBase64] = hash.split("-");
+      const parts = hash.split("-");
+      const algo = parts[0];
+      const expectedBase64 = parts[1];
+
+      if (!algo || !expectedBase64) continue;
       if (algoPriority[algo] !== strongestLevel) continue;
 
       const webCryptoAlgo = algoMap[algo];
+      if (!webCryptoAlgo) continue;
+
       const digest = await crypto.subtle.digest(webCryptoAlgo, data);
       const actualBase64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
 

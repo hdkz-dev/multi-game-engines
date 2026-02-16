@@ -63,7 +63,9 @@ describe("DefaultTelemetryMiddleware", () => {
 
     // 4. Verify Telemetry
     expect(emitTelemetrySpy).toHaveBeenCalledTimes(1);
-    const event: ITelemetryEvent = emitTelemetrySpy.mock.calls[0][0];
+    const firstCall = emitTelemetrySpy.mock.calls[0];
+    if (!firstCall) throw new Error("Expected at least one call");
+    const event: ITelemetryEvent = firstCall[0];
 
     expect(event.type).toBe("performance");
     expect(event.duration).toBe(100);

@@ -6,8 +6,10 @@ import { cn } from "./utils/cn.js";
 
 interface PVListProps {
   pvs: PrincipalVariation[];
-  onMoveClick?: (move: string, index: number, pv: PrincipalVariation) => void;
-  className?: string;
+  onMoveClick?:
+    | ((move: string, index: number, pv: PrincipalVariation) => void)
+    | undefined;
+  className?: string | undefined;
 }
 
 /**

@@ -4,13 +4,13 @@ import { EngineErrorCode } from "../types.js";
 export interface IEngineErrorOptions {
   code: EngineErrorCode;
   message: string;
-  engineId?: string;
+  engineId?: string | undefined;
   originalError?: unknown;
   /**
    * 解決策の提示 (開発者向けデバッグ情報)
    * 将来的にユーザーへ表示する場合は i18n キーへの置き換えを検討してください。
    */
-  remediation?: string;
+  remediation?: string | undefined;
 }
 
 /**
@@ -18,9 +18,9 @@ export interface IEngineErrorOptions {
  */
 export class EngineError extends Error {
   public readonly code: EngineErrorCode;
-  public readonly engineId?: string;
+  public readonly engineId?: string | undefined;
   public readonly originalError?: unknown;
-  public readonly remediation?: string;
+  public readonly remediation?: string | undefined;
 
   constructor(opts: IEngineErrorOptions) {
     super(opts.message);

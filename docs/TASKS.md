@@ -29,6 +29,7 @@
 - [x] **楽観的 UI**: `CommandDispatcher` による状態同期の安定化。
 - [x] **デザイントークン統一**: CSS Variables によるフレームワーク横断的なテーマ管理。
 - [x] **セキュリティポリシー刷新**: SRI 必須化と「Refuse by Exception」の明文化。
+- [x] **厳格な型安全性の追求 (Zenith Tier)**: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, および `Project References` の全パッケージ適用。
 - [ ] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
 - [x] **UIコンポーネント拡充**: 評価値の時系列グラフの実装。
 - [ ] **UIコンポーネント拡充**: 思考ログの永続化表示。

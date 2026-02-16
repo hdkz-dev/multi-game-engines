@@ -76,8 +76,8 @@ export type EngineStatus =
  * 探索オプション。
  */
 export interface IBaseSearchOptions {
-  fen?: FEN | PositionString;
-  signal?: AbortSignal;
+  fen?: FEN | PositionString | undefined;
+  signal?: AbortSignal | undefined;
   [key: string]: unknown;
 }
 
@@ -87,32 +87,32 @@ export interface IBaseSearchOptions {
  */
 export interface IScoreInfo {
   /** 評価値（センチポーン。主にチェス・将棋で使用） */
-  cp?: number;
+  cp?: number | undefined;
   /** 詰みまでの手数（主にチェス・将棋で使用） */
-  mate?: number;
+  mate?: number | undefined;
   /** 得点差（囲碁のコミ後点数、オセロの石数差など） */
-  points?: number;
+  points?: number | undefined;
   /** 勝率 (0.0 - 1.0)。確率論的な評価を行うエンジンで使用。 */
-  winrate?: number;
+  winrate?: number | undefined;
 }
 
 /**
  * 探索状況情報。
  */
 export interface IBaseSearchInfo {
-  depth?: number;
-  seldepth?: number;
-  nodes?: number;
-  nps?: number;
-  time?: number;
-  pv?: Move[];
-  multipv?: number;
+  depth?: number | undefined;
+  seldepth?: number | undefined;
+  nodes?: number | undefined;
+  nps?: number | undefined;
+  time?: number | undefined;
+  pv?: Move[] | undefined;
+  multipv?: number | undefined;
   /** 思考の複雑さ・規模を示す追加指標（囲碁の visits など） */
-  visits?: number;
+  visits?: number | undefined;
   /** ハッシュテーブルの使用率 (0 - 1000) */
-  hashfull?: number;
+  hashfull?: number | undefined;
   /** 構造化スコア。cp, mate, points, winrate を統合して保持する。 */
-  score?: IScoreInfo;
+  score?: IScoreInfo | undefined;
   [key: string]: unknown;
 }
 
@@ -158,7 +158,7 @@ export interface ISecurityStatus {
   sriSupported: boolean;
   canUseThreads: boolean;
   isCrossOriginIsolated: boolean;
-  missingHeaders?: string[];
+  missingHeaders?: string[] | undefined;
 }
 
 /**
@@ -182,8 +182,8 @@ export enum EngineErrorCode {
 export interface EngineError {
   message: string;
   code: EngineErrorCode;
-  remediation?: string;
-  engineId?: string;
+  remediation?: string | undefined;
+  engineId?: string | undefined;
 }
 
 /**
