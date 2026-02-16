@@ -62,6 +62,21 @@ export const SearchStateTransformer = {
         nextPvs.push(newPV);
       }
 
+      // 履歴の更新 (MultiPV=1 の場合のみ)
+      if (validatedInfo.multipv === 1) {
+        const nextEntries = [
+          ...state.evaluationHistory.entries,
+          { score: newPV.score, timestamp: Date.now() },
+        ];
+        if (nextEntries.length > state.evaluationHistory.maxEntries) {
+          nextEntries.shift();
+        }
+        nextState.evaluationHistory = {
+          ...state.evaluationHistory,
+          entries: nextEntries,
+        };
+      }
+
       // MultiPV 順にソート
       nextPvs.sort((a, b) => a.multipv - b.multipv);
     }
@@ -82,6 +97,10 @@ export const SearchStateTransformer = {
         nodes: 0,
         nps: 0,
         time: 0,
+      },
+      evaluationHistory: {
+        entries: [],
+        maxEntries: 50,
       },
     };
   },

@@ -23,6 +23,7 @@ export class EngineLoader implements IEngineLoader {
       case "eval-data":
       case "native":
       case "webgpu-compute":
+      case "asset":
         return "application/octet-stream";
       case "worker-js":
       default:

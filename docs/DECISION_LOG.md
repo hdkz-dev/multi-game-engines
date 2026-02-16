@@ -25,6 +25,7 @@
 - [ADR-024: ハンドルベースのライフサイクル管理と共有アダプターの保護](adr/024-handle-based-lifecycle.md)
 - [ADR-025: Core とアダプターのドメイン情報の分離 (Pure Domain Info)](adr/025-pure-domain-info.md)
 - [ADR-026: プロトコル入力検証の「拒否」への格上げ (Refuse by Exception)](adr/026-refuse-by-exception.md)
+- [ADR-030: 構造化スコア情報の統一 (Structured Score Information)](adr/030-structured-score-unification.md)
 
 ## 🚀 リリースと統合 (Release & Integration)
 

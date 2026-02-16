@@ -6,7 +6,7 @@
   --color-engine-busy: var(--mge-color-engine-busy);
   --color-engine-ready: var(--mge-color-engine-ready);
   --color-engine-loading: var(--mge-color-engine-loading);
-  
+
   --color-score-plus: var(--mge-color-score-plus);
   --color-score-minus: var(--mge-color-score-minus);
   --color-score-mate: var(--mge-color-score-mate);

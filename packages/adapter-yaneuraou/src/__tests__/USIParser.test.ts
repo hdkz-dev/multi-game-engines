@@ -1,46 +1,183 @@
 import { describe, it, expect } from "vitest";
 import { USIParser } from "../USIParser.js";
-import { SFEN } from "../usi-types.js";
+import { SFEN, createSFEN } from "../usi-types.js";
 
 describe("USIParser", () => {
   const parser = new USIParser();
 
-  it("should parse info correctly", () => {
-    const info = parser.parseInfo("info depth 10 score cp 100");
-    expect(info?.raw).toBeDefined();
+  // ─── parseInfo: 構造化スコア ───────────────────────
+
+  describe("parseInfo - score", () => {
+    it("should parse score cp as structured { cp } object", () => {
+      const info = parser.parseInfo("info depth 10 score cp 100");
+      expect(info).not.toBeNull();
+      expect(info!.score).toEqual({ cp: 100 });
+      expect(info!.depth).toBe(10);
+    });
+
+    it("should parse negative cp score correctly", () => {
+      const info = parser.parseInfo("info depth 5 score cp -150");
+      expect(info).not.toBeNull();
+      expect(info!.score).toEqual({ cp: -150 });
+    });
+
+    it("should parse zero cp score correctly", () => {
+      const info = parser.parseInfo("info depth 8 score cp 0");
+      expect(info).not.toBeNull();
+      expect(info!.score).toEqual({ cp: 0 });
+    });
+
+    it("should parse positive mate score as structured { mate } object", () => {
+      const info = parser.parseInfo("info score mate 5");
+      expect(info).not.toBeNull();
+      expect(info!.score).toEqual({ mate: 5 });
+    });
+
+    it("should parse negative mate score (opponent winning)", () => {
+      const info = parser.parseInfo("info score mate -3");
+      expect(info).not.toBeNull();
+      expect(info!.score).toEqual({ mate: -3 });
+    });
   });
 
-  it("should parse bestmove correctly", () => {
-    const result = parser.parseResult("bestmove 7g7f");
-    expect(result?.bestMove).toBe("7g7f");
+  // ─── parseInfo: その他のフィールド ─────────────────
+
+  describe("parseInfo - fields", () => {
+    it("should parse seldepth correctly", () => {
+      const info = parser.parseInfo("info depth 12 seldepth 20");
+      expect(info!.seldepth).toBe(20);
+    });
+
+    it("should parse nodes correctly", () => {
+      const info = parser.parseInfo("info depth 10 nodes 500000");
+      expect(info!.nodes).toBe(500000);
+    });
+
+    it("should parse nps correctly", () => {
+      const info = parser.parseInfo("info depth 10 nps 2000000");
+      expect(info!.nps).toBe(2000000);
+    });
+
+    it("should parse time correctly", () => {
+      const info = parser.parseInfo("info depth 10 time 1500");
+      expect(info!.time).toBe(1500);
+    });
+
+    it("should parse pv with multiple moves", () => {
+      const info = parser.parseInfo("info depth 10 pv 7g7f 3c3d 2g2f");
+      expect(info!.pv).toEqual(["7g7f", "3c3d", "2g2f"]);
+    });
+
+    it("should preserve raw line", () => {
+      const line = "info depth 10 score cp 50";
+      const info = parser.parseInfo(line);
+      expect(info!.raw).toBe(line);
+    });
   });
 
-  it("should reject non-standard fullwidth asterisk in bestmove", () => {
-    const result = parser.parseResult("bestmove 7g7f＊");
-    expect(result).toBeNull();
+  // ─── parseInfo: エッジケース ────────────────────────
+
+  describe("parseInfo - edge cases", () => {
+    it("should return null for non-info lines", () => {
+      expect(parser.parseInfo("bestmove 7g7f")).toBeNull();
+    });
+
+    it("should return null for non-string input", () => {
+      expect(parser.parseInfo(123 as unknown as string)).toBeNull();
+    });
+
+    it("should handle info with only depth (no score)", () => {
+      const info = parser.parseInfo("info depth 15");
+      expect(info).not.toBeNull();
+      expect(info!.depth).toBe(15);
+      // score should remain at default initialization
+    });
   });
 
-  it("should throw error for injection in SFEN", () => {
-    expect(() =>
-      parser.createSearchCommand({
-        sfen: "startpos\nquit" as SFEN,
-        depth: 10,
-      }),
-    ).toThrow(/command injection/);
+  // ─── parseResult ────────────────────────────────────
+
+  describe("parseResult", () => {
+    it("should parse bestmove correctly", () => {
+      const result = parser.parseResult("bestmove 7g7f");
+      expect(result?.bestMove).toBe("7g7f");
+    });
+
+    it("should reject non-standard fullwidth asterisk in bestmove", () => {
+      const result = parser.parseResult("bestmove 7g7f＊");
+      expect(result).toBeNull();
+    });
+
+    it("should return null for non-bestmove lines", () => {
+      expect(parser.parseResult("info depth 20")).toBeNull();
+    });
   });
 
-  it("should create valid option command", () => {
-    expect(parser.createOptionCommand("USI_Hash", 256)).toBe(
-      "setoption name USI_Hash value 256",
+  // ─── createSearchCommand ────────────────────────────
+
+  describe("createSearchCommand", () => {
+    it("should throw error for injection in SFEN", () => {
+      expect(() =>
+        parser.createSearchCommand({
+          sfen: "startpos\nquit" as SFEN,
+          depth: 10,
+        }),
+      ).toThrow(/command injection/);
+    });
+
+    it("should create valid search command with SFEN and depth", () => {
+      const sfen =
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
+      const commands = parser.createSearchCommand({ sfen, depth: 15 });
+      expect(commands).toEqual([`position sfen ${sfen}`, "go depth 15"]);
+    });
+  });
+
+  // ─── createOptionCommand ────────────────────────────
+
+  describe("createOptionCommand", () => {
+    it("should create valid option command", () => {
+      expect(parser.createOptionCommand("USI_Hash", 256)).toBe(
+        "setoption name USI_Hash value 256",
+      );
+    });
+
+    it("should throw error for injection in option name", () => {
+      expect(() => parser.createOptionCommand("USI_Hash\nquit", 256)).toThrow(
+        /command injection/,
+      );
+    });
+
+    it("should throw error for injection in option value", () => {
+      expect(() => parser.createOptionCommand("USI_Hash", "256\nquit")).toThrow(
+        /command injection/,
+      );
+    });
+  });
+});
+
+// ─── createSFEN ファクトリ ──────────────────────────
+
+describe("createSFEN", () => {
+  it("should return a branded SFEN string for valid input", () => {
+    const sfen = createSFEN(
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    );
+    expect(sfen).toBe(
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
     );
   });
 
-  it("should throw error for injection in option name or value", () => {
-    expect(() => parser.createOptionCommand("USI_Hash\nquit", 256)).toThrow(
-      /command injection/,
-    );
-    expect(() => parser.createOptionCommand("USI_Hash", "256\nquit")).toThrow(
-      /command injection/,
+  it("should throw for an empty string", () => {
+    expect(() => createSFEN("")).toThrow(/Invalid SFEN/);
+  });
+
+  it("should throw for a whitespace-only string", () => {
+    expect(() => createSFEN("   ")).toThrow(/Invalid SFEN/);
+  });
+
+  it("should throw for non-string input", () => {
+    expect(() => createSFEN(undefined as unknown as string)).toThrow(
+      /Invalid SFEN/,
     );
   });
 });

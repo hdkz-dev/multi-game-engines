@@ -3,7 +3,7 @@ import {
   IMiddlewareContext,
   IBaseSearchOptions,
 } from "@multi-game-engines/core";
-import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
+import { SearchInfoSchema } from "./schema.js";
 
 /**
 

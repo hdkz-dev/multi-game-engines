@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { PrincipalVariation } from '@multi-game-engines/ui-core';
-import ScoreBadge from './ScoreBadge.vue';
-import { useEngineUI } from './useEngineUI';
+import { PrincipalVariation } from "@multi-game-engines/ui-core";
+import ScoreBadge from "./ScoreBadge.vue";
+import { useEngineUI } from "./useEngineUI";
 
 interface Props {
   pvs: PrincipalVariation[];
@@ -9,11 +9,11 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  className: ''
+  className: "",
 });
 
 const emit = defineEmits<{
-  (e: 'move-click', move: string, index: number, pv: PrincipalVariation): void
+  (e: "move-click", move: string, index: number, pv: PrincipalVariation): void;
 }>();
 
 const { strings } = useEngineUI();
@@ -43,7 +43,7 @@ const { strings } = useEngineUI();
           @click="emit('move-click', move.toString(), idx, pv)"
           :class="[
             'px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer',
-            idx === 0 ? 'font-bold' : 'text-gray-600'
+            idx === 0 ? 'font-bold' : 'text-gray-600',
           ]"
         >
           {{ move.toString() }}
@@ -51,7 +51,10 @@ const { strings } = useEngineUI();
       </div>
     </div>
 
-    <div v-if="pvs.length === 0" class="py-8 text-center text-gray-400 italic text-sm">
+    <div
+      v-if="pvs.length === 0"
+      class="py-8 text-center text-gray-400 italic text-sm"
+    >
       {{ strings.searching }}
     </div>
   </div>

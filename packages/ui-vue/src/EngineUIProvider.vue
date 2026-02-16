@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provideEngineUI } from './useEngineUI';
+import { provideEngineUI } from "./useEngineUI";
 
 const props = defineProps<{
   localeData: unknown;

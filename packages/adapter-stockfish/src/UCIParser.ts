@@ -30,6 +30,7 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
   nps?: number;
   time?: number;
   pv?: Move[];
+  hashfull?: number;
 }
 
 /** チェス用の探索結果 */
@@ -144,6 +145,18 @@ export class UCIParser implements IProtocolParser<
           info.pv = moves;
           break;
         }
+        case "seldepth":
+          info.seldepth = parseInt(val, 10) || 0;
+          i++;
+          break;
+        case "hashfull":
+          info.hashfull = parseInt(val, 10) || 0;
+          i++;
+          break;
+        case "multipv":
+          info.multipv = parseInt(val, 10) || 0;
+          i++;
+          break;
       }
     }
 

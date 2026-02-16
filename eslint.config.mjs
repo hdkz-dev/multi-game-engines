@@ -5,18 +5,25 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  eslint.configs.recommended, 
-  ...tseslint.configs.recommended, 
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    ignores: ["**/dist/**", "**/node_modules/**", "**/*.config.ts", "**/*.config.mjs"],
-  }, 
+    ignores: [
+      "**/dist/**",
+      "**/node_modules/**",
+      "**/storybook-static/**",
+      "**/.next/**",
+      "**/*.config.ts",
+      "**/*.config.mjs",
+    ],
+  },
   {
     languageOptions: {
       parserOptions: {
         project: true,
       },
     },
-  }, 
+  },
   ...storybook.configs["flat/recommended"],
   {
     rules: {
@@ -27,5 +34,5 @@ export default tseslint.config(
       ],
       "storybook/no-renderer-packages": "off", // 2026: Override recommended to allow @storybook/react types
     },
-  }
+  },
 );

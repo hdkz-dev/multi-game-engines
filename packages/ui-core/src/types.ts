@@ -44,6 +44,22 @@ export interface PrincipalVariation {
 }
 
 /**
+ * 評価値の履歴エントリ。
+ */
+export interface IEvaluationHistoryEntry {
+  score: EvaluationScore;
+  timestamp: number;
+}
+
+/**
+ * 評価値の履歴。
+ */
+export interface IEvaluationHistory {
+  entries: IEvaluationHistoryEntry[];
+  maxEntries: number;
+}
+
+/**
  * UIが表示すべきエンジン思考の全体状態
  */
 export interface EngineSearchState {
@@ -51,6 +67,7 @@ export interface EngineSearchState {
   position: PositionString;
   stats: SearchStatistics;
   pvs: PrincipalVariation[];
+  evaluationHistory: IEvaluationHistory;
   currentMove?: Move;
   currentMoveNumber?: number;
 }
@@ -70,4 +87,8 @@ export const createInitialState = (
     time: 0,
   },
   pvs: [],
+  evaluationHistory: {
+    entries: [],
+    maxEntries: 50,
+  },
 });

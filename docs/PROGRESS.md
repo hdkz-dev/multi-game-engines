@@ -1,9 +1,17 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月15日
+## 📅 更新日: 2026年2月16日
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith)
 
+- **構造化スコア情報の統一 (ADR-030)**:
+  - スコア表現を `{ cp, mate }` オブジェクトに統一し、詰みスコア用のマジックナンバーを廃止。
+  - `core` から `shogi-yaneuraou` / `stockfish` / `ui-core` に至る全レイヤーの型定義を刷新。
+  - 例外的な `as any` キャストを example プロジェクト（Vue/React）から完全に排除。
+  - チェス (`createFEN`) および将棋 (`createSFEN`) の Branded Type ファクトリにより、UI 層の完全な型安全性を達成。
+- **パーサーの堅牢化と機能拡充**:
+  - `UCIParser` および `USIParser` のテストを大幅強化し、境界値や負数、不完全な入力に対する耐性を証明。
+  - 標準 UCI トークン (`seldepth`, `hashfull`, `multipv`) のパース処理を追加実装。
 - **UI 基盤の極致 (Zenith Tier)**:
   - `ui-core` (Logic/Tokens), `ui-react`, `ui-vue`, `ui-elements` の三層アーキテクチャを確立。
   - 全フレームワークで共通の CSS デザイントークン（CSS Variables）を使用し、視覚的な一貫性を 100% 同期。

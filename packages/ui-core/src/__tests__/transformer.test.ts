@@ -78,4 +78,41 @@ describe("SearchStateTransformer", () => {
     expect(state.pvs[0].score.type).toBe("mate");
     expect(state.pvs[0].score.value).toBe(5);
   });
+
+  it("should handle negative mate scores (opponent winning)", () => {
+    const info: ExtendedSearchInfo = {
+      multipv: 1,
+      pv: ["e2e4"].map(createMove),
+      score: { mate: -3 },
+    };
+    const state = SearchStateTransformer.mergeInfo(initialState, info);
+
+    expect(state.pvs[0].score.type).toBe("mate");
+    expect(state.pvs[0].score.value).toBe(-3);
+  });
+
+  it("should handle missing score gracefully (defaults to cp: 0)", () => {
+    const info: ExtendedSearchInfo = {
+      multipv: 1,
+      pv: ["d2d4"].map(createMove),
+      // score is omitted
+    };
+    const state = SearchStateTransformer.mergeInfo(initialState, info);
+
+    expect(state.pvs[0].score.type).toBe("cp");
+    expect(state.pvs[0].score.value).toBe(0);
+  });
+
+  it("should prioritize mate over cp when both are present", () => {
+    const info: ExtendedSearchInfo = {
+      multipv: 1,
+      pv: ["g2g4"].map(createMove),
+      score: { cp: 100, mate: 2 },
+    };
+    const state = SearchStateTransformer.mergeInfo(initialState, info);
+
+    // mate takes priority in the transformer logic
+    expect(state.pvs[0].score.type).toBe("mate");
+    expect(state.pvs[0].score.value).toBe(2);
+  });
 });

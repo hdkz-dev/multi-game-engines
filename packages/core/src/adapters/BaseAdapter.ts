@@ -10,6 +10,7 @@ import {
   IProtocolParser,
   IEngineLoader,
   EngineErrorCode,
+  ResourceMap,
 } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -177,6 +178,29 @@ export abstract class BaseAdapter<
     } else {
       this.communicator?.postMessage(command);
     }
+  }
+
+  /**
+   * Worker にリソースマップを注入します。
+   * WASM の相対パス解決（NNUE 等）に使用されます。
+   */
+  protected async injectResources(resources: ResourceMap): Promise<void> {
+    if (!this.communicator) return;
+
+    // 2026 Best Practice: レースコンディション防止のため、注入完了のハンドシェイクを待機
+    const readyPromise = this.communicator.expectMessage(
+      (data) => {
+        return (data as Record<string, unknown>)?.type === "MG_RESOURCES_READY";
+      },
+      { timeoutMs: 5000 },
+    );
+
+    this.communicator.postMessage({
+      type: "MG_INJECT_RESOURCES",
+      resources,
+    });
+
+    await readyPromise;
   }
 
   /**

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { SearchStatistics } from '@multi-game-engines/ui-core';
-import { Gauge, Cpu, Layers, Timer } from 'lucide-vue-next';
-import { useEngineUI } from './useEngineUI';
+import { SearchStatistics } from "@multi-game-engines/ui-core";
+import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
+import { useEngineUI } from "./useEngineUI";
 
 interface Props {
   stats: SearchStatistics;
@@ -9,7 +9,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  className: ''
+  className: "",
 });
 
 const { strings } = useEngineUI();
@@ -18,8 +18,8 @@ const { strings } = useEngineUI();
  * 数値を読みやすい形式にフォーマット (1000 -> 1.0k, 1000000 -> 1.0M)
  */
 const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
   return num.toString();
 };
 </script>
@@ -28,7 +28,7 @@ const formatNumber = (num: number): string => {
   <div
     :class="[
       'grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg',
-      className
+      className,
     ]"
   >
     <!-- Depth -->
@@ -38,7 +38,7 @@ const formatNumber = (num: number): string => {
         <span>{{ strings.depth }}</span>
       </div>
       <div class="text-sm font-bold text-gray-900 font-mono">
-        {{ stats.depth }}{{ stats.seldepth ? `/${stats.seldepth}` : '' }}
+        {{ stats.depth }}{{ stats.seldepth ? `/${stats.seldepth}` : "" }}
       </div>
     </div>
 

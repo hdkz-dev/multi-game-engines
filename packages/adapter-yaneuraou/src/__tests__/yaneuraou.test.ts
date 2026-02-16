@@ -2,9 +2,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { YaneuraouAdapter } from "../yaneuraou.js";
 
 class MockWorker {
-  postMessage = vi.fn();
+  postMessage = vi.fn((msg) => {
+    if (msg?.type === "MG_INJECT_RESOURCES") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    }
+  });
   terminate = vi.fn();
-  onmessage: unknown = null;
+  onmessage: ((ev: { data: unknown }) => void) | null = null;
   onerror: unknown = null;
 }
 
