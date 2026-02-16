@@ -1,0 +1,25 @@
+{
+  "engine": {
+    "title": "Engine Analysis",
+    "status": "Status",
+    "depth": "Depth",
+    "nodes": "Nodes",
+    "nps": "NPS",
+    "time": "Time",
+    "topCandidate": "Top Candidate",
+    "principalVariations": "Principal Variations",
+    "start": "START",
+    "stop": "STOP",
+    "searching": "Searching...",
+    "ready": "Ready",
+    "mateIn": "Mate in {n}",
+    "advantage": "{side} +{v}",
+    "retry": "Retry",
+    "reloadResources": "Reload Resources",
+    "errorTitle": "Engine Error",
+    "errorDefaultRemediation": "Please check the connection and try again.",
+    "timeUnitSeconds": "s",
+    "noMove": "---",
+    "standard": "2026 Engine Bridge Standard"
+  }
+}

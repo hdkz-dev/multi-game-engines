@@ -1,0 +1,58 @@
+{
+  "name": "@multi-game-engines/ui-vue",
+  "version": "0.1.0",
+  "description": "Vue 3 composables and components for multi-game engines",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "vue": ">=3.3.0"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.564.0",
+    "tailwind-merge": "^3.4.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.2.8",
+    "@storybook/addon-docs": "10.2.8",
+    "@storybook/addon-links": "10.2.8",
+    "@storybook/addon-vitest": "10.2.8",
+    "@storybook/vue3": "10.2.8",
+    "@storybook/vue3-vite": "10.2.8",
+    "@tailwindcss/vite": "^4.0.0",
+    "@types/node": "^25.2.3",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^28.1.0",
+    "storybook": "10.2.8",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.18",
+    "vue": "^3.5.13",
+    "vue-tsc": "^3.2.4"
+  }
+}

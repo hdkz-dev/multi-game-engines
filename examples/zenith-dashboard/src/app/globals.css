@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-score-plus: var(--score-plus, #3b82f6);
+  --color-score-minus: var(--score-minus, #ef4444);
+  --color-score-mate: var(--score-mate, #8b5cf6);
+  --color-score-neutral: var(--score-neutral, #9ca3af);
+}
+
+:root {
+  --score-plus: #3b82f6;
+  --score-minus: #ef4444;
+  --score-mate: #8b5cf6;
+  --score-neutral: #9ca3af;
+}
+
+body {
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #030712;
+    color: #f9fafb;
+  }
+}

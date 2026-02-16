@@ -5,6 +5,15 @@ import {
   MiddlewarePriority,
 } from "../types.js";
 
+interface PerformanceWithMemory extends Performance {
+  memory?: {
+    usedJSHeapSize: number;
+    totalJSHeapSize: number;
+    jsHeapSizeLimit: number;
+  };
+  measureUserAgentSpecificMemory?: () => Promise<{ bytes: number }>;
+}
+
 /**
  * エンジンのパフォーマンスを自動計測する標準テレメトリ・ミドルウェア。
  */
@@ -33,10 +42,11 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
     const startTime = this.startTimes.get(context);
     if (startTime !== undefined) {
       const duration = performance.now() - startTime;
-      // 明示的に削除（GC を待たずに即時解放）
       this.startTimes.delete(context);
 
-      // テレメトリイベントの構築 (2026 Standard)
+      // 2026 Best Practice: メモリ使用量の計測 (Zenith Tier)
+      const memory = await this.captureMemoryUsage();
+
       const event: ITelemetryEvent = {
         type: "performance",
         timestamp: Date.now(),
@@ -45,12 +55,40 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
           action: "search",
           engineId: context.engineId,
           telemetryId: context.telemetryId,
+          memory,
         },
       };
 
       // コンテキスト経由でテレメトリを発行
-      context.emitTelemetry(event);
+      if (context.emitTelemetry) {
+        context.emitTelemetry(event);
+      }
     }
     return result;
+  }
+
+  private async captureMemoryUsage(): Promise<
+    Record<string, number> | undefined
+  > {
+    const mem: Record<string, number> = {};
+    const p = performance as PerformanceWithMemory;
+
+    // 1. Modern API (Zenith Tier 2026)
+    if (typeof p.measureUserAgentSpecificMemory === "function") {
+      try {
+        const result = await p.measureUserAgentSpecificMemory();
+        mem.bytes = result.bytes;
+      } catch (err) {
+        console.debug("[Telemetry] Failed to capture specific memory:", err);
+      }
+    }
+
+    // 2. Legacy API (Chromium)
+    if (p.memory) {
+      mem.usedJSHeapSize = p.memory.usedJSHeapSize;
+      mem.totalJSHeapSize = p.memory.totalJSHeapSize;
+    }
+
+    return Object.keys(mem).length > 0 ? mem : undefined;
   }
 }

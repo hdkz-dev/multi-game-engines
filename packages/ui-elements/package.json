@@ -1,0 +1,44 @@
+{
+  "name": "@multi-game-engines/ui-elements",
+  "version": "0.1.0",
+  "description": "Framework-agnostic Web Components for multi-game engines",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "dev": "tsup src/index.ts --format esm --watch --dts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6008",
+    "build-storybook": "storybook build"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.2.8",
+    "@storybook/addon-docs": "10.2.8",
+    "@storybook/addon-links": "10.2.8",
+    "@storybook/web-components": "10.2.8",
+    "@storybook/web-components-vite": "10.2.8",
+    "@vueless/storybook-dark-mode": "^10.0.7",
+    "jsdom": "^28.1.0",
+    "storybook": "10.2.8",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

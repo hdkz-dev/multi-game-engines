@@ -32,6 +32,7 @@ describe("EngineLoader", () => {
     vi.mocked(storage.get).mockResolvedValue(null);
     const config: IEngineSourceConfig = {
       url: "https://test.com/engine.js",
+      type: "script",
       sri: dummySRI,
       size: 100,
     };
@@ -47,6 +48,7 @@ describe("EngineLoader", () => {
     vi.mocked(storage.get).mockResolvedValue(data);
     const config: IEngineSourceConfig = {
       url: "https://test.com/engine.js",
+      type: "script",
       sri: dummySRI,
       size: 100,
     };
@@ -59,9 +61,15 @@ describe("EngineLoader", () => {
 
   it("should atomic multi-resource load", async () => {
     const configs: Record<string, IEngineSourceConfig> = {
-      main: { url: "https://test.com/main.js", sri: dummySRI, size: 100 },
+      main: {
+        url: "https://test.com/main.js",
+        type: "script",
+        sri: dummySRI,
+        size: 100,
+      },
       weights: {
         url: "https://test.com/weights.bin",
+        type: "wasm",
         sri: dummySRI,
         size: 200,
       },
@@ -77,6 +85,7 @@ describe("EngineLoader", () => {
   it("should allow retry after failure (inflight removal)", async () => {
     const config: IEngineSourceConfig = {
       url: "https://fail.js",
+      type: "script",
       sri: dummySRI,
       size: 100,
     };

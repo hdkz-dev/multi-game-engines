@@ -3,6 +3,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  IScoreInfo,
   Brand,
   ProtocolValidator,
   EngineError,
@@ -25,10 +26,11 @@ export interface IChessSearchOptions extends IBaseSearchOptions {
 /** チェス用の思考情報 */
 export interface IChessSearchInfo extends IBaseSearchInfo {
   depth?: number;
-  score?: number;
+  score?: IScoreInfo;
   nps?: number;
   time?: number;
   pv?: Move[];
+  hashfull?: number;
 }
 
 /** チェス用の探索結果 */
@@ -36,9 +38,6 @@ export interface IChessSearchResult extends IBaseSearchResult {
   bestMove: Move;
   ponder?: Move;
 }
-
-/** 詰みスコアを cp と区別するための係数 (2026 Best Practice) */
-const MATE_SCORE_FACTOR = 100000;
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
@@ -97,7 +96,7 @@ export class UCIParser implements IProtocolParser<
 
     const info: IChessSearchInfo = {
       depth: 0,
-      score: 0,
+      score: { cp: 0 },
       raw: line,
     };
 
@@ -116,7 +115,7 @@ export class UCIParser implements IProtocolParser<
           const scoreType = parts[++i]; // "cp" or "mate"
           const scoreValue = parseInt(parts[++i], 10) || 0;
           info.score =
-            scoreType === "mate" ? scoreValue * MATE_SCORE_FACTOR : scoreValue;
+            scoreType === "mate" ? { mate: scoreValue } : { cp: scoreValue };
           break;
         }
         case "nps":
@@ -146,6 +145,18 @@ export class UCIParser implements IProtocolParser<
           info.pv = moves;
           break;
         }
+        case "seldepth":
+          info.seldepth = parseInt(val, 10) || 0;
+          i++;
+          break;
+        case "hashfull":
+          info.hashfull = parseInt(val, 10) || 0;
+          i++;
+          break;
+        case "multipv":
+          info.multipv = parseInt(val, 10) || 0;
+          i++;
+          break;
       }
     }
 

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
+  },
+  "references": [
+    { "path": "../core" },
+    { "path": "../i18n" },
+    { "path": "../ui-core" }
+  ],
+  "include": ["src/**/*", ".storybook/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

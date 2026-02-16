@@ -12,6 +12,11 @@
 - **Modern Security**: SRI 必須化と「Refuse by Exception」ポリシーによる、プロトコルレベルの堅牢なインジェクション対策。
 - **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤。
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
+- **Universal UI Architecture**:
+  - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、i18n。
+  - **ui-react**: React Hooks と Context DI を活用したアダプター。
+  - **ui-vue**: Vue 3 Composition API を活用したアダプター。
+  - **ui-elements**: Lit ベースの Web Components (Planned)。
 
 ## 🤖 AI 開発ワークフロー / AI Workflow
 
@@ -27,6 +32,9 @@
 
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
+- **Go**: KataGo (GTP) - **Ready**
+- **Othello**: Edax 4.4 (Board/Move Protocol) - **Ready**
+- **Mahjong**: Mortal (JSON Protocol) - **Ready**
 
 ## 🚀 クイックスタート / Quick Start
 

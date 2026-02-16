@@ -149,14 +149,17 @@ export class MahjongJSONParser implements IProtocolParser<
 export interface IMahjongSearchOptions {
   board: unknown;
   signal?: AbortSignal;
+  [key: string]: unknown;
 }
 
 export interface IMahjongSearchInfo {
   raw: string;
   thinking: string;
+  [key: string]: unknown;
 }
 
 export interface IMahjongSearchResult {
   raw: string;
   bestMove: MahjongMove;
+  [key: string]: unknown;
 }

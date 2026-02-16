@@ -9,6 +9,8 @@
 - [ADR-001: モノレポ構成の採用](adr/001-monorepo-structure.md)
 - [ADR-002: Async Iterable によるストリーミング通信](adr/002-async-iterable.md)
 - [ADR-014: Core と Adapter の物理的な分離](adr/014-mit-license-architecture.md)
+- [ADR-031: 厳格な TypeScript モノレポ構成とプロジェクト参照の導入](adr/031-strict-typescript-monorepo.md)
+- [ADR-032: 2026年Q1最新技術スタック (Zenith Tier) への移行](adr/032-zenith-tech-stack-2026.md)
 
 ## 📦 リソース管理とセキュリティ (Resources & Security)
 
@@ -25,8 +27,15 @@
 - [ADR-024: ハンドルベースのライフサイクル管理と共有アダプターの保護](adr/024-handle-based-lifecycle.md)
 - [ADR-025: Core とアダプターのドメイン情報の分離 (Pure Domain Info)](adr/025-pure-domain-info.md)
 - [ADR-026: プロトコル入力検証の「拒否」への格上げ (Refuse by Exception)](adr/026-refuse-by-exception.md)
+- [ADR-030: 構造化スコア情報の統一 (Structured Score Information)](adr/030-structured-score-unification.md)
 
 ## 🚀 リリースと統合 (Release & Integration)
 
 - [ADR-016: 段階的なリリース戦略](adr/016-two-stage-release.md)
 - [ADR-017: ネイティブブリッジの統合方針](adr/017-native-integration.md)
+
+## 🎨 UI と表現層 (UI & Presentation)
+
+- [ADR-027: UI 層のフレームワーク分離と Reactive Core の導入](adr/027-framework-agnostic-ui.md)
+- [ADR-028: Storybook 10 への移行と ESM 専用構成の採用](adr/028-storybook-10-esm-transition.md)
+- [ADR-029: Zenith Tier 品質標準の定義](adr/029-zenith-tier-quality-standards.md)

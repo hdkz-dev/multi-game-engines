@@ -60,7 +60,7 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 
 ### 多言語・多プロトコル対応
 
-チェスの **UCI (Universal Chess Interface)** および将棋の **USI (Universal Shogi Interface)** プロトコルをネイティブにサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
+チェスの **UCI (Universal Chess Interface)**、将棋の **USI (Universal Shogi Interface)**、囲碁の **GTP (Go Text Protocol)**、オセロ・麻雀の独自プロトコル（JSON等）をサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
 
 ## ライセンス戦略
 
@@ -84,6 +84,34 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 7.  **WASM & バイナリリソース戦略 (WASM & Binary Strategy)**:
     - **Blob URL の制約**: セキュリティとキャッシュのために `Blob URL` を使用するため、Worker 内からの**相対パスによる追加リソース（.wasm, .nnue）のフェッチは原則禁止**です（Blob の Origin は不透明であるため）。
     - **依存性注入 (Dependency Injection)**: アダプターは、JS ローダーだけでなく WASM/NNUE バイナリも `EngineLoader` 経由で個別にロードし、その Blob URL を Worker の初期化パラメータ（`Module.wasmBinaryFile` や `postMessage`）として注入する設計を必須とします。許容されるロード経路は EngineLoader 経由で注入された URL のみです。
+
+## UI と表現層 (UI & Presentation Layer)
+
+本プロジェクトは、エンジンの演算結果をユーザーに届けるための、高性能かつアクセシブルな UI 構築基盤を提供します。
+
+### 1. レイヤード・アーキテクチャ
+
+特定のフレームワークへのロックインを避けつつ、2026 年の最新フロントエンド標準に対応するため、UI 層を以下の構成に分離しています。
+
+1.  **Reactive Core (`ui-core`)**:
+    - **役割**: フレームワーク非依存のビジネスロジック。
+    - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。評価値の表示ロジック（`EvaluationPresenter`）もここに集約されています。
+2.  **Localization Layer (`i18n`)**:
+    - **役割**: 純粋な言語リソースの提供。
+    - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。
+
+3.  **Framework Adapters**:
+    - **`ui-react`**: React Hooks (`useSyncExternalStore`) と Context DI を活用したアダプター。Storybook 10 と Tailwind CSS v4 に完全対応。
+    - **`ui-vue`**: Vue 3 Composition API (`ref`, `computed`) を活用したリアクティブ・アダプター。Storybook 10 対応済み。
+    - **`ui-elements`**: Lit ベースの Web Components。あらゆる HTML 環境で動作する究極のポータビリティを提供。
+
+### 2. 契約駆動 UI (Contract-driven UI)
+
+UI 層に届くデータは、`ui-core` 内の Zod スキーマによって実行時に検証されます。これにより、新しいエンジンアダプターを追加した際のプロトコル不一致や、不正なメッセージによる UI のクラッシュを構造的に防ぎます。
+
+### 3. オブザーバビリティの統合
+
+UI 上での全ての操作（探索開始・停止等）およびエンジンの状態変化は、Core のテレメトリシステムと連動します。これにより、実環境でのユーザー体験のボトルネック（ボタンの反応速度、レンダリング遅延）を定量的・多角的に分析可能です。
 
 ## AI 開発アーキテクチャ (AI Ensemble)
 

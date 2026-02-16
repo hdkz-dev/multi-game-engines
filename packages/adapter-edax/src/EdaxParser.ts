@@ -91,14 +91,17 @@ export interface IOthelloSearchOptions {
   board: OthelloBoard;
   depth?: number;
   signal?: AbortSignal;
+  [key: string]: unknown;
 }
 
 export interface IOthelloSearchInfo {
   raw: string;
   depth: number;
+  [key: string]: unknown;
 }
 
 export interface IOthelloSearchResult {
   raw: string;
   bestMove: OthelloMove;
+  [key: string]: unknown;
 }

@@ -118,15 +118,18 @@ export interface IGOSearchOptions {
   board: GOBoard;
   color: "black" | "white" | "B" | "W";
   signal?: AbortSignal;
+  [key: string]: unknown;
 }
 
 export interface IGOSearchInfo {
   raw: string;
   visits?: number;
   winrate?: number;
+  [key: string]: unknown;
 }
 
 export interface IGOSearchResult {
   raw: string;
   bestMove: GOMove;
+  [key: string]: unknown;
 }

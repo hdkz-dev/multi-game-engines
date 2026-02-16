@@ -1,244 +1,229 @@
 import {
   IEngine,
   IEngineAdapter,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
   IBaseSearchOptions,
-  IBaseSearchInfo,
   IBaseSearchResult,
-  ISearchTask,
+  EngineStatus,
   IMiddleware,
-  IMiddlewareContext,
+  MiddlewareContext,
+  EngineErrorCode,
+  EngineTelemetry,
   EngineLoadingStrategy,
   IEngineLoader,
+  ICapabilities,
 } from "../types.js";
+import { EngineError } from "../errors/EngineError.js";
 
 /**
- * 利用者がエンジンを操作するための Facade 実装。
- * ミドルウェアの適用、ライフサイクル管理、自動ロードなどを抽象化します。
+ * エンジンとの対話を抽象化し、共通機能を提供するファサードクラス。
  */
 export class EngineFacade<
-  T_OPTIONS extends IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult,
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO = unknown,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
-  private statusListeners = new Set<(status: EngineStatus) => void>();
-  private progressListeners = new Set<(progress: ILoadProgress) => void>();
-  private telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
-  private infoListeners = new Set<(info: T_INFO) => void>();
-
-  private _loadingStrategy: EngineLoadingStrategy = "on-demand";
-  private loadingPromise: Promise<void> | null = null;
-  private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
+  private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [];
+  private _lastError: EngineError | null = null;
+  private activeTaskStop: (() => void) | null = null;
+  private loadPromise: Promise<void> | null = null;
+  public loadingStrategy: EngineLoadingStrategy = "on-demand";
 
   constructor(
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
+    initialMiddlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
     private loaderProvider?: () => Promise<IEngineLoader>,
-    private ownsAdapter: boolean = true,
+    private ownAdapter: boolean = true,
   ) {
-    // アダプターからのイベントを委譲
-    this.adapter.onStatusChange((s) => {
-      for (const l of this.statusListeners) l(s);
-    });
-    this.adapter.onProgress((p) => {
-      for (const l of this.progressListeners) l(p);
-    });
-    this.adapter.onTelemetry?.((e) => {
-      for (const l of this.telemetryListeners) l(e);
-    });
+    this.middlewares = [...initialMiddlewares];
   }
 
-  get id(): string {
+  get id() {
     return this.adapter.id;
   }
-  get name(): string {
+  get name() {
     return this.adapter.name;
   }
-  get version(): string {
+  get version() {
     return this.adapter.version;
   }
-  get status(): EngineStatus {
+  get status() {
     return this.adapter.status;
   }
-
-  get loadingStrategy(): EngineLoadingStrategy {
-    return this._loadingStrategy;
+  get lastError() {
+    return this._lastError;
   }
-  set loadingStrategy(value: EngineLoadingStrategy) {
-    this._loadingStrategy = value;
-    if (value === "eager" && this.status === "uninitialized") {
-      void this.load();
-    }
+
+  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
+    this.middlewares.push(middleware);
+    this.middlewares.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    return this;
   }
 
   async load(): Promise<void> {
-    // 2026 Best Practice: 冪等性の確保 (既にロード済みまたはロード中の場合は何もしない)
-    if (this.status === "ready" || this.status === "busy") return;
-    if (this.loadingPromise) return this.loadingPromise;
+    if (this.status !== "uninitialized") return;
+    if (this.loadPromise) return this.loadPromise;
 
-    this.loadingPromise = (async () => {
-      const loader = this.loaderProvider
-        ? await this.loaderProvider()
-        : undefined;
-      await this.adapter.load(loader);
+    this.loadPromise = (async () => {
+      try {
+        // 2026 Best Practice: ロード前に能力要件を検証
+        await this.enforceCapabilities();
+
+        if (this.adapter.load) {
+          const loader = this.loaderProvider
+            ? await this.loaderProvider()
+            : undefined;
+          await this.adapter.load(loader);
+        }
+      } catch (err: unknown) {
+        this._lastError = EngineError.from(err, this.id);
+        throw this._lastError;
+      } finally {
+        this.loadPromise = null;
+      }
     })();
 
-    try {
-      await this.loadingPromise;
-    } finally {
-      this.loadingPromise = null;
-    }
+    return this.loadPromise;
   }
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
-    // 自動ロード
     if (
-      this._loadingStrategy === "on-demand" &&
-      this.status === "uninitialized"
+      this.status === "uninitialized" &&
+      this.loadingStrategy === "on-demand"
     ) {
       await this.load();
     }
 
-    if (this.status !== "ready" && this.status !== "busy") {
-      throw new Error(
-        `Engine is not initialized (current status: ${this.status})`,
-      );
+    if (this.activeTaskStop) {
+      this.activeTaskStop();
     }
 
-    // 既存タスクがあれば停止
-    if (this.activeTask) {
-      await this.activeTask.stop();
-    }
-
-    const context: IMiddlewareContext<T_OPTIONS> = {
+    const context: MiddlewareContext<T_OPTIONS> = {
       engineId: this.id,
       options,
-      emitTelemetry: (event) => {
-        this.adapter.emitTelemetry?.(event);
-      },
-      // 2026 Best Practice: 高エントロピーな ID 生成 (並行探索の完全な識別)
-      telemetryId:
-        crypto.randomUUID?.() ??
-        `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`,
+      emitTelemetry: (t) => this.emitTelemetry(t),
     };
 
-    // 1. コマンド生成
-    let command = this.adapter.parser.createSearchCommand(options);
-
-    // 2. onCommand ミドルウェアの適用
-    for (const mw of this.middlewares) {
-      if (mw.onCommand) {
-        command = await mw.onCommand(command, context);
-      }
-    }
-
-    // 3. 探索実行
-    const task = this.adapter.searchRaw(command);
-    this.activeTask = task;
-
-    // 4. 思考情報のストリーミング (Persistent Listener + Middleware)
-    const infoProcessing = (async () => {
-      try {
-        for await (let info of task.info) {
-          // onInfo ミドルウェアの適用
-          for (const mw of this.middlewares) {
-            if (mw.onInfo) {
-              info = await mw.onInfo(info, context);
-            }
-          }
-          // 購読者に通知
-          for (const l of this.infoListeners) l(info);
-        }
-      } catch (err) {
-        // 2026 Best Practice: テレメトリ発行と同時に、開発者向けにエラーを可視化する
-        console.error(
-          `[EngineFacade] Info stream processing error (${this.id}):`,
-          err,
-        );
-        this.adapter.emitTelemetry?.({
-          type: "error",
-          timestamp: Date.now(),
-          metadata: {
-            engineId: this.id,
-            action: "info_stream",
-            error: String(err),
-          },
-        });
-      }
-    })();
-
-    // 5. 結果の待機と onResult ミドルウェアの適用
-    const onAbort = () => {
-      void task.stop();
-    };
     try {
-      if (options.signal?.aborted) {
-        await task.stop();
+      let command = this.adapter.parser.createSearchCommand(options);
+      for (const mw of this.middlewares) {
+        if (mw.onCommand) {
+          const next = await mw.onCommand(command, context);
+          if (next !== undefined && next !== null) command = next;
+        }
       }
 
-      options.signal?.addEventListener("abort", onAbort);
+      const task = this.adapter.searchRaw(command);
+      this.activeTaskStop =
+        typeof task.stop === "function" ? () => task.stop() : null;
 
-      let result = await task.result;
+      const result = await task.result;
+
+      let processedResult = result;
       for (const mw of this.middlewares) {
         if (mw.onResult) {
-          result = await mw.onResult(result, context);
+          const next = await mw.onResult(processedResult, context);
+          if (this.isValidResult(next)) processedResult = next;
         }
       }
-      await infoProcessing;
-      return result;
+
+      return processedResult;
+    } catch (err: unknown) {
+      this._lastError = EngineError.from(err, this.id);
+      throw this._lastError;
     } finally {
-      options.signal?.removeEventListener("abort", onAbort);
-      if (this.activeTask === task) {
-        this.activeTask = null;
-      }
+      this.activeTaskStop = null;
     }
-  }
-
-  onInfo(callback: (info: T_INFO) => void): () => void {
-    this.infoListeners.add(callback);
-    return () => this.infoListeners.delete(callback);
-  }
-
-  onStatusChange(callback: (status: EngineStatus) => void): () => void {
-    this.statusListeners.add(callback);
-    return () => this.statusListeners.delete(callback);
-  }
-
-  onProgress(callback: (progress: ILoadProgress) => void): () => void {
-    this.progressListeners.add(callback);
-    return () => this.progressListeners.delete(callback);
-  }
-
-  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
-    this.telemetryListeners.add(callback);
-    return () => this.telemetryListeners.delete(callback);
   }
 
   async stop(): Promise<void> {
-    if (this.activeTask) {
-      await this.activeTask.stop();
-      this.activeTask = null;
+    try {
+      await this.adapter.stop();
+    } catch (err: unknown) {
+      console.error(`[EngineFacade] Failed to stop engine ${this.id}:`, err);
+      // エラーはログに記録し、例外自体は投げない（ステートレスな停止を優先）
     }
-  }
-
-  async setOption(
-    name: string,
-    value: string | number | boolean,
-  ): Promise<void> {
-    await this.adapter.setOption(name, value);
   }
 
   async dispose(): Promise<void> {
-    await this.stop();
-    this.statusListeners.clear();
-    this.progressListeners.clear();
-    this.telemetryListeners.clear();
-    this.infoListeners.clear();
-
-    if (this.ownsAdapter) {
+    if (this.ownAdapter && this.adapter.dispose) {
       await this.adapter.dispose();
     }
+  }
+
+  onStatusChange(callback: (status: EngineStatus) => void) {
+    return this.adapter.onStatusChange(callback);
+  }
+
+  onInfo(callback: (info: T_INFO) => void) {
+    const context: MiddlewareContext<T_OPTIONS> = { engineId: this.id };
+
+    return this.adapter.onInfo
+      ? this.adapter.onInfo(async (rawInfo) => {
+          let info: T_INFO = rawInfo;
+          for (const mw of this.middlewares) {
+            if (mw.onInfo) {
+              const processed = await mw.onInfo(info, context);
+              // 2026 Best Practice: 型ガードを使用してミドルウェアの出力を検証
+              if (this.isValidInfo(processed)) {
+                info = processed;
+              }
+            }
+          }
+          callback(info);
+        })
+      : () => {};
+  }
+
+  onSearchResult(callback: (result: T_RESULT) => void) {
+    return this.adapter.onSearchResult(callback);
+  }
+
+  onTelemetry(callback: (telemetry: EngineTelemetry) => void) {
+    return this.adapter.onTelemetry(callback);
+  }
+
+  emitTelemetry(telemetry: EngineTelemetry): void {
+    this.adapter.emitTelemetry(telemetry);
+  }
+
+  private async enforceCapabilities(): Promise<void> {
+    if (!this.adapter.requiredCapabilities) return;
+
+    const { CapabilityDetector } =
+      await import("../capabilities/CapabilityDetector.js");
+    const caps = await CapabilityDetector.detect();
+    const missing: string[] = [];
+
+    for (const [key, required] of Object.entries(
+      this.adapter.requiredCapabilities,
+    )) {
+      if (required && !caps[key as keyof ICapabilities]) {
+        missing.push(key);
+      }
+    }
+
+    if (missing.length > 0) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Environment does not support required capabilities: ${missing.join(", ")}`,
+        engineId: this.id,
+        remediation:
+          "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
+      });
+    }
+  }
+
+  private isValidInfo(info: unknown): info is T_INFO {
+    // 2026: info はエンジン固有だが、少なくともオブジェクトであるか
+    // ミドルウェアが明示的に null/undefined を返さないことを確認
+    return info !== undefined && info !== null;
+  }
+
+  private isValidResult(res: unknown): res is T_RESULT {
+    return (
+      typeof res === "object" &&
+      res !== null &&
+      ("bestMove" in res || "ponder" in res)
+    );
   }
 }

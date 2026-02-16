@@ -1,7 +1,7 @@
 {
   "name": "@multi-game-engines/core",
   "version": "0.1.0",
-  "description": "Core bridge for multi-game engines",
+  "description": "Core bridge library for multi-game engines",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,22 +11,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./mocks": {
+      "types": "./dist/mocks/index.d.ts",
+      "import": "./dist/mocks/index.js",
+      "require": "./dist/mocks/index.cjs"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
+    "build": "tsup src/index.ts src/mocks/index.ts --format cjs,esm --dts --tsconfig tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
   "license": "MIT",
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
+    "tsup": "^8.3.5",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }
 }
