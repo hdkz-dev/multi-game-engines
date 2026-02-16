@@ -1,0 +1,34 @@
+{
+  "name": "@examples/zenith-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-react": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/adapter-stockfish": "workspace:*",
+    "@multi-game-engines/adapter-yaneuraou": "workspace:*",
+    "next": "15.1.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "lucide-react": "^0.475.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.7",
+    "typescript": "^5.7.3"
+  }
+}

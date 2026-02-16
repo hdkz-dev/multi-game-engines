@@ -1,4 +1,4 @@
-import { EvaluationScore } from "./types.js";
+import { EvaluationScore, IEvaluationHistoryEntry } from "./types.js";
 
 /**
  * 評価値の表示に関する共通ロジックを提供するユーティリティ。
@@ -36,8 +36,11 @@ export const EvaluationPresenter = {
       return `M${Math.abs(displayValue)}`; // i18n 前のフォールバック
     }
 
-    const sign = displayValue > 0 ? "+" : "";
-    return `${sign}${(displayValue / 100).toFixed(2)}`;
+    const formatted = (displayValue / 100).toFixed(2);
+    if (displayValue >= 0) {
+      return `+${formatted}`;
+    }
+    return formatted; // Negative numbers are handled by toFixed
   },
 
   /**
@@ -51,5 +54,36 @@ export const EvaluationPresenter = {
     if (displayValue > 0) return "plus";
     if (displayValue < 0) return "minus";
     return "neutral";
+  },
+
+  /**
+   * グラフ描画用の座標計算。
+   */
+  getGraphPoints(
+    entries: IEvaluationHistoryEntry[],
+    width: number,
+    height: number,
+    maxAbsScore = 1000,
+  ): { x: number; y: number }[] {
+    if (entries.length === 0) return [];
+
+    const xStep = width / Math.max(1, entries.length - 1);
+    const centerY = height / 2;
+
+    return entries.map((entry, i) => {
+      const x = i * xStep;
+      const y = (() => {
+        if (entry.score.type === "mate") {
+          return entry.score.value > 0 ? 0 : height;
+        }
+        const normalized = Math.max(
+          -1,
+          Math.min(1, entry.score.value / maxAbsScore),
+        );
+        return centerY - (normalized * height) / 2;
+      })();
+
+      return { x, y };
+    });
   },
 };

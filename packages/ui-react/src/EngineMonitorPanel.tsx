@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useMemo } from "react";
 import {
   IEngine,
@@ -9,6 +11,7 @@ import { useEngineMonitor } from "./useEngineMonitor.js";
 import { EngineStats } from "./EngineStats.js";
 import { PVList } from "./PVList.js";
 import { ScoreBadge } from "./ScoreBadge.js";
+import { EvaluationGraph } from "./EvaluationGraph.js";
 import { useEngineUI } from "./EngineUIProvider.js";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Separator from "@radix-ui/react-separator";
@@ -169,6 +172,15 @@ export function EngineMonitorPanel<
                 {bestPV?.moves[0]?.toString() || strings.noMove}
               </div>
             </section>
+
+            {/* Evaluation Trend Graph */}
+            <div className="px-4 py-2 bg-white">
+              {/* <EvaluationGraph
+                entries={state.evaluationHistory.entries}
+                height={40}
+                className="opacity-80 hover:opacity-100 transition-opacity"
+              /> */}
+            </div>
 
             <Separator.Root className="h-[1px] bg-gray-100" />
 

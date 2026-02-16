@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useMemo } from "react";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
 import { locales } from "@multi-game-engines/i18n";
