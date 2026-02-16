@@ -100,7 +100,11 @@ export function EngineMonitorPanel<
 
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2"
+          role="status"
+          aria-live="polite"
+        >
           <Settings2 className="w-4 h-4 text-gray-500" aria-hidden="true" />
           <h2
             id="engine-monitor-title"
@@ -114,7 +118,7 @@ export function EngineMonitorPanel<
               status === "busy" ? "bg-red-500 animate-pulse" : "bg-green-500",
               "motion-reduce:animate-none",
             )}
-            role="presentation"
+            aria-hidden="true"
           />
           <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
             {status === "busy" ? strings.searching : strings.ready}
