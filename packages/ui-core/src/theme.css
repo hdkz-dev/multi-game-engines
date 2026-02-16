@@ -1,0 +1,27 @@
+/**
+ * @multi-game-engines/ui-core - Design Tokens (Zenith Tier 2026 Standard)
+ * 全ての UI フレームワークで共有されるセマンティック・カラートークン。
+ */
+
+:root {
+  /* Status Colors */
+  --mge-color-engine-busy: #ef4444;
+  --mge-color-engine-ready: #22c55e;
+  --mge-color-engine-loading: #f59e0b;
+  
+  /* Evaluation Colors */
+  --mge-color-score-plus: #2563eb;
+  --mge-color-score-minus: #dc2626;
+  --mge-color-score-mate: #9333ea;
+  --mge-color-score-neutral: #e5e7eb;
+  --mge-color-score-neutral-text: #1f2937;
+
+  /* Typography */
+  --mge-font-mono: "Fira Code", "JetBrains Mono", ui-monospace, monospace;
+  
+  /* Shadow & Glow (Zenith Tier Aesthetic) */
+  --mge-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --mge-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mge-glow-plus: 0 0 15px rgba(37, 99, 235, 0.2);
+  --mge-glow-minus: 0 0 15px rgba(220, 38, 38, 0.2);
+}

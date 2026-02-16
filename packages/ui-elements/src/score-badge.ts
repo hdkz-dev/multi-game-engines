@@ -26,22 +26,24 @@ export class ScoreBadgeElement extends LitElement {
       transition: all 0.2s ease-in-out;
       line-height: 1.25rem;
     }
-    /* 2026 Best Practice: Tailwind v4 の色定義と整合させるための CSS 変数 */
+    /* 2026 Best Practice: グローバル・デザイントークンの適用 */
     .bg-score-plus {
-      background-color: #2563eb;
+      background-color: var(--mge-color-score-plus);
       color: white;
+      box-shadow: var(--mge-glow-plus);
     }
     .bg-score-minus {
-      background-color: #dc2626;
+      background-color: var(--mge-color-score-minus);
       color: white;
+      box-shadow: var(--mge-glow-minus);
     }
     .bg-score-mate {
-      background-color: #9333ea;
+      background-color: var(--mge-color-score-mate);
       color: white;
     }
     .bg-score-neutral {
-      background-color: #e5e7eb;
-      color: #1f2937;
+      background-color: var(--mge-color-score-neutral);
+      color: var(--mge-color-score-neutral-text);
     }
     .bg-red-600 {
       background-color: #dc2626;
