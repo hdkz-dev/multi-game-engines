@@ -1,2 +1,7 @@
 export * from "./useEngineMonitor.js";
+export * from "./useEngineUI.js";
 export { default as EngineMonitorPanel } from "./EngineMonitorPanel.vue";
+export { default as EngineUIProvider } from "./EngineUIProvider.vue";
+export { default as EngineStats } from "./EngineStats.vue";
+export { default as PVList } from "./PVList.vue";
+export { default as ScoreBadge } from "./ScoreBadge.vue";

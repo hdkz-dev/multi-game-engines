@@ -1,0 +1,33 @@
+{
+  "name": "@examples/zenith-dashboard-vue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-vue": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/adapter-stockfish": "workspace:*",
+    "@multi-game-engines/adapter-yaneuraou": "workspace:*",
+    "nuxt": "^3.17.0",
+    "vue": "^3.5.13",
+    "lucide-vue-next": "^0.475.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.7",
+    "tailwindcss": "^4.0.7",
+    "typescript": "^5.7.3",
+    "vue-tsc": "^2.2.0"
+  }
+}
