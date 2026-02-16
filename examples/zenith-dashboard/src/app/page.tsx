@@ -3,7 +3,8 @@
 import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
-import { createPositionString } from "@multi-game-engines/core";
+import { createFEN } from "@multi-game-engines/core";
+import { createSFEN } from "@multi-game-engines/adapter-yaneuraou";
 
 const EngineMonitorPanel = dynamic(
   () =>
@@ -24,9 +25,9 @@ export default function Dashboard() {
   const chessEngine = useMemo(() => bridge?.getEngine("stockfish"), [bridge]);
   const chessOptions = useMemo(
     () => ({
-      fen: createPositionString(
+      fen: createFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-      ) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      ),
     }),
     [],
   );
@@ -35,9 +36,9 @@ export default function Dashboard() {
   const shogiEngine = useMemo(() => bridge?.getEngine("yaneuraou"), [bridge]);
   const shogiOptions = useMemo(
     () => ({
-      sfen: createPositionString(
+      sfen: createSFEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
-      ) as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      ),
     }),
     [],
   );

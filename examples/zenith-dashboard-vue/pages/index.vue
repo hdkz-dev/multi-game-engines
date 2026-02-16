@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { createPositionString } from "@multi-game-engines/core";
+import { createFEN } from "@multi-game-engines/core";
+import { createSFEN } from "@multi-game-engines/adapter-yaneuraou";
 import { EngineMonitorPanel } from "@multi-game-engines/ui-vue";
 import { LayoutGrid, Sword, Trophy, Zap } from "lucide-vue-next";
 import { getBridge } from "~/composables/useEngines";
@@ -24,18 +25,18 @@ const bridge = getBridge();
 // チェス用の設定
 const chessEngine = computed(() => bridge?.getEngine("stockfish") ?? null);
 const chessOptions = {
-  fen: createPositionString(
+  fen: createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   ),
-} as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+};
 
 // 将棋用の設定
 const shogiEngine = computed(() => bridge?.getEngine("yaneuraou") ?? null);
 const shogiOptions = {
-  sfen: createPositionString(
+  sfen: createSFEN(
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   ),
-} as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+};
 
 const protocolLabel = computed(() =>
   activeEngine.value === "chess" ? "UCI 16.1" : "USI 7.5.0",
@@ -148,13 +149,13 @@ const protocolLabel = computed(() =>
       <div class="lg:col-span-4 xl:col-span-3">
         <EngineMonitorPanel
           v-if="activeEngine === 'chess' && chessEngine"
-          :engine="(chessEngine as any)"
+          :engine="chessEngine"
           :search-options="chessOptions"
           title="Stockfish 16.1"
         />
         <EngineMonitorPanel
           v-if="activeEngine === 'shogi' && shogiEngine"
-          :engine="(shogiEngine as any)"
+          :engine="shogiEngine"
           :search-options="shogiOptions"
           title="Yaneuraou 7.5.0"
         />

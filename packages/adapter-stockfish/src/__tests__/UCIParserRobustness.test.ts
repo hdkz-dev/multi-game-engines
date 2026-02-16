@@ -11,7 +11,7 @@ describe("UCIParser Robustness", () => {
     if (info) {
       expect(info.depth).toBe(10);
       expect(info.pv).toEqual(["e2e4", "e7e5"]);
-      expect(info.score).toBe(20);
+      expect(info.score).toEqual({ cp: 20 });
       expect(info.nps).toBe(1000);
     }
   });
@@ -36,7 +36,7 @@ describe("UCIParser Robustness", () => {
     const line = "info score mate 5";
     const info = parser.parseInfo(line);
     expect(info).not.toBeNull();
-    expect(info!.score).toBe(500000); // 5 * 100000
+    expect(info!.score).toEqual({ mate: 5 });
   });
 
   it("should return null for non-string inputs", () => {

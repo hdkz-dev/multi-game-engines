@@ -82,6 +82,18 @@ export interface IBaseSearchOptions {
 }
 
 /**
+ * 構造化されたスコア情報。
+ * UCI/USI プロトコルの `score cp <x>` / `score mate <x>` を忠実に表現する。
+ * マジックナンバー（例: MATE_SCORE_FACTOR = 100000）を排除し、型レベルで cp/mate を区別する。
+ */
+export interface IScoreInfo {
+  /** センチポーン値 (centipawns)。mate が定義されている場合は省略可。 */
+  cp?: number;
+  /** 詰みまでの手数。正は自分の勝ち、負は相手の勝ち。 */
+  mate?: number;
+}
+
+/**
  * 探索状況情報。
  */
 export interface IBaseSearchInfo {
@@ -92,8 +104,8 @@ export interface IBaseSearchInfo {
   time?: number;
   pv?: Move[];
   multipv?: number;
-  scoreType?: "cp" | "mate";
-  scoreValue?: number;
+  /** 構造化スコア。cp と mate を分離して保持する。 */
+  score?: IScoreInfo;
   [key: string]: unknown;
 }
 
@@ -326,16 +338,38 @@ export interface IFileStorage {
 }
 
 /**
+ * エンジン・ソースのタイプ。
+ */
+export type IEngineSourceType =
+  | "wasm"
+  | "worker-js"
+  | "eval-data"
+  | "native"
+  | "webgpu-compute"
+  | "asset";
+
+/**
  * エンジン・ソース設定。
  */
 export type IEngineSourceConfig = {
   url: string;
-  type: string;
+  type: IEngineSourceType | string;
   size?: number;
+  /**
+   * 仮想的なマウントパス（例: "/nnue/default.nnue"）。
+   * Blob URL 環境下での相対パス解決に使用される。
+   */
+  mountPath?: string;
 } & (
   | { sri: string; __unsafeNoSRI?: never }
   | { sri?: never; __unsafeNoSRI: true }
 );
+
+/**
+ * リソースマップ。
+ * 仮想マウントパス（キー）と Blob URL（値）の対応を保持します。
+ */
+export type ResourceMap = Record<string, string>;
 
 /**
  * エンジンローダー。

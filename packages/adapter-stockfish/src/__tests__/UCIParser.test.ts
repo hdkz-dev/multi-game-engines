@@ -15,7 +15,7 @@ describe("UCIParser", () => {
       "info depth 15 score cp 30 nps 1000000 time 500 pv e2e4 e7e5",
     );
     expect(info?.depth).toBe(15);
-    expect(info?.score).toBe(30);
+    expect(info?.score).toEqual({ cp: 30 });
     expect(info?.nps).toBe(1000000);
     expect(info?.time).toBe(500);
     expect(info?.pv).toEqual(["e2e4", "e7e5"]);

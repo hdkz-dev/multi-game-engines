@@ -2,6 +2,7 @@ import {
   IProtocolParser,
   IBaseSearchInfo,
   IBaseSearchResult,
+  IScoreInfo,
   ProtocolValidator,
 } from "@multi-game-engines/core";
 import { ISHOGISearchOptions, Move } from "./usi-types.js";
@@ -10,7 +11,7 @@ import { ISHOGISearchOptions, Move } from "./usi-types.js";
 export interface ISHOGISearchInfo extends IBaseSearchInfo {
   depth?: number;
   seldepth?: number;
-  score?: number;
+  score?: IScoreInfo;
   nodes?: number;
   nps?: number;
   time?: number;
@@ -53,9 +54,6 @@ export class USIParser implements IProtocolParser<
     "currline",
   ]);
 
-  // 詰みスコアの係数
-  private static readonly MATE_SCORE_FACTOR = 100000;
-
   /**
    * 文字列を Move へ変換します。
    */
@@ -88,11 +86,9 @@ export class USIParser implements IProtocolParser<
           break;
         case "score":
           if (parts[i + 1] === "cp") {
-            info.score = parseInt(parts[i + 2], 10);
+            info.score = { cp: parseInt(parts[i + 2], 10) };
           } else if (parts[i + 1] === "mate") {
-            // USI mate スコアを係数倍して正規化
-            info.score =
-              parseInt(parts[i + 2], 10) * USIParser.MATE_SCORE_FACTOR;
+            info.score = { mate: parseInt(parts[i + 2], 10) };
           }
           i += 2;
           break;
