@@ -1,60 +1,53 @@
 import { EngineSearchState, PrincipalVariation } from "./types.js";
+import { createMove, createPositionString } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
-import { Move } from "@multi-game-engines/core";
 
 /**
- * 思考状態の変換ロジック
+ * エンジンからの生の情報を UI 向けの状態に変換・マージする。
  */
-export class SearchStateTransformer {
+export const SearchStateTransformer = {
   /**
-   * エンジンからの Info イベントをステートにマージする。
-   *
-   * 2026 Best Practice:
-   * Zod スキーマによりランタイムでの構造的整合性を保証。
+   * info イベントのデータを現在の状態にマージする。
+   * Zod によるバリデーションを挟むことで、不正なデータによる UI のクラッシュを防ぐ。
    */
-  static mergeInfo<T_INFO extends ExtendedSearchInfo>(
-    currentState: EngineSearchState,
-    info: T_INFO,
+  mergeInfo(
+    state: EngineSearchState,
+    info: ExtendedSearchInfo,
   ): EngineSearchState {
-    // 境界で検証を実行 (不正なデータはエラーログと共に無視、または安全に処理)
-    const result = SearchInfoSchema.safeParse(info);
-    if (!result.success) {
-      console.warn(
-        "[SearchStateTransformer] Validation failed for info:",
-        result.error,
-      );
-      return currentState;
+    // 1. Zod による実行時検証 (契約駆動)
+    const validation = SearchInfoSchema.safeParse(info);
+    if (!validation.success) {
+      console.warn("[UICore] Invalid info ignored:", validation.error);
+      return state;
     }
-    const validatedInfo = result.data;
 
+    const validatedInfo = validation.data;
+    const nextPvs = [...state.pvs];
     const nextState: EngineSearchState = {
-      ...currentState,
-      stats: { ...currentState.stats },
-      pvs: [...currentState.pvs],
+      ...state,
+      pvs: nextPvs,
+      stats: {
+        ...state.stats,
+        depth: validatedInfo.depth ?? state.stats.depth,
+        seldepth: validatedInfo.seldepth ?? state.stats.seldepth,
+        nodes: validatedInfo.nodes ?? state.stats.nodes,
+        nps: validatedInfo.nps ?? state.stats.nps,
+        time: validatedInfo.time ?? state.stats.time,
+      },
     };
-
-    // 統計情報の更新
-    if (validatedInfo.depth !== undefined)
-      nextState.stats.depth = validatedInfo.depth;
-    if (validatedInfo.seldepth !== undefined)
-      nextState.stats.seldepth = validatedInfo.seldepth;
-    if (validatedInfo.nodes !== undefined)
-      nextState.stats.nodes = validatedInfo.nodes;
-    if (validatedInfo.nps !== undefined)
-      nextState.stats.nps = validatedInfo.nps;
-    if (validatedInfo.time !== undefined)
-      nextState.stats.time = validatedInfo.time;
-    if (validatedInfo.hashfull !== undefined)
-      nextState.stats.hashfull = validatedInfo.hashfull;
 
     // PVの更新 (MultiPV対応)
     if (validatedInfo.pv && validatedInfo.multipv !== undefined) {
-      const pvIndex = nextState.pvs.findIndex(
+      // 2026 Best Practice: 文字列配列をブランド型 Move[] へバリデーション付きで変換
+      const validatedMoves = validatedInfo.pv.map((m: string) => createMove(m));
+
+      const pvIndex = nextPvs.findIndex(
         (p) => p.multipv === validatedInfo.multipv,
       );
+
       const newPV: PrincipalVariation = {
         multipv: validatedInfo.multipv,
-        moves: validatedInfo.pv as Move[],
+        moves: validatedMoves,
         score: {
           type: validatedInfo.score?.mate !== undefined ? "mate" : "cp",
           value: validatedInfo.score?.mate ?? validatedInfo.score?.cp ?? 0,
@@ -63,15 +56,33 @@ export class SearchStateTransformer {
         },
       };
 
-      if (pvIndex > -1) {
-        nextState.pvs[pvIndex] = newPV;
+      if (pvIndex >= 0) {
+        nextPvs[pvIndex] = newPV;
       } else {
-        nextState.pvs.push(newPV);
+        nextPvs.push(newPV);
       }
 
-      nextState.pvs.sort((a, b) => a.multipv - b.multipv);
+      // MultiPV 順にソート
+      nextPvs.sort((a, b) => a.multipv - b.multipv);
     }
 
     return nextState;
-  }
-}
+  },
+
+  /**
+   * 初期状態を生成する。
+   */
+  createInitialState(position: string): EngineSearchState {
+    return {
+      isSearching: false,
+      position: createPositionString(position),
+      pvs: [],
+      stats: {
+        depth: 0,
+        nodes: 0,
+        nps: 0,
+        time: 0,
+      },
+    };
+  },
+};

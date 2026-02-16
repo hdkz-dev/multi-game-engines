@@ -1,5 +1,8 @@
 import React from "react";
-import { EvaluationScore } from "@multi-game-engines/ui-core";
+import {
+  EvaluationScore,
+  EvaluationPresenter,
+} from "@multi-game-engines/ui-core";
 import { useEngineUI } from "./EngineUIProvider.js";
 
 interface ScoreBadgeProps {
@@ -16,33 +19,27 @@ export const ScoreBadge: React.FC<ScoreBadgeProps> = React.memo(
   ({ score, inverted = false, className = "" }) => {
     const { strings } = useEngineUI();
     const { type, value } = score;
-    const displayValue = inverted ? -value : value;
 
-    const getColors = () => {
-      if (type === "mate") return "bg-score-mate text-white ring-score-mate/20";
-      if (displayValue > 100)
-        return "bg-score-plus text-white ring-score-plus/20";
-      if (displayValue < -100)
-        return "bg-score-minus text-white ring-score-minus/20";
-      return "bg-score-neutral text-gray-800 ring-gray-200";
-    };
+    // 2026 Best Practice: ロジックを ui-core の EvaluationPresenter へ委譲
+    const colorClass = EvaluationPresenter.getColorClass(score, inverted);
+    const displayValue = inverted ? -value : value;
 
     const label =
       type === "mate"
-        ? strings.mateIn(Math.abs(value))
-        : `${displayValue > 0 ? "+" : ""}${(displayValue / 100).toFixed(2)}`;
+        ? strings.mateIn(Math.abs(displayValue))
+        : EvaluationPresenter.getDisplayLabel(score, inverted);
 
     const ariaLabel =
       type === "mate"
-        ? strings.mateIn(Math.abs(value))
+        ? strings.mateIn(Math.abs(displayValue))
         : strings.advantage(
-            displayValue > 0 ? "plus" : "minus",
+            EvaluationPresenter.getAdvantageSide(value, inverted),
             Math.abs(displayValue),
           );
 
     return (
       <span
-        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ring-1 ring-inset ${getColors()} ${className}`}
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ring-1 ring-inset transition-all ${colorClass} ${className}`}
         aria-label={ariaLabel}
         role="status"
       >

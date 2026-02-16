@@ -10,8 +10,10 @@ import {
   IEngineLoader,
   IEngine,
   EngineRegistry,
+  EngineErrorCode,
 } from "../types.js";
 import { EngineFacade } from "./EngineFacade.js";
+import { EngineError } from "../errors/EngineError.js";
 
 /**
  * 全てのゲームエンジンのライフサイクルとミドルウェアを統括するブリッジ。
@@ -32,7 +34,23 @@ export class EngineBridge implements IEngineBridge {
   >[] = [];
   private loader: IEngineLoader | null = null;
   private loaderPromise: Promise<IEngineLoader> | null = null;
+  private capabilities: ICapabilities | null = null;
+  private capsPromise: Promise<ICapabilities> | null = null;
   private disposed = false;
+
+  // 2026 Best Practice: インスタンスの破棄を監視し、リークを追跡可能にする
+  private finalizationRegistry = new FinalizationRegistry((id: string) => {
+    if (this.disposed) return;
+    const ref = this.engineInstances.get(id);
+    if (ref && !ref.deref()) {
+      this.engineInstances.delete(id);
+    }
+  });
+
+  constructor() {
+    // 2026 Best Practice: 初期化時に能力検知を開始
+    void this.checkCapabilities();
+  }
 
   async registerAdapter<
     O extends IBaseSearchOptions,
@@ -40,6 +58,10 @@ export class EngineBridge implements IEngineBridge {
     R extends IBaseSearchResult,
   >(adapter: IEngineAdapter<O, I, R>): Promise<void> {
     if (this.disposed) return;
+
+    // 2026 Best Practice: アダプター登録時に能力要件を検証
+    await this.enforceCapabilities(adapter);
+
     // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
     const old = this.adapters.get(adapter.id);
     if (old) {
@@ -95,6 +117,9 @@ export class EngineBridge implements IEngineBridge {
       throw new Error(`Engine adapter not found: ${id}`);
     }
 
+    // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
+    this.enforceCapabilities(adapter);
+
     // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
     const filteredMiddlewares = this.middlewares.filter(
       (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
@@ -114,6 +139,7 @@ export class EngineBridge implements IEngineBridge {
       IBaseSearchResult
     >;
     this.engineInstances.set(id, new WeakRef(engine));
+    this.finalizationRegistry.register(engine, id);
 
     return engine;
   }
@@ -153,9 +179,53 @@ export class EngineBridge implements IEngineBridge {
   }
 
   async checkCapabilities(): Promise<ICapabilities> {
-    const { CapabilityDetector } =
-      await import("../capabilities/CapabilityDetector.js");
-    return CapabilityDetector.detect();
+    if (this.capabilities) return this.capabilities;
+    if (this.capsPromise) return this.capsPromise;
+
+    this.capsPromise = (async () => {
+      try {
+        const { CapabilityDetector } =
+          await import("../capabilities/CapabilityDetector.js");
+        const caps = await CapabilityDetector.detect();
+        this.capabilities = caps;
+        return caps;
+      } finally {
+        this.capsPromise = null;
+      }
+    })();
+
+    return this.capsPromise;
+  }
+
+  private async enforceCapabilities(
+    adapter: IEngineAdapter<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >,
+  ): Promise<void> {
+    if (!adapter.requiredCapabilities) return;
+
+    const caps = await this.checkCapabilities();
+    const missing: string[] = [];
+
+    for (const [key, required] of Object.entries(
+      adapter.requiredCapabilities,
+    )) {
+      if (required && !caps[key as keyof ICapabilities]) {
+        missing.push(key);
+      }
+    }
+
+    if (missing.length > 0) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Environment does not support required capabilities: ${missing.join(", ")}`,
+        engineId: adapter.id,
+        remediation:
+          "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
+      });
+    }
   }
 
   /**

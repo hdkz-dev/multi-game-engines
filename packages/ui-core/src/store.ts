@@ -51,7 +51,12 @@ export class EngineStore<
    * 状態を更新。
    */
   setState(updater: (state: T_STATE) => T_STATE): void {
-    this.state = updater(this.state);
+    const nextState = updater(this.state);
+
+    // 2026 Best Practice: 参照が同じなら通知をスキップ
+    if (Object.is(this.state, nextState)) return;
+
+    this.state = nextState;
     this.scheduleNotify();
   }
 

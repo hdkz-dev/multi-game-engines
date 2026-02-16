@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { MockEngine } from "../mocks/MockEngine.js";
 

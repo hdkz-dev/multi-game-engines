@@ -1,6 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
 import { MonitorRegistry } from "../MonitorRegistry.js";
-import { IEngine } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
+
+type TestEngine = IEngine<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
+>;
 
 describe("MonitorRegistry", () => {
   const mockEngine = {
@@ -8,7 +19,7 @@ describe("MonitorRegistry", () => {
     status: "ready",
     onInfo: vi.fn(() => () => {}),
     onStatusChange: vi.fn(() => () => {}),
-  } as unknown as IEngine;
+  } as unknown as TestEngine;
 
   it("should return the same monitor instance for the same engine", () => {
     const registry = MonitorRegistry.getInstance();
@@ -28,7 +39,7 @@ describe("MonitorRegistry", () => {
 
   it("should return different monitors for different engines", () => {
     const registry = MonitorRegistry.getInstance();
-    const mockEngine2 = { id: "test2" } as unknown as IEngine;
+    const mockEngine2 = { id: "test2" } as unknown as TestEngine;
 
     const monitor1 = registry.getOrCreateMonitor(
       mockEngine,

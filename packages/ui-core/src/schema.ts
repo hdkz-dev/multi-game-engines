@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createMove } from "@multi-game-engines/core";
 
 /**
  * 探索情報 (info) のランタイム・バリデーションスキーマ。
@@ -11,7 +12,10 @@ export const SearchInfoSchema = z.object({
   nps: z.number().optional(),
   time: z.number().optional(),
   multipv: z.number().optional(),
-  pv: z.array(z.string()).optional(),
+  pv: z
+    .array(z.string())
+    .transform((val) => val.map(createMove))
+    .optional(),
   score: z
     .object({
       cp: z.number().optional(),

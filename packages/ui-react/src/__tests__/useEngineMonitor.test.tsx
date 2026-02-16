@@ -1,20 +1,28 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useEngineMonitor } from "../useEngineMonitor.js";
-import { IEngine, IBaseSearchOptions } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 
 describe("useEngineMonitor", () => {
   // 2026 Zenith Practice: 型安全なモック定義
-  const mockEngine: Partial<IEngine> = {
+  const mockEngine: Partial<
+    IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+  > = {
     id: "test",
     status: "ready" as const,
     onInfo: vi.fn(() => () => {}),
+    onSearchResult: vi.fn(() => () => {}),
     onStatusChange: vi.fn(() => () => {}),
     onTelemetry: vi.fn(() => () => {}),
     emitTelemetry: vi.fn(),
     search: vi.fn(),
     stop: vi.fn(),
-    use: vi.fn(),
+    use: vi.fn().mockReturnThis(),
   };
 
   beforeEach(() => {
@@ -29,7 +37,13 @@ describe("useEngineMonitor", () => {
 
   it("should initialize with default state", () => {
     const { result } = renderHook(() =>
-      useEngineMonitor(mockEngine as IEngine),
+      useEngineMonitor(
+        mockEngine as IEngine<
+          IBaseSearchOptions,
+          IBaseSearchInfo,
+          IBaseSearchResult
+        >,
+      ),
     );
 
     expect(result.current.state.stats.depth).toBe(0);
@@ -38,7 +52,13 @@ describe("useEngineMonitor", () => {
 
   it("should call engine.search with correct options", async () => {
     const { result } = renderHook(() =>
-      useEngineMonitor(mockEngine as IEngine),
+      useEngineMonitor(
+        mockEngine as IEngine<
+          IBaseSearchOptions,
+          IBaseSearchInfo,
+          IBaseSearchResult
+        >,
+      ),
     );
     const options: IBaseSearchOptions = {
       signal: new AbortController().signal,

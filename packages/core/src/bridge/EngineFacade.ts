@@ -1,263 +1,226 @@
 import {
   IEngine,
   IEngineAdapter,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
   IBaseSearchOptions,
-  IBaseSearchInfo,
   IBaseSearchResult,
-  ISearchTask,
+  EngineStatus,
   IMiddleware,
-  IMiddlewareContext,
+  MiddlewareContext,
+  EngineErrorCode,
+  EngineTelemetry,
   EngineLoadingStrategy,
   IEngineLoader,
-  EngineErrorCode,
+  ICapabilities,
 } from "../types.js";
-
-/** 内部ミドルウェアの型定義 ( Zenith Tier ) */
-type SafeMiddleware<O> = IMiddleware<O, unknown, unknown, unknown, unknown>;
+import { EngineError } from "../errors/EngineError.js";
 
 /**
- * 利用者がエンジンを操作するための Facade 実装。
+ * エンジンとの対話を抽象化し、共通機能を提供するファサードクラス。
  */
 export class EngineFacade<
-  T_OPTIONS extends IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult,
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO = unknown,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
-  private statusListeners = new Set<(status: EngineStatus) => void>();
-  private progressListeners = new Set<(progress: ILoadProgress) => void>();
-  private telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
-  private infoListeners = new Set<(info: T_INFO) => void>();
-
-  private _loadingStrategy: EngineLoadingStrategy = "on-demand";
-  private loadingPromise: Promise<void> | null = null;
-  private activeTask: ISearchTask<T_INFO, T_RESULT> | null = null;
-  private _lastError?: {
-    message: string;
-    code?: EngineErrorCode;
-    remediation?: string;
-  };
-
-  /** 内部ミドルウェアスタック */
-  private middlewares: SafeMiddleware<T_OPTIONS>[] = [];
+  private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [];
+  private _lastError: EngineError | null = null;
+  private activeTaskStop: (() => void) | null = null;
+  private loadPromise: Promise<void> | null = null;
+  public loadingStrategy: EngineLoadingStrategy = "on-demand";
 
   constructor(
     private adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-    middlewares: SafeMiddleware<T_OPTIONS>[] = [],
+    initialMiddlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
     private loaderProvider?: () => Promise<IEngineLoader>,
-    private ownsAdapter: boolean = true,
+    private ownAdapter: boolean = true,
   ) {
-    this.middlewares = [...middlewares];
-    this.adapter.onStatusChange((s) => {
-      for (const l of this.statusListeners) l(s);
-    });
-    this.adapter.onProgress((p) => {
-      for (const l of this.progressListeners) l(p);
-    });
-    this.adapter.onTelemetry?.((e) => {
-      for (const l of this.telemetryListeners) l(e);
-    });
+    this.middlewares = [...initialMiddlewares];
   }
 
-  get id(): string {
+  get id() {
     return this.adapter.id;
   }
-  get name(): string {
+  get name() {
     return this.adapter.name;
   }
-  get version(): string {
+  get version() {
     return this.adapter.version;
   }
-  get status(): EngineStatus {
+  get status() {
     return this.adapter.status;
   }
   get lastError() {
     return this._lastError;
   }
-  get loadingStrategy(): EngineLoadingStrategy {
-    return this._loadingStrategy;
-  }
-  set loadingStrategy(value: EngineLoadingStrategy) {
-    this._loadingStrategy = value;
-    if (value === "eager" && this.status === "uninitialized") {
-      void this.load();
-    }
+
+  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
+    this.middlewares.push(middleware);
+    this.middlewares.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+    return this;
   }
 
   async load(): Promise<void> {
-    if (this.status === "ready" || this.status === "busy") return;
-    if (this.loadingPromise) return this.loadingPromise;
-    this.loadingPromise = (async () => {
-      const loader = this.loaderProvider
-        ? await this.loaderProvider()
-        : undefined;
-      await this.adapter.load(loader);
+    if (this.status !== "uninitialized") return;
+    if (this.loadPromise) return this.loadPromise;
+
+    this.loadPromise = (async () => {
+      try {
+        // 2026 Best Practice: ロード前に能力要件を検証
+        await this.enforceCapabilities();
+
+        if (this.adapter.load) {
+          const loader = this.loaderProvider
+            ? await this.loaderProvider()
+            : undefined;
+          await this.adapter.load(loader);
+        }
+      } finally {
+        this.loadPromise = null;
+      }
     })();
-    try {
-      await this.loadingPromise;
-    } finally {
-      this.loadingPromise = null;
-    }
+
+    return this.loadPromise;
   }
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (
-      this._loadingStrategy === "on-demand" &&
-      this.status === "uninitialized"
+      this.status === "uninitialized" &&
+      this.loadingStrategy === "on-demand"
     ) {
       await this.load();
     }
-    if (this.status !== "ready" && this.status !== "busy") {
-      throw new Error(
-        `Engine is not initialized (current status: ${this.status})`,
-      );
-    }
-    if (this.activeTask) {
-      await this.activeTask.stop();
+
+    if (this.activeTaskStop) {
+      this.activeTaskStop();
     }
 
-    const context: IMiddlewareContext<T_OPTIONS> = {
+    const context: MiddlewareContext<T_OPTIONS> = {
       engineId: this.id,
       options,
-      emitTelemetry: (event) => {
-        this.emitTelemetry(event);
-      },
-      telemetryId:
-        crypto.randomUUID?.() ??
-        `${Date.now().toString(36)}-${Math.random().toString(36).substring(2)}`,
+      emitTelemetry: (t) => this.emitTelemetry(t),
     };
 
-    let command: unknown = this.adapter.parser.createSearchCommand(options);
-    for (const mw of this.middlewares) {
-      if (mw.onCommand) {
-        const next = await mw.onCommand(command as string, context);
-        if (next !== undefined) command = next;
-      }
-    }
-
-    const task = this.adapter.searchRaw(command as string);
-    this.activeTask = task;
-
-    const infoProcessing = (async () => {
-      try {
-        for await (let info of task.info) {
-          for (const mw of this.middlewares) {
-            if (mw.onInfo) {
-              const processed = await mw.onInfo(info as unknown, context);
-              if (processed !== undefined) {
-                info = processed as unknown as T_INFO;
-              }
-            }
-          }
-          for (const l of this.infoListeners) l(info);
-        }
-      } catch (err) {
-        console.error(
-          `[EngineFacade] Info stream processing error (${this.id}):`,
-          err,
-        );
-        this.emitTelemetry({
-          type: "error",
-          timestamp: Date.now(),
-          metadata: {
-            engineId: this.id,
-            action: "info_stream",
-            error: String(err),
-          },
-        });
-      }
-    })();
-
-    const onAbort = () => {
-      void task.stop();
-    };
     try {
-      if (options.signal?.aborted) {
-        await task.stop();
+      let command = this.adapter.parser.createSearchCommand(options);
+      for (const mw of this.middlewares) {
+        if (mw.onCommand) {
+          const next = await mw.onCommand(command, context);
+          if (next !== undefined && next !== null) command = next;
+        }
       }
-      options.signal?.addEventListener("abort", onAbort);
 
-      let result: unknown = await task.result;
-      this._lastError = undefined;
+      const task = this.adapter.searchRaw(command);
+      this.activeTaskStop =
+        typeof task.stop === "function" ? () => task.stop() : null;
 
+      const result = await task.result;
+
+      let processedResult = result;
       for (const mw of this.middlewares) {
         if (mw.onResult) {
-          const processed = await mw.onResult(result, context);
-          if (processed !== undefined) {
-            result = processed;
-          }
+          const next = await mw.onResult(processedResult, context);
+          if (this.isValidResult(next)) processedResult = next;
         }
       }
-      await infoProcessing;
-      return result as T_RESULT;
+
+      return processedResult;
     } catch (err: unknown) {
-      this._lastError = {
-        message: err instanceof Error ? err.message : String(err),
-        code: EngineErrorCode.INTERNAL_ERROR,
-      };
-      throw err;
+      this._lastError = EngineError.from(err, this.id);
+      throw this._lastError;
     } finally {
-      options.signal?.removeEventListener("abort", onAbort);
-      if (this.activeTask === task) {
-        this.activeTask = null;
-      }
+      this.activeTaskStop = null;
     }
-  }
-
-  onInfo(callback: (info: T_INFO) => void): () => void {
-    this.infoListeners.add(callback);
-    return () => this.infoListeners.delete(callback);
-  }
-
-  onStatusChange(callback: (status: EngineStatus) => void): () => void {
-    this.statusListeners.add(callback);
-    return () => this.statusListeners.delete(callback);
-  }
-
-  onProgress(callback: (progress: ILoadProgress) => void): () => void {
-    this.progressListeners.add(callback);
-    return () => this.progressListeners.delete(callback);
-  }
-
-  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
-    this.telemetryListeners.add(callback);
-    return () => this.telemetryListeners.delete(callback);
-  }
-
-  emitTelemetry(event: ITelemetryEvent): void {
-    this.adapter.emitTelemetry?.(event);
-    for (const l of this.telemetryListeners) l(event);
-  }
-
-  use(middleware: SafeMiddleware<T_OPTIONS>): void {
-    this.middlewares.push(middleware);
-    this.middlewares.sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100));
   }
 
   async stop(): Promise<void> {
-    if (this.activeTask) {
-      await this.activeTask.stop();
-      this.activeTask = null;
+    try {
+      await this.adapter.stop();
+    } catch (err: unknown) {
+      console.error(`[EngineFacade] Failed to stop engine ${this.id}:`, err);
+      // エラーはログに記録し、例外自体は投げない（ステートレスな停止を優先）
     }
-  }
-
-  async setOption(
-    name: string,
-    value: string | number | boolean,
-  ): Promise<void> {
-    await this.adapter.setOption(name, value);
   }
 
   async dispose(): Promise<void> {
-    await this.stop();
-    this.statusListeners.clear();
-    this.progressListeners.clear();
-    this.telemetryListeners.clear();
-    this.infoListeners.clear();
-    if (this.ownsAdapter) {
+    if (this.ownAdapter && this.adapter.dispose) {
       await this.adapter.dispose();
     }
+  }
+
+  onStatusChange(callback: (status: EngineStatus) => void) {
+    return this.adapter.onStatusChange(callback);
+  }
+
+  onInfo(callback: (info: T_INFO) => void) {
+    const context: MiddlewareContext<T_OPTIONS> = { engineId: this.id };
+
+    return this.adapter.onInfo
+      ? this.adapter.onInfo(async (rawInfo) => {
+          let info: T_INFO = rawInfo;
+          for (const mw of this.middlewares) {
+            if (mw.onInfo) {
+              const processed = await mw.onInfo(info, context);
+              // 2026 Best Practice: 型ガードを使用してミドルウェアの出力を検証
+              if (this.isValidInfo(processed)) {
+                info = processed;
+              }
+            }
+          }
+          callback(info);
+        })
+      : () => {};
+  }
+
+  onSearchResult(callback: (result: T_RESULT) => void) {
+    return this.adapter.onSearchResult(callback);
+  }
+
+  onTelemetry(callback: (telemetry: EngineTelemetry) => void) {
+    return this.adapter.onTelemetry(callback);
+  }
+
+  emitTelemetry(telemetry: EngineTelemetry): void {
+    this.adapter.emitTelemetry(telemetry);
+  }
+
+  private async enforceCapabilities(): Promise<void> {
+    if (!this.adapter.requiredCapabilities) return;
+
+    const { CapabilityDetector } =
+      await import("../capabilities/CapabilityDetector.js");
+    const caps = await CapabilityDetector.detect();
+    const missing: string[] = [];
+
+    for (const [key, required] of Object.entries(
+      this.adapter.requiredCapabilities,
+    )) {
+      if (required && !caps[key as keyof ICapabilities]) {
+        missing.push(key);
+      }
+    }
+
+    if (missing.length > 0) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Environment does not support required capabilities: ${missing.join(", ")}`,
+        engineId: this.id,
+        remediation:
+          "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
+      });
+    }
+  }
+
+  private isValidInfo(info: unknown): info is T_INFO {
+    // 2026: info はエンジン固有だが、少なくともオブジェクトであるか
+    // ミドルウェアが明示的に null/undefined を返さないことを確認
+    return info !== undefined && info !== null;
+  }
+
+  private isValidResult(res: unknown): res is T_RESULT {
+    return (
+      typeof res === "object" &&
+      res !== null &&
+      ("bestMove" in res || "ponder" in res)
+    );
   }
 }

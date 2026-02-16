@@ -185,7 +185,7 @@ export function EngineMonitorPanel<
                   {strings.principalVariations}
                 </h3>
                 <span className="text-[10px] font-mono text-gray-300">
-                  N={state.pvs.length}
+                  {strings.pvCount(state.pvs.length)}
                 </span>
               </div>
               <ScrollArea.Root className="flex-1 overflow-hidden">
@@ -209,7 +209,7 @@ export function EngineMonitorPanel<
 
       <footer className="px-4 py-2 bg-gray-50/80 border-t border-gray-200 text-[9px] text-gray-400 flex justify-between font-medium">
         <span className="truncate mr-4">
-          {engine.name} v{engine.version}
+          {strings.engineVersion(engine.name, engine.version)}
         </span>
         <span className="flex-shrink-0">
           {strings.engineBridgeStandard(2026)}

@@ -1,5 +1,5 @@
-import type { Preview } from "@storybook/react";
-import "@multi-game-engines/ui-react/src/tailwind.css";
+import type { Preview } from "@storybook/react-vite";
+import "../src/tailwind.css";
 
 const preview: Preview = {
   parameters: {
@@ -10,6 +10,7 @@ const preview: Preview = {
       },
     },
   },
+  tags: ["autodocs"],
 };
 
 export default preview;

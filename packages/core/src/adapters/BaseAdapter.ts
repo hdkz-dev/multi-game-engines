@@ -27,6 +27,8 @@ export abstract class BaseAdapter<
   protected statusListeners = new Set<(status: EngineStatus) => void>();
   protected progressListeners = new Set<(progress: ILoadProgress) => void>();
   protected telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
+  protected infoListeners = new Set<(info: T_INFO) => void>();
+  protected resultListeners = new Set<(result: T_RESULT) => void>();
 
   // 共通状態管理
   protected communicator: WorkerCommunicator | null = null;
@@ -129,6 +131,16 @@ export abstract class BaseAdapter<
     const info = this.parser.parseInfo(record);
     if (info) {
       this.infoController?.enqueue(info);
+      for (const listener of this.infoListeners) {
+        try {
+          listener(info);
+        } catch (err) {
+          console.error(
+            `[BaseAdapter] Error in info listener for engine ${this.id}:`,
+            err,
+          );
+        }
+      }
     }
 
     const result = this.parser.parseResult(record);
@@ -138,6 +150,16 @@ export abstract class BaseAdapter<
       this.pendingResolve = null;
       this.pendingReject = null;
       resolve?.(result);
+      for (const listener of this.resultListeners) {
+        try {
+          listener(result);
+        } catch (err) {
+          console.error(
+            `[BaseAdapter] Error in search result listener for engine ${this.id}:`,
+            err,
+          );
+        }
+      }
       this.cleanupPendingTask();
     }
   }
@@ -254,6 +276,16 @@ export abstract class BaseAdapter<
     return () => this.statusListeners.delete(callback);
   }
 
+  onInfo(callback: (info: T_INFO) => void): () => void {
+    this.infoListeners.add(callback);
+    return () => this.infoListeners.delete(callback);
+  }
+
+  onSearchResult(callback: (result: T_RESULT) => void): () => void {
+    this.resultListeners.add(callback);
+    return () => this.resultListeners.delete(callback);
+  }
+
   onProgress(callback: (progress: ILoadProgress) => void): () => void {
     this.progressListeners.add(callback);
     return () => this.progressListeners.delete(callback);
@@ -299,5 +331,7 @@ export abstract class BaseAdapter<
     this.statusListeners.clear();
     this.progressListeners.clear();
     this.telemetryListeners.clear();
+    this.infoListeners.clear();
+    this.resultListeners.clear();
   }
 }

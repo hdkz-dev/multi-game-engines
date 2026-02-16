@@ -60,7 +60,7 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 
 ### 多言語・多プロトコル対応
 
-チェスの **UCI (Universal Chess Interface)** および将棋の **USI (Universal Shogi Interface)** プロトコルをネイティブにサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
+チェスの **UCI (Universal Chess Interface)**、将棋の **USI (Universal Shogi Interface)**、囲碁の **GTP (Go Text Protocol)**、オセロ・麻雀の独自プロトコル（JSON等）をサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
 
 ## ライセンス戦略
 
@@ -95,14 +95,14 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 
 1.  **Reactive Core (`ui-core`)**:
     - **役割**: フレームワーク非依存のビジネスロジック。
-    - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。
+    - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。評価値の表示ロジック（`EvaluationPresenter`）もここに集約されています。
 2.  **Localization Layer (`i18n`)**:
     - **役割**: 純粋な言語リソースの提供。
     - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。
 
 3.  **Framework Adapters**:
-    - **`ui-react`**: React Hooks (`useSyncExternalStore`) と Context DI を活用したアダプター。
-    - **`ui-vue`**: Vue 3 Composition API (`ref`, `computed`) を活用したリアクティブ・アダプター。
+    - **`ui-react`**: React Hooks (`useSyncExternalStore`) と Context DI を活用したアダプター。Storybook 10 と Tailwind CSS v4 に完全対応。
+    - **`ui-vue`**: Vue 3 Composition API (`ref`, `computed`) を活用したリアクティブ・アダプター。Storybook 10 対応済み。
     - **`ui-elements`**: Lit ベースの Web Components。あらゆる HTML 環境で動作する究極のポータビリティを提供。
 
 ### 2. 契約駆動 UI (Contract-driven UI)

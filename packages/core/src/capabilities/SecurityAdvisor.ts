@@ -69,10 +69,14 @@ export class SecurityAdvisor {
       }
     }
 
+    const sriSupported = typeof crypto !== "undefined" && !!crypto.subtle;
+
     return {
       isCrossOriginIsolated,
       canUseThreads: isCrossOriginIsolated,
-      sriSupported: typeof crypto !== "undefined" && !!crypto.subtle,
+      sriSupported,
+      sriEnabled: sriSupported, // 2026: 基本的にサポートされていれば有効とみなす設計
+      coopCoepEnabled: isCrossOriginIsolated,
       missingHeaders: missingHeaders.length > 0 ? missingHeaders : undefined,
     };
   }

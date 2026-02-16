@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SearchMonitor } from "../monitor.js";
-import { IEngine, IBaseSearchInfo } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchInfo,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 
 describe("SearchMonitor", () => {
   beforeEach(() => {
@@ -20,7 +25,11 @@ describe("SearchMonitor", () => {
       onStatusChange: vi.fn(() => () => {}),
       search: vi.fn(),
       stop: vi.fn(),
-    } as unknown as IEngine;
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
 
     const transformer = (
       state: Record<string, unknown>,
@@ -50,7 +59,11 @@ describe("SearchMonitor", () => {
     const mockEngine = {
       onInfo: vi.fn(() => unsubInfo),
       onStatusChange: vi.fn(() => () => {}),
-    } as unknown as IEngine;
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
 
     const monitor = new SearchMonitor(mockEngine, {}, (s) => s);
     monitor.startMonitoring();

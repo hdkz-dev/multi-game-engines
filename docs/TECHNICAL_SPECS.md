@@ -6,8 +6,8 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 ### 1-1. 抽象基盤定義
 
-- **Brand<T, K>**: 公称型 (Branded Types) を生成するための共通ヘルパー。
-- **EngineStatus**: エンジンのライフサイクル状態。
+- **Brand<K, T>**: 公称型 (Branded Types) を生成するための共通ヘルパー。
+- **EngineStatus**: エンジンのライフサイクル状態 (`loading`, `ready`, `busy` 等)。
 - **EngineErrorCode**: 標準化されたエラーコード。
 
 ### 1-2. アダプターによるドメイン拡張
@@ -33,16 +33,16 @@ type SFEN = Brand<string, "SFEN">;
 - **EngineRegistry による自動型推論**: `bridge.getEngine('stockfish')` のように呼ぶだけで、戻り値の型が自動的に最適なジェネリクスで推論されます。
 - `load()`: SRI 検証とキャッシュロードを伴う初期化。
 - `search(options)`: 非同期探索。ロード戦略に応じて自動ロードを実行。ミドルウェアをシーケンシャルに適用。新しい探索が開始されると前のタスクは自動停止します。
-- `onInfo(callback)`: リアルタイムな思考配信の購読。
+- `onInfo(callback)`: リアルタイムな思考配信の購読。ミドルウェアによるデータ正規化（`undefined` スキップ等）を経由します。
 - `loadingStrategy`: ロード戦略の動的な変更。
-- `stop()`: 現在の探索を安全に中断。
+- `stop()`: 現在の探索を安全に中断。非同期メソッドとして定義され、エラー発生時も適切にログ出力されます。
 - `dispose()`: 個別エンジンのリソース解放。アダプターへの全イベント購読（Managed Subscriptions）を自動解除。
 
 ## 3. セキュリティとインフラ
 
 ### 3-1. EngineLoader (Modern Security)
 
-- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。空の SRI はエラーとなります。W3C 標準のマルチハッシュ（スペース区切り）に対応。
+- **SRI 必須化**: 全てのリソースに対し、ハッシュ検証を強制。`sri` プロパティは必須であり、空の場合は明示的な `__unsafeNoSRI` フラグが必要です。W3C 標準のマルチハッシュ（スペース区切り）に対応。
 - **アトミック・マルチロード**: `loadResources()`により、WASM 本体と重みファイルなどの複数リソースを一括で検証・取得し、依存関係の一貫性を保証。
 - **動的 MIME タイプ**: WASM (`application/wasm`) や JS (`application/javascript`) を適切に識別。
 - **Auto-Revocation**: メモリリーク防止のため、リロード時に古い Blob URL を自動的に `revoke`。
@@ -63,6 +63,8 @@ type SFEN = Brand<string, "SFEN">;
 
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
+- **GTPParser**: 囲碁用。`genmove` や `loadboard` などのコマンド生成、および `visits` や `winrate` の解析に対応。
+- **JSONParser (Mahjong)**: 麻雀用。構造化された JSON メッセージのパースと、再帰的なインジェクション検証。
 - **インジェクション対策 (Refuse by Exception)**: 不正な制御文字（`\r`, `\n`, `\0`, `;` 等）を検出した場合、サニタイズせず即座に `SECURITY_ERROR` をスローし、入力を拒否します。
 - **再帰的オブジェクト検証**: JSON 形式のアダプター（Mahjong 等）では、オブジェクトツリーを再帰的に走査して全ての文字列値に対してインジェクション検証を適用します。
 - **Strict Regex Validation (出力検証)**: エンジンからの出力（UCI 指し手など）は、正規表現によって厳格に検証し、形式に適合しないデータは `null` として破棄します。正規表現は `static readonly` として事前コンパイルし、NPS (Nodes Per Second) への影響を最小化します。
@@ -85,9 +87,11 @@ type SFEN = Brand<string, "SFEN">;
   - **時間ベース Throttling**: `throttleMs` オプションにより、特定のミリ秒間隔での更新強制も可能です。
 - **決定論的スナップショット**: React の `useSyncExternalStore` に完全対応した `getSnapshot` / `subscribe` インターフェースを実装。レンダリングの「引き裂き（Tearing）」を構造的に防止します。
 - **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
+- **プレゼンテーションロジックの分離**: `EvaluationPresenter` により、評価値の表示色やラベル生成ロジックを UI フレームワークから分離・共通化。
 
 ### 6-2. React アダプター (`ui-react`)
 
+- **Storybook 10 対応**: 最新の Storybook エコシステム（Vite 6, Tailwind CSS v4）に完全準拠。
 - **決定論的ライフサイクル**: `useRef` によるモニターインスタンスの永続化と、`useEffect` による厳格な購読解除を徹底。React 18 以降の Strict Mode および Concurrent Rendering 下でも安全に動作します。
 - **UI 依存性注入 (EngineUIProvider)**: コンテキストを通じて i18n 文字列やデザインテーマを一括管理。
 - **アクセシビリティ (WCAG 2.2 AA)**:
@@ -95,9 +99,14 @@ type SFEN = Brand<string, "SFEN">;
   - **Intelligent Live Regions**: 重大な状態変化（詰みの発見、エラー等）のみを `aria-live=\"assertive\"` で通知し、通常の更新は `polite` で処理。
   - **Focus Trap & Management**: Radix UI プリミティブによるキーボードフォーカス制御。
 
+### 6-3. Vue アダプター (`ui-vue`)
+
+- **Vue 3 Composition API**: `useEngineMonitor` コンポーザブルによるリアクティブな状態管理。
+- **Storybook 10 対応**: Vue 3 + Vite 環境での Storybook 統合。Tailwind CSS v4 サポート。
+
 ## 7. 品質保証 (Testing Philosophy)
 
-- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅する 121 項目のテスト（Core + Adapters + UI）。
+- **ユニットテスト**: 主要ロジックおよびエッジケースを網羅するテスト（Core + Adapters + UI）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。
-- **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を禁止。`satisfies` 演算子による厳格な型推論。
+- **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を極力排除（Middleware の内部実装など不可避な場合を除く）。`satisfies` 演算子による厳格な型推論。
 - **ライフサイクル検証**: インスタンスキャッシュ、`WeakRef` によるメモリ管理、アトミックな初期化の網羅的な検証。

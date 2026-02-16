@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { SearchStateTransformer } from "../transformer.js";
 import { createInitialState, PositionString } from "../types.js";
 import { ExtendedSearchInfo } from "../schema.js";
+import { createMove } from "@multi-game-engines/core";
 
 describe("SearchStateTransformer", () => {
   const initialState = createInitialState(
@@ -26,7 +27,7 @@ describe("SearchStateTransformer", () => {
   it("should handle MultiPV updates and maintain order", () => {
     const info1: ExtendedSearchInfo = {
       multipv: 2,
-      pv: ["e2e4", "e7e5"],
+      pv: ["e2e4", "e7e5"].map(createMove),
       score: { cp: 50 },
     };
     let state = SearchStateTransformer.mergeInfo(initialState, info1);
@@ -36,7 +37,7 @@ describe("SearchStateTransformer", () => {
 
     const info2: ExtendedSearchInfo = {
       multipv: 1,
-      pv: ["d2d4", "d7d5"],
+      pv: ["d2d4", "d7d5"].map(createMove),
       score: { cp: 60 },
     };
     state = SearchStateTransformer.mergeInfo(state, info2);
@@ -49,14 +50,14 @@ describe("SearchStateTransformer", () => {
   it("should update existing PV", () => {
     const info1: ExtendedSearchInfo = {
       multipv: 1,
-      pv: ["e2e4"],
+      pv: ["e2e4"].map(createMove),
       score: { cp: 10 },
     };
     let state = SearchStateTransformer.mergeInfo(initialState, info1);
 
     const info2: ExtendedSearchInfo = {
       multipv: 1,
-      pv: ["e2e4", "e7e5"],
+      pv: ["e2e4", "e7e5"].map(createMove),
       score: { cp: 20 },
     };
     state = SearchStateTransformer.mergeInfo(state, info2);
@@ -69,7 +70,7 @@ describe("SearchStateTransformer", () => {
   it("should handle mate scores", () => {
     const info: ExtendedSearchInfo = {
       multipv: 1,
-      pv: ["f2f3"],
+      pv: ["f2f3"].map(createMove),
       score: { mate: 5 },
     };
     const state = SearchStateTransformer.mergeInfo(initialState, info);

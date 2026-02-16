@@ -18,6 +18,6 @@ describe("EngineMonitorElement", () => {
     // 2026 Best Practice: Lit の非同期レンダリングを待機
     await el.updateComplete;
 
-    expect(el.shadowRoot?.textContent).toContain("Initializing engine...");
+    expect(el.shadowRoot?.textContent).toContain("Initializing...");
   });
 });

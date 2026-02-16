@@ -9,6 +9,7 @@ import {
   IMiddleware,
   EngineStatus,
   MiddlewarePriority,
+  Move,
 } from "../types.js";
 
 describe("EngineBridge", () => {
@@ -37,13 +38,18 @@ describe("EngineBridge", () => {
     load: vi.fn().mockResolvedValue(undefined),
     searchRaw: vi.fn().mockImplementation(() => ({
       info: (async function* () {
-        yield { raw: "info depth 1 score 10" } as IBaseSearchInfo;
+        yield { depth: 1, scoreValue: 10 } as IBaseSearchInfo;
       })(),
-      result: Promise.resolve({ raw: "bestmove e2e4" } as IBaseSearchResult),
+      result: Promise.resolve({
+        bestMove: "e2e4" as Move,
+      } as IBaseSearchResult),
       stop: vi.fn(),
     })),
+    stop: vi.fn().mockResolvedValue(undefined),
     setOption: vi.fn().mockResolvedValue(undefined),
     onStatusChange: vi.fn().mockReturnValue(() => {}),
+    onInfo: vi.fn().mockReturnValue(() => {}),
+    onSearchResult: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),
     onTelemetry: vi.fn().mockReturnValue(() => {}),
     emitTelemetry: vi.fn(),

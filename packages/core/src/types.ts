@@ -1,323 +1,366 @@
 /**
- * エンジンブリッジ全体の共通型定義。
- * Core パッケージは、特定のゲームやプロトコルに対する知識を一切持ちません。
+ * ブランド型を生成するためのヘルパー型。
+ * @template T_BASE ベースとなる型（例: string）
+ * @template T_BRAND ブランド名（ユニークな文字列リテラル）
  */
+export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
-/** ブラント型 (Branded Types) の基底定義 */
-export type Brand<T, K> = T & { readonly __brand: K };
-
-/** 局面情報の抽象ブランド型 (FEN, SFEN等) */
+/**
+ * FEN (Forsyth-Edwards Notation) を表すブランド型。
+ */
 export type FEN = Brand<string, "FEN">;
 
-/** 指し手情報の抽象ブランド型 (UCI, USI等) */
+/**
+ * 指し手を表すブランド型（UCI/USI形式）。
+ */
 export type Move = Brand<string, "Move">;
 
-/** 局面情報のバリデータファクトリ (暫定的に型を確定させるためのもの) */
+/**
+ * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
+ */
+export type PositionString = Brand<string, "PositionString">;
+
+/**
+ * 局面情報のバリデータファクトリ。
+ */
 export function createFEN(pos: string): FEN {
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new Error("Invalid FEN: Input must be a non-empty string.");
+  }
+  const fields = pos.trim().split(/\s+/);
+  if (fields.length < 4) {
+    throw new Error(
+      `Invalid FEN structure: Expected at least 4 fields, found ${fields.length}`,
+    );
+  }
   return pos as FEN;
 }
 
-/** 指し手のバリデータファクトリ */
+/**
+ * 局面表記のバリデータファクトリ。
+ */
+export function createPositionString(pos: string): PositionString {
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new Error(
+      "Invalid PositionString: Input must be a non-empty string.",
+    );
+  }
+  return pos as PositionString;
+}
+
+/**
+ * 指し手のバリデータファクトリ。
+ */
 export function createMove(move: string): Move {
+  if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
+    throw new Error(
+      `Invalid Move format: "${move}" contains illegal characters.`,
+    );
+  }
   return move as Move;
 }
 
-/** エンジンの動作状態 */
+/**
+ * エンジンの状態。
+ */
 export type EngineStatus =
   | "uninitialized"
   | "loading"
   | "ready"
   | "busy"
   | "error"
+  | "disposed"
   | "terminated";
 
-/** エラーコードの定義 */
+/**
+ * 探索オプション。
+ */
+export interface IBaseSearchOptions {
+  fen?: FEN | PositionString;
+  signal?: AbortSignal;
+  [key: string]: unknown;
+}
+
+/**
+ * 探索状況情報。
+ */
+export interface IBaseSearchInfo {
+  depth?: number;
+  seldepth?: number;
+  nodes?: number;
+  nps?: number;
+  time?: number;
+  pv?: Move[];
+  multipv?: number;
+  scoreType?: "cp" | "mate";
+  scoreValue?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * 探索結果。
+ */
+export interface IBaseSearchResult {
+  bestMove?: unknown;
+  ponder?: unknown;
+  [key: string]: unknown;
+}
+
+/**
+ * ロード進捗。
+ */
+export interface ILoadProgress {
+  phase: string;
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
+/**
+ * 能力検出。
+ */
+export interface ICapabilities {
+  wasmThreads: boolean;
+  wasmSimd: boolean;
+  webNN?: boolean;
+  webGPU?: boolean;
+  webTransport?: boolean;
+  threads?: boolean;
+  simd?: boolean;
+  opfs?: boolean;
+}
+
+/**
+ * セキュリティ状態。
+ */
+export interface ISecurityStatus {
+  sriEnabled: boolean;
+  coopCoepEnabled: boolean;
+  sriSupported: boolean;
+  canUseThreads: boolean;
+  isCrossOriginIsolated: boolean;
+  missingHeaders?: string[];
+}
+
+/**
+ * エラー関連。
+ */
 export enum EngineErrorCode {
-  INITIALIZATION_ERROR = "INITIALIZATION_ERROR",
+  TIMEOUT = "TIMEOUT",
   NETWORK_ERROR = "NETWORK_ERROR",
-  SRI_MISMATCH = "SRI_MISMATCH",
-  SEARCH_TIMEOUT = "SEARCH_TIMEOUT",
-  COMMAND_TIMEOUT = "COMMAND_TIMEOUT",
+  VALIDATION_ERROR = "VALIDATION_ERROR",
   INTERNAL_ERROR = "INTERNAL_ERROR",
-  NOT_READY = "NOT_READY",
+  CANCELLED = "CANCELLED",
   SECURITY_ERROR = "SECURITY_ERROR",
-  LIFECYCLE_ERROR = "LIFECYCLE_ERROR",
+  SRI_MISMATCH = "SRI_MISMATCH",
+  NOT_READY = "NOT_READY",
   SEARCH_ABORTED = "SEARCH_ABORTED",
+  SEARCH_TIMEOUT = "SEARCH_TIMEOUT",
+  LIFECYCLE_ERROR = "LIFECYCLE_ERROR",
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
 
-/** エンジンのロード戦略 */
-export type EngineLoadingStrategy = "manual" | "on-demand" | "eager";
-
-/** ライセンス情報 */
-export interface ILicenseInfo {
-  readonly name: string;
-  readonly url: string;
+export interface EngineError {
+  message: string;
+  code: EngineErrorCode;
+  remediation?: string;
+  engineId?: string;
 }
 
-/** ロードの進捗状況 */
-export interface ILoadProgress {
-  phase: "downloading" | "initializing" | "ready";
-  percentage: number;
-  i18n?: { key: string; defaultMessage: string };
-}
-
-/** テレメトリイベント (2026 Standard) */
+/**
+ * テレメトリ関連。
+ */
 export interface ITelemetryEvent {
-  readonly type: "performance" | "error" | "lifecycle" | "resource";
-  readonly timestamp: number;
-  readonly duration?: number;
-  readonly metadata?: Record<string, unknown>;
+  type: string;
+  timestamp: number;
+  duration?: number;
+  metadata: Record<string, unknown>;
 }
 
-/** 実行環境の能力診断 */
-export interface ICapabilities {
-  readonly opfs: boolean;
-  readonly wasmThreads: boolean;
-  readonly wasmSimd: boolean;
-  readonly webNN: boolean;
-  readonly webGPU: boolean;
-  readonly webTransport: boolean;
-  readonly details?: Record<string, boolean>;
+export type EngineTelemetry = ITelemetryEvent;
+
+/**
+ * ミドルウェア関連。
+ */
+export interface MiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
+  engineId: string;
+  telemetryId?: string;
+  options?: T_OPTIONS;
+  emitTelemetry?: (telemetry: EngineTelemetry) => void;
 }
 
-/** セキュリティ診断状況 */
-export interface ISecurityStatus {
-  readonly isCrossOriginIsolated: boolean;
-  readonly canUseThreads: boolean;
-  readonly sriSupported: boolean;
-  readonly missingHeaders?: string[];
+export type IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> =
+  MiddlewareContext<T_OPTIONS>;
+
+export enum MiddlewarePriority {
+  LOW = -100,
+  NORMAL = 0,
+  HIGH = 100,
+  CRITICAL = 1000,
+}
+
+export type MiddlewareCommand =
+  | string
+  | string[]
+  | Record<string, unknown>
+  | Uint8Array;
+
+export interface IMiddleware<
+  T_OPTIONS = IBaseSearchOptions,
+  T_INFO = unknown,
+  T_RESULT = IBaseSearchResult,
+> {
+  priority?: number;
+  supportedEngines?: string[];
+  onCommand?(
+    command: MiddlewareCommand,
+    context: MiddlewareContext<T_OPTIONS>,
+  ):
+    | Promise<MiddlewareCommand | undefined | void>
+    | MiddlewareCommand
+    | undefined
+    | void;
+  onInfo?(
+    info: T_INFO,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): Promise<T_INFO | undefined | void> | T_INFO | undefined | void;
+  onResult?(
+    result: T_RESULT,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): Promise<T_RESULT | undefined | void> | T_RESULT | undefined | void;
 }
 
 /**
- * 探索の基本オプション (全ゲーム共通)
- * 2026 Best Practice: Core はプロパティを定義せず、アダプター側で完全に定義します。
+ * 探索タスク。
  */
-export interface IBaseSearchOptions {
-  /** 中断制御用のシグナルのみ、インフラ層の機能として Core で提供します。 */
-  signal?: AbortSignal;
+export interface ISearchTask<T_INFO, T_RESULT> {
+  info: AsyncIterable<T_INFO>;
+  result: Promise<T_RESULT>;
+  stop(): void;
 }
 
 /**
- * 思考状況の基本情報 (全ゲーム共通)
- * Core は、全アダプターで共通して利用可能な最も抽象的な情報のみを保持します。
+ * プロトコルパーサー。
  */
-export interface IBaseSearchInfo {
-  /** エンジンからの生の出力。デバッグやログ記録のために保持します。 */
-  raw?: string;
-}
-
-/** 探索の最終結果 (全ゲーム共通) */
-export interface IBaseSearchResult {
-  /** エンジンからの生の最終出力 */
-  raw?: string;
-}
-
-/** エンジンと型のマッピング定義 (Declaration Merging 用) */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EngineRegistry {}
-
-/** 利用者がエンジンを操作するためのメインインターフェース */
-export interface IEngine<
+export interface IProtocolParser<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_INFO = unknown,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+> {
+  createSearchCommand(options: T_OPTIONS): MiddlewareCommand;
+  createStopCommand(): MiddlewareCommand;
+  createOptionCommand(name: string, value: unknown): MiddlewareCommand;
+  parseInfo(line: string | Record<string, unknown>): T_INFO | null;
+  parseResult(line: string | Record<string, unknown>): T_RESULT | null;
+}
+
+/**
+ * エンジン・アダプター。
+ */
+export interface IEngineAdapter<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO = unknown,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > {
   readonly id: string;
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
-  readonly lastError?: {
-    message: string;
-    code?: EngineErrorCode;
-    remediation?: string;
-  };
-  loadingStrategy: EngineLoadingStrategy;
+  readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
+  readonly requiredCapabilities?: Partial<ICapabilities>;
 
-  load(): Promise<void>;
-  search(options: T_OPTIONS): Promise<T_RESULT>;
-  onInfo(callback: (info: T_INFO) => void): () => void;
+  load(loader?: IEngineLoader): Promise<void>;
+  searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
+  stop(): void | Promise<void>;
+  dispose(): Promise<void>;
+  setOption(name: string, value: string | number | boolean): Promise<void>;
+  onInfo?(callback: (info: T_INFO) => void): () => void;
+  onSearchResult(callback: (result: T_RESULT) => void): () => void;
   onStatusChange(callback: (status: EngineStatus) => void): () => void;
   onProgress(callback: (progress: ILoadProgress) => void): () => void;
-  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void;
-  /** テレメトリイベントをシステムに発行します。 */
-  emitTelemetry(event: ITelemetryEvent): void;
-  /** エンジン個別にミドルウェアを追加します。 */
-  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): void;
-  stop(): Promise<void>;
-  setOption(name: string, value: string | number | boolean): Promise<void>;
-  dispose(): Promise<void>;
+  onTelemetry(callback: (telemetry: EngineTelemetry) => void): () => void;
+  emitTelemetry(telemetry: EngineTelemetry): void;
 }
 
-/** ブリッジ全体のインターフェース */
-export interface IEngineBridge {
-  registerAdapter<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
-    adapter: IEngineAdapter<O, I, R>,
-  ): Promise<void>;
-  unregisterAdapter(id: string): Promise<void>;
-  getEngine<K extends keyof EngineRegistry>(
-    id: K,
-    strategy?: EngineLoadingStrategy,
-  ): IEngine<
-    EngineRegistry[K]["options"],
-    EngineRegistry[K]["info"],
-    EngineRegistry[K]["result"]
-  >;
-  getEngine<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
-    id: string,
-    strategy?: EngineLoadingStrategy,
-  ): IEngine<O, I, R>;
-  use<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
-    middleware: IMiddleware<O, I, R>,
-  ): void;
-  checkCapabilities(): Promise<ICapabilities>;
-  getLoader(): Promise<IEngineLoader>;
-  dispose(): Promise<void>;
-}
-
-/** アダプター用インターフェース */
-export interface IEngineAdapter<
-  T_OPTIONS extends IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo,
-  T_RESULT extends IBaseSearchResult,
+/**
+ * 利用者向け engine インターフェース。
+ */
+export interface IEngine<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO = unknown,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > {
   readonly id: string;
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
-  readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
+  readonly lastError: EngineError | null;
+  loadingStrategy?: EngineLoadingStrategy;
 
-  load(loader?: IEngineLoader): Promise<void>;
-  searchRaw(
-    command: string | string[] | Uint8Array | Record<string, unknown>,
-  ): ISearchTask<T_INFO, T_RESULT>;
-  setOption(name: string, value: string | number | boolean): Promise<void>;
-  onStatusChange(callback: (status: EngineStatus) => void): () => void;
-  onProgress(callback: (progress: ILoadProgress) => void): () => void;
-  onTelemetry?(callback: (event: ITelemetryEvent) => void): () => void;
-  emitTelemetry?(event: ITelemetryEvent): void;
+  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this;
+  load(): Promise<void>;
+  search(options: T_OPTIONS): Promise<T_RESULT>;
+  stop(): void;
   dispose(): Promise<void>;
+  onInfo(callback: (info: T_INFO) => void): () => void;
+  onSearchResult(callback: (result: T_RESULT) => void): () => void;
+  onStatusChange(callback: (status: EngineStatus) => void): () => void;
+  onTelemetry(callback: (telemetry: EngineTelemetry) => void): () => void;
+  emitTelemetry(telemetry: EngineTelemetry): void;
 }
 
-/** パーサーインターフェース */
-export interface IProtocolParser<T_OPTIONS, T_INFO, T_RESULT> {
-  parseInfo(data: string | Uint8Array | Record<string, unknown>): T_INFO | null;
-  parseResult(
-    data: string | Uint8Array | Record<string, unknown>,
-  ): T_RESULT | null;
-  /** 探索コマンドを作成します。2026 Best Practice: オブジェクトを直接返せるようにし、Worker への転送効率を最大化します。 */
-  createSearchCommand(
-    options: T_OPTIONS,
-  ): string | string[] | Uint8Array | Record<string, unknown>;
-  createStopCommand(): string | Uint8Array | Record<string, unknown>;
-  createOptionCommand(
-    name: string,
-    value: string | number | boolean,
-  ): string | Uint8Array | Record<string, unknown>;
+/**
+ * ロード戦略。
+ */
+export type EngineLoadingStrategy = "manual" | "on-demand" | "eager";
+
+/**
+ * ストレージ関連。
+ */
+export interface IFileStorage {
+  get(key: string): Promise<ArrayBuffer | null>;
+  set(key: string, data: ArrayBuffer): Promise<void>;
+  delete(key: string): Promise<void>;
+  has?(key: string): Promise<boolean>;
+  clear(): Promise<void>;
 }
 
-/** 探索タスク */
-export interface ISearchTask<T_INFO, T_RESULT> {
-  readonly info: AsyncIterable<T_INFO>;
-  readonly result: Promise<T_RESULT>;
-  stop(): Promise<void>;
-}
+/**
+ * エンジン・ソース設定。
+ */
+export type IEngineSourceConfig = {
+  url: string;
+  type: string;
+  size?: number;
+} & (
+  | { sri: string; __unsafeNoSRI?: never }
+  | { sri?: never; __unsafeNoSRI: true }
+);
 
-/** リソースローダー */
+/**
+ * エンジンローダー。
+ */
 export interface IEngineLoader {
   loadResource(engineId: string, config: IEngineSourceConfig): Promise<string>;
   loadResources(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>>;
-  revoke(url: string): void;
 }
 
-/** リソース設定 */
-export interface IEngineSourceConfig {
-  readonly url: string;
-  readonly sri: string;
-  readonly size: number;
-  readonly type?:
-    | "wasm"
-    | "worker-js"
-    | "native"
-    | "webgpu-compute"
-    | "eval-data";
+/**
+ * エンジン・ブリッジ。
+ */
+export interface IEngineBridge {
+  getEngine<T extends keyof EngineRegistry>(id: T): EngineRegistry[T];
+  registerAdapter(
+    adapter: IEngineAdapter<IBaseSearchOptions, unknown, IBaseSearchResult>,
+  ): void;
+  dispose(): Promise<void>;
 }
 
-/** ストレージ */
-export interface IFileStorage {
-  get(key: string): Promise<ArrayBuffer | null>;
-  set(key: string, data: ArrayBuffer): Promise<void>;
-  delete(key: string): Promise<void>;
-  has(key: string): Promise<boolean>;
-  clear(): Promise<void>;
-}
-
-/** ミドルウェアコンテキスト */
-export interface IMiddlewareContext<T_OPTIONS = IBaseSearchOptions> {
-  readonly engineId: string;
-  readonly options: T_OPTIONS;
-  /**
-   * テレメトリイベントを発行します。
-   * ミドルウェアはこのメソッドを通じて、システムのテレメトリパイプラインにイベントを送信できます。
-   */
-  readonly emitTelemetry: (event: ITelemetryEvent) => void;
-  /**
-   * 探索ごとに生成される一意の ID。
-   * テレメトリの計測などで、並行する探索を区別するために使用されます。
-   */
-  readonly telemetryId?: string;
-}
-
-export enum MiddlewarePriority {
-  LOW = 0,
-  NORMAL = 100,
-  HIGH = 200,
-  CRITICAL = 1000,
-}
-
-export interface IMiddleware<
-  T_OPTIONS = IBaseSearchOptions,
-  T_INFO_IN = unknown,
-  T_RESULT_IN = unknown,
-  T_INFO_OUT = T_INFO_IN,
-  T_RESULT_OUT = T_RESULT_IN,
-> {
-  priority?: MiddlewarePriority;
-  /**
-   * このミドルウェアを適用するエンジンIDのリスト。
-   * 未定義の場合はすべてのエンジンに適用されます。
-   */
-  supportedEngines?: string[];
-  onCommand?(
-    command: string | string[] | Uint8Array | Record<string, unknown>,
-    context: IMiddlewareContext<T_OPTIONS>,
-  ):
-    | string
-    | string[]
-    | Uint8Array
-    | Record<string, unknown>
-    | Promise<string | string[] | Uint8Array | Record<string, unknown>>;
-  onInfo?(
-    info: T_INFO_IN,
-    context: IMiddlewareContext<T_OPTIONS>,
-  ): T_INFO_OUT | Promise<T_INFO_OUT>;
-  onResult?(
-    result: T_RESULT_IN,
-    context: IMiddlewareContext<T_OPTIONS>,
-  ): T_RESULT_OUT | Promise<T_RESULT_OUT>;
-}
+/**
+ * 宣言併合用レジストリ。
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EngineRegistry {}

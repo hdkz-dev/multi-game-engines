@@ -1,9 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineStore } from "../store.js";
-import { IEngine } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 
 describe("EngineStore", () => {
-  const mockEngine = { status: "ready" } as unknown as IEngine;
+  const mockEngine = { status: "ready" } as unknown as IEngine<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  >;
   let mockTimestamp = 0;
 
   beforeEach(() => {

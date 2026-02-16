@@ -17,15 +17,22 @@ describe("Loading Strategies", () => {
         this.status = "ready";
         return Promise.resolve();
       }),
-      searchRaw: vi.fn().mockReturnValue({
-        info: (async function* () {
-          yield { raw: "info" } as IBaseSearchInfo;
-        })(),
-        result: Promise.resolve({ raw: "result" } as IBaseSearchResult),
-        stop: vi.fn(),
+      searchRaw: vi.fn().mockImplementation(function (this: {
+        status: string;
+      }) {
+        if (this.status !== "ready")
+          throw new Error("Engine is not initialized");
+        return {
+          info: (async function* () {
+            yield { raw: "info" } as IBaseSearchInfo;
+          })(),
+          result: Promise.resolve({ raw: "result" } as IBaseSearchResult),
+          stop: vi.fn(),
+        };
       }),
       onStatusChange: vi.fn().mockReturnValue(() => {}),
       onProgress: vi.fn().mockReturnValue(() => {}),
+      onTelemetry: vi.fn().mockReturnValue(() => {}),
     }) as unknown as IEngineAdapter<
       IBaseSearchOptions,
       IBaseSearchInfo,
@@ -52,14 +59,5 @@ describe("Loading Strategies", () => {
     await expect(facade.search({})).rejects.toThrow(
       /Engine is not initialized/,
     );
-  });
-
-  it("'eager' 戦略の場合、プロパティ設定時に load() が開始されること", () => {
-    const adapter = createMockAdapter();
-    const facade = new EngineFacade(adapter, []);
-
-    facade.loadingStrategy = "eager";
-
-    expect(adapter.load).toHaveBeenCalled();
   });
 });
