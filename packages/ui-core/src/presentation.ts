@@ -18,9 +18,19 @@ export const EvaluationPresenter = {
         : "bg-red-600 text-white ring-red-200 shadow-red-200/30";
     }
 
-    if (displayValue > 100)
+    if (type === "winrate") {
+      if (displayValue > 0.6)
+        return "bg-score-plus text-white ring-score-plus/20";
+      if (displayValue < 0.4)
+        return "bg-score-minus text-white ring-score-minus/20";
+      return "bg-score-neutral text-gray-800 ring-gray-200";
+    }
+
+    const threshold = type === "points" ? 1.0 : 100;
+
+    if (displayValue > threshold)
       return "bg-score-plus text-white ring-score-plus/20";
-    if (displayValue < -100)
+    if (displayValue < -threshold)
       return "bg-score-minus text-white ring-score-minus/20";
     return "bg-score-neutral text-gray-800 ring-gray-200";
   },
@@ -34,6 +44,15 @@ export const EvaluationPresenter = {
 
     if (type === "mate") {
       return `M${Math.abs(displayValue)}`; // i18n 前のフォールバック
+    }
+
+    if (type === "winrate") {
+      return `${(displayValue * 100).toFixed(1)}%`;
+    }
+
+    if (type === "points") {
+      const formatted = displayValue.toFixed(1);
+      return displayValue > 0 ? `+${formatted}` : formatted;
     }
 
     const formatted = (displayValue / 100).toFixed(2);

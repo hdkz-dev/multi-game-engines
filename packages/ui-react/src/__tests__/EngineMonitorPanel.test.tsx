@@ -1,10 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 // Import components
 import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
-import { IEngine } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
+import { EngineSearchState, SearchMonitor } from "@multi-game-engines/ui-core";
 
 // Mock the hooks
 vi.mock("../useEngineMonitor.js", () => ({
@@ -13,7 +18,9 @@ vi.mock("../useEngineMonitor.js", () => ({
 
 vi.mock("../EngineUIProvider.js", () => ({
   useEngineUI: vi.fn(),
-  EngineUIProvider: ({ children }: any) => <div>{children}</div>,
+  EngineUIProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock sub-components
@@ -30,8 +37,10 @@ vi.mock("../ScoreBadge.js", () => ({
   ScoreBadge: () => <div data-testid="score-badge" />,
 }));
 vi.mock("@radix-ui/react-scroll-area", () => ({
-  Root: ({ children }: any) => <div>{children}</div>,
-  Viewport: ({ children }: any) => <div>{children}</div>,
+  Root: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Viewport: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
   Corner: () => null,
   Scrollbar: () => null,
   Thumb: () => null,
@@ -55,7 +64,8 @@ describe("EngineMonitorPanel", () => {
     searching: "Searching...",
     ready: "Ready",
     mateIn: (n: number) => `Mate in ${n}`,
-    advantage: (side: any, v: number) => `${side} ${v}`,
+    advantage: (side: "plus" | "minus" | "neutral", v: number) =>
+      `${side} ${v}`,
     retry: "Retry",
     reloadResources: "Reload",
     validationFailed: "Validation failed",
@@ -88,12 +98,17 @@ describe("EngineMonitorPanel", () => {
         nps: 0,
         time: 0,
         pvs: [],
-        evaluationHistory: { entries: [] },
-      } as any,
+        evaluationHistory: { entries: [], maxEntries: 50 },
+      } as unknown as EngineSearchState,
       status: "ready",
       search: vi.fn(),
       stop: vi.fn(),
-      monitor: {} as any,
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
     });
   });
 
@@ -104,7 +119,11 @@ describe("EngineMonitorPanel", () => {
       stop: vi.fn(),
       status: "ready",
       emitTelemetry: vi.fn(),
-    } as unknown as IEngine<any, any, any>;
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
 
     render(
       <EngineMonitorPanel
@@ -123,7 +142,11 @@ describe("EngineMonitorPanel", () => {
       stop: vi.fn(),
       status: "ready",
       emitTelemetry: vi.fn(),
-    } as unknown as IEngine<any, any, any>;
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
 
     const { useEngineMonitor } = await import("../useEngineMonitor.js");
     const mockSearch = vi.fn();
@@ -137,12 +160,17 @@ describe("EngineMonitorPanel", () => {
         nps: 0,
         time: 0,
         pvs: [],
-        evaluationHistory: { entries: [] },
-      } as any,
+        evaluationHistory: { entries: [], maxEntries: 50 },
+      } as unknown as EngineSearchState,
       status: "ready",
       search: mockSearch,
       stop: mockStop,
-      monitor: {} as any,
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
     });
 
     render(
@@ -163,7 +191,11 @@ describe("EngineMonitorPanel", () => {
       stop: vi.fn(),
       status: "searching",
       emitTelemetry: vi.fn(),
-    } as unknown as IEngine<any, any, any>;
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
 
     const { useEngineMonitor } = await import("../useEngineMonitor.js");
     const mockSearch = vi.fn();
@@ -177,12 +209,17 @@ describe("EngineMonitorPanel", () => {
         nps: 500,
         time: 2000,
         pvs: [],
-        evaluationHistory: { entries: [] },
-      } as any,
+        evaluationHistory: { entries: [], maxEntries: 50 },
+      } as unknown as EngineSearchState,
       status: "busy",
       search: mockSearch,
       stop: mockStop,
-      monitor: {} as any,
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
     });
 
     render(

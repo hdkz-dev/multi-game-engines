@@ -21,8 +21,10 @@
 
    ```typescript
    export interface IScoreInfo {
-     cp?: number; // センチポーン値
-     mate?: number; // 詰みまでの手数
+     cp?: number; // センチポーン値（チェス・将棋）
+     mate?: number; // 詰みまでの手数（チェス・将棋）
+     points?: number; // 得点差（囲碁・オセロ）
+     winrate?: number; // 勝率 0.0-1.0（MCTS系エンジン）
    }
    ```
 

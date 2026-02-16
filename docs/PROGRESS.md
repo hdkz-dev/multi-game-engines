@@ -5,10 +5,10 @@
 ## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith)
 
 - **構造化スコア情報の統一 (ADR-030)**:
-  - スコア表現を `{ cp, mate }` オブジェクトに統一し、詰みスコア用のマジックナンバーを廃止。
-  - `core` から `shogi-yaneuraou` / `stockfish` / `ui-core` に至る全レイヤーの型定義を刷新。
-  - 例外的な `as any` キャストを example プロジェクト（Vue/React）から完全に排除。
-  - チェス (`createFEN`) および将棋 (`createSFEN`) の Branded Type ファクトリにより、UI 層の完全な型安全性を達成。
+  - スコア表現を `{ cp, mate, points, winrate }` オブジェクトに統一し、囲碁や MCTS 系エンジンを含む広範なゲームに対応。
+  - `core` から `adapter-katago` / `ui-core` に至る全レイヤーの型定義を刷新し、visits や hashfull 等の観測指標を拡充。
+  - 例外的な `as any` キャストをテストコードおよび Storybook 資産から完全に排除（Zero-Any Policy）。
+  - チェス (`createFEN`) および将棋 (`createSFEN`) の Branded Type ファクトリにより、UI 層の型安全性を定着。
 - **パーサーの堅牢化と機能拡充**:
   - `UCIParser` および `USIParser` のテストを大幅強化し、境界値や負数、不完全な入力に対する耐性を証明。
   - 標準 UCI トークン (`seldepth`, `hashfull`, `multipv`) のパース処理を追加実装。

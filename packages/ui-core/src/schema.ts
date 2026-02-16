@@ -20,8 +20,11 @@ export const SearchInfoSchema = z.object({
     .object({
       cp: z.number().optional(),
       mate: z.number().optional(),
+      points: z.number().optional(),
+      winrate: z.number().optional(),
     })
     .optional(),
+  visits: z.number().optional(),
   hashfull: z.number().optional(),
   raw: z.string().optional(),
 });

@@ -83,14 +83,17 @@ export interface IBaseSearchOptions {
 
 /**
  * 構造化されたスコア情報。
- * UCI/USI プロトコルの `score cp <x>` / `score mate <x>` を忠実に表現する。
- * マジックナンバー（例: MATE_SCORE_FACTOR = 100000）を排除し、型レベルで cp/mate を区別する。
+ * 各種ゲームエンジンが返却する評価値を、プロトコルの詳細（マジックナンバー等）から隔離して保持する。
  */
 export interface IScoreInfo {
-  /** センチポーン値 (centipawns)。mate が定義されている場合は省略可。 */
+  /** 評価値（センチポーン。主にチェス・将棋で使用） */
   cp?: number;
-  /** 詰みまでの手数。正は自分の勝ち、負は相手の勝ち。 */
+  /** 詰みまでの手数（主にチェス・将棋で使用） */
   mate?: number;
+  /** 得点差（囲碁のコミ後点数、オセロの石数差など） */
+  points?: number;
+  /** 勝率 (0.0 - 1.0)。確率論的な評価を行うエンジンで使用。 */
+  winrate?: number;
 }
 
 /**
@@ -104,7 +107,11 @@ export interface IBaseSearchInfo {
   time?: number;
   pv?: Move[];
   multipv?: number;
-  /** 構造化スコア。cp と mate を分離して保持する。 */
+  /** 思考の複雑さ・規模を示す追加指標（囲碁の visits など） */
+  visits?: number;
+  /** ハッシュテーブルの使用率 (0 - 1000) */
+  hashfull?: number;
+  /** 構造化スコア。cp, mate, points, winrate を統合して保持する。 */
   score?: IScoreInfo;
   [key: string]: unknown;
 }

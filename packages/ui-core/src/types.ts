@@ -10,7 +10,7 @@ export type PositionString =
 /**
  * 評価値の種類
  */
-export type ScoreType = "cp" | "mate";
+export type ScoreType = "cp" | "mate" | "points" | "winrate";
 
 /**
  * 正規化された評価情報
@@ -31,6 +31,7 @@ export interface SearchStatistics {
   nodes: number;
   nps: number;
   time: number;
+  visits?: number;
   hashfull?: number;
 }
 

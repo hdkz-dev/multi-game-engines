@@ -33,6 +33,8 @@ export const SearchStateTransformer = {
         nodes: validatedInfo.nodes ?? state.stats.nodes,
         nps: validatedInfo.nps ?? state.stats.nps,
         time: validatedInfo.time ?? state.stats.time,
+        visits: validatedInfo.visits ?? state.stats.visits,
+        hashfull: validatedInfo.hashfull ?? state.stats.hashfull,
       },
     };
 
@@ -48,12 +50,34 @@ export const SearchStateTransformer = {
       const newPV: PrincipalVariation = {
         multipv: validatedInfo.multipv,
         moves: validatedMoves,
-        score: {
-          type: validatedInfo.score?.mate !== undefined ? "mate" : "cp",
-          value: validatedInfo.score?.mate ?? validatedInfo.score?.cp ?? 0,
-          relativeValue:
-            validatedInfo.score?.mate ?? validatedInfo.score?.cp ?? 0,
-        },
+        score: (() => {
+          if (validatedInfo.score?.mate !== undefined) {
+            return {
+              type: "mate",
+              value: validatedInfo.score.mate,
+              relativeValue: validatedInfo.score.mate,
+            };
+          }
+          if (validatedInfo.score?.winrate !== undefined) {
+            return {
+              type: "winrate",
+              value: validatedInfo.score.winrate,
+              relativeValue: validatedInfo.score.winrate,
+            };
+          }
+          if (validatedInfo.score?.points !== undefined) {
+            return {
+              type: "points",
+              value: validatedInfo.score.points,
+              relativeValue: validatedInfo.score.points,
+            };
+          }
+          return {
+            type: "cp",
+            value: validatedInfo.score?.cp ?? 0,
+            relativeValue: validatedInfo.score?.cp ?? 0,
+          };
+        })(),
       };
 
       if (pvIndex >= 0) {
