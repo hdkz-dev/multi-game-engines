@@ -175,11 +175,11 @@ export function EngineMonitorPanel<
 
             {/* Evaluation Trend Graph */}
             <div className="px-4 py-2 bg-white">
-              {/* <EvaluationGraph
+              <EvaluationGraph
                 entries={state.evaluationHistory.entries}
                 height={40}
                 className="opacity-80 hover:opacity-100 transition-opacity"
-              /> */}
+              />
             </div>
 
             <Separator.Root className="h-[1px] bg-gray-100" />

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { EngineUIProvider } from "@multi-game-engines/ui-react";
-import { createUIStrings } from "@multi-game-engines/ui-core";
 import { locales } from "@multi-game-engines/i18n";
 import "@multi-game-engines/ui-react/dist/index.css";
 
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
   description: "Advanced game engine analysis powered by multi-game-engines",
 };
 
-const enStrings = createUIStrings(locales.en);
+const enStrings = locales.en;
 
 export default function RootLayout({
   children,
@@ -20,8 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {/* <EngineUIProvider strings={enStrings}>{children}</EngineUIProvider> */}
-        {children}
+        <EngineUIProvider localeData={enStrings}>{children}</EngineUIProvider>
       </body>
     </html>
   );

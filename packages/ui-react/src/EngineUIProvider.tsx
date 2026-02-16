@@ -4,7 +4,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
 import { locales } from "@multi-game-engines/i18n";
 
-const jaStrings = createUIStrings(locales.ja);
+const defaultStrings = createUIStrings(locales.ja);
 
 interface EngineUIContextValue {
   strings: EngineUIStrings;
@@ -15,18 +15,30 @@ const EngineUIContext = createContext<EngineUIContextValue | undefined>(
 );
 
 export interface EngineUIProviderProps {
-  strings?: EngineUIStrings;
+  /**
+   * Raw locale data object (e.g. from @multi-game-engines/i18n).
+   * Must be serializable (no functions) to pass from Server Components.
+   */
+  localeData?: unknown;
   children: React.ReactNode;
 }
 
 /**
  * UI コンポーネントの設定（i18n 等）を集中管理するプロバイダー。
+ * Next.js App Router (RSC) からのデータ渡しに対応するため、
+ * シリアライズ可能な localeData を受け取り、内部で createUIStrings を実行します。
  */
 export const EngineUIProvider: React.FC<EngineUIProviderProps> = ({
-  strings = jaStrings,
+  localeData,
   children,
 }) => {
+  const strings = useMemo(
+    () => createUIStrings(localeData ?? locales.ja),
+    [localeData],
+  );
+
   const value = useMemo(() => ({ strings }), [strings]);
+
   return (
     <EngineUIContext.Provider value={value}>
       {children}
@@ -41,7 +53,7 @@ export const useEngineUI = () => {
   const context = useContext(EngineUIContext);
   if (!context) {
     // プロバイダーがない場合はデフォルト（日本語）を返す
-    return { strings: jaStrings };
+    return { strings: defaultStrings };
   }
   return context;
 };
