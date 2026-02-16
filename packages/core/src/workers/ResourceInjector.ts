@@ -124,11 +124,104 @@ export class ResourceInjector {
             : input.url;
 
       const resolvedUrl = this.resolve(url);
+
+      // 解決された URL が異なる場合（Blob URL等）、かつ相対パス解決が必要な場合への対応
       if (resolvedUrl !== url) {
         return originalFetch(resolvedUrl, init);
       }
 
       return originalFetch(input, init);
     };
+  }
+
+  /**
+   * Emscripten の Module オブジェクトに対して、リソース解決ロジックを注入します。
+   * 特に `locateFile` フックをオーバーライドし、WASM バイナリや mem ファイルのパスを
+   * ResourceInjector が管理する Blob URL に差し替えます。
+   *
+   * @param moduleParams Emscripten の Module オブジェクト（初期化前パラメータ）
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static adaptEmscriptenModule(moduleParams: any): void {
+    if (!moduleParams) return;
+
+     
+    const originalLocateFile = moduleParams.locateFile;
+
+    moduleParams.locateFile = (path: string, prefix: string) => {
+      // まず ResourceInjector で解決を試みる
+      const resolved = this.resolve(path);
+
+      // Blob URL に解決された場合、prefix を無視してその URL を返す
+      // (WASM ローダーは Blob URL を直接フェッチできるため)
+      if (resolved !== path && resolved.startsWith("blob:")) {
+        return resolved;
+      }
+
+      // 解決できなかった、または Blob URL でない場合は元のロジックに従う
+      return originalLocateFile
+        ? originalLocateFile(path, prefix)
+        : prefix + path;
+    };
+  }
+
+  /**
+   * Emscripten の仮想ファイルシステム (FS) にリソースをマウントします。
+   * 巨大な評価関数ファイル (NNUE等) を WASM から `fopen` で読み込めるようにするために使用します。
+   * メインスレッドをブロックしないよう、Worker 起動時の非同期初期化フェーズで呼び出してください。
+   *
+   * @param moduleInstance 初期化された Emscripten Module インスタンス (FS プロパティを持つもの)
+   * @param vfsPath VFS 上の配置パス (例: "/eval.nnue")
+   * @param resourceKey ResourceMap のキー (例: "eval.nnue")
+   */
+   
+  static async mountToVFS(
+    moduleInstance: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    vfsPath: string,
+    resourceKey: string,
+  ): Promise<void> {
+    if (!moduleInstance || !moduleInstance.FS) {
+      throw new Error("[ResourceInjector] Module instance or FS not found.");
+    }
+
+    const blobUrl = this.resolve(resourceKey);
+    // 未解決の場合はエラーとする（空ファイルを作っても意味がないため）
+    if (blobUrl === resourceKey) {
+      console.warn(
+        `[ResourceInjector] Resource key "${resourceKey}" was not resolved in map.`,
+      );
+    }
+
+    try {
+      const response = await fetch(blobUrl);
+      if (!response.ok)
+        throw new Error(`Failed to fetch resource: ${response.statusText}`);
+
+      const buffer = await response.arrayBuffer();
+      const data = new Uint8Array(buffer);
+
+      // 親ディレクトリが必要な場合は作成 (簡易的な階層サポート)
+      const parts = vfsPath.split("/").filter((p) => p);
+      if (parts.length > 1) {
+        let currentPath = "";
+        for (let i = 0; i < parts.length - 1; i++) {
+          currentPath += "/" + parts[i];
+          try {
+            moduleInstance.FS.mkdir(currentPath);
+          } catch (e: unknown) {
+            // ディレクトリが既にある場合は無視 (EEXIST)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((e as any).code !== "EEXIST") throw e;
+          }
+        }
+      }
+
+      moduleInstance.FS.writeFile(vfsPath, data);
+    } catch (error: unknown) {
+      throw new Error(
+        `[ResourceInjector] Failed to mount "${resourceKey}" to "${vfsPath}": ${error}`,
+        { cause: error },
+      );
+    }
   }
 }

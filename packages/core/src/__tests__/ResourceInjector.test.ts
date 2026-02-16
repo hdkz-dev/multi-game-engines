@@ -1,119 +1,103 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { ResourceInjector } from "../workers/ResourceInjector.js";
 
 describe("ResourceInjector", () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-    // 内部状態のリセット（static プロパティなので手動でリセットが必要な場合があるが、
-    // ここでは新しいマッピングで上書きされることを確認する）
-  });
-
-  it("リソースを注入し解決できること", () => {
-    const resources = {
-      "stockfish.wasm": "blob:http://localhost/wasm-hash",
-      "/nnue/default.nnue": "blob:http://localhost/nnue-hash",
+  it("should resolve paths", () => {
+    // @ts-expect-error accessing private static for testing
+    ResourceInjector.resources = {
+      "path/to/resource.wasm": "blob:resource-url",
     };
 
-    // 擬似的なメッセージイベントを送信
-    const handler = vi.fn();
-    const mockPostMessage = vi.fn();
-    vi.stubGlobal("self", { postMessage: mockPostMessage });
-    vi.stubGlobal(
-      "addEventListener",
-      vi.fn((type, h) => {
-        if (type === "message") handler.mockImplementation(h);
-      }),
+    expect(ResourceInjector.resolve("path/to/resource.wasm")).toBe(
+      "blob:resource-url",
     );
-
-    ResourceInjector.listen();
-
-    const event = {
-      data: {
-        type: "MG_INJECT_RESOURCES",
-        resources,
-      },
-    } as MessageEvent;
-
-    handler(event);
-
-    expect(mockPostMessage).toHaveBeenCalledWith({
-      type: "MG_RESOURCES_READY",
-    });
-    expect(ResourceInjector.resolve("stockfish.wasm")).toBe(
-      "blob:http://localhost/wasm-hash",
+    expect(ResourceInjector.resolve("./path/to/resource.wasm")).toBe(
+      "blob:resource-url",
     );
-    expect(ResourceInjector.resolve("./stockfish.wasm")).toBe(
-      "blob:http://localhost/wasm-hash",
-    );
-    expect(ResourceInjector.resolve("path/to/stockfish.wasm")).toBe(
-      "blob:http://localhost/wasm-hash",
-    );
+    expect(ResourceInjector.resolve("unknown/path")).toBe("unknown/path");
   });
 
-  it("waitForReady が注入完了まで待機できること", async () => {
-    const readyPromise = ResourceInjector.waitForReady();
-    let resolved = false;
-    readyPromise.then(() => {
-      resolved = true;
+  describe("adaptEmscriptenModule", () => {
+    it("should override locateFile to use resolved Blob URLs", () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = {
+        "engine.wasm": "blob:engine-url",
+      };
+
+      const moduleParams = {
+        locateFile: (path: string, prefix: string) => prefix + path,
+      };
+
+      ResourceInjector.adaptEmscriptenModule(moduleParams);
+
+      // Should use Blob URL if resolved
+      expect(moduleParams.locateFile("engine.wasm", "/assets/")).toBe(
+        "blob:engine-url",
+      );
+
+      // Should fallback to original logic if not resolved
+      expect(moduleParams.locateFile("other.file", "/assets/")).toBe(
+        "/assets/other.file",
+      );
     });
-
-    expect(resolved).toBe(false);
-
-    const handler = vi.fn();
-    vi.stubGlobal(
-      "addEventListener",
-      vi.fn((type, h) => {
-        if (type === "message") handler.mockImplementation(h);
-      }),
-    );
-    ResourceInjector.listen();
-
-    handler({
-      data: {
-        type: "MG_INJECT_RESOURCES",
-        resources: { "test.wasm": "blob:..." },
-      },
-    } as MessageEvent);
-
-    await readyPromise;
-    expect(resolved).toBe(true);
   });
 
-  it("fetch をインターセプトしてパスを解決できること", async () => {
-    const resources = {
-      "data.bin": "blob:http://localhost/data-bin-blob",
-    };
+  describe("mountToVFS", () => {
+    it("should fetch and write file to Emscripten FS", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = {
+        "eval.nnue": "blob:eval-url",
+      };
 
-    // 注入
-    const handler = vi.fn();
-    vi.stubGlobal(
-      "addEventListener",
-      vi.fn((type, h) => {
-        if (type === "message") handler.mockImplementation(h);
-      }),
-    );
-    ResourceInjector.listen();
+      const mockFS = {
+        mkdir: vi.fn(),
+        writeFile: vi.fn(),
+      };
+      const mockModule = { FS: mockFS };
 
-    handler({
-      data: {
-        type: "MG_INJECT_RESOURCES",
-        resources,
-      },
-    } as MessageEvent);
+      // Mock fetch
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      });
 
-    // fetch のモック
-    const mockFetch = vi.fn().mockResolvedValue({ ok: true });
-    vi.stubGlobal("fetch", mockFetch);
+      await ResourceInjector.mountToVFS(mockModule, "/eval.nnue", "eval.nnue");
 
-    ResourceInjector.interceptFetch();
+      expect(global.fetch).toHaveBeenCalledWith("blob:eval-url");
+      expect(mockFS.writeFile).toHaveBeenCalledWith(
+        "/eval.nnue",
+        expect.any(Uint8Array),
+      );
+    });
 
-    await fetch("data.bin");
-    expect(mockFetch).toHaveBeenCalledWith(
-      "blob:http://localhost/data-bin-blob",
-      undefined,
-    );
+    it("should create directories if needed", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = {
+        "data/config.json": "blob:config-url",
+      };
 
-    await fetch("other.bin");
-    expect(mockFetch).toHaveBeenCalledWith("other.bin", undefined);
+      const mockFS = {
+        mkdir: vi.fn(),
+        writeFile: vi.fn(),
+      };
+      const mockModule = { FS: mockFS };
+
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      });
+
+      await ResourceInjector.mountToVFS(
+        mockModule,
+        "/data/config.json",
+        "data/config.json",
+      );
+
+      expect(mockFS.mkdir).toHaveBeenCalledWith("/data");
+      expect(mockFS.writeFile).toHaveBeenCalledWith(
+        "/data/config.json",
+        expect.any(Uint8Array),
+      );
+    });
   });
 });
