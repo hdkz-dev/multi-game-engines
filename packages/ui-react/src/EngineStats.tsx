@@ -1,19 +1,8 @@
 import React from "react";
-import {
-  SearchStatistics,
-  EngineUIStrings,
-  createUIStrings,
-} from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { SearchStatistics, EngineUIStrings } from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-const jaStrings = createUIStrings(locales.ja);
+import { cn } from "./utils/cn.js";
+import { useEngineUI } from "./EngineUIProvider.js";
 
 interface EngineStatsProps {
   stats: SearchStatistics;
@@ -34,7 +23,10 @@ const formatNumber = (num: number): string => {
  * 探索の統計情報（Depth, Nodes, NPS, Time）を表示するコンポーネント。
  */
 export const EngineStats: React.FC<EngineStatsProps> = React.memo(
-  ({ stats, className, strings = jaStrings }) => {
+  ({ stats, className, strings: propStrings }) => {
+    const { strings: contextStrings } = useEngineUI();
+    const strings = propStrings || contextStrings;
+
     return (
       <div
         className={cn(

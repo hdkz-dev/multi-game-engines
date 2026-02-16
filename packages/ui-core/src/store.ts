@@ -79,19 +79,32 @@ export class EngineStore<
         this.notify();
       }, this.options.throttleMs);
     } else {
-      // 2026 Best Practice: SSR (Node.js) 環境を考慮した安全なスケジューリング
       if (typeof requestAnimationFrame === "function") {
         requestAnimationFrame(() => this.notify());
       } else {
-        // Node.js 等の非ブラウザ環境用フォールバック
-        queueMicrotask(() => this.notify());
+        // SSR / Node environment fallback
+        setTimeout(() => this.notify(), 0);
       }
     }
   }
 
   private notify(): void {
+    if (!this.listeners.size) return;
     this.pendingUpdate = false;
     this.listeners.forEach((l) => l());
+  }
+
+  /**
+   * リソースの解放。
+   * 保留中の通知やタイマーをクリアします。
+   */
+  dispose(): void {
+    this.listeners.clear();
+    if (this.throttleTimeout) {
+      clearTimeout(this.throttleTimeout);
+      this.throttleTimeout = null;
+    }
+    this.pendingUpdate = false;
   }
 
   getEngine(): IEngine<T_OPTIONS, T_INFO, T_RESULT> {

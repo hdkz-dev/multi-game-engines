@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useEngineMonitor } from "../useEngineMonitor.js";
+import { MonitorRegistry } from "@multi-game-engines/ui-core";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -26,6 +27,7 @@ describe("useEngineMonitor", () => {
   };
 
   beforeEach(() => {
+    MonitorRegistry.reset();
     vi.useFakeTimers();
     vi.spyOn(performance, "now").mockReturnValue(0);
   });

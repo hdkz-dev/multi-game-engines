@@ -28,17 +28,27 @@ export class SearchMonitor<
     this.store = new EngineStore(engine, initialState);
   }
 
+  private refCount = 0;
+
   startMonitoring(): void {
-    this.stopMonitoring();
-    this.subManager.add(
-      this.engine.onInfo((info) => {
-        this.store.setState((state) => this.transformer(state, info));
-      }),
-    );
+    if (this.refCount === 0) {
+      this.subManager.clear();
+      this.subManager.add(
+        this.engine.onInfo((info) => {
+          this.store.setState((state) => this.transformer(state, info));
+        }),
+      );
+    }
+    this.refCount++;
   }
 
   stopMonitoring(): void {
-    this.subManager.clear();
+    this.refCount--;
+    if (this.refCount <= 0) {
+      this.refCount = 0;
+      this.subManager.clear();
+      this.store.dispose();
+    }
   }
 
   /**

@@ -53,6 +53,13 @@ export class MonitorRegistry {
   }
 
   /**
+   * テスト用: レジストリをリセットします。
+   */
+  static reset(): void {
+    MonitorRegistry.instance = new MonitorRegistry();
+  }
+
+  /**
    * エンジンに対応するモニターを取得、または新規作成する。
    */
   getOrCreateMonitor<

@@ -74,6 +74,9 @@ export class EngineFacade<
             : undefined;
           await this.adapter.load(loader);
         }
+      } catch (err: unknown) {
+        this._lastError = EngineError.from(err, this.id);
+        throw this._lastError;
       } finally {
         this.loadPromise = null;
       }

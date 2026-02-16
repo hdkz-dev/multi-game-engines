@@ -16,12 +16,7 @@ import { useEngineUI } from "./EngineUIProvider.js";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Separator from "@radix-ui/react-separator";
 import { Play, Square, Settings2, AlertCircle } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "./utils/cn.js";
 
 interface EngineMonitorPanelProps<
   T_OPTIONS extends IBaseSearchOptions,

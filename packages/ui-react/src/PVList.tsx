@@ -2,12 +2,7 @@ import React from "react";
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "./EngineUIProvider.js";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from "./utils/cn.js";
 
 interface PVListProps {
   pvs: PrincipalVariation[];
