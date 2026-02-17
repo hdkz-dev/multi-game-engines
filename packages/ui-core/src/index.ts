@@ -9,3 +9,4 @@ export * from "./CommandDispatcher.js";
 export * from "./i18n.js";
 export * from "./presentation.js";
 export * from "./utils/format.js";
+export * from "./utils/board.js";

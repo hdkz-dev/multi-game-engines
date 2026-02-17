@@ -19,6 +19,14 @@ const EngineUIProvider = dynamic(
     import("@multi-game-engines/ui-react").then((mod) => mod.EngineUIProvider),
   { ssr: false },
 );
+const ChessBoard = dynamic(
+  () => import("@multi-game-engines/ui-react").then((mod) => mod.ChessBoard),
+  { ssr: false },
+);
+const ShogiBoard = dynamic(
+  () => import("@multi-game-engines/ui-react").then((mod) => mod.ShogiBoard),
+  { ssr: false },
+);
 
 import {
   LayoutGrid,
@@ -29,6 +37,7 @@ import {
   Cpu,
   Gauge,
 } from "lucide-react";
+import { useEngineMonitor } from "@multi-game-engines/ui-react";
 
 type EngineType = "chess" | "shogi";
 type LocaleType = "ja" | "en";
@@ -54,6 +63,7 @@ export default function Dashboard() {
     }),
     [],
   );
+  const { state: chessState } = useEngineMonitor(chessEngine);
 
   // 将棋用の設定
   const shogiEngine = useMemo(() => bridge?.getEngine("yaneuraou"), [bridge]);
@@ -66,8 +76,21 @@ export default function Dashboard() {
     }),
     [],
   );
+  const { state: shogiState } = useEngineMonitor(shogiEngine);
 
-  if (!bridge) return null;
+  const activeBestMove = useMemo(() => {
+    if (activeEngine === "chess")
+      return chessState.pvs[0]?.moves[0]?.toString();
+    return shogiState.pvs[0]?.moves[0]?.toString();
+  }, [activeEngine, chessState.pvs, shogiState.pvs]);
+
+  const nps = useMemo(() => {
+    const stats =
+      activeEngine === "chess" ? chessState.stats : shogiState.stats;
+    return stats.nps ? `${(stats.nps / 1000).toFixed(1)}k` : "0";
+  }, [activeEngine, chessState.stats, shogiState.stats]);
+
+  if (!bridge || !chessEngine || !shogiEngine) return null;
 
   return (
     <EngineUIProvider localeData={localeData}>
@@ -159,8 +182,8 @@ export default function Dashboard() {
           <StatCard
             icon={<Zap className="text-yellow-500 w-5 h-5" />}
             label={localeData.dashboard.stats.engineRuntime.label}
-            value={localeData.dashboard.stats.engineRuntime.value}
-            sub={localeData.dashboard.stats.engineRuntime.sub}
+            value={nps}
+            sub="Nodes / Second"
           />
           <StatCard
             icon={<Cpu className="text-blue-500 w-5 h-5" />}
@@ -185,7 +208,7 @@ export default function Dashboard() {
         {/* Main Analysis Area */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-4 xl:col-span-3 h-full min-h-[600px]">
-            {activeEngine === "chess" && chessEngine && (
+            {activeEngine === "chess" && (
               <EngineMonitorPanel
                 key="chess-panel"
                 engine={chessEngine}
@@ -194,7 +217,7 @@ export default function Dashboard() {
                 className="h-full"
               />
             )}
-            {activeEngine === "shogi" && shogiEngine && (
+            {activeEngine === "shogi" && (
               <EngineMonitorPanel
                 key="shogi-panel"
                 engine={shogiEngine}
@@ -206,22 +229,24 @@ export default function Dashboard() {
           </div>
 
           <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-            {/* Game Board Placeholder Area */}
+            {/* Game Board Area */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50 aspect-video flex flex-col items-center justify-center relative overflow-hidden group">
               <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
 
-              <div className="w-full max-w-md aspect-square bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center relative">
-                {activeEngine === "chess" ? <ChessGrid /> : <ShogiGrid />}
-                <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px] rounded-xl opacity-100 group-hover:opacity-0 transition-opacity">
-                  <div className="text-center">
-                    <p className="text-gray-400 font-black uppercase tracking-[0.3em] text-sm">
-                      {localeData.dashboard.gameBoard.title}
-                    </p>
-                    <p className="text-[10px] text-gray-300 font-bold mt-1 tracking-widest">
-                      {localeData.dashboard.gameBoard.subtitle}
-                    </p>
-                  </div>
-                </div>
+              <div className="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4">
+                {activeEngine === "chess" ? (
+                  <ChessBoard
+                    fen={chessOptions.fen}
+                    lastMove={activeBestMove}
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <ShogiBoard
+                    sfen={shogiOptions.sfen}
+                    lastMove={activeBestMove}
+                    className="w-full h-full"
+                  />
+                )}
               </div>
             </div>
 
@@ -291,34 +316,6 @@ function StatCard({
         </p>
         <p className="text-[10px] text-gray-400 font-bold italic">{sub}</p>
       </div>
-    </div>
-  );
-}
-
-function ChessGrid() {
-  return (
-    <div className="grid grid-cols-8 grid-rows-8 w-64 h-64 border-2 border-gray-300">
-      {Array.from({ length: 64 }).map((_, i) => (
-        <div
-          key={i}
-          className={`w-full h-full ${
-            (Math.floor(i / 8) + (i % 8)) % 2 === 0 ? "bg-white" : "bg-gray-200"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
-
-function ShogiGrid() {
-  return (
-    <div className="grid grid-cols-9 grid-rows-9 w-64 h-64 border border-gray-300">
-      {Array.from({ length: 81 }).map((_, i) => (
-        <div
-          key={i}
-          className="w-full h-full border-[0.5px] border-gray-200 bg-[#f9f4e8]"
-        />
-      ))}
     </div>
   );
 }

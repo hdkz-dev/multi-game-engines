@@ -72,6 +72,9 @@ export class MonitorRegistry {
     initialPosition: string,
     transformer: (state: T_STATE, info: T_INFO) => T_STATE,
   ): SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
+    if (!engine) {
+      throw new Error("[MonitorRegistry] Engine instance is required.");
+    }
     const abstractEngine = engine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,

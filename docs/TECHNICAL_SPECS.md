@@ -70,6 +70,13 @@ type SFEN = Brand<string, "SFEN">;
 - **Strict Regex Validation (出力検証)**: エンジンからの出力（UCI 指し手など）は、正規表現によって厳格に検証し、形式に適合しないデータは `null` として破棄します。正規表現は `static readonly` として事前コンパイルし、NPS (Nodes Per Second) への影響を最小化します。
 - **Exception-Safe Parsing (例外安全性)**: JSON ベースのエンジンプロトコル（Mortal 等）では、`JSON.parse` を `try-catch` でラップし、不正な JSON データを受信してもストリーム処理全体がクラッシュしないよう保護します。
 
+### 4-1. 局面・指し手解析 (Board & Move Parsers)
+
+描画層での再利用を目的とした、軽量な局面文字列パーサーを提供します。
+
+- **parseFEN**: チェスの FEN 文字列をパースし、8x8 の駒配置配列と手番情報を抽出します。
+- **parseSFEN**: 将棋の SFEN 文字列をパースし、9x9 の駒配置配列、手番、および持ち駒の数を抽出します。成駒（+）の判定を含みます。
+
 ## 5. テレメトリと可観測性
 
 - **構造化テレメトリ**: `DefaultTelemetryMiddleware` による探索パフォーマンス（ミリ秒単位）の自動計測。
@@ -103,6 +110,14 @@ type SFEN = Brand<string, "SFEN">;
 
 - **Vue 3 Composition API**: `useEngineMonitor` コンポーザブルによるリアクティブな状態管理。
 - **Storybook 10 対応**: Vue 3 + Vite 環境での Storybook 統合。Tailwind CSS v4 サポート。
+
+### 6-4. Web Components アダプター (`ui-elements`)
+
+- **Lit による実装**: 軽量で標準準拠の Web Components を提供。
+- **盤面コンポーネント (`<chess-board>`, `<shogi-board>`)**:
+  - **局面同期**: `fen` または `sfen` プロパティの変更を検知し、CSS Grid を用いて効率的に再描画。
+  - **ハイライト**: `last-move` プロパティにより、直近の指し手やエンジンが検討中の最善手を視覚的に強調。
+  - **アクセシビリティ**: 局面の状況（手番、駒の配置）をスクリーンリーダーが解釈可能な形式で提供。
 
 ## 7. 品質保証 (Testing Philosophy)
 
