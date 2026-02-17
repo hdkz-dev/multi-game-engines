@@ -26,13 +26,10 @@ const EngineMonitorView = () => {
       </div>
 
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <button
-          onClick={() => monitor?.search({})}
-          disabled={status === "busy"}
-        >
+        <button onClick={() => monitor.search({})} disabled={status === "busy"}>
           Start Search
         </button>
-        <button onClick={() => monitor?.stop()} disabled={status !== "busy"}>
+        <button onClick={() => monitor.stop()} disabled={status !== "busy"}>
           Stop
         </button>
       </div>

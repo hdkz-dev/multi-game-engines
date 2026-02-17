@@ -4,12 +4,6 @@
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith - Complete)
 
-- **動的盤面コンポーネントとダッシュボードの統合**:
-  - **Framework-Agnostic Boards**: Lit ベースの `<chess-board>` および `<shogi-board>` を実装。React/Vue を含むあらゆる環境で利用可能な高精度な盤面表示を実現。
-  - **局面解析ロジックの確立**: `ui-core` に FEN/SFEN パーサーを統合し、エンジンデータから描画用データへの変換を型安全に実行。
-  - **Zenith Dashboard の完成**: プレースホルダーを排除し、エンジンの思考（最善手ハイライト）とリアルタイムに同期する検討ダッシュボードのプロトタイプを構築。
-  - **SSR/ビルド耐性の強化**: Next.js 等のプリレンダリング環境でもクラッシュしない堅牢な `useEngineMonitor` フックの実装。
-
 - **UI基盤の完成とThinking Log実装**:
   - **思考ログ (Search Log) の実装完了**: React/Vue/Lit 全フレームワークで、スマート・アグリゲーション（重複行の排除）とスロットリング（`requestAnimationFrame`）を備えた高性能ログ表示を実現。
   - **グローバル・オブザーバビリティ**: `EngineBridge` レベルでのイベントバブリング（Status, Progress, Telemetry）を確立し、アプリケーション全体の状態監視を一元化。

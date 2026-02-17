@@ -13,18 +13,20 @@ import {
   EngineStatus,
 } from "@multi-game-engines/core";
 import {
-  createInitialState,
   MonitorRegistry,
   SearchStateTransformer,
   EngineSearchState,
   ExtendedSearchInfo,
   UINormalizerMiddleware,
   CommandDispatcher,
-  PositionString,
 } from "@multi-game-engines/ui-core";
 
 /**
  * エンジンの思考状況を監視し、楽観的更新を伴うコマンド実行を提供するカスタムフック。
+ *
+ * 2026 Zenith Practice:
+ * - CommandDispatcher による Optimistic UI 制御。
+ * - システム全体のテレメトリと連動した状態同期。
  */
 export function useEngineMonitor<
   T_STATE extends EngineSearchState = EngineSearchState,
@@ -32,7 +34,7 @@ export function useEngineMonitor<
   T_INFO extends ExtendedSearchInfo = ExtendedSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 >(
-  engine: IEngine<T_OPTIONS, T_INFO, T_RESULT> | undefined | null,
+  engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>,
   options: {
     initialPosition?: string;
     transformer?: (state: T_STATE, info: T_INFO) => T_STATE;
@@ -48,18 +50,8 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  // SSR 対応: エンジンがない場合はダミーの状態を返す
-  const dummyState = useMemo(
-    () =>
-      createInitialState(
-        initialPosition as PositionString,
-      ) as unknown as T_STATE,
-    [initialPosition],
-  );
-
   // 1. Monitor の共有取得
   const monitor = useMemo(() => {
-    if (!engine) return null;
     return MonitorRegistry.getInstance().getOrCreateMonitor<
       T_STATE,
       T_OPTIONS,
@@ -70,21 +62,13 @@ export function useEngineMonitor<
 
   // 2. 状態同期
   const state = useSyncExternalStore(
-    useCallback(
-      (onStoreChange: () => void) => {
-        if (!monitor) return () => {};
-        return monitor.subscribe(onStoreChange);
-      },
-      [monitor],
-    ),
-    () => monitor?.getSnapshot() ?? dummyState,
-    () => dummyState,
+    monitor.subscribe,
+    monitor.getSnapshot,
+    monitor.getSnapshot,
   );
 
   // 3. リアクティブなステータス管理
-  const [engineStatus, setEngineStatus] = useState<EngineStatus>(
-    engine?.status ?? "ready",
-  );
+  const [engineStatus, setEngineStatus] = useState<EngineStatus>(engine.status);
   const [optimisticStatus, setOptimisticStatus] = useState<EngineStatus | null>(
     null,
   );
@@ -93,19 +77,18 @@ export function useEngineMonitor<
   // 4. コマンド・ディスパッチャーの統合
   const dispatcher = useMemo(
     () =>
-      monitor
-        ? new CommandDispatcher(monitor, (s: EngineStatus) =>
-            setOptimisticStatus(s),
-          )
-        : null,
+      new CommandDispatcher(monitor, (s: EngineStatus) =>
+        setOptimisticStatus(s),
+      ),
     [monitor],
   );
 
   // 5. エフェクト: 監視開始とミドルウェア登録
   useEffect(() => {
-    if (!monitor || !engine) return;
-
     // ミドルウェアの動的登録
+    // Note: engine.use の戻り値として解除関数がないため、二重登録防止は MonitorRegistry 側の冪等性に依存するが、
+    // ここでは useEffect の依存配列を厳密に管理することで対応。
+    // 将来的に IEngine に removeMiddleware が実装されたらクリーンアップに追加する。
     if (autoMiddleware && typeof engine.use === "function") {
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
@@ -132,11 +115,11 @@ export function useEngineMonitor<
   }, [monitor, engine, autoMiddleware]);
 
   const search = useCallback(
-    (searchOptions: T_OPTIONS) => dispatcher?.dispatchSearch(searchOptions),
+    (searchOptions: T_OPTIONS) => dispatcher.dispatchSearch(searchOptions),
     [dispatcher],
   );
 
-  const stop = useCallback(() => dispatcher?.dispatchStop(), [dispatcher]);
+  const stop = useCallback(() => dispatcher.dispatchStop(), [dispatcher]);
 
   return {
     state,

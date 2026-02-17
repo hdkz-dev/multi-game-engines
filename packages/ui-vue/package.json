@@ -30,7 +30,6 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
-    "@multi-game-engines/ui-elements": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.564.0",
     "tailwind-merge": "^3.4.1"

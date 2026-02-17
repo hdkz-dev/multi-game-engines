@@ -394,9 +394,6 @@ importers:
       '@multi-game-engines/ui-core':
         specifier: workspace:*
         version: link:../ui-core
-      '@multi-game-engines/ui-elements':
-        specifier: workspace:*
-        version: link:../ui-elements
       '@radix-ui/react-scroll-area':
         specifier: ^1.2.10
         version: 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -491,9 +488,6 @@ importers:
       '@multi-game-engines/ui-core':
         specifier: workspace:*
         version: link:../ui-core
-      '@multi-game-engines/ui-elements':
-        specifier: workspace:*
-        version: link:../ui-elements
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
