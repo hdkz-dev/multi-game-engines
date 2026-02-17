@@ -19,9 +19,20 @@ const emit = defineEmits<{
 
 const { strings } = useEngineUI();
 const scrollContainer = ref<HTMLDivElement | null>(null);
+const isNearBottom = ref(true);
+
+const handleScroll = () => {
+  if (!scrollContainer.value) return;
+  const { scrollTop, scrollHeight, clientHeight } = scrollContainer.value;
+  isNearBottom.value = scrollHeight - scrollTop - clientHeight < 50;
+};
 
 const scrollToBottom = async () => {
-  if (props.autoScroll && scrollContainer.value) {
+  if (
+    props.autoScroll &&
+    scrollContainer.value &&
+    (isNearBottom.value || props.log.length === 0)
+  ) {
     await nextTick();
     scrollContainer.value.scrollTop = scrollContainer.value.scrollHeight;
   }
@@ -36,6 +47,7 @@ onUpdated(scrollToBottom);
   <div
     ref="scrollContainer"
     class="border border-gray-200 rounded-lg bg-white overflow-y-auto max-h-[400px]"
+    @scroll="handleScroll"
   >
     <table class="min-w-full text-xs font-mono border-collapse table-fixed">
       <caption class="sr-only">{{ strings.searchLog }}</caption>

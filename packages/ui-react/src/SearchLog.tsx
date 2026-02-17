@@ -23,10 +23,22 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
   ({ log, onMoveClick, className, autoScroll = true }) => {
     const { strings } = useEngineUI();
     const scrollRef = useRef<HTMLDivElement>(null);
+    const isNearBottomRef = useRef(true);
 
-    // 自動スクロール
+    // Smart Auto-Scroll: ユーザーが上にスクロールしている時は勝手にスクロールしない
+    const handleScroll = () => {
+      if (!scrollRef.current) return;
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      // 許容誤差 50px 以内なら「一番下にいる」とみなす
+      isNearBottomRef.current = scrollHeight - scrollTop - clientHeight < 50;
+    };
+
     useEffect(() => {
-      if (autoScroll && scrollRef.current) {
+      if (
+        autoScroll &&
+        scrollRef.current &&
+        (isNearBottomRef.current || log.length === 0)
+      ) {
         scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
       }
     }, [log, autoScroll]);
@@ -34,6 +46,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
     return (
       <div
         ref={scrollRef}
+        onScroll={handleScroll}
         className={cn(
           "border border-gray-200 rounded-lg bg-white overflow-y-auto max-h-[400px]",
           className,

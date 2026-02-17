@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 import {
   SearchLogEntry,
   createUIStrings,
@@ -159,10 +159,25 @@ export class SearchLogElement extends LitElement {
   @property({ type: String }) locale = "ja";
   @property({ type: Boolean }) autoScroll = true;
 
+  @query(":host") container?: HTMLElement;
+  private _isNearBottom = true;
+
   connectedCallback() {
     super.connectedCallback();
     this.setAttribute("role", "grid");
+    this.addEventListener("scroll", this._handleScroll);
   }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener("scroll", this._handleScroll);
+  }
+
+  private _handleScroll = () => {
+    // Smart Auto-Scroll logic
+    const { scrollTop, scrollHeight, clientHeight } = this;
+    this._isNearBottom = scrollHeight - scrollTop - clientHeight < 50;
+  };
 
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has("locale") || !this.hasAttribute("aria-label")) {
@@ -177,7 +192,10 @@ export class SearchLogElement extends LitElement {
   }
 
   scrollToBottom() {
-    this.scrollTop = this.scrollHeight;
+    // Only auto-scroll if user is already at the bottom or log is empty
+    if (this._isNearBottom || this.log.length === 0) {
+      this.scrollTop = this.scrollHeight;
+    }
   }
 
   render() {
