@@ -35,6 +35,7 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-elements": "workspace:*",
     "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-separator": "^1.1.2",
     "@radix-ui/react-slot": "^1.1.2",
