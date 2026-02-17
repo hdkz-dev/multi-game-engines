@@ -102,7 +102,7 @@ export function useEngineMonitor<
 
   // 3. リアクティブなステータス管理
   const [engineStatus, setEngineStatus] = useState<EngineStatus>(
-    engine?.status ?? "ready",
+    engine?.status ?? "uninitialized",
   );
   const [optimisticStatus, setOptimisticStatus] = useState<EngineStatus | null>(
     null,

@@ -33,18 +33,18 @@ if (props.type === "chess" && !props.fen) {
 </script>
 
 <template>
-  <!-- 2026 Best Practice: テンプレート側でフォールバック値を明示し、カスタムエレメントへの null 渡しを防止 -->
+  <!-- 2026 Best Practice: 未定義時は属性をバインドせず、Web Component 側のデフォルト値を優先させる -->
   <chess-board
     v-if="type === 'chess'"
-    :fen="fen ?? ''"
-    :last-move="lastMove ?? ''"
-    :orientation="orientation ?? 'white'"
+    :fen="fen"
+    :last-move="lastMove"
+    :orientation="orientation"
     :board-label="boardLabel"
   ></chess-board>
   <shogi-board
     v-else-if="type === 'shogi'"
-    :sfen="sfen ?? ''"
-    :last-move="lastMove ?? ''"
+    :sfen="sfen"
+    :last-move="lastMove"
     :board-label="boardLabel"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"

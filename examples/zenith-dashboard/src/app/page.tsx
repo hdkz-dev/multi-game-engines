@@ -79,11 +79,11 @@ export default function Dashboard() {
   const { state: shogiState } = useEngineMonitor(shogiEngine);
 
   const chessBestMove = useMemo(
-    () => chessState.pvs[0]?.moves[0]?.toString(),
+    () => chessState.pvs[0]?.moves[0],
     [chessState.pvs],
   );
   const shogiBestMove = useMemo(
-    () => shogiState.pvs[0]?.moves[0]?.toString(),
+    () => shogiState.pvs[0]?.moves[0],
     [shogiState.pvs],
   );
 

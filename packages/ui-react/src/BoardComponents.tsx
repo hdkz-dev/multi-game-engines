@@ -1,46 +1,73 @@
-"use client";
-
 import React from "react";
 import "@multi-game-engines/ui-elements";
-import { FEN, SFEN } from "@multi-game-engines/ui-core";
+import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
 
 declare module "react/jsx-runtime" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {
+      /**
+       * Lit-based Chess board custom element.
+       */
       "chess-board": React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        /** Current position in FEN format. */
         fen?: string | undefined;
+        /** Move to highlight (e.g., 'e2e4'). */
         "last-move"?: string | undefined;
+        /** Perspective: 'white' or 'black'. */
         orientation?: "white" | "black" | undefined;
+        /** CSS class name. */
         class?: string | undefined;
+        /** Accessible label for the board. */
         "board-label"?: string | undefined;
       };
+      /**
+       * Lit-based Shogi board custom element.
+       */
       "shogi-board": React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        /** Current position in SFEN format. */
         sfen?: string | undefined;
+        /** Move to highlight (e.g., '7g7f' or 'P*5e'). */
         "last-move"?: string | undefined;
+        /** CSS class name. */
         class?: string | undefined;
+        /** Accessible label for the board. */
         "board-label"?: string | undefined;
+        /** Accessible label for Sente's hand. */
         "hand-sente-label"?: string | undefined;
+        /** Accessible label for Gote's hand. */
         "hand-gote-label"?: string | undefined;
       };
     }
   }
 }
 
+/**
+ * Props for the ChessBoard React wrapper.
+ */
 export interface ChessBoardProps {
+  /** Validated Chess FEN string. */
   fen: FEN;
-  lastMove?: string;
+  /** Move to highlight (e.g., 'e2e4'). */
+  lastMove?: Move;
+  /** Perspective: 'white' (default) or 'black'. */
   orientation?: "white" | "black";
+  /** CSS class name for styling. */
   className?: string;
+  /** Accessible label for screen readers. */
   boardLabel?: string;
 }
 
+/**
+ * React wrapper for the `<chess-board>` Web Component.
+ * Ensures type safety and framework-idiomatic usage.
+ */
 export const ChessBoard: React.FC<ChessBoardProps> = ({
   fen,
   lastMove,
@@ -59,15 +86,28 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   );
 };
 
+/**
+ * Props for the ShogiBoard React wrapper.
+ */
 export interface ShogiBoardProps {
+  /** Validated Shogi SFEN string. */
   sfen: SFEN;
-  lastMove?: string;
+  /** Move to highlight (e.g., '7g7f'). */
+  lastMove?: Move;
+  /** CSS class name for styling. */
   className?: string;
+  /** Accessible label for screen readers. */
   boardLabel?: string;
+  /** Custom label for Sente's captured pieces. */
   handSenteLabel?: string;
+  /** Custom label for Gote's captured pieces. */
   handGoteLabel?: string;
 }
 
+/**
+ * React wrapper for the `<shogi-board>` Web Component.
+ * Supports SFEN, move highlighting, and hand rendering.
+ */
 export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   sfen,
   lastMove,

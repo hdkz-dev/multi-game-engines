@@ -1,4 +1,5 @@
 import { FEN, Move } from "@multi-game-engines/core";
+export type { Move };
 
 /**
  * 局面表記の型（FEN またはアダプター定義の局面文字列）

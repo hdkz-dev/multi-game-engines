@@ -1,5 +1,4 @@
 import { FEN, SFEN } from "@multi-game-engines/core";
-export type { FEN, SFEN };
 
 /**
  * Chess piece identifiers.
@@ -53,6 +52,19 @@ export type ShogiPiece =
   | "+b"
   | "+r";
 
+/**
+ * Branded type for FEN (Chess position).
+ */
+export type { FEN };
+
+/**
+ * Branded type for SFEN (Shogi position).
+ */
+export type { SFEN };
+
+/**
+ * Represents the count of captured pieces in Shogi.
+ */
 export interface ShogiHand {
   P: number;
   L: number;
@@ -71,31 +83,40 @@ export interface ShogiHand {
 }
 
 /**
- * Parsed FEN result.
+ * Parsed FEN result containing the 2D board array and turn metadata.
  */
 export interface ParsedFEN {
+  /** 8x8 grid of pieces. board[0] is Rank 8, board[7] is Rank 1. */
   board: (ChessPiece | null)[][];
+  /** Whose turn it is: 'w' for White, 'b' for Black. */
   turn: "w" | "b";
 }
 
 /**
- * Parsed SFEN result.
+ * Parsed SFEN result containing the 2D board array, turn, and hand counts.
  */
 export interface ParsedSFEN {
+  /** 9x9 grid of pieces. board[0] is Rank 1 (top), board[8] is Rank 9 (bottom). */
   board: (ShogiPiece | null)[][];
+  /** Whose turn it is: 'b' for Sente (Black), 'w' for Gote (White). */
   turn: "b" | "w";
+  /** Counts of pieces in hand. */
   hand: ShogiHand;
 }
 
 /**
- * Validates if a character is a valid Chess piece.
+ * Validates if a character is a valid Chess piece identifier.
+ * @param char The character to validate.
+ * @returns True if valid.
  */
 export function isValidChessPiece(char: string): char is ChessPiece {
   return /^[PNBRQKpnbrqk]$/.test(char);
 }
 
 /**
- * Validates if a string is a valid Shogi piece.
+ * Validates if a string is a valid Shogi piece identifier (including promoted pieces).
+ * @param str The string to validate.
+ * @returns True if valid.
  */
 export function isValidShogiPiece(str: string): str is ShogiPiece {
   // Only allow '+' for promotable pieces: P, L, N, S, B, R
@@ -103,15 +124,17 @@ export function isValidShogiPiece(str: string): str is ShogiPiece {
 }
 
 /**
- * Type guard for ShogiHand keys.
+ * Type guard for ShogiHand keys (unpromoted pieces that can be held in hand).
+ * @param piece The piece identifier to check.
+ * @returns True if it's a valid hand key.
  */
 export function isShogiHandKey(piece: unknown): piece is keyof ShogiHand {
-  return typeof piece === "string" && /^[PLNSGBRKplnsgbrk]$/.test(piece);
+  return typeof piece === "string" && /^[PLNSGBRplnsgbr]$/.test(piece);
 }
 
 /**
- * Parses a Chess FEN string into a 2D board array.
- * @param fen Chess FEN string.
+ * Parses a Chess FEN string into a structured 2D board array.
+ * @param fen Validated Chess FEN string.
  * @returns Parsed board and metadata.
  * @throws Error if FEN is malformed.
  */
@@ -168,7 +191,7 @@ export function parseFEN(fen: FEN): ParsedFEN {
 
 /**
  * Parses a Shogi SFEN string into a 2D board array and hand counts.
- * @param sfen Shogi SFEN string.
+ * @param sfen Validated Shogi SFEN string.
  * @returns Parsed board, hand and metadata.
  * @throws Error if SFEN is malformed.
  */
