@@ -104,6 +104,18 @@ export class USIParser implements IProtocolParser<
           info.time = parseInt(val, 10);
           i++;
           break;
+        case "hashfull":
+          info.hashfull = parseInt(val, 10);
+          i++;
+          break;
+        case "multipv":
+          info.multipv = parseInt(val, 10);
+          i++;
+          break;
+        case "cpuload":
+          // USI specific field, can be ignored or stored in raw
+          i++;
+          break;
         case "pv": {
           const moves: Move[] = [];
           while (

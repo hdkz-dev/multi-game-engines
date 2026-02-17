@@ -28,6 +28,8 @@ export const SearchStateTransformer = {
     }
 
     const validatedInfo = validation.data;
+    const now = Date.now();
+    const multipv = validatedInfo.multipv ?? (validatedInfo.pv ? 1 : undefined);
     const nextPvs = [...state.pvs];
     const nextState: EngineSearchState = {
       ...state,
@@ -45,16 +47,14 @@ export const SearchStateTransformer = {
     };
 
     // PVの更新 (MultiPV対応)
-    if (validatedInfo.pv && validatedInfo.multipv !== undefined) {
-      // 2026 Best Practice: 文字列配列をブランド型 Move[] へバリデーション付きで変換
-      const validatedMoves = validatedInfo.pv.map((m: string) => createMove(m));
+    if (validatedInfo.pv && multipv !== undefined) {
+      // 2026 Best Practice: Zod で変換済みのブランド型 Move[] をそのまま使用
+      const validatedMoves = validatedInfo.pv;
 
-      const pvIndex = nextPvs.findIndex(
-        (p) => p.multipv === validatedInfo.multipv,
-      );
+      const pvIndex = nextPvs.findIndex((p) => p.multipv === multipv);
 
       const newPV: PrincipalVariation = {
-        multipv: validatedInfo.multipv,
+        multipv,
         moves: validatedMoves,
         score: (() => {
           if (validatedInfo.score?.mate !== undefined) {
@@ -93,10 +93,10 @@ export const SearchStateTransformer = {
       }
 
       // 履歴の更新 (MultiPV=1 の場合のみ)
-      if (validatedInfo.multipv === 1) {
+      if (multipv === 1) {
         const nextEntries = [
           ...state.evaluationHistory.entries,
-          { score: newPV.score, timestamp: Date.now() },
+          { score: newPV.score, timestamp: now },
         ];
         if (nextEntries.length > state.evaluationHistory.maxEntries) {
           nextEntries.shift();
@@ -114,7 +114,7 @@ export const SearchStateTransformer = {
       const newScore = newPV.score;
       let lastEntryIndex = -1;
       for (let i = state.searchLog.length - 1; i >= 0; i--) {
-        if (state.searchLog[i]?.multipv === validatedInfo.multipv) {
+        if (state.searchLog[i]?.multipv === multipv) {
           lastEntryIndex = i;
           break;
         }
@@ -133,16 +133,16 @@ export const SearchStateTransformer = {
         id:
           lastEntry && isSameProgress
             ? lastEntry.id
-            : `${Date.now()}-${logCounter++}-${validatedInfo.multipv}`,
+            : `${now}-${logCounter++}-${multipv}`,
         depth: validatedInfo.depth ?? state.stats.depth,
         seldepth: validatedInfo.seldepth ?? state.stats.seldepth,
         score: newScore,
         nodes: validatedInfo.nodes ?? state.stats.nodes,
         nps: validatedInfo.nps ?? state.stats.nps,
         time: validatedInfo.time ?? state.stats.time,
-        multipv: validatedInfo.multipv,
+        multipv,
         pv: validatedMoves,
-        timestamp: Date.now(),
+        timestamp: now,
       };
 
       let nextLog: SearchLogEntry[];

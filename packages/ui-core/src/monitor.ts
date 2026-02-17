@@ -72,19 +72,21 @@ export class SearchMonitor<
       return;
     }
 
-    // バッチ処理: 溜まっている全ての更新を適用
-    const updates = [...this.pendingUpdates];
-    this.pendingUpdates = [];
+    try {
+      // バッチ処理: 溜まっている全ての更新を適用
+      const updates = [...this.pendingUpdates];
+      this.pendingUpdates = [];
 
-    this.store.setState((currentState) => {
-      return updates.reduce(
-        (state, info) => this.transformer(state, info),
-        currentState,
-      );
-    });
-
-    this.isProcessing = false;
-    this.updateTimerId = null;
+      this.store.setState((currentState) => {
+        return updates.reduce(
+          (state, info) => this.transformer(state, info),
+          currentState,
+        );
+      });
+    } finally {
+      this.isProcessing = false;
+      this.updateTimerId = null;
+    }
   }
 
   stopMonitoring(): void {
@@ -95,14 +97,14 @@ export class SearchMonitor<
       this.store.dispose();
 
       if (this.updateTimerId !== null) {
-        if (typeof this.updateTimerId === "number") {
-          if (typeof cancelAnimationFrame !== "undefined") {
-            cancelAnimationFrame(this.updateTimerId);
-          } else {
-            clearTimeout(this.updateTimerId);
-          }
+        if (
+          typeof this.updateTimerId === "number" &&
+          typeof cancelAnimationFrame !== "undefined"
+        ) {
+          cancelAnimationFrame(this.updateTimerId);
         } else {
-          clearTimeout(this.updateTimerId);
+          // Fallback or Node.js
+          clearTimeout(this.updateTimerId as number | NodeJS.Timeout);
         }
         this.updateTimerId = null;
       }

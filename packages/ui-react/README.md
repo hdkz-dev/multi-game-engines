@@ -5,6 +5,8 @@ React components and hooks for building advanced game engine analysis interfaces
 ## Features
 
 - **High Performance**: Throttled updates synchronized with `requestAnimationFrame` via `ui-core`.
+- **Persistent Search Log**: Keep track of engine's thinking process with smart aggregation.
+- **Smart Auto-Scroll**: Intelligent scroll behavior that respects user interaction.
 - **Framework Agnostic Core**: Business logic is separated from view, ensuring long-term maintainability.
 - **Accessible by Default**: Built with Radix UI primitives and ARIA best practices.
 - **Customizable**: Styled with Tailwind CSS, easy to theme with CSS variables.

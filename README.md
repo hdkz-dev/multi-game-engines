@@ -16,7 +16,7 @@
   - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、i18n。
   - **ui-react**: React Hooks と Context DI を活用したアダプター。
   - **ui-vue**: Vue 3 Composition API を活用したアダプター。
-  - **ui-elements**: Lit ベースの Web Components (Planned)。
+  - **ui-elements**: Lit ベースの Web Components (Ready)。
 
 ## 🤖 AI 開発ワークフロー / AI Workflow
 

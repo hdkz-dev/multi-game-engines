@@ -34,7 +34,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded bg-gray-50/50 p-1 dark:bg-gray-900/50 ${className}`}
+      className={`relative overflow-hidden rounded bg-gray-50/50 p-1 ${className}`}
       style={{ width, height }}
       aria-label="Evaluation trend graph"
       role="img"
@@ -51,7 +51,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
           x2="200"
           y2={height / 2}
           stroke="currentColor"
-          className="text-gray-300 dark:text-gray-700"
+          className="text-gray-200"
           strokeDasharray="2,2"
         />
 
@@ -63,7 +63,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-blue-500 transition-all duration-300 ease-in-out dark:text-blue-400"
+          className="text-primary transition-all duration-300 ease-in-out"
         />
 
         {/* 最新のポイント */}
@@ -72,7 +72,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
             cx={points[points.length - 1]!.x}
             cy={points[points.length - 1]!.y}
             r="3"
-            className="fill-blue-500 dark:fill-blue-400"
+            className="fill-primary"
           />
         )}
       </svg>
