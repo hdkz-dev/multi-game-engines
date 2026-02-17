@@ -11,6 +11,11 @@ export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 export type FEN = Brand<string, "FEN">;
 
 /**
+ * SFEN (Shogi Forsyth-Edwards Notation) を表すブランド型。
+ */
+export type SFEN = Brand<string, "SFEN">;
+
+/**
  * 指し手を表すブランド型（UCI/USI形式）。
  */
 export type Move = Brand<string, "Move">;
@@ -34,6 +39,16 @@ export function createFEN(pos: string): FEN {
     );
   }
   return pos as FEN;
+}
+
+/**
+ * 将棋局面情報のバリデータファクトリ。
+ */
+export function createSFEN(pos: string): SFEN {
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new Error("Invalid SFEN: Input must be a non-empty string.");
+  }
+  return pos as SFEN;
 }
 
 /**

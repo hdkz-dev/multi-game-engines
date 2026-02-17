@@ -91,21 +91,23 @@ export interface EngineSearchState {
 /**
  * 初期状態の定義
  */
-export const createInitialState = (
-  position: PositionString,
-): EngineSearchState => ({
-  isSearching: false,
-  position,
-  stats: {
-    depth: 0,
-    nodes: 0,
-    nps: 0,
-    time: 0,
-  },
-  pvs: [],
-  evaluationHistory: {
-    entries: [],
-    maxEntries: 50,
-  },
-  searchLog: [],
-});
+export function createInitialState<
+  T extends EngineSearchState = EngineSearchState,
+>(position: PositionString): T {
+  return {
+    isSearching: false,
+    position,
+    stats: {
+      depth: 0,
+      nodes: 0,
+      nps: 0,
+      time: 0,
+    },
+    pvs: [],
+    evaluationHistory: {
+      entries: [],
+      maxEntries: 50,
+    },
+    searchLog: [],
+  } as unknown as T;
+}

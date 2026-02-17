@@ -9,7 +9,6 @@ import {
   IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
-  IMiddleware,
   EngineStatus,
   createPositionString,
 } from "@multi-game-engines/core";
@@ -21,7 +20,13 @@ import {
   ExtendedSearchInfo,
   UINormalizerMiddleware,
   CommandDispatcher,
+  PositionString,
 } from "@multi-game-engines/ui-core";
+
+/**
+ * 2026 Zenith Constants
+ */
+const ERR_ENGINE_NOT_AVAILABLE = "ENGINE_NOT_AVAILABLE";
 
 /**
  * エンジンの思考状況を監視し、楽観的更新を伴うコマンド実行を提供するカスタムフック。
@@ -57,13 +62,14 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as unknown as T_STATE;
+      return createInitialState<T_STATE>(brandedPos);
     } catch {
       // バリデーション失敗時は最小限の空の状態で復旧
       return {
-        position: initialPosition,
+        isSearching: false,
+        position: initialPosition as PositionString,
         pvs: [],
-        evaluationHistory: { entries: [] },
+        evaluationHistory: { entries: [], maxEntries: 50 },
         searchLog: [],
         stats: { depth: 0, nodes: 0, nps: 0, time: 0 },
       } as unknown as T_STATE;
@@ -122,12 +128,10 @@ export function useEngineMonitor<
     if (autoMiddleware && typeof engine.use === "function") {
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
-        unknown,
+        T_INFO,
         T_RESULT
       >();
-      engine.use(
-        normalizer as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>,
-      );
+      engine.use(normalizer);
     }
 
     monitor.startMonitoring();
@@ -146,7 +150,8 @@ export function useEngineMonitor<
 
   const search = useCallback(
     (searchOptions: T_OPTIONS) => {
-      if (!dispatcher) return Promise.reject(new Error("Engine not available"));
+      if (!dispatcher)
+        return Promise.reject(new Error(ERR_ENGINE_NOT_AVAILABLE));
       return dispatcher.dispatchSearch(searchOptions);
     },
     [dispatcher],

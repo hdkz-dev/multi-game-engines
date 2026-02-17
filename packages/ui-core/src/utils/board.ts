@@ -1,4 +1,5 @@
-import { Brand } from "@multi-game-engines/core";
+import { FEN, SFEN } from "@multi-game-engines/core";
+export type { FEN, SFEN };
 
 /**
  * Chess piece identifiers.
@@ -52,11 +53,6 @@ export type ShogiPiece =
   | "+b"
   | "+r";
 
-/** Forsyth-Edwards Notation for Chess */
-export type FEN = Brand<string, "FEN">;
-/** Shogi Forsyth-Edwards Notation */
-export type SFEN = Brand<string, "SFEN">;
-
 export interface ShogiHand {
   P: number;
   L: number;
@@ -102,7 +98,15 @@ export function isValidChessPiece(char: string): char is ChessPiece {
  * Validates if a string is a valid Shogi piece.
  */
 export function isValidShogiPiece(str: string): str is ShogiPiece {
-  return /^\+?[PLNSGBRKplnsgbrk]$/.test(str);
+  // Only allow '+' for promotable pieces: P, L, N, S, B, R
+  return /^(?:\+[PLNSBRplnsbr]|[PLNSGBRKplnsgbrk])$/.test(str);
+}
+
+/**
+ * Type guard for ShogiHand keys.
+ */
+export function isShogiHandKey(piece: unknown): piece is keyof ShogiHand {
+  return typeof piece === "string" && /^[PLNSGBRKplnsgbrk]$/.test(piece);
 }
 
 /**
@@ -119,6 +123,11 @@ export function parseFEN(fen: FEN): ParsedFEN {
   const turn = parts[1];
 
   if (!position) throw new Error("[parseFEN] Position part is missing.");
+  if (turn !== "w" && turn !== "b") {
+    throw new Error(
+      `[parseFEN] Invalid turn: expected "w" or "b", got "${turn}"`,
+    );
+  }
 
   const rows = position.split("/");
   if (rows.length !== 8) {
@@ -153,7 +162,7 @@ export function parseFEN(fen: FEN): ParsedFEN {
 
   return {
     board,
-    turn: turn === "w" ? "w" : "b",
+    turn,
   };
 }
 
@@ -172,6 +181,11 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
   const handStr = parts[2];
 
   if (!position) throw new Error("[parseSFEN] Position part is missing.");
+  if (turn !== "b" && turn !== "w") {
+    throw new Error(
+      `[parseSFEN] Invalid turn: expected "b" or "w", got "${turn}"`,
+    );
+  }
 
   const rows = position.split("/");
   if (rows.length !== 9) {
@@ -248,11 +262,11 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
       if (i >= handStr.length) {
         throw new Error("[parseSFEN] Unexpected end of hand string.");
       }
-      const piece = handStr[i] as keyof ShogiHand;
-      if (piece in hand) {
+      const piece = handStr[i];
+      if (isShogiHandKey(piece)) {
         hand[piece] = count;
       } else {
-        throw new Error(`[parseSFEN] Invalid piece in hand: ${handStr[i]}`);
+        throw new Error(`[parseSFEN] Invalid piece in hand: ${piece}`);
       }
       i++;
     }
@@ -260,7 +274,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
 
   return {
     board,
-    turn: turn === "b" ? "b" : "w",
+    turn,
     hand,
   };
 }

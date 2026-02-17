@@ -1,6 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
+import { createFEN } from "@multi-game-engines/core";
 
 // Human-readable names for accessibility
 const PIECE_NAMES: Record<ChessPiece, string> = {
@@ -76,13 +77,21 @@ export class ChessBoard extends LitElement {
       cursor: default;
       z-index: 1;
     }
+    .error-overlay {
+      color: #ef4444;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+    }
   `;
 
   /**
    * Current position in FEN format.
    */
   @property({ type: String })
-  fen: FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
+  fen: FEN = createFEN(
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  );
 
   /**
    * Last move to highlight (e.g., "e2e4").
@@ -103,24 +112,33 @@ export class ChessBoard extends LitElement {
   boardLabel = "Chess Board";
 
   private _getSquareIndex(algebraic: string): number {
+    if (!algebraic || algebraic.length < 2) return -1;
     const file = algebraic.charCodeAt(0) - 97; // a=0, b=1...
     const rank = 8 - parseInt(algebraic[1]!, 10);
+    if (file < 0 || file >= 8 || rank < 0 || rank >= 8) return -1;
     return rank * 8 + file;
   }
 
   override render() {
-    const { board } = parseFEN(this.fen);
+    let board: (ChessPiece | null)[][] = [];
+    try {
+      ({ board } = parseFEN(this.fen));
+    } catch (err) {
+      console.error("[chess-board] Failed to parse FEN:", err);
+      return html`
+        <div class="board" role="alert">
+          <div class="error-overlay">Invalid Position</div>
+        </div>
+      `;
+    }
+
     const highlightedSquares = new Set<number>();
 
     if (this.lastMove && this.lastMove.length >= 4) {
-      try {
-        const from = this._getSquareIndex(this.lastMove.slice(0, 2));
-        const to = this._getSquareIndex(this.lastMove.slice(2, 4));
-        if (from >= 0 && from < 64) highlightedSquares.add(from);
-        if (to >= 0 && to < 64) highlightedSquares.add(to);
-      } catch {
-        // Ignore invalid moves
-      }
+      const from = this._getSquareIndex(this.lastMove.slice(0, 2));
+      const to = this._getSquareIndex(this.lastMove.slice(2, 4));
+      if (from >= 0) highlightedSquares.add(from);
+      if (to >= 0) highlightedSquares.add(to);
     }
 
     const squares = [];
@@ -129,21 +147,11 @@ export class ChessBoard extends LitElement {
     // f: 0-7 (visual column from left to right)
     for (let r = 0; r < 8; r++) {
       for (let f = 0; f < 8; f++) {
-        // Map visual coordinates to board array indices
-        // parseFEN returns board[0] as Rank 8, board[7] as Rank 1.
-
-        // If White bottom: Top row (r=0) is Rank 8 (index 0)
-        // If Black bottom: Top row (r=0) is Rank 1 (index 7)
         const rankIndex = this.orientation === "white" ? r : 7 - r;
-
-        // If White bottom: Left col (f=0) is File A (index 0)
-        // If Black bottom: Left col (f=0) is File H (index 7)
         const fileIndex = this.orientation === "white" ? f : 7 - f;
 
         const squareIdx = rankIndex * 8 + fileIndex;
         const piece = board[rankIndex]?.[fileIndex];
-        // Calculate algebraic rank for display (data-square)
-        // rankIndex 0 -> "8", rankIndex 7 -> "1"
         const algebraicRank = 8 - rankIndex;
         const isDark = (rankIndex + fileIndex) % 2 !== 0;
         const isHighlighted = highlightedSquares.has(squareIdx);

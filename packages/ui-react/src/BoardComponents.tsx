@@ -4,7 +4,7 @@ import React from "react";
 import "@multi-game-engines/ui-elements";
 import { FEN, SFEN } from "@multi-game-engines/ui-core";
 
-declare module "react" {
+declare module "react/jsx-runtime" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {

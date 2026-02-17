@@ -6,6 +6,7 @@ import {
   ShogiHand,
   SFEN,
 } from "@multi-game-engines/ui-core";
+import { createSFEN } from "@multi-game-engines/core";
 
 // Shogi piece mapping to Kanji/Labels for display and accessibility
 const PIECE_LABELS: Record<ShogiPiece, string> = {
@@ -38,6 +39,15 @@ const PIECE_LABELS: Record<ShogiPiece, string> = {
   "+b": "馬",
   "+r": "龍",
 };
+
+/**
+ * Returns true if the piece belongs to Gote (White).
+ * Shogi SFEN uses lowercase for Gote pieces.
+ */
+function isGotePiece(piece: ShogiPiece): boolean {
+  const char = piece.startsWith("+") ? piece[1] : piece;
+  return !!char && char === char.toLowerCase();
+}
 
 /**
  * A framework-agnostic Shogi board component.
@@ -99,14 +109,21 @@ export class ShogiBoard extends LitElement {
     .piece.gote {
       transform: rotate(180deg);
     }
+    .error-overlay {
+      color: #ef4444;
+      font-weight: bold;
+      text-align: center;
+      padding: 20px;
+    }
   `;
 
   /**
    * Current position in SFEN format.
    */
   @property({ type: String })
-  sfen: SFEN =
-    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
+  sfen: SFEN = createSFEN(
+    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+  );
 
   /**
    * Last move to highlight (e.g., "7g7f" or "P*5e").
@@ -137,7 +154,35 @@ export class ShogiBoard extends LitElement {
   }
 
   override render() {
-    const { board, hand } = parseSFEN(this.sfen);
+    let board: (ShogiPiece | null)[][] = [];
+    let hand: ShogiHand = {
+      P: 0,
+      L: 0,
+      N: 0,
+      S: 0,
+      G: 0,
+      B: 0,
+      R: 0,
+      p: 0,
+      l: 0,
+      n: 0,
+      s: 0,
+      g: 0,
+      b: 0,
+      r: 0,
+    };
+
+    try {
+      ({ board, hand } = parseSFEN(this.sfen));
+    } catch (err) {
+      console.error("[shogi-board] Failed to parse SFEN:", err);
+      return html`
+        <div class="container" role="alert">
+          <div class="error-overlay">Invalid Position</div>
+        </div>
+      `;
+    }
+
     const highlightedSquares = new Set<number>();
 
     if (this.lastMove && this.lastMove.length >= 4) {
@@ -153,7 +198,7 @@ export class ShogiBoard extends LitElement {
         const squareIdx = r * 9 + f;
         const piece = board[r]?.[f];
         const isHighlighted = highlightedSquares.has(squareIdx);
-        const isGote = piece && piece.toLowerCase() === piece;
+        const isGote = piece && isGotePiece(piece);
         // USI coordinate: file (9-1), rank (a-i)
         const usiFile = 9 - f;
         const usiRank = String.fromCharCode(97 + r);

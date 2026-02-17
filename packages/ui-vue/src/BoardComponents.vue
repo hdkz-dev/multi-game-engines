@@ -6,7 +6,7 @@ import { FEN, SFEN } from "@multi-game-engines/ui-core";
  * 汎用的な盤面コンポーネント。
  * チェスまたは将棋の Web Components をラップして提供します。
  */
-defineProps<{
+const props = defineProps<{
   /** ゲーム種別 */
   type: "chess" | "shogi";
   /** チェス局面 (FEN) */
@@ -24,6 +24,12 @@ defineProps<{
   /** 駒台のラベル (将棋・後手) */
   handGoteLabel?: string;
 }>();
+
+if (props.type === "chess" && !props.fen) {
+  console.warn("[BoardComponents] 'fen' is required when type is 'chess'");
+} else if (props.type === "shogi" && !props.sfen) {
+  console.warn("[BoardComponents] 'sfen' is required when type is 'shogi'");
+}
 </script>
 
 <template>

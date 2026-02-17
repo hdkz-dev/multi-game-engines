@@ -1,21 +1,6 @@
-import { IBaseSearchOptions, Brand } from "@multi-game-engines/core";
-
-/** 将棋用の局面表記 (Shogi Forsyth-Edwards Notation) */
-export type SFEN = Brand<string, "SFEN">;
-
-/**
- * SFEN 文字列のバリデータファクトリ。
- * `createFEN()` (core) と同じパターン。
- */
-export function createSFEN(sfen: string): SFEN {
-  if (typeof sfen !== "string" || sfen.trim().length === 0) {
-    throw new Error("Invalid SFEN: Input must be a non-empty string.");
-  }
-  return sfen as SFEN;
-}
-
-/** 将棋用の指し手表記 (7g7f等) */
-export type Move = Brand<string, "Move">;
+import { IBaseSearchOptions, SFEN, Move } from "@multi-game-engines/core";
+export { createSFEN } from "@multi-game-engines/core";
+export type { SFEN, Move };
 
 /** 将棋用の探索オプション拡張 (標準規格) */
 export interface ISHOGISearchOptions extends IBaseSearchOptions {

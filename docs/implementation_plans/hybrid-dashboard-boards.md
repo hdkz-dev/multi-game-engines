@@ -45,9 +45,10 @@ The board components will be implemented as Web Components (Lit) in `@multi-game
 
 ## 5. Implementation Steps
 
-1. [ ] Implement `<chess-board>` in `packages/ui-elements`.
-2. [ ] Implement `<shogi-board>` in `packages/ui-elements`.
-3. [ ] Add piece assets (SVG) to `packages/ui-core`.
-4. [ ] Create React/Vue wrappers.
-5. [ ] Update Zenith Dashboard demo.
-6. [ ] Add unit tests for board rendering logic (parsing FEN/SFEN into grid).
+1. [x] Add `parseFEN` / `parseSFEN` utilities to `packages/ui-core`.
+2. [x] Implement `<chess-board>` in `packages/ui-elements`.
+3. [x] Implement `<shogi-board>` in `packages/ui-elements`.
+4. [ ] Add piece assets (SVG) to `packages/ui-core`.
+5. [x] Create React/Vue wrappers.
+6. [x] Update Zenith Dashboard demo.
+7. [x] Add unit tests for board rendering logic (parsing FEN/SFEN into grid).
