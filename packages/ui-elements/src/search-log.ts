@@ -50,7 +50,7 @@ export class SearchLogElement extends LitElement {
       vertical-align: middle;
     }
     tbody tr:hover {
-      background-color: #eff6ff; /* Keep subtle hover or add token */
+      background-color: var(--mge-color-gray-50);
     }
     .text-center {
       text-align: center;
@@ -122,7 +122,7 @@ export class SearchLogElement extends LitElement {
       text-decoration: underline;
     }
     button:focus {
-      outline: 2px solid #3b82f6;
+      outline: 2px solid var(--mge-color-primary);
     }
     .best-move {
       font-weight: 700;

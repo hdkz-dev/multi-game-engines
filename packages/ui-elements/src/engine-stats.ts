@@ -16,7 +16,7 @@ export class EngineStatsElement extends LitElement {
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       padding: 1rem;
-      background-color: #f9fafb;
+      background-color: var(--mge-surface-alt);
       border-radius: 0.5rem;
     }
     @media (min-width: 768px) {
@@ -31,14 +31,14 @@ export class EngineStatsElement extends LitElement {
     }
     .label {
       font-size: 0.75rem;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-weight: 500;
     }
     .value {
       font-size: 0.875rem;
       font-weight: 700;
-      color: #111827;
-      font-family: ui-monospace, monospace;
+      color: var(--mge-color-gray-900);
+      font-family: var(--mge-font-mono);
     }
   `;
 
