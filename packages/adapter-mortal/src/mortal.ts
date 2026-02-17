@@ -3,7 +3,6 @@ import {
   IEngineLoader,
   WorkerCommunicator,
   EngineError,
-  EngineErrorCode,
 } from "@multi-game-engines/core";
 import {
   IMahjongSearchOptions,

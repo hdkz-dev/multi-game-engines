@@ -3,7 +3,6 @@ import {
   IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
-  IMiddleware,
   EngineStatus,
 } from "@multi-game-engines/core";
 import {

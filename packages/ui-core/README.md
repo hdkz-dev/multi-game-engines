@@ -20,11 +20,12 @@ import {
   EvaluationPresenter,
   createInitialState,
 } from "@multi-game-engines/ui-core";
+import { createPositionString } from "@multi-game-engines/core";
 
 // Initialize monitor
 const monitor = new SearchMonitor(
   engine,
-  createInitialState("startpos"),
+  createInitialState(createPositionString("startpos")),
   transformer,
 );
 monitor.startMonitoring();

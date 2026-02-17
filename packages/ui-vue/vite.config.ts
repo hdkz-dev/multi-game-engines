@@ -5,7 +5,13 @@ import dts from "vite-plugin-dts";
 
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.endsWith("-board"),
+        },
+      },
+    }),
     dts({
       insertTypesEntry: true,
       include: ["src/**/*"],

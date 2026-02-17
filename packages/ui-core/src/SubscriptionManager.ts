@@ -9,9 +9,14 @@ export class SubscriptionManager {
 
   /**
    * 購読を追加する
+   * @returns 個別の購読解除関数
    */
-  add(unsub: Unsubscribe): void {
+  add(unsub: Unsubscribe): Unsubscribe {
     this.subscriptions.add(unsub);
+    return () => {
+      this.subscriptions.delete(unsub);
+      unsub();
+    };
   }
 
   /**

@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
 import { createFEN, createSFEN } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
+import { formatNumber } from "@multi-game-engines/ui-core";
 
 const EngineMonitorPanel = dynamic(
   () =>
@@ -89,14 +90,7 @@ export default function Dashboard() {
   const nps = useMemo(() => {
     const stats =
       activeEngine === "chess" ? chessState.stats : shogiState.stats;
-    if (!stats.nps) return "0";
-    if (stats.nps >= 1_000_000) {
-      return `${(stats.nps / 1_000_000).toFixed(1)}M`;
-    }
-    if (stats.nps >= 1_000) {
-      return `${(stats.nps / 1_000).toFixed(1)}k`;
-    }
-    return stats.nps.toString();
+    return formatNumber(stats.nps);
   }, [activeEngine, chessState.stats, shogiState.stats]);
 
   if (!bridge || !chessEngine || !shogiEngine) {

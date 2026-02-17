@@ -5,9 +5,7 @@ import {
   SearchLogEntry,
 } from "./types.js";
 import { createPositionString } from "@multi-game-engines/core";
-import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
-
-let logCounter = 0;
+import { ExtendedSearchInfo } from "./schema.js";
 
 /**
  * エンジンからの生の情報を UI 向けの状態に変換・マージする。
@@ -28,6 +26,10 @@ export const SearchStateTransformer = {
     const now = Date.now();
     const multipv = validatedInfo.multipv ?? (validatedInfo.pv ? 1 : undefined);
     const nextPvs = [...state.pvs];
+
+    // Internal counter for purity (no side effects)
+    let currentCounter = state._internalCounter;
+
     const nextState: EngineSearchState = {
       ...state,
       pvs: nextPvs,
@@ -41,6 +43,8 @@ export const SearchStateTransformer = {
         visits: validatedInfo.visits ?? state.stats.visits,
         hashfull: validatedInfo.hashfull ?? state.stats.hashfull,
       },
+      // Counter will be updated at the end
+      _internalCounter: state._internalCounter,
     };
 
     // PVの更新 (MultiPV対応)
@@ -130,7 +134,7 @@ export const SearchStateTransformer = {
         id:
           lastEntry && isSameProgress
             ? lastEntry.id
-            : `${now}-${logCounter++}-${multipv}`,
+            : `${now}-${++currentCounter}-${multipv}`,
         depth: validatedInfo.depth ?? state.stats.depth,
         seldepth: validatedInfo.seldepth ?? state.stats.seldepth,
         score: newScore,
@@ -160,7 +164,10 @@ export const SearchStateTransformer = {
       nextState.searchLog = nextLog;
     }
 
-    return nextState;
+    return {
+      ...nextState,
+      _internalCounter: currentCounter,
+    };
   },
 
   /**

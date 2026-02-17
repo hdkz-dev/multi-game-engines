@@ -87,14 +87,21 @@ export interface EngineSearchState {
   searchLog: SearchLogEntry[];
   currentMove?: Move | undefined;
   currentMoveNumber?: number | undefined;
+  /**
+   * Internal counter for generating unique IDs (e.g. for search log entries).
+   * This ensures SearchStateTransformer remains pure without module-level state.
+   */
+  readonly _internalCounter: number;
 }
 
 /**
- * 初期状態の定義
+ * 初期状態の定義。
+ * 2026 Best Practice: 危険な 'as unknown as T' キャストを排除し、ベース型を確実に構築。
  */
-export function createInitialState<
-  T extends EngineSearchState = EngineSearchState,
->(position: PositionString, overrides?: Partial<T>): T {
+export function createInitialState(
+  position: PositionString,
+  overrides?: Partial<EngineSearchState>,
+): EngineSearchState {
   return {
     isSearching: false,
     position,
@@ -110,6 +117,7 @@ export function createInitialState<
       maxEntries: 50,
     },
     searchLog: [],
+    _internalCounter: 0,
     ...overrides,
-  } as unknown as T;
+  };
 }

@@ -3,6 +3,7 @@ import { IFileStorage } from "../types.js";
 export class OPFSStorage implements IFileStorage {
   async get(_key: string): Promise<ArrayBuffer | null> {
     // Mock implementation
+    // TODO: Implement actual OPFS access using navigator.storage.getDirectory() for production usage.
     return null;
   }
   async set(_key: string, _data: ArrayBuffer): Promise<void> {}

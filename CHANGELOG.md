@@ -16,8 +16,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - **Type Safety Zenith**: Enforced Branded Types (`FEN`, `SFEN`, `Move`) across component props and eliminated remaining unsafe `as unknown as` casts in `MonitorRegistry` and `useEngineMonitor`.
+- **Pure State Transformer**: Removed module-level side effects from `SearchStateTransformer` by introducing internal counters within `EngineSearchState`, ensuring strictly pure state transitions.
 - **NPS Scaling**: Improved Performance stats display with intelligent scaling (k for thousands, M for millions) and localized units.
 - **Initialization UX**: Replaced blank dashboard screens with a high-fidelity loading spinner during engine/bridge setup.
+- **Security Audit**: Enforced HTTPS for engine resources and added strict SRI checks in `EngineLoader`.
 
 ### Fixed
 

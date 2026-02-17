@@ -6,11 +6,7 @@ import {
   createPositionString,
 } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
-import {
-  createInitialState,
-  EngineSearchState,
-  PositionString,
-} from "./types.js";
+import { createInitialState, EngineSearchState } from "./types.js";
 
 /**
  * モニターのエントリを型安全に管理するための内部インターフェース。
@@ -99,10 +95,13 @@ export class MonitorRegistry {
     }
 
     const brandedPosition = createPositionString(initialPosition);
+    const initialState = createInitialState(
+      brandedPosition,
+    ) as unknown as T_STATE;
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,
-      createInitialState<T_STATE>(brandedPosition),
+      initialState,
       transformer,
     );
 

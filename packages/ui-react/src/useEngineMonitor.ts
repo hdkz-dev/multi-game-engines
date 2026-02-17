@@ -59,11 +59,11 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState<T_STATE>(brandedPos);
+      return createInitialState(brandedPos) as unknown as T_STATE;
     } catch {
       // バリデーション失敗時は安全なデフォルト値で復旧
       const safePos = createPositionString("startpos");
-      return createInitialState<T_STATE>(safePos);
+      return createInitialState(safePos) as unknown as T_STATE;
     }
   }, [initialPosition]);
 
