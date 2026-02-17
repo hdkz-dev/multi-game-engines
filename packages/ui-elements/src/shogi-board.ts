@@ -120,7 +120,7 @@ export class ShogiBoard extends LitElement {
   /**
    * Current position in SFEN format.
    */
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   sfen: SFEN = createSFEN(
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   );
@@ -128,18 +128,18 @@ export class ShogiBoard extends LitElement {
   /**
    * Last move to highlight (e.g., "7g7f" or "P*5e").
    */
-  @property({ type: String, attribute: "last-move" })
+  @property({ type: String, attribute: "last-move", reflect: true })
   lastMove = "";
 
   /**
    * Accessible labels.
    */
-  @property({ type: String, attribute: "board-label" }) boardLabel =
-    "Shogi Board";
-  @property({ type: String, attribute: "hand-sente-label" }) handSenteLabel =
-    "Sente Hand";
-  @property({ type: String, attribute: "hand-gote-label" }) handGoteLabel =
-    "Gote Hand";
+  @property({ type: String, attribute: "board-label", reflect: true })
+  boardLabel = "Shogi Board";
+  @property({ type: String, attribute: "hand-sente-label", reflect: true })
+  handSenteLabel = "Sente Hand";
+  @property({ type: String, attribute: "hand-gote-label", reflect: true })
+  handGoteLabel = "Gote Hand";
 
   private _getSquareIndex(usi: string): number {
     if (!usi || usi.length < 2 || usi.includes("*")) return -1;

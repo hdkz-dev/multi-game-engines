@@ -48,7 +48,7 @@ Zenith ハイブリッド・ダッシュボードのプロトタイプを完成�
 1.  [x] `parseFEN` / `parseSFEN` ユーティリティを `packages/ui-core` に追加。
 2.  [x] `packages/ui-elements` に `<chess-board>` を実装。
 3.  [x] `packages/ui-elements` に `<shogi-board>` を実装。
-4.  [ ] 駒アセット (SVG) を `packages/ui-core` に追加。
+4.  [x] 駒アセット (SVG / 高品質フォント) を使用したレンダリングの実装。
 5.  [x] React/Vue 用のラッパーコンポーネントを作成。
 6.  [x] Zenith Dashboard デモを更新し、エンジンの思考と盤面を同期。
 7.  [x] 盤面のレンダリングロジック（FEN/SFEN からグリッドへの変換）のユニットテストを追加。

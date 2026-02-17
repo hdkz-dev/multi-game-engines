@@ -6,7 +6,7 @@ import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
 
 describe("BoardComponents (React)", () => {
   describe("ChessBoard", () => {
-    it("should render chess-board custom element with props mapped correctly", () => {
+    it("should render chess-board custom element with props mapped correctly", async () => {
       const fen =
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
       const lastMove = "e2e4" as Move;
@@ -24,12 +24,15 @@ describe("BoardComponents (React)", () => {
       const board = container.querySelector("chess-board") as any;
       expect(board).toBeTruthy();
 
-      // Verify properties (React 19 sets properties if they exist on the element)
+      // In React 19, properties are preferred for custom elements if they exist.
+      // We verify the data flow by checking properties on the element instance.
       expect(board.fen).toBe(fen);
       expect(board.lastMove).toBe(lastMove);
       expect(board.orientation).toBe("black");
       expect(board.boardLabel).toBe("Custom Chess Board");
-      // Verify attribute for class (mapped from className)
+
+      // Attributes that are explicitly passed as kebab-case or mapped (like className -> class)
+      // should be verifiable via getAttribute if the framework sets them or Lit reflects them.
       expect(board.getAttribute("class")).toBe("custom-class");
     });
 
@@ -37,15 +40,17 @@ describe("BoardComponents (React)", () => {
       const fen = "8/8/8/8/8/8/8/8 w - - 0 1" as FEN;
       const { container } = render(<ChessBoard fen={fen} />);
 
-      const board = container.querySelector("chess-board");
-      expect(board?.hasAttribute("last-move")).toBe(false);
-      expect(board?.hasAttribute("orientation")).toBe(false);
-      expect(board?.hasAttribute("board-label")).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const board = container.querySelector("chess-board") as any;
+      // properties should be undefined/default, attributes should be absent
+      expect(board.getAttribute("last-move")).toBeNull();
+      expect(board.getAttribute("orientation")).toBeNull();
+      expect(board.getAttribute("board-label")).toBeNull();
     });
   });
 
   describe("ShogiBoard", () => {
-    it("should render shogi-board custom element with props mapped correctly", () => {
+    it("should render shogi-board custom element with props mapped correctly", async () => {
       const sfen =
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
       const lastMove = "7g7f" as Move;
@@ -63,11 +68,13 @@ describe("BoardComponents (React)", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const board = container.querySelector("shogi-board") as any;
       expect(board).toBeTruthy();
+
       expect(board.sfen).toBe(sfen);
       expect(board.lastMove).toBe(lastMove);
       expect(board.boardLabel).toBe("Custom Shogi Board");
       expect(board.handSenteLabel).toBe("Sente pieces");
       expect(board.handGoteLabel).toBe("Gote pieces");
+
       expect(board.getAttribute("class")).toBe("shogi-custom");
     });
 
@@ -75,11 +82,12 @@ describe("BoardComponents (React)", () => {
       const sfen = "9/9/9/9/9/9/9/9/9 b - 1" as SFEN;
       const { container } = render(<ShogiBoard sfen={sfen} />);
 
-      const board = container.querySelector("shogi-board");
-      expect(board?.hasAttribute("last-move")).toBe(false);
-      expect(board?.hasAttribute("board-label")).toBe(false);
-      expect(board?.hasAttribute("hand-sente-label")).toBe(false);
-      expect(board?.hasAttribute("hand-gote-label")).toBe(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const board = container.querySelector("shogi-board") as any;
+      expect(board.getAttribute("last-move")).toBeNull();
+      expect(board.getAttribute("board-label")).toBeNull();
+      expect(board.getAttribute("hand-sente-label")).toBeNull();
+      expect(board.getAttribute("hand-gote-label")).toBeNull();
     });
   });
 });

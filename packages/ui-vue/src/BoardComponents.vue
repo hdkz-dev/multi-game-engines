@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import "@multi-game-engines/ui-elements";
-import { FEN, SFEN } from "@multi-game-engines/ui-core";
+import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
 
 /**
  * 汎用的な盤面コンポーネント。
@@ -14,7 +14,7 @@ const props = defineProps<{
   /** 将棋局面 (SFEN) */
   sfen?: SFEN;
   /** ハイライトする指し手 (LAN/USI) */
-  lastMove?: string;
+  lastMove?: Move;
   /** 盤面の向き (チェス用) */
   orientation?: "white" | "black";
   /** 盤面のアクセシビリティラベル */

@@ -3,6 +3,22 @@ import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
 import { createFEN } from "@multi-game-engines/core";
 
+// Standard SVG piece set (Wikipedia/Standard)
+const PIECE_SVG: Record<ChessPiece, string> = {
+  P: "https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg",
+  N: "https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg",
+  B: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg",
+  R: "https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg",
+  Q: "https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg",
+  K: "https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg",
+  p: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg",
+  n: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg",
+  b: "https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg",
+  r: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg",
+  q: "https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg",
+  k: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg",
+};
+
 // Human-readable names for accessibility
 const PIECE_NAMES: Record<ChessPiece, string> = {
   P: "White Pawn",
@@ -17,22 +33,6 @@ const PIECE_NAMES: Record<ChessPiece, string> = {
   r: "Black Rook",
   q: "Black Queen",
   k: "Black King",
-};
-
-// Standard Unicode characters
-const PIECE_UNICODE: Record<ChessPiece, string> = {
-  P: "♙",
-  N: "♘",
-  B: "♗",
-  R: "♖",
-  Q: "♕",
-  K: "♔",
-  p: "♟",
-  n: "♞",
-  b: "♝",
-  r: "♜",
-  q: "♛",
-  k: "♚",
 };
 
 /**
@@ -61,7 +61,6 @@ export class ChessBoard extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1rem, 8cqi, 3rem);
       position: relative;
     }
     .square.light {
@@ -76,6 +75,9 @@ export class ChessBoard extends LitElement {
     .piece {
       cursor: default;
       z-index: 1;
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
     }
     .error-overlay {
       color: #ef4444;
@@ -88,7 +90,7 @@ export class ChessBoard extends LitElement {
   /**
    * Current position in FEN format.
    */
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   fen: FEN = createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   );
@@ -96,19 +98,19 @@ export class ChessBoard extends LitElement {
   /**
    * Last move to highlight (e.g., "e2e4").
    */
-  @property({ type: String, attribute: "last-move" })
+  @property({ type: String, attribute: "last-move", reflect: true })
   lastMove = "";
 
   /**
    * Board orientation.
    */
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   orientation: "white" | "black" = "white";
 
   /**
    * Accessible label for the board.
    */
-  @property({ type: String, attribute: "board-label" })
+  @property({ type: String, attribute: "board-label", reflect: true })
   boardLabel = "Chess Board";
 
   private _getSquareIndex(algebraic: string): number {
@@ -143,8 +145,6 @@ export class ChessBoard extends LitElement {
 
     const squares = [];
 
-    // r: 0-7 (visual row from top to bottom)
-    // f: 0-7 (visual column from left to right)
     for (let r = 0; r < 8; r++) {
       for (let f = 0; f < 8; f++) {
         const rankIndex = this.orientation === "white" ? r : 7 - r;
@@ -165,13 +165,12 @@ export class ChessBoard extends LitElement {
           >
             ${piece
               ? html`
-                  <span
+                  <img
                     class="piece"
-                    role="img"
+                    src="${PIECE_SVG[piece]}"
+                    alt="${PIECE_NAMES[piece]}"
                     aria-label="${PIECE_NAMES[piece]}"
-                  >
-                    ${PIECE_UNICODE[piece]}
-                  </span>
+                  />
                 `
               : ""}
           </div>
