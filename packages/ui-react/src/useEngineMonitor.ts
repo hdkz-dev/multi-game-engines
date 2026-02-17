@@ -11,6 +11,7 @@ import {
   IBaseSearchResult,
   IMiddleware,
   EngineStatus,
+  createPositionString,
 } from "@multi-game-engines/core";
 import {
   createInitialState,
@@ -20,11 +21,15 @@ import {
   ExtendedSearchInfo,
   UINormalizerMiddleware,
   CommandDispatcher,
-  PositionString,
 } from "@multi-game-engines/ui-core";
 
 /**
  * エンジンの思考状況を監視し、楽観的更新を伴うコマンド実行を提供するカスタムフック。
+ *
+ * 2026 Zenith Practice:
+ * - CommandDispatcher による Optimistic UI 制御。
+ * - システム全体のテレメトリと連動した状態同期。
+ * - SSR (Server-Side Rendering) に配慮した堅牢な設計。
  */
 export function useEngineMonitor<
   T_STATE extends EngineSearchState = EngineSearchState,
@@ -48,14 +53,22 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  // SSR 対応: エンジンがない場合はダミーの状態を返す
-  const dummyState = useMemo(
-    () =>
-      createInitialState(
-        initialPosition as PositionString,
-      ) as unknown as T_STATE,
-    [initialPosition],
-  );
+  // SSR 対応およびエンジン不在時のフォールバック用初期状態
+  const dummyState = useMemo(() => {
+    try {
+      const brandedPos = createPositionString(initialPosition);
+      return createInitialState(brandedPos) as unknown as T_STATE;
+    } catch {
+      // バリデーション失敗時は最小限の空の状態で復旧
+      return {
+        position: initialPosition,
+        pvs: [],
+        evaluationHistory: { entries: [] },
+        searchLog: [],
+        stats: { depth: 0, nodes: 0, nps: 0, time: 0 },
+      } as unknown as T_STATE;
+    }
+  }, [initialPosition]);
 
   // 1. Monitor の共有取得
   const monitor = useMemo(() => {
@@ -68,7 +81,7 @@ export function useEngineMonitor<
     >(engine, initialPosition, transformer);
   }, [engine, initialPosition, transformer]);
 
-  // 2. 状態同期
+  // 2. 状態同期 (useSyncExternalStore)
   const state = useSyncExternalStore(
     useCallback(
       (onStoreChange: () => void) => {
@@ -132,11 +145,17 @@ export function useEngineMonitor<
   }, [monitor, engine, autoMiddleware]);
 
   const search = useCallback(
-    (searchOptions: T_OPTIONS) => dispatcher?.dispatchSearch(searchOptions),
+    (searchOptions: T_OPTIONS) => {
+      if (!dispatcher) return Promise.reject(new Error("Engine not available"));
+      return dispatcher.dispatchSearch(searchOptions);
+    },
     [dispatcher],
   );
 
-  const stop = useCallback(() => dispatcher?.dispatchStop(), [dispatcher]);
+  const stop = useCallback(() => {
+    if (!dispatcher) return;
+    void dispatcher.dispatchStop();
+  }, [dispatcher]);
 
   return {
     state,

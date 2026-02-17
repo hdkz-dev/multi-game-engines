@@ -78,11 +78,14 @@ export default function Dashboard() {
   );
   const { state: shogiState } = useEngineMonitor(shogiEngine);
 
-  const activeBestMove = useMemo(() => {
-    if (activeEngine === "chess")
-      return chessState.pvs[0]?.moves[0]?.toString();
-    return shogiState.pvs[0]?.moves[0]?.toString();
-  }, [activeEngine, chessState.pvs, shogiState.pvs]);
+  const chessBestMove = useMemo(
+    () => chessState.pvs[0]?.moves[0]?.toString(),
+    [chessState.pvs],
+  );
+  const shogiBestMove = useMemo(
+    () => shogiState.pvs[0]?.moves[0]?.toString(),
+    [shogiState.pvs],
+  );
 
   const nps = useMemo(() => {
     const stats =
@@ -183,7 +186,7 @@ export default function Dashboard() {
             icon={<Zap className="text-yellow-500 w-5 h-5" />}
             label={localeData.dashboard.stats.engineRuntime.label}
             value={nps}
-            sub="Nodes / Second"
+            sub={localeData.engine.npsUnit}
           />
           <StatCard
             icon={<Cpu className="text-blue-500 w-5 h-5" />}
@@ -237,14 +240,18 @@ export default function Dashboard() {
                 {activeEngine === "chess" ? (
                   <ChessBoard
                     fen={chessOptions.fen}
-                    lastMove={activeBestMove}
+                    lastMove={chessBestMove}
                     className="w-full h-full"
+                    boardLabel={localeData.dashboard.gameBoard.title}
                   />
                 ) : (
                   <ShogiBoard
                     sfen={shogiOptions.sfen}
-                    lastMove={activeBestMove}
+                    lastMove={shogiBestMove}
                     className="w-full h-full"
+                    boardLabel={localeData.dashboard.gameBoard.title}
+                    handSenteLabel={localeData.dashboard.gameBoard.handSente}
+                    handGoteLabel={localeData.dashboard.gameBoard.handGote}
                   />
                 )}
               </div>

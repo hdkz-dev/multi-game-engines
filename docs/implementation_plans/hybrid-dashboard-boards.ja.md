@@ -45,9 +45,9 @@ Zenith ハイブリッド・ダッシュボードのプロトタイプを完成�
 
 ## 5. 実施ステップ
 
-1.  [ ] `packages/ui-core` に FEN/SFEN パーサーを追加。
-2.  [ ] `packages/ui-elements` に `<chess-board>` を実装。
-3.  [ ] `packages/ui-elements` に `<shogi-board>` を実装。
-4.  [ ] React/Vue 用のラッパーコンポーネントを作成。
-5.  [ ] Zenith Dashboard デモを更新し、エンジンの思考と盤面を同期。
-6.  [ ] 盤面のレンダリングロジック（FEN/SFEN からグリッドへの変換）のユニットテストを追加。
+1.  [x] `packages/ui-core` に FEN/SFEN パーサーを追加。
+2.  [x] `packages/ui-elements` に `<chess-board>` を実装。
+3.  [x] `packages/ui-elements` に `<shogi-board>` を実装。
+4.  [x] React/Vue 用のラッパーコンポーネントを作成。
+5.  [x] Zenith Dashboard デモを更新し、エンジンの思考と盤面を同期。
+6.  [x] 盤面のレンダリングロジック（FEN/SFEN からグリッドへの変換）のユニットテストを追加。

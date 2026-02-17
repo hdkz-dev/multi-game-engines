@@ -1,8 +1,13 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { parseSFEN, ShogiPiece, ShogiHand } from "@multi-game-engines/ui-core";
+import {
+  parseSFEN,
+  ShogiPiece,
+  ShogiHand,
+  SFEN,
+} from "@multi-game-engines/ui-core";
 
-// Shogi piece mapping to Kanji/Unicode
+// Shogi piece mapping to Kanji/Labels for display and accessibility
 const PIECE_LABELS: Record<ShogiPiece, string> = {
   P: "歩",
   L: "香",
@@ -58,10 +63,15 @@ export class ShogiBoard extends LitElement {
       display: flex;
       gap: 5px;
       padding: 5px;
-      background: #f0d9b5;
+      background: var(--board-hand-bg, #f0d9b5);
       border-radius: 4px;
       font-size: 0.8rem;
       min-height: 1.5rem;
+      align-items: center;
+    }
+    .hand.gote span {
+      display: inline-block;
+      transform: rotate(180deg);
     }
     .board {
       display: grid;
@@ -69,8 +79,8 @@ export class ShogiBoard extends LitElement {
       grid-template-rows: repeat(9, 1fr);
       aspect-ratio: 1 / 1;
       width: 100%;
-      border: 1px solid #333;
-      background-color: #f9f4e8;
+      border: 1px solid var(--board-border-color, #333);
+      background-color: var(--board-bg, #f9f4e8);
     }
     .square {
       display: flex;
@@ -81,7 +91,7 @@ export class ShogiBoard extends LitElement {
       position: relative;
     }
     .square.highlight {
-      background-color: rgba(255, 255, 0, 0.4);
+      background-color: var(--board-highlight-color, rgba(255, 255, 0, 0.4));
     }
     .piece {
       cursor: default;
@@ -95,18 +105,34 @@ export class ShogiBoard extends LitElement {
    * Current position in SFEN format.
    */
   @property({ type: String })
-  sfen = "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1";
+  sfen: SFEN =
+    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
 
   /**
-   * Last move to highlight (e.g., "7g7f").
+   * Last move to highlight (e.g., "7g7f" or "P*5e").
    */
   @property({ type: String, attribute: "last-move" })
   lastMove = "";
 
+  /**
+   * Accessible labels.
+   */
+  @property({ type: String, attribute: "board-label" }) boardLabel =
+    "Shogi Board";
+  @property({ type: String, attribute: "hand-sente-label" }) handSenteLabel =
+    "Sente Hand";
+  @property({ type: String, attribute: "hand-gote-label" }) handGoteLabel =
+    "Gote Hand";
+
   private _getSquareIndex(usi: string): number {
-    if (usi === "0000" || usi.includes("*")) return -1;
-    const file = 9 - parseInt(usi[0]!, 10);
-    const rank = usi.charCodeAt(1) - 97; // a=0...
+    if (!usi || usi.length < 2 || usi.includes("*")) return -1;
+    const fileChar = usi[0];
+    const rankChar = usi[1];
+    if (!fileChar || !rankChar) return -1;
+
+    const file = 9 - parseInt(fileChar, 10);
+    const rank = rankChar.charCodeAt(0) - 97; // a=0...
+    if (file < 0 || file >= 9 || rank < 0 || rank >= 9) return -1;
     return rank * 9 + file;
   }
 
@@ -115,8 +141,10 @@ export class ShogiBoard extends LitElement {
     const highlightedSquares = new Set<number>();
 
     if (this.lastMove && this.lastMove.length >= 4) {
-      highlightedSquares.add(this._getSquareIndex(this.lastMove.slice(0, 2)));
-      highlightedSquares.add(this._getSquareIndex(this.lastMove.slice(2, 4)));
+      const from = this._getSquareIndex(this.lastMove.slice(0, 2));
+      const to = this._getSquareIndex(this.lastMove.slice(2, 4));
+      if (from >= 0) highlightedSquares.add(from);
+      if (to >= 0) highlightedSquares.add(to);
     }
 
     const squares = [];
@@ -126,15 +154,21 @@ export class ShogiBoard extends LitElement {
         const piece = board[r]?.[f];
         const isHighlighted = highlightedSquares.has(squareIdx);
         const isGote = piece && piece.toLowerCase() === piece;
+        // USI coordinate: file (9-1), rank (a-i)
+        const usiFile = 9 - f;
+        const usiRank = String.fromCharCode(97 + r);
 
         squares.push(html`
-          <div class="square ${isHighlighted ? "highlight" : ""}">
+          <div
+            class="square ${isHighlighted ? "highlight" : ""}"
+            data-square="${usiFile}${usiRank}"
+          >
             ${piece
               ? html`
                   <span
                     class="piece ${isGote ? "gote" : ""}"
                     role="img"
-                    aria-label="${piece}"
+                    aria-label="${PIECE_LABELS[piece]}"
                   >
                     ${PIECE_LABELS[piece]}
                   </span>
@@ -147,11 +181,13 @@ export class ShogiBoard extends LitElement {
 
     return html`
       <div class="container">
-        <div class="hand gote" aria-label="Gote Hand">
+        <div class="hand gote" aria-label="${this.handGoteLabel}">
           ${this._renderHand(hand, "gote")}
         </div>
-        <div class="board" role="grid" aria-label="Shogi Board">${squares}</div>
-        <div class="hand sente" aria-label="Sente Hand">
+        <div class="board" role="grid" aria-label="${this.boardLabel}">
+          ${squares}
+        </div>
+        <div class="hand sente" aria-label="${this.handSenteLabel}">
           ${this._renderHand(hand, "sente")}
         </div>
       </div>
@@ -167,8 +203,9 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      return html`<span
-        >${PIECE_LABELS[p as ShogiPiece]}${count > 1 ? count : ""}</span
+      const label = PIECE_LABELS[p as ShogiPiece];
+      return html`<span title="${label}"
+        >${label}${count > 1 ? count : ""}</span
       >`;
     });
   }

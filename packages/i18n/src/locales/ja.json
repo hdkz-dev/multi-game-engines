@@ -5,6 +5,7 @@
     "depth": "深さ",
     "nodes": "局面数",
     "nps": "探索速度",
+    "npsUnit": "局面 / 秒",
     "time": "時間",
     "topCandidate": "最善手候補",
     "principalVariations": "読み筋一覧",
@@ -63,7 +64,9 @@
     },
     "gameBoard": {
       "title": "ゲームボード",
-      "subtitle": "指し手連携待機中"
+      "subtitle": "指し手連携待機中",
+      "handSente": "先手 持ち駒",
+      "handGote": "後手 持ち駒"
     },
     "technicalInsight": {
       "title": "技術的な洞察",

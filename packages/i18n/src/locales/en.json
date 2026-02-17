@@ -5,6 +5,7 @@
     "depth": "Depth",
     "nodes": "Nodes",
     "nps": "NPS",
+    "npsUnit": "Nodes / Second",
     "time": "Time",
     "topCandidate": "Top Candidate",
     "principalVariations": "Principal Variations",
@@ -63,7 +64,9 @@
     },
     "gameBoard": {
       "title": "Game Board",
-      "subtitle": "Awaiting Move Integration"
+      "subtitle": "Awaiting Move Integration",
+      "handSente": "Sente Hand",
+      "handGote": "Gote Hand"
     },
     "technicalInsight": {
       "title": "Technical Insight",

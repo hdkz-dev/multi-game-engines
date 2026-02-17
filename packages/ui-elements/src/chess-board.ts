@@ -1,8 +1,24 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { parseFEN, ChessPiece } from "@multi-game-engines/ui-core";
+import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
 
-// Simplified rendering using unicode characters for the initial prototype to ensure stability
+// Human-readable names for accessibility
+const PIECE_NAMES: Record<ChessPiece, string> = {
+  P: "White Pawn",
+  N: "White Knight",
+  B: "White Bishop",
+  R: "White Rook",
+  Q: "White Queen",
+  K: "White King",
+  p: "Black Pawn",
+  n: "Black Knight",
+  b: "Black Bishop",
+  r: "Black Rook",
+  q: "Black Queen",
+  k: "Black King",
+};
+
+// Standard Unicode characters
 const PIECE_UNICODE: Record<ChessPiece, string> = {
   P: "♙",
   N: "♘",
@@ -66,7 +82,7 @@ export class ChessBoard extends LitElement {
    * Current position in FEN format.
    */
   @property({ type: String })
-  fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  fen: FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
 
   /**
    * Last move to highlight (e.g., "e2e4").
@@ -80,6 +96,12 @@ export class ChessBoard extends LitElement {
   @property({ type: String })
   orientation: "white" | "black" = "white";
 
+  /**
+   * Accessible label for the board.
+   */
+  @property({ type: String, attribute: "board-label" })
+  boardLabel = "Chess Board";
+
   private _getSquareIndex(algebraic: string): number {
     const file = algebraic.charCodeAt(0) - 97; // a=0, b=1...
     const rank = 8 - parseInt(algebraic[1]!, 10);
@@ -91,19 +113,39 @@ export class ChessBoard extends LitElement {
     const highlightedSquares = new Set<number>();
 
     if (this.lastMove && this.lastMove.length >= 4) {
-      highlightedSquares.add(this._getSquareIndex(this.lastMove.slice(0, 2)));
-      highlightedSquares.add(this._getSquareIndex(this.lastMove.slice(2, 4)));
+      try {
+        const from = this._getSquareIndex(this.lastMove.slice(0, 2));
+        const to = this._getSquareIndex(this.lastMove.slice(2, 4));
+        if (from >= 0 && from < 64) highlightedSquares.add(from);
+        if (to >= 0 && to < 64) highlightedSquares.add(to);
+      } catch {
+        // Ignore invalid moves
+      }
     }
 
     const squares = [];
 
+    // r: 0-7 (visual row from top to bottom)
+    // f: 0-7 (visual column from left to right)
     for (let r = 0; r < 8; r++) {
       for (let f = 0; f < 8; f++) {
-        const rank = this.orientation === "white" ? r : 7 - r;
-        const file = this.orientation === "white" ? f : 7 - f;
-        const squareIdx = rank * 8 + file;
-        const piece = board[rank]?.[file];
-        const isDark = (rank + file) % 2 !== 0;
+        // Map visual coordinates to board array indices
+        // parseFEN returns board[0] as Rank 8, board[7] as Rank 1.
+
+        // If White bottom: Top row (r=0) is Rank 8 (index 0)
+        // If Black bottom: Top row (r=0) is Rank 1 (index 7)
+        const rankIndex = this.orientation === "white" ? r : 7 - r;
+
+        // If White bottom: Left col (f=0) is File A (index 0)
+        // If Black bottom: Left col (f=0) is File H (index 7)
+        const fileIndex = this.orientation === "white" ? f : 7 - f;
+
+        const squareIdx = rankIndex * 8 + fileIndex;
+        const piece = board[rankIndex]?.[fileIndex];
+        // Calculate algebraic rank for display (data-square)
+        // rankIndex 0 -> "8", rankIndex 7 -> "1"
+        const algebraicRank = 8 - rankIndex;
+        const isDark = (rankIndex + fileIndex) % 2 !== 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
 
         squares.push(html`
@@ -111,12 +153,18 @@ export class ChessBoard extends LitElement {
             class="square ${isDark ? "dark" : "light"} ${isHighlighted
               ? "highlight"
               : ""}"
-            data-square="${String.fromCharCode(97 + file)}${8 - rank}"
+            data-square="${String.fromCharCode(97 + fileIndex)}${algebraicRank}"
           >
             ${piece
-              ? html`<span class="piece" role="img" aria-label="${piece}"
-                  >${PIECE_UNICODE[piece]}</span
-                >`
+              ? html`
+                  <span
+                    class="piece"
+                    role="img"
+                    aria-label="${PIECE_NAMES[piece]}"
+                  >
+                    ${PIECE_UNICODE[piece]}
+                  </span>
+                `
               : ""}
           </div>
         `);
@@ -124,7 +172,9 @@ export class ChessBoard extends LitElement {
     }
 
     return html`
-      <div class="board" role="grid" aria-label="Chess Board">${squares}</div>
+      <div class="board" role="grid" aria-label="${this.boardLabel}">
+        ${squares}
+      </div>
     `;
   }
 }
