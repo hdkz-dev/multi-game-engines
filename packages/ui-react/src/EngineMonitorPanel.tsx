@@ -55,11 +55,26 @@ export function EngineMonitorPanel<
   const { strings } = useEngineUI();
   const { state, status, search, stop } = useEngineMonitor(engine);
   const [activeTab, setActiveTab] = React.useState<"pv" | "log">("pv");
+  const pvTabRef = React.useRef<HTMLButtonElement>(null);
+  const logTabRef = React.useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const titleId = `engine-monitor-title-${panelId}`;
 
   const bestPV = state.pvs[0];
   const displayTitle = title ?? strings.title;
+
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (activeTab === "pv") {
+        setActiveTab("log");
+        setTimeout(() => logTabRef.current?.focus(), 0);
+      } else {
+        setActiveTab("pv");
+        setTimeout(() => pvTabRef.current?.focus(), 0);
+      }
+    }
+  };
 
   // 2026 Best Practice: IEngine インターフェースの公式 API を使用して型安全にイベント発行
   const emitUIInteraction = useCallback(
@@ -203,8 +218,14 @@ export function EngineMonitorPanel<
 
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="px-4 py-2 bg-gray-50/50 flex items-center justify-between border-b border-gray-100">
-                <div className="flex items-center gap-4" role="tablist">
+                <div
+                  className="flex items-center gap-4"
+                  role="tablist"
+                  aria-orientation="horizontal"
+                  onKeyDown={handleTabKeyDown}
+                >
                   <button
+                    ref={pvTabRef}
                     onClick={() => setActiveTab("pv")}
                     role="tab"
                     aria-selected={activeTab === "pv"}
@@ -222,6 +243,7 @@ export function EngineMonitorPanel<
                     {strings.principalVariations}
                   </button>
                   <button
+                    ref={logTabRef}
                     onClick={() => setActiveTab("log")}
                     role="tab"
                     aria-selected={activeTab === "log"}

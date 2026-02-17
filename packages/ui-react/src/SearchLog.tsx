@@ -40,9 +40,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
         )}
       >
         <table className="min-w-full text-xs font-mono border-collapse table-fixed">
-          <caption className="sr-only">
-            {strings.searchLog || "Search Log"}
-          </caption>
+          <caption className="sr-only">{strings.searchLog}</caption>
           <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
             <tr className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
               <th

@@ -14,9 +14,9 @@ export class SearchLogElement extends LitElement {
   static styles = css`
     :host {
       display: block;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--mge-border-base);
       border-radius: 0.5rem;
-      background-color: white;
+      background-color: var(--mge-surface-base);
       overflow-y: auto;
       max-height: 400px;
     }
@@ -24,33 +24,33 @@ export class SearchLogElement extends LitElement {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      font-family: ui-monospace, monospace;
+      font-family: var(--mge-font-mono);
       font-size: 0.75rem;
     }
     thead {
-      background-color: #f9fafb;
+      background-color: var(--mge-surface-alt);
       position: sticky;
       top: 0;
       z-index: 10;
-      box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      box-shadow: var(--mge-shadow-sm);
     }
     th {
       padding: 0.5rem;
       text-align: left;
       font-size: 0.625rem;
       font-weight: 700;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--mge-border-base);
     }
     td {
       padding: 0.5rem;
-      border-bottom: 1px solid #f9fafb;
+      border-bottom: 1px solid var(--mge-surface-alt);
       vertical-align: middle;
     }
     tbody tr:hover {
-      background-color: #eff6ff;
+      background-color: #eff6ff; /* Keep subtle hover or add token */
     }
     .text-center {
       text-align: center;
@@ -64,7 +64,7 @@ export class SearchLogElement extends LitElement {
 
     .col-depth {
       width: 3rem;
-      color: #9ca3af;
+      color: var(--mge-color-gray-400);
       font-weight: 500;
     }
     .col-score {
@@ -72,19 +72,19 @@ export class SearchLogElement extends LitElement {
     }
     .col-time {
       width: 4rem;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }
     .col-nodes {
       width: 4rem;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }
     .col-nps {
       width: 4rem;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-feature-settings: "tnum";
       font-variant-numeric: tabular-nums;
     }
@@ -104,10 +104,10 @@ export class SearchLogElement extends LitElement {
 
     .seldepth {
       font-size: 9px;
-      color: #d1d5db;
+      color: var(--mge-color-gray-300);
     }
     tr:hover .seldepth {
-      color: #9ca3af;
+      color: var(--mge-color-gray-400);
     }
 
     button {
@@ -115,13 +115,13 @@ export class SearchLogElement extends LitElement {
       border: none;
       background: transparent;
       cursor: pointer;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-size: 0.75rem;
       font-family: inherit;
       border-radius: 0.125rem;
     }
     button:hover {
-      color: #2563eb;
+      color: var(--mge-color-primary);
       text-decoration: underline;
     }
     button:focus {
@@ -129,12 +129,12 @@ export class SearchLogElement extends LitElement {
     }
     .best-move {
       font-weight: 700;
-      color: #111827;
+      color: var(--mge-color-gray-900);
     }
     .empty {
       padding: 2rem 0;
       text-align: center;
-      color: #9ca3af;
+      color: var(--mge-color-gray-400);
       font-style: italic;
     }
     .score-wrapper {
@@ -188,7 +188,7 @@ export class SearchLogElement extends LitElement {
     return html`
       <table>
         <caption class="sr-only">
-          ${strings.searchLog || "Search Log"}
+          ${strings.searchLog}
         </caption>
         <thead>
           <tr>

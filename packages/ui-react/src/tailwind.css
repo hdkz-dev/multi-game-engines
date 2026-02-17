@@ -3,6 +3,10 @@
 
 @theme {
   /* グローバルトークンを Tailwind テーマにマッピング */
+  --color-primary: var(--mge-color-primary);
+  --color-primary-hover: var(--mge-color-primary-hover);
+  --color-danger: var(--mge-color-danger);
+
   --color-engine-busy: var(--mge-color-engine-busy);
   --color-engine-ready: var(--mge-color-engine-ready);
   --color-engine-loading: var(--mge-color-engine-loading);
@@ -13,4 +17,5 @@
   --color-score-neutral: var(--mge-color-score-neutral);
 
   --font-mono: var(--mge-font-mono);
+  --font-sans: var(--mge-font-sans);
 }

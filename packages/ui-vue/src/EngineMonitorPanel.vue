@@ -7,7 +7,7 @@
     T_RESULT extends IBaseSearchResult
   "
 >
-import { computed, ref } from "vue";
+import { computed, ref, nextTick } from "vue";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -45,6 +45,20 @@ const emit = defineEmits<{
 
 const { strings } = useEngineUI();
 const activeTab = ref<"pv" | "log">("pv");
+const pvTabRef = ref<HTMLButtonElement | null>(null);
+const logTabRef = ref<HTMLButtonElement | null>(null);
+
+const handleTabKeyDown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    e.preventDefault();
+    activeTab.value = activeTab.value === "pv" ? "log" : "pv";
+    nextTick(() => {
+      if (activeTab.value === "pv") pvTabRef.value?.focus();
+      else logTabRef.value?.focus();
+    });
+  }
+};
+
 const { state, status, search, stop } = useEngineMonitor<
   EngineSearchState,
   T_OPTIONS,
@@ -56,6 +70,13 @@ const { state, status, search, stop } = useEngineMonitor<
 
 const bestPV = computed(() => state.value.pvs[0]);
 const displayTitle = computed(() => props.title ?? strings.value.title);
+
+const announcement = computed(() => {
+  if (status.value === "error") return strings.value.errorTitle;
+  if (bestPV.value?.score.type === "mate")
+    return strings.value.mateIn(bestPV.value.score.value);
+  return "";
+});
 
 const handleStart = async () => {
   void search(props.searchOptions);
@@ -75,6 +96,9 @@ const handleMoveClick = (move: string) => {
     class="flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl"
     aria-labelledby="monitor-title"
   >
+    <div class="sr-only" aria-live="assertive" role="alert">
+      {{ announcement }}
+    </div>
     <!-- Header -->
     <header
       class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200"
@@ -175,8 +199,14 @@ const handleMoveClick = (move: string) => {
           <div
             class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between"
           >
-            <div class="flex items-center gap-4" role="tablist">
+            <div
+              class="flex items-center gap-4"
+              role="tablist"
+              aria-orientation="horizontal"
+              @keydown="handleTabKeyDown"
+            >
               <button
+                ref="pvTabRef"
                 @click="activeTab = 'pv'"
                 role="tab"
                 :aria-selected="activeTab === 'pv'"
@@ -188,6 +218,7 @@ const handleMoveClick = (move: string) => {
                 <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.principalVariations }}</span>
               </button>
               <button
+                ref="logTabRef"
                 @click="activeTab = 'log'"
                 role="tab"
                 :aria-selected="activeTab === 'log'"

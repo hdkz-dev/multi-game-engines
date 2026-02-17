@@ -38,7 +38,7 @@ onUpdated(scrollToBottom);
     class="border border-gray-200 rounded-lg bg-white overflow-y-auto max-h-[400px]"
   >
     <table class="min-w-full text-xs font-mono border-collapse table-fixed">
-      <caption class="sr-only">{{ strings.searchLog || 'Search Log' }}</caption>
+      <caption class="sr-only">{{ strings.searchLog }}</caption>
       <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm">
         <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
           <th scope="col" class="p-2 w-12 text-center border-b border-gray-200">{{ strings.depth || 'D' }}</th>
