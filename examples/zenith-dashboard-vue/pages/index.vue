@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { createFEN } from "@multi-game-engines/core";
-import { createSFEN } from "@multi-game-engines/adapter-yaneuraou";
-import { EngineMonitorPanel } from "@multi-game-engines/ui-vue";
+import { createFEN, createSFEN } from "@multi-game-engines/core";
+import { EngineMonitorPanel, BoardComponents } from "@multi-game-engines/ui-vue";
+import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
+import { locales } from "@multi-game-engines/i18n";
 import { LayoutGrid, Sword, Trophy, Zap } from "lucide-vue-next";
 import { getBridge } from "~/composables/useEngines";
 
@@ -19,6 +20,8 @@ useHead({
 
 type EngineType = "chess" | "shogi";
 const activeEngine = ref<EngineType>("chess");
+const locale = ref("ja");
+const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.en));
 
 const bridge = getBridge();
 
@@ -29,6 +32,7 @@ const chessOptions = {
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   ),
 };
+const { state: chessState } = useEngineMonitor(chessEngine.value);
 
 // 将棋用の設定
 const shogiEngine = computed(() => bridge?.getEngine("yaneuraou") ?? null);
@@ -37,6 +41,10 @@ const shogiOptions = {
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   ),
 };
+const { state: shogiState } = useEngineMonitor(shogiEngine.value);
+
+const chessBestMove = computed(() => chessState.value.pvs[0]?.moves[0]);
+const shogiBestMove = computed(() => shogiState.value.pvs[0]?.moves[0]);
 
 const protocolLabel = computed(() =>
   activeEngine.value === "chess" ? "UCI 16.1" : "USI 7.5.0",
@@ -66,37 +74,61 @@ const protocolLabel = computed(() =>
         </p>
       </div>
 
-      <nav
-        class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg"
-        aria-label="Engine selector"
-      >
-        <button
-          :aria-pressed="activeEngine === 'chess'"
-          :class="[
-            'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
-            activeEngine === 'chess'
-              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
-              : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
-          ]"
-          @click="activeEngine = 'chess'"
+      <div class="flex items-center gap-4">
+        <!-- Language Switcher -->
+        <div class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-full items-center">
+          <button
+            @click="locale = 'en'"
+            :class="[
+              'px-3 py-1 rounded-full text-[10px] font-black transition-all',
+              locale === 'en' ? 'bg-gray-900 text-white' : 'text-gray-400'
+            ]"
+          >
+            EN
+          </button>
+          <button
+            @click="locale = 'ja'"
+            :class="[
+              'px-3 py-1 rounded-full text-[10px] font-black transition-all',
+              locale === 'ja' ? 'bg-gray-900 text-white' : 'text-gray-400'
+            ]"
+          >
+            JA
+          </button>
+        </div>
+
+        <nav
+          class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg"
+          aria-label="Engine selector"
         >
-          <Trophy class="w-4 h-4" />
-          CHESS
-        </button>
-        <button
-          :aria-pressed="activeEngine === 'shogi'"
-          :class="[
-            'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
-            activeEngine === 'shogi'
-              ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
-              : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
-          ]"
-          @click="activeEngine = 'shogi'"
-        >
-          <Sword class="w-4 h-4" />
-          SHOGI
-        </button>
-      </nav>
+          <button
+            :aria-pressed="activeEngine === 'chess'"
+            :class="[
+              'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
+              activeEngine === 'chess'
+                ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+            ]"
+            @click="activeEngine = 'chess'"
+          >
+            <Trophy class="w-4 h-4" />
+            CHESS
+          </button>
+          <button
+            :aria-pressed="activeEngine === 'shogi'"
+            :class="[
+              'flex items-center gap-2 px-6 py-2 rounded-md text-sm font-bold transition-all',
+              activeEngine === 'shogi'
+                ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+            ]"
+            @click="activeEngine = 'shogi'"
+          >
+            <Sword class="w-4 h-4" />
+            SHOGI
+          </button>
+        </nav>
+      </div>
     </header>
 
     <!-- Stats Cards -->
@@ -163,15 +195,25 @@ const protocolLabel = computed(() =>
 
       <div class="lg:col-span-8 xl:col-span-9 space-y-4">
         <div
-          class="bg-gray-200 dark:bg-gray-800 rounded-2xl aspect-video flex items-center justify-center border-4 border-dashed border-gray-300 dark:border-gray-700"
+          class="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-200 dark:border-gray-700 shadow-xl aspect-video flex items-center justify-center relative overflow-hidden"
         >
-          <div class="text-center">
-            <p class="text-gray-400 font-bold">GAME BOARD AREA</p>
-            <p
-              class="text-xs text-gray-500 uppercase tracking-widest mt-2"
-            >
-              Placeholder for {{ activeEngine }}
-            </p>
+          <div class="w-full max-w-md aspect-square bg-white dark:bg-gray-900 rounded-xl shadow-inner flex items-center justify-center relative p-4">
+            <BoardComponents
+              v-if="activeEngine === 'chess'"
+              type="chess"
+              :fen="chessOptions.fen"
+              :last-move="chessBestMove"
+              :piece-names="localeData.dashboard.gameBoard.chessPieces"
+              class="w-full h-full"
+            />
+            <BoardComponents
+              v-else
+              type="shogi"
+              :sfen="shogiOptions.sfen"
+              :last-move="shogiBestMove"
+              :piece-names="localeData.dashboard.gameBoard.shogiPieces"
+              class="w-full h-full"
+            />
           </div>
         </div>
 
