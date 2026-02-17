@@ -18,7 +18,7 @@ describe("ScoreBadge", () => {
       </EngineUIProvider>,
     );
 
-    expect(screen.getByText("詰みまで 5 手")).toBeInTheDocument();
+    expect(screen.getByText("詰5")).toBeInTheDocument();
   });
 
   it("should render centipawn score correctly", () => {

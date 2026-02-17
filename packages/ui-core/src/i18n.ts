@@ -9,6 +9,10 @@ export interface EngineUIStrings {
   nps: string;
   time: string;
   score: string;
+  visits: string;
+  visitsUnit: string;
+  mateShort: string;
+  evaluationGraph: string;
   pv: string;
   topCandidate: string;
   principalVariations: string;
@@ -70,6 +74,10 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     nps: t("nps", "NPS"),
     time: t("time", "Time"),
     score: t("score", "Score"),
+    visits: t("visits", "Visits"),
+    visitsUnit: t("visitsUnit", "v"),
+    mateShort: t("mateShort", "M"),
+    evaluationGraph: t("evaluationGraph", "Evaluation trend graph"),
     pv: t("pv", "PV"),
     topCandidate: t("topCandidate", "Best Move"),
     principalVariations: t("principalVariations", "PVs"),

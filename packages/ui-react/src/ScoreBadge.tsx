@@ -26,7 +26,11 @@ export const ScoreBadge: React.FC<ScoreBadgeProps> = React.memo(
 
     const label =
       type === "mate"
-        ? strings.mateIn(Math.abs(displayValue))
+        ? EvaluationPresenter.getDisplayLabel(
+            score,
+            inverted,
+            strings.mateShort || "M",
+          )
         : EvaluationPresenter.getDisplayLabel(score, inverted);
 
     const ariaLabel =

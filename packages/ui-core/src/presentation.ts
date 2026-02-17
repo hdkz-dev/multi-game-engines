@@ -38,12 +38,16 @@ export const EvaluationPresenter = {
   /**
    * 表示用の数値ラベルを生成する。
    */
-  getDisplayLabel(score: EvaluationScore, inverted: boolean = false): string {
+  getDisplayLabel(
+    score: EvaluationScore,
+    inverted: boolean = false,
+    matePrefix: string = "M",
+  ): string {
     const { type, value } = score;
     const displayValue = inverted ? -value : value;
 
     if (type === "mate") {
-      return `M${Math.abs(displayValue)}`; // i18n 前のフォールバック
+      return `${matePrefix}${Math.abs(displayValue)}`;
     }
 
     if (type === "winrate") {

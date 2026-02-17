@@ -79,6 +79,10 @@ describe("EngineMonitorPanel", () => {
     pvCount: (n: number) => `PV(${n})`,
     logCount: (n: number) => `${n} entries`,
     moveAriaLabel: (move: string) => `Move ${move}`,
+    visits: "Visits",
+    visitsUnit: "v",
+    mateShort: "M",
+    evaluationGraph: "Evaluation Graph",
     engineVersion: (n: string, v: string) => `${n} v${v}`,
     engineBridgeStandard: (y: number) => `Std ${y}`,
   };

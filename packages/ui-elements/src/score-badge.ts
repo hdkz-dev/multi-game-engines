@@ -69,7 +69,11 @@ export class ScoreBadgeElement extends LitElement {
     const displayValue = this.inverted ? -this.score.value : this.score.value;
     const label =
       this.score.type === "mate"
-        ? strings.mateIn(Math.abs(displayValue))
+        ? EvaluationPresenter.getDisplayLabel(
+            this.score,
+            this.inverted,
+            strings.mateShort || "M",
+          )
         : EvaluationPresenter.getDisplayLabel(this.score, this.inverted);
 
     const ariaLabel =
