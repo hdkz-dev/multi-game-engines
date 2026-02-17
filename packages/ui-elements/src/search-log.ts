@@ -241,9 +241,15 @@ export class SearchLogElement extends LitElement {
                 (entry, index) => html`
                   <tr role="row" aria-rowindex="${index + 1}">
                     <td class="col-depth text-center">
-                      ${entry.depth}${entry.seldepth
-                        ? html`<span class="seldepth">/${entry.seldepth}</span>`
-                        : ""}
+                      ${entry.visits
+                        ? html`<span title="Visits"
+                            >${formatNumber(entry.visits)}v</span
+                          >`
+                        : html`${entry.depth}${entry.seldepth
+                            ? html`<span class="seldepth"
+                                >/${entry.seldepth}</span
+                              >`
+                            : ""}`}
                     </td>
                     <td class="col-score">
                       <div class="score-wrapper">

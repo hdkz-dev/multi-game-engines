@@ -74,8 +74,13 @@ onUpdated(scrollToBottom);
           class="hover:bg-blue-50 transition-colors group"
         >
           <td class="p-2 text-center text-gray-400 font-medium">
-            {{ entry.depth }}
-            <span v-if="entry.seldepth" class="text-[9px] text-gray-300 group-hover:text-gray-400">/{{ entry.seldepth }}</span>
+            <template v-if="entry.visits">
+              <span title="Visits">{{ formatNumber(entry.visits) }}v</span>
+            </template>
+            <template v-else>
+              {{ entry.depth }}
+              <span v-if="entry.seldepth" class="text-[9px] text-gray-300 group-hover:text-gray-400">/{{ entry.seldepth }}</span>
+            </template>
           </td>
           <td class="p-2 flex justify-center">
             <div class="w-full flex justify-center">

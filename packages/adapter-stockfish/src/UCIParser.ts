@@ -122,6 +122,10 @@ export class UCIParser implements IProtocolParser<
           info.nps = parseInt(val, 10) || 0;
           i++;
           break;
+        case "nodes":
+          info.nodes = parseInt(val, 10) || 0;
+          i++;
+          break;
         case "time":
           info.time = parseInt(val, 10) || 0;
           i++;

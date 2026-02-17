@@ -111,13 +111,19 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                   className="hover:bg-blue-50 transition-colors group"
                 >
                   <td className="p-2 text-center text-gray-400 font-medium">
-                    {entry.depth}
-                    {entry.seldepth ? (
-                      <span className="text-[9px] text-gray-300 group-hover:text-gray-400">
-                        /{entry.seldepth}
-                      </span>
+                    {entry.visits ? (
+                      <span title="Visits">{formatNumber(entry.visits)}v</span>
                     ) : (
-                      ""
+                      <>
+                        {entry.depth}
+                        {entry.seldepth ? (
+                          <span className="text-[9px] text-gray-300 group-hover:text-gray-400">
+                            /{entry.seldepth}
+                          </span>
+                        ) : (
+                          ""
+                        )}
+                      </>
                     )}
                   </td>
                   <td className="p-2 flex justify-center">

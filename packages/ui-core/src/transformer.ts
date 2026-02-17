@@ -3,7 +3,7 @@ import {
   PrincipalVariation,
   SearchLogEntry,
 } from "./types.js";
-import { createMove, createPositionString } from "@multi-game-engines/core";
+import { createPositionString } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
 
 let logCounter = 0;
@@ -140,6 +140,7 @@ export const SearchStateTransformer = {
         nodes: validatedInfo.nodes ?? state.stats.nodes,
         nps: validatedInfo.nps ?? state.stats.nps,
         time: validatedInfo.time ?? state.stats.time,
+        visits: validatedInfo.visits ?? state.stats.visits,
         multipv,
         pv: validatedMoves,
         timestamp: now,

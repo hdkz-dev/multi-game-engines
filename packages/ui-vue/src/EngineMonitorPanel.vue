@@ -21,6 +21,7 @@ import { useEngineMonitor } from "./useEngineMonitor.js";
 import { useEngineUI } from "./useEngineUI.js";
 import ScoreBadge from "./ScoreBadge.vue";
 import EngineStats from "./EngineStats.vue";
+import EvaluationGraph from "./EvaluationGraph.vue";
 import PVList from "./PVList.vue";
 import SearchLog from "./SearchLog.vue";
 import {
@@ -47,6 +48,18 @@ const { strings } = useEngineUI();
 const activeTab = ref<"pv" | "log">("pv");
 const pvTabRef = ref<HTMLButtonElement | null>(null);
 const logTabRef = ref<HTMLButtonElement | null>(null);
+
+const emitUIInteraction = (action: string) => {
+  props.engine.emitTelemetry({
+    type: "lifecycle",
+    timestamp: Date.now(),
+    metadata: {
+      component: "EngineMonitorPanel",
+      action,
+      engineId: props.engine.id,
+    },
+  });
+};
 
 const handleTabKeyDown = (e: KeyboardEvent) => {
   if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
@@ -79,10 +92,12 @@ const announcement = computed(() => {
 });
 
 const handleStart = async () => {
+  emitUIInteraction("start_click");
   void search(props.searchOptions);
 };
 
 const handleStop = async () => {
+  emitUIInteraction("stop_click");
   void stop();
 };
 
@@ -190,6 +205,15 @@ const handleMoveClick = (move: string) => {
             </div>
           </div>
         </section>
+
+        <!-- Evaluation Trend Graph -->
+        <div class="px-4 py-2 bg-white">
+          <EvaluationGraph
+            :entries="state.evaluationHistory.entries"
+            :height="40"
+            class="opacity-80 hover:opacity-100 transition-opacity"
+          />
+        </div>
 
         <!-- Stats Infrastructure -->
         <EngineStats :stats="state.stats" class="border-b border-gray-100" />

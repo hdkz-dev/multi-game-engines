@@ -18,6 +18,7 @@ import {
 import { locales } from "@multi-game-engines/i18n";
 
 import "./score-badge.js";
+import "./evaluation-graph.js";
 import "./engine-stats.js";
 import "./pv-list.js";
 import "./search-log.js";
@@ -138,6 +139,10 @@ export class EngineMonitorElement extends LitElement {
       font-family: var(--mge-font-mono);
       letter-spacing: -0.05em;
     }
+    .graph-container {
+      padding: 0.5rem 1rem;
+      background-color: var(--mge-surface-base);
+    }
     .tab-header {
       display: flex;
       gap: 1rem;
@@ -249,14 +254,29 @@ export class EngineMonitorElement extends LitElement {
     super.disconnectedCallback();
   }
 
+  private _emitUIInteraction(action: string) {
+    if (!this.engine) return;
+    this.engine.emitTelemetry({
+      type: "lifecycle",
+      timestamp: Date.now(),
+      metadata: {
+        component: "EngineMonitorPanel",
+        action,
+        engineId: this.engine.id,
+      },
+    });
+  }
+
   private async _handleStart() {
     if (this._dispatcher) {
+      this._emitUIInteraction("start_click");
       await this._dispatcher.dispatchSearch(this.searchOptions);
     }
   }
 
   private async _handleStop() {
     if (this._dispatcher) {
+      this._emitUIInteraction("stop_click");
       await this._dispatcher.dispatchStop();
     }
   }
@@ -340,6 +360,13 @@ export class EngineMonitorElement extends LitElement {
                     : ""}
                 </div>
               </section>
+
+              <div class="graph-container">
+                <evaluation-graph
+                  .entries="${state.evaluationHistory.entries}"
+                  .height="${40}"
+                ></evaluation-graph>
+              </div>
 
               <engine-stats
                 .stats="${state.stats}"

@@ -55,6 +55,7 @@ export interface SearchLogEntry {
   nodes: number;
   nps: number;
   time: number;
+  visits?: number | undefined;
   multipv: number;
   pv: Move[];
   timestamp: number;

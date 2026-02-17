@@ -41,10 +41,9 @@ const { strings } = useEngineUI();
           :key="`${pv.multipv}-${idx}-${move}`"
           type="button"
           @click="emit('move-click', move.toString(), idx, pv)"
-          :class="[
-            'px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer',
-            idx === 0 ? 'font-bold' : 'text-gray-600',
-          ]"
+          class="px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :class="idx === 0 ? 'font-bold text-gray-900' : 'text-gray-600'"
+          :aria-label="strings.moveAriaLabel(move.toString())"
         >
           {{ move.toString() }}
         </button>

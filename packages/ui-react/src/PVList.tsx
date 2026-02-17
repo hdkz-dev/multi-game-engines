@@ -41,9 +41,10 @@ export const PVList: React.FC<PVListProps> = React.memo(
                   key={`${pv.multipv}-${idx}-${move}`}
                   onClick={() => onMoveClick?.(move.toString(), idx, pv)}
                   className={cn(
-                    "px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer",
-                    idx === 0 ? "font-bold" : "text-gray-600",
+                    "px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    idx === 0 ? "font-bold text-gray-900" : "text-gray-600",
                   )}
+                  aria-label={strings.moveAriaLabel(move.toString())}
                 >
                   {move.toString()}
                 </button>
