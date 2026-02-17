@@ -50,10 +50,8 @@ export function useEngineMonitor<
 ): UseEngineMonitorReturn<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
   const {
     initialPosition = "startpos",
-    transformer = (options.transformer ?? SearchStateTransformer.mergeInfo) as (
-      state: T_STATE,
-      info: T_INFO,
-    ) => T_STATE,
+    transformer = (state: T_STATE, info: T_INFO): T_STATE =>
+      SearchStateTransformer.mergeInfo(state, info) as T_STATE,
     autoMiddleware = true,
   } = options;
 
@@ -64,7 +62,7 @@ export function useEngineMonitor<
     T_RESULT
   >(engine, initialPosition, transformer);
 
-  // 2026 Best Practice: ShallowRef ではなく Ref を使用し、推論を安定させる
+  // 2026 Best Practice: Ref を使用し、初期状態をモニターから取得
   const state = ref<T_STATE>(monitor.getSnapshot() as T_STATE) as Ref<T_STATE>;
   const engineStatus = ref<EngineStatus>(engine.status);
   const optimisticStatus = ref<EngineStatus | null>(null);
@@ -79,16 +77,20 @@ export function useEngineMonitor<
   let unsubStore: (() => void) | null = null;
   let unsubStatus: (() => void) | null = null;
 
+  // ミドルウェア登録 (初回のみ)
   onMounted(() => {
     if (autoMiddleware && typeof engine.use === "function") {
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
-        unknown,
+        T_INFO,
         T_RESULT
       >();
-      engine.use(normalizer as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>);
+      engine.use(normalizer);
     }
+  });
 
+  // 監視開始
+  onMounted(() => {
     monitor.startMonitoring();
     unsubStore = monitor.subscribe(() => {
       state.value = monitor.getSnapshot() as T_STATE;

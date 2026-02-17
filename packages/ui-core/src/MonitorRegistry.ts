@@ -102,7 +102,7 @@ export class MonitorRegistry {
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,
-      createInitialState(brandedPosition) as T_STATE,
+      createInitialState<T_STATE>(brandedPosition),
       transformer,
     );
 
