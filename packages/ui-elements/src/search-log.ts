@@ -92,14 +92,11 @@ export class SearchLogElement extends LitElement {
       width: auto;
     }
 
-    .pv-container {
+    .pv-container-wrap {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.25rem;
-      height: 1.25rem;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
+      gap: 0.25rem 0.125rem;
+      line-height: 1.25;
     }
 
     .seldepth {
@@ -269,7 +266,7 @@ export class SearchLogElement extends LitElement {
                       ${formatNumber(entry.nps)}
                     </td>
                     <td class="col-pv">
-                      <div class="pv-container">
+                      <div class="pv-container-wrap">
                         ${entry.pv.map(
                           (move, idx) => html`
                             <button

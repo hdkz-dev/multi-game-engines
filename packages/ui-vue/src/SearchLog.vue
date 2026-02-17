@@ -97,7 +97,7 @@ onUpdated(scrollToBottom);
             {{ formatNumber(entry.nps) }}
           </td>
           <td class="p-2">
-            <div class="flex flex-wrap gap-x-1 overflow-hidden h-5 whitespace-nowrap text-ellipsis">
+            <div class="flex flex-wrap gap-x-1 gap-y-0.5 leading-tight">
               <button
                 v-for="(move, idx) in entry.pv"
                 :key="`${entry.id}-${idx}-${move}`"

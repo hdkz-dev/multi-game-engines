@@ -13,6 +13,7 @@ import {
   ExtendedSearchInfo,
   UINormalizerMiddleware,
   SearchMonitor,
+  CommandDispatcher,
 } from "@multi-game-engines/ui-core";
 
 /**
@@ -65,10 +66,15 @@ export function useEngineMonitor<
 
   // 2026 Best Practice: ShallowRef ではなく Ref を使用し、推論を安定させる
   const state = ref<T_STATE>(monitor.getSnapshot() as T_STATE) as Ref<T_STATE>;
+  const engineStatus = ref<EngineStatus>(engine.status);
   const optimisticStatus = ref<EngineStatus | null>(null);
   const status = computed<EngineStatus>(
-    () => optimisticStatus.value ?? engine.status,
+    () => optimisticStatus.value ?? engineStatus.value,
   );
+
+  const dispatcher = new CommandDispatcher(monitor, (s: EngineStatus) => {
+    optimisticStatus.value = s;
+  });
 
   let unsubStore: (() => void) | null = null;
   let unsubStatus: (() => void) | null = null;
@@ -90,7 +96,8 @@ export function useEngineMonitor<
       state.value = monitor.getSnapshot() as T_STATE;
     });
 
-    unsubStatus = engine.onStatusChange(() => {
+    unsubStatus = engine.onStatusChange((newStatus) => {
+      engineStatus.value = newStatus;
       optimisticStatus.value = null;
     });
   });
@@ -100,8 +107,9 @@ export function useEngineMonitor<
     if (unsubStatus) unsubStatus();
   });
 
-  const search = (searchOptions: T_OPTIONS) => monitor.search(searchOptions);
-  const stop = () => monitor.stop();
+  const search = (searchOptions: T_OPTIONS) =>
+    dispatcher.dispatchSearch(searchOptions);
+  const stop = () => dispatcher.dispatchStop();
 
   return {
     state,

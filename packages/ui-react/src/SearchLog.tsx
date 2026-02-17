@@ -142,7 +142,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                     {formatNumber(entry.nps)}
                   </td>
                   <td className="p-2">
-                    <div className="flex flex-wrap gap-x-1 overflow-hidden h-5 whitespace-nowrap text-ellipsis">
+                    <div className="flex flex-wrap gap-x-1 gap-y-0.5 leading-tight">
                       {entry.pv.map((move, idx) => (
                         <button
                           key={`${entry.id}-${idx}-${move}`}

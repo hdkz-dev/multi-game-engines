@@ -285,13 +285,25 @@ export class EngineMonitorElement extends LitElement {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
       e.preventDefault();
       this._activeTab = this._activeTab === "pv" ? "log" : "pv";
-      this.updateComplete.then(() => {
-        const nextTab = this.shadowRoot?.querySelector<HTMLElement>(
-          `#tab-${this._activeTab}`,
-        );
-        nextTab?.focus();
-      });
+      this._focusActiveTab();
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      this._activeTab = "pv";
+      this._focusActiveTab();
+    } else if (e.key === "End") {
+      e.preventDefault();
+      this._activeTab = "log";
+      this._focusActiveTab();
     }
+  }
+
+  private _focusActiveTab() {
+    this.updateComplete.then(() => {
+      const nextTab = this.shadowRoot?.querySelector<HTMLElement>(
+        `#tab-${this._activeTab}`,
+      );
+      nextTab?.focus();
+    });
   }
 
   render() {

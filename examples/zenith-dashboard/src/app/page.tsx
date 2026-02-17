@@ -77,7 +77,7 @@ export default function Dashboard() {
           <div className="space-y-1">
             <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
               <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
-                <LayoutGrid className="w-8 h-8 text-white" />
+                <LayoutGrid className="w-8 h-8 text-white" aria-hidden="true" />
               </div>
               {localeData.dashboard.title}
             </h1>
@@ -89,7 +89,10 @@ export default function Dashboard() {
           <div className="flex flex-wrap items-center gap-4">
             {/* Language Switcher */}
             <div className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center">
-              <Globe className="w-4 h-4 ml-2 text-gray-400" />
+              <Globe
+                className="w-4 h-4 ml-2 text-gray-400"
+                aria-hidden="true"
+              />
               <button
                 onClick={() => setLocale("en")}
                 className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all ${
@@ -128,6 +131,7 @@ export default function Dashboard() {
               >
                 <Trophy
                   className={`w-4 h-4 ${activeEngine === "chess" ? "animate-bounce" : ""}`}
+                  aria-hidden="true"
                 />
                 {localeData.dashboard.chessLabel}
               </button>
@@ -142,6 +146,7 @@ export default function Dashboard() {
               >
                 <Sword
                   className={`w-4 h-4 ${activeEngine === "shogi" ? "animate-bounce" : ""}`}
+                  aria-hidden="true"
                 />
                 {localeData.dashboard.shogiLabel}
               </button>

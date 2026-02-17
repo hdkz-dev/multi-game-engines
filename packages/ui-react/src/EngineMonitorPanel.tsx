@@ -66,13 +66,20 @@ export function EngineMonitorPanel<
   const handleTabKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
       e.preventDefault();
-      if (activeTab === "pv") {
-        setActiveTab("log");
-        setTimeout(() => logTabRef.current?.focus(), 0);
-      } else {
-        setActiveTab("pv");
-        setTimeout(() => pvTabRef.current?.focus(), 0);
-      }
+      const next = activeTab === "pv" ? "log" : "pv";
+      setActiveTab(next);
+      setTimeout(
+        () => (next === "pv" ? pvTabRef : logTabRef).current?.focus(),
+        0,
+      );
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setActiveTab("pv");
+      setTimeout(() => pvTabRef.current?.focus(), 0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setActiveTab("log");
+      setTimeout(() => logTabRef.current?.focus(), 0);
     }
   };
 

@@ -65,11 +65,23 @@ const handleTabKeyDown = (e: KeyboardEvent) => {
   if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
     e.preventDefault();
     activeTab.value = activeTab.value === "pv" ? "log" : "pv";
-    nextTick(() => {
-      if (activeTab.value === "pv") pvTabRef.value?.focus();
-      else logTabRef.value?.focus();
-    });
+    focusTab();
+  } else if (e.key === "Home") {
+    e.preventDefault();
+    activeTab.value = "pv";
+    focusTab();
+  } else if (e.key === "End") {
+    e.preventDefault();
+    activeTab.value = "log";
+    focusTab();
   }
+};
+
+const focusTab = () => {
+  nextTick(() => {
+    if (activeTab.value === "pv") pvTabRef.value?.focus();
+    else logTabRef.value?.focus();
+  });
 };
 
 const { state, status, search, stop } = useEngineMonitor<
