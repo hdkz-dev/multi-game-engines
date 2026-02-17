@@ -33,6 +33,8 @@ describe("Loading Strategies", () => {
       onStatusChange: vi.fn().mockReturnValue(() => {}),
       onProgress: vi.fn().mockReturnValue(() => {}),
       onTelemetry: vi.fn().mockReturnValue(() => {}),
+      onInfo: vi.fn().mockReturnValue(() => {}),
+      onSearchResult: vi.fn().mockReturnValue(() => {}),
     }) as unknown as IEngineAdapter<
       IBaseSearchOptions,
       IBaseSearchInfo,

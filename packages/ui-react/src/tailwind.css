@@ -7,6 +7,17 @@
   --color-primary-hover: var(--mge-color-primary-hover);
   --color-danger: var(--mge-color-danger);
 
+  --color-gray-50: var(--mge-color-gray-50);
+  --color-gray-100: var(--mge-color-gray-100);
+  --color-gray-200: var(--mge-color-gray-200);
+  --color-gray-300: var(--mge-color-gray-300);
+  --color-gray-400: var(--mge-color-gray-400);
+  --color-gray-500: var(--mge-color-gray-500);
+  --color-gray-600: var(--mge-color-gray-600);
+  --color-gray-700: var(--mge-color-gray-700);
+  --color-gray-800: var(--mge-color-gray-800);
+  --color-gray-900: var(--mge-color-gray-900);
+
   --color-engine-busy: var(--mge-color-engine-busy);
   --color-engine-ready: var(--mge-color-engine-ready);
   --color-engine-loading: var(--mge-color-engine-loading);

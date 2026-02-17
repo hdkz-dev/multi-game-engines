@@ -16,6 +16,8 @@ export class UINormalizerMiddleware<
   T_INFO_IN = unknown,
   T_RESULT = unknown,
 > implements IMiddleware<T_OPTIONS, T_INFO_IN, T_RESULT> {
+  readonly id = "ui-normalizer";
+
   /**
 
    * info イベントをインターセプトし、バリデーションと正規化を適用する。

@@ -108,26 +108,26 @@ export class UCIParser implements IProtocolParser<
 
       switch (key) {
         case "depth":
-          info.depth = parseInt(val, 10) || 0;
+          info.depth = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "score": {
           const scoreType = parts[++i]; // "cp" or "mate"
-          const scoreValue = parseInt(parts[++i], 10) || 0;
+          const scoreValue = parseInt(parts[++i] || "0", 10) || 0;
           info.score =
             scoreType === "mate" ? { mate: scoreValue } : { cp: scoreValue };
           break;
         }
         case "nps":
-          info.nps = parseInt(val, 10) || 0;
+          info.nps = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "nodes":
-          info.nodes = parseInt(val, 10) || 0;
+          info.nodes = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "time":
-          info.time = parseInt(val, 10) || 0;
+          info.time = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "pv": {

@@ -77,39 +77,39 @@ export class USIParser implements IProtocolParser<
 
       switch (key) {
         case "depth":
-          info.depth = parseInt(val, 10);
+          info.depth = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "seldepth":
-          info.seldepth = parseInt(val, 10);
+          info.seldepth = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "score":
           if (parts[i + 1] === "cp") {
-            info.score = { cp: parseInt(parts[i + 2], 10) };
+            info.score = { cp: parseInt(parts[i + 2] || "0", 10) || 0 };
           } else if (parts[i + 1] === "mate") {
-            info.score = { mate: parseInt(parts[i + 2], 10) };
+            info.score = { mate: parseInt(parts[i + 2] || "0", 10) || 0 };
           }
           i += 2;
           break;
         case "nodes":
-          info.nodes = parseInt(val, 10);
+          info.nodes = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "nps":
-          info.nps = parseInt(val, 10);
+          info.nps = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "time":
-          info.time = parseInt(val, 10);
+          info.time = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "hashfull":
-          info.hashfull = parseInt(val, 10);
+          info.hashfull = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "multipv":
-          info.multipv = parseInt(val, 10);
+          info.multipv = parseInt(val || "0", 10) || 0;
           i++;
           break;
         case "cpuload":

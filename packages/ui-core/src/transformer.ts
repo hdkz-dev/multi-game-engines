@@ -20,14 +20,10 @@ export const SearchStateTransformer = {
     state: EngineSearchState,
     info: ExtendedSearchInfo,
   ): EngineSearchState {
-    // 1. Zod による実行時検証 (契約駆動)
-    const validation = SearchInfoSchema.safeParse(info);
-    if (!validation.success) {
-      console.warn("[UICore] Invalid info ignored:", validation.error);
-      return state;
-    }
+    // 2026 Best Practice: Middleware で検証済みのデータを信頼し、ここでの二重検証を削除してパフォーマンスを向上
+    // const validation = SearchInfoSchema.safeParse(info); ...
 
-    const validatedInfo = validation.data;
+    const validatedInfo = info;
     const now = Date.now();
     const multipv = validatedInfo.multipv ?? (validatedInfo.pv ? 1 : undefined);
     const nextPvs = [...state.pvs];
