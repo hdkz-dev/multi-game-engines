@@ -3,6 +3,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  createPositionString,
 } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
 import {
@@ -36,7 +37,7 @@ export class MonitorRegistry {
   private monitors = new WeakMap<
     IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
     MonitorEntry<
-      unknown,
+      EngineSearchState,
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -75,6 +76,8 @@ export class MonitorRegistry {
     if (!engine) {
       throw new Error("[MonitorRegistry] Engine instance is required.");
     }
+    // 2026 Best Practice: 抽象インターフェースへのキャスト。
+    // IEngine は共変的に扱えるプロパティのみを持つため、IBase へのキャストは安全。
     const abstractEngine = engine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
@@ -83,6 +86,10 @@ export class MonitorRegistry {
     const entry = this.monitors.get(abstractEngine);
 
     if (entry) {
+      // 内部ストレージからは EngineSearchState (ベース型) で返るため、
+      // 呼び出し側の要求する具体的なサブタイプにキャストして返却する。
+      // SearchMonitor は T_STATE に対して不変 (invariant) であるが、
+      // レジストリが作成時の transformer との一貫性を保証するため、論理的に安全。
       return entry.monitor as unknown as SearchMonitor<
         T_STATE,
         T_OPTIONS,
@@ -91,7 +98,7 @@ export class MonitorRegistry {
       >;
     }
 
-    const brandedPosition = initialPosition as unknown as PositionString;
+    const brandedPosition = createPositionString(initialPosition);
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,
@@ -100,13 +107,15 @@ export class MonitorRegistry {
     );
 
     const newEntry: MonitorEntry<
-      unknown,
+      EngineSearchState,
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
     > = {
+      // 永続化のためにベース型にキャストして保存。
+      // 異なるエンジン間で共通のベース型で管理するための必要悪としてのキャスト。
       monitor: newMonitor as unknown as SearchMonitor<
-        unknown,
+        EngineSearchState,
         IBaseSearchOptions,
         IBaseSearchInfo,
         IBaseSearchResult

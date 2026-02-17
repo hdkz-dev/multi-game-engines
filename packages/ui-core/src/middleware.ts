@@ -55,9 +55,9 @@ export class UINormalizerMiddleware<
         raw: rawText,
 
         depth: 0,
-      } as unknown as T_INFO_IN;
+      } as T_INFO_IN;
     }
 
-    return result.data as unknown as T_INFO_IN;
+    return result.data as T_INFO_IN;
   }
 }

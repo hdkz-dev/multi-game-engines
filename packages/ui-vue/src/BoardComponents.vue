@@ -24,6 +24,8 @@ const props = defineProps<{
   handSenteLabel?: string;
   /** 駒台のラベル (将棋・後手) */
   handGoteLabel?: string;
+  /** カスタム駒名称 (アクセシビリティ用) */
+  pieceNames?: Record<string, string>;
 }>();
 
 watchEffect(() => {
@@ -43,6 +45,7 @@ watchEffect(() => {
     :last-move="lastMove"
     :orientation="orientation"
     :board-label="boardLabel"
+    .pieceNames="pieceNames"
   ></chess-board>
   <shogi-board
     v-else-if="type === 'shogi'"
@@ -51,5 +54,6 @@ watchEffect(() => {
     :board-label="boardLabel"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
+    .pieceNames="pieceNames"
   ></shogi-board>
 </template>

@@ -50,7 +50,7 @@ export function useEngineMonitor<
 ): UseEngineMonitorReturn<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
   const {
     initialPosition = "startpos",
-    transformer = SearchStateTransformer.mergeInfo as unknown as (
+    transformer = (options.transformer ?? SearchStateTransformer.mergeInfo) as (
       state: T_STATE,
       info: T_INFO,
     ) => T_STATE,
@@ -86,9 +86,7 @@ export function useEngineMonitor<
         unknown,
         T_RESULT
       >();
-      engine.use(
-        normalizer as unknown as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>,
-      );
+      engine.use(normalizer as IMiddleware<T_OPTIONS, T_INFO, T_RESULT>);
     }
 
     monitor.startMonitoring();

@@ -39,3 +39,4 @@
 - [ADR-027: UI 層のフレームワーク分離と Reactive Core の導入](adr/027-framework-agnostic-ui.md)
 - [ADR-028: Storybook 10 への移行と ESM 専用構成の採用](adr/028-storybook-10-esm-transition.md)
 - [ADR-029: Zenith Tier 品質標準の定義](adr/029-zenith-tier-quality-standards.md)
+- [ADR-033: フレームワーク非依存の盤面コンポーネント](adr/033-framework-agnostic-boards.md)

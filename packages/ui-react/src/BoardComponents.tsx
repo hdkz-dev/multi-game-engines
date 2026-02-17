@@ -23,6 +23,8 @@ declare module "react/jsx-runtime" {
         class?: string | undefined;
         /** Accessible label for the board. */
         "board-label"?: string | undefined;
+        /** Custom piece names for accessibility. */
+        pieceNames?: Record<string, string> | undefined;
       };
       /**
        * Lit-based Shogi board custom element.
@@ -43,6 +45,8 @@ declare module "react/jsx-runtime" {
         "hand-sente-label"?: string | undefined;
         /** Accessible label for Gote's hand. */
         "hand-gote-label"?: string | undefined;
+        /** Custom piece names for accessibility. */
+        pieceNames?: Record<string, string> | undefined;
       };
     }
   }
@@ -62,6 +66,8 @@ export interface ChessBoardProps {
   className?: string;
   /** Accessible label for screen readers. */
   boardLabel?: string;
+  /** Custom piece names for accessibility (aria-labels). */
+  pieceNames?: Record<string, string>;
 }
 
 /**
@@ -74,6 +80,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   orientation,
   className,
   boardLabel,
+  pieceNames,
 }) => {
   return (
     <chess-board
@@ -82,6 +89,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       orientation={orientation}
       class={className}
       board-label={boardLabel}
+      pieceNames={pieceNames}
     />
   );
 };
@@ -102,6 +110,8 @@ export interface ShogiBoardProps {
   handSenteLabel?: string;
   /** Custom label for Gote's captured pieces. */
   handGoteLabel?: string;
+  /** Custom piece names for accessibility (aria-labels). */
+  pieceNames?: Record<string, string>;
 }
 
 /**
@@ -115,6 +125,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   boardLabel,
   handSenteLabel,
   handGoteLabel,
+  pieceNames,
 }) => {
   return (
     <shogi-board
@@ -124,6 +135,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
       board-label={boardLabel}
       hand-sente-label={handSenteLabel}
       hand-gote-label={handGoteLabel}
+      pieceNames={pieceNames}
     />
   );
 };

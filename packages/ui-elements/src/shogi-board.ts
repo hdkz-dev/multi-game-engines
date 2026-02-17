@@ -141,6 +141,12 @@ export class ShogiBoard extends LitElement {
   @property({ type: String, attribute: "hand-gote-label", reflect: true })
   handGoteLabel = "Gote Hand";
 
+  /**
+   * Custom piece names for accessibility (aria-labels).
+   */
+  @property({ type: Object })
+  pieceNames: Partial<Record<ShogiPiece, string>> = {};
+
   private _getSquareIndex(usi: string): number {
     if (!usi || usi.length < 2 || usi.includes("*")) return -1;
     const fileChar = usi[0];
@@ -174,8 +180,7 @@ export class ShogiBoard extends LitElement {
 
     try {
       ({ board, hand } = parseSFEN(this.sfen));
-    } catch (err) {
-      console.error("[shogi-board] Failed to parse SFEN:", err);
+    } catch {
       return html`
         <div class="container" role="alert">
           <div class="error-overlay">Invalid Position</div>
@@ -203,6 +208,10 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const usiRank = String.fromCharCode(97 + r);
 
+        const label = piece
+          ? this.pieceNames[piece] || PIECE_LABELS[piece]
+          : "";
+
         squares.push(html`
           <div
             class="square ${isHighlighted ? "highlight" : ""}"
@@ -213,9 +222,9 @@ export class ShogiBoard extends LitElement {
                   <span
                     class="piece ${isGote ? "gote" : ""}"
                     role="img"
-                    aria-label="${PIECE_LABELS[piece]}"
+                    aria-label="${label}"
                   >
-                    ${PIECE_LABELS[piece]}
+                    ${label}
                   </span>
                 `
               : ""}
@@ -248,7 +257,8 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = PIECE_LABELS[p as ShogiPiece];
+      const label =
+        this.pieceNames[p as ShogiPiece] || PIECE_LABELS[p as ShogiPiece];
       return html`<span title="${label}"
         >${label}${count > 1 ? count : ""}</span
       >`;

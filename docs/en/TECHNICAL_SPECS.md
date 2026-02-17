@@ -6,65 +6,100 @@ The Core package provides only abstract definitions independent of specific game
 
 ### 1-1. Abstract Foundation
 
-- **Brand<T, K>**: Common helper for creating Branded Types.
-- **EngineStatus**: Lifecycle states of an engine.
+- **Brand<K, T>**: Common helper for creating Branded Types.
+- **EngineStatus**: Lifecycle states (`loading`, `ready`, `busy`, etc.).
 - **EngineErrorCode**: Standardized error codes.
 
-### 1-2. Domain Extension via Adapters
+### 1-2. Domain-Specific Branded Types
 
-Game-specific types (e.g., `FEN`, `SFEN`, `Move`) are defined within their respective adapter packages to maintain core purity.
+Game-specific types are centralized in `@multi-game-engines/core`'s `types.ts` to avoid circular dependencies and ensure cross-package consistency.
 
-```typescript
-/** Examples of types defined by adapters */
-type FEN = Brand<string, "FEN">;
-type SFEN = Brand<string, "SFEN">;
-```
+- **FEN**: Chess position notation (Branded string). Validated via `createFEN`.
+- **SFEN**: Shogi position notation (Branded string). Validated via `createSFEN`.
+- **Move**: Move notation (Branded string). Supports UCI/USI formats, validated via `createMove`.
+- **PositionString**: Generic game-agnostic position string.
 
 ### 1-3. Loading Strategy
 
-- `manual`: Requires explicit `load()` call.
+- `manual`: Requires explicit `load()`.
 - `on-demand`: Auto-loads if not ready when `search()` is called.
 - `eager`: Starts loading immediately upon engine creation.
 
 ## 2. Engine Facade (IEngine)
 
-The main API for consumers.
+The main consumer API.
 
+- **EngineRegistry-based Inference**: Automatic type inference for `bridge.getEngine('id')`.
 - `load()`: Initialization with SRI validation and cache loading.
-- `search(options)`: Asynchronous search. Handles auto-loading based on strategy. Sequential middleware application.
-- `onInfo(callback)`: Subscription to real-time thinking stream.
-- `loadingStrategy`: Dynamic strategy switching.
-- `stop()`: Safely aborts the current search.
-- `dispose()`: Releases resources for an individual engine. Automatically unbinds all subscriptions to adapters (Managed Subscriptions).
+- `search(options)`: Asynchronous search with middleware support. Sequential task management stops previous tasks.
+- `onInfo(callback)`: Real-time thinking stream subscription.
+- `stop()`: Safely aborts current search.
+- `dispose()`: Releases individual engine resources and clears managed subscriptions.
 
 ## 3. Security & Infrastructure
 
 ### 3-1. EngineLoader (Modern Security)
 
-- **Mandatory SRI**: Force hash validation for all resources. Supports W3C standard multi-hash (space-separated) formats.
-- **Dynamic MIME Types**: Identifies WASM (`application/wasm`) and JS (`application/javascript`).
-- **Auto-Revocation**: Proactively `revoke` old Blob URLs on re-load to prevent memory leaks.
-- **30s Timeout**: Prevents network fetch hangs. Advanced error tracking via `Error Cause API`.
+- **Mandatory SRI**: Force hash validation for all resources. Supports W3C standard multi-hash formats.
+- **Atomic Multi-load**: Loads multiple related resources (e.g., WASM + NNUE weights) atomically via `loadResources()`.
+- **Auto-Revocation**: Prevents memory leaks by revoking old Blob URLs on reload.
+- **30s Timeout**: Prevents fetch hangs with detailed `Error Cause API` tracking.
 
 ### 3-2. File Storage (2026 Best Practice)
 
 - **Environment Adaptation**: Auto-switches between `OPFSStorage` (Fast) and `IndexedDBStorage`.
-- **Robust Connections**: `IndexedDBStorage` implements auto-recovery from browser disconnects.
-- **Exception Separation**: `OPFSStorage` treats `NotFoundError` as a normal cache miss.
+- **Robust Connections**: Auto-recovery from browser disconnects in `IndexedDBStorage`.
 
 ### 3-3. WorkerCommunicator (Race-condition Free)
 
-- **Message Buffering**: Processes messages even if they arrive before `expectMessage` is called.
-- **Error Propagation**: Correctly forwards internal Worker errors and rejects pending tasks on `terminate()`.
+- **Message Buffering**: Handles messages arriving before `expectMessage` is called.
+- **Exception Propagation**: Forwards internal Worker errors and terminates pending tasks correctly.
 
-## 4. Protocol Parsing
+## 4. Protocol Parsing (2026 Best Practice)
 
-- **UCIParser**: For Chess. Supports `mate` score conversion (factor 10,000).
-- **USIParser**: For Shogi. Supports time control, `mate` score conversion (factor 100,000), and special handling for the `startpos` keyword.
-- **Injection Protection (Refuse by Exception)**: Immediately throws a `SECURITY_ERROR` when illegal control characters (`\r`, `\n`, `\0`, `;`, etc.) are detected, rather than attempting to sanitize.
+- **UCIParser**: Chess protocol with factor 10,000 `mate` score conversion.
+- **USIParser**: Shogi protocol with time control and `startpos` keyword support.
+- **GTPParser**: Go protocol supporting `genmove`, `visits`, and `winrate`.
+- **JSONParser (Mahjong)**: Structured message parsing with recursive injection validation.
+- **Strict Regex Validation**: Engine outputs are validated against pre-compiled static regexes to minimize NPS impact.
+- **Injection Protection**: Illegal control characters trigger immediate `SECURITY_ERROR` rejection.
 
-## 5. Quality Assurance (Testing Philosophy)
+### 4-1. Board & Move Parsers
 
-- **117 Unit Tests**: 100% logic and edge-case coverage.
-- **Zero-Any Policy**: Forbidden usage of `any` across implementation and test code.
-- **Lifecycle Validation**: Simulates real WebWorker communication and various loading strategies.
+Lightweight parsers for UI-layer reuse.
+
+- **parseFEN**: Extracts 8x8 grid and turn metadata from FEN strings.
+- **parseSFEN**: Extracts 9x9 grid, turn, and hand counts from SFEN strings.
+
+## 5. Telemetry & Observability
+
+- **Structured Telemetry**: Automatic measurement of search performance via `DefaultTelemetryMiddleware`.
+- **Remediation**: All errors include `remediation` fields with specific recovery actions.
+
+## 6. UI & Presentation Foundation
+
+### 6-1. Reactive Engine Store (`ui-core`)
+
+High-frequency state management foundation.
+
+- **Adaptive Throttling**: Synchronizes with `requestAnimationFrame` by default.
+- **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering tears.
+- **Zod Contract Validation**: Validates all engine messages via `SearchInfoSchema` at runtime.
+- **EvaluationPresenter**: Separates display logic (colors, labels) from UI frameworks.
+
+### 6-2. React Adapter (`ui-react`)
+
+- **Storybook 10**: Fully compatible with Vite 6 and Tailwind CSS v4.
+- **Deterministic Lifecycle**: Ref-based monitor persistence and Strict Mode safety.
+- **A11y (WCAG 2.2 AA)**: Landmark roles and intelligent live regions.
+
+### 6-3. Web Components Adapter (`ui-elements`)
+
+- **Lit Implementation**: Standard-compliant lightweight Web Components.
+- **Board Components**: Efficient CSS Grid rendering with move highlighting and accessible localized piece names.
+
+## 7. Quality Assurance (Testing Philosophy)
+
+- **140+ Unit Tests**: Comprehensive coverage across Core, Adapters, and UI.
+- **Deterministic Time**: Mocks `performance.now()` for environment-independent telemetry validation.
+- **Zero-Any Policy**: Strict elimination of `any` using `satisfies` and explicit interfaces.

@@ -50,7 +50,7 @@ export function useEngineMonitor<
 ) {
   const {
     initialPosition = "startpos",
-    transformer = SearchStateTransformer.mergeInfo as unknown as (
+    transformer = (options.transformer ?? SearchStateTransformer.mergeInfo) as (
       state: T_STATE,
       info: T_INFO,
     ) => T_STATE,

@@ -3,8 +3,7 @@
 import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
-import { createFEN } from "@multi-game-engines/core";
-import { createSFEN } from "@multi-game-engines/adapter-yaneuraou";
+import { createFEN, createSFEN } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 const EngineMonitorPanel = dynamic(
@@ -243,6 +242,7 @@ export default function Dashboard() {
                     lastMove={chessBestMove}
                     className="w-full h-full"
                     boardLabel={localeData.dashboard.gameBoard.title}
+                    pieceNames={localeData.dashboard.gameBoard.chessPieces}
                   />
                 ) : (
                   <ShogiBoard
@@ -252,6 +252,7 @@ export default function Dashboard() {
                     boardLabel={localeData.dashboard.gameBoard.title}
                     handSenteLabel={localeData.dashboard.gameBoard.handSente}
                     handGoteLabel={localeData.dashboard.gameBoard.handGote}
+                    pieceNames={localeData.dashboard.gameBoard.shogiPieces}
                   />
                 )}
               </div>

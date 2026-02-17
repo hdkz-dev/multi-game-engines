@@ -10,14 +10,21 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **EngineStatus**: エンジンのライフサイクル状態 (`loading`, `ready`, `busy` 等)。
 - **EngineErrorCode**: 標準化されたエラーコード。
 
-### 1-2. アダプターによるドメイン拡張
+### 1-2. ドメイン固有の型定義 (Domain Types)
 
-各ゲーム固有の型（`FEN`, `SFEN`, `Move` 等）は、各アダプターパッケージで個別に定義されます。これにより Core の純粋性が保たれます。
+各種ゲーム固有の型（`FEN`, `SFEN`, `Move` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、`@multi-game-engines/core` パッケージの `types.ts` に集約されています。
+
+- **FEN**: チェス局面表記（Branded string）。`createFEN` ファクトリによるバリデーション。
+- **SFEN**: 将棋局面表記（Branded string）。`createSFEN` ファクトリによるバリデーション。
+- **Move**: 指し手表記（Branded string）。UCI/USI 形式をサポートし、`createMove` で検証。
+- **PositionString**: ゲームに依存しない汎用局面表記。
 
 ```typescript
-/** 各アダプターで定義される例 */
-type FEN = Brand<string, "FEN">;
-type SFEN = Brand<string, "SFEN">;
+import { FEN, createFEN } from "@multi-game-engines/core";
+
+const pos = createFEN(
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+);
 ```
 
 ### 1-3. ロード戦略 (Loading Strategy)

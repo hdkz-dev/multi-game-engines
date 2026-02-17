@@ -3,20 +3,20 @@ import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
 import { createFEN } from "@multi-game-engines/core";
 
-// Standard SVG piece set (Wikipedia/Standard)
+// Standard SVG piece set (Wikipedia/Standard) - Inlined as Data URIs for SRI compliance and zero external dependencies.
 const PIECE_SVG: Record<ChessPiece, string> = {
-  P: "https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg",
-  N: "https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg",
-  B: "https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg",
-  R: "https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg",
-  Q: "https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg",
-  K: "https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg",
-  p: "https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg",
-  n: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg",
-  b: "https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg",
-  r: "https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg",
-  q: "https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg",
-  k: "https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg",
+  P: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22.5 9c-2.21 0-4 1.79-4 4 0 .89.36 1.7.94 2.28C19.15 15.59 19 15.79 19 16c0 .55.45 1 1 1h7c.55 0 1-.45 1-1 0-.21-.15-.41-.44-.72.58-.58.94-1.39.94-2.28 0-2.21-1.79-4-4-4h-2.5zM23 29.5c-4.42 0-8 1.57-8 3.5h16c0-1.93-3.58-3.5-8-3.5z' fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  N: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21' fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  B: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z'/%3E%3Cpath d='M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z'/%3E%3Cpath d='M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3C/svg%3E",
+  R: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke='%23000' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E",
+  Q: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM11 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM38 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0z'/%3E%3Cpath d='M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25L7 14l2 12z'/%3E%3Cpath d='M9 26c0 2 1.5 2 2.5 4 1 1 1 1 1 1h20s0 0 1-1c1-2 2.5-2 2.5-4 0 0-4.5-1.5-13.5-1.5S9 26 9 26z'/%3E%3Cpath d='M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+  K: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+  p: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22.5 9c-2.21 0-4 1.79-4 4 0 .89.36 1.7.94 2.28C19.15 15.59 19 15.79 19 16c0 .55.45 1 1 1h7c.55 0 1-.45 1-1 0-.21-.15-.41-.44-.72.58-.58.94-1.39.94-2.28 0-2.21-1.79-4-4-4h-2.5zM23 29.5c-4.42 0-8 1.57-8 3.5h16c0-1.93-3.58-3.5-8-3.5z' fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  n: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21' fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
+  b: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z'/%3E%3Cpath d='M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z'/%3E%3Cpath d='M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3C/svg%3E",
+  r: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke='%23fff' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E",
+  q: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM11 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM38 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0z'/%3E%3Cpath d='M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25L7 14l2 12z'/%3E%3Cpath d='M9 26c0 2 1.5 2 2.5 4 1 1 1 1 1 1h20s0 0 1-1c1-2 2.5-2 2.5-4 0 0-4.5-1.5-13.5-1.5S9 26 9 26z'/%3E%3Cpath d='M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+  k: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
 };
 
 // Human-readable names for accessibility
@@ -113,6 +113,12 @@ export class ChessBoard extends LitElement {
   @property({ type: String, attribute: "board-label", reflect: true })
   boardLabel = "Chess Board";
 
+  /**
+   * Custom piece names for accessibility (aria-labels).
+   */
+  @property({ type: Object })
+  pieceNames: Partial<Record<ChessPiece, string>> = {};
+
   private _getSquareIndex(algebraic: string): number {
     if (!algebraic || algebraic.length < 2) return -1;
     const file = algebraic.charCodeAt(0) - 97; // a=0, b=1...
@@ -125,8 +131,7 @@ export class ChessBoard extends LitElement {
     let board: (ChessPiece | null)[][] = [];
     try {
       ({ board } = parseFEN(this.fen));
-    } catch (err) {
-      console.error("[chess-board] Failed to parse FEN:", err);
+    } catch {
       return html`
         <div class="board" role="alert">
           <div class="error-overlay">Invalid Position</div>
@@ -156,6 +161,10 @@ export class ChessBoard extends LitElement {
         const isDark = (rankIndex + fileIndex) % 2 !== 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
 
+        const pieceName = piece
+          ? this.pieceNames[piece] || PIECE_NAMES[piece]
+          : "";
+
         squares.push(html`
           <div
             class="square ${isDark ? "dark" : "light"} ${isHighlighted
@@ -168,8 +177,8 @@ export class ChessBoard extends LitElement {
                   <img
                     class="piece"
                     src="${PIECE_SVG[piece]}"
-                    alt="${PIECE_NAMES[piece]}"
-                    aria-label="${PIECE_NAMES[piece]}"
+                    alt="${pieceName}"
+                    aria-label="${pieceName}"
                   />
                 `
               : ""}
