@@ -203,6 +203,8 @@ const protocolLabel = computed(() =>
               type="chess"
               :fen="chessOptions.fen"
               :last-move="chessBestMove"
+              :board-label="localeData.dashboard.gameBoard.title"
+              :error-message="localeData.dashboard.gameBoard.invalidPosition"
               :piece-names="localeData.dashboard.gameBoard.chessPieces"
               class="w-full h-full"
             />
@@ -211,6 +213,8 @@ const protocolLabel = computed(() =>
               type="shogi"
               :sfen="shogiOptions.sfen"
               :last-move="shogiBestMove"
+              :board-label="localeData.dashboard.gameBoard.title"
+              :error-message="localeData.dashboard.gameBoard.invalidPosition"
               :piece-names="localeData.dashboard.gameBoard.shogiPieces"
               class="w-full h-full"
             />

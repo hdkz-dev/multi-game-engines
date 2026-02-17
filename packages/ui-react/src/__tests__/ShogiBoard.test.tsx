@@ -8,6 +8,7 @@ interface ShogiBoardElement extends HTMLElement {
   sfen: string;
   lastMove: string;
   boardLabel: string;
+  errorMessage: string;
   handSenteLabel: string;
   handGoteLabel: string;
   pieceNames: Record<string, string>;
@@ -26,6 +27,7 @@ describe("ShogiBoard (React)", () => {
         lastMove={lastMove}
         className="shogi-custom"
         boardLabel="Custom Shogi Board"
+        errorMessage="Custom Error"
         handSenteLabel="Sente pieces"
         handGoteLabel="Gote pieces"
         pieceNames={pieceNames}
@@ -38,6 +40,7 @@ describe("ShogiBoard (React)", () => {
     expect(board.sfen).toBe(sfen);
     expect(board.lastMove).toBe(lastMove);
     expect(board.boardLabel).toBe("Custom Shogi Board");
+    expect(board.errorMessage).toBe("Custom Error");
     expect(board.handSenteLabel).toBe("Sente pieces");
     expect(board.handGoteLabel).toBe("Gote pieces");
     expect(board.pieceNames).toEqual(pieceNames);
@@ -52,6 +55,7 @@ describe("ShogiBoard (React)", () => {
     const board = container.querySelector("shogi-board") as ShogiBoardElement;
     expect(board.getAttribute("last-move")).toBeNull();
     expect(board.getAttribute("board-label")).toBeNull();
+    expect(board.getAttribute("error-message")).toBeNull();
     expect(board.getAttribute("hand-sente-label")).toBeNull();
     expect(board.getAttribute("hand-gote-label")).toBeNull();
   });

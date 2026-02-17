@@ -260,6 +260,9 @@ export default function Dashboard() {
                     lastMove={chessBestMove}
                     className="w-full h-full"
                     boardLabel={localeData.dashboard.gameBoard.title}
+                    errorMessage={
+                      localeData.dashboard.gameBoard.invalidPosition
+                    }
                     pieceNames={localeData.dashboard.gameBoard.chessPieces}
                   />
                 ) : (
@@ -268,6 +271,9 @@ export default function Dashboard() {
                     lastMove={shogiBestMove}
                     className="w-full h-full"
                     boardLabel={localeData.dashboard.gameBoard.title}
+                    errorMessage={
+                      localeData.dashboard.gameBoard.invalidPosition
+                    }
                     handSenteLabel={localeData.dashboard.gameBoard.handSente}
                     handGoteLabel={localeData.dashboard.gameBoard.handGote}
                     pieceNames={localeData.dashboard.gameBoard.shogiPieces}

@@ -67,6 +67,7 @@
       "subtitle": "Awaiting Move Integration",
       "handSente": "Sente Hand",
       "handGote": "Gote Hand",
+      "invalidPosition": "Failed to parse position",
       "chessPieces": {
         "P": "White Pawn",
         "N": "White Knight",

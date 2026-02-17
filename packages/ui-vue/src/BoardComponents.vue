@@ -20,6 +20,8 @@ const props = defineProps<{
   orientation?: "white" | "black";
   /** 盤面のアクセシビリティラベル */
   boardLabel?: string;
+  /** 解析失敗時のエラーメッセージ */
+  errorMessage?: string;
   /** 駒台のラベル (将棋・先手) */
   handSenteLabel?: string;
   /** 駒台のラベル (将棋・後手) */
@@ -45,6 +47,7 @@ watchEffect(() => {
     :last-move="lastMove"
     :orientation="orientation"
     :board-label="boardLabel"
+    :error-message="errorMessage"
     .pieceNames="pieceNames"
   ></chess-board>
   <shogi-board
@@ -52,6 +55,7 @@ watchEffect(() => {
     :sfen="sfen"
     :last-move="lastMove"
     :board-label="boardLabel"
+    :error-message="errorMessage"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
     .pieceNames="pieceNames"

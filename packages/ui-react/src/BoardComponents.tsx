@@ -23,6 +23,8 @@ declare module "react/jsx-runtime" {
         class?: string | undefined;
         /** Accessible label for the board. */
         "board-label"?: string | undefined;
+        /** Error message to display when parsing fails. */
+        "error-message"?: string | undefined;
         /** Custom piece names for accessibility. */
         pieceNames?: Record<string, string> | undefined;
       };
@@ -41,6 +43,8 @@ declare module "react/jsx-runtime" {
         class?: string | undefined;
         /** Accessible label for the board. */
         "board-label"?: string | undefined;
+        /** Error message to display when parsing fails. */
+        "error-message"?: string | undefined;
         /** Accessible label for Sente's hand. */
         "hand-sente-label"?: string | undefined;
         /** Accessible label for Gote's hand. */
@@ -66,6 +70,8 @@ export interface ChessBoardProps {
   className?: string;
   /** Accessible label for screen readers. */
   boardLabel?: string;
+  /** Error message to display when parsing fails. */
+  errorMessage?: string;
   /** Custom piece names for accessibility (aria-labels). */
   pieceNames?: Record<string, string>;
 }
@@ -80,6 +86,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   orientation,
   className,
   boardLabel,
+  errorMessage,
   pieceNames,
 }) => {
   return (
@@ -89,6 +96,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       orientation={orientation}
       class={className}
       board-label={boardLabel}
+      error-message={errorMessage}
       pieceNames={pieceNames}
     />
   );
@@ -106,6 +114,8 @@ export interface ShogiBoardProps {
   className?: string;
   /** Accessible label for screen readers. */
   boardLabel?: string;
+  /** Error message to display when parsing fails. */
+  errorMessage?: string;
   /** Custom label for Sente's captured pieces. */
   handSenteLabel?: string;
   /** Custom label for Gote's captured pieces. */
@@ -123,6 +133,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   lastMove,
   className,
   boardLabel,
+  errorMessage,
   handSenteLabel,
   handGoteLabel,
   pieceNames,
@@ -133,6 +144,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
       last-move={lastMove}
       class={className}
       board-label={boardLabel}
+      error-message={errorMessage}
       hand-sente-label={handSenteLabel}
       hand-gote-label={handGoteLabel}
       pieceNames={pieceNames}

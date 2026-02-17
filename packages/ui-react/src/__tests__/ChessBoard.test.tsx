@@ -9,6 +9,7 @@ interface ChessBoardElement extends HTMLElement {
   lastMove: string;
   orientation: string;
   boardLabel: string;
+  errorMessage: string;
   pieceNames: Record<string, string>;
 }
 
@@ -26,6 +27,7 @@ describe("ChessBoard (React)", () => {
         orientation="black"
         className="custom-class"
         boardLabel="Custom Chess Board"
+        errorMessage="Custom Error"
         pieceNames={pieceNames}
       />,
     );
@@ -38,6 +40,7 @@ describe("ChessBoard (React)", () => {
     expect(board.lastMove).toBe(lastMove);
     expect(board.orientation).toBe("black");
     expect(board.boardLabel).toBe("Custom Chess Board");
+    expect(board.errorMessage).toBe("Custom Error");
     expect(board.pieceNames).toEqual(pieceNames);
 
     expect(board.getAttribute("class")).toBe("custom-class");
@@ -51,5 +54,6 @@ describe("ChessBoard (React)", () => {
     expect(board.getAttribute("last-move")).toBeNull();
     expect(board.getAttribute("orientation")).toBeNull();
     expect(board.getAttribute("board-label")).toBeNull();
+    expect(board.getAttribute("error-message")).toBeNull();
   });
 });
