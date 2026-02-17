@@ -14,9 +14,9 @@ declare module "react/jsx-runtime" {
         HTMLElement
       > & {
         /** Current position in FEN format. */
-        fen?: string | undefined;
+        fen?: FEN | undefined;
         /** Move to highlight (e.g., 'e2e4'). */
-        "last-move"?: string | undefined;
+        "last-move"?: Move | undefined;
         /** Perspective: 'white' or 'black'. */
         orientation?: "white" | "black" | undefined;
         /** CSS class name. */
@@ -34,9 +34,9 @@ declare module "react/jsx-runtime" {
         HTMLElement
       > & {
         /** Current position in SFEN format. */
-        sfen?: string | undefined;
+        sfen?: SFEN | undefined;
         /** Move to highlight (e.g., '7g7f' or 'P*5e'). */
-        "last-move"?: string | undefined;
+        "last-move"?: Move | undefined;
         /** CSS class name. */
         class?: string | undefined;
         /** Accessible label for the board. */

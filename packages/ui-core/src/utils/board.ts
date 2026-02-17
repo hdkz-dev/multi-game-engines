@@ -1,7 +1,7 @@
 import { FEN, SFEN } from "@multi-game-engines/core";
 
 /**
- * Chess piece identifiers.
+ * チェスの駒識別子。
  */
 export type ChessPiece =
   | "P"
@@ -18,9 +18,9 @@ export type ChessPiece =
   | "k";
 
 /**
- * Shogi piece identifiers.
- * Uppercase for Sente (Black), Lowercase for Gote (White).
- * "+" prefix for promoted pieces.
+ * 将棋の駒識別子。
+ * 大文字は先手 (Sente)、小文字は後手 (Gote)。
+ * "+" プレフィックスは成駒を表す。
  */
 export type ShogiPiece =
   | "P"
@@ -105,18 +105,18 @@ export interface ParsedSFEN {
 }
 
 /**
- * Validates if a character is a valid Chess piece identifier.
- * @param char The character to validate.
- * @returns True if valid.
+ * 文字が有効なチェスの駒識別子かどうかを検証します。
+ * @param char 検証する文字。
+ * @returns 有効な場合 true。
  */
 export function isValidChessPiece(char: string): char is ChessPiece {
   return /^[PNBRQKpnbrqk]$/.test(char);
 }
 
 /**
- * Validates if a string is a valid Shogi piece identifier (including promoted pieces).
- * @param str The string to validate.
- * @returns True if valid.
+ * 文字列が有効な将棋の駒識別子（成駒を含む）かどうかを検証します。
+ * @param str 検証する文字列。
+ * @returns 有効な場合 true。
  */
 export function isValidShogiPiece(str: string): str is ShogiPiece {
   // Only allow '+' for promotable pieces: P, L, N, S, B, R
@@ -124,28 +124,32 @@ export function isValidShogiPiece(str: string): str is ShogiPiece {
 }
 
 /**
- * Type guard for ShogiHand keys (unpromoted pieces that can be held in hand).
- * @param piece The piece identifier to check.
- * @returns True if it's a valid hand key.
+ * 将棋の持ち駒キー（持ち駒にできる不成駒）の型ガード。
+ * @param piece 検証する駒識別子。
+ * @returns 有効な持ち駒キーの場合 true。
  */
 export function isShogiHandKey(piece: unknown): piece is keyof ShogiHand {
   return typeof piece === "string" && /^[PLNSGBRplnsgbr]$/.test(piece);
 }
 
 /**
- * Parses a Chess FEN string into a structured 2D board array.
- * @param fen Validated Chess FEN string.
- * @returns Parsed board and metadata.
- * @throws Error if FEN is malformed.
+ * FEN 文字列を解析して 2D 盤面配列に変換します。
+ * @param fen 検証済みの FEN 文字列。
+ * @returns 解析された盤面とメタデータ。
+ * @throws FEN が不正な場合にエラーをスローします。
  */
 export function parseFEN(fen: FEN): ParsedFEN {
   if (!fen) throw new Error("[parseFEN] FEN string is empty.");
 
   const parts = fen.split(" ");
   const position = parts[0] || "";
-  const turn = (parts[1] || "w") as "w" | "b";
+  const turnPart = parts[1];
 
   if (!position) throw new Error("[parseFEN] Position part is missing.");
+  if (!turnPart) throw new Error("[parseFEN] Turn part is missing.");
+
+  const turn = turnPart as "w" | "b";
+
   if (turn !== "w" && turn !== "b") {
     throw new Error(
       `[parseFEN] Invalid turn: expected "w" or "b", got "${turn}"`,
@@ -190,10 +194,10 @@ export function parseFEN(fen: FEN): ParsedFEN {
 }
 
 /**
- * Parses a Shogi SFEN string into a 2D board array and hand counts.
- * @param sfen Validated Shogi SFEN string.
- * @returns Parsed board, hand and metadata.
- * @throws Error if SFEN is malformed.
+ * SFEN 文字列を解析して 2D 盤面配列と持ち駒数に変換します。
+ * @param sfen 検証済みの SFEN 文字列。
+ * @returns 解析された盤面、持ち駒、メタデータ。
+ * @throws SFEN が不正な場合にエラーをスローします。
  */
 export function parseSFEN(sfen: SFEN): ParsedSFEN {
   if (!sfen) throw new Error("[parseSFEN] SFEN string is empty.");

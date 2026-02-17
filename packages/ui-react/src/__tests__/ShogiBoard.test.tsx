@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import React from "react";
 import { ShogiBoard } from "../BoardComponents.js";
-import { SFEN, Move } from "@multi-game-engines/ui-core";
+import { createSFEN, createMove } from "@multi-game-engines/core";
 
 interface ShogiBoardElement extends HTMLElement {
   sfen: string;
@@ -15,9 +15,10 @@ interface ShogiBoardElement extends HTMLElement {
 
 describe("ShogiBoard (React)", () => {
   it("should render shogi-board custom element with props mapped correctly", async () => {
-    const sfen =
-      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
-    const lastMove = "7g7f" as Move;
+    const sfen = createSFEN(
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    );
+    const lastMove = createMove("7g7f");
     const pieceNames = { P: "歩", K: "王" };
     const { container } = render(
       <ShogiBoard
@@ -45,7 +46,7 @@ describe("ShogiBoard (React)", () => {
   });
 
   it("should not set optional attributes when undefined", () => {
-    const sfen = "9/9/9/9/9/9/9/9/9 b - 1" as SFEN;
+    const sfen = createSFEN("9/9/9/9/9/9/9/9/9 b - 1");
     const { container } = render(<ShogiBoard sfen={sfen} />);
 
     const board = container.querySelector("shogi-board") as ShogiBoardElement;

@@ -92,9 +92,9 @@ export interface EngineSearchState {
 /**
  * 初期状態の定義
  */
-export function createInitialState(
-  position: PositionString,
-): EngineSearchState {
+export function createInitialState<
+  T extends EngineSearchState = EngineSearchState,
+>(position: PositionString, overrides?: Partial<T>): T {
   return {
     isSearching: false,
     position,
@@ -110,5 +110,6 @@ export function createInitialState(
       maxEntries: 50,
     },
     searchLog: [],
-  };
+    ...overrides,
+  } as unknown as T;
 }

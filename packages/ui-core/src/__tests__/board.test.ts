@@ -68,5 +68,32 @@ describe("Board Utilities", () => {
       const sfen = "9/9/9/9/9/9/9/9/8+ b" as SFEN; // '+' at end
       expect(() => parseSFEN(sfen)).toThrow("'+' prefix at end of row string");
     });
+
+    it("should throw error for invalid piece character", () => {
+      const sfen = "9/9/9/9/9/9/9/9/8Z b" as SFEN; // 'Z' is invalid
+      expect(() => parseSFEN(sfen)).toThrow("Invalid character");
+    });
+  });
+
+  describe("Parser Robustness", () => {
+    it("parseFEN should throw on empty string", () => {
+      expect(() => parseFEN("" as FEN)).toThrow("FEN string is empty");
+    });
+
+    it("parseSFEN should throw on empty string", () => {
+      expect(() => parseSFEN("" as SFEN)).toThrow("SFEN string is empty");
+    });
+
+    it("parseFEN should throw on missing fields", () => {
+      expect(() => parseFEN("8/8/8/8/8/8/8/8" as FEN)).toThrow(
+        "Turn part is missing",
+      );
+      // Actually parseFEN logic checks parts[0].
+      expect(() => parseFEN(" w" as FEN)).toThrow("Position part is missing");
+    });
+
+    it("parseSFEN should throw on missing fields", () => {
+      expect(() => parseSFEN(" b" as SFEN)).toThrow("Position part is missing");
+    });
   });
 });

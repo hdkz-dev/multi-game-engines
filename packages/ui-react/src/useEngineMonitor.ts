@@ -50,10 +50,8 @@ export function useEngineMonitor<
 ) {
   const {
     initialPosition = "startpos",
-    transformer = (options.transformer ?? SearchStateTransformer.mergeInfo) as (
-      state: T_STATE,
-      info: T_INFO,
-    ) => T_STATE,
+    transformer = (state: T_STATE, info: T_INFO): T_STATE =>
+      SearchStateTransformer.mergeInfo(state, info) as T_STATE,
     autoMiddleware = true,
   } = options;
 
@@ -61,11 +59,11 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as T_STATE;
+      return createInitialState<T_STATE>(brandedPos);
     } catch {
       // バリデーション失敗時は安全なデフォルト値で復旧
       const safePos = createPositionString("startpos");
-      return createInitialState(safePos) as T_STATE;
+      return createInitialState<T_STATE>(safePos);
     }
   }, [initialPosition]);
 
@@ -113,12 +111,9 @@ export function useEngineMonitor<
     [monitor],
   );
 
-  // 5. エフェクト: 監視開始とミドルウェア登録
+  // 5. エフェクト: ミドルウェア登録 (初回のみ)
   useEffect(() => {
-    if (!monitor || !engine) return;
-
-    // ミドルウェアの動的登録
-    if (autoMiddleware && typeof engine.use === "function") {
+    if (autoMiddleware && engine && typeof engine.use === "function") {
       const normalizer = new UINormalizerMiddleware<
         T_OPTIONS,
         T_INFO,
@@ -126,6 +121,11 @@ export function useEngineMonitor<
       >();
       engine.use(normalizer);
     }
+  }, [engine, autoMiddleware]);
+
+  // 6. エフェクト: 監視開始
+  useEffect(() => {
+    if (!monitor || !engine) return;
 
     monitor.startMonitoring();
 
@@ -139,7 +139,7 @@ export function useEngineMonitor<
       unsubStatus();
       monitor.stopMonitoring();
     };
-  }, [monitor, engine, autoMiddleware]);
+  }, [monitor, engine]);
 
   const search = useCallback(
     (searchOptions: T_OPTIONS) => {

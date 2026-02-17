@@ -114,6 +114,12 @@ export class ChessBoard extends LitElement {
   boardLabel = "Chess Board";
 
   /**
+   * Error message to display when position parsing fails.
+   */
+  @property({ type: String, attribute: "error-message", reflect: true })
+  errorMessage = "Invalid Position";
+
+  /**
    * Custom piece names for accessibility (aria-labels).
    */
   @property({ type: Object })
@@ -134,7 +140,7 @@ export class ChessBoard extends LitElement {
     } catch {
       return html`
         <div class="board" role="alert">
-          <div class="error-overlay">Invalid Position</div>
+          <div class="error-overlay">${this.errorMessage}</div>
         </div>
       `;
     }

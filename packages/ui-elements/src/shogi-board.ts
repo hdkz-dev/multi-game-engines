@@ -142,6 +142,12 @@ export class ShogiBoard extends LitElement {
   handGoteLabel = "Gote Hand";
 
   /**
+   * Error message to display when position parsing fails.
+   */
+  @property({ type: String, attribute: "error-message", reflect: true })
+  errorMessage = "Invalid Position";
+
+  /**
    * Custom piece names for accessibility (aria-labels).
    */
   @property({ type: Object })
@@ -183,7 +189,7 @@ export class ShogiBoard extends LitElement {
     } catch {
       return html`
         <div class="container" role="alert">
-          <div class="error-overlay">Invalid Position</div>
+          <div class="error-overlay">${this.errorMessage}</div>
         </div>
       `;
     }

@@ -89,10 +89,28 @@ export default function Dashboard() {
   const nps = useMemo(() => {
     const stats =
       activeEngine === "chess" ? chessState.stats : shogiState.stats;
-    return stats.nps ? `${(stats.nps / 1000).toFixed(1)}k` : "0";
+    if (!stats.nps) return "0";
+    if (stats.nps >= 1_000_000) {
+      return `${(stats.nps / 1_000_000).toFixed(1)}M`;
+    }
+    if (stats.nps >= 1_000) {
+      return `${(stats.nps / 1_000).toFixed(1)}k`;
+    }
+    return stats.nps.toString();
   }, [activeEngine, chessState.stats, shogiState.stats]);
 
-  if (!bridge || !chessEngine || !shogiEngine) return null;
+  if (!bridge || !chessEngine || !shogiEngine) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-bold tracking-widest text-sm">
+            INITIALIZING ENGINES...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <EngineUIProvider localeData={localeData}>

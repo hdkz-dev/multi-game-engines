@@ -99,14 +99,14 @@ export class EngineBridge implements IEngineBridge {
     );
 
     this.adapterUnsubscribers.set(id, unsubs);
-    this.adapters.set(
-      id,
-      adapter as unknown as IEngineAdapter<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
-    );
+    // 2026 Best Practice: アダプターの型を IBase 型へ正規化して保存。
+    // 外部 API はジェネリクスで公開されるが、内部管理は基底インターフェースで行う。
+    const abstractAdapter = adapter as IEngineAdapter<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+    this.adapters.set(id, abstractAdapter);
   }
 
   async unregisterAdapter(id: string): Promise<void> {
@@ -201,13 +201,13 @@ export class EngineBridge implements IEngineBridge {
     I extends IBaseSearchInfo,
     R extends IBaseSearchResult,
   >(middleware: IMiddleware<O, I, R>): void {
-    this.middlewares.push(
-      middleware as unknown as IMiddleware<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
-    );
+    // 2026 Best Practice: ミドルウェアを IBase 型へ正規化して保存。
+    const abstractMiddleware = middleware as IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+    this.middlewares.push(abstractMiddleware);
     this.middlewares.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
     // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア

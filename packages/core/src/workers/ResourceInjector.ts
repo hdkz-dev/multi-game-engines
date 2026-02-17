@@ -56,15 +56,13 @@ export class ResourceInjector {
         this.isReady = true;
 
         // 注入完了をホストに通知（ハンドシェイク）
-        if (
-          typeof self !== "undefined" &&
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          typeof (self as any).postMessage === "function"
-        ) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (self as any).postMessage({
-            type: "MG_RESOURCES_READY",
-          });
+        if (typeof self !== "undefined") {
+          const workerScope = self as unknown as WorkerGlobalScope;
+          if (typeof workerScope.postMessage === "function") {
+            workerScope.postMessage({
+              type: "MG_RESOURCES_READY",
+            });
+          }
         }
 
         const callbacks = [...this.readyCallbacks];
@@ -80,11 +78,9 @@ export class ResourceInjector {
 
     if (typeof globalThis.addEventListener === "function") {
       globalThis.addEventListener("message", handler);
-    } else if (
-      typeof self !== "undefined" &&
-      "onmessage" in (self as unknown as object)
-    ) {
-      (self as unknown as WorkerGlobalScope).onmessage = handler;
+    } else if (typeof self !== "undefined") {
+      const workerScope = self as unknown as WorkerGlobalScope;
+      workerScope.onmessage = handler;
     }
   }
 

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import React from "react";
 import { ChessBoard } from "../BoardComponents.js";
-import { FEN, Move } from "@multi-game-engines/ui-core";
+import { createFEN, createMove } from "@multi-game-engines/core";
 
 interface ChessBoardElement extends HTMLElement {
   fen: string;
@@ -14,9 +14,10 @@ interface ChessBoardElement extends HTMLElement {
 
 describe("ChessBoard (React)", () => {
   it("should render chess-board custom element with props mapped correctly", async () => {
-    const fen =
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
-    const lastMove = "e2e4" as Move;
+    const fen = createFEN(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    );
+    const lastMove = createMove("e2e4");
     const pieceNames = { P: "Pawn", p: "Gote Pawn" };
     const { container } = render(
       <ChessBoard
@@ -43,7 +44,7 @@ describe("ChessBoard (React)", () => {
   });
 
   it("should not set optional attributes when undefined", () => {
-    const fen = "8/8/8/8/8/8/8/8 w - - 0 1" as FEN;
+    const fen = createFEN("8/8/8/8/8/8/8/8 w - - 0 1");
     const { container } = render(<ChessBoard fen={fen} />);
 
     const board = container.querySelector("chess-board") as ChessBoardElement;
