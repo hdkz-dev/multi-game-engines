@@ -4,6 +4,9 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
   EngineLoadingStrategy,
   IMiddleware,
   ICapabilities,
@@ -38,6 +41,17 @@ export class EngineBridge implements IEngineBridge {
   private capsPromise: Promise<ICapabilities> | null = null;
   private disposed = false;
 
+  private statusListeners = new Set<
+    (id: string, status: EngineStatus) => void
+  >();
+  private progressListeners = new Set<
+    (id: string, progress: ILoadProgress) => void
+  >();
+  private telemetryListeners = new Set<
+    (id: string, event: ITelemetryEvent) => void
+  >();
+  private adapterUnsubscribers = new Map<string, (() => void)[]>();
+
   // 2026 Best Practice: インスタンスの破棄を監視し、リークを追跡可能にする
   private finalizationRegistry = new FinalizationRegistry((id: string) => {
     if (this.disposed) return;
@@ -62,25 +76,47 @@ export class EngineBridge implements IEngineBridge {
     // 2026 Best Practice: アダプター登録時に能力要件を検証
     await this.enforceCapabilities(adapter);
 
+    const id = adapter.id;
+
     // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
-    const old = this.adapters.get(adapter.id);
-    if (old) {
-      await old.dispose();
-    }
+    await this.unregisterAdapter(id);
+
+    const unsubs: (() => void)[] = [];
+    unsubs.push(
+      adapter.onStatusChange((status) => {
+        for (const cb of this.statusListeners) cb(id, status);
+      }),
+    );
+    unsubs.push(
+      adapter.onProgress((progress) => {
+        for (const cb of this.progressListeners) cb(id, progress);
+      }),
+    );
+    unsubs.push(
+      adapter.onTelemetry((event) => {
+        for (const cb of this.telemetryListeners) cb(id, event);
+      }),
+    );
+
+    this.adapterUnsubscribers.set(id, unsubs);
     this.adapters.set(
-      adapter.id,
+      id,
       adapter as unknown as IEngineAdapter<
         IBaseSearchOptions,
         IBaseSearchInfo,
         IBaseSearchResult
       >,
     );
-    this.engineInstances.delete(adapter.id);
   }
 
   async unregisterAdapter(id: string): Promise<void> {
     const adapter = this.adapters.get(id);
     if (adapter) {
+      const unsubs = this.adapterUnsubscribers.get(id);
+      if (unsubs) {
+        for (const unsub of unsubs) unsub();
+      }
+      this.adapterUnsubscribers.delete(id);
       await adapter.dispose();
     }
     this.adapters.delete(id);
@@ -176,6 +212,27 @@ export class EngineBridge implements IEngineBridge {
 
     // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア
     this.engineInstances.clear();
+  }
+
+  onGlobalStatusChange(
+    callback: (id: string, status: EngineStatus) => void,
+  ): () => void {
+    this.statusListeners.add(callback);
+    return () => this.statusListeners.delete(callback);
+  }
+
+  onGlobalProgress(
+    callback: (id: string, progress: ILoadProgress) => void,
+  ): () => void {
+    this.progressListeners.add(callback);
+    return () => this.progressListeners.delete(callback);
+  }
+
+  onGlobalTelemetry(
+    callback: (id: string, event: ITelemetryEvent) => void,
+  ): () => void {
+    this.telemetryListeners.add(callback);
+    return () => this.telemetryListeners.delete(callback);
   }
 
   async checkCapabilities(): Promise<ICapabilities> {

@@ -126,10 +126,18 @@ export abstract class BaseAdapter<
    * Worker からのメッセージを処理します。
    */
   protected handleIncomingMessage(data: unknown): void {
-    if (typeof data !== "object" || data === null) return;
-    const record = data as Record<string, unknown>;
+    // 2026 Best Practice: 文字列とオブジェクトの両方をプロトコル解析に渡す
+    // UCI/USI/GTP は主に文字列、Mahjong (Mortal) は JSON オブジェクトを使用。
+    if (
+      typeof data !== "string" &&
+      (typeof data !== "object" || data === null)
+    ) {
+      return;
+    }
 
-    const info = this.parser.parseInfo(record);
+    const input = data as string | Record<string, unknown>;
+
+    const info = this.parser.parseInfo(input);
     if (info) {
       this.infoController?.enqueue(info);
       for (const listener of this.infoListeners) {
@@ -144,7 +152,7 @@ export abstract class BaseAdapter<
       }
     }
 
-    const result = this.parser.parseResult(record);
+    const result = this.parser.parseResult(input);
     if (result) {
       // 2026 Best Practice: 即座に参照をクリアして二重解決を防止
       const resolve = this.pendingResolve;
@@ -161,7 +169,7 @@ export abstract class BaseAdapter<
           );
         }
       }
-      this.cleanupPendingTask();
+      this.cleanupPendingTask("Search completed successfully");
     }
   }
 

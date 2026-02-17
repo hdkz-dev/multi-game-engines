@@ -101,9 +101,12 @@ export class PVListElement extends LitElement {
                     @click="${() =>
                       this.dispatchEvent(
                         new CustomEvent("move-click", {
-                          detail: { move: move.toString(), pv },
+                          detail: { move: move.toString(), index: idx, pv },
+                          bubbles: true,
+                          composed: true,
                         }),
                       )}"
+                    aria-label="${strings.moveAriaLabel(move.toString())}"
                   >
                     ${move}
                   </button>

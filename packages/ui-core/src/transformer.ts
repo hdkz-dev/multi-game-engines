@@ -1,6 +1,12 @@
-import { EngineSearchState, PrincipalVariation } from "./types.js";
-import { createMove, createPositionString } from "@multi-game-engines/core";
+import {
+  EngineSearchState,
+  PrincipalVariation,
+  SearchLogEntry,
+} from "./types.js";
+import { createPositionString } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
+
+let logCounter = 0;
 
 /**
  * エンジンからの生の情報を UI 向けの状態に変換・マージする。
@@ -14,14 +20,12 @@ export const SearchStateTransformer = {
     state: EngineSearchState,
     info: ExtendedSearchInfo,
   ): EngineSearchState {
-    // 1. Zod による実行時検証 (契約駆動)
-    const validation = SearchInfoSchema.safeParse(info);
-    if (!validation.success) {
-      console.warn("[UICore] Invalid info ignored:", validation.error);
-      return state;
-    }
+    // 2026 Best Practice: Middleware で検証済みのデータを信頼し、ここでの二重検証を削除してパフォーマンスを向上
+    // const validation = SearchInfoSchema.safeParse(info); ...
 
-    const validatedInfo = validation.data;
+    const validatedInfo = info;
+    const now = Date.now();
+    const multipv = validatedInfo.multipv ?? (validatedInfo.pv ? 1 : undefined);
     const nextPvs = [...state.pvs];
     const nextState: EngineSearchState = {
       ...state,
@@ -39,16 +43,14 @@ export const SearchStateTransformer = {
     };
 
     // PVの更新 (MultiPV対応)
-    if (validatedInfo.pv && validatedInfo.multipv !== undefined) {
-      // 2026 Best Practice: 文字列配列をブランド型 Move[] へバリデーション付きで変換
-      const validatedMoves = validatedInfo.pv.map((m: string) => createMove(m));
+    if (validatedInfo.pv && multipv !== undefined) {
+      // 2026 Best Practice: Zod で変換済みのブランド型 Move[] をそのまま使用
+      const validatedMoves = validatedInfo.pv;
 
-      const pvIndex = nextPvs.findIndex(
-        (p) => p.multipv === validatedInfo.multipv,
-      );
+      const pvIndex = nextPvs.findIndex((p) => p.multipv === multipv);
 
       const newPV: PrincipalVariation = {
-        multipv: validatedInfo.multipv,
+        multipv,
         moves: validatedMoves,
         score: (() => {
           if (validatedInfo.score?.mate !== undefined) {
@@ -87,10 +89,10 @@ export const SearchStateTransformer = {
       }
 
       // 履歴の更新 (MultiPV=1 の場合のみ)
-      if (validatedInfo.multipv === 1) {
+      if (multipv === 1) {
         const nextEntries = [
           ...state.evaluationHistory.entries,
-          { score: newPV.score, timestamp: Date.now() },
+          { score: newPV.score, timestamp: now },
         ];
         if (nextEntries.length > state.evaluationHistory.maxEntries) {
           nextEntries.shift();
@@ -103,6 +105,58 @@ export const SearchStateTransformer = {
 
       // MultiPV 順にソート
       nextPvs.sort((a, b) => a.multipv - b.multipv);
+
+      // 探索ログの更新ロジック (Smart Log Entry)
+      const newScore = newPV.score;
+      let lastEntryIndex = -1;
+      for (let i = state.searchLog.length - 1; i >= 0; i--) {
+        if (state.searchLog[i]?.multipv === multipv) {
+          lastEntryIndex = i;
+          break;
+        }
+      }
+      const lastEntry =
+        lastEntryIndex >= 0 ? state.searchLog[lastEntryIndex] : null;
+
+      const isSameProgress =
+        lastEntry &&
+        lastEntry.depth === (validatedInfo.depth ?? state.stats.depth) &&
+        lastEntry.score.type === newScore.type &&
+        lastEntry.score.value === newScore.value &&
+        lastEntry.pv.join(",") === validatedMoves.join(",");
+
+      const logEntry: SearchLogEntry = {
+        id:
+          lastEntry && isSameProgress
+            ? lastEntry.id
+            : `${now}-${logCounter++}-${multipv}`,
+        depth: validatedInfo.depth ?? state.stats.depth,
+        seldepth: validatedInfo.seldepth ?? state.stats.seldepth,
+        score: newScore,
+        nodes: validatedInfo.nodes ?? state.stats.nodes,
+        nps: validatedInfo.nps ?? state.stats.nps,
+        time: validatedInfo.time ?? state.stats.time,
+        visits: validatedInfo.visits ?? state.stats.visits,
+        multipv,
+        pv: validatedMoves,
+        timestamp: now,
+      };
+
+      let nextLog: SearchLogEntry[];
+      if (lastEntry && isSameProgress) {
+        // 同じ進捗なら最後の該当エントリを更新
+        nextLog = [...state.searchLog];
+        nextLog[lastEntryIndex] = logEntry;
+      } else {
+        // 進捗があれば新規追加
+        nextLog = [...state.searchLog, logEntry];
+      }
+
+      // 最大 200 件に制限
+      if (nextLog.length > 200) {
+        nextLog.shift();
+      }
+      nextState.searchLog = nextLog;
     }
 
     return nextState;
@@ -126,6 +180,7 @@ export const SearchStateTransformer = {
         entries: [],
         maxEntries: 50,
       },
+      searchLog: [],
     };
   },
 };

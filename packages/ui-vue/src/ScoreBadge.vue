@@ -23,8 +23,10 @@ const colorClass = computed(() =>
 );
 const label = computed(() => {
   if (props.score.type === "mate") {
-    return strings.value.mateIn(
-      Math.abs(props.inverted ? -props.score.value : props.score.value),
+    return EvaluationPresenter.getDisplayLabel(
+      props.score,
+      props.inverted,
+      strings.value.mateShort || "M",
     );
   }
   return EvaluationPresenter.getDisplayLabel(props.score, props.inverted);

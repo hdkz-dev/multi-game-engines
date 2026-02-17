@@ -6,7 +6,7 @@ Portable, high-performance UI components that work anywhere HTML works.
 ## Features
 
 - **Portable**: Works in React, Vue, Svelte, or vanilla HTML.
-- **Components**: `<engine-monitor>`, `<score-badge>`, `<engine-stats>`, `<pv-list>`.
+- **Components**: `<engine-monitor>`, `<score-badge>`, `<engine-stats>`, `<pv-list>`, `<search-log>`.
 - **Shadow DOM**: Encapsulated styling immune to external CSS conflicts.
 - **Performance**: Lit-based efficient rendering.
 

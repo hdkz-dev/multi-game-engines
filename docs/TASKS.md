@@ -32,7 +32,10 @@
 - [x] **厳格な型安全性の追求 (Zenith Tier)**: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, および `Project References` の全パッケージ適用。
 - [x] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
 - [x] **UIコンポーネント拡充**: 評価値の時系列グラフの実装。
-- [ ] **UIコンポーネント拡充**: 思考ログの永続化表示。
+- [x] **UIコンポーネント拡充**: 思考ログの永続化表示。
+  - [x] `requestAnimationFrame` による状態更新のスロットリング実装とユニットテストによる検証 (Performance/Reliability)。
+  - [x] ネイティブ HTML `<table>` 要素による完全なセマンティクスとアクセシビリティの確保 (A11y Best Practice)。
+  - [x] ユーザー操作を妨げない「スマート・オートスクロール」ロジックの実装 (UX Improvement).
 - [x] **Node.js 24 & Turborepo 統合**: モノレポ全体のビルドパイプライン高速化と最新ランタイム環境の確立。
 - [ ] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。

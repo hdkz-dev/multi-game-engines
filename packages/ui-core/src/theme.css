@@ -4,6 +4,30 @@
  */
 
 :root {
+  /* Core Palette */
+  --mge-color-primary: #2563eb;
+  --mge-color-primary-hover: #1d4ed8;
+  --mge-color-danger: #dc2626;
+  --mge-color-danger-bg: #fef2f2;
+
+  /* Gray Scale */
+  --mge-color-gray-50: #f9fafb;
+  --mge-color-gray-100: #f3f4f6;
+  --mge-color-gray-200: #e5e7eb;
+  --mge-color-gray-300: #d1d5db;
+  --mge-color-gray-400: #9ca3af;
+  --mge-color-gray-500: #6b7280;
+  --mge-color-gray-600: #4b5563;
+  --mge-color-gray-700: #374151;
+  --mge-color-gray-800: #1f2937;
+  --mge-color-gray-900: #111827;
+
+  /* Surface & Borders */
+  --mge-surface-base: #ffffff;
+  --mge-surface-alt: var(--mge-color-gray-50);
+  --mge-border-base: var(--mge-color-gray-200);
+  --mge-border-alt: var(--mge-color-gray-100);
+
   /* Status Colors */
   --mge-color-engine-busy: #ef4444;
   --mge-color-engine-ready: #22c55e;
@@ -13,16 +37,20 @@
   --mge-color-score-plus: #2563eb;
   --mge-color-score-minus: #dc2626;
   --mge-color-score-mate: #9333ea;
-  --mge-color-score-neutral: #e5e7eb;
-  --mge-color-score-neutral-text: #1f2937;
+  --mge-color-score-neutral: var(--mge-color-gray-200);
+  --mge-color-score-neutral-text: var(--mge-color-gray-800);
 
   /* Typography */
   --mge-font-mono: "Fira Code", "JetBrains Mono", ui-monospace, monospace;
+  --mge-font-sans: ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   /* Shadow & Glow (Zenith Tier Aesthetic) */
   --mge-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --mge-shadow-md:
-    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mge-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mge-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
   --mge-glow-plus: 0 0 15px rgba(37, 99, 235, 0.2);
   --mge-glow-minus: 0 0 15px rgba(220, 38, 38, 0.2);
 }
+

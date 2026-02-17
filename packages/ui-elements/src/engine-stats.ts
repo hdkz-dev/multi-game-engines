@@ -1,6 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { SearchStatistics, createUIStrings } from "@multi-game-engines/ui-core";
+import {
+  SearchStatistics,
+  createUIStrings,
+  formatNumber,
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { locales } from "@multi-game-engines/i18n";
 
 @customElement("engine-stats")
@@ -11,7 +16,7 @@ export class EngineStatsElement extends LitElement {
       grid-template-columns: repeat(2, 1fr);
       gap: 1rem;
       padding: 1rem;
-      background-color: #f9fafb;
+      background-color: var(--mge-surface-alt);
       border-radius: 0.5rem;
     }
     @media (min-width: 768px) {
@@ -26,25 +31,19 @@ export class EngineStatsElement extends LitElement {
     }
     .label {
       font-size: 0.75rem;
-      color: #6b7280;
+      color: var(--mge-color-gray-500);
       font-weight: 500;
     }
     .value {
       font-size: 0.875rem;
       font-weight: 700;
-      color: #111827;
-      font-family: ui-monospace, monospace;
+      color: var(--mge-color-gray-900);
+      font-family: var(--mge-font-mono);
     }
   `;
 
   @property({ type: Object }) stats?: SearchStatistics;
   @property({ type: String }) locale = "ja";
-
-  private _formatNumber(num: number): string {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-    return num.toString();
-  }
 
   render() {
     if (!this.stats) return html``;
@@ -54,27 +53,31 @@ export class EngineStatsElement extends LitElement {
 
     return html`
       <div class="stat-box">
-        <span class="label">${strings.depth}</span>
-        <span class="value"
-          >${this.stats.depth}${this.stats.seldepth
-            ? `/${this.stats.seldepth}`
-            : ""}</span
+        <span class="label"
+          >${this.stats.visits && this.stats.visits > 0
+            ? strings.visits
+            : strings.depth}</span
         >
+        <span class="value">
+          ${this.stats.visits && this.stats.visits > 0
+            ? html`${formatNumber(this.stats.visits)}${strings.visitsUnit}`
+            : html`${this.stats.depth}${this.stats.seldepth
+                ? `/${this.stats.seldepth}`
+                : ""}`}
+        </span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.nodes}</span>
-        <span class="value">${this._formatNumber(this.stats.nodes)}</span>
+        <span class="value">${formatNumber(this.stats.nodes)}</span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.nps}</span>
-        <span class="value">${this._formatNumber(this.stats.nps)}</span>
+        <span class="value">${formatNumber(this.stats.nps)}</span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.time}</span>
         <span class="value"
-          >${(this.stats.time / 1000).toFixed(
-            1,
-          )}${strings.timeUnitSeconds}</span
+          >${formatTime(this.stats.time)}${strings.timeUnitSeconds}</span
         >
       </div>
     `;

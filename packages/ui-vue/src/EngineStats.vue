@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SearchStatistics } from "@multi-game-engines/ui-core";
+import { SearchStatistics, formatNumber, formatTime } from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
 import { useEngineUI } from "./useEngineUI.js";
 
@@ -13,15 +13,6 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { strings } = useEngineUI();
-
-/**
- * 数値を読みやすい形式にフォーマット (1000 -> 1.0k, 1000000 -> 1.0M)
- */
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-  return num.toString();
-};
 </script>
 
 <template>
@@ -31,14 +22,20 @@ const formatNumber = (num: number): string => {
       className,
     ]"
   >
-    <!-- Depth -->
+    <!-- Depth / Visits -->
     <div class="flex flex-col gap-1">
       <div class="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
         <Layers class="w-4 h-4" />
-        <span>{{ strings.depth }}</span>
+        <span v-if="stats.visits && stats.visits > 0">{{ strings.visits }}</span>
+        <span v-else>{{ strings.depth }}</span>
       </div>
       <div class="text-sm font-bold text-gray-900 font-mono">
-        {{ stats.depth }}{{ stats.seldepth ? `/${stats.seldepth}` : "" }}
+        <template v-if="stats.visits && stats.visits > 0">
+          {{ formatNumber(stats.visits) }}{{ strings.visitsUnit }}
+        </template>
+        <template v-else>
+          {{ stats.depth }}{{ stats.seldepth ? `/${stats.seldepth}` : "" }}
+        </template>
       </div>
     </div>
 
@@ -71,7 +68,7 @@ const formatNumber = (num: number): string => {
         <span>{{ strings.time }}</span>
       </div>
       <div class="text-sm font-bold text-gray-900 font-mono">
-        {{ (stats.time / 1000).toFixed(1) }}{{ strings.timeUnitSeconds }}
+        {{ formatTime(stats.time) }}{{ strings.timeUnitSeconds }}
       </div>
     </div>
   </div>

@@ -229,6 +229,7 @@ export interface IMiddleware<
   T_INFO = unknown,
   T_RESULT = IBaseSearchResult,
 > {
+  id?: string;
   priority?: number;
   supportedEngines?: string[];
   onCommand?(
@@ -393,10 +394,23 @@ export interface IEngineLoader {
  * エンジン・ブリッジ。
  */
 export interface IEngineBridge {
-  getEngine<T extends keyof EngineRegistry>(id: T): EngineRegistry[T];
+  getEngine<T extends keyof EngineRegistry>(
+    id: T,
+    strategy?: EngineLoadingStrategy,
+  ): EngineRegistry[T];
   registerAdapter(
     adapter: IEngineAdapter<IBaseSearchOptions, unknown, IBaseSearchResult>,
-  ): void;
+  ): Promise<void>;
+  unregisterAdapter(id: string): Promise<void>;
+  onGlobalStatusChange(
+    callback: (id: string, status: EngineStatus) => void,
+  ): () => void;
+  onGlobalProgress(
+    callback: (id: string, progress: ILoadProgress) => void,
+  ): () => void;
+  onGlobalTelemetry(
+    callback: (id: string, event: ITelemetryEvent) => void,
+  ): () => void;
   dispose(): Promise<void>;
 }
 

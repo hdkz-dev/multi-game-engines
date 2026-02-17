@@ -7,7 +7,7 @@
     T_RESULT extends IBaseSearchResult
   "
 >
-import { computed } from "vue";
+import { computed, ref, nextTick } from "vue";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -21,13 +21,16 @@ import { useEngineMonitor } from "./useEngineMonitor.js";
 import { useEngineUI } from "./useEngineUI.js";
 import ScoreBadge from "./ScoreBadge.vue";
 import EngineStats from "./EngineStats.vue";
+import EvaluationGraph from "./EvaluationGraph.vue";
 import PVList from "./PVList.vue";
+import SearchLog from "./SearchLog.vue";
 import {
   Settings2,
   Play,
   Square,
   AlertCircle,
   ScrollText,
+  History,
 } from "lucide-vue-next";
 
 // 2026 Best Practice: Vue 3.3+ のジェネリック・マクロを使用
@@ -42,6 +45,45 @@ const emit = defineEmits<{
 }>();
 
 const { strings } = useEngineUI();
+const activeTab = ref<"pv" | "log">("pv");
+const pvTabRef = ref<HTMLButtonElement | null>(null);
+const logTabRef = ref<HTMLButtonElement | null>(null);
+
+const emitUIInteraction = (action: string) => {
+  props.engine.emitTelemetry({
+    type: "lifecycle",
+    timestamp: Date.now(),
+    metadata: {
+      component: "EngineMonitorPanel",
+      action,
+      engineId: props.engine.id,
+    },
+  });
+};
+
+const handleTabKeyDown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    e.preventDefault();
+    activeTab.value = activeTab.value === "pv" ? "log" : "pv";
+    focusTab();
+  } else if (e.key === "Home") {
+    e.preventDefault();
+    activeTab.value = "pv";
+    focusTab();
+  } else if (e.key === "End") {
+    e.preventDefault();
+    activeTab.value = "log";
+    focusTab();
+  }
+};
+
+const focusTab = () => {
+  nextTick(() => {
+    if (activeTab.value === "pv") pvTabRef.value?.focus();
+    else logTabRef.value?.focus();
+  });
+};
+
 const { state, status, search, stop } = useEngineMonitor<
   EngineSearchState,
   T_OPTIONS,
@@ -54,11 +96,20 @@ const { state, status, search, stop } = useEngineMonitor<
 const bestPV = computed(() => state.value.pvs[0]);
 const displayTitle = computed(() => props.title ?? strings.value.title);
 
+const announcement = computed(() => {
+  if (status.value === "error") return strings.value.errorTitle;
+  if (bestPV.value?.score.type === "mate")
+    return strings.value.mateIn(bestPV.value.score.value);
+  return "";
+});
+
 const handleStart = async () => {
+  emitUIInteraction("start_click");
   void search(props.searchOptions);
 };
 
 const handleStop = async () => {
+  emitUIInteraction("stop_click");
   void stop();
 };
 
@@ -72,6 +123,9 @@ const handleMoveClick = (move: string) => {
     class="flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl"
     aria-labelledby="monitor-title"
   >
+    <div class="sr-only" aria-live="assertive" role="alert">
+      {{ announcement }}
+    </div>
     <!-- Header -->
     <header
       class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200"
@@ -164,26 +218,83 @@ const handleMoveClick = (move: string) => {
           </div>
         </section>
 
+        <!-- Evaluation Trend Graph -->
+        <div class="px-4 py-2 bg-white">
+          <EvaluationGraph
+            :entries="state.evaluationHistory.entries"
+            :height="40"
+            class="opacity-80 hover:opacity-100 transition-opacity"
+          />
+        </div>
+
         <!-- Stats Infrastructure -->
         <EngineStats :stats="state.stats" class="border-b border-gray-100" />
 
-        <!-- Principal Variations List -->
+        <!-- Principal Variations / Log List -->
         <div class="flex-1 flex flex-col min-h-0">
           <div
-            class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2"
+            class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between"
           >
-            <ScrollText class="w-3.5 h-3.5 text-gray-400" />
-            <span
-              class="text-[10px] text-gray-500 font-bold uppercase tracking-wider"
-              >{{ strings.principalVariations }}</span
+            <div
+              class="flex items-center gap-4"
+              role="tablist"
+              aria-orientation="horizontal"
+              @keydown="handleTabKeyDown"
             >
+              <button
+                ref="pvTabRef"
+                @click="activeTab = 'pv'"
+                role="tab"
+                :aria-selected="activeTab === 'pv'"
+                :tabindex="activeTab === 'pv' ? 0 : -1"
+                class="flex items-center gap-1.5 transition-colors outline-none"
+                :class="activeTab === 'pv' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+              >
+                <ScrollText class="w-3.5 h-3.5" />
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.principalVariations }}</span>
+              </button>
+              <button
+                ref="logTabRef"
+                @click="activeTab = 'log'"
+                role="tab"
+                :aria-selected="activeTab === 'log'"
+                :tabindex="activeTab === 'log' ? 0 : -1"
+                class="flex items-center gap-1.5 transition-colors outline-none"
+                :class="activeTab === 'log' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+              >
+                <History class="w-3.5 h-3.5" />
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.searchLog }}</span>
+              </button>
+            </div>
+            <span class="text-[10px] font-mono text-gray-300">
+              {{ activeTab === 'pv' ? strings.pvCount(state.pvs.length) : strings.logCount(state.searchLog.length) }}
+            </span>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <PVList
-              :pvs="state.pvs"
-              class="p-4"
-              @move-click="handleMoveClick"
-            />
+            <div
+              role="tabpanel"
+              :aria-hidden="activeTab !== 'pv'"
+              class="h-full"
+            >
+              <PVList
+                v-if="activeTab === 'pv'"
+                :pvs="state.pvs"
+                class="p-4"
+                @move-click="handleMoveClick"
+              />
+            </div>
+            <div
+              role="tabpanel"
+              :aria-hidden="activeTab !== 'log'"
+              class="h-full"
+            >
+              <SearchLog
+                v-if="activeTab === 'log'"
+                :log="state.searchLog"
+                class="border-none rounded-none"
+                @move-click="handleMoveClick"
+              />
+            </div>
           </div>
         </div>
       </template>

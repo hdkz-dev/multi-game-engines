@@ -50,24 +50,4 @@ export class MortalAdapter extends BaseAdapter<
       throw EngineError.from(error, this.id);
     }
   }
-
-  async stop(): Promise<void> {
-    this.cleanupPendingTask("Search aborted");
-    if (!this.communicator) return;
-    this.communicator.postMessage(this.parser.createStopCommand());
-  }
-
-  protected async sendOptionToWorker(
-    name: string,
-    value: string | number | boolean,
-  ): Promise<void> {
-    if (!this.communicator) {
-      throw new EngineError({
-        code: EngineErrorCode.NOT_READY,
-        message: "Engine is not loaded",
-        engineId: this.id,
-      });
-    }
-    this.communicator.postMessage(this.parser.createOptionCommand(name, value));
-  }
 }

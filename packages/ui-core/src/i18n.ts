@@ -8,8 +8,15 @@ export interface EngineUIStrings {
   nodes: string;
   nps: string;
   time: string;
+  score: string;
+  visits: string;
+  visitsUnit: string;
+  mateShort: string;
+  evaluationGraph: string;
+  pv: string;
   topCandidate: string;
   principalVariations: string;
+  searchLog: string;
   start: string;
   stop: string;
   searching: string;
@@ -24,6 +31,8 @@ export interface EngineUIStrings {
   timeUnitSeconds: string;
   noMove: string;
   pvCount: (n: number) => string;
+  logCount: (n: number) => string;
+  moveAriaLabel: (move: string) => string;
   engineVersion: (name: string, version: string) => string;
   engineBridgeStandard: (year: number) => string;
 }
@@ -64,8 +73,15 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     nodes: t("nodes", "Nodes"),
     nps: t("nps", "NPS"),
     time: t("time", "Time"),
+    score: t("score", "Score"),
+    visits: t("visits", "Visits"),
+    visitsUnit: t("visitsUnit", "v"),
+    mateShort: t("mateShort", "M"),
+    evaluationGraph: t("evaluationGraph", "Evaluation trend graph"),
+    pv: t("pv", "PV"),
     topCandidate: t("topCandidate", "Best Move"),
     principalVariations: t("principalVariations", "PVs"),
+    searchLog: t("searchLog", "Log"),
     start: t("start", "START"),
     stop: t("stop", "STOP"),
     searching: t("searching", "Searching..."),
@@ -87,6 +103,10 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     timeUnitSeconds: t("timeUnitSeconds", "s"),
     noMove: t("noMove", "---"),
     pvCount: (n: number) => t("pvCount", "N={n}").replace("{n}", n.toString()),
+    logCount: (n: number) =>
+      t("logCount", "{n} entries").replace("{n}", n.toString()),
+    moveAriaLabel: (move: string) =>
+      t("moveAriaLabel", "Move {move}").replace("{move}", move),
     engineVersion: (name: string, version: string) =>
       t("engineVersion", "{name} v{version}")
         .replace("{name}", name)
