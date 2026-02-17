@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watchEffect } from "vue";
 import "@multi-game-engines/ui-elements";
 import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
 
@@ -25,11 +26,13 @@ const props = defineProps<{
   handGoteLabel?: string;
 }>();
 
-if (props.type === "chess" && !props.fen) {
-  console.warn("[BoardComponents] 'fen' is required when type is 'chess'");
-} else if (props.type === "shogi" && !props.sfen) {
-  console.warn("[BoardComponents] 'sfen' is required when type is 'shogi'");
-}
+watchEffect(() => {
+  if (props.type === "chess" && !props.fen) {
+    console.warn("[BoardComponents] 'fen' is required when type is 'chess'");
+  } else if (props.type === "shogi" && !props.sfen) {
+    console.warn("[BoardComponents] 'sfen' is required when type is 'shogi'");
+  }
+});
 </script>
 
 <template>

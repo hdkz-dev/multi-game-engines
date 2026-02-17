@@ -20,7 +20,6 @@ import {
   ExtendedSearchInfo,
   UINormalizerMiddleware,
   CommandDispatcher,
-  PositionString,
 } from "@multi-game-engines/ui-core";
 
 /**
@@ -62,17 +61,11 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState<T_STATE>(brandedPos);
+      return createInitialState(brandedPos) as T_STATE;
     } catch {
-      // バリデーション失敗時は最小限の空の状態で復旧
-      return {
-        isSearching: false,
-        position: initialPosition as PositionString,
-        pvs: [],
-        evaluationHistory: { entries: [], maxEntries: 50 },
-        searchLog: [],
-        stats: { depth: 0, nodes: 0, nps: 0, time: 0 },
-      } as unknown as T_STATE;
+      // バリデーション失敗時は安全なデフォルト値で復旧
+      const safePos = createPositionString("startpos");
+      return createInitialState(safePos) as T_STATE;
     }
   }, [initialPosition]);
 

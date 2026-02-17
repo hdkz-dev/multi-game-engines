@@ -4,6 +4,21 @@ import React from "react";
 import { ChessBoard, ShogiBoard } from "../BoardComponents.js";
 import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
 
+interface ChessBoardElement extends HTMLElement {
+  fen: string;
+  lastMove: string;
+  orientation: string;
+  boardLabel: string;
+}
+
+interface ShogiBoardElement extends HTMLElement {
+  sfen: string;
+  lastMove: string;
+  boardLabel: string;
+  handSenteLabel: string;
+  handGoteLabel: string;
+}
+
 describe("BoardComponents (React)", () => {
   describe("ChessBoard", () => {
     it("should render chess-board custom element with props mapped correctly", async () => {
@@ -20,19 +35,15 @@ describe("BoardComponents (React)", () => {
         />,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const board = container.querySelector("chess-board") as any;
+      const board = container.querySelector("chess-board") as ChessBoardElement;
       expect(board).toBeTruthy();
 
       // In React 19, properties are preferred for custom elements if they exist.
-      // We verify the data flow by checking properties on the element instance.
       expect(board.fen).toBe(fen);
       expect(board.lastMove).toBe(lastMove);
       expect(board.orientation).toBe("black");
       expect(board.boardLabel).toBe("Custom Chess Board");
 
-      // Attributes that are explicitly passed as kebab-case or mapped (like className -> class)
-      // should be verifiable via getAttribute if the framework sets them or Lit reflects them.
       expect(board.getAttribute("class")).toBe("custom-class");
     });
 
@@ -40,9 +51,7 @@ describe("BoardComponents (React)", () => {
       const fen = "8/8/8/8/8/8/8/8 w - - 0 1" as FEN;
       const { container } = render(<ChessBoard fen={fen} />);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const board = container.querySelector("chess-board") as any;
-      // properties should be undefined/default, attributes should be absent
+      const board = container.querySelector("chess-board") as ChessBoardElement;
       expect(board.getAttribute("last-move")).toBeNull();
       expect(board.getAttribute("orientation")).toBeNull();
       expect(board.getAttribute("board-label")).toBeNull();
@@ -65,8 +74,7 @@ describe("BoardComponents (React)", () => {
         />,
       );
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const board = container.querySelector("shogi-board") as any;
+      const board = container.querySelector("shogi-board") as ShogiBoardElement;
       expect(board).toBeTruthy();
 
       expect(board.sfen).toBe(sfen);
@@ -82,8 +90,7 @@ describe("BoardComponents (React)", () => {
       const sfen = "9/9/9/9/9/9/9/9/9 b - 1" as SFEN;
       const { container } = render(<ShogiBoard sfen={sfen} />);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const board = container.querySelector("shogi-board") as any;
+      const board = container.querySelector("shogi-board") as ShogiBoardElement;
       expect(board.getAttribute("last-move")).toBeNull();
       expect(board.getAttribute("board-label")).toBeNull();
       expect(board.getAttribute("hand-sente-label")).toBeNull();

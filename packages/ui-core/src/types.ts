@@ -92,9 +92,9 @@ export interface EngineSearchState {
 /**
  * 初期状態の定義
  */
-export function createInitialState<
-  T extends EngineSearchState = EngineSearchState,
->(position: PositionString): T {
+export function createInitialState(
+  position: PositionString,
+): EngineSearchState {
   return {
     isSearching: false,
     position,
@@ -110,5 +110,5 @@ export function createInitialState<
       maxEntries: 50,
     },
     searchLog: [],
-  } as unknown as T;
+  };
 }

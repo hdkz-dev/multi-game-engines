@@ -37,7 +37,7 @@ import {
   Cpu,
   Gauge,
 } from "lucide-react";
-import { useEngineMonitor } from "@multi-game-engines/ui-react";
+import { useEngineMonitor } from "@multi-game-engines/ui-react/hooks";
 
 type EngineType = "chess" | "shogi";
 type LocaleType = "ja" | "en";

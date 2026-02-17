@@ -1,4 +1,5 @@
 import {
+  createInitialState,
   EngineSearchState,
   PrincipalVariation,
   SearchLogEntry,
@@ -166,21 +167,6 @@ export const SearchStateTransformer = {
    * 初期状態を生成する。
    */
   createInitialState(position: string): EngineSearchState {
-    return {
-      isSearching: false,
-      position: createPositionString(position),
-      pvs: [],
-      stats: {
-        depth: 0,
-        nodes: 0,
-        nps: 0,
-        time: 0,
-      },
-      evaluationHistory: {
-        entries: [],
-        maxEntries: 50,
-      },
-      searchLog: [],
-    };
+    return createInitialState(createPositionString(position));
   },
 };
