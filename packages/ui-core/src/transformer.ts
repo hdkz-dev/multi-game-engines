@@ -1,6 +1,12 @@
-import { EngineSearchState, PrincipalVariation } from "./types.js";
+import {
+  EngineSearchState,
+  PrincipalVariation,
+  SearchLogEntry,
+} from "./types.js";
 import { createMove, createPositionString } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "./schema.js";
+
+let logCounter = 0;
 
 /**
  * エンジンからの生の情報を UI 向けの状態に変換・マージする。
@@ -103,6 +109,55 @@ export const SearchStateTransformer = {
 
       // MultiPV 順にソート
       nextPvs.sort((a, b) => a.multipv - b.multipv);
+
+      // 探索ログの更新ロジック (Smart Log Entry)
+      const newScore = newPV.score;
+      const lastEntryIndex = [...state.searchLog]
+        .reverse()
+        .findIndex((e) => e.multipv === validatedInfo.multipv);
+      const lastEntry =
+        lastEntryIndex >= 0
+          ? state.searchLog[state.searchLog.length - 1 - lastEntryIndex]
+          : null;
+
+      const isSameProgress =
+        lastEntry &&
+        lastEntry.depth === (validatedInfo.depth ?? state.stats.depth) &&
+        lastEntry.score.type === newScore.type &&
+        lastEntry.score.value === newScore.value &&
+        lastEntry.pv.join(",") === validatedMoves.join(",");
+
+      const logEntry: SearchLogEntry = {
+        id:
+          lastEntry && isSameProgress
+            ? lastEntry.id
+            : `${Date.now()}-${logCounter++}-${validatedInfo.multipv}`,
+        depth: validatedInfo.depth ?? state.stats.depth,
+        seldepth: validatedInfo.seldepth ?? state.stats.seldepth,
+        score: newScore,
+        nodes: validatedInfo.nodes ?? state.stats.nodes,
+        nps: validatedInfo.nps ?? state.stats.nps,
+        time: validatedInfo.time ?? state.stats.time,
+        multipv: validatedInfo.multipv,
+        pv: validatedMoves,
+        timestamp: Date.now(),
+      };
+
+      let nextLog: SearchLogEntry[];
+      if (lastEntry && isSameProgress) {
+        // 同じ進捗なら最後の該当エントリを更新
+        nextLog = [...state.searchLog];
+        nextLog[state.searchLog.length - 1 - lastEntryIndex] = logEntry;
+      } else {
+        // 進捗があれば新規追加
+        nextLog = [...state.searchLog, logEntry];
+      }
+
+      // 最大 200 件に制限
+      if (nextLog.length > 200) {
+        nextLog.shift();
+      }
+      nextState.searchLog = nextLog;
     }
 
     return nextState;
@@ -126,6 +181,7 @@ export const SearchStateTransformer = {
         entries: [],
         maxEntries: 50,
       },
+      searchLog: [],
     };
   },
 };

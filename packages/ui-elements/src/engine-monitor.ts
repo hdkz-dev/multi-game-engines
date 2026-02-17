@@ -20,6 +20,7 @@ import { locales } from "@multi-game-engines/i18n";
 import "./score-badge.js";
 import "./engine-stats.js";
 import "./pv-list.js";
+import "./search-log.js";
 
 /**
  * フレームワーク非依存のエンジンモニター・カスタム要素 <engine-monitor>
@@ -139,7 +140,30 @@ export class EngineMonitorElement extends LitElement {
       font-family: ui-monospace, monospace;
       letter-spacing: -0.05em;
     }
-    .pv-container {
+    .tab-header {
+      display: flex;
+      gap: 1rem;
+      padding: 0.5rem 1rem;
+      background-color: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .tab-btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.625rem;
+      font-weight: 800;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: none;
+      border: none;
+      border-radius: 0;
+      border-bottom: 2px solid transparent;
+    }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+    .tab-content {
       flex: 1;
       overflow-y: auto;
       padding: 1rem;
@@ -167,6 +191,7 @@ export class EngineMonitorElement extends LitElement {
 
   @state() private _searchState?: EngineSearchState;
   @state() private _status: EngineStatus = "uninitialized";
+  @state() private _activeTab: "pv" | "log" = "pv";
 
   private _unsub?: () => void;
   private _dispatcher?: CommandDispatcher<
@@ -300,9 +325,31 @@ export class EngineMonitorElement extends LitElement {
                 .locale="${this.locale}"
               ></engine-stats>
 
-              <div class="pv-container">
-                <span class="label-xs">${strings.principalVariations}</span>
-                <pv-list .pvs="${state.pvs}" .locale="${this.locale}"></pv-list>
+              <div class="tab-header">
+                <button
+                  class="tab-btn ${this._activeTab === "pv" ? "active" : ""}"
+                  @click="${() => (this._activeTab = "pv")}"
+                >
+                  ${strings.principalVariations}
+                </button>
+                <button
+                  class="tab-btn ${this._activeTab === "log" ? "active" : ""}"
+                  @click="${() => (this._activeTab = "log")}"
+                >
+                  ${strings.searchLog || "Log"}
+                </button>
+              </div>
+
+              <div class="tab-content">
+                ${this._activeTab === "pv"
+                  ? html`<pv-list
+                      .pvs="${state.pvs}"
+                      .locale="${this.locale}"
+                    ></pv-list>`
+                  : html`<search-log
+                      .log="${state.searchLog}"
+                      .locale="${this.locale}"
+                    ></search-log>`}
               </div>
             `}
       </div>

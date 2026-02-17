@@ -45,6 +45,22 @@ export interface PrincipalVariation {
 }
 
 /**
+ * 探索ログのエントリ（一行分）。
+ */
+export interface SearchLogEntry {
+  id: string;
+  depth: number;
+  seldepth?: number | undefined;
+  score: EvaluationScore;
+  nodes: number;
+  nps: number;
+  time: number;
+  multipv: number;
+  pv: Move[];
+  timestamp: number;
+}
+
+/**
  * 評価値の履歴エントリ。
  */
 export interface IEvaluationHistoryEntry {
@@ -66,6 +82,7 @@ export interface EngineSearchState {
   stats: SearchStatistics;
   pvs: PrincipalVariation[];
   evaluationHistory: IEvaluationHistory;
+  searchLog: SearchLogEntry[];
   currentMove?: Move | undefined;
   currentMoveNumber?: number | undefined;
 }
@@ -89,4 +106,5 @@ export const createInitialState = (
     entries: [],
     maxEntries: 50,
   },
+  searchLog: [],
 });

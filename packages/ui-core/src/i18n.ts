@@ -8,8 +8,11 @@ export interface EngineUIStrings {
   nodes: string;
   nps: string;
   time: string;
+  score: string;
+  pv: string;
   topCandidate: string;
   principalVariations: string;
+  searchLog: string;
   start: string;
   stop: string;
   searching: string;
@@ -64,8 +67,11 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     nodes: t("nodes", "Nodes"),
     nps: t("nps", "NPS"),
     time: t("time", "Time"),
+    score: t("score", "Score"),
+    pv: t("pv", "PV"),
     topCandidate: t("topCandidate", "Best Move"),
     principalVariations: t("principalVariations", "PVs"),
+    searchLog: t("searchLog", "Log"),
     start: t("start", "START"),
     stop: t("stop", "STOP"),
     searching: t("searching", "Searching..."),

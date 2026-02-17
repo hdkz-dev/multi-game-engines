@@ -9,4 +9,5 @@
 export * from "./score-badge.js";
 export * from "./engine-stats.js";
 export * from "./pv-list.js";
+export * from "./search-log.js";
 export * from "./engine-monitor.js";

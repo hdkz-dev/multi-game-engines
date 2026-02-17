@@ -17,6 +17,7 @@
   - 全フレームワークで共通の CSS デザイントークン（CSS Variables）を使用し、視覚的な一貫性を 100% 同期。
   - `MonitorRegistry` による購読の重複排除、`CommandDispatcher` による楽観的 UI 制御を導入。
   - Zod による契約駆動設計（Contract-driven UI）により、ランタイムでの型安全性を 100% 保証。
+  - **思考ログ (Search Log) の永続化表示**: 探索の深さ、評価値、NPS等の推移を時系列で保持・表示するコンポーネントを React/Vue/Web Components 全フレームワークで実装。
 - **品質保証の完遂 (Total AI Audit)**:
   - CodeRabbit による計 5 回の反復監査ループを完了。
   - CI 上での V8 特有のエラー（captureStackTrace）を含め、全 140 ケース以上のテストをパス。

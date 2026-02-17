@@ -7,7 +7,7 @@
     T_RESULT extends IBaseSearchResult
   "
 >
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -22,12 +22,14 @@ import { useEngineUI } from "./useEngineUI.js";
 import ScoreBadge from "./ScoreBadge.vue";
 import EngineStats from "./EngineStats.vue";
 import PVList from "./PVList.vue";
+import SearchLog from "./SearchLog.vue";
 import {
   Settings2,
   Play,
   Square,
   AlertCircle,
   ScrollText,
+  History,
 } from "lucide-vue-next";
 
 // 2026 Best Practice: Vue 3.3+ のジェネリック・マクロを使用
@@ -42,6 +44,7 @@ const emit = defineEmits<{
 }>();
 
 const { strings } = useEngineUI();
+const activeTab = ref<"pv" | "log">("pv");
 const { state, status, search, stop } = useEngineMonitor<
   EngineSearchState,
   T_OPTIONS,
@@ -167,21 +170,41 @@ const handleMoveClick = (move: string) => {
         <!-- Stats Infrastructure -->
         <EngineStats :stats="state.stats" class="border-b border-gray-100" />
 
-        <!-- Principal Variations List -->
+        <!-- Principal Variations / Log List -->
         <div class="flex-1 flex flex-col min-h-0">
           <div
-            class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2"
+            class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between"
           >
-            <ScrollText class="w-3.5 h-3.5 text-gray-400" />
-            <span
-              class="text-[10px] text-gray-500 font-bold uppercase tracking-wider"
-              >{{ strings.principalVariations }}</span
-            >
+            <div class="flex items-center gap-4">
+              <button
+                @click="activeTab = 'pv'"
+                class="flex items-center gap-1.5 transition-colors"
+                :class="activeTab === 'pv' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+              >
+                <ScrollText class="w-3.5 h-3.5" />
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.principalVariations }}</span>
+              </button>
+              <button
+                @click="activeTab = 'log'"
+                class="flex items-center gap-1.5 transition-colors"
+                :class="activeTab === 'log' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+              >
+                <History class="w-3.5 h-3.5" />
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.searchLog || 'Log' }}</span>
+              </button>
+            </div>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">
             <PVList
+              v-if="activeTab === 'pv'"
               :pvs="state.pvs"
               class="p-4"
+              @move-click="handleMoveClick"
+            />
+            <SearchLog
+              v-else
+              :log="state.searchLog"
+              class="border-none rounded-none"
               @move-click="handleMoveClick"
             />
           </div>

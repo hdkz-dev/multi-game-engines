@@ -10,6 +10,8 @@ import { SubscriptionManager } from "./SubscriptionManager.js";
 
 /**
  * エンジン解析を監視・制御するための高レベルモニター。
+ * 2026 Best Practice: requestAnimationFrame によるスロットリングを導入し、
+ * 高頻度な info 出力時でも UI スレッドのブロックを防ぐ。
  */
 export class SearchMonitor<
   T_STATE,
@@ -19,6 +21,9 @@ export class SearchMonitor<
 > {
   private readonly store: EngineStore<T_STATE, T_OPTIONS, T_INFO, T_RESULT>;
   private readonly subManager = new SubscriptionManager();
+  private pendingUpdates: T_INFO[] = [];
+  private updateTimerId: number | NodeJS.Timeout | null = null;
+  private isProcessing = false;
 
   constructor(
     private readonly engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>,
@@ -35,11 +40,51 @@ export class SearchMonitor<
       this.subManager.clear();
       this.subManager.add(
         this.engine.onInfo((info) => {
-          this.store.setState((state) => this.transformer(state, info));
+          this.queueUpdate(info);
         }),
       );
     }
     this.refCount++;
+  }
+
+  private queueUpdate(info: T_INFO) {
+    // バッファサイズ制限: UI更新が追いつかない場合の安全策 (最大1000件保持し、古いものは捨てる)
+    // 通常 reduce 処理されるためここが溢れることは稀だが、異常時の保護として重要。
+    if (this.pendingUpdates.length >= 1000) {
+      this.pendingUpdates.shift();
+    }
+    this.pendingUpdates.push(info);
+
+    if (!this.isProcessing) {
+      this.isProcessing = true;
+      if (typeof requestAnimationFrame !== "undefined") {
+        this.updateTimerId = requestAnimationFrame(() => this.processUpdates());
+      } else {
+        // Fallback for Node.js environment (tests)
+        this.updateTimerId = setTimeout(() => this.processUpdates(), 0);
+      }
+    }
+  }
+
+  private processUpdates() {
+    if (this.pendingUpdates.length === 0) {
+      this.isProcessing = false;
+      return;
+    }
+
+    // バッチ処理: 溜まっている全ての更新を適用
+    const updates = [...this.pendingUpdates];
+    this.pendingUpdates = [];
+
+    this.store.setState((currentState) => {
+      return updates.reduce(
+        (state, info) => this.transformer(state, info),
+        currentState,
+      );
+    });
+
+    this.isProcessing = false;
+    this.updateTimerId = null;
   }
 
   stopMonitoring(): void {
@@ -48,6 +93,20 @@ export class SearchMonitor<
       this.refCount = 0;
       this.subManager.clear();
       this.store.dispose();
+
+      if (this.updateTimerId !== null) {
+        if (
+          typeof cancelAnimationFrame !== "undefined" &&
+          typeof this.updateTimerId === "number"
+        ) {
+          cancelAnimationFrame(this.updateTimerId);
+        } else {
+          clearTimeout(this.updateTimerId as NodeJS.Timeout);
+        }
+        this.updateTimerId = null;
+      }
+      this.pendingUpdates = [];
+      this.isProcessing = false;
     }
   }
 

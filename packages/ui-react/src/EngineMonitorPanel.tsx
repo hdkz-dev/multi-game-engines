@@ -10,12 +10,20 @@ import {
 import { useEngineMonitor } from "./useEngineMonitor.js";
 import { EngineStats } from "./EngineStats.js";
 import { PVList } from "./PVList.js";
+import { SearchLog } from "./SearchLog.js";
 import { ScoreBadge } from "./ScoreBadge.js";
 import { EvaluationGraph } from "./EvaluationGraph.js";
 import { useEngineUI } from "./EngineUIProvider.js";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Separator from "@radix-ui/react-separator";
-import { Play, Square, Settings2, AlertCircle } from "lucide-react";
+import {
+  Play,
+  Square,
+  Settings2,
+  AlertCircle,
+  List,
+  History,
+} from "lucide-react";
 import { cn } from "./utils/cn.js";
 
 interface EngineMonitorPanelProps<
@@ -46,6 +54,7 @@ export function EngineMonitorPanel<
 }: EngineMonitorPanelProps<T_OPTIONS, T_INFO, T_RESULT>) {
   const { strings } = useEngineUI();
   const { state, status, search, stop } = useEngineMonitor(engine);
+  const [activeTab, setActiveTab] = React.useState<"pv" | "log">("pv");
   const panelId = useId();
   const titleId = `engine-monitor-title-${panelId}`;
 
@@ -194,16 +203,48 @@ export function EngineMonitorPanel<
 
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="px-4 py-2 bg-gray-50/50 flex items-center justify-between border-b border-gray-100">
-                <h3 className="text-[10px] text-gray-400 font-black uppercase tracking-widest">
-                  {strings.principalVariations}
-                </h3>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setActiveTab("pv")}
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors",
+                      activeTab === "pv"
+                        ? "text-blue-600"
+                        : "text-gray-400 hover:text-gray-600",
+                    )}
+                  >
+                    <List className="w-3 h-3" />
+                    {strings.principalVariations}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("log")}
+                    className={cn(
+                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors",
+                      activeTab === "log"
+                        ? "text-blue-600"
+                        : "text-gray-400 hover:text-gray-600",
+                    )}
+                  >
+                    <History className="w-3 h-3" />
+                    {strings.searchLog || "Log"}
+                  </button>
+                </div>
                 <span className="text-[10px] font-mono text-gray-300">
-                  {strings.pvCount(state.pvs.length)}
+                  {activeTab === "pv"
+                    ? strings.pvCount(state.pvs.length)
+                    : `${state.searchLog.length} entries`}
                 </span>
               </div>
               <ScrollArea.Root className="flex-1 overflow-hidden">
                 <ScrollArea.Viewport className="h-full w-full p-4">
-                  <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
+                  {activeTab === "pv" ? (
+                    <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
+                  ) : (
+                    <SearchLog
+                      log={state.searchLog}
+                      onMoveClick={onMoveClick}
+                    />
+                  )}
                 </ScrollArea.Viewport>
                 <ScrollArea.Scrollbar
                   className="flex select-none touch-none p-0.5 bg-gray-100/50 transition-colors duration-150 ease-out hover:bg-gray-200 data-[orientation=vertical]:w-2"

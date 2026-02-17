@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SearchStatistics } from "@multi-game-engines/ui-core";
+import { SearchStatistics, formatNumber, formatTime } from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
 import { useEngineUI } from "./useEngineUI.js";
 
@@ -13,15 +13,6 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { strings } = useEngineUI();
-
-/**
- * 数値を読みやすい形式にフォーマット (1000 -> 1.0k, 1000000 -> 1.0M)
- */
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-  return num.toString();
-};
 </script>
 
 <template>
@@ -71,7 +62,7 @@ const formatNumber = (num: number): string => {
         <span>{{ strings.time }}</span>
       </div>
       <div class="text-sm font-bold text-gray-900 font-mono">
-        {{ (stats.time / 1000).toFixed(1) }}{{ strings.timeUnitSeconds }}
+        {{ formatTime(stats.time) }}{{ strings.timeUnitSeconds }}
       </div>
     </div>
   </div>

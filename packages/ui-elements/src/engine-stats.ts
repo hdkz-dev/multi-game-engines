@@ -1,6 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { SearchStatistics, createUIStrings } from "@multi-game-engines/ui-core";
+import {
+  SearchStatistics,
+  createUIStrings,
+  formatNumber,
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { locales } from "@multi-game-engines/i18n";
 
 @customElement("engine-stats")
@@ -40,12 +45,6 @@ export class EngineStatsElement extends LitElement {
   @property({ type: Object }) stats?: SearchStatistics;
   @property({ type: String }) locale = "ja";
 
-  private _formatNumber(num: number): string {
-    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
-    return num.toString();
-  }
-
   render() {
     if (!this.stats) return html``;
     const strings = createUIStrings(
@@ -63,18 +62,16 @@ export class EngineStatsElement extends LitElement {
       </div>
       <div class="stat-box">
         <span class="label">${strings.nodes}</span>
-        <span class="value">${this._formatNumber(this.stats.nodes)}</span>
+        <span class="value">${formatNumber(this.stats.nodes)}</span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.nps}</span>
-        <span class="value">${this._formatNumber(this.stats.nps)}</span>
+        <span class="value">${formatNumber(this.stats.nps)}</span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.time}</span>
         <span class="value"
-          >${(this.stats.time / 1000).toFixed(
-            1,
-          )}${strings.timeUnitSeconds}</span
+          >${formatTime(this.stats.time)}${strings.timeUnitSeconds}</span
         >
       </div>
     `;
