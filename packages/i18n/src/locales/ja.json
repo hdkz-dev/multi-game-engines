@@ -9,6 +9,10 @@
     "topCandidate": "最善手候補",
     "principalVariations": "読み筋一覧",
     "searchLog": "探索履歴",
+    "logCount": "{n} 件",
+    "moveAriaLabel": "着手 {move}",
+    "score": "評価値",
+    "pv": "読み筋",
     "start": "開始",
     "stop": "停止",
     "searching": "解析中...",
@@ -21,6 +25,51 @@
     "errorDefaultRemediation": "接続を確認して、もう一度お試しください。",
     "timeUnitSeconds": "秒",
     "noMove": "---",
-    "standard": "2026 Engine Bridge Standard"
+    "standard": "2026 Engine Bridge Standard",
+    "stockfishTitle": "Stockfish 16.1",
+    "yaneuraouTitle": "やねうら王 7.5.0"
+  },
+  "dashboard": {
+    "title": "ZENITH DASHBOARD",
+    "subtitle": "次世代ゲームインテリジェンス・ブリッジ",
+    "chessLabel": "チェス / UCI",
+    "shogiLabel": "将棋 / USI",
+    "engineSelector": "エンジン選択",
+    "stats": {
+      "engineRuntime": {
+        "label": "エンジン実行環境",
+        "value": "WASM スレッド",
+        "sub": "SIMD 加速"
+      },
+      "hardware": {
+        "label": "ハードウェア",
+        "value": "ネイティブ V8",
+        "sub": "最大最適化"
+      },
+      "performance": {
+        "label": "パフォーマンス",
+        "value": "Zenith ティア",
+        "sub": "低遅延"
+      },
+      "accessibility": {
+        "label": "アクセシビリティ",
+        "value": "WCAG 2.2 AA",
+        "sub": "インクルーシブ・デザイン"
+      }
+    },
+    "gameBoard": {
+      "title": "ゲームボード",
+      "subtitle": "指し手連携待機中"
+    },
+    "technicalInsight": {
+      "title": "技術的な洞察",
+      "description": "このダッシュボードは 2026 エンジンブリッジプロトコルを活用しています。UI をエンジン固有のロジックから分離することで、Worker のシリアライズから React のレンダリングに至るまで、全レイヤーで Zero-Any ポリシーを実現しています。"
+    },
+    "zenithFeatures": {
+      "title": "Zenith 機能一覧",
+      "multiPv": "Multi-PV 永続ログ",
+      "reactiveState": "リアクティブ状態変換",
+      "contractUi": "契約駆動 UI (Zod)"
+    }
   }
 }

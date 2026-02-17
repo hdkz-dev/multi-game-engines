@@ -175,10 +175,13 @@ const handleMoveClick = (move: string) => {
           <div
             class="px-4 py-2 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between"
           >
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-4" role="tablist">
               <button
                 @click="activeTab = 'pv'"
-                class="flex items-center gap-1.5 transition-colors"
+                role="tab"
+                :aria-selected="activeTab === 'pv'"
+                :tabindex="activeTab === 'pv' ? 0 : -1"
+                class="flex items-center gap-1.5 transition-colors outline-none"
                 :class="activeTab === 'pv' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
               >
                 <ScrollText class="w-3.5 h-3.5" />
@@ -186,27 +189,45 @@ const handleMoveClick = (move: string) => {
               </button>
               <button
                 @click="activeTab = 'log'"
-                class="flex items-center gap-1.5 transition-colors"
+                role="tab"
+                :aria-selected="activeTab === 'log'"
+                :tabindex="activeTab === 'log' ? 0 : -1"
+                class="flex items-center gap-1.5 transition-colors outline-none"
                 :class="activeTab === 'log' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
               >
                 <History class="w-3.5 h-3.5" />
-                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.searchLog || 'Log' }}</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.searchLog }}</span>
               </button>
             </div>
+            <span class="text-[10px] font-mono text-gray-300">
+              {{ activeTab === 'pv' ? strings.pvCount(state.pvs.length) : strings.logCount(state.searchLog.length) }}
+            </span>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">
-            <PVList
-              v-if="activeTab === 'pv'"
-              :pvs="state.pvs"
-              class="p-4"
-              @move-click="handleMoveClick"
-            />
-            <SearchLog
-              v-else
-              :log="state.searchLog"
-              class="border-none rounded-none"
-              @move-click="handleMoveClick"
-            />
+            <div
+              role="tabpanel"
+              :aria-hidden="activeTab !== 'pv'"
+              class="h-full"
+            >
+              <PVList
+                v-if="activeTab === 'pv'"
+                :pvs="state.pvs"
+                class="p-4"
+                @move-click="handleMoveClick"
+              />
+            </div>
+            <div
+              role="tabpanel"
+              :aria-hidden="activeTab !== 'log'"
+              class="h-full"
+            >
+              <SearchLog
+                v-if="activeTab === 'log'"
+                :log="state.searchLog"
+                class="border-none rounded-none"
+                @move-click="handleMoveClick"
+              />
+            </div>
           </div>
         </div>
       </template>

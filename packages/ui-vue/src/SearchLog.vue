@@ -45,14 +45,14 @@ onUpdated(scrollToBottom);
           <th scope="col" class="p-2 w-20 text-center border-b border-gray-200">{{ strings.score || 'Score' }}</th>
           <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.time || 'Time' }}</th>
           <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.nodes || 'Nodes' }}</th>
-          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">NPS</th>
+          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.nps || 'NPS' }}</th>
           <th scope="col" class="p-2 text-left border-b border-gray-200 w-auto">{{ strings.pv || 'PV' }}</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-50 bg-white">
         <tr v-if="log.length === 0">
           <td colspan="6" class="py-8 text-center text-gray-400 italic">
-            {{ strings.searching }}
+            {{ strings.searching || 'Searching...' }}
           </td>
         </tr>
         <tr
@@ -71,7 +71,7 @@ onUpdated(scrollToBottom);
             </div>
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
-            {{ formatTime(entry.time) }}s
+            {{ formatTime(entry.time) }}{{ strings.timeUnitSeconds }}
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
             {{ formatNumber(entry.nodes) }}
@@ -87,7 +87,7 @@ onUpdated(scrollToBottom);
                 @click="emit('move-click', move.toString())"
                 class="hover:text-blue-600 hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-0.5 transition-colors"
                 :class="idx === 0 ? 'font-bold text-gray-900' : 'text-gray-500'"
-                :aria-label="`Move ${move.toString()}`"
+                :aria-label="strings.moveAriaLabel(move.toString())"
               >
                 {{ move.toString() }}
               </button>

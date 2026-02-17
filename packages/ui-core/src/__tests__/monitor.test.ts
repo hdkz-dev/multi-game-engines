@@ -11,6 +11,17 @@ import {
 type MockState = { count: number; lastRaw: string };
 type MockInfo = { raw: string };
 
+const createMockInfo = (raw: string): MockInfo & IBaseSearchInfo => ({
+  raw,
+  depth: 1,
+  seldepth: 1,
+  nodes: 1,
+  nps: 1,
+  time: 1,
+  multipv: 1,
+  pv: [],
+});
+
 describe("SearchMonitor (Throttling)", () => {
   let mockEngine: IEngine<
     IBaseSearchOptions,
@@ -67,9 +78,9 @@ describe("SearchMonitor (Throttling)", () => {
     monitor.startMonitoring();
 
     // 1. 短期間に複数の更新を発生させる
-    infoCallback({ raw: "msg1" });
-    infoCallback({ raw: "msg2" });
-    infoCallback({ raw: "msg3" });
+    infoCallback(createMockInfo("msg1"));
+    infoCallback(createMockInfo("msg2"));
+    infoCallback(createMockInfo("msg3"));
 
     // まだ非同期処理前なので、更新は反映されていないはず
     expect(listener).not.toHaveBeenCalled();
@@ -105,7 +116,7 @@ describe("SearchMonitor (Throttling)", () => {
     >(mockEngine, { count: 0, lastRaw: "" }, transformer);
 
     monitor.startMonitoring();
-    infoCallback({ raw: "msg1" });
+    infoCallback(createMockInfo("msg1"));
 
     // 処理される前に停止
     monitor.stopMonitoring();

@@ -73,7 +73,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                 scope="col"
                 className="p-2 w-16 text-right border-b border-gray-200"
               >
-                NPS
+                {strings.nps || "NPS"}
               </th>
               <th
                 scope="col"
@@ -90,7 +90,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                   colSpan={6}
                   className="py-8 text-center text-gray-400 italic"
                 >
-                  {strings.searching}
+                  {strings.searching || "Searching..."}
                 </td>
               </tr>
             ) : (
@@ -115,7 +115,8 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                     </div>
                   </td>
                   <td className="p-2 text-right text-gray-500 tabular-nums">
-                    {formatTime(entry.time)}s
+                    {formatTime(entry.time)}
+                    {strings.timeUnitSeconds}
                   </td>
                   <td className="p-2 text-right text-gray-500 tabular-nums">
                     {formatNumber(entry.nodes)}
@@ -135,7 +136,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                               ? "font-bold text-gray-900"
                               : "text-gray-500",
                           )}
-                          aria-label={`Move ${move.toString()}`}
+                          aria-label={strings.moveAriaLabel(move.toString())}
                         >
                           {move.toString()}
                         </button>

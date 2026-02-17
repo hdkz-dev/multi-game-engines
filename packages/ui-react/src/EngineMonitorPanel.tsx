@@ -203,11 +203,16 @@ export function EngineMonitorPanel<
 
             <div className="flex-1 min-h-0 flex flex-col">
               <div className="px-4 py-2 bg-gray-50/50 flex items-center justify-between border-b border-gray-100">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4" role="tablist">
                   <button
                     onClick={() => setActiveTab("pv")}
+                    role="tab"
+                    aria-selected={activeTab === "pv"}
+                    aria-controls={`${panelId}-pv-panel`}
+                    id={`${panelId}-pv-tab`}
+                    tabIndex={activeTab === "pv" ? 0 : -1}
                     className={cn(
-                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors",
+                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors outline-none",
                       activeTab === "pv"
                         ? "text-blue-600"
                         : "text-gray-400 hover:text-gray-600",
@@ -218,33 +223,53 @@ export function EngineMonitorPanel<
                   </button>
                   <button
                     onClick={() => setActiveTab("log")}
+                    role="tab"
+                    aria-selected={activeTab === "log"}
+                    aria-controls={`${panelId}-log-panel`}
+                    id={`${panelId}-log-tab`}
+                    tabIndex={activeTab === "log" ? 0 : -1}
                     className={cn(
-                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors",
+                      "flex items-center gap-1 text-[10px] font-black uppercase tracking-widest transition-colors outline-none",
                       activeTab === "log"
                         ? "text-blue-600"
                         : "text-gray-400 hover:text-gray-600",
                     )}
                   >
                     <History className="w-3 h-3" />
-                    {strings.searchLog || "Log"}
+                    {strings.searchLog}
                   </button>
                 </div>
                 <span className="text-[10px] font-mono text-gray-300">
                   {activeTab === "pv"
                     ? strings.pvCount(state.pvs.length)
-                    : `${state.searchLog.length} entries`}
+                    : strings.logCount(state.searchLog.length)}
                 </span>
               </div>
               <ScrollArea.Root className="flex-1 overflow-hidden">
                 <ScrollArea.Viewport className="h-full w-full p-4">
-                  {activeTab === "pv" ? (
-                    <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
-                  ) : (
-                    <SearchLog
-                      log={state.searchLog}
-                      onMoveClick={onMoveClick}
-                    />
-                  )}
+                  <div
+                    role="tabpanel"
+                    id={
+                      activeTab === "pv"
+                        ? `${panelId}-pv-panel`
+                        : `${panelId}-log-panel`
+                    }
+                    aria-labelledby={
+                      activeTab === "pv"
+                        ? `${panelId}-pv-tab`
+                        : `${panelId}-log-tab`
+                    }
+                    className="h-full"
+                  >
+                    {activeTab === "pv" ? (
+                      <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
+                    ) : (
+                      <SearchLog
+                        log={state.searchLog}
+                        onMoveClick={onMoveClick}
+                      />
+                    )}
+                  </div>
                 </ScrollArea.Viewport>
                 <ScrollArea.Scrollbar
                   className="flex select-none touch-none p-0.5 bg-gray-100/50 transition-colors duration-150 ease-out hover:bg-gray-200 data-[orientation=vertical]:w-2"

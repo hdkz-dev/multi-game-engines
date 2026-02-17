@@ -95,13 +95,14 @@ export class SearchMonitor<
       this.store.dispose();
 
       if (this.updateTimerId !== null) {
-        if (
-          typeof cancelAnimationFrame !== "undefined" &&
-          typeof this.updateTimerId === "number"
-        ) {
-          cancelAnimationFrame(this.updateTimerId);
+        if (typeof this.updateTimerId === "number") {
+          if (typeof cancelAnimationFrame !== "undefined") {
+            cancelAnimationFrame(this.updateTimerId);
+          } else {
+            clearTimeout(this.updateTimerId);
+          }
         } else {
-          clearTimeout(this.updateTimerId as NodeJS.Timeout);
+          clearTimeout(this.updateTimerId);
         }
         this.updateTimerId = null;
       }

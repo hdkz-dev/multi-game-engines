@@ -9,6 +9,10 @@
     "topCandidate": "Top Candidate",
     "principalVariations": "Principal Variations",
     "searchLog": "Search Log",
+    "logCount": "{n} entries",
+    "moveAriaLabel": "Move {move}",
+    "score": "Score",
+    "pv": "PV",
     "start": "START",
     "stop": "STOP",
     "searching": "Searching...",
@@ -21,6 +25,51 @@
     "errorDefaultRemediation": "Please check the connection and try again.",
     "timeUnitSeconds": "s",
     "noMove": "---",
-    "standard": "2026 Engine Bridge Standard"
+    "standard": "2026 Engine Bridge Standard",
+    "stockfishTitle": "Stockfish 16.1",
+    "yaneuraouTitle": "Yaneuraou 7.5.0"
+  },
+  "dashboard": {
+    "title": "ZENITH DASHBOARD",
+    "subtitle": "Next-Gen Game Intelligence Bridge",
+    "chessLabel": "CHESS / UCI",
+    "shogiLabel": "SHOGI / USI",
+    "engineSelector": "Engine selector",
+    "stats": {
+      "engineRuntime": {
+        "label": "Engine Runtime",
+        "value": "WASM Threads",
+        "sub": "SIMD Accelerated"
+      },
+      "hardware": {
+        "label": "Hardware",
+        "value": "Native V8",
+        "sub": "Max Optimization"
+      },
+      "performance": {
+        "label": "Performance",
+        "value": "Zenith Tier",
+        "sub": "Low Latency"
+      },
+      "accessibility": {
+        "label": "Accessibility",
+        "value": "WCAG 2.2 AA",
+        "sub": "Inclusive Design"
+      }
+    },
+    "gameBoard": {
+      "title": "Game Board",
+      "subtitle": "Awaiting Move Integration"
+    },
+    "technicalInsight": {
+      "title": "Technical Insight",
+      "description": "The dashboard leverages the 2026 Engine Bridge Protocol. By decoupling the UI from engine-specific logic, we achieve Zero-Any Policy across all layers, from Worker serialization to React rendering."
+    },
+    "zenithFeatures": {
+      "title": "Zenith Features",
+      "multiPv": "Multi-PV Persistent Log",
+      "reactiveState": "Reactive State Transformer",
+      "contractUi": "Contract-driven UI (Zod)"
+    }
   }
 }

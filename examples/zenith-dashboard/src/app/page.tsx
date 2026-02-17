@@ -79,10 +79,10 @@ export default function Dashboard() {
               <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
                 <LayoutGrid className="w-8 h-8 text-white" />
               </div>
-              ZENITH <span className="text-blue-600">DASHBOARD</span>
+              {localeData.dashboard.title}
             </h1>
             <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] ml-1">
-              Next-Gen Game Intelligence Bridge
+              {localeData.dashboard.subtitle}
             </p>
           </div>
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
             {/* Engine Switcher */}
             <nav
               className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-xl"
-              aria-label="Engine selector"
+              aria-label={localeData.dashboard.engineSelector}
             >
               <button
                 onClick={() => setActiveEngine("chess")}
@@ -129,7 +129,7 @@ export default function Dashboard() {
                 <Trophy
                   className={`w-4 h-4 ${activeEngine === "chess" ? "animate-bounce" : ""}`}
                 />
-                CHESS / UCI
+                {localeData.dashboard.chessLabel}
               </button>
               <button
                 onClick={() => setActiveEngine("shogi")}
@@ -143,7 +143,7 @@ export default function Dashboard() {
                 <Sword
                   className={`w-4 h-4 ${activeEngine === "shogi" ? "animate-bounce" : ""}`}
                 />
-                SHOGI / USI
+                {localeData.dashboard.shogiLabel}
               </button>
             </nav>
           </div>
@@ -153,27 +153,27 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard
             icon={<Zap className="text-yellow-500 w-5 h-5" />}
-            label="Engine Runtime"
-            value="WASM Threads"
-            sub="SIMD Accelerated"
+            label={localeData.dashboard.stats.engineRuntime.label}
+            value={localeData.dashboard.stats.engineRuntime.value}
+            sub={localeData.dashboard.stats.engineRuntime.sub}
           />
           <StatCard
             icon={<Cpu className="text-blue-500 w-5 h-5" />}
-            label="Hardware"
-            value="Native V8"
-            sub="Max Optimization"
+            label={localeData.dashboard.stats.hardware.label}
+            value={localeData.dashboard.stats.hardware.value}
+            sub={localeData.dashboard.stats.hardware.sub}
           />
           <StatCard
             icon={<Gauge className="text-green-500 w-5 h-5" />}
-            label="Performance"
-            value="Zenith Tier"
-            sub="Low Latency"
+            label={localeData.dashboard.stats.performance.label}
+            value={localeData.dashboard.stats.performance.value}
+            sub={localeData.dashboard.stats.performance.sub}
           />
           <StatCard
             icon={<Trophy className="text-purple-500 w-5 h-5" />}
-            label="Accessibility"
-            value="WCAG 2.2 AA"
-            sub="Inclusive Design"
+            label={localeData.dashboard.stats.accessibility.label}
+            value={localeData.dashboard.stats.accessibility.value}
+            sub={localeData.dashboard.stats.accessibility.sub}
           />
         </div>
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
                 key="chess-panel"
                 engine={chessEngine}
                 searchOptions={chessOptions}
-                title="Stockfish 16.1"
+                title={localeData.engine.stockfishTitle || "Stockfish 16.1"}
                 className="h-full"
               />
             )}
@@ -194,7 +194,7 @@ export default function Dashboard() {
                 key="shogi-panel"
                 engine={shogiEngine}
                 searchOptions={shogiOptions}
-                title="Yaneuraou 7.5.0"
+                title={localeData.engine.yaneuraouTitle || "Yaneuraou 7.5.0"}
                 className="h-full"
               />
             )}
@@ -210,10 +210,10 @@ export default function Dashboard() {
                 <div className="absolute inset-0 flex items-center justify-center bg-white/40 backdrop-blur-[2px] rounded-xl opacity-100 group-hover:opacity-0 transition-opacity">
                   <div className="text-center">
                     <p className="text-gray-400 font-black uppercase tracking-[0.3em] text-sm">
-                      Game Board
+                      {localeData.dashboard.gameBoard.title}
                     </p>
                     <p className="text-[10px] text-gray-300 font-bold mt-1 tracking-widest">
-                      Awaiting Move Integration
+                      {localeData.dashboard.gameBoard.subtitle}
                     </p>
                   </div>
                 </div>
@@ -224,41 +224,34 @@ export default function Dashboard() {
               <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                  Technical Insight
+                  {localeData.dashboard.technicalInsight.title}
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                  The dashboard leverages the{" "}
-                  <strong>2026 Engine Bridge Protocol</strong>. By decoupling
-                  the UI from engine-specific logic, we achieve
-                  <span className="text-gray-900 font-bold mx-1">
-                    Zero-Any Policy
-                  </span>
-                  across all layers, from Worker serialization to React
-                  rendering.
+                  {localeData.dashboard.technicalInsight.description}
                 </p>
               </div>
               <div className="bg-gray-900 p-8 rounded-3xl border border-gray-800 shadow-2xl">
                 <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
-                  Zenith Features
+                  {localeData.dashboard.zenithFeatures.title}
                 </h3>
                 <ul className="text-sm space-y-3">
                   <li className="flex items-center gap-3 text-white/80 font-bold">
                     <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
                       <Zap className="w-3 h-3 text-green-500" />
                     </div>
-                    Multi-PV Persistent Log
+                    {localeData.dashboard.zenithFeatures.multiPv}
                   </li>
                   <li className="flex items-center gap-3 text-white/80 font-bold">
                     <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
                       <Zap className="w-3 h-3 text-green-500" />
                     </div>
-                    Reactive State Transformer
+                    {localeData.dashboard.zenithFeatures.reactiveState}
                   </li>
                   <li className="flex items-center gap-3 text-white/80 font-bold">
                     <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
                       <Zap className="w-3 h-3 text-green-500" />
                     </div>
-                    Contract-driven UI (Zod)
+                    {localeData.dashboard.zenithFeatures.contractUi}
                   </li>
                 </ul>
               </div>

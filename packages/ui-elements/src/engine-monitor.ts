@@ -325,31 +325,52 @@ export class EngineMonitorElement extends LitElement {
                 .locale="${this.locale}"
               ></engine-stats>
 
-              <div class="tab-header">
+              <div class="tab-header" role="tablist">
                 <button
+                  id="tab-pv"
+                  role="tab"
+                  aria-selected="${this._activeTab === "pv"}"
+                  aria-controls="panel-pv"
                   class="tab-btn ${this._activeTab === "pv" ? "active" : ""}"
                   @click="${() => (this._activeTab = "pv")}"
                 >
                   ${strings.principalVariations}
                 </button>
                 <button
+                  id="tab-log"
+                  role="tab"
+                  aria-selected="${this._activeTab === "log"}"
+                  aria-controls="panel-log"
                   class="tab-btn ${this._activeTab === "log" ? "active" : ""}"
                   @click="${() => (this._activeTab = "log")}"
                 >
-                  ${strings.searchLog || "Log"}
+                  ${strings.searchLog}
                 </button>
               </div>
 
               <div class="tab-content">
-                ${this._activeTab === "pv"
-                  ? html`<pv-list
-                      .pvs="${state.pvs}"
-                      .locale="${this.locale}"
-                    ></pv-list>`
-                  : html`<search-log
-                      .log="${state.searchLog}"
-                      .locale="${this.locale}"
-                    ></search-log>`}
+                <div
+                  id="panel-pv"
+                  role="tabpanel"
+                  aria-labelledby="tab-pv"
+                  ?hidden="${this._activeTab !== "pv"}"
+                >
+                  <pv-list
+                    .pvs="${state.pvs}"
+                    .locale="${this.locale}"
+                  ></pv-list>
+                </div>
+                <div
+                  id="panel-log"
+                  role="tabpanel"
+                  aria-labelledby="tab-log"
+                  ?hidden="${this._activeTab !== "log"}"
+                >
+                  <search-log
+                    .log="${state.searchLog}"
+                    .locale="${this.locale}"
+                  ></search-log>
+                </div>
               </div>
             `}
       </div>

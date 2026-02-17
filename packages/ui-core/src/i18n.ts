@@ -27,6 +27,8 @@ export interface EngineUIStrings {
   timeUnitSeconds: string;
   noMove: string;
   pvCount: (n: number) => string;
+  logCount: (n: number) => string;
+  moveAriaLabel: (move: string) => string;
   engineVersion: (name: string, version: string) => string;
   engineBridgeStandard: (year: number) => string;
 }
@@ -93,6 +95,10 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     timeUnitSeconds: t("timeUnitSeconds", "s"),
     noMove: t("noMove", "---"),
     pvCount: (n: number) => t("pvCount", "N={n}").replace("{n}", n.toString()),
+    logCount: (n: number) =>
+      t("logCount", "{n} entries").replace("{n}", n.toString()),
+    moveAriaLabel: (move: string) =>
+      t("moveAriaLabel", "Move {move}").replace("{move}", move),
     engineVersion: (name: string, version: string) =>
       t("engineVersion", "{name} v{version}")
         .replace("{name}", name)

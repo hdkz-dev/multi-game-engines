@@ -112,13 +112,15 @@ export const SearchStateTransformer = {
 
       // 探索ログの更新ロジック (Smart Log Entry)
       const newScore = newPV.score;
-      const lastEntryIndex = [...state.searchLog]
-        .reverse()
-        .findIndex((e) => e.multipv === validatedInfo.multipv);
+      let lastEntryIndex = -1;
+      for (let i = state.searchLog.length - 1; i >= 0; i--) {
+        if (state.searchLog[i]?.multipv === validatedInfo.multipv) {
+          lastEntryIndex = i;
+          break;
+        }
+      }
       const lastEntry =
-        lastEntryIndex >= 0
-          ? state.searchLog[state.searchLog.length - 1 - lastEntryIndex]
-          : null;
+        lastEntryIndex >= 0 ? state.searchLog[lastEntryIndex] : null;
 
       const isSameProgress =
         lastEntry &&
@@ -147,7 +149,7 @@ export const SearchStateTransformer = {
       if (lastEntry && isSameProgress) {
         // 同じ進捗なら最後の該当エントリを更新
         nextLog = [...state.searchLog];
-        nextLog[state.searchLog.length - 1 - lastEntryIndex] = logEntry;
+        nextLog[lastEntryIndex] = logEntry;
       } else {
         // 進捗があれば新規追加
         nextLog = [...state.searchLog, logEntry];

@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import { customElement, property } from "lit/decorators.js";
 import {
   SearchLogEntry,
   createUIStrings,
@@ -159,24 +159,25 @@ export class SearchLogElement extends LitElement {
   @property({ type: String }) locale = "ja";
   @property({ type: Boolean }) autoScroll = true;
 
-  @query(":host") container?: HTMLElement;
-
   connectedCallback() {
     super.connectedCallback();
     this.setAttribute("role", "grid");
-    this.setAttribute("aria-label", "Search Log");
   }
 
   updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has("locale") || !this.hasAttribute("aria-label")) {
+      const strings = createUIStrings(
+        this.locale === "ja" ? locales.ja : locales.en,
+      );
+      this.setAttribute("aria-label", strings.searchLog || "Search Log");
+    }
     if (this.autoScroll && changedProperties.has("log")) {
       this.scrollToBottom();
     }
   }
 
   scrollToBottom() {
-    if (this.container) {
-      this.container.scrollTop = this.container.scrollHeight;
-    }
+    this.scrollTop = this.scrollHeight;
   }
 
   render() {
@@ -203,7 +204,9 @@ export class SearchLogElement extends LitElement {
             <th scope="col" class="col-nodes text-right">
               ${strings.nodes || "Nodes"}
             </th>
-            <th scope="col" class="col-nps text-right">NPS</th>
+            <th scope="col" class="col-nps text-right">
+              ${strings.nps || "NPS"}
+            </th>
             <th scope="col" class="col-pv text-left">${strings.pv || "PV"}</th>
           </tr>
         </thead>
@@ -211,7 +214,9 @@ export class SearchLogElement extends LitElement {
           ${this.log.length === 0
             ? html`
                 <tr>
-                  <td colspan="6" class="empty">${strings.searching}</td>
+                  <td colspan="6" class="empty">
+                    ${strings.searching || "Searching..."}
+                  </td>
                 </tr>
               `
             : this.log.map(
@@ -231,7 +236,7 @@ export class SearchLogElement extends LitElement {
                       </div>
                     </td>
                     <td class="col-time text-right">
-                      ${formatTime(entry.time)}s
+                      ${formatTime(entry.time)}${strings.timeUnitSeconds}
                     </td>
                     <td class="col-nodes text-right">
                       ${formatNumber(entry.nodes)}
@@ -249,9 +254,13 @@ export class SearchLogElement extends LitElement {
                                 this.dispatchEvent(
                                   new CustomEvent("move-click", {
                                     detail: { move: move.toString() },
+                                    bubbles: true,
+                                    composed: true,
                                   }),
                                 )}"
-                              aria-label="Move ${move.toString()}"
+                              aria-label="${strings.moveAriaLabel(
+                                move.toString(),
+                              )}"
                             >
                               ${move}
                             </button>
