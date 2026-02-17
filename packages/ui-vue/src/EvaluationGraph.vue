@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { EvaluationPresenter, IEvaluationHistoryEntry } from '@multi-game-engines/ui-core';
+import { useEngineUI } from './useEngineUI.js';
 
 interface Props {
   entries: IEvaluationHistoryEntry[];
@@ -12,6 +13,8 @@ const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   height: 60
 });
+
+const { strings } = useEngineUI();
 
 const points = computed(() => {
   return EvaluationPresenter.getGraphPoints(props.entries, 200, props.height);
@@ -31,7 +34,7 @@ const lastPoint = computed(() => {
   <div
     class="relative overflow-hidden rounded bg-gray-50/50 p-1"
     :style="{ width: typeof width === 'number' ? `${width}px` : width, height: `${height}px` }"
-    aria-label="Evaluation trend graph"
+    :aria-label="strings.evaluationGraph"
     role="img"
   >
     <svg

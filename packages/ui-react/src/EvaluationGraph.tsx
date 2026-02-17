@@ -5,6 +5,7 @@ import {
   EvaluationPresenter,
   IEvaluationHistoryEntry,
 } from "@multi-game-engines/ui-core";
+import { useEngineUI } from "./EngineUIProvider.js";
 
 interface EvaluationGraphProps {
   entries: IEvaluationHistoryEntry[];
@@ -22,6 +23,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
   height = 60,
   className = "",
 }) => {
+  const { strings } = useEngineUI();
   const points = useMemo(() => {
     // 内部的な計算用に固定幅 200 を使用し、SVG の preserveAspectRatio でリサイズ対応
     return EvaluationPresenter.getGraphPoints(entries, 200, height);
@@ -36,7 +38,7 @@ export const EvaluationGraph: React.FC<EvaluationGraphProps> = ({
     <div
       className={`relative overflow-hidden rounded bg-gray-50/50 p-1 ${className}`}
       style={{ width, height }}
-      aria-label="Evaluation trend graph"
+      aria-label={strings.evaluationGraph}
       role="img"
     >
       <svg

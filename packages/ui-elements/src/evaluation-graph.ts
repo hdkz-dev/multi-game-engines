@@ -3,7 +3,9 @@ import { customElement, property } from "lit/decorators.js";
 import {
   EvaluationPresenter,
   IEvaluationHistoryEntry,
+  createUIStrings,
 } from "@multi-game-engines/ui-core";
+import { locales } from "@multi-game-engines/i18n";
 
 @customElement("evaluation-graph")
 export class EvaluationGraphElement extends LitElement {
@@ -40,8 +42,12 @@ export class EvaluationGraphElement extends LitElement {
 
   @property({ type: Array }) entries: IEvaluationHistoryEntry[] = [];
   @property({ type: Number }) height = 60;
+  @property({ type: String }) locale = "ja";
 
   render() {
+    const strings = createUIStrings(
+      this.locale === "ja" ? locales.ja : locales.en,
+    );
     const points = EvaluationPresenter.getGraphPoints(
       this.entries,
       200,
@@ -57,7 +63,7 @@ export class EvaluationGraphElement extends LitElement {
       <svg
         viewBox="0 0 200 ${this.height}"
         preserveAspectRatio="none"
-        aria-label="Evaluation trend graph"
+        aria-label="${strings.evaluationGraph}"
         role="img"
       >
         <!-- ゼロライン -->

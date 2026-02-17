@@ -53,12 +53,18 @@ export class EngineStatsElement extends LitElement {
 
     return html`
       <div class="stat-box">
-        <span class="label">${strings.depth}</span>
-        <span class="value"
-          >${this.stats.depth}${this.stats.seldepth
-            ? `/${this.stats.seldepth}`
-            : ""}</span
+        <span class="label"
+          >${this.stats.visits && this.stats.visits > 0
+            ? strings.visits
+            : strings.depth}</span
         >
+        <span class="value">
+          ${this.stats.visits && this.stats.visits > 0
+            ? html`${formatNumber(this.stats.visits)}${strings.visitsUnit}`
+            : html`${this.stats.depth}${this.stats.seldepth
+                ? `/${this.stats.seldepth}`
+                : ""}`}
+        </span>
       </div>
       <div class="stat-box">
         <span class="label">${strings.nodes}</span>

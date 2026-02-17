@@ -75,11 +75,19 @@ onUpdated(scrollToBottom);
         >
           <td class="p-2 text-center text-gray-400 font-medium">
             <template v-if="entry.visits">
-              <span title="Visits">{{ formatNumber(entry.visits) }}v</span>
+              <span :title="strings.visits">
+                {{ formatNumber(entry.visits) }}{{ strings.visitsUnit }}
+                <span class="sr-only">{{ strings.visits }}</span>
+              </span>
             </template>
             <template v-else>
+              <span class="sr-only">{{ strings.depth }}: </span>
               {{ entry.depth }}
-              <span v-if="entry.seldepth" class="text-[9px] text-gray-300 group-hover:text-gray-400">/{{ entry.seldepth }}</span>
+              <span
+                v-if="entry.seldepth"
+                class="text-[9px] text-gray-300 group-hover:text-gray-400"
+                >/{{ entry.seldepth }}</span
+              >
             </template>
           </td>
           <td class="p-2 flex justify-center">

@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - **Components**: Synchronized `ScoreBadge`, `EngineStats`, `PVList`, and `EngineMonitorPanel` across all frameworks.
 - **Persistent Thinking Log**: Added `SearchLog` component with smart aggregation and throttling to React, Vue, and Web Components.
 - **Smart Auto-Scroll**: Implemented intelligent scroll behavior for `SearchLog` to improve user experience during active analysis.
+- **Accessibility**: Achieved WCAG 2.2 AA compliance with `aria-live` announcements for critical states, enhanced keyboard navigation (Home/End support), and localized ARIA labels.
+- **MCTS Support**: Added `visits` display support for Monte Carlo Tree Search engines (e.g., KataGo) across all UI components.
+- **Framework Parity**: Achieved 100% functional and visual parity for `EvaluationGraph` and `CommandDispatcher` (Optimistic UI) across React, Vue, and Web Components.
 
 ### Changed
 

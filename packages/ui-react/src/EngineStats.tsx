@@ -30,11 +30,19 @@ export const EngineStats: React.FC<EngineStatsProps> = React.memo(
           className,
         )}
       >
-        <StatBox
-          icon={<Layers className="w-4 h-4" />}
-          label={strings.depth}
-          value={`${stats.depth}${stats.seldepth ? `/${stats.seldepth}` : ""}`}
-        />
+        {stats.visits && stats.visits > 0 ? (
+          <StatBox
+            icon={<Layers className="w-4 h-4" />}
+            label={strings.visits}
+            value={`${formatNumber(stats.visits)}${strings.visitsUnit}`}
+          />
+        ) : (
+          <StatBox
+            icon={<Layers className="w-4 h-4" />}
+            label={strings.depth}
+            value={`${stats.depth}${stats.seldepth ? `/${stats.seldepth}` : ""}`}
+          />
+        )}
         <StatBox
           icon={<Cpu className="w-4 h-4" />}
           label={strings.nodes}
