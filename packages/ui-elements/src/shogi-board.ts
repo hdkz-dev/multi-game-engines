@@ -7,6 +7,7 @@ import {
   SFEN,
 } from "@multi-game-engines/ui-core";
 import { createSFEN, Move } from "@multi-game-engines/core";
+import { locales } from "@multi-game-engines/i18n";
 
 // Shogi piece mapping to Kanji/Labels for display and accessibility
 const PIECE_LABELS: Record<ShogiPiece, string> = {
@@ -132,26 +133,43 @@ export class ShogiBoard extends LitElement {
   lastMove: Move | "" = "";
 
   /**
+   * Current locale for default labels.
+   */
+  @property({ type: String })
+  locale = "en";
+
+  /**
    * Accessible labels.
    */
   @property({ type: String, attribute: "board-label", reflect: true })
-  boardLabel = "Shogi Board";
+  boardLabel = "";
   @property({ type: String, attribute: "hand-sente-label", reflect: true })
-  handSenteLabel = "Sente Hand";
+  handSenteLabel = "";
   @property({ type: String, attribute: "hand-gote-label", reflect: true })
-  handGoteLabel = "Gote Hand";
+  handGoteLabel = "";
 
   /**
    * Error message to display when position parsing fails.
    */
   @property({ type: String, attribute: "error-message", reflect: true })
-  errorMessage = "Invalid Position";
+  errorMessage = "";
 
   /**
    * Custom piece names for accessibility (aria-labels).
    */
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
+
+  private _getLocalizedStrings() {
+    const data = this.locale === "ja" ? locales.ja : locales.en;
+    return {
+      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
+      handSenteLabel: this.handSenteLabel || data.dashboard.gameBoard.handSente,
+      handGoteLabel: this.handGoteLabel || data.dashboard.gameBoard.handGote,
+      errorMessage:
+        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
+    };
+  }
 
   private _getSquareIndex(usi: string): number {
     if (!usi || usi.length < 2 || usi.includes("*")) return -1;
@@ -166,6 +184,7 @@ export class ShogiBoard extends LitElement {
   }
 
   override render() {
+    const strings = this._getLocalizedStrings();
     let board: (ShogiPiece | null)[][] = [];
     let hand: ShogiHand = {
       P: 0,
@@ -189,7 +208,7 @@ export class ShogiBoard extends LitElement {
     } catch {
       return html`
         <div class="container" role="alert">
-          <div class="error-overlay">${this.errorMessage}</div>
+          <div class="error-overlay">${strings.errorMessage}</div>
         </div>
       `;
     }
@@ -241,13 +260,13 @@ export class ShogiBoard extends LitElement {
 
     return html`
       <div class="container">
-        <div class="hand gote" aria-label="${this.handGoteLabel}">
+        <div class="hand gote" aria-label="${strings.handGoteLabel}">
           ${this._renderHand(hand, "gote")}
         </div>
-        <div class="board" role="grid" aria-label="${this.boardLabel}">
+        <div class="board" role="grid" aria-label="${strings.boardLabel}">
           ${squares}
         </div>
-        <div class="hand sente" aria-label="${this.handSenteLabel}">
+        <div class="hand sente" aria-label="${strings.handSenteLabel}">
           ${this._renderHand(hand, "sente")}
         </div>
       </div>

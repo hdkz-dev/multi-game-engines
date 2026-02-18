@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased] - 2026-02-18
+## [Unreleased]
+
+### Added
+
+- **Zenith Tier Quality**: Enhanced core components with rigorous type safety and best practices.
+- **Subscription ID Management**: Added `unuse` to `IEngine` for middleware cleanup and made `SubscriptionManager` idempotent.
+- **Enhanced Board Localization**: Localized default labels and error messages in `<chess-board>` and `<shogi-board>` using shared i18n resources.
+- **StatCard (Vue)**: Added missing `StatCard` component to the Vue dashboard for UX parity with React.
+- **Ref-based Props (React)**: Switched to `useRef` for passing complex objects (like `pieceNames`) to custom elements in React 19.
+
+## [Unreleased - Zenith Tier Initial] - 2026-02-18
 
 ### Added
 

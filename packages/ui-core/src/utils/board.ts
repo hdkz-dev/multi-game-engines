@@ -204,13 +204,17 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
 
   const parts = sfen.split(" ");
   const position = parts[0] || "";
-  const turn = (parts[1] || "b") as "b" | "w";
+  const turnPart = parts[1];
   const handStr = parts[2] || "-";
 
   if (!position) throw new Error("[parseSFEN] Position part is missing.");
+  if (!turnPart) throw new Error("[parseSFEN] Turn part is missing.");
+
+  const turn = turnPart as "b" | "w";
+
   if (turn !== "b" && turn !== "w") {
     throw new Error(
-      `[parseSFEN] Invalid turn: expected "b" or "w", got "${turn}"`,
+      `[parseSFEN] Invalid turn: expected "b" or "w", got "${turnPart}"`,
     );
   }
 

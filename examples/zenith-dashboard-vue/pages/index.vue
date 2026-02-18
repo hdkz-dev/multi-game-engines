@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, h, defineComponent } from "vue";
 import { createFEN, createSFEN } from "@multi-game-engines/core";
 import { formatNumber } from "@multi-game-engines/ui-core";
-import { EngineMonitorPanel, BoardComponents, EngineUIProvider } from "@multi-game-engines/ui-vue";
+import { EngineMonitorPanel, ChessBoard, ShogiBoard, EngineUIProvider } from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { locales } from "@multi-game-engines/i18n";
 import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "lucide-vue-next";
@@ -18,6 +18,32 @@ useHead({
     },
   ],
 });
+
+/**
+ * StatCard component for dashboard metrics.
+ */
+const StatCard = defineComponent({
+  props: {
+    label: { type: String, required: true },
+    value: { type: String, required: true },
+    sub: { type: String, required: true },
+    iconClass: { type: String, default: "" },
+  },
+  setup(props, { slots }) {
+    return () => h('div', {
+      class: 'bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-start gap-4'
+    }, [
+      h('div', { class: 'p-3 bg-gray-50 rounded-xl text-gray-700' }, [
+        slots.icon?.()
+      ]),
+      h('div', {}, [
+        h('p', { class: 'text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1' }, props.label),
+        h('p', { class: 'text-lg font-black text-gray-900 tracking-tight leading-none mb-1' }, props.value),
+        h('p', { class: 'text-[10px] text-gray-400 font-bold italic' }, props.sub)
+      ])
+    ])
+  }
+})
 
 type EngineType = "chess" | "shogi";
 const activeEngine = ref<EngineType>("chess");
@@ -214,19 +240,18 @@ const nps = computed(() => {
             <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
 
             <div class="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4">
-              <BoardComponents
+              <ChessBoard
                 v-if="activeEngine === 'chess'"
-                type="chess"
                 :fen="chessOptions.fen"
                 :last-move="chessBestMove"
                 :board-label="localeData.dashboard.gameBoard.title"
                 :error-message="localeData.dashboard.gameBoard.invalidPosition"
                 :piece-names="localeData.dashboard.gameBoard.chessPieces"
+                :locale="locale"
                 class="w-full h-full"
               />
-              <BoardComponents
+              <ShogiBoard
                 v-else
-                type="shogi"
                 :sfen="shogiOptions.sfen"
                 :last-move="shogiBestMove"
                 :board-label="localeData.dashboard.gameBoard.title"
@@ -234,6 +259,7 @@ const nps = computed(() => {
                 :hand-sente-label="localeData.dashboard.gameBoard.handSente"
                 :hand-gote-label="localeData.dashboard.gameBoard.handGote"
                 :piece-names="localeData.dashboard.gameBoard.shogiPieces"
+                :locale="locale"
                 class="w-full h-full"
               />
             </div>

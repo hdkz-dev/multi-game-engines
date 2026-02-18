@@ -72,7 +72,11 @@ export function useEngineMonitor<
     try {
       const brandedPos = createPositionString(initialPosition);
       return createInitialState<T_STATE>(brandedPos);
-    } catch {
+    } catch (err) {
+      console.warn(
+        `[useEngineMonitor] Invalid initialPosition: "${initialPosition}". Falling back to "startpos".`,
+        err,
+      );
       const safePos = createPositionString("startpos");
       return createInitialState<T_STATE>(safePos);
     }
@@ -97,7 +101,10 @@ export function useEngineMonitor<
   let unsubStore: (() => void) | null = null;
   let unsubStatus: (() => void) | null = null;
 
+  const mwId = "ui-normalizer";
+
   const cleanup = () => {
+    const currentEngine = toValue(engineSource);
     if (unsubStore) {
       unsubStore();
       unsubStore = null;
@@ -110,6 +117,9 @@ export function useEngineMonitor<
       monitor.value.stopMonitoring();
       monitor.value = null;
     }
+    if (currentEngine && typeof currentEngine.unuse === "function") {
+      currentEngine.unuse(mwId);
+    }
     dispatcher.value = null;
   };
 
@@ -117,6 +127,10 @@ export function useEngineMonitor<
   watch(
     () => toValue(engineSource),
     (newEngine) => {
+      // 古いエンジンの後始末
+      // 注意: cleanup() 内で toValue(engineSource) を呼ぶと新しい方を引いてしまう可能性があるため、
+      // ここでは明示的に古いリソース（前回保存分）を掃除する設計が望ましいが、
+      // 現在のシンプルさを維持しつつ middleware の unuse を追加
       cleanup();
 
       if (!newEngine) {

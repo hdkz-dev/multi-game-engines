@@ -9,21 +9,28 @@ export class SubscriptionManager {
 
   /**
    * 購読を追加する
-   * @returns 個別の購読解除関数
+   * @returns 個別の購読解除関数（冪等性が保証されています）
    */
   add(unsub: Unsubscribe): Unsubscribe {
-    this.subscriptions.add(unsub);
-    return () => {
-      this.subscriptions.delete(unsub);
+    let called = false;
+    const wrappedUnsub: Unsubscribe = () => {
+      if (called) return;
+      called = true;
+      this.subscriptions.delete(wrappedUnsub);
       unsub();
     };
+
+    this.subscriptions.add(wrappedUnsub);
+    return wrappedUnsub;
   }
 
   /**
    * すべての購読を解除する
    */
   clear(): void {
-    this.subscriptions.forEach((unsub) => {
+    // 2026 Best Practice: ループ中での Set からの削除を安全に行うため、コピーを作成
+    const currentSubscribers = Array.from(this.subscriptions);
+    currentSubscribers.forEach((unsub) => {
       try {
         unsub();
       } catch (e) {

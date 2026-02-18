@@ -339,6 +339,7 @@ export interface IEngine<
   loadingStrategy?: EngineLoadingStrategy;
 
   use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this;
+  unuse(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT> | string): this;
   load(): Promise<void>;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   stop(): void;

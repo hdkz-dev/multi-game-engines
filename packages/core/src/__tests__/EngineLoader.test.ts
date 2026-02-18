@@ -123,4 +123,24 @@ describe("EngineLoader", () => {
     expect(fetch).toHaveBeenCalled();
     // SRI検証（verifySRI）が呼ばれないこと、または呼ばれても成功することを期待（実装上はスキップされる）
   });
+
+  it("should reject __unsafeNoSRI if NODE_ENV is production", async () => {
+    // NODE_ENV を本番に偽装
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+
+    try {
+      const config: IEngineSourceConfig = {
+        url: "https://test.com/engine.js",
+        type: "script",
+        __unsafeNoSRI: true,
+      };
+
+      await expect(loader.loadResource("test", config)).rejects.toThrow(
+        "SRI bypass (__unsafeNoSRI) is not allowed in production",
+      );
+    } finally {
+      process.env.NODE_ENV = originalEnv;
+    }
+  });
 });

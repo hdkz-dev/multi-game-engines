@@ -58,11 +58,26 @@ export class EngineLoader implements IEngineLoader {
         const unsafeNoSRI =
           (config as { __unsafeNoSRI?: boolean }).__unsafeNoSRI === true;
 
+        // 2026 Best Practice: 本番環境での SRI バイパスを禁止
+        const isProduction =
+          typeof process !== "undefined" &&
+          process.env?.["NODE_ENV"] === "production";
+
         if (!sri && !unsafeNoSRI) {
           throw new EngineError({
             code: EngineErrorCode.SRI_MISMATCH,
             message: "SRI required for security verification.",
             engineId,
+          });
+        }
+
+        if (unsafeNoSRI && isProduction) {
+          throw new EngineError({
+            code: EngineErrorCode.SECURITY_ERROR,
+            message:
+              "SRI bypass (__unsafeNoSRI) is not allowed in production environment.",
+            engineId,
+            remediation: "Provide a valid SRI hash for all engine resources.",
           });
         }
 

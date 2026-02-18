@@ -105,6 +105,14 @@ export class MockEngine implements IEngine<
     return this;
   }
 
+  unuse(
+    _middleware:
+      | IMiddleware<IBaseSearchOptions, ExtendedSearchInfo, IBaseSearchResult>
+      | string,
+  ): this {
+    return this;
+  }
+
   onInfo(callback: (info: ExtendedSearchInfo) => void): () => void {
     this.infoListeners.add(callback);
     return () => this.infoListeners.delete(callback);

@@ -107,6 +107,15 @@ export class EngineFacade<
     return this;
   }
 
+  unuse(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT> | string): this {
+    if (typeof middleware === "string") {
+      this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
+    } else {
+      this.middlewares = this.middlewares.filter((m) => m !== middleware);
+    }
+    return this;
+  }
+
   async load(): Promise<void> {
     if (this.status !== "uninitialized") return;
     if (this.loadPromise) return this.loadPromise;

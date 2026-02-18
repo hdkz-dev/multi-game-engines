@@ -2,6 +2,7 @@ import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
 import { createFEN, Move } from "@multi-game-engines/core";
+import { locales } from "@multi-game-engines/i18n";
 
 // Standard SVG piece set (Wikipedia/Standard) - Inlined as Data URIs for SRI compliance and zero external dependencies.
 const PIECE_SVG: Record<ChessPiece, string> = {
@@ -102,6 +103,12 @@ export class ChessBoard extends LitElement {
   lastMove: Move | "" = "";
 
   /**
+   * Current locale for default labels.
+   */
+  @property({ type: String })
+  locale = "en";
+
+  /**
    * Board orientation.
    */
   @property({ type: String, reflect: true })
@@ -111,19 +118,28 @@ export class ChessBoard extends LitElement {
    * Accessible label for the board.
    */
   @property({ type: String, attribute: "board-label", reflect: true })
-  boardLabel = "Chess Board";
+  boardLabel = "";
 
   /**
    * Error message to display when position parsing fails.
    */
   @property({ type: String, attribute: "error-message", reflect: true })
-  errorMessage = "Invalid Position";
+  errorMessage = "";
 
   /**
    * Custom piece names for accessibility (aria-labels).
    */
   @property({ type: Object })
   pieceNames: Partial<Record<ChessPiece, string>> = {};
+
+  private _getLocalizedStrings() {
+    const data = this.locale === "ja" ? locales.ja : locales.en;
+    return {
+      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
+      errorMessage:
+        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
+    };
+  }
 
   private _getSquareIndex(algebraic: string): number {
     if (!algebraic || algebraic.length < 2) return -1;
@@ -134,13 +150,14 @@ export class ChessBoard extends LitElement {
   }
 
   override render() {
+    const strings = this._getLocalizedStrings();
     let board: (ChessPiece | null)[][] = [];
     try {
       ({ board } = parseFEN(this.fen));
     } catch {
       return html`
         <div class="board" role="alert">
-          <div class="error-overlay">${this.errorMessage}</div>
+          <div class="error-overlay">${strings.errorMessage}</div>
         </div>
       `;
     }
@@ -194,7 +211,7 @@ export class ChessBoard extends LitElement {
     }
 
     return html`
-      <div class="board" role="grid" aria-label="${this.boardLabel}">
+      <div class="board" role="grid" aria-label="${strings.boardLabel}">
         ${squares}
       </div>
     `;

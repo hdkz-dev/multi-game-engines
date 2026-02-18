@@ -60,7 +60,13 @@ export function useEngineMonitor<
     try {
       const brandedPos = createPositionString(initialPosition);
       return createInitialState<T_STATE>(brandedPos);
-    } catch {
+    } catch (err) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          `[useEngineMonitor] Invalid initialPosition: "${initialPosition}". Falling back to "startpos".`,
+          err,
+        );
+      }
       // バリデーション失敗時は安全なデフォルト値で復旧
       const safePos = createPositionString("startpos");
       return createInitialState<T_STATE>(safePos);
@@ -119,8 +125,16 @@ export function useEngineMonitor<
         T_INFO,
         T_RESULT
       >();
+      const mwId = normalizer.id;
       engine.use(normalizer);
+
+      return () => {
+        if (typeof engine.unuse === "function") {
+          engine.unuse(mwId);
+        }
+      };
     }
+    return undefined;
   }, [engine, autoMiddleware]);
 
   // 6. エフェクト: 監視開始

@@ -1,6 +1,10 @@
 import React from "react";
 import "@multi-game-engines/ui-elements";
 import {
+  ChessBoard as ChessBoardElement,
+  ShogiBoard as ShogiBoardElement,
+} from "@multi-game-engines/ui-elements";
+import {
   FEN,
   SFEN,
   Move,
@@ -33,6 +37,9 @@ declare module "react/jsx-runtime" {
         "error-message"?: string | undefined;
         /** Custom piece names for accessibility. */
         pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+        /** Ref support */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref?: React.RefObject<any> | undefined;
       };
       /**
        * Lit-based Shogi board custom element.
@@ -57,6 +64,9 @@ declare module "react/jsx-runtime" {
         "hand-gote-label"?: string | undefined;
         /** Custom piece names for accessibility. */
         pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+        /** Ref support */
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref?: React.RefObject<any> | undefined;
       };
     }
   }
@@ -95,15 +105,24 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   errorMessage,
   pieceNames,
 }) => {
+  const ref = React.useRef<ChessBoardElement>(null);
+
+  React.useEffect(() => {
+    if (ref.current && pieceNames) {
+      ref.current.pieceNames = pieceNames;
+    }
+  }, [pieceNames]);
+
   return (
     <chess-board
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ref={ref as React.RefObject<any>}
       fen={fen}
       last-move={lastMove}
       orientation={orientation}
       class={className}
       board-label={boardLabel}
       error-message={errorMessage}
-      pieceNames={pieceNames}
     />
   );
 };
@@ -144,8 +163,18 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   handGoteLabel,
   pieceNames,
 }) => {
+  const ref = React.useRef<ShogiBoardElement>(null);
+
+  React.useEffect(() => {
+    if (ref.current && pieceNames) {
+      ref.current.pieceNames = pieceNames;
+    }
+  }, [pieceNames]);
+
   return (
     <shogi-board
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ref={ref as React.RefObject<any>}
       sfen={sfen}
       last-move={lastMove}
       class={className}
@@ -153,7 +182,6 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
       error-message={errorMessage}
       hand-sente-label={handSenteLabel}
       hand-gote-label={handGoteLabel}
-      pieceNames={pieceNames}
     />
   );
 };
