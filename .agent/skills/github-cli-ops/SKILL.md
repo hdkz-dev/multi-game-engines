@@ -7,6 +7,15 @@ description: Best practices for safe and reliable GitHub CLI (`gh`) operations. 
 
 This skill defines the mandatory workflow for using the GitHub CLI (`gh`) to ensure reliability and avoid common pitfalls like shell escaping issues and complex output parsing.
 
+## 🆘 Mandatory Fallback Protocol (API Failure)
+
+If a task involves GitHub operations (merging, commenting, labeling, etc.) and the primary GitHub API tools fail with a `403 Forbidden` or `401 Unauthorized` error (e.g., "Resource not accessible by personal access token"):
+
+1. **Diagnosis**: Confirm the error is permission-related.
+2. **Consult User**: Immediately inform the user: "GitHub API permissions are insufficient for this operation. Would you like me to attempt this using the local GitHub CLI (`gh`) instead?"
+3. **Approval-Gated Execution**: **ONLY** proceed with `gh` commands (following the "Safe-Path" rules above) after explicit user confirmation.
+4. **Consistency**: Ensure any local changes (e.g., branch deletion after merge) are synchronized with the remote state.
+
 ## 🚨 Core Rules: The "Safe-Path" Strategy
 
 ### 1. File-Based Input (Anti-Escaping)

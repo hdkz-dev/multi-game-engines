@@ -120,6 +120,19 @@ cr review --prompt-only --base main
 cr review --prompt-only --base-commit abc123
 ```
 
+## 🤝 GitHub Operations & Fallback
+
+When performing PR operations (merging, adding/editing comments, labeling) via GitHub API tools:
+
+1. **Permission Check**: If an operation fails with a `403 Forbidden` or `401 Unauthorized` error (e.g., "Resource not accessible by personal access token"):
+   - **DO NOT** give up immediately.
+   - **Ask User Permission**: "GitHub API permissions are insufficient for this operation. Would you like me to attempt this using the GitHub CLI (`gh`) instead?"
+2. **Execute via gh**: Upon user approval, use `run_shell_command` with the `gh` CLI:
+   - **Merge PR**: `gh pr merge <number> --squash`
+   - **Comment on PR**: `gh pr comment <number> --body "message"`
+   - **Edit Comment**: `gh api -X PATCH /repos/:owner/:repo/issues/comments/<id> -f body="new body"`
+3. **Verify Status**: After using `gh`, verify the operation success via `gh pr view <number>` or similar commands.
+
 ## 🆘 Graceful Degradation (Fallback)
 
 If `coderabbit` CLI is unavailable, rate-limited, or fails:
