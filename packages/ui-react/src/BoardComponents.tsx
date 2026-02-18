@@ -1,6 +1,12 @@
 import React from "react";
 import "@multi-game-engines/ui-elements";
-import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
+import {
+  FEN,
+  SFEN,
+  Move,
+  ChessPiece,
+  ShogiPiece,
+} from "@multi-game-engines/ui-core";
 
 declare module "react/jsx-runtime" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -26,7 +32,7 @@ declare module "react/jsx-runtime" {
         /** Error message to display when parsing fails. */
         "error-message"?: string | undefined;
         /** Custom piece names for accessibility. */
-        pieceNames?: Record<string, string> | undefined;
+        pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
       };
       /**
        * Lit-based Shogi board custom element.
@@ -50,7 +56,7 @@ declare module "react/jsx-runtime" {
         /** Accessible label for Gote's hand. */
         "hand-gote-label"?: string | undefined;
         /** Custom piece names for accessibility. */
-        pieceNames?: Record<string, string> | undefined;
+        pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
       };
     }
   }
@@ -73,7 +79,7 @@ export interface ChessBoardProps {
   /** Error message to display when parsing fails. */
   errorMessage?: string;
   /** Custom piece names for accessibility (aria-labels). */
-  pieceNames?: Record<string, string>;
+  pieceNames?: Partial<Record<ChessPiece, string>>;
 }
 
 /**
@@ -121,7 +127,7 @@ export interface ShogiBoardProps {
   /** Custom label for Gote's captured pieces. */
   handGoteLabel?: string;
   /** Custom piece names for accessibility (aria-labels). */
-  pieceNames?: Record<string, string>;
+  pieceNames?: Partial<Record<ShogiPiece, string>>;
 }
 
 /**

@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { watchEffect } from "vue";
 import "@multi-game-engines/ui-elements";
-import { FEN, SFEN, Move } from "@multi-game-engines/ui-core";
+import {
+  FEN,
+  SFEN,
+  Move,
+  ChessPiece,
+  ShogiPiece,
+} from "@multi-game-engines/ui-core";
 
 /**
  * 汎用的な盤面コンポーネント。
@@ -27,7 +33,7 @@ const props = defineProps<{
   /** 駒台のラベル (将棋・後手) */
   handGoteLabel?: string;
   /** カスタム駒名称 (アクセシビリティ用) */
-  pieceNames?: Record<string, string>;
+  pieceNames?: Partial<Record<ChessPiece | ShogiPiece, string>>;
 }>();
 
 watchEffect(() => {
