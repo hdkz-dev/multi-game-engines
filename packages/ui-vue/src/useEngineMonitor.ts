@@ -1,9 +1,19 @@
-import { ref, onUnmounted, onMounted, computed, Ref, ComputedRef } from "vue";
+import {
+  ref,
+  onUnmounted,
+  watch,
+  computed,
+  unref,
+  Ref,
+  ComputedRef,
+  MaybeRef,
+} from "vue";
 import {
   IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   EngineStatus,
+  createPositionString,
 } from "@multi-game-engines/core";
 import {
   MonitorRegistry,
@@ -13,6 +23,7 @@ import {
   UINormalizerMiddleware,
   SearchMonitor,
   CommandDispatcher,
+  createInitialState,
 } from "@multi-game-engines/ui-core";
 
 /**
@@ -28,7 +39,7 @@ export interface UseEngineMonitorReturn<
   status: ComputedRef<EngineStatus>;
   search: (searchOptions: T_OPTIONS) => Promise<T_RESULT>;
   stop: () => Promise<void>;
-  monitor: SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>;
+  monitor: Ref<SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> | null>;
 }
 
 /**
@@ -40,7 +51,9 @@ export function useEngineMonitor<
   T_INFO extends ExtendedSearchInfo = ExtendedSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 >(
-  engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>,
+  engineSource: MaybeRef<
+    IEngine<T_OPTIONS, T_INFO, T_RESULT> | null | undefined
+  >,
   options: {
     initialPosition?: string;
     transformer?: (state: T_STATE, info: T_INFO) => T_STATE;
@@ -54,67 +67,131 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  const monitor = MonitorRegistry.getInstance().getOrCreateMonitor<
+  // ダミー状態の作成 (初期化前やエラー時のフォールバック)
+  const createDummyState = (): T_STATE => {
+    try {
+      const brandedPos = createPositionString(initialPosition);
+      return createInitialState(brandedPos) as unknown as T_STATE;
+    } catch {
+      const safePos = createPositionString("startpos");
+      return createInitialState(safePos) as unknown as T_STATE;
+    }
+  };
+
+  const state = ref<T_STATE>(createDummyState()) as Ref<T_STATE>;
+  const engineStatus = ref<EngineStatus>("uninitialized");
+  const optimisticStatus = ref<EngineStatus | null>(null);
+  const monitor = ref<SearchMonitor<
     T_STATE,
     T_OPTIONS,
     T_INFO,
     T_RESULT
-  >(engine, initialPosition, transformer);
-
-  // 2026 Best Practice: Ref を使用し、初期状態をモニターから取得
-  const state = ref<T_STATE>(monitor.getSnapshot() as T_STATE) as Ref<T_STATE>;
-  const engineStatus = ref<EngineStatus>(engine.status);
-  const optimisticStatus = ref<EngineStatus | null>(null);
-  const status = computed<EngineStatus>(
-    () => optimisticStatus.value ?? engineStatus.value,
-  );
-
-  const dispatcher = new CommandDispatcher(monitor, (s: EngineStatus) => {
-    optimisticStatus.value = s;
-  });
+  > | null>(null);
+  const dispatcher = ref<CommandDispatcher<
+    T_STATE,
+    T_OPTIONS,
+    T_INFO,
+    T_RESULT
+  > | null>(null);
 
   let unsubStore: (() => void) | null = null;
   let unsubStatus: (() => void) | null = null;
 
-  // ミドルウェア登録 (初回のみ)
-  onMounted(() => {
-    if (autoMiddleware && typeof engine.use === "function") {
-      const normalizer = new UINormalizerMiddleware<
+  const cleanup = () => {
+    if (unsubStore) {
+      unsubStore();
+      unsubStore = null;
+    }
+    if (unsubStatus) {
+      unsubStatus();
+      unsubStatus = null;
+    }
+    if (monitor.value) {
+      monitor.value.stopMonitoring();
+      monitor.value = null;
+    }
+    dispatcher.value = null;
+  };
+
+  // エンジンの変更を監視
+  watch(
+    () => unref(engineSource),
+    (newEngine) => {
+      cleanup();
+
+      if (!newEngine) {
+        engineStatus.value = "uninitialized";
+        // エンジンがない場合、状態をダミーに戻すべきか？
+        // React版では monitor?.getSnapshot() ?? dummyState なので、monitorがなければdummyStateになる。
+        // ここでもダミー状態に戻すのが一貫性がある。
+        state.value = createDummyState();
+        return;
+      }
+
+      // ミドルウェア登録 (初回のみ)
+      if (autoMiddleware && typeof newEngine.use === "function") {
+        const normalizer = new UINormalizerMiddleware<
+          T_OPTIONS,
+          T_INFO,
+          T_RESULT
+        >();
+        newEngine.use(normalizer);
+      }
+
+      const m = MonitorRegistry.getInstance().getOrCreateMonitor<
+        T_STATE,
         T_OPTIONS,
         T_INFO,
         T_RESULT
-      >();
-      engine.use(normalizer);
+      >(newEngine, initialPosition, transformer);
+      monitor.value = m;
+
+      const d = new CommandDispatcher(m, (s: EngineStatus) => {
+        optimisticStatus.value = s;
+      });
+      dispatcher.value = d;
+
+      // 監視開始
+      m.startMonitoring();
+      state.value = m.getSnapshot() as T_STATE;
+
+      unsubStore = m.subscribe(() => {
+        state.value = m.getSnapshot() as T_STATE;
+      });
+
+      engineStatus.value = newEngine.status;
+      unsubStatus = newEngine.onStatusChange((newStatus) => {
+        engineStatus.value = newStatus;
+        optimisticStatus.value = null;
+      });
+    },
+    { immediate: true },
+  );
+
+  onUnmounted(cleanup);
+
+  const search = (searchOptions: T_OPTIONS) => {
+    if (!dispatcher.value)
+      return Promise.reject(new Error("ENGINE_NOT_AVAILABLE"));
+    return dispatcher.value.dispatchSearch(searchOptions);
+  };
+
+  const stop = async () => {
+    if (dispatcher.value) {
+      await dispatcher.value.dispatchStop();
     }
-  });
-
-  // 監視開始
-  onMounted(() => {
-    monitor.startMonitoring();
-    unsubStore = monitor.subscribe(() => {
-      state.value = monitor.getSnapshot() as T_STATE;
-    });
-
-    unsubStatus = engine.onStatusChange((newStatus) => {
-      engineStatus.value = newStatus;
-      optimisticStatus.value = null;
-    });
-  });
-
-  onUnmounted(() => {
-    if (unsubStore) unsubStore();
-    if (unsubStatus) unsubStatus();
-  });
-
-  const search = (searchOptions: T_OPTIONS) =>
-    dispatcher.dispatchSearch(searchOptions);
-  const stop = () => dispatcher.dispatchStop();
+  };
 
   return {
     state,
-    status,
+    status: computed(() => optimisticStatus.value ?? engineStatus.value),
     search,
     stop,
-    monitor,
+    monitor: monitor as Ref<SearchMonitor<
+      T_STATE,
+      T_OPTIONS,
+      T_INFO,
+      T_RESULT
+    > | null>,
   };
 }

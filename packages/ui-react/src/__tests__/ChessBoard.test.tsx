@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { render } from "@testing-library/react";
 import React from "react";
 import { ChessBoard } from "../BoardComponents.js";
-import { createFEN, createMove } from "@multi-game-engines/core";
+import { createFEN, createMove, FEN, Move } from "@multi-game-engines/core";
 
 interface ChessBoardElement extends HTMLElement {
-  fen: string;
-  lastMove: string;
+  fen: FEN;
+  lastMove: Move;
   orientation: string;
   boardLabel: string;
   errorMessage: string;
@@ -14,6 +14,14 @@ interface ChessBoardElement extends HTMLElement {
 }
 
 describe("ChessBoard (React)", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should render chess-board custom element with props mapped correctly", async () => {
     const fen = createFEN(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -32,7 +40,9 @@ describe("ChessBoard (React)", () => {
       />,
     );
 
-    const board = container.querySelector("chess-board") as ChessBoardElement;
+    const board = container.querySelector(
+      "chess-board",
+    ) as unknown as ChessBoardElement;
     expect(board).toBeTruthy();
 
     // In React 19, properties are preferred for custom elements if they exist.
@@ -50,7 +60,9 @@ describe("ChessBoard (React)", () => {
     const fen = createFEN("8/8/8/8/8/8/8/8 w - - 0 1");
     const { container } = render(<ChessBoard fen={fen} />);
 
-    const board = container.querySelector("chess-board") as ChessBoardElement;
+    const board = container.querySelector(
+      "chess-board",
+    ) as unknown as ChessBoardElement;
     expect(board.getAttribute("last-move")).toBeNull();
     expect(board.getAttribute("orientation")).toBeNull();
     expect(board.getAttribute("board-label")).toBeNull();

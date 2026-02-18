@@ -37,6 +37,7 @@
   "dashboard": {
     "title": "ZENITH DASHBOARD",
     "subtitle": "Next-Gen Game Intelligence Bridge",
+    "initializingEngines": "INITIALIZING ENGINES...",
     "chessLabel": "CHESS / UCI",
     "shogiLabel": "SHOGI / USI",
     "engineSelector": "Engine selector",

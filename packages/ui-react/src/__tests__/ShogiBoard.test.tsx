@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { render } from "@testing-library/react";
 import React from "react";
 import { ShogiBoard } from "../BoardComponents.js";
-import { createSFEN, createMove } from "@multi-game-engines/core";
+import { createSFEN, createMove, SFEN, Move } from "@multi-game-engines/core";
 
 interface ShogiBoardElement extends HTMLElement {
-  sfen: string;
-  lastMove: string;
+  sfen: SFEN;
+  lastMove: Move;
   boardLabel: string;
   errorMessage: string;
   handSenteLabel: string;
@@ -15,6 +15,14 @@ interface ShogiBoardElement extends HTMLElement {
 }
 
 describe("ShogiBoard (React)", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should render shogi-board custom element with props mapped correctly", async () => {
     const sfen = createSFEN(
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
@@ -34,7 +42,9 @@ describe("ShogiBoard (React)", () => {
       />,
     );
 
-    const board = container.querySelector("shogi-board") as ShogiBoardElement;
+    const board = container.querySelector(
+      "shogi-board",
+    ) as unknown as ShogiBoardElement;
     expect(board).toBeTruthy();
 
     expect(board.sfen).toBe(sfen);
@@ -52,7 +62,9 @@ describe("ShogiBoard (React)", () => {
     const sfen = createSFEN("9/9/9/9/9/9/9/9/9 b - 1");
     const { container } = render(<ShogiBoard sfen={sfen} />);
 
-    const board = container.querySelector("shogi-board") as ShogiBoardElement;
+    const board = container.querySelector(
+      "shogi-board",
+    ) as unknown as ShogiBoardElement;
     expect(board.getAttribute("last-move")).toBeNull();
     expect(board.getAttribute("board-label")).toBeNull();
     expect(board.getAttribute("error-message")).toBeNull();

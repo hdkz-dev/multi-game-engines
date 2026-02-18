@@ -34,7 +34,7 @@ const chessOptions = {
   ),
   multipv: 3,
 };
-const { state: chessState } = useEngineMonitor(chessEngine.value);
+const { state: chessState } = useEngineMonitor(chessEngine);
 
 // 将棋用の設定
 const shogiEngine = computed(() => bridge?.getEngine("yaneuraou") ?? null);
@@ -44,7 +44,7 @@ const shogiOptions = {
   ),
   multipv: 2,
 };
-const { state: shogiState } = useEngineMonitor(shogiEngine.value);
+const { state: shogiState } = useEngineMonitor(shogiEngine);
 
 const chessBestMove = computed(() => chessState.value.pvs[0]?.moves[0]);
 const shogiBestMove = computed(() => shogiState.value.pvs[0]?.moves[0]);
