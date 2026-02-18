@@ -111,7 +111,7 @@ export const SearchStateTransformer = {
       // MultiPV 順にソート
       nextPvs.sort((a, b) => a.multipv - b.multipv);
 
-      // 探索ログの更新ロジック (Smart Log Entry)
+      // Smart Log Entry logic
       const newScore = newPV.score;
       let lastEntryIndex = -1;
       for (let i = state.searchLog.length - 1; i >= 0; i--) {

@@ -42,6 +42,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Initial lang attribute based on default state
   return (
     <html lang="ja">
       <body className="antialiased">

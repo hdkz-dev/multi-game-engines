@@ -9,12 +9,12 @@ describe("SubscriptionManager", () => {
 
     expect(manager.size).toBe(1);
 
-    // 1回目の実行: 元の関数が呼ばれ、Set から削除される
+    // First call: calls the original function and removes it from the Set
     unsub();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(manager.size).toBe(0);
 
-    // 2回目の実行: 何も起きない
+    // Second call: does nothing
     unsub();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(manager.size).toBe(0);
@@ -43,7 +43,7 @@ describe("SubscriptionManager", () => {
     manager.clear();
     expect(spy).toHaveBeenCalledTimes(1);
 
-    // 既に clear で呼ばれているので、ここでは呼ばれない
+    // Already called by clear(), so it should not be called again here
     unsub();
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -57,7 +57,7 @@ describe("SubscriptionManager", () => {
     expect(spy).toHaveBeenCalledTimes(1);
 
     manager.clear();
-    expect(spy).toHaveBeenCalledTimes(1); // すでに unsub() 済みなので追加で呼ばれない
+    expect(spy).toHaveBeenCalledTimes(1); // Already unsubscribed, so should not be called again
   });
 
   it("should continue calling other unsubscribers even if one throws", () => {

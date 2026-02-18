@@ -14,21 +14,12 @@ const EngineMonitorPanel = dynamic(
     ),
   { ssr: false },
 );
-const EngineUIProvider = dynamic(
-  () =>
-    import("@multi-game-engines/ui-react").then((mod) => mod.EngineUIProvider),
-  { ssr: false },
-);
 const ChessBoard = dynamic(
   () => import("@multi-game-engines/ui-react").then((mod) => mod.ChessBoard),
   { ssr: false },
 );
 const ShogiBoard = dynamic(
   () => import("@multi-game-engines/ui-react").then((mod) => mod.ShogiBoard),
-  { ssr: false },
-);
-const StatCard = dynamic(
-  () => import("@multi-game-engines/ui-react").then((mod) => mod.StatCard),
   { ssr: false },
 );
 
@@ -41,10 +32,17 @@ import {
   Cpu,
   Gauge,
 } from "lucide-react";
-import { useEngineMonitor } from "@multi-game-engines/ui-react/hooks";
+import {
+  EngineUIProvider,
+  useEngineMonitor,
+  StatCard,
+} from "@multi-game-engines/ui-react";
 import { useLocale } from "./layout";
 
 type EngineType = "chess" | "shogi";
+
+const CHESS_MULTI_PV = 3;
+const SHOGI_MULTI_PV = 2;
 
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>("chess");
@@ -63,7 +61,7 @@ export default function Dashboard() {
       fen: createFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       ),
-      multipv: 3,
+      multipv: CHESS_MULTI_PV,
     }),
     [],
   );
@@ -76,7 +74,7 @@ export default function Dashboard() {
       sfen: createSFEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
       ),
-      multipv: 2,
+      multipv: SHOGI_MULTI_PV,
     }),
     [],
   );
@@ -129,13 +127,18 @@ export default function Dashboard() {
 
           <div className="flex flex-wrap items-center gap-4">
             {/* Language Switcher */}
-            <div className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center">
+            <div
+              role="group"
+              aria-label="Language selector"
+              className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center"
+            >
               <Globe
                 className="w-4 h-4 ml-2 text-gray-400"
                 aria-hidden="true"
               />
               <button
                 onClick={() => setLocale("en")}
+                aria-pressed={locale === "en"}
                 className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all ${
                   locale === "en"
                     ? "bg-gray-900 text-white"
@@ -146,6 +149,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setLocale("ja")}
+                aria-pressed={locale === "ja"}
                 className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all ${
                   locale === "ja"
                     ? "bg-gray-900 text-white"

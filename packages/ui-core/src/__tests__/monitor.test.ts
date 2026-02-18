@@ -7,7 +7,7 @@ import {
   IBaseSearchResult,
 } from "@multi-game-engines/core";
 
-// モック用の型定義
+// Mock type definitions
 type MockState = { count: number; lastRaw: string };
 type MockInfo = { raw: string };
 
@@ -59,7 +59,7 @@ describe("SearchMonitor (Throttling)", () => {
   });
 
   it("should batch multiple updates into a single state notification", async () => {
-    // 状態変換ロジック: カウントアップと最後の生メッセージ保持
+    // Transformation logic: increment count and store last raw message
     const transformer = vi.fn((state: MockState, info: MockInfo) => ({
       count: state.count + 1,
       lastRaw: info.raw,
@@ -77,26 +77,26 @@ describe("SearchMonitor (Throttling)", () => {
 
     monitor.startMonitoring();
 
-    // 1. 短期間に複数の更新を発生させる
+    // 1. Trigger multiple updates in a short period
     infoCallback(createMockInfo("msg1"));
     infoCallback(createMockInfo("msg2"));
     infoCallback(createMockInfo("msg3"));
 
-    // まだ非同期処理前なので、更新は反映されていないはず
+    // Async processing hasn't happened yet, so updates shouldn't be reflected
     expect(listener).not.toHaveBeenCalled();
     expect(transformer).not.toHaveBeenCalled();
 
-    // 2. タイマーを進める (requestAnimationFrame / setTimeout 発火)
+    // 2. Advance timers (requestAnimationFrame / setTimeout trigger)
     await vi.runAllTimersAsync();
 
-    // 3. 検証
-    // トランスフォーマーは受信したメッセージの回数分呼ばれるべき (msg1 -> msg2 -> msg3)
+    // 3. Validation
+    // Transformer should be called for each received message
     expect(transformer).toHaveBeenCalledTimes(3);
 
-    // しかし、ストアのリスナーへの通知（再レンダリング）は1回にまとめられるべき
+    // But notification to store listeners (re-render) should be batched to once
     expect(listener).toHaveBeenCalledTimes(1);
 
-    // 最終状態の確認
+    // Final state check
     const state = monitor.getState();
     expect(state.count).toBe(3);
     expect(state.lastRaw).toBe("msg3");
@@ -118,12 +118,12 @@ describe("SearchMonitor (Throttling)", () => {
     monitor.startMonitoring();
     infoCallback(createMockInfo("msg1"));
 
-    // 処理される前に停止
+    // Stop before processing
     monitor.stopMonitoring();
 
     await vi.runAllTimersAsync();
 
-    // 停止後は更新が反映されていないこと
+    // Updates should not be reflected after stopping
     expect(monitor.getState().lastRaw).toBe("");
   });
 });
