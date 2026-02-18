@@ -42,33 +42,33 @@ describe("ShogiBoard (React)", () => {
       />,
     );
 
-    const board = container.querySelector(
-      "shogi-board",
-    ) as unknown as ShogiBoardElement;
+    const board = container.querySelector<ShogiBoardElement>("shogi-board");
     expect(board).toBeTruthy();
 
-    expect(board.sfen).toBe(sfen);
-    expect(board.lastMove).toBe(lastMove);
-    expect(board.boardLabel).toBe("Custom Shogi Board");
-    expect(board.errorMessage).toBe("Custom Error");
-    expect(board.handSenteLabel).toBe("Sente pieces");
-    expect(board.handGoteLabel).toBe("Gote pieces");
-    expect(board.pieceNames).toEqual(pieceNames);
+    if (board) {
+      expect(board.sfen).toBe(sfen);
+      expect(board.lastMove).toBe(lastMove);
+      expect(board.boardLabel).toBe("Custom Shogi Board");
+      expect(board.errorMessage).toBe("Custom Error");
+      expect(board.handSenteLabel).toBe("Sente pieces");
+      expect(board.handGoteLabel).toBe("Gote pieces");
+      expect(board.pieceNames).toEqual(pieceNames);
 
-    expect(board.getAttribute("class")).toBe("shogi-custom");
+      expect(board.getAttribute("class")).toBe("shogi-custom");
+    }
   });
 
   it("should not set optional attributes when undefined", () => {
     const sfen = createSFEN("9/9/9/9/9/9/9/9/9 b - 1");
     const { container } = render(<ShogiBoard sfen={sfen} />);
 
-    const board = container.querySelector(
-      "shogi-board",
-    ) as unknown as ShogiBoardElement;
-    expect(board.getAttribute("last-move")).toBeNull();
-    expect(board.getAttribute("board-label")).toBeNull();
-    expect(board.getAttribute("error-message")).toBeNull();
-    expect(board.getAttribute("hand-sente-label")).toBeNull();
-    expect(board.getAttribute("hand-gote-label")).toBeNull();
+    const board = container.querySelector<ShogiBoardElement>("shogi-board");
+    if (board) {
+      expect(board.getAttribute("last-move")).toBeNull();
+      expect(board.getAttribute("board-label")).toBeNull();
+      expect(board.getAttribute("error-message")).toBeNull();
+      expect(board.getAttribute("hand-sente-label")).toBeNull();
+      expect(board.getAttribute("hand-gote-label")).toBeNull();
+    }
   });
 });

@@ -3,10 +3,10 @@ import {
   onUnmounted,
   watch,
   computed,
-  unref,
+  toValue,
   Ref,
   ComputedRef,
-  MaybeRef,
+  MaybeRefOrGetter,
 } from "vue";
 import {
   IEngine,
@@ -51,7 +51,7 @@ export function useEngineMonitor<
   T_INFO extends ExtendedSearchInfo = ExtendedSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 >(
-  engineSource: MaybeRef<
+  engineSource: MaybeRefOrGetter<
     IEngine<T_OPTIONS, T_INFO, T_RESULT> | null | undefined
   >,
   options: {
@@ -63,7 +63,7 @@ export function useEngineMonitor<
   const {
     initialPosition = "startpos",
     transformer = (state: T_STATE, info: T_INFO): T_STATE =>
-      SearchStateTransformer.mergeInfo(state, info) as T_STATE,
+      SearchStateTransformer.mergeInfo<T_STATE>(state, info),
     autoMiddleware = true,
   } = options;
 
@@ -71,10 +71,10 @@ export function useEngineMonitor<
   const createDummyState = (): T_STATE => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as unknown as T_STATE;
+      return createInitialState<T_STATE>(brandedPos);
     } catch {
       const safePos = createPositionString("startpos");
-      return createInitialState(safePos) as unknown as T_STATE;
+      return createInitialState<T_STATE>(safePos);
     }
   };
 
@@ -113,17 +113,14 @@ export function useEngineMonitor<
     dispatcher.value = null;
   };
 
-  // エンジンの変更を監視
+  // 2026 Best Practice: MaybeRefOrGetter を監視し、toValue で評価
   watch(
-    () => unref(engineSource),
+    () => toValue(engineSource),
     (newEngine) => {
       cleanup();
 
       if (!newEngine) {
         engineStatus.value = "uninitialized";
-        // エンジンがない場合、状態をダミーに戻すべきか？
-        // React版では monitor?.getSnapshot() ?? dummyState なので、monitorがなければdummyStateになる。
-        // ここでもダミー状態に戻すのが一貫性がある。
         state.value = createDummyState();
         return;
       }

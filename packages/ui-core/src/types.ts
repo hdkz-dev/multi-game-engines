@@ -96,13 +96,12 @@ export interface EngineSearchState {
 
 /**
  * 初期状態の定義。
- * 2026 Best Practice: 危険な 'as unknown as T' キャストを排除し、ベース型を確実に構築。
+ * 2026 Best Practice: 呼び出し側での 'as unknown as T' を排除するため、ジェネリクスをサポート。
  */
-export function createInitialState(
-  position: PositionString,
-  overrides?: Partial<EngineSearchState>,
-): EngineSearchState {
-  return {
+export function createInitialState<
+  T extends EngineSearchState = EngineSearchState,
+>(position: PositionString, overrides?: Partial<T>): T {
+  const base: EngineSearchState = {
     isSearching: false,
     position,
     stats: {
@@ -118,6 +117,10 @@ export function createInitialState(
     },
     searchLog: [],
     _internalCounter: 0,
-    ...overrides,
   };
+
+  return {
+    ...base,
+    ...overrides,
+  } as T;
 }

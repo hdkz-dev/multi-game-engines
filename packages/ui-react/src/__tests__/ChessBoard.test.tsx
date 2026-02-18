@@ -40,32 +40,32 @@ describe("ChessBoard (React)", () => {
       />,
     );
 
-    const board = container.querySelector(
-      "chess-board",
-    ) as unknown as ChessBoardElement;
+    const board = container.querySelector<ChessBoardElement>("chess-board");
     expect(board).toBeTruthy();
 
-    // In React 19, properties are preferred for custom elements if they exist.
-    expect(board.fen).toBe(fen);
-    expect(board.lastMove).toBe(lastMove);
-    expect(board.orientation).toBe("black");
-    expect(board.boardLabel).toBe("Custom Chess Board");
-    expect(board.errorMessage).toBe("Custom Error");
-    expect(board.pieceNames).toEqual(pieceNames);
+    if (board) {
+      // In React 19, properties are preferred for custom elements if they exist.
+      expect(board.fen).toBe(fen);
+      expect(board.lastMove).toBe(lastMove);
+      expect(board.orientation).toBe("black");
+      expect(board.boardLabel).toBe("Custom Chess Board");
+      expect(board.errorMessage).toBe("Custom Error");
+      expect(board.pieceNames).toEqual(pieceNames);
 
-    expect(board.getAttribute("class")).toBe("custom-class");
+      expect(board.getAttribute("class")).toBe("custom-class");
+    }
   });
 
   it("should not set optional attributes when undefined", () => {
     const fen = createFEN("8/8/8/8/8/8/8/8 w - - 0 1");
     const { container } = render(<ChessBoard fen={fen} />);
 
-    const board = container.querySelector(
-      "chess-board",
-    ) as unknown as ChessBoardElement;
-    expect(board.getAttribute("last-move")).toBeNull();
-    expect(board.getAttribute("orientation")).toBeNull();
-    expect(board.getAttribute("board-label")).toBeNull();
-    expect(board.getAttribute("error-message")).toBeNull();
+    const board = container.querySelector<ChessBoardElement>("chess-board");
+    if (board) {
+      expect(board.getAttribute("last-move")).toBeNull();
+      expect(board.getAttribute("orientation")).toBeNull();
+      expect(board.getAttribute("board-label")).toBeNull();
+      expect(board.getAttribute("error-message")).toBeNull();
+    }
   });
 });

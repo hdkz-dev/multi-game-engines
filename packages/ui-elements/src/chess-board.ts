@@ -1,7 +1,7 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
-import { createFEN } from "@multi-game-engines/core";
+import { createFEN, Move } from "@multi-game-engines/core";
 
 // Standard SVG piece set (Wikipedia/Standard) - Inlined as Data URIs for SRI compliance and zero external dependencies.
 const PIECE_SVG: Record<ChessPiece, string> = {
@@ -99,7 +99,7 @@ export class ChessBoard extends LitElement {
    * Last move to highlight (e.g., "e2e4").
    */
   @property({ type: String, attribute: "last-move", reflect: true })
-  lastMove = "";
+  lastMove: Move | "" = "";
 
   /**
    * Board orientation.

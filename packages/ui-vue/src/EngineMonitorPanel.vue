@@ -89,7 +89,7 @@ const { state, status, search, stop } = useEngineMonitor<
   T_OPTIONS,
   T_INFO,
   T_RESULT
->(props.engine, {
+>(() => props.engine, {
   autoMiddleware: true,
 });
 

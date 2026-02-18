@@ -95,9 +95,7 @@ export class MonitorRegistry {
     }
 
     const brandedPosition = createPositionString(initialPosition);
-    const initialState = createInitialState(
-      brandedPosition,
-    ) as unknown as T_STATE;
+    const initialState = createInitialState<T_STATE>(brandedPosition);
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,
@@ -112,7 +110,8 @@ export class MonitorRegistry {
       IBaseSearchResult
     > = {
       // 永続化のためにベース型にキャストして保存。
-      // 異なるエンジン間で共通のベース型で管理するための必要悪としてのキャスト。
+      // SearchMonitor は不変 (invariant) だが、
+      // 内部管理用の WeakMap においては具象型を抽象型として扱う。
       monitor: newMonitor as unknown as SearchMonitor<
         EngineSearchState,
         IBaseSearchOptions,

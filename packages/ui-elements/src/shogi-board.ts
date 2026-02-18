@@ -6,7 +6,7 @@ import {
   ShogiHand,
   SFEN,
 } from "@multi-game-engines/ui-core";
-import { createSFEN } from "@multi-game-engines/core";
+import { createSFEN, Move } from "@multi-game-engines/core";
 
 // Shogi piece mapping to Kanji/Labels for display and accessibility
 const PIECE_LABELS: Record<ShogiPiece, string> = {
@@ -129,7 +129,7 @@ export class ShogiBoard extends LitElement {
    * Last move to highlight (e.g., "7g7f" or "P*5e").
    */
   @property({ type: String, attribute: "last-move", reflect: true })
-  lastMove = "";
+  lastMove: Move | "" = "";
 
   /**
    * Accessible labels.

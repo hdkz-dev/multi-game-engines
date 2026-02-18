@@ -51,7 +51,7 @@ export function useEngineMonitor<
   const {
     initialPosition = "startpos",
     transformer = (state: T_STATE, info: T_INFO): T_STATE =>
-      SearchStateTransformer.mergeInfo(state, info) as T_STATE,
+      SearchStateTransformer.mergeInfo<T_STATE>(state, info),
     autoMiddleware = true,
   } = options;
 
@@ -59,11 +59,11 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as unknown as T_STATE;
+      return createInitialState<T_STATE>(brandedPos);
     } catch {
       // バリデーション失敗時は安全なデフォルト値で復旧
       const safePos = createPositionString("startpos");
-      return createInitialState(safePos) as unknown as T_STATE;
+      return createInitialState<T_STATE>(safePos);
     }
   }, [initialPosition]);
 

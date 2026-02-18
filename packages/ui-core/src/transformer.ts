@@ -15,10 +15,10 @@ export const SearchStateTransformer = {
    * info イベントのデータを現在の状態にマージする。
    * Zod によるバリデーションを挟むことで、不正なデータによる UI のクラッシュを防ぐ。
    */
-  mergeInfo(
-    state: EngineSearchState,
+  mergeInfo<T extends EngineSearchState = EngineSearchState>(
+    state: T,
     info: ExtendedSearchInfo,
-  ): EngineSearchState {
+  ): T {
     // 2026 Best Practice: Middleware で検証済みのデータを信頼し、ここでの二重検証を削除してパフォーマンスを向上
     // const validation = SearchInfoSchema.safeParse(info); ...
 
@@ -30,7 +30,7 @@ export const SearchStateTransformer = {
     // Internal counter for purity (no side effects)
     let currentCounter = state._internalCounter;
 
-    const nextState: EngineSearchState = {
+    const nextState: T = {
       ...state,
       pvs: nextPvs,
       stats: {
