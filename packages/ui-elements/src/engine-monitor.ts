@@ -317,13 +317,14 @@ export class EngineMonitorElement extends LitElement {
   }
 
   render() {
-    if (!this.engine || !this._searchState) {
-      return html`<div class="error-container">Initializing...</div>`;
-    }
-
     const strings = createUIStrings(
       this.locale === "ja" ? locales.ja : locales.en,
     );
+
+    if (!this.engine || !this._searchState) {
+      return html`<div class="error-container">${strings.initializing}</div>`;
+    }
+
     const state = this._searchState;
     const bestPV = state.pvs[0];
 

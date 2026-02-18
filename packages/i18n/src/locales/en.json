@@ -21,6 +21,7 @@
     "start": "START",
     "stop": "STOP",
     "searching": "Searching...",
+    "initializing": "Initializing...",
     "ready": "Ready",
     "mateIn": "Mate in {n}",
     "advantage": "{side} +{v}",

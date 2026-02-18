@@ -99,6 +99,7 @@ const pos = createFEN(
 - **Adaptive Throttling**:
   - **RAF 同期モード**: デフォルトで `requestAnimationFrame` に同期し、ブラウザの再描画周期（通常 60fps）を超えた無駄な通知を自動的に破棄します。
   - **時間ベース Throttling**: `throttleMs` オプションにより、特定のミリ秒間隔での更新強制も可能です。
+- **Generic State Management**: `SearchMonitor<T_STATE>` および `createInitialState<T>` のジェネリクス対応により、アプリケーション固有の状態（例: デバッグ用カウンタ、履歴拡張）を型安全に管理可能。`as unknown as` キャストを排除。
 - **決定論的スナップショット**: React の `useSyncExternalStore` に完全対応した `getSnapshot` / `subscribe` インターフェースを実装。レンダリングの「引き裂き（Tearing）」を構造的に防止します。
 - **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
 - **プレゼンテーションロジックの分離**: `EvaluationPresenter` により、評価値の表示色やラベル生成ロジックを UI フレームワークから分離・共通化。

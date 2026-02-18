@@ -8,8 +8,13 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  createPositionString,
 } from "@multi-game-engines/core";
-import { EngineSearchState, SearchMonitor } from "@multi-game-engines/ui-core";
+import {
+  EngineSearchState,
+  SearchMonitor,
+  createInitialState,
+} from "@multi-game-engines/ui-core";
 
 // Mock the hooks
 vi.mock("../useEngineMonitor.js", () => ({
@@ -65,6 +70,7 @@ describe("EngineMonitorPanel", () => {
     start: "START",
     stop: "STOP",
     searching: "Searching...",
+    initializing: "Initializing...",
     ready: "Ready",
     mateIn: (n: number) => `Mate in ${n}`,
     advantage: (side: "plus" | "minus" | "neutral", v: number) =>
@@ -99,17 +105,10 @@ describe("EngineMonitorPanel", () => {
       strings: mockStrings,
     });
 
+    const baseState = createInitialState(createPositionString("startpos"));
+
     vi.mocked(useEngineMonitor).mockReturnValue({
-      state: {
-        status: "ready",
-        depth: 0,
-        nodes: 0,
-        nps: 0,
-        time: 0,
-        pvs: [],
-        evaluationHistory: { entries: [], maxEntries: 50 },
-        searchLog: [],
-      } as unknown as EngineSearchState,
+      state: baseState,
       status: "ready",
       search: vi.fn(),
       stop: vi.fn(),
@@ -162,17 +161,10 @@ describe("EngineMonitorPanel", () => {
     const mockSearch = vi.fn();
     const mockStop = vi.fn();
 
+    const baseState = createInitialState(createPositionString("startpos"));
+
     vi.mocked(useEngineMonitor).mockReturnValue({
-      state: {
-        status: "ready",
-        depth: 0,
-        nodes: 0,
-        nps: 0,
-        time: 0,
-        pvs: [],
-        evaluationHistory: { entries: [], maxEntries: 50 },
-        searchLog: [],
-      } as unknown as EngineSearchState,
+      state: baseState,
       status: "ready",
       search: mockSearch,
       stop: mockStop,
@@ -212,17 +204,17 @@ describe("EngineMonitorPanel", () => {
     const mockSearch = vi.fn();
     const mockStop = vi.fn();
 
-    vi.mocked(useEngineMonitor).mockReturnValue({
-      state: {
-        status: "busy",
+    const baseState = createInitialState(createPositionString("startpos"), {
+      stats: {
         depth: 10,
         nodes: 1000,
         nps: 500,
         time: 2000,
-        pvs: [],
-        evaluationHistory: { entries: [], maxEntries: 50 },
-        searchLog: [],
-      } as unknown as EngineSearchState,
+      },
+    });
+
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      state: baseState,
       status: "busy",
       search: mockSearch,
       stop: mockStop,

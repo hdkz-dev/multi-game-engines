@@ -56,7 +56,21 @@ const nps = computed(() => {
 </script>
 
 <template>
-  <EngineUIProvider :locale-data="localeData">
+  <div
+    v-if="!bridge || !chessEngine || !shogiEngine"
+    class="min-h-screen flex items-center justify-center bg-gray-50"
+  >
+    <div class="flex flex-col items-center gap-4">
+      <div
+        class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
+      ></div>
+      <p class="text-gray-500 font-bold tracking-widest text-sm">
+        {{ localeData.dashboard.initializingEngines }}
+      </p>
+    </div>
+  </div>
+
+  <EngineUIProvider v-else :locale-data="localeData">
     <main class="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30">
       <!-- Header Area -->
       <header class="flex flex-col md:flex-row md:items-end justify-between gap-6">

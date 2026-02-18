@@ -21,6 +21,7 @@
     "start": "開始",
     "stop": "停止",
     "searching": "解析中...",
+    "initializing": "初期化中...",
     "ready": "待機中",
     "mateIn": "詰みまで {n} 手",
     "advantage": "{side}有利 {v} 点",

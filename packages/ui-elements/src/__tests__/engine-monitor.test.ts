@@ -13,6 +13,7 @@ describe("EngineMonitorElement", () => {
 
   it("should render placeholder text when no engine is provided", async () => {
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
+    el.locale = "en";
     document.body.appendChild(el);
 
     // 2026 Best Practice: Lit の非同期レンダリングを待機

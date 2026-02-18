@@ -20,6 +20,7 @@ export interface EngineUIStrings {
   start: string;
   stop: string;
   searching: string;
+  initializing: string;
   ready: string;
   mateIn: (moves: number) => string;
   advantage: (side: "plus" | "minus" | "neutral", value: number) => string;
@@ -85,6 +86,7 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     start: t("start", "START"),
     stop: t("stop", "STOP"),
     searching: t("searching", "Searching..."),
+    initializing: t("initializing", "Initializing..."),
     ready: t("ready", "Ready"),
     mateIn: (n: number) =>
       t("mateIn", "Mate in {n}").replace("{n}", n.toString()),
