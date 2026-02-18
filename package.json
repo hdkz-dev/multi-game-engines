@@ -29,6 +29,11 @@
     "pnpm": ">=10.0.0"
   },
   "pnpm": {
+    "auditConfig": {
+      "ignoreAdvisories": [
+        "GHSA-2g4f-4pwh-qvx6"
+      ]
+    },
     "onlyBuiltDependencies": [
       "esbuild",
       "sharp",
