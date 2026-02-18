@@ -1,10 +1,18 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EvaluationGraph } from "../EvaluationGraph.js";
 import { IEvaluationHistoryEntry } from "@multi-game-engines/ui-core";
 
 describe("EvaluationGraph", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should render correctly with entries", () => {
     const entries: IEvaluationHistoryEntry[] = [
       { score: { type: "cp", value: 10, relativeValue: 10 }, timestamp: 0 },

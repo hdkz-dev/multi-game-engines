@@ -20,22 +20,6 @@ const PIECE_SVG: Record<ChessPiece, string> = {
   k: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
 };
 
-// Human-readable names for accessibility
-const PIECE_NAMES: Record<ChessPiece, string> = {
-  P: "White Pawn",
-  N: "White Knight",
-  B: "White Bishop",
-  R: "White Rook",
-  Q: "White Queen",
-  K: "White King",
-  p: "Black Pawn",
-  n: "Black Knight",
-  b: "Black Bishop",
-  r: "Black Rook",
-  q: "Black Queen",
-  k: "Black King",
-};
-
 /**
  * A framework-agnostic Chess board component.
  * @element chess-board
@@ -138,6 +122,10 @@ export class ChessBoard extends LitElement {
       boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
       errorMessage:
         this.errorMessage || data.dashboard.gameBoard.invalidPosition,
+      pieceNames: data.dashboard.gameBoard.chessPieces as Record<
+        ChessPiece,
+        string
+      >,
       squareLabel: (f: string, r: number) =>
         data.dashboard.gameBoard.squareLabel
           .replace("{file}", f)
@@ -195,7 +183,7 @@ export class ChessBoard extends LitElement {
         const isHighlighted = highlightedSquares.has(squareIdx);
 
         const pieceName = piece
-          ? this.pieceNames[piece] || PIECE_NAMES[piece]
+          ? this.pieceNames[piece] || strings.pieceNames[piece]
           : "";
 
         const ariaLabel = piece

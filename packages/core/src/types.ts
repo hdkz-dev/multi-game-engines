@@ -25,18 +25,24 @@ export type Move = Brand<string, "Move">;
  */
 export type PositionString = Brand<string, "PositionString">;
 
+import { EngineError } from "./errors/EngineError.js";
+
 /**
  * 局面情報のバリデータファクトリ。
  */
 export function createFEN(pos: string): FEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new Error("Invalid FEN: Input must be a non-empty string.");
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid FEN: Input must be a non-empty string.",
+    });
   }
   const fields = pos.trim().split(/\s+/);
   if (fields.length < 4) {
-    throw new Error(
-      `Invalid FEN structure: Expected at least 4 fields, found ${fields.length}`,
-    );
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN structure: Expected 4 fields, found ${fields.length}`,
+    });
   }
   return pos as FEN;
 }
@@ -46,13 +52,28 @@ export function createFEN(pos: string): FEN {
  */
 export function createSFEN(pos: string): SFEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new Error("Invalid SFEN: Input must be a non-empty string.");
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid SFEN: Input must be a non-empty string.",
+    });
   }
+
+  // 2026 Best Practice: Refuse by Exception character validation
+  // USI/SFEN allowed characters: [1-9], [a-z], [A-Z], /, +, *, whitespace, -
+  if (!/^[1-9a-zA-Z/+\s*-]+$/.test(pos)) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "Invalid SFEN: Illegal characters detected.",
+      remediation: "Remove control characters and non-standard symbols.",
+    });
+  }
+
   const fields = pos.trim().split(/\s+/);
   if (fields.length < 4) {
-    throw new Error(
-      `Invalid SFEN structure: Expected at least 4 fields (position, turn, hand, move count), found ${fields.length}`,
-    );
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
+    });
   }
   return pos as SFEN;
 }
@@ -62,9 +83,10 @@ export function createSFEN(pos: string): SFEN {
  */
 export function createPositionString(pos: string): PositionString {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new Error(
-      "Invalid PositionString: Input must be a non-empty string.",
-    );
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid PositionString: Input must be a non-empty string.",
+    });
   }
   return pos as PositionString;
 }
@@ -74,9 +96,10 @@ export function createPositionString(pos: string): PositionString {
  */
 export function createMove(move: string): Move {
   if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
-    throw new Error(
-      `Invalid Move format: "${move}" contains illegal characters.`,
-    );
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid Move format: "${move}" contains illegal characters.`,
+    });
   }
   return move as Move;
 }
@@ -200,7 +223,7 @@ export enum EngineErrorCode {
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
 
-export interface EngineError {
+export interface IEngineError {
   message: string;
   code: EngineErrorCode;
   remediation?: string | undefined;
@@ -335,7 +358,7 @@ export interface IEngine<
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
-  readonly lastError: EngineError | null;
+  readonly lastError: IEngineError | null;
   loadingStrategy?: EngineLoadingStrategy;
 
   use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this;

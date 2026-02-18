@@ -69,8 +69,6 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  const { strings } = useEngineUI();
-
   // ダミー状態の作成 (初期化前やエラー時のフォールバック)
   const createDummyState = (): T_STATE => {
     try {
@@ -115,6 +113,7 @@ export function useEngineMonitor<
       }
 
       // ミドルウェア登録 (初回のみ)
+      let didRegister = false;
       if (autoMiddleware && typeof newEngine.use === "function") {
         const normalizer = new UINormalizerMiddleware<
           T_OPTIONS,
@@ -122,6 +121,7 @@ export function useEngineMonitor<
           T_RESULT
         >();
         newEngine.use(normalizer);
+        didRegister = true;
       }
 
       const m = MonitorRegistry.getInstance().getOrCreateMonitor<
@@ -161,7 +161,7 @@ export function useEngineMonitor<
           monitor.value.stopMonitoring();
           monitor.value = null;
         }
-        if (newEngine && typeof newEngine.unuse === "function") {
+        if (didRegister && typeof newEngine.unuse === "function") {
           newEngine.unuse(UI_NORMALIZER_MIDDLEWARE_ID);
         }
         dispatcher.value = null;
@@ -170,22 +170,9 @@ export function useEngineMonitor<
     { immediate: true },
   );
 
-  // コンポーネント破棄時のクリーンアップは watch の停止と共に onWatcherCleanup が走るわけではないため
-  // 明示的な onUnmounted は依然として必要だが、
-  // watch scope が閉じるときに自動で cleanup される機能があればそれがベスト。
-  // しかし toValue(engineSource) が変わらない限り watch は再実行されない。
-  // コンポーネントが unmount されると watch effect は stop される。
-  // Vue 3.5 では effect stop 時に onWatcherCleanup も呼ばれる。
-  // したがって、onUnmounted は不要になるはずである。
-  // Verify: "Cleanup callbacks are called when the watcher is about to re-run, or when the watcher is stopped (i.e. when the component is unmounted if the watcher was created within setup())."
-  // Source: Vue 3.5 docs.
-  // So I can remove onUnmounted(cleanup) and the manual cleanup variables outside!
-
   const search = (searchOptions: T_OPTIONS) => {
     if (!dispatcher.value) {
-      return Promise.reject(
-        new Error(`${strings.value.errorTitle}: ENGINE_NOT_AVAILABLE`),
-      );
+      return Promise.reject(new Error("ENGINE_NOT_AVAILABLE"));
     }
     return dispatcher.value.dispatchSearch(searchOptions);
   };

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { ScoreBadge } from "../ScoreBadge.js";
@@ -11,6 +11,14 @@ import { EngineUIProvider } from "../EngineUIProvider.js";
 import "@testing-library/jest-dom/vitest";
 
 describe("ScoreBadge", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should render mate score correctly", () => {
     render(
       <EngineUIProvider>

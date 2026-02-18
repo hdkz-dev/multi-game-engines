@@ -48,14 +48,15 @@ The system provides a unified interface for common tasks (search, moves, evaluat
 
 ```typescript
 // Type-safe access to engine-specific features
-import {
-  IChessSearchOptions,
-  FEN,
-} from "@multi-game-engines/adapter-stockfish";
+import { IChessSearchOptions } from "@multi-game-engines/adapter-stockfish";
+import { createFEN } from "@multi-game-engines/core";
 
 const stockfish = bridge.getEngine("stockfish");
 // Type is automatically inferred via EngineRegistry if adapter is imported
-stockfish.search({ fen: "..." as FEN, depth: 20 });
+stockfish.search({
+  fen: createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
+  depth: 20,
+});
 ```
 
 ### Multi-Protocol & Multi-Game Support

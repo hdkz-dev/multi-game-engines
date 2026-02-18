@@ -9,38 +9,6 @@ import {
 import { createSFEN, Move } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
-// Shogi piece mapping to Kanji/Labels for display and accessibility
-const PIECE_LABELS: Record<ShogiPiece, string> = {
-  P: "歩",
-  L: "香",
-  N: "桂",
-  S: "銀",
-  G: "金",
-  B: "角",
-  R: "飛",
-  K: "玉",
-  p: "後手 歩",
-  l: "後手 香",
-  n: "後手 桂",
-  s: "後手 銀",
-  g: "後手 金",
-  b: "後手 角",
-  r: "後手 飛",
-  k: "後手 王",
-  "+P": "と金",
-  "+L": "成香",
-  "+N": "成桂",
-  "+S": "成銀",
-  "+B": "龍馬",
-  "+R": "龍王",
-  "+p": "後手 と金",
-  "+l": "後手 成香",
-  "+n": "後手 成桂",
-  "+s": "後手 成銀",
-  "+b": "後手 龍馬",
-  "+r": "後手 龍王",
-};
-
 /**
  * Returns true if the piece belongs to Gote (White).
  * Shogi SFEN uses lowercase for Gote pieces.
@@ -168,6 +136,11 @@ export class ShogiBoard extends LitElement {
       handGoteLabel: this.handGoteLabel || data.dashboard.gameBoard.handGote,
       errorMessage:
         this.errorMessage || data.dashboard.gameBoard.invalidPosition,
+      pieceNames: data.dashboard.gameBoard.shogiPieces as Record<
+        ShogiPiece,
+        string
+      >,
+      handPieceCount: data.dashboard.gameBoard.handPieceCount,
       squareLabel: (f: number, r: number) =>
         data.dashboard.gameBoard.squareLabel
           .replace("{file}", String(f))
@@ -247,7 +220,7 @@ export class ShogiBoard extends LitElement {
         const displayRank = r + 1;
 
         const pieceLabel = piece
-          ? this.pieceNames[piece] || PIECE_LABELS[piece]
+          ? this.pieceNames[piece] || strings.pieceNames[piece]
           : "";
 
         const ariaLabel = piece
@@ -280,19 +253,23 @@ export class ShogiBoard extends LitElement {
     return html`
       <div class="container">
         <div class="hand gote" aria-label="${strings.handGoteLabel}">
-          ${this._renderHand(hand, "gote")}
+          ${this._renderHand(hand, "gote", strings)}
         </div>
         <div class="board" role="grid" aria-label="${strings.boardLabel}">
           ${squares}
         </div>
         <div class="hand sente" aria-label="${strings.handSenteLabel}">
-          ${this._renderHand(hand, "sente")}
+          ${this._renderHand(hand, "sente", strings)}
         </div>
       </div>
     `;
   }
 
-  private _renderHand(hand: ShogiHand, side: "sente" | "gote") {
+  private _renderHand(
+    hand: ShogiHand,
+    side: "sente" | "gote",
+    strings: ReturnType<typeof this._getLocalizedStrings>,
+  ) {
     const pieces =
       side === "sente"
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
@@ -301,13 +278,12 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label =
-        this.pieceNames[p as ShogiPiece] || PIECE_LABELS[p as ShogiPiece];
+      const label = this.pieceNames[p as ShogiPiece] || strings.pieceNames[p];
       const ariaLabel =
         count > 1
-          ? this.locale === "ja"
-            ? `${label}${count}枚`
-            : `${count} ${label}s`
+          ? strings.handPieceCount
+              .replace("{piece}", label)
+              .replace("{count}", String(count))
           : label;
       return html`<span title="${label}" aria-label="${ariaLabel}"
         >${label}${count > 1 ? count : ""}</span

@@ -102,21 +102,45 @@ export class ResourceInjector {
    * マップにない場合は元のパスを返します。
    */
   static resolve(path: string): string {
-    // ADR-026: Refuse by Exception - パストラバーサルや絶対パス指定を検出した場合は拒否
-    if (path.includes("..") || path.startsWith("/")) {
+    // 2026 Best Practice: ADR-026 Refuse by Exception
+    // URL エンコードされた攻撃パターンやバックスラッシュを検出するため
+    // デコードと正規化を行ってから検証します
+    let decodedPath = path;
+    let prevPath = "";
+
+    // 二重エンコーディング対策: 安定するまでデコード
+    try {
+      while (decodedPath !== prevPath) {
+        prevPath = decodedPath;
+        decodedPath = decodeURIComponent(decodedPath);
+      }
+    } catch {
+      throw new Error(
+        `[ResourceInjector] SECURITY_ERROR: Invalid URL encoding in path: "${path}"`,
+      );
+    }
+
+    // バックスラッシュの正規化
+    const normalizedForCheck = decodedPath.replace(/\\/g, "/");
+
+    if (
+      normalizedForCheck.includes("..") ||
+      normalizedForCheck.startsWith("/") ||
+      normalizedForCheck.includes("./")
+    ) {
       throw new Error(
         `[ResourceInjector] SECURITY_ERROR: Invalid or restricted path pattern detected: "${path}"`,
       );
     }
 
-    // パスの正規化: セキュリティのため、絶対パス化や相対参照の排除を行う簡易的な処理
-    const normalizedPath = path.startsWith("./") ? path.slice(2) : path;
+    // ルックアップ用の正規化
+    const lookupPath = path.startsWith("./") ? path.slice(2) : path;
 
-    if (this.resources[normalizedPath]) return this.resources[normalizedPath];
+    if (this.resources[lookupPath]) return this.resources[lookupPath];
 
     // 末尾一致（相対パス解決の模倣）
     for (const [mountPath, blobUrl] of Object.entries(this.resources)) {
-      if (normalizedPath.endsWith(mountPath)) {
+      if (lookupPath.endsWith(mountPath)) {
         return blobUrl;
       }
     }

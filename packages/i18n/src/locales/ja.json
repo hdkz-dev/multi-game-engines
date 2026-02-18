@@ -42,6 +42,7 @@
     "chessLabel": "チェス / UCI",
     "shogiLabel": "将棋 / USI",
     "engineSelector": "エンジン選択",
+    "languageSelector": "言語選択",
     "stats": {
       "engineRuntime": {
         "label": "エンジン実行環境",
@@ -70,6 +71,7 @@
       "handSente": "先手 持ち駒",
       "handGote": "後手 持ち駒",
       "invalidPosition": "局面の解析に失敗しました",
+      "handPieceCount": "{piece}{count}枚",
       "squareLabel": "{file}筋 {rank}段",
       "squarePieceLabel": "{file}筋 {rank}段 {piece}",
       "chessPieces": {

@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import { YaneuraouAdapter } from "../yaneuraou.js";
 
 class MockWorker {
@@ -23,6 +31,14 @@ class MockWorker {
 }
 
 describe("YaneuraouAdapter", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     vi.stubGlobal("Worker", MockWorker);
   });

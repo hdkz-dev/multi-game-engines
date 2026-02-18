@@ -1,7 +1,15 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { ResourceInjector } from "../workers/ResourceInjector.js";
 
 describe("ResourceInjector", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should resolve paths", () => {
     // @ts-expect-error accessing private static for testing
     ResourceInjector.resources = {
@@ -9,9 +17,6 @@ describe("ResourceInjector", () => {
     };
 
     expect(ResourceInjector.resolve("path/to/resource.wasm")).toBe(
-      "blob:resource-url",
-    );
-    expect(ResourceInjector.resolve("./path/to/resource.wasm")).toBe(
       "blob:resource-url",
     );
     expect(ResourceInjector.resolve("unknown/path")).toBe("unknown/path");

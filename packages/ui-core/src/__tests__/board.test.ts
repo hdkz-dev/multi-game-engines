@@ -1,8 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { parseFEN, parseSFEN } from "../utils/board.js";
 import { createFEN, createSFEN, FEN, SFEN } from "@multi-game-engines/core";
 
 describe("Board Utilities", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   describe("parseFEN", () => {
     it("should parse initial position correctly", () => {
       const fen = createFEN(

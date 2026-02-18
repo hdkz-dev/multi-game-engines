@@ -47,6 +47,8 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
       <div
         ref={scrollRef}
         onScroll={handleScroll}
+        role="region"
+        aria-label={strings.searchLog}
         className={cn(
           "border border-gray-200 rounded-lg bg-white overflow-y-auto max-h-[400px]",
           className,

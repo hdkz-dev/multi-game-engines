@@ -18,9 +18,11 @@ describe("WorkerCommunicator", () => {
   beforeEach(() => {
     currentMockWorker = null;
     vi.stubGlobal("Worker", MockWorker);
+    vi.spyOn(performance, "now").mockReturnValue(0);
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 

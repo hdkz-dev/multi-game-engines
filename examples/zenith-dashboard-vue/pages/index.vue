@@ -88,9 +88,14 @@ const nps = computed(() => {
 
         <div class="flex flex-wrap items-center gap-4">
           <!-- Language Switcher -->
-          <div class="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center">
+          <div
+            role="group"
+            :aria-label="localeData.dashboard.languageSelector"
+            class="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center"
+          >
             <Globe class="w-4 h-4 ml-2 text-gray-400" aria-hidden="true" />
             <button
+              :aria-pressed="locale === 'en'"
               :class="[
                 'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
                 locale === 'en' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
@@ -100,6 +105,7 @@ const nps = computed(() => {
               EN
             </button>
             <button
+              :aria-pressed="locale === 'ja'"
               :class="[
                 'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
                 locale === 'ja' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
@@ -195,7 +201,7 @@ const nps = computed(() => {
             key="chess-panel"
             :engine="chessEngine"
             :search-options="chessOptions"
-            :title="localeData.engine.stockfishTitle || 'Stockfish 16.1'"
+            :title="localeData.engine.stockfishTitle"
             class="h-full"
           />
           <EngineMonitorPanel
@@ -203,7 +209,7 @@ const nps = computed(() => {
             key="shogi-panel"
             :engine="shogiEngine"
             :search-options="shogiOptions"
-            :title="localeData.engine.yaneuraouTitle || 'Yaneuraou 7.5.0'"
+            :title="localeData.engine.yaneuraouTitle"
             class="h-full"
           />
         </div>

@@ -1,8 +1,24 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import "../engine-monitor.js";
 import { EngineMonitorElement } from "../engine-monitor.js";
 
 describe("EngineMonitorElement", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     document.body.innerHTML = "";
   });

@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import { KatagoAdapter } from "../katago.js";
 
 class MockWorker {
@@ -9,6 +17,14 @@ class MockWorker {
 }
 
 describe("KatagoAdapter", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     vi.stubGlobal("Worker", MockWorker);
   });

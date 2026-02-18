@@ -1,8 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { MahjongJSONParser } from "../MahjongJSONParser.js";
 import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 describe("MahjongJSONParser", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   const parser = new MahjongJSONParser();
 
   it("should parse JSON info correctly", () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { BaseAdapter } from "../adapters/BaseAdapter.js";
 import {
   IBaseSearchOptions,
@@ -39,6 +39,14 @@ class TestAdapter extends BaseAdapter<
 }
 
 describe("BaseAdapter", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should initialize with uninitialized status", () => {
     const adapter = new TestAdapter();
     expect(adapter.status).toBe("uninitialized");

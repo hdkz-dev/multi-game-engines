@@ -129,7 +129,7 @@ export default function Dashboard() {
             {/* Language Switcher */}
             <div
               role="group"
-              aria-label="Language selector"
+              aria-label={localeData.dashboard.languageSelector}
               className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center"
             >
               <Globe

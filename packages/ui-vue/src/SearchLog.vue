@@ -44,6 +44,8 @@ watch(() => props.log.length, scrollToBottom, { immediate: true });
 <template>
   <div
     ref="scrollContainer"
+    role="region"
+    :aria-label="strings.searchLog"
     class="border border-gray-200 rounded-lg bg-white overflow-y-auto max-h-[400px]"
     @scroll="handleScroll"
   >
@@ -94,7 +96,7 @@ watch(() => props.log.length, scrollToBottom, { immediate: true });
             </div>
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
-            {{ formatTime(entry.time) }}{{ strings.timeUnitSeconds }}
+            {{ formatTime(entry.time) }}{{ strings.timeUnitSeconds || 's' }}
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
             {{ formatNumber(entry.nodes) }}

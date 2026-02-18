@@ -1,8 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
 import { SFEN, createSFEN } from "../usi-types.js";
 
 describe("USIParser", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   const parser = new USIParser();
 
   // ─── parseInfo: 構造化スコア ───────────────────────

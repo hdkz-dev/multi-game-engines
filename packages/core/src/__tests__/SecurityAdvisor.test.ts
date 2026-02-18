@@ -8,9 +8,11 @@ describe("SecurityAdvisor", () => {
 
   beforeEach(() => {
     vi.stubGlobal("crossOriginIsolated", false);
+    vi.spyOn(performance, "now").mockReturnValue(0);
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
 

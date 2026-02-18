@@ -43,13 +43,13 @@ export class UINormalizerMiddleware<
         return String(info);
       })();
 
-      return {
+      return SearchInfoSchema.parse({
         raw: rawText,
         depth: 0,
-      } as T_INFO_IN;
+      }) as T_INFO_IN;
     }
 
-    // T_INFO_IN extends ExtendedSearchInfo なのでキャストなしで返却可能
+    // result.data is ExtendedSearchInfo, which T_INFO_IN extends.
     return result.data as T_INFO_IN;
   }
 }

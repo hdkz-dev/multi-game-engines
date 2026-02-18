@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineLoader } from "../bridge/EngineLoader.js";
 import { IFileStorage, IEngineSourceConfig } from "../types.js";
 import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
@@ -27,6 +27,12 @@ describe("EngineLoader", () => {
     // globalThis URL mock
     globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:test");
     globalThis.URL.revokeObjectURL = vi.fn();
+
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should fetch and cache if not in storage", async () => {

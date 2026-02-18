@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardComponents from "../BoardComponents.vue";
-import {
-  createFEN,
-  createSFEN,
-  createMove,
-  FEN,
-  SFEN,
-} from "@multi-game-engines/core";
+import { createFEN, createSFEN, createMove } from "@multi-game-engines/core";
 import "@multi-game-engines/ui-elements";
 
 describe("BoardComponents (Vue)", () => {
@@ -27,7 +21,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "chess",
-        fen: fen as FEN,
+        fen,
         lastMove,
         boardLabel: "Custom Chess",
       },
@@ -53,7 +47,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "shogi",
-        sfen: sfen as SFEN,
+        sfen,
         handSenteLabel: "Sente pieces",
       },
       global: {
@@ -75,7 +69,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "chess",
-        fen: fen as FEN,
+        fen,
       },
       global: {
         stubs: {
@@ -97,8 +91,9 @@ describe("BoardComponents (Vue)", () => {
     mount(BoardComponents, {
       props: {
         type: "chess",
-        // fen is missing
-      } as unknown as { type: "chess"; fen: FEN },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fen: undefined as unknown as any,
+      },
     });
 
     expect(consoleSpy).toHaveBeenCalledWith(

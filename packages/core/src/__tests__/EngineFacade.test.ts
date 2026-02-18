@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import { EngineFacade } from "../bridge/EngineFacade.js";
 import {
   IMiddleware,
@@ -12,6 +20,14 @@ import {
 } from "../types.js";
 
 describe("EngineFacade", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   let adapter: IEngineAdapter<
     IBaseSearchOptions,
     IBaseSearchInfo,

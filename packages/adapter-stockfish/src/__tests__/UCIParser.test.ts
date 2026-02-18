@@ -1,8 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { UCIParser, FEN } from "../UCIParser.js";
 import { createFEN } from "@multi-game-engines/core";
 
 describe("UCIParser", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   const parser = new UCIParser();
 
   // ─── parseInfo: 構造化スコア ───────────────────────

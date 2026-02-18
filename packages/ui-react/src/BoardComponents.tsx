@@ -38,8 +38,7 @@ declare module "react/jsx-runtime" {
         /** Custom piece names for accessibility. */
         pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
         /** Ref support */
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref?: React.RefObject<any> | undefined;
+        ref?: React.Ref<ChessBoardElement> | undefined;
       };
       /**
        * Lit-based Shogi board custom element.
@@ -65,8 +64,7 @@ declare module "react/jsx-runtime" {
         /** Custom piece names for accessibility. */
         pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
         /** Ref support */
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref?: React.RefObject<any> | undefined;
+        ref?: React.Ref<ShogiBoardElement> | undefined;
       };
     }
   }
@@ -115,8 +113,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
   return (
     <chess-board
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ref={ref as React.RefObject<any>}
+      ref={ref}
       fen={fen}
       last-move={lastMove}
       orientation={orientation}
@@ -173,8 +170,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
 
   return (
     <shogi-board
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ref={ref as React.RefObject<any>}
+      ref={ref}
       sfen={sfen}
       last-move={lastMove}
       class={className}

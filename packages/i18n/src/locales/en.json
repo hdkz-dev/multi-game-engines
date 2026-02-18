@@ -42,6 +42,7 @@
     "chessLabel": "CHESS / UCI",
     "shogiLabel": "SHOGI / USI",
     "engineSelector": "Engine selector",
+    "languageSelector": "Language selector",
     "stats": {
       "engineRuntime": {
         "label": "Engine Runtime",
@@ -70,6 +71,7 @@
       "handSente": "Sente Hand",
       "handGote": "Gote Hand",
       "invalidPosition": "Failed to parse position",
+      "handPieceCount": "{count} {piece}s",
       "squareLabel": "{file}{rank}",
       "squarePieceLabel": "{piece} at {file}{rank}",
       "chessPieces": {

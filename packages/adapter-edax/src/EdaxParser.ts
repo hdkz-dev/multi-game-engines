@@ -62,7 +62,7 @@ export class EdaxParser implements IProtocolParser<
     const sBoard = String(options.board);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(sBoard, "board data");
+    ProtocolValidator.assertNoInjection(sBoard, "board data", true);
 
     commands.push(`setboard ${sBoard}`);
     commands.push(`go ${options.depth ?? 20}`);
@@ -80,8 +80,8 @@ export class EdaxParser implements IProtocolParser<
     const sValue = String(value);
 
     // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(name, "option name");
-    ProtocolValidator.assertNoInjection(sValue, "option value");
+    ProtocolValidator.assertNoInjection(name, "option name", true);
+    ProtocolValidator.assertNoInjection(sValue, "option value", true);
 
     return `set ${name} ${sValue}`;
   }
