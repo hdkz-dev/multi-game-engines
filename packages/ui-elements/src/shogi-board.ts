@@ -303,7 +303,13 @@ export class ShogiBoard extends LitElement {
       if (count === 0) return null;
       const label =
         this.pieceNames[p as ShogiPiece] || PIECE_LABELS[p as ShogiPiece];
-      return html`<span title="${label}"
+      const ariaLabel =
+        count > 1
+          ? this.locale === "ja"
+            ? `${label}${count}枚`
+            : `${count} ${label}s`
+          : label;
+      return html`<span title="${label}" aria-label="${ariaLabel}"
         >${label}${count > 1 ? count : ""}</span
       >`;
     });

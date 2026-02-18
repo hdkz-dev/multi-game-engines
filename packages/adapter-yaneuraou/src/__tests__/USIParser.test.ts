@@ -63,6 +63,32 @@ describe("USIParser", () => {
       expect(info!.time).toBe(1500);
     });
 
+    it("should parse hashfull correctly", () => {
+      const info = parser.parseInfo("info depth 10 hashfull 500");
+      expect(info!.hashfull).toBe(500);
+    });
+
+    it("should parse multipv correctly", () => {
+      const info = parser.parseInfo("info depth 10 multipv 2");
+      expect(info!.multipv).toBe(2);
+    });
+
+    it("should ignore cpuload correctly", () => {
+      const info = parser.parseInfo("info depth 10 cpuload 80");
+      expect(info).not.toHaveProperty("cpuload");
+    });
+
+    it("should parse multiple tokens correctly", () => {
+      const info = parser.parseInfo(
+        "info depth 20 hashfull 800 multipv 3 nodes 1000000 nps 500000",
+      );
+      expect(info!.depth).toBe(20);
+      expect(info!.hashfull).toBe(800);
+      expect(info!.multipv).toBe(3);
+      expect(info!.nodes).toBe(1000000);
+      expect(info!.nps).toBe(500000);
+    });
+
     it("should parse pv with multiple moves", () => {
       const info = parser.parseInfo("info depth 10 pv 7g7f 3c3d 2g2f");
       expect(info!.pv).toEqual(["7g7f", "3c3d", "2g2f"]);

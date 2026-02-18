@@ -104,39 +104,42 @@ export class UCIParser implements IProtocolParser<
 
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
-      const val = parts[i + 1];
+      const hasNext = i + 1 < parts.length;
+      const val = hasNext ? parts[i + 1] : undefined;
 
       switch (key) {
         case "depth":
           info.depth = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "score": {
-          const scoreType = parts[++i]; // "cp" or "mate"
-          const scoreValue = parseInt(parts[++i] || "0", 10) || 0;
-          info.score =
-            scoreType === "mate" ? { mate: scoreValue } : { cp: scoreValue };
+          if (i + 2 < parts.length) {
+            const scoreType = parts[++i]; // "cp" or "mate"
+            const scoreValue = parseInt(parts[++i] || "0", 10) || 0;
+            info.score =
+              scoreType === "mate" ? { mate: scoreValue } : { cp: scoreValue };
+          }
           break;
         }
         case "nps":
           info.nps = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "nodes":
           info.nodes = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "time":
           info.time = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "pv": {
           const moves: Move[] = [];
           while (
             i + 1 < parts.length &&
-            !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1])
+            !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1]!)
           ) {
-            const token = parts[++i];
+            const token = parts[++i]!;
             const m = this.createMove(token);
             if (m) {
               moves.push(m);
@@ -150,16 +153,16 @@ export class UCIParser implements IProtocolParser<
           break;
         }
         case "seldepth":
-          info.seldepth = parseInt(val, 10) || 0;
-          i++;
+          info.seldepth = parseInt(val || "0", 10) || 0;
+          if (val !== undefined) i++;
           break;
         case "hashfull":
-          info.hashfull = parseInt(val, 10) || 0;
-          i++;
+          info.hashfull = parseInt(val || "0", 10) || 0;
+          if (val !== undefined) i++;
           break;
         case "multipv":
-          info.multipv = parseInt(val, 10) || 0;
-          i++;
+          info.multipv = parseInt(val || "0", 10) || 0;
+          if (val !== undefined) i++;
           break;
       }
     }

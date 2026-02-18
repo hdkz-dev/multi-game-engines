@@ -31,7 +31,7 @@ export class EngineError extends Error {
     this.remediation = opts.remediation;
 
     // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
-    const errorConstructor = Error as {
+    const errorConstructor = Error as unknown as {
       captureStackTrace?: (target: object, constructor?: unknown) => void;
     };
     if (typeof errorConstructor.captureStackTrace === "function") {

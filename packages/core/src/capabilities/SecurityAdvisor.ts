@@ -5,10 +5,36 @@ import { ISecurityStatus } from "../types.js";
  */
 export class SecurityAdvisor {
   /**
+   * SRI文字列が有効な形式（W3C規格）かどうかを検証します。
+   * マルチハッシュ形式をサポートします。
+   */
+  static isValidSRI(sri: string): boolean {
+    if (!sri || typeof sri !== "string") return false;
+    const hashes = sri.split(/\s+/);
+    const pattern = /^(sha256|sha384|sha512)-[A-Za-z0-9+/=]+$/;
+    return hashes.every((h) => pattern.test(h));
+  }
+
+  /**
+   * 安全な fetch オプションを生成します。
+   */
+  static getSafeFetchOptions(sri?: string): RequestInit {
+    if (!sri || !SecurityAdvisor.isValidSRI(sri)) return {};
+
+    return {
+      integrity: sri,
+      mode: "cors",
+      credentials: "omit",
+    };
+  }
+
+  /**
    * W3C勧告に基づいたマルチハッシュSRI検証。
    * 最強のアルゴリズムを優先して検証します。
    */
   static async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
+    if (!SecurityAdvisor.isValidSRI(sri)) return false;
+
     const hashes = sri.split(/\s+/);
 
     const algoPriority: Record<string, number> = {
@@ -23,11 +49,10 @@ export class SecurityAdvisor {
       sha512: "SHA-512",
     };
 
-    // 2026 Best Practice: 最強アルゴリズムを特定し、それのみを検証対象とする (Algorithm Agility)
+    // 2026 Best Practice: 最強アルゴリズムを特定
     let strongestLevel = 0;
     for (const hash of hashes) {
-      const parts = hash.split("-");
-      const algo = parts[0];
+      const algo = hash.split("-")[0];
       if (algo) {
         const priority = algoPriority[algo];
         if (priority !== undefined && priority > strongestLevel) {
@@ -38,12 +63,9 @@ export class SecurityAdvisor {
 
     if (strongestLevel === 0) return false;
 
+    // 最強レベルのハッシュのうち、いずれか一つにマッチすればOK
     for (const hash of hashes) {
-      const parts = hash.split("-");
-      const algo = parts[0];
-      const expectedBase64 = parts[1];
-
-      if (!algo || !expectedBase64) continue;
+      const [algo, expectedBase64] = hash.split("-") as [string, string];
       if (algoPriority[algo] !== strongestLevel) continue;
 
       const webCryptoAlgo = algoMap[algo];
@@ -61,12 +83,12 @@ export class SecurityAdvisor {
    * セキュリティステータスを診断します。
    * COOP/COEPヘッダーの存在を確認します。
    */
-  static async checkStatus(): Promise<ISecurityStatus> {
+  static async getStatus(): Promise<ISecurityStatus> {
     const isCrossOriginIsolated =
       typeof crossOriginIsolated !== "undefined" && crossOriginIsolated;
     const missingHeaders: string[] = [];
 
-    // 2026 Best Practice: ブラウザ環境でのみヘッダー診断を試行 (CORS/Node.js 考慮)
+    // 2026 Best Practice: ブラウザ環境でのみヘッダー診断を試行
     if (typeof window !== "undefined" && typeof fetch !== "undefined") {
       try {
         const response = await fetch(window.location.href, { method: "HEAD" });
@@ -86,7 +108,7 @@ export class SecurityAdvisor {
       isCrossOriginIsolated,
       canUseThreads: isCrossOriginIsolated,
       sriSupported,
-      sriEnabled: sriSupported, // 2026: 基本的にサポートされていれば有効とみなす設計
+      sriEnabled: sriSupported,
       coopCoepEnabled: isCrossOriginIsolated,
       missingHeaders: missingHeaders.length > 0 ? missingHeaders : undefined,
     };

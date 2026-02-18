@@ -139,33 +139,38 @@ export function isShogiHandKey(piece: unknown): piece is keyof ShogiHand {
  * @throws FEN が不正な場合にエラーをスローします。
  */
 export function parseFEN(fen: FEN): ParsedFEN {
-  if (!fen) throw new Error("[parseFEN] FEN string is empty.");
+  if (!fen) throw new Error("[parseFEN] FEN string is empty or undefined.");
 
-  const parts = fen.split(" ");
-  const position = parts[0] || "";
+  const parts = fen.trim().split(/\s+/);
+  const position = parts[0];
   const turnPart = parts[1];
 
-  if (!position) throw new Error("[parseFEN] Position part is missing.");
-  if (!turnPart) throw new Error("[parseFEN] Turn part is missing.");
+  if (!position)
+    throw new Error("[parseFEN] Position part is missing in FEN string.");
+  if (!turnPart)
+    throw new Error(
+      "[parseFEN] Turn part is missing in FEN string (expected 'w' or 'b' as the second part).",
+    );
 
   const turn = turnPart as "w" | "b";
 
   if (turn !== "w" && turn !== "b") {
     throw new Error(
-      `[parseFEN] Invalid turn: expected "w" or "b", got "${turn}"`,
+      `[parseFEN] Invalid turn indicator: expected "w" or "b", got "${turnPart}" at the second part.`,
     );
   }
 
   const rows = position.split("/");
   if (rows.length !== 8) {
     throw new Error(
-      `[parseFEN] Invalid row count: expected 8, got ${rows.length}`,
+      `[parseFEN] Invalid board structure: expected 8 ranks (separated by '/'), but found ${rows.length} ranks.`,
     );
   }
 
   const board: (ChessPiece | null)[][] = [];
 
-  for (const row of rows) {
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r]!;
     const boardRow: (ChessPiece | null)[] = [];
     for (const char of row) {
       if (/[1-8]/.test(char)) {
@@ -176,12 +181,14 @@ export function parseFEN(fen: FEN): ParsedFEN {
       } else if (isValidChessPiece(char)) {
         boardRow.push(char);
       } else {
-        throw new Error(`[parseFEN] Invalid character in FEN: ${char}`);
+        throw new Error(
+          `[parseFEN] Invalid character "${char}" found at rank ${8 - r} (FEN row ${r + 1}).`,
+        );
       }
     }
     if (boardRow.length !== 8) {
       throw new Error(
-        `[parseFEN] Invalid row length: expected 8, got ${boardRow.length} in row "${row}"`,
+        `[parseFEN] Rank ${8 - r} (row ${r + 1}) has an invalid length: expected 8 squares, but got ${boardRow.length}. Row string: "${row}"`,
       );
     }
     board.push(boardRow);
@@ -200,34 +207,39 @@ export function parseFEN(fen: FEN): ParsedFEN {
  * @throws SFEN が不正な場合にエラーをスローします。
  */
 export function parseSFEN(sfen: SFEN): ParsedSFEN {
-  if (!sfen) throw new Error("[parseSFEN] SFEN string is empty.");
+  if (!sfen) throw new Error("[parseSFEN] SFEN string is empty or undefined.");
 
-  const parts = sfen.split(" ");
-  const position = parts[0] || "";
+  const parts = sfen.trim().split(/\s+/);
+  const position = parts[0];
   const turnPart = parts[1];
   const handStr = parts[2] || "-";
 
-  if (!position) throw new Error("[parseSFEN] Position part is missing.");
-  if (!turnPart) throw new Error("[parseSFEN] Turn part is missing.");
+  if (!position)
+    throw new Error("[parseSFEN] Position part is missing in SFEN string.");
+  if (!turnPart)
+    throw new Error(
+      "[parseSFEN] Turn part is missing in SFEN string (expected 'b' or 'w' as the second part).",
+    );
 
   const turn = turnPart as "b" | "w";
 
   if (turn !== "b" && turn !== "w") {
     throw new Error(
-      `[parseSFEN] Invalid turn: expected "b" or "w", got "${turnPart}"`,
+      `[parseSFEN] Invalid turn indicator: expected "b" (Sente) or "w" (Gote), got "${turnPart}" at the second part.`,
     );
   }
 
   const rows = position.split("/");
   if (rows.length !== 9) {
     throw new Error(
-      `[parseSFEN] Invalid row count: expected 9, got ${rows.length}`,
+      `[parseSFEN] Invalid board structure: expected 9 ranks (separated by '/'), but found ${rows.length} ranks.`,
     );
   }
 
   const board: (ShogiPiece | null)[][] = [];
 
-  for (const row of rows) {
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r]!;
     const boardRow: (ShogiPiece | null)[] = [];
     let i = 0;
     while (i < row.length) {
@@ -241,7 +253,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
       } else if (char === "+") {
         if (i + 1 >= row.length) {
           throw new Error(
-            `[parseSFEN] '+' prefix at end of row string in row "${row}".`,
+            `[parseSFEN] Malformed SFEN: '+' promotion prefix found at the end of rank ${r + 1} string. Row: "${row}"`,
           );
         }
         const piece = `+${row[i + 1]}`;
@@ -249,18 +261,22 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
           boardRow.push(piece);
           i += 2;
         } else {
-          throw new Error(`[parseSFEN] Invalid promoted piece: ${piece}`);
+          throw new Error(
+            `[parseSFEN] Invalid promoted piece "${piece}" found at rank ${r + 1}.`,
+          );
         }
       } else if (isValidShogiPiece(char)) {
         boardRow.push(char);
         i++;
       } else {
-        throw new Error(`[parseSFEN] Invalid character in SFEN: ${char}`);
+        throw new Error(
+          `[parseSFEN] Invalid character "${char}" found at rank ${r + 1}.`,
+        );
       }
     }
     if (boardRow.length !== 9) {
       throw new Error(
-        `[parseSFEN] Invalid row length: expected 9, got ${boardRow.length} in row "${row}"`,
+        `[parseSFEN] Rank ${r + 1} has an invalid length: expected 9 squares, but got ${boardRow.length}. Row string: "${row}"`,
       );
     }
     board.push(boardRow);
@@ -292,16 +308,18 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
         i++;
       }
       const count = countStr === "" ? 1 : parseInt(countStr, 10);
-      const piece = handStr[i];
-      if (!piece) {
+      const pieceChar = handStr[i];
+      if (!pieceChar) {
         throw new Error(
-          `[parseSFEN] Unexpected end of hand string: ${handStr}`,
+          `[parseSFEN] Unexpected end of hand string after count "${countStr}": "${handStr}"`,
         );
       }
-      if (isShogiHandKey(piece)) {
-        hand[piece] = count;
+      if (isShogiHandKey(pieceChar)) {
+        hand[pieceChar] = count;
       } else {
-        throw new Error(`[parseSFEN] Invalid piece in hand: ${piece}`);
+        throw new Error(
+          `[parseSFEN] Invalid piece identifier "${pieceChar}" found in hand string: "${handStr}"`,
+        );
       }
       i++;
     }

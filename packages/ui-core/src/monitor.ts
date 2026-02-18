@@ -131,6 +131,7 @@ export class SearchMonitor<
     return this.engine.search(options);
   }
   async stop(): Promise<void> {
+    this.stopMonitoring();
     return this.engine.stop();
   }
   getState(): T_STATE {

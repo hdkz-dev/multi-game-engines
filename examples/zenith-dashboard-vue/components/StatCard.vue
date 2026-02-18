@@ -9,7 +9,7 @@ defineProps<{
 
 <template>
   <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-start gap-4">
-    <div :class="['p-3 bg-gray-50 rounded-xl text-gray-700', iconClass]">
+    <div :class="['p-3 bg-gray-50 rounded-xl', iconClass]">
       <slot name="icon" />
     </div>
     <div>

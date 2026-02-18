@@ -46,8 +46,8 @@ const shogiOptions = {
 };
 const { state: shogiState } = useEngineMonitor(shogiEngine);
 
-const chessBestMove = computed(() => chessState.value.pvs[0]?.moves[0]);
-const shogiBestMove = computed(() => shogiState.value.pvs[0]?.moves[0]);
+const chessBestMove = computed(() => chessState.value?.pvs[0]?.moves[0]);
+const shogiBestMove = computed(() => shogiState.value?.pvs[0]?.moves[0]);
 
 const nps = computed(() => {
   const stats = activeEngine.value === "chess" ? chessState.value.stats : shogiState.value.stats;

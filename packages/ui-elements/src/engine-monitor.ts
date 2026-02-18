@@ -246,7 +246,7 @@ export class EngineMonitorElement extends LitElement {
 
     this._unsub = monitor.subscribe(() => {
       this._searchState = monitor.getSnapshot();
-      this._status = (this.engine as IEngine).status;
+      this._status = this.engine!.status;
     });
 
     this._dispatcher = new CommandDispatcher<

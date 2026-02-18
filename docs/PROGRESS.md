@@ -35,12 +35,13 @@
   - 例外的な `as any` キャストをテストコードおよび Storybook 資産から完全に排除（Zero-Any Policy）。
   - チェス (`createFEN`) および将棋 (`createSFEN`) の Branded Type ファクトリにより、UI 層の型安全性を定着。
 
-- **パーサーの堅牢化と機能拡充**:
-  - `UCIParser` / `USIParser` の数値パースに境界チェックとデフォルト値処理を追加し、不正なプロトコルメッセージに対する堅牢性を向上。
-  - 標準 UCI トークン (`seldepth`, `hashfull`, `multipv`) のパース処理を追加実装。
+- **パーサーの堅牢化と超深層監査 (Zenith Parser Hardening)**:
+  - **インデックス境界チェックの徹底**: `UCIParser`, `USIParser` および `GTPParser` において、プロトコルメッセージの分割後の配列アクセスに対する厳格な境界チェックを導入。不正な形式の `info` や `bestmove` 受信時でも、未定義アクセス (`undefined`) によるサイレントな失敗を物理的に排除しました。
+  - **パースエラーの可視化**: `parseFEN` および `parseSFEN` において、エラー発生箇所（Rank/Row）と原因を具体的に提示する「デバッグフレンドリー・エラーメッセージ」を採用。
+  - **PR #24 超深層監査の完遂**: 41 スレッドに及ぶ全レビュー指摘を、最新のベストプラクティス（React 19, Branded Types, Code Splitting）に基づいて再検証・昇華させ、全ての指摘事項を完全に解消しました。
 
 - **品質保証の完遂 (Total AI Audit)**:
-  - CodeRabbit による計 5 回の反復監査ループを完了。
+  - CodeRabbit および Gemini CLI による計 6 回の反復監査ループを完了。
   - CI 上での V8 特有のエラー（captureStackTrace）を含め、全 140 ケース以上のテストをパス。
 
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:

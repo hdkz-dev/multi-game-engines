@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 // Import components
 import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
@@ -97,6 +97,7 @@ describe("EngineMonitorPanel", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.spyOn(performance, "now").mockReturnValue(12345);
 
     const { useEngineMonitor } = await import("../useEngineMonitor.js");
     const { useEngineUI } = await import("../EngineUIProvider.js");
@@ -119,6 +120,10 @@ describe("EngineMonitorPanel", () => {
         IBaseSearchResult
       >,
     });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("renders with initial state safely", () => {
@@ -234,7 +239,8 @@ describe("EngineMonitorPanel", () => {
     );
 
     expect(screen.getByText("STOP")).toBeDefined();
-    expect(screen.getByText("Searching...")).toBeDefined();
+    // Use a more specific selector to avoid ambiguity between status and empty list message
+    expect(screen.getAllByText("Searching...").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByText("STOP"));
     expect(mockStop).toHaveBeenCalled();

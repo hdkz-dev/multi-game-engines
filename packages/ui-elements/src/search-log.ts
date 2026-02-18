@@ -161,7 +161,7 @@ export class SearchLogElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.setAttribute("role", "grid");
+    this.setAttribute("role", "region");
     this.addEventListener("scroll", this._handleScroll);
   }
 

@@ -75,6 +75,21 @@ describe("UCIParser", () => {
       );
       expect(info!.multipv).toBe(2);
     });
+
+    it("should parse nodes correctly", () => {
+      const info = parser.parseInfo("info nodes 1000");
+      expect(info!.nodes).toBe(1000);
+    });
+
+    it("should handle nodes with no value correctly", () => {
+      const info = parser.parseInfo("info nodes");
+      expect(info!.nodes).toBe(0);
+    });
+
+    it("should handle nodes with invalid value correctly", () => {
+      const info = parser.parseInfo("info nodes abc");
+      expect(info!.nodes).toBe(0);
+    });
   });
 
   // ─── parseResult ────────────────────────────────────

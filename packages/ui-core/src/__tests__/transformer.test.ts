@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { SearchStateTransformer } from "../transformer.js";
-import { createInitialState, PositionString } from "../types.js";
+import { createInitialState } from "../types.js";
 import { ExtendedSearchInfo } from "../schema.js";
 import { createMove, createPositionString } from "@multi-game-engines/core";
 
 describe("SearchStateTransformer", () => {
   beforeAll(() => {
     vi.spyOn(Date, "now").mockReturnValue(0);
+    vi.spyOn(performance, "now").mockReturnValue(0);
   });
 
   afterAll(() => {

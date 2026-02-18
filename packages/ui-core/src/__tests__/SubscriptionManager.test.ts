@@ -59,4 +59,29 @@ describe("SubscriptionManager", () => {
     manager.clear();
     expect(spy).toHaveBeenCalledTimes(1); // すでに unsub() 済みなので追加で呼ばれない
   });
+
+  it("should continue calling other unsubscribers even if one throws", () => {
+    const manager = new SubscriptionManager();
+    const spy1 = vi.fn();
+    const throwingSpy = vi.fn(() => {
+      throw new Error("Test error");
+    });
+    const spy2 = vi.fn();
+
+    manager.add(spy1);
+    manager.add(throwingSpy);
+    manager.add(spy2);
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    manager.clear();
+
+    expect(spy1).toHaveBeenCalledTimes(1);
+    expect(throwingSpy).toHaveBeenCalledTimes(1);
+    expect(spy2).toHaveBeenCalledTimes(1);
+    expect(manager.size).toBe(0);
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
 });

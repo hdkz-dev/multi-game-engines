@@ -49,9 +49,9 @@ export function createSFEN(pos: string): SFEN {
     throw new Error("Invalid SFEN: Input must be a non-empty string.");
   }
   const fields = pos.trim().split(/\s+/);
-  if (fields.length < 3) {
+  if (fields.length < 4) {
     throw new Error(
-      `Invalid SFEN structure: Expected at least 3 fields (position, turn, hand), found ${fields.length}`,
+      `Invalid SFEN structure: Expected at least 4 fields (position, turn, hand, move count), found ${fields.length}`,
     );
   }
   return pos as SFEN;

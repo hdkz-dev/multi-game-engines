@@ -24,6 +24,7 @@ import {
   SearchMonitor,
   CommandDispatcher,
   createInitialState,
+  UI_NORMALIZER_MIDDLEWARE_ID,
 } from "@multi-game-engines/ui-core";
 import { useEngineUI } from "./useEngineUI.js";
 
@@ -161,7 +162,7 @@ export function useEngineMonitor<
           monitor.value = null;
         }
         if (newEngine && typeof newEngine.unuse === "function") {
-          newEngine.unuse("ui-normalizer");
+          newEngine.unuse(UI_NORMALIZER_MIDDLEWARE_ID);
         }
         dispatcher.value = null;
       });

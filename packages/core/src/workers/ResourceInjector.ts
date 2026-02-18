@@ -80,7 +80,10 @@ export class ResourceInjector {
       globalThis.addEventListener("message", handler);
     } else if (typeof self !== "undefined") {
       const workerScope = self as unknown as WorkerGlobalScope;
-      workerScope.onmessage = handler;
+      // 2026 Best Practice: ランタイムガードによる安全な代入
+      if ("onmessage" in workerScope) {
+        workerScope.onmessage = handler;
+      }
     }
   }
 
@@ -99,6 +102,13 @@ export class ResourceInjector {
    * マップにない場合は元のパスを返します。
    */
   static resolve(path: string): string {
+    // ADR-026: Refuse by Exception - パストラバーサルや絶対パス指定を検出した場合は拒否
+    if (path.includes("..") || path.startsWith("/")) {
+      throw new Error(
+        `[ResourceInjector] SECURITY_ERROR: Invalid or restricted path pattern detected: "${path}"`,
+      );
+    }
+
     // パスの正規化: セキュリティのため、絶対パス化や相対参照の排除を行う簡易的な処理
     const normalizedPath = path.startsWith("./") ? path.slice(2) : path;
 
@@ -212,8 +222,8 @@ export class ResourceInjector {
             moduleInstance.FS.mkdir(currentPath);
           } catch (e: unknown) {
             // ディレクトリが既にある場合は無視 (EEXIST)
-            const error = e as { code?: string };
-            if (error.code !== "EEXIST") throw e;
+            // 2026: 型ガードによる安全なエラーチェック
+            if (!this.isFsError(e) || e.code !== "EEXIST") throw e;
           }
         }
       }
@@ -227,5 +237,17 @@ export class ResourceInjector {
         },
       );
     }
+  }
+
+  /**
+   * Emscripten FS エラーの型ガード。
+   */
+  private static isFsError(e: unknown): e is { code: string } {
+    return (
+      typeof e === "object" &&
+      e !== null &&
+      "code" in e &&
+      typeof (e as { code: unknown }).code === "string"
+    );
   }
 }

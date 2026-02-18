@@ -25,7 +25,7 @@ describe("Board Utilities", () => {
 
     it("should throw error for invalid row count", () => {
       const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w" as FEN; // 7 rows
-      expect(() => parseFEN(fen)).toThrow("Invalid row count");
+      expect(() => parseFEN(fen)).toThrow("Invalid board structure");
     });
 
     it("should throw error for invalid character", () => {
@@ -64,12 +64,12 @@ describe("Board Utilities", () => {
     it("should throw error for invalid row length", () => {
       const sfen =
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSN b - 1" as SFEN; // last row missing piece
-      expect(() => parseSFEN(sfen)).toThrow("Invalid row length");
+      expect(() => parseSFEN(sfen)).toThrow("invalid length");
     });
 
     it("should throw error for incomplete promoted piece", () => {
       const sfen = "9/9/9/9/9/9/9/9/8+ b - 1" as SFEN; // '+' at end
-      expect(() => parseSFEN(sfen)).toThrow("'+' prefix at end of row string");
+      expect(() => parseSFEN(sfen)).toThrow("Malformed SFEN");
     });
 
     it("should throw error for invalid piece character", () => {
@@ -86,23 +86,24 @@ describe("Board Utilities", () => {
 
   describe("Parser Robustness", () => {
     it("parseFEN should throw on empty string", () => {
-      expect(() => parseFEN("" as FEN)).toThrow("FEN string is empty");
+      expect(() => parseFEN("" as FEN)).toThrow("is empty");
     });
 
     it("parseSFEN should throw on empty string", () => {
-      expect(() => parseSFEN("" as SFEN)).toThrow("SFEN string is empty");
+      expect(() => parseSFEN("" as SFEN)).toThrow("is empty");
     });
 
     it("parseFEN should throw on missing fields", () => {
       expect(() => parseFEN("8/8/8/8/8/8/8/8" as FEN)).toThrow(
         "Turn part is missing",
       );
-      // Actually parseFEN logic checks parts[0].
-      expect(() => parseFEN(" w" as FEN)).toThrow("Position part is missing");
+      // " w" trimmed becomes "w", then split gives ["w"], so turnPart is missing.
+      expect(() => parseFEN(" w" as FEN)).toThrow("Turn part is missing");
     });
 
     it("parseSFEN should throw on missing fields", () => {
-      expect(() => parseSFEN(" b" as SFEN)).toThrow("Position part is missing");
+      // " b" trimmed becomes "b", then split gives ["b"], so turnPart is missing.
+      expect(() => parseSFEN(" b" as SFEN)).toThrow("Turn part is missing");
     });
   });
 });

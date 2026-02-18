@@ -82,16 +82,25 @@ export class EngineLoader implements IEngineLoader {
         }
 
         const cached = await this.storage.get(cacheKey);
-        if (cached && sri) {
-          const isValid = await SecurityAdvisor.verifySRI(cached, sri);
-          if (isValid) {
+        if (cached) {
+          if (sri) {
+            const isValid = await SecurityAdvisor.verifySRI(cached, sri);
+            if (isValid) {
+              const url = URL.createObjectURL(
+                new Blob([cached], { type: this.getMimeType(config) }),
+              );
+              this.updateBlobUrl(cacheKey, url);
+              return url;
+            }
+            await this.storage.delete(cacheKey);
+          } else if (config.__unsafeNoSRI) {
+            // 2026: 非本番環境かつ SRI バイパス時はキャッシュをそのまま使用可能
             const url = URL.createObjectURL(
               new Blob([cached], { type: this.getMimeType(config) }),
             );
             this.updateBlobUrl(cacheKey, url);
             return url;
           }
-          await this.storage.delete(cacheKey);
         }
 
         let data: ArrayBuffer;

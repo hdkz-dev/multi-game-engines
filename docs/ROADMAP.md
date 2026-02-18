@@ -17,6 +17,16 @@
 
 ---
 
+## 🎨 UI アーキテクチャ (2026 Standard)
+
+本プロジェクトの UI 層は、特定のフレームワークへの依存を最小限に抑えつつ、最高のパフォーマンスを実現する二層構造を採用しています。
+
+- **Reactive Core (`ui-core`)**: フレームワーク非依存のビジネスロジック。状態管理、NPS スケーリング、局面解析、および `requestAnimationFrame` による描画最適化を担います。
+- **Framework Adapters**: `ui-react`, `ui-vue`, `ui-elements` (Lit) を提供。Core のロジックを各フレームワークの流儀に合わせてラップし、100% の機能パリティを維持します。
+- **Contract-driven UI**: エンジンからの出力は `Zod` スキーマによって実行時に検証され、UI のクラッシュを構造的に防止します。
+
+---
+
 ## 🏁 フェーズ 2: 早期リリース戦略 (Stage 1) (進行中)
 
 **目的**: 既存の npm/CDN 資産を統合し、実用的なツールとしての価値を早期に証明。
@@ -58,6 +68,7 @@
 - [ ] **Self-Healing Docs**: `TypeDoc` による、コード変更に 1 秒も遅れない API リファレンス生成。
 - [x] **Browser Matrix Verification**: `Playwright` による、実ブラウザ（各 OS エンジン）上での WASM 動作保証。
 - [x] **Contract-driven Safety**: `Zod` 等による、Worker 通信境界でのランタイム検証の強制。
+- [x] **Observability Integration**: 全 UI インタラクションとエンジン状態変化のテレメトリ同期。
 
 ---
 

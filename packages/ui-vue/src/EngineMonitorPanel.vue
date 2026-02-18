@@ -7,7 +7,7 @@
     T_RESULT extends IBaseSearchResult
   "
 >
-import { computed, ref, nextTick } from "vue";
+import { computed, ref, nextTick, useId } from "vue";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -43,6 +43,9 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "moveClick", move: string): void;
 }>();
+
+const panelId = useId();
+const titleId = `engine-monitor-title-${panelId}`;
 
 const { strings } = useEngineUI();
 const activeTab = ref<"pv" | "log">("pv");
@@ -121,7 +124,7 @@ const handleMoveClick = (move: string) => {
 <template>
   <section
     class="flex flex-col h-full bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg transition-all hover:shadow-xl"
-    aria-labelledby="monitor-title"
+    :aria-labelledby="titleId"
   >
     <div class="sr-only" aria-live="assertive" role="alert">
       {{ announcement }}
@@ -133,7 +136,7 @@ const handleMoveClick = (move: string) => {
       <div class="flex items-center gap-2">
         <Settings2 class="w-4 h-4 text-gray-500" />
         <h2
-          id="monitor-title"
+          :id="titleId"
           class="font-bold text-gray-700 text-sm tracking-tight"
         >
           {{ displayTitle }}
@@ -246,6 +249,8 @@ const handleMoveClick = (move: string) => {
                 @click="activeTab = 'pv'"
                 role="tab"
                 :aria-selected="activeTab === 'pv'"
+                :aria-controls="`${panelId}-pv-panel`"
+                :id="`${panelId}-pv-tab`"
                 :tabindex="activeTab === 'pv' ? 0 : -1"
                 class="flex items-center gap-1.5 transition-colors outline-none"
                 :class="activeTab === 'pv' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
@@ -258,6 +263,8 @@ const handleMoveClick = (move: string) => {
                 @click="activeTab = 'log'"
                 role="tab"
                 :aria-selected="activeTab === 'log'"
+                :aria-controls="`${panelId}-log-panel`"
+                :id="`${panelId}-log-tab`"
                 :tabindex="activeTab === 'log' ? 0 : -1"
                 class="flex items-center gap-1.5 transition-colors outline-none"
                 :class="activeTab === 'log' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
@@ -273,7 +280,9 @@ const handleMoveClick = (move: string) => {
           <div class="flex-1 overflow-y-auto custom-scrollbar">
             <div
               role="tabpanel"
-              :aria-hidden="activeTab !== 'pv'"
+              :id="`${panelId}-pv-panel`"
+              :aria-labelledby="`${panelId}-pv-tab`"
+              :hidden="activeTab !== 'pv'"
               class="h-full"
             >
               <PVList
@@ -285,7 +294,9 @@ const handleMoveClick = (move: string) => {
             </div>
             <div
               role="tabpanel"
-              :aria-hidden="activeTab !== 'log'"
+              :id="`${panelId}-log-panel`"
+              :aria-labelledby="`${panelId}-log-tab`"
+              :hidden="activeTab !== 'log'"
               class="h-full"
             >
               <SearchLog

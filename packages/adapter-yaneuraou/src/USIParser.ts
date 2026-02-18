@@ -73,56 +73,62 @@ export class USIParser implements IProtocolParser<
 
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
-      const val = parts[i + 1];
+      const hasNext = i + 1 < parts.length;
+      const val = hasNext ? parts[i + 1] : undefined;
 
       switch (key) {
         case "depth":
           info.depth = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "seldepth":
           info.seldepth = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "score":
-          if (parts[i + 1] === "cp") {
-            info.score = { cp: parseInt(parts[i + 2] || "0", 10) || 0 };
-          } else if (parts[i + 1] === "mate") {
-            info.score = { mate: parseInt(parts[i + 2] || "0", 10) || 0 };
+          if (i + 2 < parts.length) {
+            const scoreType = parts[++i];
+            const scoreValStr = parts[++i];
+            if (scoreType === "cp") {
+              info.score = { cp: parseInt(scoreValStr || "0", 10) || 0 };
+            } else if (scoreType === "mate") {
+              info.score = { mate: parseInt(scoreValStr || "0", 10) || 0 };
+            }
+          } else {
+            i = parts.length; // Skip to end
           }
-          i += 2;
           break;
         case "nodes":
           info.nodes = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "nps":
           info.nps = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "time":
           info.time = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "hashfull":
           info.hashfull = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "multipv":
           info.multipv = parseInt(val || "0", 10) || 0;
-          i++;
+          if (val !== undefined) i++;
           break;
         case "cpuload":
-          // USI specific field, can be ignored or stored in raw
-          i++;
+          // USI specific field
+          if (val !== undefined) i++;
           break;
         case "pv": {
           const moves: Move[] = [];
           while (
             i + 1 < parts.length &&
-            !USIParser.USI_INFO_TOKENS.has(parts[i + 1])
+            !USIParser.USI_INFO_TOKENS.has(parts[i + 1]!)
           ) {
-            const m = this.createMove(parts[++i]);
+            const m = this.createMove(parts[++i]!);
             if (m) moves.push(m);
           }
           info.pv = moves;

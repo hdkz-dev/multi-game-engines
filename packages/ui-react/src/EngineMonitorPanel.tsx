@@ -278,26 +278,24 @@ export function EngineMonitorPanel<
                 <ScrollArea.Viewport className="h-full w-full p-4">
                   <div
                     role="tabpanel"
-                    id={
-                      activeTab === "pv"
-                        ? `${panelId}-pv-panel`
-                        : `${panelId}-log-panel`
-                    }
-                    aria-labelledby={
-                      activeTab === "pv"
-                        ? `${panelId}-pv-tab`
-                        : `${panelId}-log-tab`
-                    }
+                    id={`${panelId}-pv-panel`}
+                    aria-labelledby={`${panelId}-pv-tab`}
                     className="h-full"
+                    hidden={activeTab !== "pv"}
                   >
-                    {activeTab === "pv" ? (
-                      <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
-                    ) : (
-                      <SearchLog
-                        log={state.searchLog}
-                        onMoveClick={onMoveClick}
-                      />
-                    )}
+                    <PVList pvs={state.pvs} onMoveClick={onMoveClick} />
+                  </div>
+                  <div
+                    role="tabpanel"
+                    id={`${panelId}-log-panel`}
+                    aria-labelledby={`${panelId}-log-tab`}
+                    className="h-full"
+                    hidden={activeTab !== "log"}
+                  >
+                    <SearchLog
+                      log={state.searchLog}
+                      onMoveClick={onMoveClick}
+                    />
                   </div>
                 </ScrollArea.Viewport>
                 <ScrollArea.Scrollbar
