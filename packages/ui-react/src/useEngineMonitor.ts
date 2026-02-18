@@ -63,7 +63,9 @@ export function useEngineMonitor<
     } catch (err) {
       if (process.env.NODE_ENV !== "production") {
         console.warn(
-          `[useEngineMonitor] Invalid initialPosition: "${initialPosition}". Falling back to "startpos".`,
+          `[useEngineMonitor] Validation failed for initialPosition: "${initialPosition}". 
+          The position format may be invalid for this engine type. 
+          Falling back to "startpos". Error details:`,
           err,
         );
       }

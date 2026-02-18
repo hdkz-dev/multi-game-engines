@@ -30,6 +30,9 @@
 - [x] **デザイントークン統一**: CSS Variables によるフレームワーク横断的なテーマ管理。
 - [x] **セキュリティポリシー刷新**: SRI 必須化と「Refuse by Exception」の明文化。
 - [x] **厳格な型安全性の追求 (Zenith Tier)**: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, および `Project References` の全パッケージ適用。
+- [x] **最新技術トレンドの追従 (Modernization)**:
+  - [x] Vue 3.5+ `onWatcherCleanup` による副作用管理の最新化。
+  - [x] モノレポ全域における `sideEffects` 最適化による Tree-shaking 効率の最大化。
 - [x] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
 - [x] **UIコンポーネント拡充**: 評価値の時系列グラフの実装。
 - [x] **UIコンポーネント拡充**: 思考ログの永続化表示。

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { SearchStateTransformer } from "../transformer.js";
 import { createInitialState, PositionString } from "../types.js";
 import { ExtendedSearchInfo } from "../schema.js";
-import { createMove } from "@multi-game-engines/core";
+import { createMove, createPositionString } from "@multi-game-engines/core";
 
 describe("SearchStateTransformer", () => {
   beforeAll(() => {
@@ -13,9 +13,7 @@ describe("SearchStateTransformer", () => {
     vi.restoreAllMocks();
   });
 
-  const initialState = createInitialState(
-    "startpos" as unknown as PositionString,
-  );
+  const initialState = createInitialState(createPositionString("startpos"));
 
   it("should update basic statistics", () => {
     const info: ExtendedSearchInfo = {

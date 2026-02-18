@@ -168,6 +168,15 @@ export class ShogiBoard extends LitElement {
       handGoteLabel: this.handGoteLabel || data.dashboard.gameBoard.handGote,
       errorMessage:
         this.errorMessage || data.dashboard.gameBoard.invalidPosition,
+      squareLabel: (f: number, r: number) =>
+        data.dashboard.gameBoard.squareLabel
+          .replace("{file}", String(f))
+          .replace("{rank}", String(r)),
+      squarePieceLabel: (f: number, r: number, p: string) =>
+        data.dashboard.gameBoard.squarePieceLabel
+          .replace("{file}", String(f))
+          .replace("{rank}", String(r))
+          .replace("{piece}", p),
     };
   }
 
@@ -231,25 +240,35 @@ export class ShogiBoard extends LitElement {
         const isGote = piece && isGotePiece(piece);
         // USI coordinate: file (9-1), rank (a-i)
         const usiFile = 9 - f;
-        const usiRank = String.fromCharCode(97 + r);
+        // const usiRank = String.fromCharCode(97 + r); // Not used in display loop but valid
 
-        const label = piece
+        // Localization: 1-9 for files, 1-9 for ranks
+        const displayFile = usiFile;
+        const displayRank = r + 1;
+
+        const pieceLabel = piece
           ? this.pieceNames[piece] || PIECE_LABELS[piece]
           : "";
+
+        const ariaLabel = piece
+          ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
+          : strings.squareLabel(displayFile, displayRank);
 
         squares.push(html`
           <div
             class="square ${isHighlighted ? "highlight" : ""}"
-            data-square="${usiFile}${usiRank}"
+            data-square="${usiFile}${String.fromCharCode(97 + r)}"
+            role="gridcell"
+            aria-label="${ariaLabel}"
           >
             ${piece
               ? html`
                   <span
                     class="piece ${isGote ? "gote" : ""}"
                     role="img"
-                    aria-label="${label}"
+                    aria-hidden="true"
                   >
-                    ${label}
+                    ${pieceLabel}
                   </span>
                 `
               : ""}

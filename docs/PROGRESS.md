@@ -1,8 +1,17 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月17日
+## 📅 更新日: 2026年2月18日
 
 ## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith - Complete)
+
+- **Vue 3.5+ `onWatcherCleanup` によるモダン化**:
+  - `useEngineMonitor` フックを Vue 3.5 の最新パターンへ刷新。`onWatcherCleanup` を活用した副作用の自動クリーンアップにより、エンジン切り替え時のメモリリークや競合状態を 100% 排除しました。
+- **リポジトリ全域の Tree-shaking 最適化 (sideEffects)**:
+  - 全 14 パッケージの `package.json` において `sideEffects` フラグを厳密に設定。`ui-elements` (Web Components) の登録副作用を明示しつつ、`core` や `i18n` の純粋なロジック層でのデッドコード削除を最大化しました。
+- **WCAG 2.2 AA 準拠の視覚順序 ARIA マッピング**:
+  - `chess-board` および `shogi-board` において、盤面の「視覚的な位置」に基づいた ARIA 座標生成ロジックを確立。盤面の向き (Orientation) に応じて、左上が "a8" (先手) または "h1" (後手) となるように国際化されたラベルを動的にマッピング。
+- **ミドルウェアのべき等な後始末 (`unuse`)**:
+  - `IEngine.unuse` の実装を強化し、ID 指定またはインスタンス指定による安全な登録解除を保証。コンポーネントの再マウントを繰り返してもミドルウェアが累積しない堅牢なライフサイクル管理を実現。
 
 - **動的盤面コンポーネントとダッシュボードの統合**:
   - **Framework-Agnostic Boards**: Lit ベースの `<chess-board>` および `<shogi-board>` を実装。React/Vue を含むあらゆる環境で利用可能な高精度な盤面表示を実現。

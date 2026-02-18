@@ -1,12 +1,12 @@
 import {
   ref,
-  onUnmounted,
   watch,
   computed,
   toValue,
   Ref,
   ComputedRef,
   MaybeRefOrGetter,
+  onWatcherCleanup,
 } from "vue";
 import {
   IEngine,
@@ -25,6 +25,7 @@ import {
   CommandDispatcher,
   createInitialState,
 } from "@multi-game-engines/ui-core";
+import { useEngineUI } from "./useEngineUI.js";
 
 /**
  * useEngineMonitor の戻り値型を明示的に定義。
@@ -67,6 +68,8 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
+  const { strings } = useEngineUI();
+
   // ダミー状態の作成 (初期化前やエラー時のフォールバック)
   const createDummyState = (): T_STATE => {
     try {
@@ -74,7 +77,9 @@ export function useEngineMonitor<
       return createInitialState<T_STATE>(brandedPos);
     } catch (err) {
       console.warn(
-        `[useEngineMonitor] Invalid initialPosition: "${initialPosition}". Falling back to "startpos".`,
+        `[useEngineMonitor] Validation failed for initialPosition: "${initialPosition}". 
+        Check if the position string matches the engine's protocol (e.g., FEN for Chess, SFEN for Shogi). 
+        Falling back to "startpos". Original error:`,
         err,
       );
       const safePos = createPositionString("startpos");
@@ -98,41 +103,10 @@ export function useEngineMonitor<
     T_RESULT
   > | null>(null);
 
-  let unsubStore: (() => void) | null = null;
-  let unsubStatus: (() => void) | null = null;
-
-  const mwId = "ui-normalizer";
-
-  const cleanup = () => {
-    const currentEngine = toValue(engineSource);
-    if (unsubStore) {
-      unsubStore();
-      unsubStore = null;
-    }
-    if (unsubStatus) {
-      unsubStatus();
-      unsubStatus = null;
-    }
-    if (monitor.value) {
-      monitor.value.stopMonitoring();
-      monitor.value = null;
-    }
-    if (currentEngine && typeof currentEngine.unuse === "function") {
-      currentEngine.unuse(mwId);
-    }
-    dispatcher.value = null;
-  };
-
-  // 2026 Best Practice: MaybeRefOrGetter を監視し、toValue で評価
+  // 2026 Best Practice: Vue 3.5+ onWatcherCleanup によるクリーンアップ管理
   watch(
     () => toValue(engineSource),
     (newEngine) => {
-      // 古いエンジンの後始末
-      // 注意: cleanup() 内で toValue(engineSource) を呼ぶと新しい方を引いてしまう可能性があるため、
-      // ここでは明示的に古いリソース（前回保存分）を掃除する設計が望ましいが、
-      // 現在のシンプルさを維持しつつ middleware の unuse を追加
-      cleanup();
-
       if (!newEngine) {
         engineStatus.value = "uninitialized";
         state.value = createDummyState();
@@ -166,24 +140,52 @@ export function useEngineMonitor<
       m.startMonitoring();
       state.value = m.getSnapshot() as T_STATE;
 
-      unsubStore = m.subscribe(() => {
+      // 変数への代入
+      const unsubStore = m.subscribe(() => {
         state.value = m.getSnapshot() as T_STATE;
       });
 
       engineStatus.value = newEngine.status;
-      unsubStatus = newEngine.onStatusChange((newStatus) => {
+      const unsubStatus = newEngine.onStatusChange((newStatus) => {
         engineStatus.value = newStatus;
         optimisticStatus.value = null;
+      });
+
+      // クリーンアップ登録 (Vue 3.5+)
+      // 監視対象が変わる直前、またはコンポーネントがアンマウントされる際に実行される
+      onWatcherCleanup(() => {
+        unsubStore();
+        unsubStatus();
+        if (monitor.value) {
+          monitor.value.stopMonitoring();
+          monitor.value = null;
+        }
+        if (newEngine && typeof newEngine.unuse === "function") {
+          newEngine.unuse("ui-normalizer");
+        }
+        dispatcher.value = null;
       });
     },
     { immediate: true },
   );
 
-  onUnmounted(cleanup);
+  // コンポーネント破棄時のクリーンアップは watch の停止と共に onWatcherCleanup が走るわけではないため
+  // 明示的な onUnmounted は依然として必要だが、
+  // watch scope が閉じるときに自動で cleanup される機能があればそれがベスト。
+  // しかし toValue(engineSource) が変わらない限り watch は再実行されない。
+  // コンポーネントが unmount されると watch effect は stop される。
+  // Vue 3.5 では effect stop 時に onWatcherCleanup も呼ばれる。
+  // したがって、onUnmounted は不要になるはずである。
+  // Verify: "Cleanup callbacks are called when the watcher is about to re-run, or when the watcher is stopped (i.e. when the component is unmounted if the watcher was created within setup())."
+  // Source: Vue 3.5 docs.
+  // So I can remove onUnmounted(cleanup) and the manual cleanup variables outside!
 
   const search = (searchOptions: T_OPTIONS) => {
-    if (!dispatcher.value)
-      return Promise.reject(new Error("ENGINE_NOT_AVAILABLE"));
+    if (!dispatcher.value) {
+      return Promise.reject(
+        new Error(`${strings.value.errorTitle}: ENGINE_NOT_AVAILABLE`),
+      );
+    }
     return dispatcher.value.dispatchSearch(searchOptions);
   };
 

@@ -61,6 +61,7 @@ describe("ChessBoard (React)", () => {
     const { container } = render(<ChessBoard fen={fen} />);
 
     const board = container.querySelector<ChessBoardElement>("chess-board");
+    expect(board).toBeTruthy();
     if (board) {
       expect(board.getAttribute("last-move")).toBeNull();
       expect(board.getAttribute("orientation")).toBeNull();

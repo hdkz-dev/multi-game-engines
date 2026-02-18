@@ -28,6 +28,10 @@
     "build-storybook": "storybook build"
   },
   "license": "MIT",
+  "sideEffects": [
+    "*.css",
+    "*.vue"
+  ],
   "peerDependencies": {
     "vue": ">=3.3.0"
   },

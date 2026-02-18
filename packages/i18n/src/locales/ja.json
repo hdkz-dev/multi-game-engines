@@ -70,6 +70,8 @@
       "handSente": "先手 持ち駒",
       "handGote": "後手 持ち駒",
       "invalidPosition": "局面の解析に失敗しました",
+      "squareLabel": "{file}筋 {rank}段",
+      "squarePieceLabel": "{file}筋 {rank}段 {piece}",
       "chessPieces": {
         "P": "白 歩兵",
         "N": "白 騎士",

@@ -63,6 +63,7 @@ describe("ShogiBoard (React)", () => {
     const { container } = render(<ShogiBoard sfen={sfen} />);
 
     const board = container.querySelector<ShogiBoardElement>("shogi-board");
+    expect(board).toBeTruthy();
     if (board) {
       expect(board.getAttribute("last-move")).toBeNull();
       expect(board.getAttribute("board-label")).toBeNull();

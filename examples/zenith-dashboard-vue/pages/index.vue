@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, h, defineComponent } from "vue";
+import { ref, computed } from "vue";
 import { createFEN, createSFEN } from "@multi-game-engines/core";
 import { formatNumber } from "@multi-game-engines/ui-core";
 import { EngineMonitorPanel, ChessBoard, ShogiBoard, EngineUIProvider } from "@multi-game-engines/ui-vue";
@@ -18,32 +18,6 @@ useHead({
     },
   ],
 });
-
-/**
- * StatCard component for dashboard metrics.
- */
-const StatCard = defineComponent({
-  props: {
-    label: { type: String, required: true },
-    value: { type: String, required: true },
-    sub: { type: String, required: true },
-    iconClass: { type: String, default: "" },
-  },
-  setup(props, { slots }) {
-    return () => h('div', {
-      class: 'bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-start gap-4'
-    }, [
-      h('div', { class: 'p-3 bg-gray-50 rounded-xl text-gray-700' }, [
-        slots.icon?.()
-      ]),
-      h('div', {}, [
-        h('p', { class: 'text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1' }, props.label),
-        h('p', { class: 'text-lg font-black text-gray-900 tracking-tight leading-none mb-1' }, props.value),
-        h('p', { class: 'text-[10px] text-gray-400 font-bold italic' }, props.sub)
-      ])
-    ])
-  }
-})
 
 type EngineType = "chess" | "shogi";
 const activeEngine = ref<EngineType>("chess");
