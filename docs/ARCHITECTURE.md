@@ -96,6 +96,7 @@ stockfish.search({ fen: "..." as FEN, depth: 20 });
 1.  **Reactive Core (`ui-core`)**:
     - **役割**: フレームワーク非依存のビジネスロジック。
     - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。評価値の表示ロジック（`EvaluationPresenter`）もここに集約されています。
+    - **Generic State Support**: `SearchMonitor` と `createInitialState` は、ジェネリクスによってアプリケーション固有の状態拡張をサポートします。これにより、ベースの状態型を安全に拡張しつつ、`as unknown as` キャストを排除した 100% 型安全な開発が可能です。
 2.  **Localization Layer (`i18n`)**:
     - **役割**: 純粋な言語リソースの提供。
     - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。

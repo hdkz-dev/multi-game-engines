@@ -1,10 +1,24 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardComponents from "../BoardComponents.vue";
-import { createFEN, createSFEN, createMove } from "@multi-game-engines/core";
+import {
+  createFEN,
+  createSFEN,
+  createMove,
+  FEN,
+  SFEN,
+} from "@multi-game-engines/core";
 import "@multi-game-engines/ui-elements";
 
 describe("BoardComponents (Vue)", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should render chess-board when type is 'chess'", () => {
     const fen = createFEN(
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -13,7 +27,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "chess",
-        fen,
+        fen: fen as FEN,
         lastMove,
         boardLabel: "Custom Chess",
       },
@@ -39,7 +53,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "shogi",
-        sfen,
+        sfen: sfen as SFEN,
         handSenteLabel: "Sente pieces",
       },
       global: {
@@ -61,7 +75,7 @@ describe("BoardComponents (Vue)", () => {
     const wrapper = mount(BoardComponents, {
       props: {
         type: "chess",
-        fen,
+        fen: fen as FEN,
       },
       global: {
         stubs: {
@@ -84,7 +98,7 @@ describe("BoardComponents (Vue)", () => {
       props: {
         type: "chess",
         // fen is missing
-      },
+      } as unknown as { type: "chess"; fen: FEN },
     });
 
     expect(consoleSpy).toHaveBeenCalledWith(

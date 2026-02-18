@@ -108,4 +108,19 @@ describe("EngineLoader", () => {
     const url = await loader.loadResource("test", config);
     expect(url).toBe("blob:test");
   });
+
+  it("should allow loading without SRI if __unsafeNoSRI is true", async () => {
+    vi.mocked(storage.get).mockResolvedValue(null);
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      __unsafeNoSRI: true,
+    };
+
+    const url = await loader.loadResource("test", config);
+
+    expect(url).toBe("blob:test");
+    expect(fetch).toHaveBeenCalled();
+    // SRI検証（verifySRI）が呼ばれないこと、または呼ばれても成功することを期待（実装上はスキップされる）
+  });
 });

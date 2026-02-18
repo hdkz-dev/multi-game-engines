@@ -88,6 +88,7 @@ The project provides a high-performance, accessible UI foundation for delivering
 To avoid framework lock-in and support 2026 standards, the UI layer is separated into:
 
 1.  **Reactive Core (`ui-core`)**: Framework-agnostic business logic, state management, and requestAnimationFrame (RAF)-based throttling for high-frequency updates.
+    - **Generic State Support**: `SearchMonitor` and `createInitialState` now support custom state types via generics, allowing applications to extend the base engine state while maintaining 100% type safety and eliminating unsafe casts.
 2.  **Localization Layer (`i18n`)**: Pure language resources and type-safe interfaces.
 3.  **Framework Adapters**:
     - **`ui-react`**: React Hooks (`useSyncExternalStore`) and Context DI. Fully supports React 19 and Tailwind CSS v4.

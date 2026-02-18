@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { useEngineMonitor } from "../useEngineMonitor.js";
@@ -15,11 +15,11 @@ import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 class LocalMockEngine implements Partial<
   IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
 > {
+  id = "mock-vue-engine";
   name = "MockEngine";
   status: EngineStatus = "ready";
   onStatusChange = () => () => {};
-  onSearchInfo = () => () => {}; // Alias for onInfo in some contexts, but SearchMonitor specifically uses onInfo
-  onInfo = () => () => {}; // This is the one needed
+  onInfo = () => () => {};
   onSearchResult = () => () => {};
   onTelemetry = () => () => {};
   use = () =>
@@ -31,6 +31,14 @@ class LocalMockEngine implements Partial<
 }
 
 describe("useEngineMonitor (Vue)", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should initialize within component lifecycle", () => {
     const engine = new LocalMockEngine() as unknown as IEngine<
       IBaseSearchOptions,
