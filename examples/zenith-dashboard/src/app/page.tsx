@@ -27,6 +27,10 @@ const ShogiBoard = dynamic(
   () => import("@multi-game-engines/ui-react").then((mod) => mod.ShogiBoard),
   { ssr: false },
 );
+const StatCard = dynamic(
+  () => import("@multi-game-engines/ui-react").then((mod) => mod.StatCard),
+  { ssr: false },
+);
 
 import {
   LayoutGrid,
@@ -38,13 +42,13 @@ import {
   Gauge,
 } from "lucide-react";
 import { useEngineMonitor } from "@multi-game-engines/ui-react/hooks";
+import { useLocale } from "./layout";
 
 type EngineType = "chess" | "shogi";
-type LocaleType = "ja" | "en";
 
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>("chess");
-  const [locale, setLocale] = useState<LocaleType>("ja");
+  const { locale, setLocale } = useLocale();
   const bridge = useMemo(() => getBridge(), []);
 
   const localeData = useMemo(
@@ -194,25 +198,29 @@ export default function Dashboard() {
         {/* Hero Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard
-            icon={<Zap className="text-yellow-500 w-5 h-5" />}
+            icon={<Zap className="w-5 h-5" />}
+            iconClass="text-yellow-500"
             label={localeData.dashboard.stats.engineRuntime.label}
             value={nps}
             sub={localeData.engine.npsUnit}
           />
           <StatCard
-            icon={<Cpu className="text-blue-500 w-5 h-5" />}
+            icon={<Cpu className="w-5 h-5" />}
+            iconClass="text-blue-500"
             label={localeData.dashboard.stats.hardware.label}
             value={localeData.dashboard.stats.hardware.value}
             sub={localeData.dashboard.stats.hardware.sub}
           />
           <StatCard
-            icon={<Gauge className="text-green-500 w-5 h-5" />}
+            icon={<Gauge className="w-5 h-5" />}
+            iconClass="text-green-500"
             label={localeData.dashboard.stats.performance.label}
             value={localeData.dashboard.stats.performance.value}
             sub={localeData.dashboard.stats.performance.sub}
           />
           <StatCard
-            icon={<Trophy className="text-purple-500 w-5 h-5" />}
+            icon={<Trophy className="w-5 h-5" />}
+            iconClass="text-purple-500"
             label={localeData.dashboard.stats.accessibility.label}
             value={localeData.dashboard.stats.accessibility.value}
             sub={localeData.dashboard.stats.accessibility.sub}
@@ -316,32 +324,5 @@ export default function Dashboard() {
         </div>
       </main>
     </EngineUIProvider>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  sub: string;
-}) {
-  return (
-    <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm flex items-start gap-4">
-      <div className="p-3 bg-gray-50 rounded-xl text-gray-700">{icon}</div>
-      <div>
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-          {label}
-        </p>
-        <p className="text-lg font-black text-gray-900 tracking-tight leading-none mb-1">
-          {value}
-        </p>
-        <p className="text-[10px] text-gray-400 font-bold italic">{sub}</p>
-      </div>
-    </div>
   );
 }
