@@ -6,5 +6,4 @@ export * from "./EngineStats.js";
 export * from "./EvaluationGraph.js";
 export * from "./EngineMonitorPanel.js";
 export * from "./EngineUIProvider.js";
-export * from "./BoardComponents.js";
 export * from "./StatCard.js";

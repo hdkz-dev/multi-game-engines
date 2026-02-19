@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardComponents from "../BoardComponents.vue";
-import { createFEN, createSFEN, createMove } from "@multi-game-engines/core";
+import { createMove } from "@multi-game-engines/core";
+import { createFEN } from "@multi-game-engines/core/chess";
+import { createSFEN } from "@multi-game-engines/core/shogi";
 import "@multi-game-engines/ui-elements";
 
 describe("BoardComponents (Vue)", () => {

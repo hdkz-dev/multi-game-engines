@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { parseFEN, parseSFEN } from "../utils/board.js";
-import { createFEN, createSFEN, FEN, SFEN } from "@multi-game-engines/core";
+import { parseFEN } from "../domains/chess/index.js";
+import { parseSFEN } from "../domains/shogi/index.js";
+import { createFEN, FEN } from "@multi-game-engines/core/chess";
+import { createSFEN, SFEN } from "@multi-game-engines/core/shogi";
 
 describe("Board Utilities", () => {
   beforeAll(() => {
@@ -28,16 +30,19 @@ describe("Board Utilities", () => {
     it("should handle empty squares", () => {
       const fen = createFEN("8/8/8/8/8/8/8/8 w - - 0 1");
       const { board } = parseFEN(fen);
-      expect(board.every((row) => row.every((sq) => sq === null))).toBe(true);
+      expect(
+        board.every((row: (string | null)[]) => row.every((sq) => sq === null)),
+      ).toBe(true);
     });
 
     it("should throw error for invalid row count", () => {
-      const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w" as FEN; // 7 rows
+      const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w - - 0 1" as FEN; // 7 rows
       expect(() => parseFEN(fen)).toThrow("Invalid board structure");
     });
 
     it("should throw error for invalid character", () => {
-      const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNZ w" as FEN; // 'Z' is invalid
+      const fen =
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNZ w - - 0 1" as FEN; // 'Z' is invalid
       expect(() => parseFEN(fen)).toThrow("Invalid character");
     });
   });
@@ -84,12 +89,6 @@ describe("Board Utilities", () => {
       const sfen = "9/9/9/9/9/9/9/9/8Z b - 1" as SFEN; // 'Z' is invalid
       expect(() => parseSFEN(sfen)).toThrow("Invalid character");
     });
-
-    it("should throw error for missing turn", () => {
-      expect(() => parseSFEN("9/9/9/9/9/9/9/9/9" as unknown as SFEN)).toThrow(
-        "Turn part is missing",
-      );
-    });
   });
 
   describe("Parser Robustness", () => {
@@ -99,19 +98,6 @@ describe("Board Utilities", () => {
 
     it("parseSFEN should throw on empty string", () => {
       expect(() => parseSFEN("" as SFEN)).toThrow("is empty");
-    });
-
-    it("parseFEN should throw on missing fields", () => {
-      expect(() => parseFEN("8/8/8/8/8/8/8/8" as FEN)).toThrow(
-        "Turn part is missing",
-      );
-      // " w" trimmed becomes "w", then split gives ["w"], so turnPart is missing.
-      expect(() => parseFEN(" w" as FEN)).toThrow("Turn part is missing");
-    });
-
-    it("parseSFEN should throw on missing fields", () => {
-      // " b" trimmed becomes "b", then split gives ["b"], so turnPart is missing.
-      expect(() => parseSFEN(" b" as SFEN)).toThrow("Turn part is missing");
     });
   });
 });

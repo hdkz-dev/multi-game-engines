@@ -1,3 +1,14 @@
 {
-  "extends": "./.nuxt/tsconfig.json"
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@multi-game-engines/core": ["../../packages/core/dist"],
+      "@multi-game-engines/core/*": ["../../packages/core/dist/*"],
+      "@multi-game-engines/adapter-uci": ["../../packages/adapter-uci/dist"],
+      "@multi-game-engines/adapter-usi": ["../../packages/adapter-usi/dist"],
+      "@multi-game-engines/ui-vue": ["../../packages/ui-vue/dist"],
+      "@multi-game-engines/ui-vue/*": ["../../packages/ui-vue/dist/*"]
+    }
+  }
 }

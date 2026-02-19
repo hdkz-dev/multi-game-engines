@@ -12,6 +12,7 @@ import {
   ICapabilities,
   IEngineLoader,
   IEngine,
+  IEngineConfig,
   EngineRegistry,
   EngineErrorCode,
 } from "../types.js";
@@ -25,6 +26,12 @@ export class EngineBridge implements IEngineBridge {
   private adapters = new Map<
     string,
     IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+  >();
+  private adapterFactories = new Map<
+    string,
+    (
+      config: IEngineConfig,
+    ) => IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -66,6 +73,26 @@ export class EngineBridge implements IEngineBridge {
     void this.checkCapabilities();
   }
 
+  registerAdapterFactory<
+    O extends IBaseSearchOptions,
+    I extends IBaseSearchInfo,
+    R extends IBaseSearchResult,
+  >(
+    type: string,
+    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+  ): void {
+    this.adapterFactories.set(
+      type,
+      factory as (
+        config: IEngineConfig,
+      ) => IEngineAdapter<
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    );
+  }
+
   async registerAdapter<
     O extends IBaseSearchOptions,
     I extends IBaseSearchInfo,
@@ -74,7 +101,13 @@ export class EngineBridge implements IEngineBridge {
     if (this.disposed) return;
 
     // 2026 Best Practice: アダプター登録時に能力要件を検証
-    await this.enforceCapabilities(adapter);
+    await this.enforceCapabilities(
+      adapter as IEngineAdapter<
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    );
 
     const id = adapter.id;
 
@@ -100,7 +133,6 @@ export class EngineBridge implements IEngineBridge {
 
     this.adapterUnsubscribers.set(id, unsubs);
     // 2026 Best Practice: アダプターの型を IBase 型へ正規化して保存。
-    // 外部 API はジェネリクスで公開されるが、内部管理は基底インターフェースで行う。
     const abstractAdapter = adapter as IEngineAdapter<
       IBaseSearchOptions,
       IBaseSearchInfo,
@@ -126,20 +158,29 @@ export class EngineBridge implements IEngineBridge {
   getEngine<K extends keyof EngineRegistry>(
     id: K,
     strategy?: EngineLoadingStrategy,
-  ): IEngine<
-    EngineRegistry[K]["options"],
-    EngineRegistry[K]["info"],
-    EngineRegistry[K]["result"]
-  >;
+  ): Promise<EngineRegistry[K]>;
   getEngine<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(id: string, strategy?: EngineLoadingStrategy): IEngine<O, I, R>;
-  getEngine(
-    id: string,
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    config: IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+  getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    idOrConfig: string | IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+  async getEngine(
+    idOrConfig: string | IEngineConfig,
     strategy: EngineLoadingStrategy = "on-demand",
-  ): IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+  ): Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>> {
+    const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
+
     // 2026 Best Practice: インスタンスのキャッシュ (WeakRef ベース)
     const ref = this.engineInstances.get(id);
     const cached = ref?.deref();
@@ -148,13 +189,36 @@ export class EngineBridge implements IEngineBridge {
       return cached;
     }
 
-    const adapter = this.adapters.get(id);
+    let adapter = this.adapters.get(id);
+
+    // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
+    if (!adapter && typeof idOrConfig !== "string") {
+      const factory = this.adapterFactories.get(idOrConfig.adapter);
+      if (factory) {
+        const newAdapter = factory(idOrConfig) as IEngineAdapter<
+          IBaseSearchOptions,
+          IBaseSearchInfo,
+          IBaseSearchResult
+        >;
+        adapter = newAdapter;
+        // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
+        await this.registerAdapter(newAdapter);
+      }
+    }
+
     if (!adapter) {
-      throw new Error(`Engine adapter not found: ${id}`);
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Engine adapter not found or factory not registered: ${id}`,
+        remediation:
+          typeof idOrConfig !== "string"
+            ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
+            : "Register the adapter instance first or provide a full IEngineConfig.",
+      });
     }
 
     // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-    this.enforceCapabilities(adapter);
+    await this.enforceCapabilities(adapter);
 
     // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
     const filteredMiddlewares = this.middlewares.filter(

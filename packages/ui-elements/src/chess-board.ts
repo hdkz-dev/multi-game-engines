@@ -1,7 +1,8 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { parseFEN, ChessPiece, FEN } from "@multi-game-engines/ui-core";
-import { createFEN, Move } from "@multi-game-engines/core";
+import { parseFEN, ChessPiece } from "@multi-game-engines/ui-core/chess";
+import { FEN, createFEN } from "@multi-game-engines/core/chess";
+import { Move } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 // Standard SVG piece set (Wikipedia/Standard) - Inlined as Data URIs for SRI compliance and zero external dependencies.

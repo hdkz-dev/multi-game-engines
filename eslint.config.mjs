@@ -1,12 +1,8 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
-
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
+import storybook from "eslint-plugin-storybook";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
+export default [
   {
     ignores: [
       "**/dist/**",
@@ -15,25 +11,37 @@ export default tseslint.config(
       "**/.next/**",
       "**/*.config.ts",
       "**/*.config.mjs",
+      "**/*.config.js",
       "**/next-env.d.ts",
     ],
   },
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
+      parser: tseslint.parser,
       parserOptions: {
-        project: true,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
     },
-  },
-  ...storybook.configs["flat/recommended"],
-  {
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { argsIgnorePattern: "^_" },
+        { "argsIgnorePattern": "^_" },
       ],
-      "storybook/no-renderer-packages": "off", // 2026: Override recommended to allow @storybook/react types
     },
   },
-);
+  // Storybook 用の設定を個別に定義（互換性エラーを避けるため、configs を直接展開）
+  {
+    files: ["**/*.stories.@(ts|tsx|js|jsx|mjs|cjs)"],
+    plugins: {
+      storybook,
+    },
+    rules: {
+      "storybook/no-renderer-packages": "off",
+    },
+  },
+];

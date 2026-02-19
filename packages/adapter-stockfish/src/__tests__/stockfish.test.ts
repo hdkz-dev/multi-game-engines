@@ -18,6 +18,14 @@ class MockWorker {
         }
       }, 0);
     }
+    // 2026: ハンドシェイク対応
+    if (msg === "uci") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "uciok" });
+        }
+      }, 0);
+    }
   });
   terminate = vi.fn();
   onmessage: ((ev: { data: unknown }) => void) | null = null;

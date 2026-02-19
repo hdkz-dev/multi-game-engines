@@ -43,8 +43,19 @@ export class EngineLoader implements IEngineLoader {
 
     const promise = (async () => {
       try {
-        // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
-        if (config.url.startsWith("http://")) {
+        // 2026 Best Practice: 実行リソース（Worker/WASM）のオリジン検証
+        if (config.type === "worker-js" || config.type === "wasm") {
+          this.validateWorkerUrl(config.url, engineId);
+        }
+
+        // 2026 Best Practice: HTTPS 強制 (Strict Loopback Check)
+        const url = new URL(config.url, window.location.href);
+        const isLoopback =
+          url.hostname === "localhost" ||
+          url.hostname === "127.0.0.1" ||
+          url.hostname === "::1";
+
+        if (url.protocol === "http:" && !isLoopback) {
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
@@ -86,20 +97,20 @@ export class EngineLoader implements IEngineLoader {
           if (sri) {
             const isValid = await SecurityAdvisor.verifySRI(cached, sri);
             if (isValid) {
-              const url = URL.createObjectURL(
+              const cachedBlobUrl = URL.createObjectURL(
                 new Blob([cached], { type: this.getMimeType(config) }),
               );
-              this.updateBlobUrl(cacheKey, url);
-              return url;
+              this.updateBlobUrl(cacheKey, cachedBlobUrl);
+              return cachedBlobUrl;
             }
             await this.storage.delete(cacheKey);
           } else if (config.__unsafeNoSRI) {
             // 2026: 非本番環境かつ SRI バイパス時はキャッシュをそのまま使用可能
-            const url = URL.createObjectURL(
+            const bypassBlobUrl = URL.createObjectURL(
               new Blob([cached], { type: this.getMimeType(config) }),
             );
-            this.updateBlobUrl(cacheKey, url);
-            return url;
+            this.updateBlobUrl(cacheKey, bypassBlobUrl);
+            return bypassBlobUrl;
           }
         }
 
@@ -136,11 +147,10 @@ export class EngineLoader implements IEngineLoader {
         }
 
         await this.storage.set(cacheKey, data);
-        const url = URL.createObjectURL(
-          new Blob([data], { type: this.getMimeType(config) }),
-        );
-        this.updateBlobUrl(cacheKey, url);
-        return url;
+        const blob = new Blob([data], { type: this.getMimeType(config) });
+        const blobUrl = URL.createObjectURL(blob);
+        this.updateBlobUrl(cacheKey, blobUrl);
+        return blobUrl;
       } finally {
         // 2026 Best Practice: 完了または失敗時に Map から除去し、再試行を可能にする
         this.inflightLoads.delete(cacheKey);
@@ -208,6 +218,37 @@ export class EngineLoader implements IEngineLoader {
         this.activeBlobs.delete(key);
         break;
       }
+    }
+  }
+
+  /**
+   * 2026 Best Practice: Worker 実行コンテキストのオリジン検証
+   */
+  private validateWorkerUrl(url: string, engineId?: string): void {
+    if (url.startsWith("blob:")) return;
+    try {
+      const parsedUrl = new URL(url, window.location.href);
+      const isLoopback =
+        parsedUrl.hostname === "localhost" ||
+        parsedUrl.hostname === "127.0.0.1" ||
+        parsedUrl.hostname === "::1";
+
+      if (parsedUrl.origin !== window.location.origin && !isLoopback) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Cross-origin Worker scripts are prohibited for security: ${url}`,
+          engineId,
+          remediation:
+            "Host the engine worker script on the same origin or use a Blob URL via EngineLoader.",
+        });
+      }
+    } catch (e) {
+      if (e instanceof EngineError) throw e;
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid resource URL: ${url}`,
+        engineId,
+      });
     }
   }
 }

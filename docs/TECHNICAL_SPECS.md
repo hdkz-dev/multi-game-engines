@@ -68,16 +68,24 @@ const pos = createFEN(
 
 ## 4. プロトコル解析 (2026 Best Practice)
 
+本プロジェクトは、多様なゲームプロトコルを共通の `IEngineAdapter` に抽象化します。
+
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
 - **GTPParser**: 囲碁用。`genmove` や `loadboard` などのコマンド生成、および `visits` や `winrate` の解析に対応。
+- **UCCIParser**: 中国将棋（Xiangqi）用。UCI ベースだが XQFEN 局面形式に対応。
 - **JSONParser (Mahjong)**: 麻雀用。構造化された JSON メッセージのパースと、再帰的なインジェクション検証。
-- **インジェクション対策 (Refuse by Exception)**: 不正な制御文字（`\r`, `\n`, `\0`, `;` 等）を検出した場合、サニタイズせず即座に `SECURITY_ERROR` をスローし、入力を拒否します。
-- **再帰的オブジェクト検証**: JSON 形式のアダプター（Mahjong 等）では、オブジェクトツリーを再帰的に走査して全ての文字列値に対してインジェクション検証を適用します。
-- **Strict Regex Validation (出力検証)**: エンジンからの出力（UCI 指し手など）は、正規表現によって厳格に検証し、形式に適合しないデータは `null` として破棄します。正規表現は `static readonly` として事前コンパイルし、NPS (Nodes Per Second) への影響を最小化します。
-- **Exception-Safe Parsing (例外安全性)**: JSON ベースのエンジンプロトコル（Mortal 等）では、`JSON.parse` を `try-catch` でラップし、不正な JSON データを受信してもストリーム処理全体がクラッシュしないよう保護します。
+- **Generic Text Parsers**: Edax, gnubg, KingsRow 等の独自テキストプロトコルに対応するための柔軟な正規表現ベースのパーサー。
 
-### 4-1. 局面・指し手解析 (Board & Move Parsers)
+### 4-1. 同一ゲーム・マルチエンジン対応 (Multi-Engine Support)
+
+`EngineBridge` は、同一のプロトコルを使用する複数のエンジンを同時に管理可能です。
+
+- **汎用アダプター (Generic Adapters)**: `adapter-uci` 等の汎用パッケージを提供。利用者は URL と SRI を指定するだけで、Stockfish 以外の UCI エンジンも即座に利用可能。
+- **ID 空間の分離**: `chess-sf-16` と `chess-sf-17` のように ID を分けることで、同一ページ内でのエンジン比較（アンサンブル分析）を実現。
+- **並列 Worker 実行**: エンジンごとに独立した Web Worker を割り当て、ブラウザのマルチコア能力を最大限活用。
+
+### 4-2. 局面・指し手解析 (Board & Move Parsers)
 
 描画層での再利用を目的とした、軽量な局面文字列パーサーを提供します。
 

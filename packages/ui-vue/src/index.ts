@@ -7,6 +7,3 @@ export { default as EvaluationGraph } from "./EvaluationGraph.vue";
 export { default as PVList } from "./PVList.vue";
 export { default as SearchLog } from "./SearchLog.vue";
 export { default as ScoreBadge } from "./ScoreBadge.vue";
-export { default as BoardComponents } from "./BoardComponents.vue";
-export { default as ChessBoard } from "./ChessBoard.vue";
-export { default as ShogiBoard } from "./ShogiBoard.vue";

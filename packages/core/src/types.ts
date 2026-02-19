@@ -6,16 +6,6 @@
 export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
 /**
- * FEN (Forsyth-Edwards Notation) を表すブランド型。
- */
-export type FEN = Brand<string, "FEN">;
-
-/**
- * SFEN (Shogi Forsyth-Edwards Notation) を表すブランド型。
- */
-export type SFEN = Brand<string, "SFEN">;
-
-/**
  * 指し手を表すブランド型（UCI/USI形式）。
  */
 export type Move = Brand<string, "Move">;
@@ -23,60 +13,19 @@ export type Move = Brand<string, "Move">;
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-export type PositionString = Brand<string, "PositionString">;
+export type PositionString = string & { readonly __brand: string };
+
+/**
+ * チェスの局面表記（FEN）。
+ */
+export type FEN = PositionString & { readonly __brand: "FEN" };
+
+/**
+ * 将棋の局面表記（SFEN）。
+ */
+export type SFEN = PositionString & { readonly __brand: "SFEN" };
 
 import { EngineError } from "./errors/EngineError.js";
-
-/**
- * 局面情報のバリデータファクトリ。
- */
-export function createFEN(pos: string): FEN {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid FEN: Input must be a non-empty string.",
-    });
-  }
-  const fields = pos.trim().split(/\s+/);
-  if (fields.length < 4) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN structure: Expected 4 fields, found ${fields.length}`,
-    });
-  }
-  return pos as FEN;
-}
-
-/**
- * 将棋局面情報のバリデータファクトリ。
- */
-export function createSFEN(pos: string): SFEN {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid SFEN: Input must be a non-empty string.",
-    });
-  }
-
-  // 2026 Best Practice: Refuse by Exception character validation
-  // USI/SFEN allowed characters: [1-9], [a-z], [A-Z], /, +, *, whitespace, -
-  if (!/^[1-9a-zA-Z/+\s*-]+$/.test(pos)) {
-    throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid SFEN: Illegal characters detected.",
-      remediation: "Remove control characters and non-standard symbols.",
-    });
-  }
-
-  const fields = pos.trim().split(/\s+/);
-  if (fields.length < 4) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
-    });
-  }
-  return pos as SFEN;
-}
 
 /**
  * 局面表記のバリデータファクトリ。
@@ -120,7 +69,7 @@ export type EngineStatus =
  * 探索オプション。
  */
 export interface IBaseSearchOptions {
-  fen?: FEN | PositionString | undefined;
+  fen?: PositionString | undefined;
   signal?: AbortSignal | undefined;
   [key: string]: unknown;
 }
@@ -157,6 +106,10 @@ export interface IBaseSearchInfo {
   hashfull?: number | undefined;
   /** 構造化スコア。cp, mate, points, winrate を統合して保持する。 */
   score?: IScoreInfo | undefined;
+  /** ハードウェアアクセラレーションの使用状況 */
+  acceleration?: "none" | "simd" | "webgpu" | "webnn" | undefined;
+  /** デバイスメモリ使用量 (bytes) */
+  memoryUsage?: number | undefined;
   [key: string]: unknown;
 }
 
@@ -419,6 +372,36 @@ export type IEngineSourceConfig = {
 );
 
 /**
+ * 2026 Zenith Tier: 動的エンジン構成定義。
+ * 特定のアダプター実装と、その実行に必要なリソースをパッケージ化します。
+ */
+export interface IEngineConfig {
+  /** インスタンスの一意識別子 */
+  id: string;
+  /** 使用するプロトコル/アダプター型（例: 'uci', 'usi', 'gtp'） */
+  adapter: string;
+  /** 表示名 */
+  name?: string;
+  /** バージョン情報 */
+  version?: string;
+  /** 実行リソースの定義 */
+  sources: {
+    /** メインのJSローダー/エントリーポイント */
+    main: IEngineSourceConfig;
+    /** WASM バイナリ（オプション） */
+    wasm?: IEngineSourceConfig;
+    /** ニューラルネットワークの重みファイル等（オプション） */
+    eval?: IEngineSourceConfig;
+    /** 追加の任意リソース */
+    [key: string]: IEngineSourceConfig | undefined;
+  };
+  /** エンジン起動時のデフォルトオプション */
+  options?: Record<string, unknown>;
+  /** 必須とされる環境能力 */
+  requiredCapabilities?: Partial<ICapabilities>;
+}
+
+/**
  * リソースマップ。
  * 仮想マウントパス（キー）と Blob URL（値）の対応を保持します。
  */
@@ -439,13 +422,53 @@ export interface IEngineLoader {
  * エンジン・ブリッジ。
  */
 export interface IEngineBridge {
-  getEngine<T extends keyof EngineRegistry>(
-    id: T,
+  /**
+   * 登録済みの ID または動的な設定オブジェクトからエンジンを取得します。
+   */
+  getEngine<K extends keyof EngineRegistry>(
+    id: K,
     strategy?: EngineLoadingStrategy,
-  ): EngineRegistry[T];
+  ): Promise<EngineRegistry[K]>;
+  getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    config: IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+  getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    idOrConfig: string | IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+
+  /**
+   * アダプターインスタンスを明示的に登録します。
+   */
   registerAdapter(
-    adapter: IEngineAdapter<IBaseSearchOptions, unknown, IBaseSearchResult>,
+    adapter: IEngineAdapter<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >,
   ): Promise<void>;
+
+  /**
+   * 汎用アダプター用のファクトリ（クラス）を登録します。
+   */
+  registerAdapterFactory<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    type: string,
+    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+  ): void;
+
   unregisterAdapter(id: string): Promise<void>;
   onGlobalStatusChange(
     callback: (id: string, status: EngineStatus) => void,

@@ -48,6 +48,11 @@
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
+- [ ] **Extended Adapters**:
+  - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), オセロ (Edax)。
+  - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。
+  - **Incomplete Information**: ポーカー (DeepStack), ブリッジ, 花札。
+- [ ] **Multi-Engine Ensemble**: 同一局面を複数エンジンで同時解析する UI/Logic の提供。
 
 ---
 

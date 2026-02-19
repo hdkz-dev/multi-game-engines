@@ -19,7 +19,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@multi-game-engines/core": ["../../packages/core/dist"],
+      "@multi-game-engines/core/*": ["../../packages/core/dist/*"],
+      "@multi-game-engines/adapter-uci": ["../../packages/adapter-uci/dist"],
+      "@multi-game-engines/adapter-usi": ["../../packages/adapter-usi/dist"],
+      "@multi-game-engines/ui-react": ["../../packages/ui-react/dist"],
+      "@multi-game-engines/ui-react/*": ["../../packages/ui-react/dist/*"]
     }
   },
   "include": [

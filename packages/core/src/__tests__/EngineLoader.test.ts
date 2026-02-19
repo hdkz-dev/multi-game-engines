@@ -18,6 +18,14 @@ describe("EngineLoader", () => {
     };
     loader = new EngineLoader(storage);
 
+    // Mock window.location
+    vi.stubGlobal("window", {
+      location: {
+        href: "https://test.com/index.html",
+        origin: "https://test.com",
+      },
+    });
+
     // globalThis fetch mock
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -33,6 +41,7 @@ describe("EngineLoader", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("should fetch and cache if not in storage", async () => {

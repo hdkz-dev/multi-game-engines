@@ -12,6 +12,16 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./chess": {
+      "types": "./dist/chess/index.d.ts",
+      "import": "./dist/chess/index.js",
+      "require": "./dist/chess/index.cjs"
+    },
+    "./shogi": {
+      "types": "./dist/shogi/index.d.ts",
+      "import": "./dist/shogi/index.js",
+      "require": "./dist/shogi/index.cjs"
+    },
     "./hooks": {
       "types": "./dist/hooks.d.ts",
       "import": "./dist/hooks.js",
@@ -23,7 +33,7 @@
     "*.css"
   ],
   "scripts": {
-    "build": "tsup && tailwindcss -i src/tailwind.css -o dist/index.css",
+    "build": "tsup src/index.ts src/hooks.ts src/chess/index.tsx src/shogi/index.tsx --format cjs,esm --dts && tailwindcss -i src/tailwind.css -o dist/index.css",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
@@ -49,26 +59,26 @@
     "tailwind-merge": "^3.4.1"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.8",
-    "@storybook/addon-docs": "10.2.8",
-    "@storybook/addon-links": "10.2.8",
-    "@storybook/react-vite": "10.2.8",
-    "@tailwindcss/cli": "^4.1.18",
-    "@tailwindcss/vite": "^4.0.0",
+    "@storybook/addon-a11y": "10.2.10",
+    "@storybook/addon-docs": "10.2.10",
+    "@storybook/addon-links": "10.2.10",
+    "@storybook/react-vite": "10.2.10",
+    "@tailwindcss/cli": "^4.2.0",
+    "@tailwindcss/vite": "^4.2.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.2.3",
-    "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "storybook": "10.2.8",
-    "tailwindcss": "^4.0.0",
-    "tsup": "^8.3.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "storybook": "10.2.10",
+    "tailwindcss": "^4.2.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

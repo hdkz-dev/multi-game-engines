@@ -38,3 +38,17 @@ export class ProtocolValidator {
     }
   }
 }
+
+import { Move, PositionString } from "../types.js";
+
+/** 汎用指し手バリデータ (基本セキュリティチェックのみ) */
+export function createMove(move: string): Move {
+  ProtocolValidator.assertNoInjection(move, "Move");
+  return move as Move;
+}
+
+/** 汎用局面バリデータ (基本セキュリティチェックのみ) */
+export function createPositionString(pos: string): PositionString {
+  ProtocolValidator.assertNoInjection(pos, "Position");
+  return pos as PositionString;
+}

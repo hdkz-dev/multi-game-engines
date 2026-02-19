@@ -12,6 +12,21 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./chess": {
+      "types": "./dist/domains/chess/index.d.ts",
+      "import": "./dist/domains/chess/index.js",
+      "require": "./dist/domains/chess/index.cjs"
+    },
+    "./shogi": {
+      "types": "./dist/domains/shogi/index.d.ts",
+      "import": "./dist/domains/shogi/index.js",
+      "require": "./dist/domains/shogi/index.cjs"
+    },
+    "./go": {
+      "types": "./dist/domains/go/index.d.ts",
+      "import": "./dist/domains/go/index.js",
+      "require": "./dist/domains/go/index.cjs"
+    },
     "./mocks": {
       "types": "./dist/mocks/index.d.ts",
       "import": "./dist/mocks/index.js",
@@ -19,7 +34,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/mocks/index.ts --format cjs,esm --dts --tsconfig tsconfig.build.json",
+    "build": "tsup",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
@@ -31,7 +46,7 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.3",
-    "tsup": "^8.3.5",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

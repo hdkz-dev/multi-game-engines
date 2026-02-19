@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
     "@multi-game-engines/ui-core",
     "@multi-game-engines/ui-react",
     "@multi-game-engines/i18n",
+    "@multi-game-engines/adapter-uci",
+    "@multi-game-engines/adapter-usi",
+    "@multi-game-engines/adapter-stockfish",
+    "@multi-game-engines/adapter-yaneuraou",
+    "@multi-game-engines/adapter-katago",
   ],
   reactCompiler: true,
 };

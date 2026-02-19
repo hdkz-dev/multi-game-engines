@@ -13,6 +13,7 @@
   "dependencies": {
     "@multi-game-engines/adapter-stockfish": "workspace:*",
     "@multi-game-engines/adapter-yaneuraou": "workspace:*",
+    "@multi-game-engines/adapter-katago": "workspace:*",
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
@@ -26,8 +27,8 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.3",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.6",

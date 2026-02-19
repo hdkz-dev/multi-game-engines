@@ -4,9 +4,9 @@ import {
   parseSFEN,
   ShogiPiece,
   ShogiHand,
-  SFEN,
-} from "@multi-game-engines/ui-core";
-import { createSFEN, Move } from "@multi-game-engines/core";
+} from "@multi-game-engines/ui-core/shogi";
+import { SFEN, createSFEN } from "@multi-game-engines/core/shogi";
+import { Move } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 /**

@@ -20,7 +20,15 @@ class MockWorker {
         if (typeof this.onmessage === "function") {
           this.onmessage({
             data: { type: "MG_RESOURCES_READY" },
-          } as MessageEvent);
+          } as unknown as MessageEvent);
+        }
+      }, 0);
+    }
+    // 2026: ハンドシェイク対応
+    if (msg === "usi") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "usiok" } as unknown as MessageEvent);
         }
       }, 0);
     }

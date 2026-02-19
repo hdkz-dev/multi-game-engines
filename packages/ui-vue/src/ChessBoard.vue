@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import "@multi-game-engines/ui-elements";
-import { FEN, Move, ChessPiece } from "@multi-game-engines/ui-core";
+import { Move } from "@multi-game-engines/core";
+import { FEN } from "@multi-game-engines/core/chess";
+import { ChessPiece } from "@multi-game-engines/ui-core/chess";
 
 /**
  * React-like wrapper for the `<chess-board>` Web Component in Vue.

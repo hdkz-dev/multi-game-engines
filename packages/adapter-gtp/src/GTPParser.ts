@@ -1,14 +1,29 @@
 import {
   IProtocolParser,
   ProtocolValidator,
-  Brand,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
 } from "@multi-game-engines/core";
+import { GOBoard, GOMove } from "@multi-game-engines/core/go";
 
-/** 囲碁の盤面データ */
-export type GOBoard = Brand<string, "GOBoard">;
-/** 囲碁の指し手 */
-export type GOMove = Brand<string, "GOMove">;
+export interface IGOSearchOptions extends IBaseSearchOptions {
+  board: GOBoard;
+  color: "black" | "white" | "B" | "W";
+}
 
+export interface IGOSearchInfo extends IBaseSearchInfo {
+  visits?: number;
+  winrate?: number;
+}
+
+export interface IGOSearchResult extends IBaseSearchResult {
+  bestMove: GOMove;
+}
+
+/**
+ * 囲碁エンジン向けの GTP (Go Text Protocol) プロトコルパーサー。
+ */
 export class GTPParser implements IProtocolParser<
   IGOSearchOptions,
   IGOSearchInfo,
@@ -20,7 +35,6 @@ export class GTPParser implements IProtocolParser<
   private static readonly WHITESPACE_REGEX = /\s+/;
   private static readonly DIGITS_ONLY_REGEX = /^\d+$/;
   // GTP 指し手形式 (A1, B19, pass, resign 等)。
-  // 座標は I を除く A-T 1-19
   private static readonly MOVE_REGEX =
     /^([A-HJ-T](1[0-9]|[1-9])|pass|resign)$/i;
 
@@ -32,7 +46,9 @@ export class GTPParser implements IProtocolParser<
     return value as GOMove;
   }
 
-  parseInfo(data: string | Record<string, unknown>): IGOSearchInfo | null {
+  parseInfo(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): IGOSearchInfo | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("info")) return null;
 
@@ -42,29 +58,27 @@ export class GTPParser implements IProtocolParser<
     if (visitsMatch || winrateMatch) {
       return {
         raw: data,
-        visits: visitsMatch ? parseInt(visitsMatch[1], 10) : undefined,
-        winrate: winrateMatch ? parseFloat(winrateMatch[1]) : undefined,
+        visits: visitsMatch ? parseInt(visitsMatch[1]!, 10) : undefined,
+        winrate: winrateMatch ? parseFloat(winrateMatch[1]!) : undefined,
       };
     }
     return null;
   }
 
-  parseResult(data: string | Record<string, unknown>): IGOSearchResult | null {
+  parseResult(
+    data: string | Uint8Array | Record<string, unknown>,
+  ): IGOSearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("=")) return null;
 
-    // GTP レスポンス形式: "= <id> <move>" または "= <move>"
-    // ID は省略可能。
-    // ReDoS 回避のため正規表現ではなく split を使用
     const tokens = data.substring(1).trim().split(GTPParser.WHITESPACE_REGEX);
     if (tokens.length === 0 || (tokens.length === 1 && tokens[0] === ""))
       return null;
 
-    let moveStr = tokens[0];
-    // 先頭が数字のみの場合は ID として読み飛ばす
+    let moveStr = tokens[0]!;
     if (GTPParser.DIGITS_ONLY_REGEX.test(moveStr)) {
-      if (tokens.length < 2) return null; // IDのみで指し手がない場合は無効
-      moveStr = tokens[1];
+      if (tokens.length < 2) return null;
+      moveStr = tokens[1]!;
     }
 
     const bestMove = this.createMove(moveStr);
@@ -80,9 +94,7 @@ export class GTPParser implements IProtocolParser<
     const commands: string[] = [];
     const sBoard = String(options.board);
 
-    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
     ProtocolValidator.assertNoInjection(sBoard, "board data", true);
-
     commands.push(`loadboard ${sBoard}`);
 
     const sColor = String(options.color);
@@ -96,40 +108,14 @@ export class GTPParser implements IProtocolParser<
     return commands;
   }
 
-  /**
-   * 探索停止コマンドを生成します。
-   */
   createStopCommand(): string {
     return "quit";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
     const sValue = String(value);
-
-    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
     ProtocolValidator.assertNoInjection(name, "option name", true);
     ProtocolValidator.assertNoInjection(sValue, "option value", true);
-
     return `set_option ${name} ${sValue}`;
   }
-}
-
-export interface IGOSearchOptions {
-  board: GOBoard;
-  color: "black" | "white" | "B" | "W";
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
-
-export interface IGOSearchInfo {
-  raw: string;
-  visits?: number;
-  winrate?: number;
-  [key: string]: unknown;
-}
-
-export interface IGOSearchResult {
-  raw: string;
-  bestMove: GOMove;
-  [key: string]: unknown;
 }

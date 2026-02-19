@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { UCIParser, FEN } from "../UCIParser.js";
-import { createFEN } from "@multi-game-engines/core";
+import { UCIParser } from "../UCIParser.js";
+import { FEN, createFEN } from "@multi-game-engines/core/chess";
 
 describe("UCIParser", () => {
   beforeAll(() => {

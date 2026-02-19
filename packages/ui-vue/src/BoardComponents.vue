@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { watchEffect } from "vue";
 import "@multi-game-engines/ui-elements";
-import {
-  FEN,
-  SFEN,
-  Move,
-  ChessPiece,
-  ShogiPiece,
-} from "@multi-game-engines/ui-core";
+import { Move } from "@multi-game-engines/core";
+import { FEN } from "@multi-game-engines/core/chess";
+import { SFEN } from "@multi-game-engines/core/shogi";
+import { ChessPiece } from "@multi-game-engines/ui-core/chess";
+import { ShogiPiece } from "@multi-game-engines/ui-core/shogi";
 
 /**
  * 汎用的な盤面コンポーネント。

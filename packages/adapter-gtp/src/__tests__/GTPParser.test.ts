@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { GTPParser } from "../GTPParser.js";
+import { GOBoard } from "@multi-game-engines/core/go";
 
 describe("GTPParser", () => {
   beforeAll(() => {
@@ -74,7 +75,7 @@ describe("GTPParser", () => {
   it("should throw error for injection in board data", () => {
     expect(() =>
       parser.createSearchCommand({
-        board: "A1\nquit" as unknown as import("../GTPParser.js").GOBoard,
+        board: "A1\nquit" as unknown as GOBoard,
         color: "black",
       }),
     ).toThrow(/command injection/);

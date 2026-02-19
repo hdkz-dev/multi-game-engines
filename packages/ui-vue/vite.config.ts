@@ -22,6 +22,8 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         hooks: resolve(__dirname, "src/hooks.ts"),
+        chess: resolve(__dirname, "src/chess/index.ts"),
+        shogi: resolve(__dirname, "src/shogi/index.ts"),
       },
       name: "UIVue",
       formats: ["es", "cjs"],

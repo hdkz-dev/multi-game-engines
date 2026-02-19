@@ -4,8 +4,10 @@ import {
   IBaseSearchResult,
   IScoreInfo,
   ProtocolValidator,
+  Move,
 } from "@multi-game-engines/core";
-import { ISHOGISearchOptions, Move } from "./usi-types.js";
+import { SFEN } from "@multi-game-engines/core/shogi";
+import { ISHOGISearchOptions } from "./usi-types.js";
 
 /** 将棋用の思考情報 (USI規格) */
 export interface ISHOGISearchInfo extends IBaseSearchInfo {
@@ -34,9 +36,9 @@ export class USIParser implements IProtocolParser<
 > {
   // 2026 Best Practice: 正規表現の事前コンパイル
   // USI 指し手形式 (7g7f, 8h2b+ 等) および nullmove (resign, win 等)
-  // 玉 (K) のドロップはルール上存在しないため除外
+  // エンジンが返す 'none' / '(none)' も許容します。
   private static readonly MOVE_REGEX =
-    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$/i;
+    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$|^none$|^\(none\)$/i;
 
   // 2026 Best Practice: Set の定数化による効率化
   private static readonly USI_INFO_TOKENS = new Set([
@@ -73,6 +75,7 @@ export class USIParser implements IProtocolParser<
 
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
+      if (key === undefined) continue;
       const hasNext = i + 1 < parts.length;
       const val = hasNext ? parts[i + 1] : undefined;
 
@@ -118,10 +121,6 @@ export class USIParser implements IProtocolParser<
           info.multipv = parseInt(val || "0", 10) || 0;
           if (val !== undefined) i++;
           break;
-        case "cpuload":
-          // USI specific field
-          if (val !== undefined) i++;
-          break;
         case "pv": {
           const moves: Move[] = [];
           while (
@@ -147,7 +146,11 @@ export class USIParser implements IProtocolParser<
     if (!data.startsWith("bestmove ")) return null;
 
     const parts = data.split(" ");
-    const bestMove = this.createMove(parts[1] || "");
+    const moveStr = parts[1] || "";
+
+    // none または (none) の場合は有効な指し手なしとして null を返す（または特殊な Move 型を定義検討）
+    // 現状は MOVE_REGEX がこれらをパスするように修正済み。
+    const bestMove = this.createMove(moveStr);
     if (!bestMove) return null;
 
     const result: ISHOGISearchResult = {
@@ -157,7 +160,7 @@ export class USIParser implements IProtocolParser<
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      const ponder = this.createMove(parts[ponderIndex + 1]);
+      const ponder = this.createMove(parts[ponderIndex + 1] || "");
       if (ponder) result.ponder = ponder;
     }
 

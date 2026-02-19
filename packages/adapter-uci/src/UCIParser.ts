@@ -4,16 +4,12 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
-  Brand,
+  Move,
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
 } from "@multi-game-engines/core";
-
-/** チェス用の局面表記 (Forsyth-Edwards Notation) */
-export type FEN = Brand<string, "FEN">;
-/** チェス用の指し手表記 (e2e4等) */
-export type Move = Brand<string, "Move">;
+import { FEN } from "@multi-game-engines/core/chess";
 
 /** チェス用の探索オプション (UCI標準規格) */
 export interface IChessSearchOptions extends IBaseSearchOptions {
@@ -26,11 +22,14 @@ export interface IChessSearchOptions extends IBaseSearchOptions {
 /** チェス用の思考情報 */
 export interface IChessSearchInfo extends IBaseSearchInfo {
   depth?: number;
+  seldepth?: number;
   score?: IScoreInfo;
+  nodes?: number;
   nps?: number;
   time?: number;
   pv?: Move[];
   hashfull?: number;
+  multipv?: number;
 }
 
 /** チェス用の探索結果 */
@@ -104,6 +103,7 @@ export class UCIParser implements IProtocolParser<
 
     for (let i = 1; i < parts.length; i++) {
       const key = parts[i];
+      if (key === undefined) continue;
       const hasNext = i + 1 < parts.length;
       const val = hasNext ? parts[i + 1] : undefined;
 
@@ -191,7 +191,7 @@ export class UCIParser implements IProtocolParser<
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      const ponder = this.createMove(parts[ponderIndex + 1]);
+      const ponder = this.createMove(parts[ponderIndex + 1] || "");
       if (ponder) result.ponder = ponder;
     }
 

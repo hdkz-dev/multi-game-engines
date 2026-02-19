@@ -62,9 +62,67 @@
 
 ---
 
-## 4. 共通の洗練（2026 Best Practice）
+## 4. バックギャモン: GNU Backgammon (adapter-gnubg)
 
-### 4.1 Zero-Any Policy
+### 4.1 プロトコル: コマンドライン・インターフェース (CLI)
+
+- **特徴**: 歴史的な C 言語ベースの実装であり、テキストコマンドによる対話。
+- **実装課題**: WASM 環境における対話型プロンプトのシミュレーション。
+- **型定義**:
+  - `T_INFO`: 評価値（Equities）、勝率分布、ムーブの期待値損失。
+
+---
+
+## 5. チェッカー: KingsRow / Scan (adapter-checkers)
+
+### 5.1 プロトコル: 独自テキストプロトコル
+
+- **特徴**: シンプルな指し手と評価値のやり取り。
+- **演算加速**: 巨大なデータベース（エンドゲーム・テーブルベース）の効率的なロード。
+
+---
+
+## 6. 中国将棋 (Xiangqi): ElephantEye / Stockfish (adapter-xiangqi)
+
+### 6.1 プロトコル: UCCI (Universal Chinese Chess Interface)
+
+- **特徴**: UCI に極めて近いが、FEN ではなく WEN (Xiangqi Fen) を使用。
+- **実装課題**: 盤面が 9x10 であり、河（River）や九宮（Palace）の概念を UI 側で表現。
+
+---
+
+## 7. チャンギ (Janggi): Stockfish Janggi (adapter-janggi)
+
+### 7.1 特徴: パスの概念
+
+- **プロトコル**: UCI 拡張。
+- **実装課題**: 駒の動きやパス（スキップ）のルールを `Move` 型でどう表現するか。
+
+---
+
+## 8. 五目並べ・連珠 (Gomoku/Renju): Yisin (adapter-gomoku)
+
+### 8.1 プロトコル: 独自テキストベース
+
+- **特徴**: 15x15 のグリッド上の座標指定。
+- **型定義**: `T_INFO` に VCF/VCT (Victory by Continuous Force/Threat) の読み情報を追加。
+
+---
+
+## 9. マルチエンジン対応と汎用アダプター (Generic Adapters)
+
+同一ゲームに対する複数エンジンの同時サポートを効率化するため、プロトコル単位の「汎用アダプター」を導入します。
+
+### 9.1 設計方針
+
+- **設定駆動**: `id`, `name`, `binaryUrl`, `sri` を外部から注入可能にする。
+- **アンサンブル分析**: `EngineBridge` を通じて複数のアダプターインスタンスを生成し、UI 層でその出力を集計・比較。
+
+---
+
+## 10. 共通の洗練（2026 Best Practice）
+
+### 10.1 Zero-Any Policy
 
 全アダプターにおいて、以下の厳格な型定義を強制します。
 

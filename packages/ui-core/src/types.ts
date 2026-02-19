@@ -1,17 +1,10 @@
-import { FEN, Move } from "@multi-game-engines/core";
-export type { Move };
+import { PositionString, Move } from "@multi-game-engines/core";
+export type { Move, PositionString };
 
 /**
  * UI 正規化ミドルウェアの一意な ID。
  */
 export const UI_NORMALIZER_MIDDLEWARE_ID = "ui-normalizer" as const;
-
-/**
- * 局面表記の型（FEN またはアダプター定義の局面文字列）
- */
-export type PositionString =
-  | FEN
-  | (string & { readonly __brand: "PositionString" });
 
 /**
  * 評価値の種類

@@ -10,10 +10,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./chess": {
+      "types": "./dist/chess-board.d.ts",
+      "import": "./dist/chess-board.js"
+    },
+    "./shogi": {
+      "types": "./dist/shogi-board.d.ts",
+      "import": "./dist/shogi-board.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "build": "tsup src/index.ts src/chess-board.ts src/shogi-board.ts --format esm --dts --minify --clean",
     "dev": "tsup src/index.ts --format esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
@@ -30,15 +38,15 @@
     "lit": "^3.2.1"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.8",
-    "@storybook/addon-docs": "10.2.8",
-    "@storybook/addon-links": "10.2.8",
-    "@storybook/web-components": "10.2.8",
-    "@storybook/web-components-vite": "10.2.8",
+    "@storybook/addon-a11y": "10.2.10",
+    "@storybook/addon-docs": "10.2.10",
+    "@storybook/addon-links": "10.2.10",
+    "@storybook/web-components": "10.2.10",
+    "@storybook/web-components-vite": "10.2.10",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
-    "storybook": "10.2.8",
-    "tsup": "^8.3.5",
+    "storybook": "10.2.10",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

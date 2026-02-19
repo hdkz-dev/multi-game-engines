@@ -49,6 +49,7 @@
   - [x] React/Vue 両フレームワークにおけるアクセシビリティ完全準拠 (ARIA, Focus, Live Regions)。
   - [x] Next.js 15/React 19/Vue 3.5 最新機能への追従と最適化。
   - [x] 14パッケージ全域にわたるドキュメント・実装の完全同期。
+  - [x] Project-wide Zero-Any Policy の完遂とブランド型の再定義。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---
@@ -68,3 +69,8 @@
 - [ ] **Engine Registry**: SRI ハッシュとバージョンを中央管理し、URL 指定を不要にする。
 - [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+- [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
+- [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
+- [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
+- [ ] **adapter-gnubg**: バックギャモンエンジンの基本統合と WASM ポートの調査。
+- [ ] **adapter-checkers**: チェッカーエンジンの統合とテーブルベース対応。

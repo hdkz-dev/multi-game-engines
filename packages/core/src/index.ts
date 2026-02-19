@@ -17,6 +17,11 @@ export { WorkerCommunicator } from "./workers/index.js";
 export { CapabilityDetector, SecurityAdvisor } from "./capabilities/index.js";
 export { EngineError } from "./errors/index.js";
 export { ProtocolValidator } from "./protocol/index.js";
+export { deepMerge } from "./utils/index.js";
+export {
+  createMove,
+  createPositionString,
+} from "./protocol/ProtocolValidator.js";
 
 // 標準ミドルウェア
 export * from "./middlewares/index.js";

@@ -1,17 +1,38 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月18日
+## 📅 更新日: 2026年2月19日
 
-## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith - Complete)
+## 🏆 到達ハイライト (Phase 3 Stage 2 - 究極のパワーと制御 - Completed Zenith Consolidation)
 
-- **Vue 3.5+ `onWatcherCleanup` によるモダン化**:
-  - `useEngineMonitor` フックを Vue 3.5 の最新パターンへ刷新。`onWatcherCleanup` を活用した副作用の自動クリーンアップにより、エンジン切り替え時のメモリリークや競合状態を 100% 排除しました。
+- **Zenith Tier 深層監査と型安全性の極致 (Zero-Any Policy)**:
+  - モノレポ全域から `any` / `as any` キャストを完全に排除。テストコード、ユーティリティ（`deepMerge`）、モックワーカーに至るまで、TypeScript 5.9 の厳格な型安全性を 100% 達成しました。
+  - **Branded Types の再構築**: `PositionString`, `FEN`, `SFEN` のブランド衝突を解消し、継承関係を正しく表現することで、局面表記の型混同を物理的に防止。
+- **汎用アダプター基盤のアーキテクチャ整合**:
+  - `IEngineAdapter` と `IEngine` の役割を型レベルで明確に分離。ファクトリ関数がアダプターを返し、`EngineBridge` が Facade にラップする設計を整合させ、循環依存や型不一致を解消。
+- **FEN バリデーションの Zenith 強化**:
+  - `createFEN` においてホワイトリスト方式の厳格な文字チェックと構造検証（ランク数、手番、キャスリング等）を導入。Next.js のプリレンダリング環境下でも動作する堅牢な局面解析を確立。
+- **セキュリティとエラー追跡の高度化**:
+  - `EngineLoader` のエラーオブジェクトに `engineId` を一貫して付与。Worker オリジン検証における例外の透明性を向上。
+- **テストスイートの健全化**:
+  - `vi.unstubAllGlobals()` によるグローバルスタブの確実なクリーンアップ。
+  - `MessageEvent` 準拠のモックワーカー実装により、非同期通信のテストをより本物に近い形で再現。
+
+- **汎用プロトコルアダプター基盤の確立**:
+  - `@multi-game-engines/adapter-uci`, `adapter-usi`, `adapter-gtp` を新規実装。特定のエンジン名に依存せず、プロトコル仕様のみをカプセル化した再利用可能な基盤を構築しました。
+- **コンフィギュレーション主導のエンジン生成**:
+  - `EngineBridge.getEngine` が `IEngineConfig` を受け取れるよう拡張。バイナリ URL、SRI、および依存リソースを動的に注入可能にし、コード変更なしでのエンジン追加を可能にしました。
+- **宣言併合による高度な型安全性**:
+  - `EngineRegistry` への宣言併合を各アダプターに導入。`bridge.getEngine("stockfish")` 等の呼び出しに対し、プラグインをインポートするだけで完璧な型推論が効く「ゼロ構成型安全性」を達成しました。
+- **セキュリティの Zenith Tier 強化**:
+  - `EngineLoader` に Worker スクリプトのオリジン検証を導入。クロスオリジンな実行ファイルのロードを構造的に遮断し、ブラウザセキュリティを極限まで高めました。
 - **リポジトリ全域の Tree-shaking 最適化 (sideEffects)**:
   - 全 14 パッケージの `package.json` において `sideEffects` フラグを厳密に設定。`ui-elements` (Web Components) の登録副作用を明示しつつ、`core` や `i18n` の純粋なロジック層でのデッドコード削除を最大化しました。
 - **WCAG 2.2 AA 準拠の視覚順序 ARIA マッピング**:
   - `chess-board` および `shogi-board` において、盤面の「視覚的な位置」に基づいた ARIA 座標生成ロジックを確立。盤面の向き (Orientation) に応じて、左上が "a8" (先手) または "h1" (後手) となるように国際化されたラベルを動的にマッピング。
-- **ミドルウェアのべき等な後始末 (`unuse`)**:
-  - `IEngine.unuse` の実装を強化し、ID 指定またはインスタンス指定による安全な登録解除を保証。コンポーネントの再マウントを繰り返してもミドルウェアが累積しない堅牢なライフサイクル管理を実現。
+- **Zenith Tier 品質標準の確立**:
+  - `docs/ZENITH_STANDARD.md` を策定し、アーキテクチャ、性能、アクセシビリティ、セキュリティの 5 軸でプロジェクトの絶対的な到達目標を定義。
+  - 汎用プロトコルアダプター（`adapter-uci` 等）による、エンジンの「No-Code 追加」ロードマップを策定。
+  - `core` の型定義を拡張し、WebGPU/WebNN 等の次世代演算加速指標を統合。
 
 - **動的盤面コンポーネントとダッシュボードの統合**:
   - **Framework-Agnostic Boards**: Lit ベースの `<chess-board>` および `<shogi-board>` を実装。React/Vue を含むあらゆる環境で利用可能な高精度な盤面表示を実現。
@@ -73,5 +94,6 @@
 ## 🚀 次のステップ
 
 1. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
-2. **技術的負債の解消**: `adapter-edax` の本番用 SRI ハッシュ適用など。
-3. **テレメトリ拡張**: UI 上のインタラクション計測ポイントの拡充。
+2. **Extended Adapters 調査**: バックギャモン、シャンチー、ポーカー等の WASM 移植状況の確認。
+3. **汎用アダプター基盤の構築**: `adapter-uci`, `adapter-usi` によるマルチエンジン対応の強化。
+4. **技術的負債の解消**: `adapter-edax` の本番用 SRI ハッシュ適用など。
