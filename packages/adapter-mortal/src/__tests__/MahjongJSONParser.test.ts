@@ -52,11 +52,15 @@ describe("MahjongJSONParser", () => {
   it("should detect injection in top-level string", () => {
     const options = { board: "bad\ninput" };
     expect(() => parser.createSearchCommand(options)).toThrow(EngineError);
+    let thrown: unknown;
     try {
       parser.createSearchCommand(options);
     } catch (e) {
-      expect(e).toBeInstanceOf(EngineError);
-      expect((e as EngineError).code).toBe(EngineErrorCode.SECURITY_ERROR);
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    if (thrown instanceof EngineError) {
+      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
     }
   });
 

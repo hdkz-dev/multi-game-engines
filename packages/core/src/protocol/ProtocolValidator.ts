@@ -41,14 +41,26 @@ export class ProtocolValidator {
 
 import { Move, PositionString } from "../types.js";
 
-/** 汎用指し手バリデータ (基本セキュリティチェックのみ) */
+/** 汎用指し手バリデータ (2026 Zenith Tier: Refuse by Exception) */
 export function createMove(move: string): Move {
+  if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: `Invalid Move format: "${move}" contains illegal characters.`,
+    });
+  }
   ProtocolValidator.assertNoInjection(move, "Move");
   return move as Move;
 }
 
-/** 汎用局面バリデータ (基本セキュリティチェックのみ) */
+/** 汎用局面バリデータ (2026 Zenith Tier: Refuse by Exception) */
 export function createPositionString(pos: string): PositionString {
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid PositionString: Input must be a non-empty string.",
+    });
+  }
   ProtocolValidator.assertNoInjection(pos, "Position");
   return pos as PositionString;
 }

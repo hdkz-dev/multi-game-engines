@@ -235,4 +235,40 @@ describe("createFEN", () => {
   it("should throw for non-string input", () => {
     expect(() => createFEN(undefined as unknown as string)).toThrow();
   });
+
+  it("should accept 'startpos' and expand it to initial FEN", () => {
+    const fen = createFEN("startpos");
+    expect(fen).toBe(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    );
+  });
+
+  it("should throw SECURITY_ERROR for illegal characters", () => {
+    expect(() =>
+      createFEN(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1; quit",
+      ),
+    ).toThrow();
+  });
+
+  it("should throw VALIDATION_ERROR for incorrect field count", () => {
+    expect(() =>
+      createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"),
+    ).toThrow();
+  });
+
+  it("should throw VALIDATION_ERROR for invalid castling", () => {
+    expect(() =>
+      createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w QKkq - 0 1"),
+    ).toThrow();
+  });
+
+  it("should throw VALIDATION_ERROR for invalid move counters", () => {
+    expect(() =>
+      createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - -1 1"),
+    ).toThrow();
+    expect(() =>
+      createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0"),
+    ).toThrow();
+  });
 });

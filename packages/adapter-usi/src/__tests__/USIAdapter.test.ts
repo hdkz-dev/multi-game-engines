@@ -57,6 +57,7 @@ describe("USIAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {

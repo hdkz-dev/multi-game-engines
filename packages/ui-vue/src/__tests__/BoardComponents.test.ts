@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardComponents from "../BoardComponents.vue";
 import { createMove } from "@multi-game-engines/core";
-import { createFEN, FEN } from "@multi-game-engines/core/chess";
+import { createFEN } from "@multi-game-engines/core/chess";
 import { createSFEN } from "@multi-game-engines/core/shogi";
 import "@multi-game-engines/ui-elements";
 
@@ -13,6 +13,7 @@ describe("BoardComponents (Vue)", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("should render chess-board when type is 'chess'", () => {
@@ -93,12 +94,29 @@ describe("BoardComponents (Vue)", () => {
     mount(BoardComponents, {
       props: {
         type: "chess",
-        fen: undefined as unknown as FEN,
+        fen: undefined,
       },
     });
 
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining("'fen' is required"),
+    );
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should warn when sfen is missing for type 'shogi'", () => {
+    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    mount(BoardComponents, {
+      props: {
+        type: "shogi",
+        sfen: undefined,
+      },
+    });
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining("'sfen' is required"),
     );
 
     consoleSpy.mockRestore();

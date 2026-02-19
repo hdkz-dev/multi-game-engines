@@ -94,7 +94,6 @@ export interface EngineSearchState {
 
 /**
  * 初期状態の定義。
- * 2026 Best Practice: 呼び出し側での 'as unknown as T' を排除するため、ジェネリクスをサポート。
  * T がベース型を拡張している場合、不足している必須フィールドを overrides で補う必要があります。
  */
 export function createInitialState<
@@ -118,6 +117,6 @@ export function createInitialState<
     _internalCounter: 0,
   };
 
-  // 2026: 型安全性を高めるため、base と overrides を明示的にマージ
-  return Object.assign(base, overrides) as T;
+  // 2026: 型健全性を保つため、サブタイプ T へのキャストは呼び出し側の責任とする
+  return { ...base, ...overrides } as T;
 }

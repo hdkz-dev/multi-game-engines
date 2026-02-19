@@ -21,25 +21,31 @@ describe("createSFEN", () => {
   });
 
   it("should throw SECURITY_ERROR for illegal characters", () => {
+    let thrown: unknown;
     try {
       createSFEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1; quit",
       );
-      throw new Error("Should have thrown");
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    if (thrown instanceof EngineError) {
+      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
     }
   });
 
   it("should throw VALIDATION_ERROR for too few fields", () => {
+    let thrown: unknown;
     try {
       createSFEN("lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b");
-      throw new Error("Should have thrown");
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-      expect(err.message).toContain("Expected exactly 4 fields");
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    if (thrown instanceof EngineError) {
+      expect(thrown.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(thrown.message).toContain("Expected exactly 4 fields");
     }
   });
 });

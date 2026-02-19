@@ -49,10 +49,14 @@
     "title": "ZENITH DASHBOARD",
     "subtitle": "次世代ゲームインテリジェンス・ブリッジ",
     "initializingEngines": "エンジンを初期化中...",
+    "initializationFailed": "初期化失敗",
     "chessLabel": "チェス / UCI",
     "shogiLabel": "将棋 / USI",
     "engineSelector": "エンジン選択",
     "languageSelector": "言語選択",
+    "errors": {
+      "bridgeNotAvailable": "エンジンブリッジが利用できません。"
+    },
     "stats": {
       "engineRuntime": {
         "label": "エンジン実行環境",

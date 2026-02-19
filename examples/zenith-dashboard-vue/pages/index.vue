@@ -37,7 +37,8 @@ const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSea
 const shogiEngine = ref<IEngine<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> | null>(null);
 const initError = ref<string | null>(null);
 
-onMounted(async () => {
+const initEngines = async () => {
+  initError.value = null;
   if (bridge) {
     try {
       const [chess, shogi] = await Promise.all([
@@ -48,10 +49,15 @@ onMounted(async () => {
       shogiEngine.value = shogi;
     } catch (error) {
       console.error("Engine initialization failed:", error);
-      initError.value = error instanceof Error ? error.message : "Failed to initialize engines";
+      initError.value =
+        error instanceof Error ? error.message : "Failed to initialize engines";
     }
+  } else {
+    initError.value = localeData.value.dashboard.errors.bridgeNotAvailable;
   }
-});
+};
+
+onMounted(initEngines);
 
 // チェス用の設定
 const chessOptions = {
@@ -75,7 +81,11 @@ const chessBestMove = computed(() => chessState.value?.pvs[0]?.moves[0]);
 const shogiBestMove = computed(() => shogiState.value?.pvs[0]?.moves[0]);
 
 const nps = computed(() => {
-  const stats = activeEngine.value === "chess" ? chessState.value.stats : shogiState.value.stats;
+  const stats =
+    activeEngine.value === "chess"
+      ? chessState.value?.stats
+      : shogiState.value?.stats;
+  if (!stats) return formatNumber(0);
   return formatNumber(stats.nps);
 });
 </script>
@@ -87,9 +97,21 @@ const nps = computed(() => {
   >
     <div class="flex flex-col items-center gap-4 text-center px-4">
       <template v-if="initError">
-        <div class="p-4 bg-red-100 text-red-700 rounded-lg border border-red-200">
-          <p class="font-bold mb-1">Initialization Failed</p>
-          <p class="text-sm">{{ initError }}</p>
+        <div
+          class="p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm"
+        >
+          <p class="font-black mb-2 uppercase tracking-widest text-xs">
+            {{ localeData.dashboard.initializationFailed }}
+          </p>
+          <p class="text-sm font-medium mb-6 leading-relaxed">
+            {{ initError }}
+          </p>
+          <button
+            class="w-full py-3 px-6 bg-red-600 text-white rounded-xl font-black text-xs tracking-widest hover:bg-red-700 active:scale-[0.98] transition-all shadow-lg shadow-red-200"
+            @click="initEngines"
+          >
+            {{ localeData.engine.retry }}
+          </button>
         </div>
       </template>
       <template v-else>

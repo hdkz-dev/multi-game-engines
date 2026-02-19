@@ -13,7 +13,6 @@ export interface IGOSearchOptions extends IBaseSearchOptions {
 }
 
 export interface IGOSearchInfo extends IBaseSearchInfo {
-  visits?: number;
   winrate?: number;
 }
 

@@ -6,7 +6,7 @@ import {
   ShogiHand,
 } from "@multi-game-engines/ui-core/shogi";
 import { SFEN, createSFEN } from "@multi-game-engines/core/shogi";
-import { Move } from "@multi-game-engines/core";
+import { Move, createMove } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 /**
@@ -86,19 +86,39 @@ export class ShogiBoard extends LitElement {
     }
   `;
 
+  private _sfen: SFEN = createSFEN(
+    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+  );
+
   /**
    * Current position in SFEN format.
    */
   @property({ type: String, reflect: true })
-  sfen: SFEN = createSFEN(
-    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
-  );
+  get sfen(): SFEN {
+    return this._sfen;
+  }
+
+  set sfen(value: string) {
+    const old = this._sfen;
+    this._sfen = createSFEN(value);
+    this.requestUpdate("sfen", old);
+  }
+
+  private _lastMove: Move | "" = "";
 
   /**
    * Last move to highlight (e.g., "7g7f" or "P*5e").
    */
   @property({ type: String, attribute: "last-move", reflect: true })
-  lastMove: Move | "" = "";
+  get lastMove(): Move | "" {
+    return this._lastMove;
+  }
+
+  set lastMove(value: string) {
+    const old = this._lastMove;
+    this._lastMove = value === "" ? "" : createMove(value);
+    this.requestUpdate("lastMove", old);
+  }
 
   /**
    * Current locale for default labels.

@@ -145,6 +145,18 @@ describe("USIParser", () => {
     it("should return null for non-bestmove lines", () => {
       expect(parser.parseResult("info depth 20")).toBeNull();
     });
+
+    it("should handle bestmove none as null bestMove", () => {
+      const result = parser.parseResult("bestmove none");
+      expect(result).not.toBeNull();
+      expect(result!.bestMove).toBeNull();
+    });
+
+    it("should handle bestmove (none) as null bestMove", () => {
+      const result = parser.parseResult("bestmove (none)");
+      expect(result).not.toBeNull();
+      expect(result!.bestMove).toBeNull();
+    });
   });
 
   // ─── createSearchCommand ────────────────────────────

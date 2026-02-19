@@ -41,5 +41,8 @@ jobs:
       - name: Test
         run: pnpm exec turbo test
 
+      - name: Doc Sync Check
+        run: pnpm run doc-sync
+
       - name: Audit
         run: pnpm audit --prod

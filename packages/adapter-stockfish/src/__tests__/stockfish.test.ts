@@ -43,6 +43,7 @@ describe("StockfishAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {

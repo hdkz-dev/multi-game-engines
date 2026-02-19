@@ -166,4 +166,41 @@ describe("EngineLoader", () => {
       process.env.NODE_ENV = originalEnv;
     }
   });
+
+  it("should reject non-loopback HTTP URLs", async () => {
+    const config: IEngineSourceConfig = {
+      url: "http://malicious.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    await expect(loader.loadResource("test", config)).rejects.toThrow(
+      "Insecure connection (HTTP) is not allowed",
+    );
+  });
+
+  it("should provide fallback for empty safeId", async () => {
+    // 全て特殊文字のID
+    const engineId = "!!!@@@";
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    const url = await loader.loadResource(engineId, config);
+    expect(url).toBe("blob:test");
+    // 内部的なキャッシュキーが生成できていることを確認（例外が起きない）
+  });
+
+  it("should handle undefined config.type as script", async () => {
+    const config = {
+      url: "https://test.com/engine.js",
+      sri: dummySRI,
+    } as unknown as IEngineSourceConfig; // type を意図的に省略
+
+    const url = await loader.loadResource("test", config);
+    expect(url).toBe("blob:test");
+    // デフォルトで JS として扱われ、オリジン検証が走る
+  });
 });

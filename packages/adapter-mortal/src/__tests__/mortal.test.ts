@@ -23,6 +23,7 @@ describe("MortalAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {

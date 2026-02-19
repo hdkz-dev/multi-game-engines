@@ -1,6 +1,7 @@
 import { SFEN, EngineErrorCode } from "../../types.js";
-export { SFEN };
 import { EngineError } from "../../errors/EngineError.js";
+
+export { SFEN };
 
 /**
  * 将棋局面情報 (SFEN) のバリデータファクトリ。
@@ -57,6 +58,17 @@ export function createSFEN(pos: string): SFEN {
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid board structure: Expected 9 ranks, found ${ranks.length}`,
     });
+  }
+
+  for (let i = 0; i < ranks.length; i++) {
+    const rank = ranks[i]!;
+    // SFEN rank: shogi pieces (KRBGSNLPkrbgsnlp), promotion (+), digits (1-9)
+    if (!/^(?:[1-9]|(?:\+?[KRBGSNLPkrbgsnlp]))+$/.test(rank)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid characters in board rank ${i + 1}: "${rank}"`,
+      });
+    }
   }
 
   // 2. Active color

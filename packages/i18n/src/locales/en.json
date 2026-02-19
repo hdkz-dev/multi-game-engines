@@ -49,10 +49,14 @@
     "title": "ZENITH DASHBOARD",
     "subtitle": "Next-Gen Game Intelligence Bridge",
     "initializingEngines": "INITIALIZING ENGINES...",
+    "initializationFailed": "Initialization Failed",
     "chessLabel": "CHESS / UCI",
     "shogiLabel": "SHOGI / USI",
     "engineSelector": "Engine selector",
     "languageSelector": "Language selector",
+    "errors": {
+      "bridgeNotAvailable": "Engine bridge is not available."
+    },
     "stats": {
       "engineRuntime": {
         "label": "Engine Runtime",

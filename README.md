@@ -40,7 +40,7 @@
 
 ```typescript
 import { EngineBridge } from "@multi-game-engines/core";
-import { StockfishAdapter, FEN } from "@multi-game-engines/adapter-stockfish";
+import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
 import { createFEN } from "@multi-game-engines/core/chess";
 
 const bridge = new EngineBridge();
@@ -48,7 +48,7 @@ const bridge = new EngineBridge();
 await bridge.registerAdapter(new StockfishAdapter());
 
 // アダプターをインポートしていれば、EngineRegistry により型推論が自動的に働きます
-const engine = bridge.getEngine("stockfish");
+const engine = await bridge.getEngine("stockfish");
 await engine.load();
 
 // 思考状況の購読 (アダプター固有の型が適用されます)

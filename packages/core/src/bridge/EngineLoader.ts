@@ -41,7 +41,13 @@ export class EngineLoader implements IEngineLoader {
     config: IEngineSourceConfig,
   ): Promise<string> {
     // Path Traversal 対策: ID をサニタイズ
-    const safeId = engineId.replace(/[^a-zA-Z0-9-_]/g, "");
+    let safeId = engineId.replace(/[^a-zA-Z0-9-_]/g, "");
+    if (!safeId) {
+      // 全て特殊文字の場合のフォールバック (Zenith Tier: Robustness)
+      safeId = `engine-${Array.from(engineId)
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        .toString(16)}`;
+    }
     const cacheKey = `${safeId}_${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
@@ -50,20 +56,9 @@ export class EngineLoader implements IEngineLoader {
 
     const promise = (async () => {
       try {
-        // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
-        // type が明示的に安全（json, css 等）でない限り、デフォルトで検証対象とする。
-        if (
-          config.type === "worker-js" ||
-          config.type === "wasm" ||
-          config.type === undefined || // Default to JS
-          (config.type as string).includes("script") ||
-          (config.type as string).includes("javascript")
-        ) {
-          this.validateWorkerUrl(config.url, engineId);
-        }
-
         // 2026 Best Practice: HTTPS 強制 (Strict Loopback Check)
-        const url = new URL(config.url, window.location.href);
+        const base = typeof window !== "undefined" ? window.location.href : "";
+        const url = new URL(config.url, base || undefined);
         const isLoopback =
           url.hostname === "localhost" ||
           url.hostname === "127.0.0.1" ||
@@ -79,12 +74,25 @@ export class EngineLoader implements IEngineLoader {
           });
         }
 
+        // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
+        // type が明示的に安全（json, css 等）でない限り、デフォルトで検証対象とする。
+        if (
+          config.type === "worker-js" ||
+          config.type === "wasm" ||
+          config.type === undefined || // Default to JS
+          (typeof config.type === "string" &&
+            (config.type.includes("script") ||
+              config.type.includes("javascript")))
+        ) {
+          this.validateWorkerUrl(config.url, engineId);
+        }
+
         const sri = config.sri;
         const unsafeNoSRI = config.__unsafeNoSRI === true;
 
         if (!sri && !unsafeNoSRI) {
           throw new EngineError({
-            code: EngineErrorCode.SRI_MISMATCH,
+            code: EngineErrorCode.SECURITY_ERROR,
             message: "SRI required for security verification.",
             engineId,
           });
@@ -235,7 +243,8 @@ export class EngineLoader implements IEngineLoader {
   private validateWorkerUrl(url: string, engineId?: string): void {
     if (url.startsWith("blob:")) return;
     try {
-      const parsedUrl = new URL(url, window.location.href);
+      const base = typeof window !== "undefined" ? window.location.href : "";
+      const parsedUrl = new URL(url, base || undefined);
       const isLoopback =
         parsedUrl.hostname === "localhost" ||
         parsedUrl.hostname === "127.0.0.1" ||
@@ -250,7 +259,10 @@ export class EngineLoader implements IEngineLoader {
         });
       }
 
-      if (parsedUrl.origin !== window.location.origin && !isLoopback) {
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "";
+
+      if (currentOrigin && parsedUrl.origin !== currentOrigin && !isLoopback) {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Cross-origin Worker scripts are prohibited for security: ${url}`,

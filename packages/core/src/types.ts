@@ -25,34 +25,6 @@ export type FEN = PositionString & { readonly __brand: "FEN" };
  */
 export type SFEN = PositionString & { readonly __brand: "SFEN" };
 
-import { EngineError } from "./errors/EngineError.js";
-
-/**
- * 局面表記のバリデータファクトリ。
- */
-export function createPositionString(pos: string): PositionString {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid PositionString: Input must be a non-empty string.",
-    });
-  }
-  return pos as PositionString;
-}
-
-/**
- * 指し手のバリデータファクトリ。
- */
-export function createMove(move: string): Move {
-  if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid Move format: "${move}" contains illegal characters.`,
-    });
-  }
-  return move as Move;
-}
-
 /**
  * エンジンの状態。
  */

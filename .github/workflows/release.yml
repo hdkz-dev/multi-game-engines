@@ -29,6 +29,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Doc Sync Check
+        run: pnpm run doc-sync
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1

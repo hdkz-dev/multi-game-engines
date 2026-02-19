@@ -2,7 +2,7 @@ import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { parseFEN, ChessPiece } from "@multi-game-engines/ui-core/chess";
 import { FEN, createFEN } from "@multi-game-engines/core/chess";
-import { Move } from "@multi-game-engines/core";
+import { Move, createMove } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 // Standard SVG piece set (Wikipedia/Standard) - Inlined as Data URIs for SRI compliance and zero external dependencies.
@@ -73,19 +73,39 @@ export class ChessBoard extends LitElement {
     }
   `;
 
+  private _fen: FEN = createFEN(
+    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  );
+
   /**
    * Current position in FEN format.
    */
   @property({ type: String, reflect: true })
-  fen: FEN = createFEN(
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-  );
+  get fen(): FEN {
+    return this._fen;
+  }
+
+  set fen(value: string) {
+    const old = this._fen;
+    this._fen = createFEN(value);
+    this.requestUpdate("fen", old);
+  }
+
+  private _lastMove: Move | "" = "";
 
   /**
    * Last move to highlight (e.g., "e2e4").
    */
   @property({ type: String, attribute: "last-move", reflect: true })
-  lastMove: Move | "" = "";
+  get lastMove(): Move | "" {
+    return this._lastMove;
+  }
+
+  set lastMove(value: string) {
+    const old = this._lastMove;
+    this._lastMove = value === "" ? "" : createMove(value);
+    this.requestUpdate("lastMove", old);
+  }
 
   /**
    * Current locale for default labels.

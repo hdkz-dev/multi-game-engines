@@ -220,7 +220,16 @@ export class EngineBridge implements IEngineBridge {
     idOrConfig: string | IEngineConfig,
     strategy: EngineLoadingStrategy = "on-demand",
   ): Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>> {
-    const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
+    if (this.disposed) {
+      throw new EngineError({
+        code: EngineErrorCode.LIFECYCLE_ERROR,
+        message: "EngineBridge has already been disposed.",
+      });
+    }
+
+    const rawId = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
+    // Path Traversal 対策: ID をサニタイズ
+    const id = rawId.replace(/[^a-zA-Z0-9-_]/g, "");
 
     // 2026 Best Practice: インフライトの初期化をデデュプリケーション
     const pending = this.pendingEngines.get(id);
@@ -235,23 +244,42 @@ export class EngineBridge implements IEngineBridge {
     }
 
     const enginePromise = (async () => {
+      if (this.disposed) {
+        throw new EngineError({
+          code: EngineErrorCode.LIFECYCLE_ERROR,
+          message: "EngineBridge was disposed during engine initialization.",
+          engineId: id,
+        });
+      }
+
       let adapter = this.adapters.get(id);
+      let newlyRegistered = false;
 
       // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
       if (!adapter && typeof idOrConfig !== "string") {
         const factory = this.adapterFactories.get(idOrConfig.adapter);
         if (factory) {
           const newAdapter = factory(idOrConfig);
-          adapter = newAdapter;
           // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
           await this.registerAdapter(newAdapter);
+          newlyRegistered = true;
+          if (this.disposed) {
+            await newAdapter.dispose();
+            throw new EngineError({
+              code: EngineErrorCode.LIFECYCLE_ERROR,
+              message: "EngineBridge was disposed during adapter registration.",
+              engineId: id,
+            });
+          }
+          adapter = this.adapters.get(id);
         }
       }
 
       if (!adapter) {
         throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
+          code: EngineErrorCode.INTERNAL_ERROR,
           message: `Engine adapter not found or factory not registered: ${id}`,
+          engineId: id,
           remediation:
             typeof idOrConfig !== "string"
               ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
@@ -260,7 +288,18 @@ export class EngineBridge implements IEngineBridge {
       }
 
       // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-      await this.enforceCapabilities(adapter);
+      // registerAdapter 内で既に実行されている場合はスキップ
+      if (!newlyRegistered) {
+        await this.enforceCapabilities(adapter);
+      }
+
+      if (this.disposed) {
+        throw new EngineError({
+          code: EngineErrorCode.LIFECYCLE_ERROR,
+          message: "EngineBridge was disposed before creating facade.",
+          engineId: id,
+        });
+      }
 
       // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
       const filteredMiddlewares = this.middlewares.filter(
@@ -280,8 +319,11 @@ export class EngineBridge implements IEngineBridge {
         IBaseSearchInfo,
         IBaseSearchResult
       >;
-      this.engineInstances.set(id, new WeakRef(engine));
-      this.finalizationRegistry.register(engine, id);
+
+      if (!this.disposed) {
+        this.engineInstances.set(id, new WeakRef(engine));
+        this.finalizationRegistry.register(engine, id);
+      }
 
       return engine;
     })();
@@ -441,18 +483,30 @@ export class EngineBridge implements IEngineBridge {
   async dispose(): Promise<void> {
     this.disposed = true;
     const pendingLoader = this.loaderPromise;
+    const pendingEngines = Array.from(this.pendingEngines.values());
+
     const promises = Array.from(this.adapters.values()).map((a) => a.dispose());
     await Promise.all(promises);
 
-    // 2026 Best Practice: 実行中のロード処理の完了を待機（または例外吸収）
-    if (pendingLoader) {
-      await pendingLoader.catch(() => {
-        /* disposed 時の意図的な例外を吸収 */
-      });
+    // 2026 Best Practice: 進行中のエンジン生成とロード処理の完了を待機（または例外吸収）
+    await Promise.all([
+      ...pendingEngines.map((p) => p.catch(() => {})),
+      pendingLoader ? pendingLoader.catch(() => {}) : Promise.resolve(),
+    ]);
+
+    // アダプターのイベントリスナーを確実に解除
+    for (const unsubs of this.adapterUnsubscribers.values()) {
+      for (const unsub of unsubs) unsub();
     }
+    this.adapterUnsubscribers.clear();
 
     this.adapters.clear();
     this.engineInstances.clear();
+    this.pendingEngines.clear();
+    this.adapterFactories.clear();
+    this.statusListeners.clear();
+    this.progressListeners.clear();
+    this.telemetryListeners.clear();
     this.middlewares = [];
     this.loader = null;
     this.loaderPromise = null;

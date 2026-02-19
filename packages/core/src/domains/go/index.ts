@@ -53,7 +53,7 @@ export function createGOMove(move: string): GOMove {
   // GTP Move format: A1 to T19 (skipping I), pass, resign
   if (!/^([A-HJ-T](1[0-9]|[1-9])|pass|resign)$/i.test(move)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid GOMove format: "${move}"`,
     });
   }

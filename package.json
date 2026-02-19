@@ -19,6 +19,7 @@
     "format:check": "prettier --check .",
     "mcp:mask": "node scripts/sync-mcp-tokens.js mask",
     "mcp:fill": "node scripts/sync-mcp-tokens.js fill",
+    "doc-sync": "node scripts/doc-sync.js",
     "prepare": "husky",
     "release": "pnpm build && changeset publish",
     "ai:check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",

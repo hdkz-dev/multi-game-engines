@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineLoader } from "./EngineLoader.js";
 import { IFileStorage, EngineErrorCode } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -6,6 +6,11 @@ import { EngineError } from "../errors/EngineError.js";
 describe("EngineLoader Security", () => {
   let storage: IFileStorage;
   let loader: EngineLoader;
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
 
   beforeEach(() => {
     storage = {
@@ -64,13 +69,16 @@ describe("EngineLoader Security", () => {
 
     it("should throw SECURITY_ERROR for cross-origin URLs", () => {
       const url = "https://malicious.com/worker.js";
+      let thrown: unknown;
       try {
         callValidate(url);
-        throw new Error("Should have thrown");
       } catch (e) {
-        const err = e as EngineError;
-        expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(err.message).toContain(
+        thrown = e;
+      }
+      expect(thrown).toBeInstanceOf(EngineError);
+      if (thrown instanceof EngineError) {
+        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        expect(thrown.message).toContain(
           "Cross-origin Worker scripts are prohibited",
         );
       }
@@ -78,12 +86,15 @@ describe("EngineLoader Security", () => {
 
     it("should throw SECURITY_ERROR for spoofed localhost", () => {
       const url = "https://localhost.evil.com/worker.js";
+      let thrown: unknown;
       try {
         callValidate(url);
-        throw new Error("Should have thrown");
       } catch (e) {
-        const err = e as EngineError;
-        expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        thrown = e;
+      }
+      expect(thrown).toBeInstanceOf(EngineError);
+      if (thrown instanceof EngineError) {
+        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
       }
     });
   });
