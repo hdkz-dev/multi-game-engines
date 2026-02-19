@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
-import { SFEN } from "@multi-game-engines/core/shogi";
-import { createSFEN } from "@multi-game-engines/core/shogi";
+import { createSFEN, SFEN } from "@multi-game-engines/core/shogi";
 
 describe("USIParser", () => {
   beforeAll(() => {
@@ -10,6 +9,7 @@ describe("USIParser", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   const parser = new USIParser();
@@ -165,15 +165,16 @@ describe("USIParser", () => {
     it("should throw error for injection in SFEN", () => {
       expect(() =>
         parser.createSearchCommand({
-          sfen: "startpos\nquit" as SFEN,
+          sfen: "startpos\nquit" as unknown as SFEN, // 意図的に不正なキャスト
           depth: 10,
         }),
       ).toThrow(/command injection/);
     });
 
     it("should create valid search command with SFEN and depth", () => {
-      const sfen =
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
+      const sfen = createSFEN(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+      );
       const commands = parser.createSearchCommand({ sfen, depth: 15 });
       expect(commands).toEqual([`position sfen ${sfen}`, "go depth 15"]);
     });

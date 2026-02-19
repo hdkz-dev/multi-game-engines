@@ -69,6 +69,22 @@ export function createSFEN(pos: string): SFEN {
         message: `Invalid characters in board rank ${i + 1}: "${rank}"`,
       });
     }
+
+    // 2026 Best Practice: ランクごとの合計マス数（9）を検証
+    let width = 0;
+    for (const char of rank.replace(/\+./g, "P")) {
+      if (/[1-9]/.test(char)) {
+        width += parseInt(char, 10);
+      } else {
+        width += 1;
+      }
+    }
+    if (width !== 9) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid rank width in rank ${i + 1}: found ${width} squares (expected 9)`,
+      });
+    }
   }
 
   // 2. Active color

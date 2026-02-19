@@ -87,7 +87,12 @@ export class ChessBoard extends LitElement {
 
   set fen(value: string) {
     const old = this._fen;
-    this._fen = createFEN(value);
+    try {
+      this._fen = createFEN(value);
+    } catch (e) {
+      console.warn(`[ChessBoard] Invalid FEN attribute: ${value}`, e);
+      // Keep previous valid value or default
+    }
     this.requestUpdate("fen", old);
   }
 
@@ -103,7 +108,12 @@ export class ChessBoard extends LitElement {
 
   set lastMove(value: string) {
     const old = this._lastMove;
-    this._lastMove = value === "" ? "" : createMove(value);
+    try {
+      this._lastMove = value === "" ? "" : createMove(value);
+    } catch (e) {
+      console.warn(`[ChessBoard] Invalid move attribute: ${value}`, e);
+      this._lastMove = "";
+    }
     this.requestUpdate("lastMove", old);
   }
 

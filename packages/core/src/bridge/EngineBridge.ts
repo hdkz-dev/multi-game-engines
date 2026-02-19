@@ -137,7 +137,8 @@ export class EngineBridge implements IEngineBridge {
       >,
     );
 
-    const id = adapter.id;
+    // 2026 Best Practice: ID をサニタイズして正規化 (Path Traversal 対策とルックアップの一貫性)
+    const id = adapter.id.replace(/[^a-zA-Z0-9-_]/g, "");
 
     // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
     await this.unregisterAdapter(id);
@@ -216,10 +217,14 @@ export class EngineBridge implements IEngineBridge {
    * @returns IEngine インターフェースを実装した Facade インスタンス。
    * @throws {EngineError} アダプターが見つからない、または初期化に失敗した場合。
    */
-  async getEngine(
+  async getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
     idOrConfig: string | IEngineConfig,
     strategy: EngineLoadingStrategy = "on-demand",
-  ): Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>> {
+  ): Promise<IEngine<O, I, R>> {
     if (this.disposed) {
       throw new EngineError({
         code: EngineErrorCode.LIFECYCLE_ERROR,
@@ -231,109 +236,110 @@ export class EngineBridge implements IEngineBridge {
     // Path Traversal 対策: ID をサニタイズ
     const id = rawId.replace(/[^a-zA-Z0-9-_]/g, "");
 
-    // 2026 Best Practice: インフライトの初期化をデデュプリケーション
+    // 2026 Best Practice: インフライトの初期化をデデュプリケーション (TOCTOU レースコンディション対策)
     const pending = this.pendingEngines.get(id);
-    if (pending) return pending;
+    if (pending) return pending as Promise<IEngine<O, I, R>>;
 
     // 2026 Best Practice: インスタンスのキャッシュ (WeakRef ベース)
     const ref = this.engineInstances.get(id);
     const cached = ref?.deref();
     if (cached) {
       cached.loadingStrategy = strategy;
-      return cached;
+      return cached as IEngine<O, I, R>;
     }
 
     const enginePromise = (async () => {
-      if (this.disposed) {
-        throw new EngineError({
-          code: EngineErrorCode.LIFECYCLE_ERROR,
-          message: "EngineBridge was disposed during engine initialization.",
-          engineId: id,
-        });
-      }
-
-      let adapter = this.adapters.get(id);
-      let newlyRegistered = false;
-
-      // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
-      if (!adapter && typeof idOrConfig !== "string") {
-        const factory = this.adapterFactories.get(idOrConfig.adapter);
-        if (factory) {
-          const newAdapter = factory(idOrConfig);
-          // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
-          await this.registerAdapter(newAdapter);
-          newlyRegistered = true;
-          if (this.disposed) {
-            await newAdapter.dispose();
-            throw new EngineError({
-              code: EngineErrorCode.LIFECYCLE_ERROR,
-              message: "EngineBridge was disposed during adapter registration.",
-              engineId: id,
-            });
-          }
-          adapter = this.adapters.get(id);
+      try {
+        if (this.disposed) {
+          throw new EngineError({
+            code: EngineErrorCode.LIFECYCLE_ERROR,
+            message: "EngineBridge was disposed during engine initialization.",
+            engineId: id,
+          });
         }
+
+        let adapter = this.adapters.get(id);
+        let newlyRegistered = false;
+
+        // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
+        if (!adapter && typeof idOrConfig !== "string") {
+          const factory = this.adapterFactories.get(idOrConfig.adapter);
+          if (factory) {
+            const newAdapter = factory(idOrConfig);
+            // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
+            await this.registerAdapter(newAdapter);
+            newlyRegistered = true;
+            if (this.disposed) {
+              await newAdapter.dispose();
+              throw new EngineError({
+                code: EngineErrorCode.LIFECYCLE_ERROR,
+                message:
+                  "EngineBridge was disposed during adapter registration.",
+                engineId: id,
+              });
+            }
+            adapter = this.adapters.get(id);
+          }
+        }
+
+        if (!adapter) {
+          throw new EngineError({
+            code: EngineErrorCode.INTERNAL_ERROR,
+            message: `Engine adapter not found or factory not registered: ${id}`,
+            engineId: id,
+            remediation:
+              typeof idOrConfig !== "string"
+                ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
+                : "Register the adapter instance first or provide a full IEngineConfig.",
+          });
+        }
+
+        // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
+        // registerAdapter 内で既に実行されている場合はスキップ
+        if (!newlyRegistered) {
+          await this.enforceCapabilities(adapter);
+        }
+
+        if (this.disposed) {
+          throw new EngineError({
+            code: EngineErrorCode.LIFECYCLE_ERROR,
+            message: "EngineBridge was disposed before creating facade.",
+            engineId: id,
+          });
+        }
+
+        // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
+        const filteredMiddlewares = this.middlewares.filter(
+          (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
+        );
+
+        const facade = new EngineFacade(
+          adapter,
+          filteredMiddlewares,
+          async () => this.getLoader(),
+          false, // EngineBridge がアダプターのライフサイクルを管理するため
+        );
+        facade.loadingStrategy = strategy;
+
+        const engine = facade as IEngine<
+          IBaseSearchOptions,
+          IBaseSearchInfo,
+          IBaseSearchResult
+        >;
+
+        if (!this.disposed) {
+          this.engineInstances.set(id, new WeakRef(engine));
+          this.finalizationRegistry.register(engine, id);
+        }
+
+        return engine;
+      } finally {
+        this.pendingEngines.delete(id);
       }
-
-      if (!adapter) {
-        throw new EngineError({
-          code: EngineErrorCode.INTERNAL_ERROR,
-          message: `Engine adapter not found or factory not registered: ${id}`,
-          engineId: id,
-          remediation:
-            typeof idOrConfig !== "string"
-              ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
-              : "Register the adapter instance first or provide a full IEngineConfig.",
-        });
-      }
-
-      // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-      // registerAdapter 内で既に実行されている場合はスキップ
-      if (!newlyRegistered) {
-        await this.enforceCapabilities(adapter);
-      }
-
-      if (this.disposed) {
-        throw new EngineError({
-          code: EngineErrorCode.LIFECYCLE_ERROR,
-          message: "EngineBridge was disposed before creating facade.",
-          engineId: id,
-        });
-      }
-
-      // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
-      const filteredMiddlewares = this.middlewares.filter(
-        (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
-      );
-
-      const facade = new EngineFacade(
-        adapter,
-        filteredMiddlewares,
-        async () => this.getLoader(),
-        false, // EngineBridge がアダプターのライフサイクルを管理するため
-      );
-      facade.loadingStrategy = strategy;
-
-      const engine = facade as IEngine<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >;
-
-      if (!this.disposed) {
-        this.engineInstances.set(id, new WeakRef(engine));
-        this.finalizationRegistry.register(engine, id);
-      }
-
-      return engine;
     })();
 
     this.pendingEngines.set(id, enginePromise);
-    try {
-      return await enginePromise;
-    } finally {
-      this.pendingEngines.delete(id);
-    }
+    return enginePromise as Promise<IEngine<O, I, R>>;
   }
 
   /**
@@ -368,6 +374,7 @@ export class EngineBridge implements IEngineBridge {
 
     // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア
     this.engineInstances.clear();
+    this.pendingEngines.clear();
   }
 
   onGlobalStatusChange(
@@ -510,5 +517,7 @@ export class EngineBridge implements IEngineBridge {
     this.middlewares = [];
     this.loader = null;
     this.loaderPromise = null;
+    this.capabilities = null;
+    this.capsPromise = null;
   }
 }

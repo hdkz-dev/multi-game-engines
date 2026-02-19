@@ -100,7 +100,12 @@ export class ShogiBoard extends LitElement {
 
   set sfen(value: string) {
     const old = this._sfen;
-    this._sfen = createSFEN(value);
+    try {
+      this._sfen = createSFEN(value);
+    } catch (e) {
+      console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
+      // Keep previous valid value
+    }
     this.requestUpdate("sfen", old);
   }
 
@@ -116,7 +121,12 @@ export class ShogiBoard extends LitElement {
 
   set lastMove(value: string) {
     const old = this._lastMove;
-    this._lastMove = value === "" ? "" : createMove(value);
+    try {
+      this._lastMove = value === "" ? "" : createMove(value);
+    } catch (e) {
+      console.warn(`[ShogiBoard] Invalid move attribute: ${value}`, e);
+      this._lastMove = "";
+    }
     this.requestUpdate("lastMove", old);
   }
 

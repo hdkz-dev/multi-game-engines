@@ -40,7 +40,7 @@ export function createGOBoard(pos: string): GOBoard {
  * @throws {EngineError} 形式が無効な場合。
  *
  * 仕様:
- * - 座標: 列 A-T (Iを除く), 行 1-19 (またはそれ以上)。
+ * - 座標: 列 A-Z (Iを除く), 行 1-25 (19x19以上をサポート)。
  * - 特殊手: pass, resign (大文字小文字無視)。
  */
 export function createGOMove(move: string): GOMove {
@@ -50,10 +50,19 @@ export function createGOMove(move: string): GOMove {
       message: "Invalid GOMove: Input must be a non-empty string.",
     });
   }
-  // GTP Move format: A1 to T19 (skipping I), pass, resign
-  if (!/^([A-HJ-T](1[0-9]|[1-9])|pass|resign)$/i.test(move)) {
+
+  // 2026 Best Practice: Command Injection Prevention
+  if (!/^[a-zA-Z0-9]+$/.test(move)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
+      message: "Invalid GOMove: Illegal characters detected.",
+    });
+  }
+
+  // GTP Move format: A-Z (skipping I) + rows 1-25 or pass/resign
+  if (!/^([A-HJ-Z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/i.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid GOMove format: "${move}"`,
     });
   }

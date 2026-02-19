@@ -43,10 +43,12 @@ export class EngineLoader implements IEngineLoader {
     // Path Traversal 対策: ID をサニタイズ
     let safeId = engineId.replace(/[^a-zA-Z0-9-_]/g, "");
     if (!safeId) {
-      // 全て特殊文字の場合のフォールバック (Zenith Tier: Robustness)
-      safeId = `engine-${Array.from(engineId)
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0)
-        .toString(16)}`;
+      // 全て特殊文字の場合のフォールバック (2026 Zenith Tier: DJB2 collision-resistant hash)
+      let hash = 5381;
+      for (let i = 0; i < engineId.length; i++) {
+        hash = (hash << 5) + hash + engineId.charCodeAt(i);
+      }
+      safeId = `engine-${(hash >>> 0).toString(16)}`;
     }
     const cacheKey = `${safeId}_${config.url}`;
 
@@ -75,15 +77,15 @@ export class EngineLoader implements IEngineLoader {
         }
 
         // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
-        // type が明示的に安全（json, css 等）でない限り、デフォルトで検証対象とする。
-        if (
-          config.type === "worker-js" ||
-          config.type === "wasm" ||
-          config.type === undefined || // Default to JS
-          (typeof config.type === "string" &&
-            (config.type.includes("script") ||
-              config.type.includes("javascript")))
-        ) {
+        // Zenith Tier: 既知の安全なデータ型（eval-data, asset, json, text）以外は
+        // 潜在的な実行コードとみなしてオリジン検証を強制し、バイパス攻撃を防御する。
+        const isSafeType =
+          config.type === "eval-data" ||
+          config.type === "asset" ||
+          config.type === "json" ||
+          config.type === "text";
+
+        if (!isSafeType) {
           this.validateWorkerUrl(config.url, engineId);
         }
 

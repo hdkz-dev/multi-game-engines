@@ -27,10 +27,10 @@ describe("EngineLoader", () => {
     });
 
     // globalThis fetch mock
-    globalThis.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn<() => Promise<Response>>().mockResolvedValue({
       ok: true,
       arrayBuffer: async () => new TextEncoder().encode("test").buffer,
-    } as unknown as Response);
+    } as Response);
 
     // globalThis URL mock
     globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:test");

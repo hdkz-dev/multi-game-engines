@@ -59,16 +59,18 @@ describe("GTPParser", () => {
   });
 
   it("should validate move coordinates edge cases", () => {
-    // Valid cases
+    // Valid cases (up to row 25 in 2026 Zenith Tier)
     expect(parser.parseResult("= T19")).not.toBeNull();
     expect(parser.parseResult("= A1")).not.toBeNull();
+    expect(parser.parseResult("= A20")).not.toBeNull();
+    expect(parser.parseResult("= Z25")).not.toBeNull();
     expect(parser.parseResult("= pass")).not.toBeNull();
     expect(parser.parseResult("= resign")).not.toBeNull();
 
     // Invalid cases
     expect(parser.parseResult("= I1")).toBeNull(); // 'I' is skipped
     expect(parser.parseResult("= A0")).toBeNull();
-    expect(parser.parseResult("= A20")).toBeNull();
+    expect(parser.parseResult("= A26")).toBeNull();
     expect(parser.parseResult("= @1")).toBeNull();
   });
 

@@ -9,6 +9,7 @@ describe("MahjongJSONParser", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   const parser = new MahjongJSONParser();
@@ -51,7 +52,6 @@ describe("MahjongJSONParser", () => {
 
   it("should detect injection in top-level string", () => {
     const options = { board: "bad\ninput" };
-    expect(() => parser.createSearchCommand(options)).toThrow(EngineError);
     let thrown: unknown;
     try {
       parser.createSearchCommand(options);
