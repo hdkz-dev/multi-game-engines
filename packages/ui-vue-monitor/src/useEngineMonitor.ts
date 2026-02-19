@@ -26,7 +26,6 @@ import {
   createInitialState,
   UI_NORMALIZER_MIDDLEWARE_ID,
 } from "@multi-game-engines/ui-core";
-import { useEngineUI } from "@multi-game-engines/ui-vue-core";
 
 /**
  * useEngineMonitor の戻り値型を明示的に定義。
@@ -73,7 +72,7 @@ export function useEngineMonitor<
   const createDummyState = (): T_STATE => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState<T_STATE>(brandedPos);
+      return createInitialState(brandedPos) as T_STATE;
     } catch (err) {
       console.warn(
         `[useEngineMonitor] Validation failed for initialPosition: "${initialPosition}". 
@@ -82,7 +81,7 @@ export function useEngineMonitor<
         err,
       );
       const safePos = createPositionString("startpos");
-      return createInitialState<T_STATE>(safePos);
+      return createInitialState(safePos) as T_STATE;
     }
   };
 

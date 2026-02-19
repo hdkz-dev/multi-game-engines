@@ -96,9 +96,10 @@ export interface EngineSearchState {
  * 初期状態の定義。
  * T がベース型を拡張している場合、不足している必須フィールドを overrides で補う必要があります。
  */
-export function createInitialState<
-  T extends EngineSearchState = EngineSearchState,
->(position: PositionString, overrides?: Partial<T>): T {
+export function createInitialState(
+  position: PositionString,
+  overrides?: Partial<EngineSearchState>,
+): EngineSearchState {
   const base: EngineSearchState = {
     isSearching: false,
     position,
@@ -117,6 +118,5 @@ export function createInitialState<
     _internalCounter: 0,
   };
 
-  // 2026: 型健全性を保つため、サブタイプ T へのキャストは呼び出し側の責任とする
-  return { ...base, ...overrides } as T;
+  return { ...base, ...overrides };
 }

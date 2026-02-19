@@ -59,7 +59,7 @@ export function useEngineMonitor<
   const dummyState = useMemo(() => {
     try {
       const brandedPos = createPositionString(initialPosition);
-      return createInitialState<T_STATE>(brandedPos);
+      return createInitialState(brandedPos) as T_STATE;
     } catch (err) {
       if (process.env.NODE_ENV !== "production") {
         console.warn(
@@ -71,7 +71,7 @@ export function useEngineMonitor<
       }
       // バリデーション失敗時は安全なデフォルト値で復旧
       const safePos = createPositionString("startpos");
-      return createInitialState<T_STATE>(safePos);
+      return createInitialState(safePos) as T_STATE;
     }
   }, [initialPosition]);
 

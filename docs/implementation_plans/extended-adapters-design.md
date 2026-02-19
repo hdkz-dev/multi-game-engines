@@ -182,8 +182,10 @@
     threats: Array<{ x: number; y: number; type: "four" | "three" }>; // 脅威リスト
   }
 
+  type GomokuBoard = Brand<number[][], "GomokuBoard">;
+
   interface IGomokuOptions extends IBaseSearchOptions {
-    board: number[][]; // 15x15 grid (0: empty, 1: black, 2: white)
+    board: GomokuBoard; // 15x15 grid (0: empty, 1: black, 2: white)
     rules: "freestyle" | "standard" | "renju";
   }
   ```

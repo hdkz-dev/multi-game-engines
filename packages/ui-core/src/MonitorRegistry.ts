@@ -95,7 +95,7 @@ export class MonitorRegistry {
     }
 
     const brandedPosition = createPositionString(initialPosition);
-    const initialState = createInitialState<T_STATE>(brandedPosition);
+    const initialState = createInitialState(brandedPosition) as T_STATE;
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,
