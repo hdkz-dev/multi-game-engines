@@ -51,6 +51,8 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid FEN: Illegal characters detected.",
+      remediation:
+        "FEN should only contain digits [0-9], files [a-h], pieces [rnbqkpRNBQKP], active color [wb], '/', ' ', and '-'.",
     });
   }
   const fields = trimmedPos.split(/\s+/);

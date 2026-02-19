@@ -12,10 +12,20 @@
   - `EngineLoader` において、`window` オブジェクトが未定義の環境（Server-side Rendering / Node.js）でも URL 解析がクラッシュしないよう、確実なフォールバックメカニズムを導入。
 - **モダンな ESM エコシステムへの完全移行**:
   - ルートの `package.json` に `"type": "module"` を設定。ツール系スクリプトも CommonJS から ESM へ完全に刷新し、`doc-sync.js` 等のユーティリティにおいて ESLint バージョン等の完全同期を強制しました。
+- **ドメイン層の最終研磨と堅牢化**:
+  - チェス FEN 検証における詳細な remediation メッセージの追加。
+  - 将棋 SFEN 検証における手数カウンターの整数厳密チェックを導入。
+  - 囲碁 GTP 指し手検証のサポート範囲 (A1-Z25) を明確化。
+- **ドキュメントの同期と標準化**:
+  - `README.md`, `ARCHITECTURE.md`, `TECHNICAL_SPECS.md` 等の主要ドキュメントを最新の実装（ドメインパッケージへの分離、Refuse by Exception 方針等）に完全同期。
+  - `CODING_CONVENTIONS.md` および `ZENITH_STANDARD.md` へ「Refuse by Exception」の規約を追加。
+  - ドキュメント間のサンプルコードの不一致を解消。
 - **テストスイートの Zenith 品質確保**:
-  - `UCIAdapter` / `USIAdapter` のユニットテストを大幅に拡充。正常系だけでなく、ハンドシェイクのタイムアウト、リソース注入失敗、ステータス遷移の整合性を網羅的に検証し、Vitest のフェイクタイマー下での `Unhandled Rejection` も完全に解消しました。
+  - `EngineError` の型安全な捕捉 (`instanceof`) を徹底し、テストコードの堅牢性を確保。
+  - USI プロトコルにおける `bestmove none` 等のエッジケース対応テストを完備。
+  - `UCIAdapter` / `USIAdapter` において、ハンドシェイクのタイムアウト、リソース注入失敗、ステータス遷移の整合性を網羅的に検証。
 - **ドキュメントと実装の完全同期**:
-  - ADR-026 の更新、および Zenith Dashboard 例におけるハードコード文字列の排除（i18n 統合）を完遂。実装・テスト・ドキュメントの三位一体が完全に保たれている状態を確立しました。
+  - ADR-026 の更新、README のインポート順序修正、および Zenith Dashboard 例におけるハードコード文字列の排除（i18n 統合）を完遂。
 
 ## 🏆 到達ハイライト (Phase 3 Stage 3 - 究極のモジュール化と知的財産保護 - Package Reorganization & IP Safety)
 

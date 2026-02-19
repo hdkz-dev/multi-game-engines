@@ -2,7 +2,7 @@ import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
 export type GOBoard = string & { readonly __brand: "GOBoard" };
-/** 囲碁の 指し手 (GTP形式: A1, pass, etc.) */
+/** 囲碁の 指し手 (GTP形式: A1-Z25 (skip I), pass, resign) */
 export type GOMove = string & { readonly __brand: "GOMove" };
 
 /**

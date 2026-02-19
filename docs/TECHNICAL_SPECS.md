@@ -12,15 +12,15 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 ### 1-2. ドメイン固有の型定義 (Domain Types)
 
-各種ゲーム固有の型（`FEN`, `SFEN`, `Move` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、`@multi-game-engines/core` パッケージの `types.ts` に集約されています。
+各種ゲーム固有の型（`FEN`, `SFEN`, `GOMove` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、それぞれのドメインパッケージ（`@multi-game-engines/domain-*`）で提供されています。
 
-- **FEN**: チェス局面表記（Branded string）。`createFEN` ファクトリによるバリデーション。
-- **SFEN**: 将棋局面表記（Branded string）。`createSFEN` ファクトリによるバリデーション。
-- **Move**: 指し手表記（Branded string）。UCI/USI 形式をサポートし、`createMove` で検証。
-- **PositionString**: ゲームに依存しない汎用局面表記。
+- **FEN**: チェス局面表記（Branded string）。`@multi-game-engines/domain-chess` の `createFEN` ファクトリによる、文字種・フィールド数・手番等の厳格なバリデーション。
+- **SFEN**: 将棋局面表記（Branded string）。`@multi-game-engines/domain-shogi` の `createSFEN` ファクトリによる、駒配置、持ち駒、および手数カウンター（整数値 >= 1）の厳格なバリデーション。
+- **GOMove**: 囲碁の指し手（Branded string）。GTP 形式（A1-Z25, pass, resign）をサポート。
+- **PositionString**: `core` パッケージで提供される、ゲームに依存しない汎用局面表記の基底型。
 
 ```typescript
-import { FEN, createFEN } from "@multi-game-engines/core";
+import { createFEN } from "@multi-game-engines/domain-chess";
 
 const pos = createFEN(
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -90,7 +90,7 @@ const pos = createFEN(
 描画層での再利用を目的とした、軽量な局面文字列パーサーを提供します。
 
 - **parseFEN**: チェスの FEN 文字列をパースし、8x8 の駒配置配列と手番情報を抽出します。2026 Zenith Standard として、手番 (`turn`) フィールドを必須とし、欠落時は厳格にエラーをスローします。
-- **parseSFEN**: 将棋の SFEN 文字列をパースし、9x9 の駒配置配列、手番、および持ち駒の数を抽出します。成駒（+）の判定、および持ち駒文字列の文法（数字の連続、末尾文字等）を厳格に検証します。
+- **parseSFEN**: 将棋の SFEN 文字列をパースし、9x9 の駒配置配列、手番、および持ち駒の数を抽出します。成駒（+）の判定、持ち駒文字列の文法、および手数カウンターが正の整数（>= 1）であることを厳格に検証します。
 
 ## 5. テレメトリと可観測性
 

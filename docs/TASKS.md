@@ -58,7 +58,7 @@
 - [x] **UI 品質とフレームワーク統合の昇華 (UI Quality & Integration Excellence)**:
   - [x] React 19 / Vue 3 / Lit における確実なプロパティ同期パターン (useLayoutEffect + Property Reflection) の確立。
   - [x] チェス・将棋盤面コンポーネントにおける網羅的なユニット・統合テスト（100%パス）の達成。
-- [x] **PR #25 最終監査 (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行、およびテスト強化。
+- [x] **PR #25 最終監査 & フォローアップ (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行、およびレビュー指摘事項（バリデーション詳細化、テスト強化）の全対応。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---

@@ -118,8 +118,8 @@ export function createSFEN(pos: string): SFEN {
   }
 
   // 4th field: Move counter (>= 1)
-  const moveCount = parseInt(fields[3]!, 10);
-  if (isNaN(moveCount) || moveCount < 1) {
+  const moveCountNum = Number(fields[3]!);
+  if (!Number.isInteger(moveCountNum) || moveCountNum < 1) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN move counter: "${fields[3]}"`,
