@@ -52,7 +52,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
 }: ShogiBoardProps) => {
   const ref = React.useRef<ShogiBoardElement>(null);
   React.useLayoutEffect(() => {
-    if (ref.current && pieceNames) {
+    if (ref.current) {
       ref.current.pieceNames = pieceNames;
     }
   }, [pieceNames]);

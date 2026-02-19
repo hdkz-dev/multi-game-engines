@@ -50,7 +50,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const ref = React.useRef<ChessBoardElement>(null);
 
   React.useLayoutEffect(() => {
-    if (ref.current && pieceNames) {
+    if (ref.current) {
       ref.current.pieceNames = pieceNames;
     }
   }, [pieceNames]);

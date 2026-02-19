@@ -287,8 +287,8 @@ export class EngineLoader implements IEngineLoader {
     } catch (e) {
       if (e instanceof EngineError) throw e;
       throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid resource URL: ${url}`,
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Invalid resource URL (Validation Failed): ${url}`,
         engineId,
       });
     }
