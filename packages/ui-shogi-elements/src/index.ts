@@ -10,6 +10,37 @@ import {
 import { Move, createMove } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
+const KANJI_SYMBOLS: Record<ShogiPiece, string> = {
+  P: "歩",
+  L: "香",
+  N: "桂",
+  S: "銀",
+  G: "金",
+  B: "角",
+  R: "飛",
+  K: "王", // Sente King usually "玉", Gote King "王". Standardizing to King generic or context aware? Usually Board handles specific King. SFEN K/k.
+  p: "歩",
+  l: "香",
+  n: "桂",
+  s: "銀",
+  g: "金",
+  b: "角",
+  r: "飛",
+  k: "王",
+  "+P": "と",
+  "+L": "成香",
+  "+N": "成桂",
+  "+S": "成銀",
+  "+B": "馬",
+  "+R": "龍",
+  "+p": "と",
+  "+l": "成香",
+  "+n": "成桂",
+  "+s": "成銀",
+  "+b": "馬",
+  "+r": "龍",
+};
+
 /**
  * Returns true if the piece belongs to Gote (White).
  * Shogi SFEN uses lowercase for Gote pieces.
@@ -149,6 +180,9 @@ export class ShogiBoard extends LitElement {
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> | undefined = {};
 
+  @property({ type: Object })
+  pieceSymbols: Partial<Record<ShogiPiece, string>> | undefined = {};
+
   private _getLocalizedStrings() {
     const data = this.locale === "ja" ? locales.ja : locales.en;
     return {
@@ -221,11 +255,14 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const displayFile = usiFile;
         const displayRank = r + 1;
-        const pieceLabel = piece
+        const pieceName = piece
           ? this.pieceNames?.[piece] || strings.pieceNames[piece]
           : "";
+        const pieceSymbol = piece
+          ? this.pieceSymbols?.[piece] || KANJI_SYMBOLS[piece] || pieceName
+          : "";
         const ariaLabel = piece
-          ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
+          ? strings.squarePieceLabel(displayFile, displayRank, pieceName)
           : strings.squareLabel(displayFile, displayRank);
 
         squares.push(html`
@@ -240,7 +277,7 @@ export class ShogiBoard extends LitElement {
                   class="piece ${isGote ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
-                  >${pieceLabel}</span
+                  >${pieceSymbol}</span
                 >`
               : ""}
           </div>
@@ -275,15 +312,20 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = this.pieceNames?.[p as ShogiPiece] || strings.pieceNames[p];
+      const name = this.pieceNames?.[p as ShogiPiece] || strings.pieceNames[p];
+      const symbol =
+        this.pieceSymbols?.[p as ShogiPiece] ||
+        KANJI_SYMBOLS[p as ShogiPiece] ||
+        name;
+
       const ariaLabel =
         count > 1
           ? strings.handPieceCount
-              .replace("{piece}", label)
+              .replace("{piece}", name)
               .replace("{count}", String(count))
-          : label;
-      return html`<span title="${label}" aria-label="${ariaLabel}"
-        >${label}${count > 1 ? count : ""}</span
+          : name;
+      return html`<span title="${name}" aria-label="${ariaLabel}"
+        >${symbol}${count > 1 ? count : ""}</span
       >`;
     });
   }

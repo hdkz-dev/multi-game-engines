@@ -20,6 +20,7 @@ declare module "react/jsx-runtime" {
         "hand-sente-label"?: string | undefined;
         "hand-gote-label"?: string | undefined;
         pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+        pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
         locale?: string | undefined;
         ref?: React.Ref<ShogiBoardElement> | undefined;
       };
@@ -36,6 +37,7 @@ export interface ShogiBoardProps {
   handSenteLabel?: string;
   handGoteLabel?: string;
   pieceNames?: Partial<Record<ShogiPiece, string>>;
+  pieceSymbols?: Partial<Record<ShogiPiece, string>>;
   locale?: string;
 }
 
@@ -48,14 +50,16 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   handSenteLabel,
   handGoteLabel,
   pieceNames,
+  pieceSymbols,
   locale,
 }: ShogiBoardProps) => {
   const ref = React.useRef<ShogiBoardElement>(null);
   React.useLayoutEffect(() => {
     if (ref.current) {
       ref.current.pieceNames = pieceNames;
+      ref.current.pieceSymbols = pieceSymbols;
     }
-  }, [pieceNames]);
+  }, [pieceNames, pieceSymbols]);
 
   return (
     <shogi-board

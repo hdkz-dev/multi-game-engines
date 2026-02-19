@@ -51,6 +51,10 @@ export class EngineLoader implements IEngineLoader {
     const cacheKey = `${safeId}_${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
+    // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
+    const activeUrl = this.activeBlobs.get(cacheKey);
+    if (activeUrl) return activeUrl;
+
     const existing = this.inflightLoads.get(cacheKey);
     if (existing) return existing;
 

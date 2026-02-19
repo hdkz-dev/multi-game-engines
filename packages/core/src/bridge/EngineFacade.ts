@@ -111,7 +111,10 @@ export class EngineFacade<
     if (typeof middleware === "string") {
       this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
     } else {
-      this.middlewares = this.middlewares.filter((m) => m !== middleware);
+      const targetId = middleware.id;
+      this.middlewares = this.middlewares.filter(
+        (m) => m !== middleware && (!targetId || m.id !== targetId),
+      );
     }
     return this;
   }
