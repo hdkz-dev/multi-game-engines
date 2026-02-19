@@ -208,8 +208,8 @@ export class EngineLoader implements IEngineLoader {
     );
 
     const failures = settledResults.filter(
-      (r) => r.status === "rejected",
-    ) as PromiseRejectedResult[];
+      (r): r is PromiseRejectedResult => r.status === "rejected",
+    );
     if (failures.length > 0) {
       // ロールバック: 成功した分の URL を revoke する
       for (const res of settledResults) {

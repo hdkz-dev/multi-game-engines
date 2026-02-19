@@ -12,9 +12,10 @@ import { KataGoAdapter } from "../katago.js";
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
     if (
-      msg &&
+      msg !== null &&
       typeof msg === "object" &&
-      (msg as Record<string, unknown>).type === "MG_INJECT_RESOURCES"
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
     ) {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {

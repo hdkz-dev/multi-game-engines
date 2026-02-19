@@ -12,18 +12,18 @@ import { StockfishAdapter } from "../stockfish.js";
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
     if (
-      msg &&
+      msg !== null &&
       typeof msg === "object" &&
-      (msg as Record<string, unknown>).type === "MG_INJECT_RESOURCES"
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
     ) {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
         }
       }, 0);
-    }
-    // 2026: ハンドシェイク対応
-    if (msg === "uci") {
+    } else if (msg === "uci") {
+      // 2026: ハンドシェイク対応
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: "uciok" });
