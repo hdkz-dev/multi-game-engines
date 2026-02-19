@@ -30,7 +30,16 @@
     "build-storybook": "storybook build"
   },
   "license": "MIT",
-  "sideEffects": true,
+  "sideEffects": [
+    "./dist/chess-board.js",
+    "./dist/shogi-board.js",
+    "./dist/engine-monitor.js",
+    "./dist/evaluation-graph.js",
+    "./dist/pv-list.js",
+    "./dist/search-log.js",
+    "./dist/score-badge.js",
+    "./dist/engine-stats.js"
+  ],
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",

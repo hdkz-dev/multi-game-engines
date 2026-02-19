@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import "@multi-game-engines/ui-elements";
+import "@multi-game-engines/ui-elements/chess";
 import { Move } from "@multi-game-engines/core";
 import { FEN } from "@multi-game-engines/core/chess";
 import { ChessPiece } from "@multi-game-engines/ui-core/chess";

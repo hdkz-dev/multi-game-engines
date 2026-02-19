@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import "@multi-game-engines/ui-elements";
+import "@multi-game-engines/ui-elements/shogi";
 import { Move } from "@multi-game-engines/core";
 import { SFEN } from "@multi-game-engines/core/shogi";
 import { ShogiPiece } from "@multi-game-engines/ui-core/shogi";
