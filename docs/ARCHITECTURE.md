@@ -56,7 +56,10 @@ import {
 
 const stockfish = bridge.getEngine("stockfish");
 // アダプターをインポートしていれば、EngineRegistry を通じて自動的に型が推論されます
-stockfish.search({ fen: "..." as FEN, depth: 20 });
+const fen = createFEN(
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+);
+stockfish.search({ fen, depth: 20 });
 ```
 
 ### 多言語・多プロトコル対応

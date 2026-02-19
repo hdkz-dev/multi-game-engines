@@ -5,7 +5,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
 } from "@multi-game-engines/core";
-import { GOBoard, GOMove } from "@multi-game-engines/core/go";
+import { GOBoard, GOMove, createGOMove } from "@multi-game-engines/core/go";
 
 export interface IGOSearchOptions extends IBaseSearchOptions {
   board: GOBoard;
@@ -34,16 +34,16 @@ export class GTPParser implements IProtocolParser<
   private static readonly WINRATE_REGEX = /winrate ([\d.]+)/;
   private static readonly WHITESPACE_REGEX = /\s+/;
   private static readonly DIGITS_ONLY_REGEX = /^\d+$/;
-  // GTP 指し手形式 (A1, B19, pass, resign 等)。
-  private static readonly MOVE_REGEX =
-    /^([A-HJ-T](1[0-9]|[1-9])|pass|resign)$/i;
 
   /**
    * 文字列を GOMove へ変換します。
    */
-  private createMove(value: string): GOMove | null {
-    if (!GTPParser.MOVE_REGEX.test(value)) return null;
-    return value as GOMove;
+  private parseMove(value: string): GOMove | null {
+    try {
+      return createGOMove(value);
+    } catch {
+      return null;
+    }
   }
 
   parseInfo(
@@ -81,7 +81,7 @@ export class GTPParser implements IProtocolParser<
       moveStr = tokens[1]!;
     }
 
-    const bestMove = this.createMove(moveStr);
+    const bestMove = this.parseMove(moveStr);
     if (!bestMove) return null;
 
     return {

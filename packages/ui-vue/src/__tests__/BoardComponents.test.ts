@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
 import BoardComponents from "../BoardComponents.vue";
 import { createMove } from "@multi-game-engines/core";
-import { createFEN } from "@multi-game-engines/core/chess";
+import { createFEN, FEN } from "@multi-game-engines/core/chess";
 import { createSFEN } from "@multi-game-engines/core/shogi";
 import "@multi-game-engines/ui-elements";
 
@@ -93,8 +93,7 @@ describe("BoardComponents (Vue)", () => {
     mount(BoardComponents, {
       props: {
         type: "chess",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        fen: undefined as unknown as any,
+        fen: undefined as unknown as FEN,
       },
     });
 

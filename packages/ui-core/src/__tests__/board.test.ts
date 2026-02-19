@@ -36,13 +36,14 @@ describe("Board Utilities", () => {
     });
 
     it("should throw error for invalid row count", () => {
-      const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w - - 0 1" as FEN; // 7 rows
+      const fen =
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w - - 0 1" as unknown as FEN; // 7 rows
       expect(() => parseFEN(fen)).toThrow("Invalid board structure");
     });
 
     it("should throw error for invalid character", () => {
       const fen =
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNZ w - - 0 1" as FEN; // 'Z' is invalid
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNZ w - - 0 1" as unknown as FEN; // 'Z' is invalid
       expect(() => parseFEN(fen)).toThrow("Invalid character");
     });
   });
@@ -76,28 +77,28 @@ describe("Board Utilities", () => {
 
     it("should throw error for invalid row length", () => {
       const sfen =
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSN b - 1" as SFEN; // last row missing piece
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSN b - 1" as unknown as SFEN; // last row missing piece
       expect(() => parseSFEN(sfen)).toThrow("invalid length");
     });
 
     it("should throw error for incomplete promoted piece", () => {
-      const sfen = "9/9/9/9/9/9/9/9/8+ b - 1" as SFEN; // '+' at end
+      const sfen = "9/9/9/9/9/9/9/9/8+ b - 1" as unknown as SFEN; // '+' at end
       expect(() => parseSFEN(sfen)).toThrow("Malformed SFEN");
     });
 
     it("should throw error for invalid piece character", () => {
-      const sfen = "9/9/9/9/9/9/9/9/8Z b - 1" as SFEN; // 'Z' is invalid
+      const sfen = "9/9/9/9/9/9/9/9/8Z b - 1" as unknown as SFEN; // 'Z' is invalid
       expect(() => parseSFEN(sfen)).toThrow("Invalid character");
     });
   });
 
   describe("Parser Robustness", () => {
     it("parseFEN should throw on empty string", () => {
-      expect(() => parseFEN("" as FEN)).toThrow("is empty");
+      expect(() => parseFEN("" as unknown as FEN)).toThrow("is empty");
     });
 
     it("parseSFEN should throw on empty string", () => {
-      expect(() => parseSFEN("" as SFEN)).toThrow("is empty");
+      expect(() => parseSFEN("" as unknown as SFEN)).toThrow("is empty");
     });
   });
 });

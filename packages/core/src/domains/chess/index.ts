@@ -2,7 +2,24 @@ import { FEN, EngineErrorCode } from "../../types.js";
 export { FEN };
 import { EngineError } from "../../errors/EngineError.js";
 
-/** チェス局面情報のバリデータファクトリ */
+/**
+ * チェス局面情報 (FEN) のバリデータファクトリ。
+ * 与えられた文字列が有効な FEN 形式であることを厳密に検証し、Branded Type として返します。
+ *
+ * @param pos - 検証対象の FEN 文字列。
+ * @returns 検証済みの FEN 文字列。
+ * @throws {EngineError} FEN が無効な場合（空文字、不正な文字、構造エラー、フィールド不正など）。
+ *
+ * バリデーション仕様:
+ * 1. 空文字チェック: 空でないこと。
+ * 2. 文字種制限: [0-9], [a-z], [A-Z], '/', ' ', '-' のみ許可。
+ * 3. 構造チェック: スペース区切りで正確に 6 つのフィールドを持つこと。
+ * 4. 駒配置 (Piece Placement): '/' 区切りで 8 ランクあること。各ランクは 1-8 または駒文字のみ。
+ * 5. 手番 (Active Color): 'w' または 'b'。
+ * 6. キャスリング (Castling): '-' または 'KQkq' の組み合わせ。
+ * 7. アンパッサン (En Passant): '-' または代数表記のマス（例: 'e3'）。
+ * 8. 手数 (Move Counters): 半手数・全手数が数値であること。
+ */
 export function createFEN(pos: string): FEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({

@@ -68,7 +68,7 @@
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:
   - **Next.js 16.1 (Stable)** & **React 19.2** へのメジャーアップデート、および **React Compiler** の有効化。
   - **Node.js 24 (LTS Target)** & **Turborepo 2.8** によるビルドパイプラインの高速化と並列実行の導入。
-  - **TypeScript 5.9** & **ESLint 9.20.0 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
+  - **TypeScript 5.9** & **ESLint 9.39.2 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
   - **Project References** の導入によるモノレポ構成の最適化と、`noUncheckedIndexedAccess` 等の極めて厳格な型安全性の確立。
 
 ---

@@ -42,6 +42,10 @@ export class EngineBridge implements IEngineBridge {
     IBaseSearchInfo,
     IBaseSearchResult
   >[] = [];
+  private pendingEngines = new Map<
+    string,
+    Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>
+  >();
   private loader: IEngineLoader | null = null;
   private loaderPromise: Promise<IEngineLoader> | null = null;
   private capabilities: ICapabilities | null = null;
@@ -181,6 +185,10 @@ export class EngineBridge implements IEngineBridge {
   ): Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>> {
     const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
 
+    // 2026 Best Practice: インフライトの初期化をデデュプリケーション
+    const pending = this.pendingEngines.get(id);
+    if (pending) return pending;
+
     // 2026 Best Practice: インスタンスのキャッシュ (WeakRef ベース)
     const ref = this.engineInstances.get(id);
     const cached = ref?.deref();
@@ -189,59 +197,64 @@ export class EngineBridge implements IEngineBridge {
       return cached;
     }
 
-    let adapter = this.adapters.get(id);
+    const enginePromise = (async () => {
+      let adapter = this.adapters.get(id);
 
-    // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
-    if (!adapter && typeof idOrConfig !== "string") {
-      const factory = this.adapterFactories.get(idOrConfig.adapter);
-      if (factory) {
-        const newAdapter = factory(idOrConfig) as IEngineAdapter<
-          IBaseSearchOptions,
-          IBaseSearchInfo,
-          IBaseSearchResult
-        >;
-        adapter = newAdapter;
-        // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
-        await this.registerAdapter(newAdapter);
+      // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
+      if (!adapter && typeof idOrConfig !== "string") {
+        const factory = this.adapterFactories.get(idOrConfig.adapter);
+        if (factory) {
+          const newAdapter = factory(idOrConfig);
+          adapter = newAdapter;
+          // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
+          await this.registerAdapter(newAdapter);
+        }
       }
+
+      if (!adapter) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: `Engine adapter not found or factory not registered: ${id}`,
+          remediation:
+            typeof idOrConfig !== "string"
+              ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
+              : "Register the adapter instance first or provide a full IEngineConfig.",
+        });
+      }
+
+      // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
+      await this.enforceCapabilities(adapter);
+
+      // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
+      const filteredMiddlewares = this.middlewares.filter(
+        (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
+      );
+
+      const facade = new EngineFacade(
+        adapter,
+        filteredMiddlewares,
+        async () => this.getLoader(),
+        false, // EngineBridge がアダプターのライフサイクルを管理するため
+      );
+      facade.loadingStrategy = strategy;
+
+      const engine = facade as IEngine<
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >;
+      this.engineInstances.set(id, new WeakRef(engine));
+      this.finalizationRegistry.register(engine, id);
+
+      return engine;
+    })();
+
+    this.pendingEngines.set(id, enginePromise);
+    try {
+      return await enginePromise;
+    } finally {
+      this.pendingEngines.delete(id);
     }
-
-    if (!adapter) {
-      throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Engine adapter not found or factory not registered: ${id}`,
-        remediation:
-          typeof idOrConfig !== "string"
-            ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
-            : "Register the adapter instance first or provide a full IEngineConfig.",
-      });
-    }
-
-    // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-    await this.enforceCapabilities(adapter);
-
-    // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
-    const filteredMiddlewares = this.middlewares.filter(
-      (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
-    );
-
-    const facade = new EngineFacade(
-      adapter,
-      filteredMiddlewares,
-      async () => this.getLoader(),
-      false, // EngineBridge がアダプターのライフサイクルを管理するため
-    );
-    facade.loadingStrategy = strategy;
-
-    const engine = facade as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
-    this.engineInstances.set(id, new WeakRef(engine));
-    this.finalizationRegistry.register(engine, id);
-
-    return engine;
   }
 
   /**

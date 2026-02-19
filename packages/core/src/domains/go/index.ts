@@ -9,6 +9,10 @@ export type GOMove = Brand<string, "GOMove">;
 
 /**
  * 囲碁盤面データのバリデータファクトリ。
+ *
+ * @param pos - 盤面データ文字列。
+ * @returns 検証済みの GOBoard。
+ * @throws {EngineError} 文字列が空または不正な文字を含む場合。
  */
 export function createGOBoard(pos: string): GOBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
@@ -29,6 +33,15 @@ export function createGOBoard(pos: string): GOBoard {
 
 /**
  * 囲碁指し手のバリデータファクトリ。
+ * GTP (Go Text Protocol) 形式の座標（例: A1, T19）または特殊手（pass, resign）を検証します。
+ *
+ * @param move - 指し手文字列。
+ * @returns 検証済みの GOMove。
+ * @throws {EngineError} 形式が無効な場合。
+ *
+ * 仕様:
+ * - 座標: 列 A-T (Iを除く), 行 1-19 (またはそれ以上)。
+ * - 特殊手: pass, resign (大文字小文字無視)。
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {

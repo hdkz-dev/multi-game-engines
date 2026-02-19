@@ -66,8 +66,7 @@ export class EngineLoader implements IEngineLoader {
         }
 
         const sri = config.sri;
-        const unsafeNoSRI =
-          (config as { __unsafeNoSRI?: boolean }).__unsafeNoSRI === true;
+        const unsafeNoSRI = config.__unsafeNoSRI === true;
 
         // 2026 Best Practice: 本番環境での SRI バイパスを禁止
         const isProduction =

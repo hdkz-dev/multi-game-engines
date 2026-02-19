@@ -129,6 +129,6 @@
 - `T_OPTIONS`: 各ゲームの初期局面・ルール設定を完全にカバー。
 - `T_INFO`: リアルタイム UI（検討窓、ヒートマップ）に必要な情報を網羅。
 
-### 4.2 Proactive Disposal
+### 10.2 Proactive Disposal
 
 - 囲碁や麻雀の巨大な NN モデルがメモリを圧迫しないよう、`dispose()` 実行時に `WebGPU` コンテキストの破棄と、WASM メモリの明示的なヌル化を徹底。

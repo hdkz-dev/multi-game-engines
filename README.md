@@ -56,7 +56,12 @@ engine.onInfo((info) => {
 });
 
 // 探索の実行 (startpos キーワードもサポート)
-const result = await engine.search({ fen: "startpos" as FEN });
+import { createFEN } from "@multi-game-engines/core/chess";
+
+// ...
+
+const fen = createFEN("startpos");
+const result = await engine.search({ fen });
 console.log(`Best Move: ${result.bestMove}`);
 ```
 
