@@ -35,6 +35,13 @@ export class GTPAdapter extends BaseAdapter<
     this.version = config.version ?? "unknown";
   }
 
+  /**
+   * エンジンのリソースをロードし、Worker を初期化します。
+   *
+   * @param loader - オプションのカスタムローダー。省略時はデフォルトのリソース解決ロジックが使用されます。
+   * @returns 初期化完了時に解決される Promise。
+   * @throws {EngineError} 必須リソースの欠落や Worker の起動失敗時にスローされます。
+   */
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {

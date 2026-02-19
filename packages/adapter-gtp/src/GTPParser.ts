@@ -45,6 +45,14 @@ export class GTPParser implements IProtocolParser<
     }
   }
 
+  /**
+   * エンジンからの info 行を解析し、構造化された探索情報を返します。
+   * GTP プロトコルでは標準的な info コマンドは定義されていませんが、
+   * KataGo 等の拡張 (visits, winrate) に対応しています。
+   *
+   * @param data - 解析対象の行データ。
+   * @returns 解析された探索情報。info 行でない場合は null。
+   */
   parseInfo(
     data: string | Uint8Array | Record<string, unknown>,
   ): IGOSearchInfo | null {
@@ -64,6 +72,12 @@ export class GTPParser implements IProtocolParser<
     return null;
   }
 
+  /**
+   * エンジンからの最終結果 (genmove の応答) を解析します。
+   *
+   * @param data - 解析対象の行データ。
+   * @returns 解析された探索結果。応答でない場合は null。
+   */
   parseResult(
     data: string | Uint8Array | Record<string, unknown>,
   ): IGOSearchResult | null {
@@ -89,6 +103,13 @@ export class GTPParser implements IProtocolParser<
     };
   }
 
+  /**
+   * 探索オプションに基づいて GTP コマンドシーケンスを生成します。
+   *
+   * @param options - 探索オプション (盤面、手番など)。
+   * @returns 実行すべき GTP コマンドの配列 (例: ["loadboard ...", "genmove black"])。
+   * @throws {EngineError} インジェクション攻撃の可能性がある不正な入力が含まれる場合。
+   */
   createSearchCommand(options: IGOSearchOptions): string[] {
     const commands: string[] = [];
     const sBoard = String(options.board);

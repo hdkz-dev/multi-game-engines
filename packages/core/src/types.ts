@@ -65,12 +65,19 @@ export interface IScoreInfo {
  * 探索状況情報。
  */
 export interface IBaseSearchInfo {
+  /** 探索深度 (プライまたは手数) */
   depth?: number | undefined;
+  /** 選択的探索深度 (Selective Depth) */
   seldepth?: number | undefined;
+  /** 探索したノード数 */
   nodes?: number | undefined;
+  /** 探索速度 (Nodes Per Second) */
   nps?: number | undefined;
+  /** 探索時間 (ミリ秒) */
   time?: number | undefined;
+  /** 読み筋 (Principal Variation) */
   pv?: Move[] | undefined;
+  /** MultiPV の順位 (1, 2, ...) */
   multipv?: number | undefined;
   /** 思考の複雑さ・規模を示す追加指標（囲碁の visits など） */
   visits?: number | undefined;
@@ -201,6 +208,12 @@ export interface IMiddleware<
   id?: string;
   priority?: number;
   supportedEngines?: string[];
+  /**
+   * エンジンへのコマンド送信前に呼び出されます。
+   * @param command 送信されるコマンド
+   * @param context コンテキスト情報
+   * @returns 変更されたコマンド、または undefined (変更なし)
+   */
   onCommand?(
     command: MiddlewareCommand,
     context: MiddlewareContext<T_OPTIONS>,
@@ -209,10 +222,22 @@ export interface IMiddleware<
     | MiddlewareCommand
     | undefined
     | void;
+  /**
+   * エンジンからの情報受信時に呼び出されます。
+   * @param info 受信した情報
+   * @param context コンテキスト情報
+   * @returns 変更された情報、または undefined (変更なし)
+   */
   onInfo?(
     info: T_INFO,
     context: MiddlewareContext<T_OPTIONS>,
   ): Promise<T_INFO | undefined | void> | T_INFO | undefined | void;
+  /**
+   * 探索結果の受信時に呼び出されます。
+   * @param result 受信した結果
+   * @param context コンテキスト情報
+   * @returns 変更された結果、または undefined (変更なし)
+   */
   onResult?(
     result: T_RESULT,
     context: MiddlewareContext<T_OPTIONS>,
@@ -221,10 +246,14 @@ export interface IMiddleware<
 
 /**
  * 探索タスク。
+ * 非同期イテレータによる途中経過の取得と、Promise による最終結果の取得を両立します。
  */
 export interface ISearchTask<T_INFO, T_RESULT> {
+  /** 途中経過をストリームとして取得するための非同期イテレータ */
   info: AsyncIterable<T_INFO>;
+  /** 最終結果が確定した時点で解決される Promise */
   result: Promise<T_RESULT>;
+  /** 探索を強制的に中断します */
   stop(): void;
 }
 

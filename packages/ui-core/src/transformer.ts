@@ -12,8 +12,12 @@ import { ExtendedSearchInfo } from "./schema.js";
  */
 export const SearchStateTransformer = {
   /**
-   * info イベントのデータを現在の状態にマージする。
-   * Zod によるバリデーションを挟むことで、不正なデータによる UI のクラッシュを防ぐ。
+   * info イベントのデータを現在の状態にマージし、新しい状態を返します。
+   * イミュータブルな更新を行い、スマートなログ集約（重複排除）や評価値履歴の更新も同時に処理します。
+   *
+   * @param state - 現在のエンジン探索状態。
+   * @param info - エンジンから受信した、または Middleware で加工された探索情報。
+   * @returns 更新された新しい状態オブジェクト。
    */
   mergeInfo<T extends EngineSearchState = EngineSearchState>(
     state: T,

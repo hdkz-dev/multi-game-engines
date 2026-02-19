@@ -64,6 +64,13 @@ export class USIParser implements IProtocolParser<
     return value as Move;
   }
 
+  /**
+   * info 行を解析します。
+   * USI 独自のトークン（cpuload 等）は無視し、共通の思考情報を抽出します。
+   *
+   * @param data - 受信したデータ。
+   * @returns 解析された思考情報。info 行でない場合は null。
+   */
   parseInfo(
     data: string | Uint8Array | Record<string, unknown>,
   ): ISHOGISearchInfo | null {
@@ -139,6 +146,13 @@ export class USIParser implements IProtocolParser<
     return info;
   }
 
+  /**
+   * bestmove 行を解析します。
+   * 'none' や '(none)' などの特殊な応答も適切にハンドリングします。
+   *
+   * @param data - 受信したデータ。
+   * @returns 解析された探索結果。
+   */
   parseResult(
     data: string | Uint8Array | Record<string, unknown>,
   ): ISHOGISearchResult | null {
@@ -170,6 +184,13 @@ export class USIParser implements IProtocolParser<
     return result;
   }
 
+  /**
+   * 探索開始コマンド (position sfen ... -> go ...) を生成します。
+   * SFEN のインジェクション検証を行います。
+   *
+   * @param options - 探索オプション (sfen, btime, wtime, byoyomi, depth, nodes)。
+   * @returns 実行すべき USI コマンド配列。
+   */
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {

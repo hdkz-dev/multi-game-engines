@@ -36,6 +36,13 @@ export class UCIAdapter extends BaseAdapter<
     this.version = config.version ?? "unknown";
   }
 
+  /**
+   * エンジンのリソースをロードし、Worker を初期化して 'uci' ハンドシェイクを実行します。
+   *
+   * @param loader - オプションのカスタムローダー。
+   * @returns 初期化とハンドシェイク ('uciok') 完了時に解決される Promise。
+   * @throws {EngineError} リソース不足、Worker エラー、またはハンドシェイクのタイムアウト時にスローされます。
+   */
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {

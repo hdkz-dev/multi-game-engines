@@ -85,6 +85,10 @@ export class UCIParser implements IProtocolParser<
 
   /**
    * info 行を解析します。
+   * UCI 標準のトークン（depth, score, pv 等）を抽出し、構造化データとして返します。
+   *
+   * @param data - 受信したデータ（文字列）。
+   * @returns 解析された思考情報。info 行でない場合は null。
    */
   parseInfo(
     data: string | Uint8Array | Record<string, unknown>,
@@ -172,6 +176,9 @@ export class UCIParser implements IProtocolParser<
 
   /**
    * bestmove 行を解析します。
+   *
+   * @param data - 受信したデータ（文字列）。
+   * @returns 解析された探索結果（bestMove, ponder）。bestmove 行でない場合は null。
    */
   parseResult(
     data: string | Uint8Array | Record<string, unknown>,
@@ -199,7 +206,12 @@ export class UCIParser implements IProtocolParser<
   }
 
   /**
-   * 探索開始コマンドを生成します。
+   * 探索開始コマンド (position ... -> go ...) を生成します。
+   * FEN のバリデーションおよびインジェクション対策を含みます。
+   *
+   * @param options - 探索オプション (fen, depth, time, nodes)。
+   * @returns 実行すべき UCI コマンド配列。
+   * @throws {EngineError} FEN が未指定または不正な場合。
    */
   createSearchCommand(options: IChessSearchOptions): string[] {
     if (!options.fen) {
