@@ -86,7 +86,8 @@
 
 ### 6.1 プロトコル: UCCI (Universal Chinese Chess Interface)
 
-- **特徴**: UCI に極めて近いが、FEN ではなく WEN (Xiangqi Fen) を使用。
+- **特徴**: UCI に極めて近いが、チェス FEN と構造は同一で駒表記のみ異なる Xiangqi FEN を使用。
+- **コマンド**: `position fen <fen_string>` を使用して局面を設定。
 - **実装課題**: 盤面が 9x10 であり、河（River）や九宮（Palace）の概念を UI 側で表現。
 
 ---
