@@ -3,8 +3,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
-import { createFEN } from "@multi-game-engines/core/chess";
-import { createSFEN } from "@multi-game-engines/core/shogi";
+import { createFEN } from "@multi-game-engines/domain-chess";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { IEngine } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,
@@ -27,13 +27,11 @@ const EngineMonitorPanel = dynamic(
   { ssr: false },
 );
 const ChessBoard = dynamic(
-  () =>
-    import("@multi-game-engines/ui-react/chess").then((mod) => mod.ChessBoard),
+  () => import("@multi-game-engines/ui-react").then((mod) => mod.ChessBoard),
   { ssr: false },
 );
 const ShogiBoard = dynamic(
-  () =>
-    import("@multi-game-engines/ui-react/shogi").then((mod) => mod.ShogiBoard),
+  () => import("@multi-game-engines/ui-react").then((mod) => mod.ShogiBoard),
   { ssr: false },
 );
 

@@ -31,6 +31,9 @@
     "wasm",
     "multi-game-engines"
   ],
+  "dependencies": {
+    "@multi-game-engines/domain-shogi": "workspace:*"
+  },
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"
   },

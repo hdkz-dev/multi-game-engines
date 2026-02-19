@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
-import { createSFEN, SFEN } from "@multi-game-engines/core/shogi";
+import { createSFEN, SFEN } from "@multi-game-engines/domain-shogi";
 
 describe("USIParser", () => {
   beforeAll(() => {

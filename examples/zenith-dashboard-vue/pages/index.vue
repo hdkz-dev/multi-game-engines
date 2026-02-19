@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import { createFEN } from "@multi-game-engines/core/chess";
-import { createSFEN } from "@multi-game-engines/core/shogi";
+import { createFEN } from "@multi-game-engines/domain-chess";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { formatNumber } from "@multi-game-engines/ui-core";
 import type { IEngine } from "@multi-game-engines/core";
 import type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/adapter-uci";
 import type { ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult } from "@multi-game-engines/adapter-usi";
-import { EngineMonitorPanel, EngineUIProvider } from "@multi-game-engines/ui-vue";
-import { ChessBoard } from "@multi-game-engines/ui-vue/chess";
-import { ShogiBoard } from "@multi-game-engines/ui-vue/shogi";
+import { EngineMonitorPanel, EngineUIProvider, ChessBoard, ShogiBoard } from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { locales } from "@multi-game-engines/i18n";
 import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "lucide-vue-next";

@@ -33,6 +33,9 @@
     "wasm",
     "multi-game-engines"
   ],
+  "dependencies": {
+    "@multi-game-engines/domain-go": "workspace:*"
+  },
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"
   },

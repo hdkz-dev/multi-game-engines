@@ -1,6 +1,6 @@
 # @multi-game-engines/adapter-edax
 
-Othello engine adapter for Edax 4.4.
+Reversi engine adapter for Edax 4.4.
 
 ## Protocols
 

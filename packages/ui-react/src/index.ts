@@ -1,9 +1,6 @@
-export * from "./useEngineMonitor.js";
-export * from "./ScoreBadge.js";
-export * from "./PVList.js";
-export * from "./SearchLog.js";
-export * from "./EngineStats.js";
-export * from "./EvaluationGraph.js";
-export * from "./EngineMonitorPanel.js";
-export * from "./EngineUIProvider.js";
-export * from "./StatCard.js";
+export * from "@multi-game-engines/ui-react-core";
+export * from "@multi-game-engines/ui-react-monitor";
+
+// Re-exports from domain-specific React packages
+export * from "@multi-game-engines/ui-chess-react";
+export * from "@multi-game-engines/ui-shogi-react";

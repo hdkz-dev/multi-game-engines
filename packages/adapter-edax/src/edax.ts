@@ -5,16 +5,16 @@ import {
   EngineError,
 } from "@multi-game-engines/core";
 import {
-  IOthelloSearchOptions,
-  IOthelloSearchInfo,
-  IOthelloSearchResult,
+  IReversiSearchOptions,
+  IReversiSearchInfo,
+  IReversiSearchResult,
 } from "./EdaxParser.js";
 import { EdaxParser } from "./EdaxParser.js";
 
 export class EdaxAdapter extends BaseAdapter<
-  IOthelloSearchOptions,
-  IOthelloSearchInfo,
-  IOthelloSearchResult
+  IReversiSearchOptions,
+  IReversiSearchInfo,
+  IReversiSearchResult
 > {
   readonly id = "edax";
   readonly name = "Edax";

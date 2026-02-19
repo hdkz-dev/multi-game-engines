@@ -12,5 +12,7 @@ export * from "./engine-stats.js";
 export * from "./pv-list.js";
 export * from "./search-log.js";
 export * from "./engine-monitor.js";
-export * from "./chess-board.js";
-export * from "./shogi-board.js";
+
+// Re-exports from domain-specific element packages
+export * from "@multi-game-engines/ui-chess-elements";
+export * from "@multi-game-engines/ui-shogi-elements";

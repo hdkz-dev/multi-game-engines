@@ -3,12 +3,15 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "types": ["vitest/globals", "@testing-library/jest-dom", "node"]
+    "types": ["vitest/globals"]
   },
   "references": [
     { "path": "../core" },
-    { "path": "../i18n" },
-    { "path": "../ui-core" }
+    { "path": "../ui-core" },
+    { "path": "../ui-react-core" },
+    { "path": "../ui-react-monitor" },
+    { "path": "../ui-chess-react" },
+    { "path": "../ui-shogi-react" }
   ],
   "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]

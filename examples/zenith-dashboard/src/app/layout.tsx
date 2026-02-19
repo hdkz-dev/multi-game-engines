@@ -2,7 +2,7 @@
 
 import React, { useState, createContext, useContext, useEffect } from "react";
 import "./globals.css";
-import "@multi-game-engines/ui-react/dist/index.css";
+import "@multi-game-engines/ui-react/index.css";
 
 type Locale = "en" | "ja";
 

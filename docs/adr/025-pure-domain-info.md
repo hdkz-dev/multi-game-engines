@@ -21,6 +21,6 @@ We will remove all game-specific properties from `IBaseSearchInfo`, `IBaseSearch
 ## Consequences
 
 - **Positive**: The core package becomes truly generic and stable, independent of specific game types.
-- **Positive**: Type safety is improved as users get precise types for each engine (e.g., `winrate` for Go, `isExact` for Othello) without dealing with irrelevant properties.
+- **Positive**: Type safety is improved as users get precise types for each engine (e.g., `winrate` for Go, `isExact` for Reversi) without dealing with irrelevant properties.
 - **Negative**: There is a slight increase in boilerplate for adapter developers as they must explicitly define properties like `depth` even if they are common across 80% of engines.
 - **Neutral**: This change enforces a strict "Zero-Any Policy" as developers can no longer rely on optional properties in the base interface and must define correct domain types.

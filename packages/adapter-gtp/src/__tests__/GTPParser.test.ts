@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { GTPParser } from "../GTPParser.js";
-import { GOBoard } from "@multi-game-engines/core/go";
+import { GOBoard } from "@multi-game-engines/domain-go";
 
 describe("GTPParser", () => {
   beforeAll(() => {

@@ -1,33 +1,20 @@
+import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
 import {
-  IProtocolParser,
-  ProtocolValidator,
-  Brand,
-} from "@multi-game-engines/core";
-
-/** オセロの盤面データ */
-export type OthelloBoard = Brand<string, "OthelloBoard">;
-/** オセロの指し手 */
-export type OthelloMove = Brand<string, "OthelloMove">;
+  ReversiBoard,
+  ReversiMove,
+  REVERSI_MOVE_REGEX,
+  createReversiMove,
+} from "@multi-game-engines/domain-reversi";
 
 export class EdaxParser implements IProtocolParser<
-  IOthelloSearchOptions,
-  IOthelloSearchInfo,
-  IOthelloSearchResult
+  IReversiSearchOptions,
+  IReversiSearchInfo,
+  IReversiSearchResult
 > {
   // 2026 Best Practice: 正規表現の事前コンパイル
   private static readonly DEPTH_REGEX = /depth (\d+)/;
-  // Edax 指し手形式 (a1-h8, PS (Pass) 等)。
-  private static readonly MOVE_REGEX = /^([a-h][1-8]|PS)$/i;
 
-  /**
-   * 文字列を OthelloMove へ変換します。
-   */
-  private createMove(value: string): OthelloMove | null {
-    if (!EdaxParser.MOVE_REGEX.test(value)) return null;
-    return value as OthelloMove;
-  }
-
-  parseInfo(data: string | Record<string, unknown>): IOthelloSearchInfo | null {
+  parseInfo(data: string | Record<string, unknown>): IReversiSearchInfo | null {
     if (typeof data !== "string") return null;
     if (!data.includes("depth")) return null;
 
@@ -43,21 +30,23 @@ export class EdaxParser implements IProtocolParser<
 
   parseResult(
     data: string | Record<string, unknown>,
-  ): IOthelloSearchResult | null {
+  ): IReversiSearchResult | null {
     if (typeof data !== "string") return null;
     if (!data.startsWith("move ")) return null;
 
     const moveStr = data.slice(5).trim();
-    const bestMove = this.createMove(moveStr);
-    if (!bestMove) return null;
-
-    return {
-      raw: data,
-      bestMove,
-    };
+    try {
+      const bestMove = createReversiMove(moveStr);
+      return {
+        raw: data,
+        bestMove,
+      };
+    } catch {
+      return null;
+    }
   }
 
-  createSearchCommand(options: IOthelloSearchOptions): string[] {
+  createSearchCommand(options: IReversiSearchOptions): string[] {
     const commands: string[] = [];
     const sBoard = String(options.board);
 
@@ -87,21 +76,21 @@ export class EdaxParser implements IProtocolParser<
   }
 }
 
-export interface IOthelloSearchOptions {
-  board: OthelloBoard;
+export interface IReversiSearchOptions {
+  board: ReversiBoard;
   depth?: number;
   signal?: AbortSignal;
   [key: string]: unknown;
 }
 
-export interface IOthelloSearchInfo {
+export interface IReversiSearchInfo {
   raw: string;
   depth: number;
   [key: string]: unknown;
 }
 
-export interface IOthelloSearchResult {
+export interface IReversiSearchResult {
   raw: string;
-  bestMove: OthelloMove;
+  bestMove: ReversiMove;
   [key: string]: unknown;
 }

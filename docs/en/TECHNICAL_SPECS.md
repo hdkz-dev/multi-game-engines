@@ -61,7 +61,7 @@ The main consumer API.
 - **USIParser**: Shogi protocol with time control and `startpos` keyword support.
 - **GTPParser**: Go protocol supporting `genmove`, `visits`, and `winrate`.
 - **JSONParser (Mahjong)**: Structured message parsing with recursive injection validation.
-- **Strict Regex Validation**: Engine outputs are validated against pre-compiled static regexes to minimize NPS impact.
+- **Generic Text Parsers**: Flexible regex-based parsers for custom text protocols like Edax (Reversi), gnubg, etc.
 - **Injection Protection**: Illegal control characters trigger immediate `SECURITY_ERROR` rejection.
 
 ### 4-1. Board & Move Parsers
@@ -87,13 +87,26 @@ High-frequency state management foundation.
 - **Zod Contract Validation**: Validates all engine messages via `SearchInfoSchema` at runtime.
 - **EvaluationPresenter**: Separates display logic (colors, labels) from UI frameworks.
 
-### 6-2. React Adapter (`ui-react`)
+### 6-2. React Adapters
 
+- **`ui-react-core`**: Core React context and Provider.
+- **`ui-react-monitor`**: Monitoring components and `useEngineMonitor` hook.
+- **`ui-chess-react`, `ui-shogi-react`**: Domain-specific components.
+- **`ui-react` (Hub)**: All-in-one package for convenience.
 - **Storybook 10**: Fully compatible with Vite 6 and Tailwind CSS v4.
 - **Deterministic Lifecycle**: Ref-based monitor persistence and Strict Mode safety.
 - **A11y (WCAG 2.2 AA)**: Landmark roles and intelligent live regions.
 
-### 6-3. Web Components Adapter (`ui-elements`)
+### 6-3. Vue Adapters
+
+- **`ui-vue-core`**: Core Vue context and Provider.
+- **`ui-vue-monitor`**: Monitoring components and `useEngineMonitor` composable.
+- **`ui-chess-vue`, `ui-shogi-vue`**: Domain-specific components.
+- **`ui-vue` (Hub)**: All-in-one package for convenience.
+- **Vue 3 Composition API**: `useEngineMonitor` composable for reactive state.
+- **Storybook 10**: Storybook integration in Vue 3 + Vite.
+
+### 6-4. Web Components Adapter (`ui-elements`)
 
 - **Lit Implementation**: Standard-compliant lightweight Web Components.
 - **Board Components**: Efficient CSS Grid rendering with move highlighting and accessible localized piece names.

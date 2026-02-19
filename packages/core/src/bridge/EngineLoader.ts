@@ -56,6 +56,11 @@ export class EngineLoader implements IEngineLoader {
     const existing = this.inflightLoads.get(cacheKey);
     if (existing) return existing;
 
+    // 2026: SSR Compatibility Guard
+    if (typeof URL.createObjectURL === "undefined") {
+      return config.url;
+    }
+
     const promise = (async () => {
       try {
         // 2026 Best Practice: HTTPS 強制 (Strict Loopback Check)

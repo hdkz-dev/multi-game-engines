@@ -1,7 +1,7 @@
 {
   "name": "@multi-game-engines/ui-react",
   "version": "0.1.0",
-  "description": "React components for multi-game engines",
+  "description": "React components for multi-game engines (Hub Package)",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -12,34 +12,23 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./chess": {
-      "types": "./dist/chess/index.d.ts",
-      "import": "./dist/chess/index.js",
-      "require": "./dist/chess/index.cjs"
-    },
-    "./shogi": {
-      "types": "./dist/shogi/index.d.ts",
-      "import": "./dist/shogi/index.js",
-      "require": "./dist/shogi/index.cjs"
-    },
     "./hooks": {
       "types": "./dist/hooks.d.ts",
       "import": "./dist/hooks.js",
       "require": "./dist/hooks.cjs"
     },
-    "./dist/index.css": "./dist/index.css"
+    "./dist/index.css": "./dist/index.css",
+    "./index.css": "./dist/index.css"
   },
   "sideEffects": [
     "*.css"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/hooks.ts src/chess/index.tsx src/shogi/index.tsx --format cjs,esm --dts && tailwindcss -i src/tailwind.css -o dist/index.css",
+    "build": "tsup src/index.ts src/hooks.ts --format cjs,esm --dts && pnpm exec tailwindcss -i src/tailwind.css -o dist/index.css",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "typecheck": "tsc --noEmit"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -49,37 +38,26 @@
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-chess-react": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-elements": "workspace:*",
-    "@radix-ui/react-scroll-area": "^1.2.10",
-    "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slot": "^1.1.2",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.564.0",
-    "tailwind-merge": "^3.4.1"
+    "@multi-game-engines/ui-react-core": "workspace:*",
+    "@multi-game-engines/ui-react-monitor": "workspace:*",
+    "@multi-game-engines/ui-shogi-react": "workspace:*"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.10",
-    "@storybook/addon-docs": "10.2.10",
-    "@storybook/addon-links": "10.2.10",
     "@storybook/react-vite": "10.2.10",
     "@tailwindcss/cli": "^4.2.0",
     "@tailwindcss/vite": "^4.2.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.2.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^25.2.3",
+    "@types/node": "^24.10.13",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
-    "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "storybook": "10.2.10",
     "tailwindcss": "^4.2.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vitest": "^4.0.18"
   }
 }

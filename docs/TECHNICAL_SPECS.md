@@ -75,7 +75,7 @@ const pos = createFEN(
 - **GTPParser**: 囲碁用。`genmove` や `loadboard` などのコマンド生成、および `visits` や `winrate` の解析に対応。
 - **UCCIParser**: 中国将棋（Xiangqi）用。UCI ベースだが XQFEN 局面形式に対応。
 - **JSONParser (Mahjong)**: 麻雀用。構造化された JSON メッセージのパースと、再帰的なインジェクション検証。
-- **Generic Text Parsers**: Edax, gnubg, KingsRow 等の独自テキストプロトコルに対応するための柔軟な正規表現ベースのパーサー。
+- **Generic Text Parsers**: Edax, gnubg, KingsRow 等の独自テキストプロトコルに対応するための柔軟な正規表現ベースのパーサー。リバーシやバックギャモン等のゲームをサポートします。
 
 ### 4-1. 同一ゲーム・マルチエンジン対応 (Multi-Engine Support)
 
@@ -112,18 +112,21 @@ const pos = createFEN(
 - **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
 - **プレゼンテーションロジックの分離**: `EvaluationPresenter` により、評価値の表示色やラベル生成ロジックを UI フレームワークから分離・共通化。
 
-### 6-2. React アダプター (`ui-react`)
+### 6-2. React アダプター群
 
-- **Storybook 10 対応**: 最新の Storybook エコシステム（Vite 6, Tailwind CSS v4）に完全準拠。
+- **`ui-react-core`**: React 専用の基盤（`EngineUIProvider`）。他の UI パッケージの基盤となります。
+- **`ui-react-monitor`**: エンジン監視コンポーネント（`EngineMonitorPanel` 等）と専用フック（`useEngineMonitor`）。
+- **`ui-chess-react`, `ui-shogi-react`**: ゲーム固有の React コンポーネント。
+- **`ui-react` (Hub)**: 上記を統合して提供するパッケージ。
+- **Storybook 10 対応**: 最新 of Storybook エコシステム（Vite 6, Tailwind CSS v4）に完全準拠。
 - **決定論的ライフサイクル**: `useRef` によるモニターインスタンスの永続化と、`useEffect` による厳格な購読解除を徹底。React 18 以降の Strict Mode および Concurrent Rendering 下でも安全に動作します。
-- **UI 依存性注入 (EngineUIProvider)**: コンテキストを通じて i18n 文字列やデザインテーマを一括管理。
-- **アクセシビリティ (WCAG 2.2 AA)**:
-  - **Landmark Roles**: `EngineMonitorPanel` は `section` ランドマークとして機能。
-  - **Intelligent Live Regions**: 重大な状態変化（詰みの発見、エラー等）のみを `aria-live=\"assertive\"` で通知し、通常の更新は `polite` で処理。
-  - **Focus Trap & Management**: Radix UI プリミティブによるキーボードフォーカス制御。
 
-### 6-3. Vue アダプター (`ui-vue`)
+### 6-3. Vue アダプター群
 
+- **`ui-vue-core`**: Vue 3 専用の基盤。
+- **`ui-vue-monitor`**: エンジン監視コンポーネントと `useEngineMonitor` コンポーザブル。
+- **`ui-chess-vue`, `ui-shogi-vue`**: ゲーム固有の Vue コンポーネント。
+- **`ui-vue` (Hub)**: 上記を統合して提供するパッケージ。
 - **Vue 3 Composition API**: `useEngineMonitor` コンポーザブルによるリアクティブな状態管理。
 - **Storybook 10 対応**: Vue 3 + Vite 環境での Storybook 統合。Tailwind CSS v4 サポート。
 

@@ -3,8 +3,6 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   entry: {
     index: "src/index.ts",
-    "domains/chess/index": "src/domains/chess/index.ts",
-    "domains/shogi/index": "src/domains/shogi/index.ts",
   },
   format: ["cjs", "esm"],
   dts: true,

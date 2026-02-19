@@ -13,17 +13,36 @@ export type Move = Brand<string, "Move">;
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-export type PositionString = string & { readonly __brand: string };
+/**
+ * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
+ */
+export type PositionString<T extends string = string> = string & {
+  readonly __brand: T;
+};
 
 /**
  * チェスの局面表記（FEN）。
  */
-export type FEN = PositionString & { readonly __brand: "FEN" };
+export type FEN = PositionString<"FEN">;
 
 /**
  * 将棋の局面表記（SFEN）。
  */
-export type SFEN = PositionString & { readonly __brand: "SFEN" };
+export type SFEN = PositionString<"SFEN">;
+
+export function createPositionString<T extends string>(
+  value: string,
+): PositionString<T> {
+  return value as PositionString<T>;
+}
+
+export function createFEN(value: string): FEN {
+  return createPositionString<"FEN">(value);
+}
+
+export function createSFEN(value: string): SFEN {
+  return createPositionString<"SFEN">(value);
+}
 
 /**
  * エンジンの状態。

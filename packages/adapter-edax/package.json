@@ -1,7 +1,7 @@
 {
   "name": "@multi-game-engines/adapter-edax",
   "version": "0.1.0",
-  "description": "Edax (Othello) engine adapter for multi-game-engines ecosystem",
+  "description": "Edax (Reversi) engine adapter for multi-game-engines ecosystem",
   "license": "MIT",
   "author": "multi-game-engines contributors",
   "repository": {
@@ -25,13 +25,15 @@
     "LICENSE"
   ],
   "keywords": [
-    "othello",
     "reversi",
     "edax",
     "engine",
     "wasm",
     "multi-game-engines"
   ],
+  "dependencies": {
+    "@multi-game-engines/domain-reversi": "workspace:*"
+  },
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"
   },

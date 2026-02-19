@@ -10,18 +10,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./chess": {
-      "types": "./dist/chess-board.d.ts",
-      "import": "./dist/chess-board.js"
-    },
-    "./shogi": {
-      "types": "./dist/shogi-board.d.ts",
-      "import": "./dist/shogi-board.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/chess-board.ts src/shogi-board.ts --format esm --dts --minify --clean",
+    "build": "tsup src/index.ts --format esm --dts --minify --clean",
     "dev": "tsup src/index.ts --format esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
@@ -31,19 +23,20 @@
   },
   "license": "MIT",
   "sideEffects": [
-    "./dist/chess-board.js",
-    "./dist/shogi-board.js",
-    "./dist/engine-monitor.js",
-    "./dist/evaluation-graph.js",
-    "./dist/pv-list.js",
-    "./dist/search-log.js",
-    "./dist/score-badge.js",
-    "./dist/engine-stats.js"
+    "src/engine-monitor.ts",
+    "src/evaluation-graph.ts",
+    "src/pv-list.ts",
+    "src/search-log.ts",
+    "src/score-badge.ts",
+    "src/engine-stats.ts",
+    "dist/*.js"
   ],
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-chess-elements": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-shogi-elements": "workspace:*",
     "lit": "^3.2.1"
   },
   "devDependencies": {

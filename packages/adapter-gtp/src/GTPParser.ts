@@ -5,7 +5,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
 } from "@multi-game-engines/core";
-import { GOBoard, GOMove, createGOMove } from "@multi-game-engines/core/go";
+import { GOBoard, GOMove, createGOMove } from "@multi-game-engines/domain-go";
 
 export interface IGOSearchOptions extends IBaseSearchOptions {
   board: GOBoard;

@@ -17,17 +17,15 @@ export default defineConfig({
       include: ["src/**/*"],
     }),
   ],
+  esbuild: {
+    minifyIdentifiers: false,
+  },
   build: {
     minify: "esbuild",
-    esbuild: {
-      minifyIdentifiers: false,
-    },
     lib: {
       entry: {
         index: resolve(__dirname, "src/index.ts"),
         hooks: resolve(__dirname, "src/hooks.ts"),
-        chess: resolve(__dirname, "src/chess/index.ts"),
-        shogi: resolve(__dirname, "src/shogi/index.ts"),
       },
       name: "UIVue",
       formats: ["es", "cjs"],

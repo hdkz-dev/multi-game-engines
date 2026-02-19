@@ -64,7 +64,7 @@ stockfish.search({ fen, depth: 20 });
 
 ### 多言語・多プロトコル対応
 
-チェスの **UCI (Universal Chess Interface)**、将棋の **USI (Universal Shogi Interface)**、囲碁の **GTP (Go Text Protocol)**、オセロ・麻雀の独自プロトコル（JSON等）をサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
+チェスの **UCI (Universal Chess Interface)**、将棋の **USI (Universal Shogi Interface)**、囲碁の **GTP (Go Text Protocol)**、リバーシ・麻雀の独自プロトコル（JSON等）をサポート。それぞれのパーサーはインジェクション対策が施されており、安全に利用可能です。
 
 ### 同一ゲーム・マルチエンジン対応
 
@@ -113,9 +113,11 @@ stockfish.search({ fen, depth: 20 });
     - **役割**: 純粋な言語リソースの提供。
     - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。
 
-3.  **Framework Adapters**:
-    - **`ui-react`**: React Hooks (`useSyncExternalStore`) と Context DI を活用したアダプター。Storybook 10 と Tailwind CSS v4 に完全対応。
-    - **`ui-vue`**: Vue 3 Composition API (`ref`, `computed`) を活用したリアクティブ・アダプター。Storybook 10 対応済み。
+3.  **Framework Adapters (Modular Split)**:
+    - **`ui-*-core`**: 各フレームワーク（React/Vue）における基盤（i18n Provider、基本的な UI コンテキスト管理）。
+    - **`ui-*-monitor`**: エンジン監視・管理ツール（`EngineMonitorPanel` およびそのサブコンポーネント）。
+    - **`ui-*-game`**: 個別ゲームの UI (ChessBoard 等)。
+    - **`ui-react` / `ui-vue`**: 上記のモジュールを統合し、一括で提供するハブパッケージ。利用者は必要に応じて最小限の依存関係（例: `ui-chess-react` のみ）を選択可能です。
     - **`ui-elements`**: Lit ベースの Web Components。あらゆる HTML 環境で動作する究極のポータビリティを提供。
 
 ### 2. 契約駆動 UI (Contract-driven UI)

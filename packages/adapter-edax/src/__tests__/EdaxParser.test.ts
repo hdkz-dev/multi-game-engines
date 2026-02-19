@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EdaxParser } from "../EdaxParser.js";
+import { ReversiBoard } from "@multi-game-engines/domain-reversi";
 
 describe("EdaxParser", () => {
   beforeAll(() => {
@@ -35,8 +36,7 @@ describe("EdaxParser", () => {
   it("should throw error for injection in board data", () => {
     expect(() =>
       parser.createSearchCommand({
-        board:
-          "start\nquit" as unknown as import("../EdaxParser.js").OthelloBoard,
+        board: "start\nquit" as unknown as ReversiBoard,
         depth: 10,
       }),
     ).toThrow(/command injection/);

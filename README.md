@@ -14,8 +14,7 @@
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
 - **Universal UI Architecture**:
   - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、i18n。
-  - **ui-react**: React Hooks と Context DI を活用したアダプター。
-  - **ui-vue**: Vue 3 Composition API を活用したアダプター。
+  - **ui-react / ui-vue**: 基盤、監視ツール、ゲームUIをモジュール化したフレームワーク専用スイート。
   - **ui-elements**: Lit ベースの Web Components (Ready)。
 
 ## 🤖 AI 開発ワークフロー / AI Workflow
@@ -33,7 +32,7 @@
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
 - **Go**: KataGo (GTP) - **Ready**
-- **Othello**: Edax 4.4 (Board/Move Protocol) - **Ready**
+- **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
 - **Mahjong**: Mortal (JSON Protocol) - **Ready**
 
 ## 🚀 クイックスタート / Quick Start
@@ -41,7 +40,7 @@
 ```typescript
 import { EngineBridge } from "@multi-game-engines/core";
 import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
-import { createFEN } from "@multi-game-engines/core/chess";
+import { createFEN } from "@multi-game-engines/domain-chess";
 
 const bridge = new EngineBridge();
 // registerAdapter は非同期メソッドです

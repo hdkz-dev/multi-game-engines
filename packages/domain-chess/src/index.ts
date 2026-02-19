@@ -1,0 +1,124 @@
+import { EngineErrorCode } from "@multi-game-engines/core";
+import { EngineError } from "@multi-game-engines/core";
+
+/**
+ * Branded Type for FEN (Forsyth-Edwards Notation) strings.
+ */
+export type FEN = string & { readonly __brand: "FEN" };
+
+/**
+ * チェスの駒識別子。
+ */
+export type ChessPiece =
+  | "P"
+  | "N"
+  | "B"
+  | "R"
+  | "Q"
+  | "K"
+  | "p"
+  | "n"
+  | "b"
+  | "r"
+  | "q"
+  | "k";
+
+/**
+ * Parsed FEN result containing the 2D board array and turn metadata.
+ */
+export interface ParsedFEN {
+  /** 8x8 grid of pieces. board[0] is Rank 8, board[7] is Rank 1. */
+  board: (ChessPiece | null)[][];
+  /** Whose turn it is: 'w' for White, 'b' for Black. */
+  turn: "w" | "b";
+}
+
+/**
+ * FEN 形式の文字列を厳密に検証し、Branded Type を返します。
+ */
+export function createFEN(pos: string): FEN {
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid FEN: Input must be a non-empty string.",
+    });
+  }
+  const trimmedPos = pos.trim();
+  if (trimmedPos === "startpos") {
+    return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
+  }
+  if (!/^[0-9a-hRNBQKPpnbrqkw/\s-]+$/.test(trimmedPos)) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "Invalid FEN: Illegal characters detected.",
+    });
+  }
+  const fields = trimmedPos.split(/\s+/);
+  if (fields.length !== 6) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN structure: Expected 6 fields, found ${fields.length}`,
+    });
+  }
+
+  // 3rd field: Castling rights (K, Q, k, q or -)
+  if (!/^(?:K?Q?k?q?|-)$/.test(fields[2]!) || fields[2] === "") {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN castling rights: "${fields[2]}"`,
+    });
+  }
+
+  // 5th field: Halfmove clock (>= 0)
+  const halfmove = parseInt(fields[4]!, 10);
+  if (isNaN(halfmove) || halfmove < 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN halfmove clock: "${fields[4]}"`,
+    });
+  }
+
+  // 6th field: Fullmove number (>= 1)
+  const fullmove = parseInt(fields[5]!, 10);
+  if (isNaN(fullmove) || fullmove < 1) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN fullmove number: "${fields[5]}"`,
+    });
+  }
+
+  return trimmedPos as FEN;
+}
+
+export function isValidChessPiece(char: string): char is ChessPiece {
+  return /^[PNBRQKpnbrqk]$/.test(char);
+}
+
+/**
+ * FEN 文字列を解析して 2D 盤面配列に変換します。
+ */
+export function parseFEN(fen: FEN): ParsedFEN {
+  const parts = fen.trim().split(/\s+/);
+  const position = parts[0]!;
+  const turn = parts[1] as "w" | "b";
+
+  const rows = position.split("/");
+  if (rows.length !== 8) throw new Error("Invalid FEN: Expected 8 ranks");
+
+  const board: (ChessPiece | null)[][] = [];
+  for (let r = 0; r < 8; r++) {
+    const row = rows[r]!;
+    const boardRow: (ChessPiece | null)[] = [];
+    for (const char of row) {
+      if (/[1-8]/.test(char)) {
+        const emptyCount = parseInt(char, 10);
+        for (let i = 0; i < emptyCount; i++) boardRow.push(null);
+      } else if (isValidChessPiece(char)) {
+        boardRow.push(char);
+      } else throw new Error("Invalid FEN character");
+    }
+    if (boardRow.length !== 8) throw new Error("Invalid FEN rank width");
+    board.push(boardRow);
+  }
+  return { board, turn };
+}

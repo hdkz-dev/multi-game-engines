@@ -6,7 +6,7 @@ import {
   ProtocolValidator,
   Move,
 } from "@multi-game-engines/core";
-import { SFEN } from "@multi-game-engines/core/shogi";
+import { SFEN } from "@multi-game-engines/domain-shogi";
 import { ISHOGISearchOptions } from "./usi-types.js";
 
 /** 将棋用の思考情報 (USI規格) */

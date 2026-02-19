@@ -48,8 +48,16 @@
   - [x] 全プロトコルパーサーの異常系堅牢化（境界チェック・デフォルト値補完）。
   - [x] React/Vue 両フレームワークにおけるアクセシビリティ完全準拠 (ARIA, Focus, Live Regions)。
   - [x] Next.js 15/React 19/Vue 3.5 最新機能への追従と最適化。
-  - [x] 14パッケージ全域にわたるドキュメント・実装の完全同期。
+  - [x] 全パッケージ全域にわたるドキュメント・実装の完全同期。
   - [x] Project-wide Zero-Any Policy の完遂とブランド型の再定義。
+- [x] **究極のモジュール化とIP保護 (Modularization & IP Safety)**:
+  - [x] UI パッケージの物理分離（`core`, `monitor`, `game`）とフレームワーク独立性の確保。
+  - [x] 商標保護のための名称変更（`Othello` -> `Reversi`）の全域適用。
+  - [x] `domain-reversi`, `domain-mahjong` の新設によるドメインロジックの完全分離。
+  - [x] ハブパッケージ（`ui-react`, `ui-vue`）による統合インポート環境の整備。
+- [x] **UI 品質とフレームワーク統合の昇華 (UI Quality & Integration Excellence)**:
+  - [x] React 19 / Vue 3 / Lit における確実なプロパティ同期パターン (useLayoutEffect + Property Reflection) の確立。
+  - [x] チェス・将棋盤面コンポーネントにおける網羅的なユニット・統合テスト（100%パス）の達成。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---

@@ -1,16 +1,16 @@
 import "@multi-game-engines/core";
 import {
-  IOthelloSearchOptions,
-  IOthelloSearchInfo,
-  IOthelloSearchResult,
+  IReversiSearchOptions,
+  IReversiSearchInfo,
+  IReversiSearchResult,
 } from "./EdaxParser.js";
 
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
     edax: {
-      options: IOthelloSearchOptions;
-      info: IOthelloSearchInfo;
-      result: IOthelloSearchResult;
+      options: IReversiSearchOptions;
+      info: IReversiSearchInfo;
+      result: IReversiSearchResult;
     };
   }
 }

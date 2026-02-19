@@ -48,4 +48,5 @@
 
 1. `ui-core` でロジックをテスト（Vitest）。
 2. Storybook で `MockEngine` を用いて視覚的なバリエーション（ダークモード、狭い画面等）を確認。
-3. `packages/ui-react` で実装し、型チェックとビルド検証を行う。
+3. `packages/ui-*-monitor` または `packages/ui-*-game` で実装し、型チェックとビルド検証を行う。
+4. `packages/ui-react` または `packages/ui-vue` (Hub) から再エクスポートを行い、利用者に統合的な API を提供する。

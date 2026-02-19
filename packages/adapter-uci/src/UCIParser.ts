@@ -9,7 +9,7 @@ import {
   EngineError,
   EngineErrorCode,
 } from "@multi-game-engines/core";
-import { FEN } from "@multi-game-engines/core/chess";
+import { FEN } from "@multi-game-engines/domain-chess";
 
 /** チェス用の探索オプション (UCI標準規格) */
 export interface IChessSearchOptions extends IBaseSearchOptions {

@@ -21,6 +21,7 @@
   - `requestAnimationFrame` 同期機能を内蔵し、描画レートをブラウザの再描画周期に自動調整する。
 - **Framework Adapters (ui-react, etc.)**:
   - `ui-core` をラップした薄い表現層として提供。React なら Hooks、Vue なら Composables として提供する。
+  - フレームワークごとに `core`, `monitor`, `game` パッケージへ細分化し、利用者のプロジェクトに必要な最小限の依存関係（Pay-as-you-go）を保証する。
 
 ## 結果
 

@@ -22,7 +22,7 @@
 本プロジェクトの UI 層は、特定のフレームワークへの依存を最小限に抑えつつ、最高のパフォーマンスを実現する二層構造を採用しています。
 
 - **Reactive Core (`ui-core`)**: フレームワーク非依存のビジネスロジック。状態管理、NPS スケーリング、局面解析、および `requestAnimationFrame` による描画最適化を担います。
-- **Framework Adapters**: `ui-react`, `ui-vue`, `ui-elements` (Lit) を提供。Core のロジックを各フレームワークの流儀に合わせてラップし、100% の機能パリティを維持します。
+- **Framework Adapters**: `ui-react`, `ui-vue`, `ui-elements` (Lit) を提供。基盤 (core)、監視ツール (monitor)、ゲーム UI (game) にモジュール化されており、必要なコンポーネントのみを最小限の依存関係で利用可能です。
 - **Contract-driven UI**: エンジンからの出力は `Zod` スキーマによって実行時に検証され、UI のクラッシュを構造的に防止します。
 
 ---
@@ -36,6 +36,7 @@
 - [x] **Core-UI 連携**: 主要フレームワーク（React/Next.js/Vue）向け UI 基盤の提供。
 - [x] **Thinking Log**: 永続化ログとパフォーマンス最適化の実装。
 - [x] **Board UI**: フレームワーク非依存のチェス・将棋盤コンポーネント。
+- [x] **IP Safety**: 全域での Reversi への改称と商標リスク排除。
 
 ---
 
@@ -45,11 +46,12 @@
 
 - [ ] **Build Pipeline**: Emscripten / Rust 最適化ビルド（SIMD128, Multithreading）の自動化。
 - [x] **Turborepo 統合**: 並列実行とキャッシュによる高速なビルドパイプラインの確立。
+- [x] **Modular Split**: UI パッケージの物理分離（core/monitor/game）による「Pay-as-you-go」アーキテクチャの完成。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Extended Adapters**:
-  - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), オセロ (Edax)。
+  - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), リバーシ (Edax)。
   - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。
   - **Incomplete Information**: ポーカー (DeepStack), ブリッジ, 花札。
 - [ ] **Multi-Engine Ensemble**: 同一局面を複数エンジンで同時解析する UI/Logic の提供。
