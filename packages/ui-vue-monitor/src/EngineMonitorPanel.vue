@@ -37,7 +37,7 @@ import {
 const props = defineProps<{
   engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>;
   searchOptions: T_OPTIONS;
-  title?: string;
+  title?: string | undefined;
 }>();
 
 const emit = defineEmits<{

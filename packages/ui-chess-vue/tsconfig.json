@@ -4,7 +4,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "preserve",
-    "exactOptionalPropertyTypes": false,
     "outDir": "./dist"
   },
   "references": [

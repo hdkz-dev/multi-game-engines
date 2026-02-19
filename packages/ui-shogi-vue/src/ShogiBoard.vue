@@ -5,25 +5,27 @@ import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
 defineProps<{
   sfen: SFEN;
-  lastMove?: Move;
-  boardLabel?: string;
-  errorMessage?: string;
-  handSenteLabel?: string;
-  handGoteLabel?: string;
-  pieceNames?: Partial<Record<ShogiPiece, string>>;
-  locale?: string;
+  lastMove?: Move | undefined;
+  boardLabel?: string | undefined;
+  errorMessage?: string | undefined;
+  handSenteLabel?: string | undefined;
+  handGoteLabel?: string | undefined;
+  pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+  pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
+  locale?: string | undefined;
 }>();
 </script>
 
 <template>
   <shogi-board
     :sfen="sfen"
-    :last-move="lastMove"
+    :last-move="lastMove || undefined"
     :board-label="boardLabel"
     :error-message="errorMessage"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
     :locale="locale"
     .pieceNames="pieceNames"
+    .pieceSymbols="pieceSymbols"
   ></shogi-board>
 </template>

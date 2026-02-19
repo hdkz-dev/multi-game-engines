@@ -10,11 +10,10 @@ import {
   IBaseSearchResult,
 } from "@multi-game-engines/core";
 
-const meta: Meta<typeof EngineMonitorPanel> = {
+const meta: Meta = {
   title: "Components/EngineMonitorPanel",
-  component: EngineMonitorPanel as unknown as Meta<
-    typeof EngineMonitorPanel
-  >["component"],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: EngineMonitorPanel as any,
   tags: ["autodocs"],
   decorators: [
     () => ({

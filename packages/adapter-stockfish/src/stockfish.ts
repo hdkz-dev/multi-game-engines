@@ -20,12 +20,14 @@ export class StockfishAdapter extends UCIAdapter {
       sources: {
         main: {
           url: "https://example.com/stockfish.js",
-          sri: "sha256-dummy-main",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-StockfishMainScriptHashPlaceholder",
           type: "worker-js",
         },
         wasm: {
           url: "https://example.com/stockfish.wasm",
-          sri: "sha256-dummy-wasm",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-StockfishWasmBinaryHashPlaceholder",
           type: "wasm",
           mountPath: "stockfish.wasm",
         },

@@ -6,7 +6,6 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "exactOptionalPropertyTypes": false,
     "outDir": "./dist",
     "types": ["vitest/globals"]
   },

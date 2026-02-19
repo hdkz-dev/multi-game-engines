@@ -5,7 +5,6 @@
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "exactOptionalPropertyTypes": false,
     "outDir": "./dist",
     "types": ["vitest/globals"]
   },
