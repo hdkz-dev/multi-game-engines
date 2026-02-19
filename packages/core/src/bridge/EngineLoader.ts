@@ -278,8 +278,10 @@ export class EngineLoader implements IEngineLoader {
 
       const currentOrigin =
         typeof window !== "undefined" ? window.location.origin : "";
+      const isCrossOrigin = currentOrigin && parsedUrl.origin !== currentOrigin;
+      const shouldReject = isCrossOrigin && (this.isProduction || !isLoopback);
 
-      if (currentOrigin && parsedUrl.origin !== currentOrigin && !isLoopback) {
+      if (shouldReject) {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Cross-origin Worker scripts are prohibited for security: ${url}`,

@@ -20,29 +20,7 @@ export type PositionString<T extends string = string> = string & {
   readonly __brand: T;
 };
 
-/**
- * チェスの局面表記（FEN）。
- */
-export type FEN = PositionString<"FEN">;
-
-/**
- * 将棋の局面表記（SFEN）。
- */
-export type SFEN = PositionString<"SFEN">;
-
-export function createPositionString<T extends string>(
-  value: string,
-): PositionString<T> {
-  return value as PositionString<T>;
-}
-
-export function createFEN(value: string): FEN {
-  return createPositionString<"FEN">(value);
-}
-
-export function createSFEN(value: string): SFEN {
-  return createPositionString<"SFEN">(value);
-}
+// 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
 /**
  * エンジンの状態。

@@ -311,7 +311,16 @@ export class EngineBridge implements IEngineBridge {
         }
 
         // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-        // registerAdapter 内で既に実行されている場合はスキップ
+        // registerAdapter 内で既に実行されている場合はスキップ。
+        // ただし実行前に再確認。
+        if (this.disposed) {
+          throw new EngineError({
+            code: EngineErrorCode.LIFECYCLE_ERROR,
+            message: "EngineBridge was disposed before capability enforcement.",
+            engineId: id,
+          });
+        }
+
         if (!newlyRegistered) {
           await this.enforceCapabilities(adapter);
         }
@@ -343,10 +352,13 @@ export class EngineBridge implements IEngineBridge {
           IBaseSearchResult
         >;
 
-        if (!this.disposed) {
-          this.engineInstances.set(id, new WeakRef(engine));
-          this.finalizationRegistry.register(engine, id);
+        if (this.disposed) {
+          // ファサードが生成されていても、破棄されていたらキャッシュしない
+          return engine;
         }
+
+        this.engineInstances.set(id, new WeakRef(engine));
+        this.finalizationRegistry.register(engine, id);
 
         return engine;
       } finally {

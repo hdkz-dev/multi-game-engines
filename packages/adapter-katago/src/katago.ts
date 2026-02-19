@@ -15,12 +15,14 @@ export class KataGoAdapter extends GTPAdapter {
       sources: {
         main: {
           url: "https://example.com/katago.js",
-          sri: "sha256-dummy",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-KataGoMainScriptHashPlaceholder",
           type: "worker-js",
         },
         wasm: {
           url: "https://example.com/katago.wasm",
-          sri: "sha256-dummy",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-KataGoWasmBinaryHashPlaceholder",
           type: "wasm",
           mountPath: "katago.wasm",
         },

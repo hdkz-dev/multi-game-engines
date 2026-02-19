@@ -54,13 +54,15 @@ export function createMove(move: string): Move {
 }
 
 /** 汎用局面バリデータ (2026 Zenith Tier: Refuse by Exception) */
-export function createPositionString(pos: string): PositionString {
+export function createPositionString<T extends string = string>(
+  pos: string,
+): PositionString<T> {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid PositionString: Input must be a non-empty string.",
     });
   }
   ProtocolValidator.assertNoInjection(pos, "Position");
-  return pos as PositionString;
+  return pos as PositionString<T>;
 }

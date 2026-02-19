@@ -28,8 +28,8 @@ export class EdaxAdapter extends BaseAdapter<
       const url = "https://example.com/edax.js";
       const config = {
         url,
-        // TODO: Replace with actual SRI hash before production release
-        sri: "sha256-dummy",
+        // TODO: Replace with real SRI hash before production release
+        sri: "sha384-EdaxMainScriptHashPlaceholder",
         size: 0,
         type: "worker-js" as const,
       };

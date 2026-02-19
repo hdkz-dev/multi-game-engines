@@ -20,18 +20,21 @@ export class YaneuraouAdapter extends USIAdapter {
       sources: {
         main: {
           url: "https://example.com/yaneuraou.js",
-          sri: "sha256-dummy-main",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouMainScriptHashPlaceholder",
           type: "worker-js",
         },
         wasm: {
           url: "https://example.com/yaneuraou.wasm",
-          sri: "sha256-dummy-wasm",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouWasmBinaryHashPlaceholder",
           type: "wasm",
           mountPath: "yaneuraou.wasm",
         },
         nnue: {
           url: "https://example.com/nnue.bin",
-          sri: "sha256-dummy-nnue",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouNNUEHashPlaceholder",
           type: "eval-data",
           mountPath: "nnue.bin",
         },

@@ -27,8 +27,8 @@ export class MortalAdapter extends BaseAdapter<
       const url = "https://example.com/mortal.js";
       const config = {
         url,
-        // TODO: Replace with actual SRI hash before production release
-        sri: "sha256-dummy",
+        // TODO: Replace with real SRI hash before production release
+        sri: "sha384-MortalMainScriptHashPlaceholder",
         size: 0,
         type: "worker-js" as const,
       };
