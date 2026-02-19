@@ -21,6 +21,13 @@ import { EngineError } from "../errors/EngineError.js";
 
 /**
  * 全てのゲームエンジンのライフサイクルとミドルウェアを統括するブリッジ。
+ *
+ * シングルトンとしてではなく、アプリケーションのコンテキストごとにインスタンス化することを推奨します。
+ * 主要な機能:
+ * - アダプターの登録と管理
+ * - エンジンの動的ロードと依存性注入
+ * - グローバルイベント（ステータス、進捗、テレメトリ）の集約
+ * - ミドルウェアの適用と実行
  */
 export class EngineBridge implements IEngineBridge {
   private adapters = new Map<
@@ -77,6 +84,13 @@ export class EngineBridge implements IEngineBridge {
     void this.checkCapabilities();
   }
 
+  /**
+   * 汎用アダプター（UCI/USI/GTP等）を生成するためのファクトリ関数を登録します。
+   * これにより、`getEngine` に設定オブジェクトを渡すだけで、事前にインスタンス化することなくエンジンを利用可能になります。
+   *
+   * @param type - アダプターの種類識別子（例: "uci", "usi"）。IEngineConfig.adapter と一致させる必要があります。
+   * @param factory - 設定を受け取りアダプターを返す関数。
+   */
   registerAdapterFactory<
     O extends IBaseSearchOptions,
     I extends IBaseSearchInfo,
@@ -97,6 +111,16 @@ export class EngineBridge implements IEngineBridge {
     );
   }
 
+  /**
+   * アダプターインスタンスをブリッジに登録します。
+   *
+   * 処理内容:
+   * 1. 環境能力（Capabilities）の検証。不足している場合はエラーをスロー。
+   * 2. 同一 ID の既存アダプターの破棄（リソースリーク防止）。
+   * 3. ステータス、進捗、テレメトリイベントのグローバルリスナーへの接続。
+   *
+   * @param adapter - 登録する IEngineAdapter 実装。
+   */
   async registerAdapter<
     O extends IBaseSearchOptions,
     I extends IBaseSearchInfo,
@@ -179,6 +203,19 @@ export class EngineBridge implements IEngineBridge {
     idOrConfig: string | IEngineConfig,
     strategy?: EngineLoadingStrategy,
   ): Promise<IEngine<O, I, R>>;
+  /**
+   * 指定された ID または設定に基づいてエンジンインスタンスを取得します。
+   *
+   * 特徴:
+   * - **キャッシュ**: 既にインスタンスが存在する場合は、WeakRef キャッシュから即座に返却します。
+   * - **並行性制御**: 同一 ID に対する同時リクエストはデデュプリケーション（Promise 共有）され、競合を防ぎます。
+   * - **動的生成**: ID の代わりに IEngineConfig を渡すことで、未登録のアダプターをオンデマンドで生成・登録できます。
+   *
+   * @param idOrConfig - エンジン ID (string) または設定オブジェクト (IEngineConfig)。
+   * @param strategy - ロード戦略 ('on-demand' | 'manual' | 'eager')。デフォルトは 'on-demand'。
+   * @returns IEngine インターフェースを実装した Facade インスタンス。
+   * @throws {EngineError} アダプターが見つからない、または初期化に失敗した場合。
+   */
   async getEngine(
     idOrConfig: string | IEngineConfig,
     strategy: EngineLoadingStrategy = "on-demand",
@@ -390,6 +427,17 @@ export class EngineBridge implements IEngineBridge {
     return this.loaderPromise;
   }
 
+  /**
+   * ブリッジを破棄し、管理下の全てのリソースを解放します。
+   *
+   * 処理内容:
+   * 1. 登録された全アダプターの `dispose()` を呼び出し、Worker を停止。
+   * 2. イベントリスナーの解除。
+   * 3. 内部キャッシュ（インスタンス、ミドルウェア）のクリア。
+   * 4. 実行中のローダー処理の待機とクリーンアップ。
+   *
+   * このメソッド呼び出し後、ブリッジは使用不能になります。
+   */
   async dispose(): Promise<void> {
     this.disposed = true;
     const pendingLoader = this.loaderPromise;
