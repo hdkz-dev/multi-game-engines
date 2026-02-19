@@ -179,7 +179,7 @@ describe("EngineLoader", () => {
     );
   });
 
-  it("should provide fallback for empty safeId", async () => {
+  it("should reject invalid engine ids", async () => {
     // 全て特殊文字のID
     const engineId = "!!!@@@";
     const config: IEngineSourceConfig = {
@@ -188,9 +188,9 @@ describe("EngineLoader", () => {
       sri: dummySRI,
     };
 
-    const url = await loader.loadResource(engineId, config);
-    expect(url).toBe("blob:test");
-    // 内部的なキャッシュキーが生成できていることを確認（例外が起きない）
+    await expect(loader.loadResource(engineId, config)).rejects.toThrow(
+      "Invalid engine ID",
+    );
   });
 
   it("should handle undefined config.type as script", async () => {

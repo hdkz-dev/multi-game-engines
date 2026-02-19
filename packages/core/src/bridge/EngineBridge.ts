@@ -138,7 +138,14 @@ export class EngineBridge implements IEngineBridge {
     );
 
     // 2026 Best Practice: ID をサニタイズして正規化 (Path Traversal 対策とルックアップの一貫性)
-    const id = adapter.id.replace(/[^a-zA-Z0-9-_]/g, "");
+    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
+    if (/[^a-zA-Z0-9-_]/.test(adapter.id)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid adapter ID: "${adapter.id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+      });
+    }
+    const id = adapter.id;
 
     // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
     await this.unregisterAdapter(id);
@@ -232,9 +239,16 @@ export class EngineBridge implements IEngineBridge {
       });
     }
 
-    const rawId = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
-    // Path Traversal 対策: ID をサニタイズ
-    const id = rawId.replace(/[^a-zA-Z0-9-_]/g, "");
+    const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
+
+    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
+    if (/[^a-zA-Z0-9-_]/.test(id)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid engine ID: "${id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        remediation: "Check your engine configuration or factory registration.",
+      });
+    }
 
     // 2026 Best Practice: インフライトの初期化をデデュプリケーション (TOCTOU レースコンディション対策)
     const pending = this.pendingEngines.get(id);

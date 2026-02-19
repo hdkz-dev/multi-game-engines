@@ -1,6 +1,7 @@
 {
   "name": "multi-game-engines",
   "private": true,
+  "type": "module",
   "description": "A bridge library for various game engines with a plugin-based architecture.",
   "workspaces": [
     "packages/*",

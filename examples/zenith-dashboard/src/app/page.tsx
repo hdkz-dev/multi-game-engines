@@ -93,7 +93,7 @@ export default function Dashboard() {
           setInitError(
             error instanceof Error
               ? error.message
-              : "Failed to initialize engines",
+              : "__INITIALIZATION_FAILED__",
           );
         }
       }
@@ -158,10 +158,12 @@ export default function Dashboard() {
             <div className="p-6 bg-red-50 text-red-700 rounded-3xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm">
               <Zap className="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
               <p className="font-black tracking-tighter text-lg mb-1">
-                Initialization Failed
+                {localeData.dashboard.initializationFailed}
               </p>
               <p className="text-xs font-bold opacity-70 leading-relaxed">
-                {initError}
+                {initError === "__INITIALIZATION_FAILED__"
+                  ? localeData.dashboard.initializationFailed
+                  : initError}
               </p>
             </div>
           ) : (

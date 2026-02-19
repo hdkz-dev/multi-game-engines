@@ -103,8 +103,11 @@ export class ShogiBoard extends LitElement {
     const old = this._sfen;
     try {
       this._sfen = createSFEN(value);
+      this.errorMessage = ""; // Clear error on success
     } catch (e) {
       console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
+      this.errorMessage =
+        e instanceof Error ? e.message : "Invalid SFEN position";
     }
     this.requestUpdate("sfen", old);
   }
@@ -193,7 +196,9 @@ export class ShogiBoard extends LitElement {
     } catch {
       return html`
         <div class="container" role="alert">
-          <div class="error-overlay">${strings.errorMessage}</div>
+          <div class="error-overlay">
+            ${this.errorMessage || strings.errorMessage}
+          </div>
         </div>
       `;
     }

@@ -61,6 +61,22 @@ export function createFEN(pos: string): FEN {
     });
   }
 
+  // 2nd field: Active color (w or b)
+  if (!/^[wb]$/.test(fields[1]!)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN turn: Expected "w" or "b", found "${fields[1]}"`,
+    });
+  }
+
+  // 4th field: En passant target square (- or a-h3/a-h6)
+  if (!/^(?:-|[a-h][36])$/.test(fields[3]!)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid FEN en passant: "${fields[3]}"`,
+    });
+  }
+
   // 3rd field: Castling rights (K, Q, k, q or -)
   if (!/^(?:K?Q?k?q?|-)$/.test(fields[2]!) || fields[2] === "") {
     throw new EngineError({

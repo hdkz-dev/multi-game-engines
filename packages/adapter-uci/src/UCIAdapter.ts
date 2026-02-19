@@ -3,6 +3,7 @@ import {
   IEngineLoader,
   WorkerCommunicator,
   EngineError,
+  EngineErrorCode,
   ResourceMap,
   IEngineConfig,
   IEngineSourceConfig,
@@ -62,7 +63,11 @@ export class UCIAdapter extends BaseAdapter<
         : { main: sources.main?.url };
 
       if (!resources["main"]) {
-        throw new Error("Missing main entry point URL");
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Missing main entry point URL",
+          engineId: this.id,
+        });
       }
 
       this.communicator = new WorkerCommunicator(resources["main"]);

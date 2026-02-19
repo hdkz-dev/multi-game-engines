@@ -1,5 +1,4 @@
-import { EngineErrorCode, Move } from "@multi-game-engines/core";
-import { EngineError } from "@multi-game-engines/core";
+import { EngineErrorCode, EngineError } from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
@@ -97,7 +96,36 @@ export function createSFEN(pos: string): SFEN {
       message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
     });
   }
-  // 簡易的な構造チェック（詳細は parseSFEN で行う）
+
+  // 2nd field: Turn (b or w)
+  if (!/^[bw]$/.test(fields[1]!)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
+    });
+  }
+
+  // 3rd field: Hand pieces (e.g., 2P3k or -)
+  if (!/^(?:(?:[1-9][0-9]*[PLNSGBRKplnsgbrk]+)+|-)$/.test(fields[2]!)) {
+    // Note: USI standard for hand pieces can be complex, but usually it is [count][piece][count][piece]...
+    // Adjusting to a simpler check that covers common patterns.
+    if (!/^[0-9a-zA-Z-]+$/.test(fields[2]!)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid SFEN hand: "${fields[2]}"`,
+      });
+    }
+  }
+
+  // 4th field: Move counter (>= 1)
+  const moveCount = parseInt(fields[3]!, 10);
+  if (isNaN(moveCount) || moveCount < 1) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid SFEN move counter: "${fields[3]}"`,
+    });
+  }
+
   return trimmedPos as SFEN;
 }
 

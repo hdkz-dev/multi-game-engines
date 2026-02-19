@@ -1,5 +1,4 @@
-import { EngineErrorCode } from "@multi-game-engines/core";
-import { EngineError } from "@multi-game-engines/core";
+import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
 export type GOBoard = string & { readonly __brand: "GOBoard" };

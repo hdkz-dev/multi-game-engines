@@ -16,11 +16,11 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  viteFinal: async (config: any) => {
-    config.plugins = config.plugins || [];
-    config.plugins.push(tailwindcss());
-    return config;
+  viteFinal: async (config) => {
+    const { mergeConfig } = await import("vite");
+    return mergeConfig(config, {
+      plugins: [tailwindcss()],
+    });
   },
   docs: {
     // 2026: Storybook 10 style autodocs

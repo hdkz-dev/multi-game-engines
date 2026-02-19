@@ -40,16 +40,14 @@ export class EngineLoader implements IEngineLoader {
     engineId: string,
     config: IEngineSourceConfig,
   ): Promise<string> {
-    // Path Traversal 対策: ID をサニタイズ
-    let safeId = engineId.replace(/[^a-zA-Z0-9-_]/g, "");
-    if (!safeId) {
-      // 全て特殊文字の場合のフォールバック (2026 Zenith Tier: DJB2 collision-resistant hash)
-      let hash = 5381;
-      for (let i = 0; i < engineId.length; i++) {
-        hash = (hash << 5) + hash + engineId.charCodeAt(i);
-      }
-      safeId = `engine-${(hash >>> 0).toString(16)}`;
+    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
+    if (/[^a-zA-Z0-9-_]/.test(engineId)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid engine ID: "${engineId}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+      });
     }
+    const safeId = engineId;
     const cacheKey = `${safeId}_${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
@@ -64,8 +62,11 @@ export class EngineLoader implements IEngineLoader {
     const promise = (async () => {
       try {
         // 2026 Best Practice: HTTPS 強制 (Strict Loopback Check)
-        const base = typeof window !== "undefined" ? window.location.href : "";
-        const url = new URL(config.url, base || undefined);
+        const base =
+          typeof window !== "undefined"
+            ? window.location.href
+            : "https://multi-game-engines.local";
+        const url = new URL(config.url, base);
         const isLoopback =
           url.hostname === "localhost" ||
           url.hostname === "127.0.0.1" ||

@@ -48,7 +48,9 @@ const initEngines = async () => {
     } catch (error) {
       console.error("Engine initialization failed:", error);
       initError.value =
-        error instanceof Error ? error.message : "Failed to initialize engines";
+        error instanceof Error
+          ? error.message
+          : localeData.value.dashboard.initializationFailed;
     }
   } else {
     initError.value = localeData.value.dashboard.errors.bridgeNotAvailable;

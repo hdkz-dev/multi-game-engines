@@ -51,10 +51,10 @@ function checkDocs() {
       if (pkg.devDependencies && pkg.devDependencies.eslint) {
         const eslintVer = pkg.devDependencies.eslint.replace(/[\^~]/, "");
         if (!progress.includes(`ESLint ${eslintVer}`)) {
-          console.warn(
-            `⚠️ Version mismatch: PROGRESS.md should contain "ESLint ${eslintVer}"`,
+          console.error(
+            `❌ Version mismatch: PROGRESS.md should contain "ESLint ${eslintVer}"`,
           );
-          // 厳密な同期を求めるなら hasError = true にするが、警告に留める
+          hasError = true;
         } else {
           console.log(`✅ Version sync verified: ESLint ${eslintVer}`);
         }

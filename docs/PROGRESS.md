@@ -1,6 +1,21 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月19日
+## 📅 更新日: 2026年2月20日
+
+## 🏆 到達ハイライト (PR #25 最終監査完遂 - Final Security & Robustness Hardening)
+
+- **「Refuse by Exception」原則の全域適用 (ADR-026)**:
+  - 従来のサイレントなサニタイズを完全に廃止。エンジン ID、FEN/SFEN 局面文字列に対し、不正な入力を検知した時点で `EngineError` をスローする厳格なバリデーションを、ブリッジからドメイン層まで一貫して適用しました。
+- **UI エラーフィードバックの高度化**:
+  - `ChessBoard` / `ShogiBoard` において、局面パースエラー時に `errorMessage` プロパティを通じて詳細なエラー理由をユーザーに提示する仕組みを実装。開発効率とユーザー体験の両面を向上させました。
+- **完全な SSR 互換性の確保**:
+  - `EngineLoader` において、`window` オブジェクトが未定義の環境（Server-side Rendering / Node.js）でも URL 解析がクラッシュしないよう、確実なフォールバックメカニズムを導入。
+- **モダンな ESM エコシステムへの完全移行**:
+  - ルートの `package.json` に `"type": "module"` を設定。ツール系スクリプトも CommonJS から ESM へ完全に刷新し、`doc-sync.js` 等のユーティリティにおいて ESLint バージョン等の完全同期を強制しました。
+- **テストスイートの Zenith 品質確保**:
+  - `UCIAdapter` / `USIAdapter` のユニットテストを大幅に拡充。正常系だけでなく、ハンドシェイクのタイムアウト、リソース注入失敗、ステータス遷移の整合性を網羅的に検証し、Vitest のフェイクタイマー下での `Unhandled Rejection` も完全に解消しました。
+- **ドキュメントと実装の完全同期**:
+  - ADR-026 の更新、および Zenith Dashboard 例におけるハードコード文字列の排除（i18n 統合）を完遂。実装・テスト・ドキュメントの三位一体が完全に保たれている状態を確立しました。
 
 ## 🏆 到達ハイライト (Phase 3 Stage 3 - 究極のモジュール化と知的財産保護 - Package Reorganization & IP Safety)
 

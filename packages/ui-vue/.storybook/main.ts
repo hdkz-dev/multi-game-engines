@@ -14,11 +14,11 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/vue3-vite"),
     options: {},
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  viteFinal: async (config: any) => {
-    config.plugins = config.plugins || [];
-    config.plugins.push(tailwindcss());
-    return config;
+  viteFinal: async (config) => {
+    const { mergeConfig } = await import("vite");
+    return mergeConfig(config, {
+      plugins: [tailwindcss()],
+    });
   },
   docs: {
     // Storybook 10 default

@@ -84,8 +84,11 @@ export class ChessBoard extends LitElement {
     const old = this._fen;
     try {
       this._fen = createFEN(value);
-    } catch {
-      /* Ignore */
+      this.errorMessage = "";
+    } catch (e) {
+      console.warn(`[ChessBoard] Invalid FEN attribute: ${value}`, e);
+      this.errorMessage =
+        e instanceof Error ? e.message : "Invalid FEN position";
     }
     this.requestUpdate("fen", old);
   }
@@ -155,7 +158,9 @@ export class ChessBoard extends LitElement {
       ({ board } = parseFEN(this.fen));
     } catch {
       return html`<div class="board" role="alert">
-        <div class="error-overlay">${strings.errorMessage}</div>
+        <div class="error-overlay">
+          ${this.errorMessage || strings.errorMessage}
+        </div>
       </div>`;
     }
     const highlightedSquares = new Set<number>();
