@@ -147,7 +147,26 @@
 
 ## 🚀 次のステップ
 
-1. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
-2. **Extended Adapters 調査**: バックギャモン、シャンチー、ポーカー等の WASM 移植状況の確認。
-3. **汎用アダプター基盤の構築**: `adapter-uci`, `adapter-usi` によるマルチエンジン対応の強化。
-4. **技術的負債の解消**: `adapter-edax` の本番用 SRI ハッシュ適用など。
+> 2026-02-19 プロジェクト全体レビューの結果に基づく。詳細は [実装計画書](implementation_plans/project-review-improvements.md) を参照。
+
+### フェーズ A: 即時対応 (Critical)
+
+1. **LICENSE ファイル整備**: ルートに MIT LICENSE を作成し、12パッケージの `license` フィールド欠落を解消。
+2. **release.yml Node.js 修正**: `release.yml` の `node-version` を `"22"` → `"24"` に修正し、CI/CD 全体の整合性を確保。
+3. **不要ファイルの除去**: `review_audit_raw.md`, `pr_review_comments*.json`, `pr_view.json`, `status.txt`, `opencode_test.txt` を `.gitignore` に追加し、Git 管理から除外。
+
+### フェーズ B: リリース準備 (High)
+
+1. **SRI ダミーハッシュの解消**: 全5アダプター（計9箇所）の `sha256-dummy*` を本番用ハッシュ値に置換。
+2. **README 一括作成**: 19パッケージへの README.md 追加。
+3. **pnpm-workspace.yaml 整合**: ルート `package.json` の `workspaces` に `"examples/*"` を追加。
+4. **ADR 欠番整理**: DECISION_LOG.md に ADR-003〜013 の欠番経緯を注記。
+
+### フェーズ C: 品質向上 (Medium)
+
+1. **lint warning 解消**: `ui-vue-monitor` の未使用インポート削除。
+2. **`as unknown as` 削減**: プロダクションコード3箇所のキャスト解消。
+3. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
+4. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
+5. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。
+6. **.DS_Store のGit管理除外**: `git rm --cached` で既存の `.DS_Store` ファイルを除外。
