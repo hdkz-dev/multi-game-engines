@@ -38,7 +38,7 @@ const scrollToBottom = async () => {
   }
 };
 
-watch(() => props.log.length, scrollToBottom, { immediate: true });
+watch(() => props.log.length, scrollToBottom, { immediate: true, flush: 'post' });
 </script>
 
 <template>

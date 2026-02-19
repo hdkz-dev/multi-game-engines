@@ -215,9 +215,10 @@ export abstract class BaseAdapter<
    * 探索を停止します。
    */
   async stop(): Promise<void> {
+    if (this.communicator) {
+      this.communicator.postMessage(this.parser.createStopCommand());
+    }
     this.cleanupPendingTask("Search aborted");
-    if (!this.communicator) return;
-    this.communicator.postMessage(this.parser.createStopCommand());
   }
 
   /**
