@@ -41,10 +41,10 @@ export function createSFEN(pos: string): SFEN {
   }
 
   const fields = trimmedPos.split(/\s+/);
-  if (fields.length < 4) {
+  if (fields.length !== 4) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
+      message: `Invalid SFEN structure: Expected exactly 4 fields, found ${fields.length}`,
     });
   }
 
@@ -76,7 +76,8 @@ export function createSFEN(pos: string): SFEN {
   }
 
   // 4. Move count
-  if (isNaN(Number(moveCount))) {
+  const mc = Number(moveCount);
+  if (!Number.isInteger(mc) || mc < 1) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid move count: "${moveCount}"`,

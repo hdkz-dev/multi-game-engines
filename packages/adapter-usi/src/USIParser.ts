@@ -22,7 +22,7 @@ export interface ISHOGISearchInfo extends IBaseSearchInfo {
 
 /** 将棋用の探索結果 (USI規格) */
 export interface ISHOGISearchResult extends IBaseSearchResult {
-  bestMove: Move;
+  bestMove: Move | null;
   ponder?: Move;
 }
 
@@ -148,8 +148,11 @@ export class USIParser implements IProtocolParser<
     const parts = data.split(" ");
     const moveStr = parts[1] || "";
 
-    // none または (none) の場合は有効な指し手なしとして null を返す（または特殊な Move 型を定義検討）
-    // 現状は MOVE_REGEX がこれらをパスするように修正済み。
+    // 投了や千日手などで指し手がない場合
+    if (moveStr === "none" || moveStr === "(none)") {
+      return { raw: data, bestMove: null };
+    }
+
     const bestMove = this.createMove(moveStr);
     if (!bestMove) return null;
 

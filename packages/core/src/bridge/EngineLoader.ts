@@ -13,8 +13,13 @@ import { EngineError } from "../errors/EngineError.js";
 export class EngineLoader implements IEngineLoader {
   private inflightLoads = new Map<string, Promise<string>>();
   private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
+  private isProduction: boolean;
 
-  constructor(private storage: IFileStorage) {}
+  constructor(private storage: IFileStorage) {
+    this.isProduction =
+      typeof process !== "undefined" &&
+      process.env?.["NODE_ENV"] === "production";
+  }
 
   private getMimeType(config: IEngineSourceConfig): string {
     switch (config.type) {
@@ -35,7 +40,9 @@ export class EngineLoader implements IEngineLoader {
     engineId: string,
     config: IEngineSourceConfig,
   ): Promise<string> {
-    const cacheKey = `${engineId}_${config.url}`;
+    // Path Traversal 対策: ID をサニタイズ
+    const safeId = engineId.replace(/[^a-zA-Z0-9-_]/g, "");
+    const cacheKey = `${safeId}_${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     const existing = this.inflightLoads.get(cacheKey);
@@ -43,8 +50,15 @@ export class EngineLoader implements IEngineLoader {
 
     const promise = (async () => {
       try {
-        // 2026 Best Practice: 実行リソース（Worker/WASM）のオリジン検証
-        if (config.type === "worker-js" || config.type === "wasm") {
+        // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
+        // type が明示的に安全（json, css 等）でない限り、デフォルトで検証対象とする。
+        if (
+          config.type === "worker-js" ||
+          config.type === "wasm" ||
+          config.type === undefined || // Default to JS
+          (config.type as string).includes("script") ||
+          (config.type as string).includes("javascript")
+        ) {
           this.validateWorkerUrl(config.url, engineId);
         }
 
@@ -68,11 +82,6 @@ export class EngineLoader implements IEngineLoader {
         const sri = config.sri;
         const unsafeNoSRI = config.__unsafeNoSRI === true;
 
-        // 2026 Best Practice: 本番環境での SRI バイパスを禁止
-        const isProduction =
-          typeof process !== "undefined" &&
-          process.env?.["NODE_ENV"] === "production";
-
         if (!sri && !unsafeNoSRI) {
           throw new EngineError({
             code: EngineErrorCode.SRI_MISMATCH,
@@ -81,7 +90,7 @@ export class EngineLoader implements IEngineLoader {
           });
         }
 
-        if (unsafeNoSRI && isProduction) {
+        if (unsafeNoSRI && this.isProduction) {
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
@@ -231,6 +240,15 @@ export class EngineLoader implements IEngineLoader {
         parsedUrl.hostname === "localhost" ||
         parsedUrl.hostname === "127.0.0.1" ||
         parsedUrl.hostname === "::1";
+
+      // 本番環境ではループバックも禁止（開発者モードの混入を防ぐ）
+      if (this.isProduction && isLoopback) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Loopback resources are prohibited in production: ${url}`,
+          engineId,
+        });
+      }
 
       if (parsedUrl.origin !== window.location.origin && !isLoopback) {
         throw new EngineError({

@@ -39,7 +39,7 @@ describe("createSFEN", () => {
     } catch (e) {
       const err = e as EngineError;
       expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-      expect(err.message).toContain("Expected 4 fields");
+      expect(err.message).toContain("Expected exactly 4 fields");
     }
   });
 });

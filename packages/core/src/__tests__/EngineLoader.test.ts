@@ -100,7 +100,7 @@ describe("EngineLoader", () => {
 
   it("should allow retry after failure (inflight removal)", async () => {
     const config: IEngineSourceConfig = {
-      url: "https://fail.js",
+      url: "https://test.com/fail.js",
       type: "script",
       sri: dummySRI,
       size: 100,
@@ -151,13 +151,15 @@ describe("EngineLoader", () => {
     process.env.NODE_ENV = "production";
 
     try {
+      // コンストラクタで環境変数を読むため、再インスタンス化が必要
+      const prodLoader = new EngineLoader(storage);
       const config: IEngineSourceConfig = {
         url: "https://test.com/engine.js",
         type: "script",
         __unsafeNoSRI: true,
       };
 
-      await expect(loader.loadResource("test", config)).rejects.toThrow(
+      await expect(prodLoader.loadResource("test", config)).rejects.toThrow(
         "SRI bypass (__unsafeNoSRI) is not allowed in production",
       );
     } finally {

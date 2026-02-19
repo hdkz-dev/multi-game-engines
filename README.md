@@ -41,6 +41,7 @@
 ```typescript
 import { EngineBridge } from "@multi-game-engines/core";
 import { StockfishAdapter, FEN } from "@multi-game-engines/adapter-stockfish";
+import { createFEN } from "@multi-game-engines/core/chess";
 
 const bridge = new EngineBridge();
 // registerAdapter は非同期メソッドです
@@ -56,10 +57,6 @@ engine.onInfo((info) => {
 });
 
 // 探索の実行 (startpos キーワードもサポート)
-import { createFEN } from "@multi-game-engines/core/chess";
-
-// ...
-
 const fen = createFEN("startpos");
 const result = await engine.search({ fen });
 console.log(`Best Move: ${result.bestMove}`);

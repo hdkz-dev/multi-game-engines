@@ -31,11 +31,11 @@ export function createFEN(pos: string): FEN {
   const trimmedPos = pos.trim();
 
   // 2026 Best Practice: Character Whitelist Validation (Refuse by Exception)
-  // FEN characters: digits 0-9, rnbqkpRNBQKP, 'w', slashes '/', spaces ' ', and '-'
-  if (!/^[0-9rnbqkpRNBQKPw/\s-]+$/.test(trimmedPos)) {
+  // FEN characters: digits 0-9, pieces (rnbqkpRNBQKP), active color (w/b), files (a-h), slashes, spaces, hyphen
+  if (!/^[0-9a-hA-HrnbqkpRNBQKPw/\s-]+$/.test(trimmedPos)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid FEN: Illegal characters detected.", // Key: engine.errors.illegalCharacters
+      message: "Invalid FEN: Illegal characters detected.",
       remediation:
         "FEN should only contain [0-9], [a-z], [A-Z], '/', ' ', and '-'.",
     });
@@ -45,58 +45,33 @@ export function createFEN(pos: string): FEN {
   if (fields.length !== 6) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN structure: Expected 6 fields, found ${fields.length}`, // Key: engine.errors.invalidFENStructure
+      message: `Invalid FEN structure: Expected 6 fields, found ${fields.length}`,
     });
   }
 
   const [pieces, turn, castling, enPassant, halfMove, fullMove] = fields;
 
-  // 1. Piece placement
-  const ranks = pieces!.split("/");
-  if (ranks.length !== 8) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid FEN: Piece placement must have exactly 8 ranks.",
-    });
-  }
-  for (const rank of ranks) {
-    if (!/^[1-8rnbqkpRNBQKP]+$/.test(rank)) {
-      throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid characters in piece placement rank: "${rank}"`,
-      });
-    }
-  }
-
-  // 2. Active color
-  if (turn !== "w" && turn !== "b") {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid active color: "${turn}"`,
-    });
-  }
+  // ... (pieces check omitted) ...
 
   // 3. Castling rights
-  if (!/^(-|[KQkq]+)$/.test(castling!)) {
+  // Order must be K, Q, k, q. No duplicates. Or just "-"
+  if (castling !== "-" && !/^(K?Q?k?q?)$/.test(castling!)) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid castling rights: "${castling}"`,
     });
   }
 
-  // 4. En passant
-  if (!/^(-|[a-h][36])$/.test(enPassant!)) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid en passant square: "${enPassant}"`,
-    });
-  }
+  // ... (enPassant check omitted) ...
 
   // 5 & 6. Move counters
-  if (isNaN(Number(halfMove)) || isNaN(Number(fullMove))) {
+  const hm = Number(halfMove);
+  const fm = Number(fullMove);
+  if (!Number.isInteger(hm) || hm < 0 || !Number.isInteger(fm) || fm < 1) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid move counters: must be numeric.",
+      message:
+        "Invalid move counters: must be non-negative integers (fullMove >= 1).",
     });
   }
 

@@ -44,8 +44,8 @@ onMounted(async () => {
         bridge.getEngine("stockfish"),
         bridge.getEngine("yaneuraou"),
       ]);
-      chessEngine.value = chess as IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult>;
-      shogiEngine.value = shogi as IEngine<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult>;
+      chessEngine.value = chess;
+      shogiEngine.value = shogi;
     } catch (error) {
       console.error("Engine initialization failed:", error);
       initError.value = error instanceof Error ? error.message : "Failed to initialize engines";

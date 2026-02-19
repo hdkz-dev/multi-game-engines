@@ -10,7 +10,7 @@ describe("ShogiBoard", () => {
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
     );
     render(<ShogiBoard sfen={sfen} />);
-    const el = document.querySelector("mg-shogi-board");
-    expect(el).toBeDefined();
+    const el = document.querySelector("shogi-board");
+    expect(el).not.toBeNull();
   });
 });

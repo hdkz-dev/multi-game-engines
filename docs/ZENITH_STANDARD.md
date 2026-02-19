@@ -52,7 +52,7 @@
 ### 3.1. Self-Healing Documentation
 
 - **基準**: コードの変更とドキュメント（TECHNICAL_SPECS.md, API リファレンス）の乖離を許容しない。
-- **実装**: TypeDoc による API リファレンス自動生成と、`scripts/doc-sync.js` 等の実装同期スクリプトを CI ワークフロー（GitHub Actions）に組み込み、コードと Markdown 仕様書の一貫性を常時検証する。
+- **実装**: TypeDoc による API リファレンス自動生成を行い、コードとドキュメントの同期を維持する。
 
 ### 3.2. Hermetic Development
 
