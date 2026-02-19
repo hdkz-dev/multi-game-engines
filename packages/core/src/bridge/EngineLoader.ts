@@ -81,6 +81,9 @@ export class EngineLoader implements IEngineLoader {
           });
         }
 
+        // 2026 Best Practice: プロトコル・オリジン検証を通過した安全な URL を以降で使用
+        const validatedUrl = url.href;
+
         // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
         // Zenith Tier: 既知の安全なデータ型（eval-data, asset, json, text）以外は
         // 潜在的な実行コードとみなしてオリジン検証を強制し、バイパス攻撃を防御する。
@@ -91,7 +94,7 @@ export class EngineLoader implements IEngineLoader {
           config.type === "text";
 
         if (!isSafeType) {
-          this.validateWorkerUrl(config.url, engineId);
+          this.validateWorkerUrl(validatedUrl, engineId);
         }
 
         const sri = config.sri;
@@ -137,9 +140,10 @@ export class EngineLoader implements IEngineLoader {
           }
         }
 
+        // 2026 Best Practice: 検証済み URL を使用して fetch を実行
         let data: ArrayBuffer;
         try {
-          const response = await fetch(config.url);
+          const response = await fetch(validatedUrl);
           if (!response.ok) {
             throw new EngineError({
               code: EngineErrorCode.NETWORK_ERROR,
@@ -152,7 +156,7 @@ export class EngineLoader implements IEngineLoader {
           if (err instanceof EngineError) throw err;
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,
-            message: `Network error while fetching engine resource: ${config.url}`,
+            message: `Network error while fetching engine resource: ${validatedUrl}`,
             engineId,
             originalError: err,
           });
