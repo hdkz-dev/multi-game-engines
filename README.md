@@ -56,7 +56,9 @@ engine.onInfo((info) => {
 });
 
 // 探索の実行 (startpos キーワードもサポート)
-const fen = createFEN("startpos");
+const fen = createFEN(
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+);
 const result = await engine.search({ fen });
 console.log(`Best Move: ${result.bestMove}`);
 ```

@@ -241,14 +241,16 @@ export class EngineBridge implements IEngineBridge {
 
     const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
 
-    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
-    if (/[^a-zA-Z0-9-_]/.test(id)) {
+    // 2026 Security: Path Traversal Prevention
+    // Ensure the ID (used for cache keys and storage paths) is strictly alphanumeric.
+    if (!/^[a-zA-Z0-9-_]+$/.test(id)) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
-        remediation: "Check your engine configuration or factory registration.",
       });
     }
+
+    // 2026 Best Practice: Check if already disposed
 
     // 2026 Best Practice: インフライトの初期化をデデュプリケーション (TOCTOU レースコンディション対策)
     const pending = this.pendingEngines.get(id);

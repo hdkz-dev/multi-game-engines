@@ -118,6 +118,14 @@ describe("UCIParser", () => {
     it("should return null for non-bestmove lines", () => {
       expect(parser.parseResult("info depth 20")).toBeNull();
     });
+
+    it("should handle bestmove none as null bestMove", () => {
+      const result = parser.parseResult("bestmove none");
+      expect(result).not.toBeNull();
+      // bestmove 'none' means 'no move', but as a string value for bestMove.
+      // The interface demands a Move object (string), so it should be the raw string.
+      expect(result!.bestMove).toBe("none");
+    });
   });
 
   // ─── parseInfo: エッジケース ────────────────────────

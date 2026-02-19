@@ -85,9 +85,10 @@ export class EngineLoader implements IEngineLoader {
         // 2026 Best Practice: プロトコル・オリジン検証を通過した安全な URL を以降で使用
         const validatedUrl = url.href;
 
-        // 2026 Best Practice: 実行リソース（Worker/WASM/Script）のオリジン検証
-        // Zenith Tier: 既知の安全なデータ型（eval-data, asset, json, text）以外は
-        // 潜在的な実行コードとみなしてオリジン検証を強制し、バイパス攻撃を防御する。
+        // 2026 Security: Validate ALL resource URLs capable of execution (JS/Wasm)
+        // Prevent bypassing checks by using obscure mime types or missing type field.
+        // We default to strictly validate ALL types except specific safe data types.
+        // This closes the hole where `config.type = "script"` could bypass validation but still execute.
         const isSafeType =
           config.type === "eval-data" ||
           config.type === "asset" ||
