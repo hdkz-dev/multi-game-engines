@@ -1,33 +1,29 @@
-// This file has been automatically migrated to valid ESM format by Storybook.
-import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
 import type { StorybookConfig } from "@storybook/react-vite";
-import tailwindcss from "@tailwindcss/vite";
 
-const config: StorybookConfig = {
-  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
-  addons: [
-    getAbsolutePath("@storybook/addon-links"),
-    getAbsolutePath("@storybook/addon-a11y"),
-    getAbsolutePath("@vueless/storybook-dark-mode"),
-    getAbsolutePath("@storybook/addon-docs"),
-  ],
-  framework: {
-    name: getAbsolutePath("@storybook/react-vite"),
-    options: {},
-  },
-  viteFinal: async (config) => {
-    const { mergeConfig } = await import("vite");
-    return mergeConfig(config, {
-      plugins: [tailwindcss()],
-    });
-  },
-  docs: {
-    // 2026: Storybook 10 style autodocs
-  },
-};
-export default config;
+import { dirname } from "path";
 
-function getAbsolutePath(value: string): string {
+import { fileURLToPath } from "url";
+
+/**
+ * This function is used to resolve the absolute path of a package.
+ * It is needed in projects that use Yarn PnP or are set up within a monorepo.
+ */
+function getAbsolutePath(value: string) {
   return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
 }
+const config: StorybookConfig = {
+  stories: [
+    "../src/**/*.mdx",
+    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../../ui-react-monitor/src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+  ],
+  addons: [
+    getAbsolutePath("@chromatic-com/storybook"),
+    getAbsolutePath("@storybook/addon-vitest"),
+    getAbsolutePath("@storybook/addon-a11y"),
+    getAbsolutePath("@storybook/addon-docs"),
+    getAbsolutePath("@storybook/addon-onboarding"),
+  ],
+  framework: getAbsolutePath("@storybook/react-vite"),
+};
+export default config;

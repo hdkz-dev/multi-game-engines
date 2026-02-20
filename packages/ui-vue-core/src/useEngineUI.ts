@@ -1,7 +1,7 @@
 import { inject, provide, ref, Ref } from "vue";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
 
-const EngineUIKey = Symbol("EngineUI");
+const EngineUIKey = Symbol.for("EngineUI");
 
 export interface EngineUIContext {
   strings: Ref<EngineUIStrings>;

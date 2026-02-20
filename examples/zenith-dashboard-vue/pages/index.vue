@@ -28,7 +28,7 @@ const activeEngine = ref<EngineType>("chess");
 const locale = ref("ja");
 const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.en));
 
-const { bridge, isReady, error: bridgeError } = useEngines();
+const { bridge } = useEngines();
 
 // エンジンインスタンスの保持 (2026: getBridge が非同期のため)
 const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
@@ -41,8 +41,16 @@ const initEngines = async () => {
   if (bridgeInstance) {
     try {
       const [chess, shogi] = await Promise.all([
-        bridgeInstance.getEngine("stockfish"),
-        bridgeInstance.getEngine("yaneuraou"),
+        bridgeInstance.getEngine<
+          IChessSearchOptions,
+          IChessSearchInfo,
+          IChessSearchResult
+        >({ id: "stockfish", adapter: "stockfish" }),
+        bridgeInstance.getEngine<
+          IShogiSearchOptions,
+          IShogiSearchInfo,
+          IShogiSearchResult
+        >({ id: "yaneuraou", adapter: "yaneuraou" }),
       ]);
       chessEngine.value = chess;
       shogiEngine.value = shogi;

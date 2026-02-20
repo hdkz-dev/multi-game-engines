@@ -29,7 +29,7 @@ Zenith ハイブリッド・ダッシュボードのプロトタイプを完成�
 - `@multi-game-engines/ui-react`: `ChessBoard` および `ShogiBoard` の React ラッパーをエクスポート。
 - `@multi-game-engines/ui-vue`: `ChessBoard` および `ShogiBoard` の Vue ラッパーをエクスポート。
 
-## 3. ダッシュボードへの統合 (`examples/zenith-dashboard`)
+## 3. ダッシュボードへの統合 (`examples/zenith-dashboard-react`)
 
 - 現在の `ChessGrid` / `ShogiGrid` プレースホルダーを、実際の `<chess-board>` / `<shogi-board>` に置き換えます。
 - エンジンの `bestPV` 出力を盤面の `last-move` プロパティに接続します。

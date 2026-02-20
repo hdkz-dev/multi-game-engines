@@ -1,5 +1,5 @@
 {
-  "name": "@examples/zenith-dashboard",
+  "name": "@examples/zenith-dashboard-react",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,14 +7,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test:e2e": "playwright test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@multi-game-engines/adapter-katago": "workspace:*",
     "@multi-game-engines/adapter-edax": "workspace:*",
     "@multi-game-engines/adapter-gnubg": "workspace:*",
     "@multi-game-engines/adapter-gtp": "workspace:*",
+    "@multi-game-engines/adapter-katago": "workspace:*",
     "@multi-game-engines/adapter-kingsrow": "workspace:*",
     "@multi-game-engines/adapter-mortal": "workspace:*",
     "@multi-game-engines/adapter-stockfish": "workspace:*",
@@ -37,6 +38,7 @@
     "tailwind-merge": "^3.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",

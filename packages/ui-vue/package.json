@@ -23,7 +23,9 @@
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6007",
+    "build-storybook": "storybook build"
   },
   "license": "MIT",
   "sideEffects": [
@@ -44,6 +46,9 @@
     "@multi-game-engines/ui-vue-monitor": "workspace:*"
   },
   "devDependencies": {
+    "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/domain-shogi": "workspace:*",
+    "@storybook/vue3": "10.2.10",
     "@storybook/vue3-vite": "10.2.10",
     "@tailwindcss/vite": "^4.2.0",
     "@types/node": "^25.3.0",

@@ -16,6 +16,10 @@
         "src/**/*.vue"
       ]
     },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
     "lint": {
       "dependsOn": ["^build"],
       "cache": true

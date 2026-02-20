@@ -172,6 +172,9 @@ const errorMessage = computed(() => {
           ]"
           :title="status"
         />
+        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+          {{ status === 'busy' ? strings.searching : strings.ready }}
+        </span>
       </div>
 
       <div class="flex items-center gap-2">
@@ -334,6 +337,18 @@ const errorMessage = computed(() => {
         </div>
       </template>
     </div>
+
+    <!-- Footer -->
+    <footer
+      class="px-4 py-2 bg-gray-50/80 border-t border-gray-200 text-[9px] text-gray-400 flex justify-between font-medium"
+    >
+      <span class="truncate mr-4">
+        {{ strings.engineVersion(engine.name, engine.version) }}
+      </span>
+      <span class="flex-shrink-0">
+        {{ strings.engineBridgeStandard(2026) }}
+      </span>
+    </footer>
   </section>
 </template>
 

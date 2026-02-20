@@ -28,7 +28,9 @@
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "license": "MIT",
   "peerDependencies": {
@@ -46,6 +48,9 @@
     "@multi-game-engines/ui-shogi-react": "workspace:*"
   },
   "devDependencies": {
+    "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/domain-shogi": "workspace:*",
+    "@storybook/react": "10.2.10",
     "@storybook/react-vite": "10.2.10",
     "@tailwindcss/cli": "^4.2.0",
     "@tailwindcss/vite": "^4.2.0",

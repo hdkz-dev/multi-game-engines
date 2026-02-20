@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
 import { createFEN } from "@multi-game-engines/domain-chess";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { IEngine } from "@multi-game-engines/core";
+import { IEngine, EngineBridge } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,
   IChessSearchInfo,
@@ -59,8 +59,7 @@ const SHOGI_MULTI_PV = 2;
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>("chess");
   const { locale, setLocale } = useLocale();
-  const bridge = useMemo(() => getBridge(), []);
-
+  const [bridge, setBridge] = useState<EngineBridge | null>(null);
   const [chessEngine, setChessEngine] = useState<IEngine<
     IChessSearchOptions,
     IChessSearchInfo,
@@ -79,11 +78,25 @@ export default function Dashboard() {
     async function initEngines() {
       const bridgeInstance = await getBridge();
       if (!bridgeInstance) return;
+
+      if (isMounted) {
+        setBridge(bridgeInstance);
+      }
+
       try {
         const [chess, shogi] = await Promise.all([
-          bridgeInstance.getEngine("stockfish"),
-          bridgeInstance.getEngine("yaneuraou"),
+          bridgeInstance.getEngine<
+            IChessSearchOptions,
+            IChessSearchInfo,
+            IChessSearchResult
+          >({ id: "stockfish", adapter: "stockfish" }),
+          bridgeInstance.getEngine<
+            IShogiSearchOptions,
+            IShogiSearchInfo,
+            IShogiSearchResult
+          >({ id: "yaneuraou", adapter: "yaneuraou" }),
         ]);
+
         if (isMounted) {
           setChessEngine(chess);
           setShogiEngine(shogi);
@@ -102,10 +115,13 @@ export default function Dashboard() {
 
     void initEngines();
 
+    // Set document title for E2E tests
+    document.title = "Zenith Hybrid Analysis Dashboard";
+
     return () => {
       isMounted = false;
     };
-  }, [bridge]);
+  }, []);
 
   const localeData = useMemo(
     () => (locale === "ja" ? locales.ja : locales.en),

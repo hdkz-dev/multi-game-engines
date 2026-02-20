@@ -2,7 +2,6 @@ import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
 import {
   ReversiBoard,
   ReversiMove,
-  REVERSI_MOVE_REGEX,
   createReversiMove,
 } from "@multi-game-engines/domain-reversi";
 
