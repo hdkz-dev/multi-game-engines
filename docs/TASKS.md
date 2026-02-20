@@ -75,14 +75,14 @@
 ### 🔴 Critical（法的・CI整合性）
 
 - [ ] **LICENSE ファイル欠落**: ルートに MIT ライセンスファイルが存在しない。31パッケージ中30パッケージで `LICENSE` ファイルが物理的に欠落。
-- [ ] **license フィールド欠落**: 12パッケージ（`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 3件）で `package.json` に `license` フィールドがない。
+- [ ] **license フィールド欠落**: 13パッケージ（`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件）で `package.json` に `license` フィールドがない。
 - [ ] **release.yml Node.js 不整合**: `.github/workflows/release.yml` が Node.js 22 を使用。`ci.yml` (24)、`.node-version` (24.13.0)、`package.json` (`>=24.0.0`) と不一致。
 - [ ] **不要ファイルの Git 管理**: `review_audit_raw.md`, `pr_review_comments*.json`, `pr_view.json`, `status.txt`, `opencode_test.txt` がリポジトリに混入。`.gitignore` への追加と `git rm --cached` が必要。
 
 ### 🟠 High（リリース準備）
 
 - [ ] **全アダプター SRI ダミーハッシュ**: `sha256-dummy*` が全5アダプター、計9箇所に残存（`adapter-stockfish` 2箇所、`adapter-yaneuraou` 3箇所、`adapter-edax` 1箇所、`adapter-mortal` 1箇所、`adapter-katago` 2箇所）。本番用バイナリのハッシュ値への置換が必要。
-- [ ] **README 欠落**: 19パッケージに `README.md` が存在しない（`adapter-gtp/uci/usi`、`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件、`ui-*-core/monitor` 4件）。
+- [ ] **README 欠落**: 20パッケージに `README.md` が存在しない（`adapter-gtp/uci/usi`、`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件、`ui-*-core/monitor` 4件）。
 - [ ] **pnpm-workspace.yaml 不整合**: `examples/*` が `pnpm-workspace.yaml` には含まれるが、ルート `package.json` の `workspaces` には未記載。
 - [ ] **ADR 欠番**: ADR-003〜013 が未登録。初期設計フェーズからの経緯を `DECISION_LOG.md` に注記が必要。
 

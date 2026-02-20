@@ -22,7 +22,7 @@
 ### A-1. ルート LICENSE ファイルの作成
 
 - [ ] ルートに MIT ライセンスの `LICENSE` ファイルを作成。
-- [ ] `package.json` に `"license": "MIT"` フィールドが明記されていないパッケージ（12件）への追加：
+- [ ] `package.json` に `"license": "MIT"` フィールドが明記されていないパッケージ（13件）への追加：
   - `domain-chess`, `domain-go`, `domain-mahjong`, `domain-reversi`, `domain-shogi`
   - `ui-chess-elements`, `ui-chess-react`, `ui-chess-vue`, `ui-chess`
   - `ui-shogi-elements`, `ui-shogi-react`, `ui-shogi-vue`, `ui-shogi`
@@ -65,7 +65,7 @@
 
 ### B-2. README の一括作成
 
-- [ ] 以下の19パッケージに、パッケージ名・目的・エクスポート一覧・使用例を含む README.md を作成：
+- [ ] 以下の20パッケージに、パッケージ名・目的・エクスポート一覧・使用例を含む README.md を作成：
   - `adapter-gtp`, `adapter-uci`, `adapter-usi`
   - `domain-chess`, `domain-go`, `domain-mahjong`, `domain-reversi`, `domain-shogi`
   - `ui-chess-elements`, `ui-chess-react`, `ui-chess-vue`, `ui-chess`
