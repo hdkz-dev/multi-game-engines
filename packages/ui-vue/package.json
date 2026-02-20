@@ -46,7 +46,7 @@
   "devDependencies": {
     "@storybook/vue3-vite": "10.2.10",
     "@tailwindcss/vite": "^4.2.0",
-    "@types/node": "^24.10.13",
+    "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
