@@ -1,0 +1,52 @@
+{
+  "name": "@multi-game-engines/ui-vue-core",
+  "version": "0.1.0",
+  "description": "Core Vue 3 primitives and context for multi-game engines",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./hooks": {
+      "types": "./dist/hooks.d.ts",
+      "import": "./dist/hooks.js",
+      "require": "./dist/hooks.cjs"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "license": "MIT",
+  "sideEffects": [
+    "*.css",
+    "*.vue"
+  ],
+  "peerDependencies": {
+    "vue": ">=3.3.0"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.4",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^28.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.18",
+    "vue": "3.5.28",
+    "vue-tsc": "^3.2.4"
+  }
+}

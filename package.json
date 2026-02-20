@@ -1,6 +1,7 @@
 {
   "name": "multi-game-engines",
   "private": true,
+  "type": "module",
   "description": "A bridge library for various game engines with a plugin-based architecture.",
   "workspaces": [
     "packages/*",
@@ -19,6 +20,7 @@
     "format:check": "prettier --check .",
     "mcp:mask": "node scripts/sync-mcp-tokens.js mask",
     "mcp:fill": "node scripts/sync-mcp-tokens.js fill",
+    "doc-sync": "node scripts/doc-sync.js",
     "prepare": "husky",
     "release": "pnpm build && changeset publish",
     "ai:check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
@@ -35,20 +37,21 @@
       "workerd"
     ],
     "overrides": {
-      "ajv": "8.18.0"
+      "@rushstack/ts-command-line": "5.2.0",
+      "@microsoft/api-extractor": "7.56.3"
     }
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
     "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
-    "eslint-plugin-storybook": "10.2.8",
+    "eslint-plugin-storybook": "^10.2.10",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
-    "turbo": "^2.8.9",
+    "turbo": "^2.8.10",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0"
+    "typescript-eslint": "^8.56.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

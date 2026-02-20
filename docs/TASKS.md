@@ -48,14 +48,29 @@
   - [x] 全プロトコルパーサーの異常系堅牢化（境界チェック・デフォルト値補完）。
   - [x] React/Vue 両フレームワークにおけるアクセシビリティ完全準拠 (ARIA, Focus, Live Regions)。
   - [x] Next.js 15/React 19/Vue 3.5 最新機能への追従と最適化。
-  - [x] 14パッケージ全域にわたるドキュメント・実装の完全同期。
+  - [x] 全パッケージ全域にわたるドキュメント・実装の完全同期。
+  - [x] Project-wide Zero-Any Policy の完遂とブランド型の再定義。
+- [x] **究極のモジュール化とIP保護 (Modularization & IP Safety)**:
+  - [x] UI パッケージの物理分離（`core`, `monitor`, `game`）とフレームワーク独立性の確保。
+  - [x] 商標保護のための名称変更（`Othello` -> `Reversi`）の全域適用。
+  - [x] `domain-reversi`, `domain-mahjong` の新設によるドメインロジックの完全分離。
+  - [x] ハブパッケージ（`ui-react`, `ui-vue`）による統合インポート環境の整備。
+- [x] **UI 品質とフレームワーク統合の昇華 (UI Quality & Integration Excellence)**:
+  - [x] React 19 / Vue 3 / Lit における確実なプロパティ同期パターン (useLayoutEffect + Property Reflection) の確立。
+  - [x] チェス・将棋盤面コンポーネントにおける網羅的なユニット・統合テスト（100%パス）の達成。
+- [x] **PR #25 最終監査 & フォローアップ (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行、およびレビュー指摘事項（バリデーション詳細化、テスト強化）の全対応。
+- [x] **Zenith Tier 究極監査と型安全性の昇華 (Zenith Audit & Strict Type Hardening)**:
+  - [x] 全マージ済み PR (#15, #21, #24, #25) の 100 以上のレビューポイントを再監査し、実装に反映。
+  - [x] モノレポ全域での `exactOptionalPropertyTypes` の復旧と UI パッケージの型整合。
+  - [x] `MonitorRegistry` 等のコア基盤における `any` の完全排除。
+  - [x] 全エンジンアダプターにおける SRI ハッシュの `sha384` 標準化と TODO 追跡の開始。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
-- [ ] **adapter-edax**: ダミー SRI ハッシュ (`sha256-dummy`) を本番用バイナリのハッシュ値へ置換。
+- [ ] **SRI 最終適用**: 全エンジンアダプターのダミー SRI ハッシュ (`sha384-Placeholder`) を、各プラットフォーム配信用の実効バイナリのハッシュ値へ置換。
 - [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 
@@ -68,3 +83,8 @@
 - [ ] **Engine Registry**: SRI ハッシュとバージョンを中央管理し、URL 指定を不要にする。
 - [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+- [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
+- [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
+- [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
+- [ ] **adapter-gnubg**: バックギャモンエンジンの基本統合と WASM ポートの調査。
+- [ ] **adapter-checkers**: チェッカーエンジンの統合とテーブルベース対応。

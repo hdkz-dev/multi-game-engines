@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { createFEN, createSFEN } from "@multi-game-engines/core";
+import { ref, computed, onMounted } from "vue";
+import { createFEN } from "@multi-game-engines/domain-chess";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { formatNumber } from "@multi-game-engines/ui-core";
-import { EngineMonitorPanel, ChessBoard, ShogiBoard, EngineUIProvider } from "@multi-game-engines/ui-vue";
+import type { IEngine } from "@multi-game-engines/core";
+import type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/adapter-uci";
+import type { ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult } from "@multi-game-engines/adapter-usi";
+import { EngineMonitorPanel, EngineUIProvider, ChessBoard, ShogiBoard } from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { locales } from "@multi-game-engines/i18n";
 import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "lucide-vue-next";
-import { getBridge } from "~/composables/useEngines";
+import { getBridge } from "../composables/useEngines";
 
 useHead({
   title: "Zenith Hybrid Analysis Dashboard (Vue)",
@@ -26,8 +30,36 @@ const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.
 
 const bridge = getBridge();
 
+// エンジンインスタンスの保持 (2026: getEngine が非同期のため)
+const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
+const shogiEngine = ref<IEngine<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> | null>(null);
+const initError = ref<string | null>(null);
+
+const initEngines = async () => {
+  initError.value = null;
+  if (bridge) {
+    try {
+      const [chess, shogi] = await Promise.all([
+        bridge.getEngine("stockfish"),
+        bridge.getEngine("yaneuraou"),
+      ]);
+      chessEngine.value = chess;
+      shogiEngine.value = shogi;
+    } catch (error) {
+      console.error("Engine initialization failed:", error);
+      initError.value =
+        error instanceof Error
+          ? error.message
+          : localeData.value.dashboard.initializationFailed;
+    }
+  } else {
+    initError.value = localeData.value.dashboard.errors.bridgeNotAvailable;
+  }
+};
+
+onMounted(initEngines);
+
 // チェス用の設定
-const chessEngine = computed(() => bridge?.getEngine("stockfish") ?? null);
 const chessOptions = {
   fen: createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
@@ -37,7 +69,6 @@ const chessOptions = {
 const { state: chessState } = useEngineMonitor(chessEngine);
 
 // 将棋用の設定
-const shogiEngine = computed(() => bridge?.getEngine("yaneuraou") ?? null);
 const shogiOptions = {
   sfen: createSFEN(
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
@@ -50,23 +81,47 @@ const chessBestMove = computed(() => chessState.value?.pvs[0]?.moves[0]);
 const shogiBestMove = computed(() => shogiState.value?.pvs[0]?.moves[0]);
 
 const nps = computed(() => {
-  const stats = activeEngine.value === "chess" ? chessState.value.stats : shogiState.value.stats;
+  const stats =
+    activeEngine.value === "chess"
+      ? chessState.value?.stats
+      : shogiState.value?.stats;
+  if (!stats) return formatNumber(0);
   return formatNumber(stats.nps);
 });
 </script>
 
 <template>
   <div
-    v-if="!bridge || !chessEngine || !shogiEngine"
+    v-if="initError || !bridge || !chessEngine || !shogiEngine"
     class="min-h-screen flex items-center justify-center bg-gray-50"
   >
-    <div class="flex flex-col items-center gap-4">
-      <div
-        class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
-      ></div>
-      <p class="text-gray-500 font-bold tracking-widest text-sm">
-        {{ localeData.dashboard.initializingEngines }}
-      </p>
+    <div class="flex flex-col items-center gap-4 text-center px-4">
+      <template v-if="initError">
+        <div
+          class="p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm"
+        >
+          <p class="font-black mb-2 uppercase tracking-widest text-xs">
+            {{ localeData.dashboard.initializationFailed }}
+          </p>
+          <p class="text-sm font-medium mb-6 leading-relaxed">
+            {{ initError }}
+          </p>
+          <button
+            class="w-full py-3 px-6 bg-red-600 text-white rounded-xl font-black text-xs tracking-widest hover:bg-red-700 active:scale-[0.98] transition-all shadow-lg shadow-red-200"
+            @click="initEngines"
+          >
+            {{ localeData.engine.retry }}
+          </button>
+        </div>
+      </template>
+      <template v-else>
+        <div
+          class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
+        ></div>
+        <p class="text-gray-500 font-bold tracking-widest text-sm">
+          {{ localeData.dashboard.initializingEngines }}
+        </p>
+      </template>
     </div>
   </div>
 

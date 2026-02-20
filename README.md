@@ -14,8 +14,7 @@
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
 - **Universal UI Architecture**:
   - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、i18n。
-  - **ui-react**: React Hooks と Context DI を活用したアダプター。
-  - **ui-vue**: Vue 3 Composition API を活用したアダプター。
+  - **ui-react / ui-vue**: 基盤、監視ツール、ゲームUIをモジュール化したフレームワーク専用スイート。
   - **ui-elements**: Lit ベースの Web Components (Ready)。
 
 ## 🤖 AI 開発ワークフロー / AI Workflow
@@ -33,21 +32,22 @@
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
 - **Go**: KataGo (GTP) - **Ready**
-- **Othello**: Edax 4.4 (Board/Move Protocol) - **Ready**
+- **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
 - **Mahjong**: Mortal (JSON Protocol) - **Ready**
 
 ## 🚀 クイックスタート / Quick Start
 
 ```typescript
 import { EngineBridge } from "@multi-game-engines/core";
-import { StockfishAdapter, FEN } from "@multi-game-engines/adapter-stockfish";
+import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
+import { createFEN } from "@multi-game-engines/domain-chess";
 
 const bridge = new EngineBridge();
 // registerAdapter は非同期メソッドです
 await bridge.registerAdapter(new StockfishAdapter());
 
 // アダプターをインポートしていれば、EngineRegistry により型推論が自動的に働きます
-const engine = bridge.getEngine("stockfish");
+const engine = await bridge.getEngine("stockfish");
 await engine.load();
 
 // 思考状況の購読 (アダプター固有の型が適用されます)
@@ -56,7 +56,10 @@ engine.onInfo((info) => {
 });
 
 // 探索の実行 (startpos キーワードもサポート)
-const result = await engine.search({ fen: "startpos" as FEN });
+const fen = createFEN(
+  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+);
+const result = await engine.search({ fen });
 console.log(`Best Move: ${result.bestMove}`);
 ```
 

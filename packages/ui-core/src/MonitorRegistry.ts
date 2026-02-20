@@ -74,7 +74,7 @@ export class MonitorRegistry {
     }
     // 2026 Best Practice: 抽象インターフェースへのキャスト。
     // IEngine は共変的に扱えるプロパティのみを持つため、IBase へのキャストは安全。
-    const abstractEngine = engine as unknown as IEngine<
+    const abstractEngine = engine as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -95,7 +95,7 @@ export class MonitorRegistry {
     }
 
     const brandedPosition = createPositionString(initialPosition);
-    const initialState = createInitialState<T_STATE>(brandedPosition);
+    const initialState = createInitialState(brandedPosition) as T_STATE;
 
     const newMonitor = new SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
       engine,

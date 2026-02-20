@@ -1,75 +1,57 @@
+import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
 import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  ResourceMap,
-  IEngineSourceConfig,
-} from "@multi-game-engines/core";
-import { ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
-import { ISHOGISearchOptions } from "./usi-types.js";
-import { USIParser } from "./USIParser.js";
-
-export class YaneuraouAdapter extends BaseAdapter<
+  USIAdapter,
   ISHOGISearchOptions,
   ISHOGISearchInfo,
-  ISHOGISearchResult
-> {
-  readonly id = "yaneuraou";
-  readonly name = "Yaneuraou";
-  readonly version = "7.5.0";
-  readonly parser = new USIParser();
+  ISHOGISearchResult,
+} from "@multi-game-engines/adapter-usi";
 
-  async load(loader?: IEngineLoader): Promise<void> {
-    this.emitStatusChange("loading");
-    try {
-      const configs: Record<string, IEngineSourceConfig> = {
+/**
+ * 2026 Zenith Tier: やねうら王専用アダプター。
+ * 汎用的な USIAdapter を拡張し、デフォルト設定を提供します。
+ */
+export class YaneuraouAdapter extends USIAdapter {
+  constructor(config?: Partial<IEngineConfig>) {
+    const defaultConfig: IEngineConfig = {
+      id: "yaneuraou",
+      adapter: "usi",
+      name: "Yaneuraou",
+      version: "7.5.0",
+      sources: {
         main: {
           url: "https://example.com/yaneuraou.js",
-          sri: "sha256-dummy-main",
-          type: "worker-js" as const,
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouMainScriptHashPlaceholder",
+          type: "worker-js",
         },
         wasm: {
           url: "https://example.com/yaneuraou.wasm",
-          sri: "sha256-dummy-wasm",
-          type: "wasm" as const,
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouWasmBinaryHashPlaceholder",
+          type: "wasm",
           mountPath: "yaneuraou.wasm",
         },
         nnue: {
-          url: "https://example.com/eval/nnue.bin",
-          sri: "sha256-dummy-nnue",
-          type: "eval-data" as const,
+          url: "https://example.com/nnue.bin",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-YaneuraouNNUEHashPlaceholder",
+          type: "eval-data",
           mountPath: "nnue.bin",
         },
-      };
+      },
+    };
+    const finalConfig = deepMerge(defaultConfig, config);
+    super(finalConfig);
+  }
+}
 
-      const resources = loader
-        ? await loader.loadResources(this.id, configs)
-        : {
-            main: configs.main.url,
-            wasm: configs.wasm.url,
-            nnue: configs.nnue.url,
-          };
-
-      this.communicator = new WorkerCommunicator(resources.main);
-
-      // 依存性注入: WASM/NNUE 等の Blob URL マップを Worker に送信
-      const resourceMap: ResourceMap = {};
-      for (const [key, config] of Object.entries(configs)) {
-        if (config.mountPath) {
-          resourceMap[config.mountPath] = resources[key];
-        }
-      }
-      await this.injectResources(resourceMap);
-
-      this.messageUnsubscriber = this.communicator.onMessage((data) => {
-        this.handleIncomingMessage(data);
-      });
-
-      this.emitStatusChange("ready");
-    } catch (error) {
-      this.emitStatusChange("error");
-      throw EngineError.from(error, this.id);
-    }
+// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
+declare module "@multi-game-engines/core" {
+  interface EngineRegistry {
+    yaneuraou: IEngine<
+      ISHOGISearchOptions,
+      ISHOGISearchInfo,
+      ISHOGISearchResult
+    >;
   }
 }

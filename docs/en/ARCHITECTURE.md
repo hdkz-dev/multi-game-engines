@@ -61,7 +61,7 @@ stockfish.search({
 
 ### Multi-Protocol & Multi-Game Support
 
-Native support for **UCI (Universal Chess Interface)**, **USI (Universal Shogi Interface)**, **GTP (Go Text Protocol)**, and custom JSON protocols (e.g., Mahjong). Each parser includes strict injection validation.
+Native support for **UCI (Universal Chess Interface)**, **USI (Universal Shogi Interface)**, **GTP (Go Text Protocol)**, **Reversi**, and custom JSON protocols (e.g., Mahjong). Each parser includes strict injection validation.
 
 ## License Strategy
 
@@ -91,9 +91,11 @@ To avoid framework lock-in and support 2026 standards, the UI layer is separated
 1.  **Reactive Core (`ui-core`)**: Framework-agnostic business logic, state management, and requestAnimationFrame (RAF)-based throttling for high-frequency updates.
     - **Generic State Support**: `SearchMonitor` and `createInitialState` now support custom state types via generics, allowing applications to extend the base engine state while maintaining 100% type safety and eliminating unsafe casts.
 2.  **Localization Layer (`i18n`)**: Pure language resources and type-safe interfaces.
-3.  **Framework Adapters**:
-    - **`ui-react`**: React Hooks (`useSyncExternalStore`) and Context DI. Fully supports React 19 and Tailwind CSS v4.
-    - **`ui-vue`**: Vue 3 Composition API adapter.
+3.  **Framework Adapters (Modular Split)**:
+    - **`ui-*-core`**: Foundation for each framework (i18n Provider, basic UI context).
+    - **`ui-*-monitor`**: Engine monitoring and management tools (`EngineMonitorPanel` and its sub-components).
+    - **`ui-*-game`**: Game-specific UI components (e.g., `ChessBoard`).
+    - **`ui-react` / `ui-vue`**: Hub packages that integrate and export all modular components. Users can choose to install only what they need (e.g., just `ui-chess-react`) for minimum dependencies.
     - **`ui-elements`**: Lit-based Web Components for ultimate portability.
 
 ### 2. Contract-driven UI

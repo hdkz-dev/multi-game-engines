@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "outDir": "./dist"
+  },
+  "references": [
+    { "path": "../core" },
+    { "path": "../domain-shogi" },
+    { "path": "../ui-shogi-elements" }
+  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

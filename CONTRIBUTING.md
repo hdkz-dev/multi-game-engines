@@ -25,6 +25,7 @@
 - 型チェック（TypeScript）
 - ビルド検証
 - 全ユニットテスト
+- ドキュメント同期チェック（doc-sync）
 
 [EN] Automated checks are executed upon commit using **Husky** and **lint-staged**. Commits will be aborted unless the following checks pass:
 
@@ -34,3 +35,4 @@
 - Type checking (TypeScript)
 - Build verification
 - All unit tests
+- Documentation sync check (doc-sync)

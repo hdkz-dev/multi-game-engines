@@ -6,16 +6,6 @@
 export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
 /**
- * FEN (Forsyth-Edwards Notation) を表すブランド型。
- */
-export type FEN = Brand<string, "FEN">;
-
-/**
- * SFEN (Shogi Forsyth-Edwards Notation) を表すブランド型。
- */
-export type SFEN = Brand<string, "SFEN">;
-
-/**
  * 指し手を表すブランド型（UCI/USI形式）。
  */
 export type Move = Brand<string, "Move">;
@@ -23,86 +13,14 @@ export type Move = Brand<string, "Move">;
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-export type PositionString = Brand<string, "PositionString">;
-
-import { EngineError } from "./errors/EngineError.js";
-
 /**
- * 局面情報のバリデータファクトリ。
+ * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-export function createFEN(pos: string): FEN {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid FEN: Input must be a non-empty string.",
-    });
-  }
-  const fields = pos.trim().split(/\s+/);
-  if (fields.length < 4) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN structure: Expected 4 fields, found ${fields.length}`,
-    });
-  }
-  return pos as FEN;
-}
+export type PositionString<T extends string = string> = string & {
+  readonly __brand: T;
+};
 
-/**
- * 将棋局面情報のバリデータファクトリ。
- */
-export function createSFEN(pos: string): SFEN {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid SFEN: Input must be a non-empty string.",
-    });
-  }
-
-  // 2026 Best Practice: Refuse by Exception character validation
-  // USI/SFEN allowed characters: [1-9], [a-z], [A-Z], /, +, *, whitespace, -
-  if (!/^[1-9a-zA-Z/+\s*-]+$/.test(pos)) {
-    throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid SFEN: Illegal characters detected.",
-      remediation: "Remove control characters and non-standard symbols.",
-    });
-  }
-
-  const fields = pos.trim().split(/\s+/);
-  if (fields.length < 4) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
-    });
-  }
-  return pos as SFEN;
-}
-
-/**
- * 局面表記のバリデータファクトリ。
- */
-export function createPositionString(pos: string): PositionString {
-  if (typeof pos !== "string" || pos.trim().length === 0) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid PositionString: Input must be a non-empty string.",
-    });
-  }
-  return pos as PositionString;
-}
-
-/**
- * 指し手のバリデータファクトリ。
- */
-export function createMove(move: string): Move {
-  if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid Move format: "${move}" contains illegal characters.`,
-    });
-  }
-  return move as Move;
-}
+// 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
 /**
  * エンジンの状態。
@@ -120,7 +38,7 @@ export type EngineStatus =
  * 探索オプション。
  */
 export interface IBaseSearchOptions {
-  fen?: FEN | PositionString | undefined;
+  fen?: PositionString | undefined;
   signal?: AbortSignal | undefined;
   [key: string]: unknown;
 }
@@ -144,12 +62,19 @@ export interface IScoreInfo {
  * 探索状況情報。
  */
 export interface IBaseSearchInfo {
+  /** 探索深度 (プライまたは手数) */
   depth?: number | undefined;
+  /** 選択的探索深度 (Selective Depth) */
   seldepth?: number | undefined;
+  /** 探索したノード数 */
   nodes?: number | undefined;
+  /** 探索速度 (Nodes Per Second) */
   nps?: number | undefined;
+  /** 探索時間 (ミリ秒) */
   time?: number | undefined;
+  /** 読み筋 (Principal Variation) */
   pv?: Move[] | undefined;
+  /** MultiPV の順位 (1, 2, ...) */
   multipv?: number | undefined;
   /** 思考の複雑さ・規模を示す追加指標（囲碁の visits など） */
   visits?: number | undefined;
@@ -157,6 +82,10 @@ export interface IBaseSearchInfo {
   hashfull?: number | undefined;
   /** 構造化スコア。cp, mate, points, winrate を統合して保持する。 */
   score?: IScoreInfo | undefined;
+  /** ハードウェアアクセラレーションの使用状況 */
+  acceleration?: "none" | "simd" | "webgpu" | "webnn" | undefined;
+  /** デバイスメモリ使用量 (bytes) */
+  memoryUsage?: number | undefined;
   [key: string]: unknown;
 }
 
@@ -276,6 +205,12 @@ export interface IMiddleware<
   id?: string;
   priority?: number;
   supportedEngines?: string[];
+  /**
+   * エンジンへのコマンド送信前に呼び出されます。
+   * @param command 送信されるコマンド
+   * @param context コンテキスト情報
+   * @returns 変更されたコマンド、または undefined (変更なし)
+   */
   onCommand?(
     command: MiddlewareCommand,
     context: MiddlewareContext<T_OPTIONS>,
@@ -284,10 +219,22 @@ export interface IMiddleware<
     | MiddlewareCommand
     | undefined
     | void;
+  /**
+   * エンジンからの情報受信時に呼び出されます。
+   * @param info 受信した情報
+   * @param context コンテキスト情報
+   * @returns 変更された情報、または undefined (変更なし)
+   */
   onInfo?(
     info: T_INFO,
     context: MiddlewareContext<T_OPTIONS>,
   ): Promise<T_INFO | undefined | void> | T_INFO | undefined | void;
+  /**
+   * 探索結果の受信時に呼び出されます。
+   * @param result 受信した結果
+   * @param context コンテキスト情報
+   * @returns 変更された結果、または undefined (変更なし)
+   */
   onResult?(
     result: T_RESULT,
     context: MiddlewareContext<T_OPTIONS>,
@@ -296,10 +243,14 @@ export interface IMiddleware<
 
 /**
  * 探索タスク。
+ * 非同期イテレータによる途中経過の取得と、Promise による最終結果の取得を両立します。
  */
 export interface ISearchTask<T_INFO, T_RESULT> {
+  /** 途中経過をストリームとして取得するための非同期イテレータ */
   info: AsyncIterable<T_INFO>;
+  /** 最終結果が確定した時点で解決される Promise */
   result: Promise<T_RESULT>;
+  /** 探索を強制的に中断します */
   stop(): void;
 }
 
@@ -419,6 +370,36 @@ export type IEngineSourceConfig = {
 );
 
 /**
+ * 2026 Zenith Tier: 動的エンジン構成定義。
+ * 特定のアダプター実装と、その実行に必要なリソースをパッケージ化します。
+ */
+export interface IEngineConfig {
+  /** インスタンスの一意識別子 */
+  id: string;
+  /** 使用するプロトコル/アダプター型（例: 'uci', 'usi', 'gtp'） */
+  adapter: string;
+  /** 表示名 */
+  name?: string;
+  /** バージョン情報 */
+  version?: string;
+  /** 実行リソースの定義 */
+  sources: {
+    /** メインのJSローダー/エントリーポイント */
+    main: IEngineSourceConfig;
+    /** WASM バイナリ（オプション） */
+    wasm?: IEngineSourceConfig;
+    /** ニューラルネットワークの重みファイル等（オプション） */
+    eval?: IEngineSourceConfig;
+    /** 追加の任意リソース */
+    [key: string]: IEngineSourceConfig | undefined;
+  };
+  /** エンジン起動時のデフォルトオプション */
+  options?: Record<string, unknown>;
+  /** 必須とされる環境能力 */
+  requiredCapabilities?: Partial<ICapabilities>;
+}
+
+/**
  * リソースマップ。
  * 仮想マウントパス（キー）と Blob URL（値）の対応を保持します。
  */
@@ -433,19 +414,61 @@ export interface IEngineLoader {
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>>;
+  revoke(url: string): void;
+  revokeByEngineId(engineId: string): void;
 }
 
 /**
  * エンジン・ブリッジ。
  */
 export interface IEngineBridge {
-  getEngine<T extends keyof EngineRegistry>(
-    id: T,
+  /**
+   * 登録済みの ID または動的な設定オブジェクトからエンジンを取得します。
+   */
+  getEngine<K extends keyof EngineRegistry>(
+    id: K,
     strategy?: EngineLoadingStrategy,
-  ): EngineRegistry[T];
+  ): Promise<EngineRegistry[K]>;
+  getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    config: IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+  getEngine<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    idOrConfig: string | IEngineConfig,
+    strategy?: EngineLoadingStrategy,
+  ): Promise<IEngine<O, I, R>>;
+
+  /**
+   * アダプターインスタンスを明示的に登録します。
+   */
   registerAdapter(
-    adapter: IEngineAdapter<IBaseSearchOptions, unknown, IBaseSearchResult>,
+    adapter: IEngineAdapter<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >,
   ): Promise<void>;
+
+  /**
+   * 汎用アダプター用のファクトリ（クラス）を登録します。
+   */
+  registerAdapterFactory<
+    O extends IBaseSearchOptions = IBaseSearchOptions,
+    I extends IBaseSearchInfo = IBaseSearchInfo,
+    R extends IBaseSearchResult = IBaseSearchResult,
+  >(
+    type: string,
+    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+  ): void;
+
   unregisterAdapter(id: string): Promise<void>;
   onGlobalStatusChange(
     callback: (id: string, status: EngineStatus) => void,

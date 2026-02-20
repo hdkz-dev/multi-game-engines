@@ -35,6 +35,9 @@
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"
   },
+  "dependencies": {
+    "@multi-game-engines/adapter-uci": "workspace:*"
+  },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
     "eslint": "^9.39.2",

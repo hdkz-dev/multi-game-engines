@@ -96,6 +96,7 @@ export default {
       return new Response("OK", {
         headers: {
           "Content-Type": "text/plain",
+          ...CORS_HEADERS,
           ...SECURITY_HEADERS,
         },
       });

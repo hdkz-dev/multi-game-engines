@@ -1,0 +1,35 @@
+{
+  "name": "@multi-game-engines/ui-chess-elements",
+  "version": "0.1.0",
+  "description": "Domain-specific Chess Web Components (Lit)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "dev": "tsup src/index.ts --format esm --watch --dts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "@multi-game-engines/ui-core": "workspace:*",
+    "jsdom": "^28.1.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

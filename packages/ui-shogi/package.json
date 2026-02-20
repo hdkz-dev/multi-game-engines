@@ -1,0 +1,61 @@
+{
+  "name": "@multi-game-engines/ui-shogi",
+  "version": "0.1.0",
+  "description": "Domain-specific Shogi UI components for all frameworks",
+  "type": "module",
+  "types": "./dist/elements.d.ts",
+  "exports": {
+    "./elements": {
+      "types": "./dist/elements.d.ts",
+      "import": "./dist/elements.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts",
+      "import": "./dist/vue.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "lit": "^3.2.1",
+    "react": ">=18.0.0",
+    "vue": ">=3.3.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/domain-shogi": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.13",
+    "@types/react": "^19.2.3",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-vue": "^6.0.4",
+    "lit": "^3.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.18",
+    "vue": "3.5.28"
+  }
+}

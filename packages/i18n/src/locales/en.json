@@ -33,16 +33,30 @@
     "noMove": "---",
     "standard": "2026 Engine Bridge Standard",
     "stockfishTitle": "Stockfish 16.1",
-    "yaneuraouTitle": "Yaneuraou 7.5.0"
+    "yaneuraouTitle": "Yaneuraou 7.5.0",
+    "errors": {
+      "invalidFEN": "Invalid FEN: Input must not be empty.",
+      "invalidFENStructure": "Invalid FEN structure: At least 4 fields required.",
+      "invalidSFEN": "Invalid SFEN: Input must not be empty.",
+      "invalidSFENStructure": "Invalid SFEN structure: At least 4 fields required.",
+      "illegalCharacters": "Illegal characters detected.",
+      "networkError": "Failed to fetch engine resources.",
+      "securityViolation": "Security violation: Unsafe resource loading blocked.",
+      "missingMainEntryPoint": "Engine main entry point URL is missing."
+    }
   },
   "dashboard": {
     "title": "ZENITH DASHBOARD",
     "subtitle": "Next-Gen Game Intelligence Bridge",
     "initializingEngines": "INITIALIZING ENGINES...",
+    "initializationFailed": "Initialization Failed",
     "chessLabel": "CHESS / UCI",
     "shogiLabel": "SHOGI / USI",
     "engineSelector": "Engine selector",
     "languageSelector": "Language selector",
+    "errors": {
+      "bridgeNotAvailable": "Engine bridge is not available."
+    },
     "stats": {
       "engineRuntime": {
         "label": "Engine Runtime",

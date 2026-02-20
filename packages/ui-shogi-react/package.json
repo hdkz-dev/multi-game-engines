@@ -1,0 +1,39 @@
+{
+  "name": "@multi-game-engines/ui-shogi-react",
+  "version": "0.1.0",
+  "description": "Domain-specific Shogi UI components for React",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm --dts --clean",
+    "dev": "tsup src/index.tsx --format esm --watch --dts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/domain-shogi": "workspace:*",
+    "@multi-game-engines/ui-shogi-elements": "workspace:*"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^19.2.3",
+    "jsdom": "^28.1.0",
+    "react": "^19.2.4",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

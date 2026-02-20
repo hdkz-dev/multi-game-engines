@@ -22,23 +22,33 @@
     "build-storybook": "storybook build"
   },
   "license": "MIT",
-  "sideEffects": true,
+  "sideEffects": [
+    "src/engine-monitor.ts",
+    "src/evaluation-graph.ts",
+    "src/pv-list.ts",
+    "src/search-log.ts",
+    "src/score-badge.ts",
+    "src/engine-stats.ts",
+    "dist/*.js"
+  ],
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/ui-chess-elements": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-shogi-elements": "workspace:*",
     "lit": "^3.2.1"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.8",
-    "@storybook/addon-docs": "10.2.8",
-    "@storybook/addon-links": "10.2.8",
-    "@storybook/web-components": "10.2.8",
-    "@storybook/web-components-vite": "10.2.8",
+    "@storybook/addon-a11y": "10.2.10",
+    "@storybook/addon-docs": "10.2.10",
+    "@storybook/addon-links": "10.2.10",
+    "@storybook/web-components": "10.2.10",
+    "@storybook/web-components-vite": "10.2.10",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
-    "storybook": "10.2.8",
-    "tsup": "^8.3.5",
+    "storybook": "10.2.10",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   }

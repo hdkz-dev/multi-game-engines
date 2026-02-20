@@ -10,11 +10,23 @@ import {
 import { StockfishAdapter } from "../stockfish.js";
 
 class MockWorker {
-  postMessage = vi.fn((msg) => {
-    if (msg?.type === "MG_INJECT_RESOURCES") {
+  postMessage = vi.fn((msg: unknown) => {
+    if (
+      msg !== null &&
+      typeof msg === "object" &&
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
+    ) {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    } else if (msg === "uci") {
+      // 2026: ハンドシェイク対応
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "uciok" });
         }
       }, 0);
     }
@@ -31,6 +43,7 @@ describe("StockfishAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {

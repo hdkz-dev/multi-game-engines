@@ -1,9 +1,21 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
-import { createFEN, createSFEN } from "@multi-game-engines/core";
+import { createFEN } from "@multi-game-engines/domain-chess";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
+import { IEngine } from "@multi-game-engines/core";
+import {
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "@multi-game-engines/adapter-uci";
+import {
+  ISHOGISearchOptions,
+  ISHOGISearchInfo,
+  ISHOGISearchResult,
+} from "@multi-game-engines/adapter-usi";
 import { locales } from "@multi-game-engines/i18n";
 import { formatNumber } from "@multi-game-engines/ui-core";
 
@@ -49,13 +61,57 @@ export default function Dashboard() {
   const { locale, setLocale } = useLocale();
   const bridge = useMemo(() => getBridge(), []);
 
+  const [chessEngine, setChessEngine] = useState<IEngine<
+    IChessSearchOptions,
+    IChessSearchInfo,
+    IChessSearchResult
+  > | null>(null);
+  const [shogiEngine, setShogiEngine] = useState<IEngine<
+    ISHOGISearchOptions,
+    ISHOGISearchInfo,
+    ISHOGISearchResult
+  > | null>(null);
+  const [initError, setInitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initEngines() {
+      if (!bridge) return;
+      try {
+        const [chess, shogi] = await Promise.all([
+          bridge.getEngine("stockfish"),
+          bridge.getEngine("yaneuraou"),
+        ]);
+        if (isMounted) {
+          setChessEngine(chess);
+          setShogiEngine(shogi);
+        }
+      } catch (error) {
+        console.error("Engine initialization failed:", error);
+        if (isMounted) {
+          setInitError(
+            error instanceof Error
+              ? error.message
+              : "__INITIALIZATION_FAILED__",
+          );
+        }
+      }
+    }
+
+    void initEngines();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [bridge]);
+
   const localeData = useMemo(
     () => (locale === "ja" ? locales.ja : locales.en),
     [locale],
   );
 
   // チェス用の設定
-  const chessEngine = useMemo(() => bridge?.getEngine("stockfish"), [bridge]);
   const chessOptions = useMemo(
     () => ({
       fen: createFEN(
@@ -68,7 +124,6 @@ export default function Dashboard() {
   const { state: chessState } = useEngineMonitor(chessEngine);
 
   // 将棋用の設定
-  const shogiEngine = useMemo(() => bridge?.getEngine("yaneuraou"), [bridge]);
   const shogiOptions = useMemo(
     () => ({
       sfen: createSFEN(
@@ -95,14 +150,30 @@ export default function Dashboard() {
     return formatNumber(stats.nps);
   }, [activeEngine, chessState.stats, shogiState.stats]);
 
-  if (!bridge || !chessEngine || !shogiEngine) {
+  if (initError || !bridge || !chessEngine || !shogiEngine) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500 font-bold tracking-widest text-sm">
-            {localeData.dashboard.initializingEngines}
-          </p>
+        <div className="flex flex-col items-center gap-4 text-center px-4">
+          {initError ? (
+            <div className="p-6 bg-red-50 text-red-700 rounded-3xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm">
+              <Zap className="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
+              <p className="font-black tracking-tighter text-lg mb-1">
+                {localeData.dashboard.initializationFailed}
+              </p>
+              <p className="text-xs font-bold opacity-70 leading-relaxed">
+                {initError === "__INITIALIZATION_FAILED__"
+                  ? localeData.dashboard.initializationFailed
+                  : initError}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-gray-500 font-bold tracking-widest text-sm uppercase">
+                {localeData.dashboard.initializingEngines}
+              </p>
+            </>
+          )}
         </div>
       </div>
     );

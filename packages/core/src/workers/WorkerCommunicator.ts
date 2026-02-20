@@ -37,7 +37,7 @@ export class WorkerCommunicator {
         if (exp.predicate(data)) {
           this.expectations.delete(exp); // 解決前に削除 (Atomic Resolution)
           exp.resolve(data);
-          return;
+          // 2026 Best Practice: 他のリスナーもメッセージを必要とする場合があるため、ここで return しない
         }
       } catch (err) {
         console.error("Error in message predicate:", err);

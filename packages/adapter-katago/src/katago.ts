@@ -1,52 +1,34 @@
-import { BaseAdapter } from "@multi-game-engines/core";
-import {
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-} from "@multi-game-engines/core";
-import {
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult,
-} from "./GTPParser.js";
-import { GTPParser } from "./GTPParser.js";
+import { IEngineConfig, deepMerge } from "@multi-game-engines/core";
+import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
 
-export class KatagoAdapter extends BaseAdapter<
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult
-> {
-  readonly id = "katago";
-  readonly name = "KataGo";
-  readonly version = "1.15.0";
-  readonly parser = new GTPParser();
-
-  async load(loader?: IEngineLoader): Promise<void> {
-    this.emitStatusChange("loading");
-    try {
-      const url = "https://example.com/katago.js";
-      const config = {
-        url,
-        // TODO: Replace with actual SRI hash before production release
-        sri: "sha256-dummy",
-        size: 0,
-        type: "worker-js" as const,
-      };
-
-      const scriptUrl = loader
-        ? await loader.loadResource(this.id, config)
-        : url;
-
-      this.communicator = new WorkerCommunicator(scriptUrl);
-
-      this.messageUnsubscriber = this.communicator.onMessage((data) => {
-        this.handleIncomingMessage(data);
-      });
-
-      this.emitStatusChange("ready");
-    } catch (error) {
-      this.emitStatusChange("error");
-      throw EngineError.from(error, this.id);
-    }
+/**
+ * 2026 Zenith Tier: KataGo 専用アダプター。
+ * 汎用的な GTPAdapter を拡張し、デフォルト設定を提供します。
+ */
+export class KataGoAdapter extends GTPAdapter {
+  constructor(config?: Partial<IEngineConfig>) {
+    const defaultConfig: IEngineConfig = {
+      id: "katago",
+      adapter: "gtp",
+      name: "KataGo",
+      version: "1.15.0",
+      sources: {
+        main: {
+          url: "https://example.com/katago.js",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-KataGoMainScriptHashPlaceholder",
+          type: "worker-js",
+        },
+        wasm: {
+          url: "https://example.com/katago.wasm",
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-KataGoWasmBinaryHashPlaceholder",
+          type: "wasm",
+          mountPath: "katago.wasm",
+        },
+      },
+    };
+    const finalConfig = deepMerge(defaultConfig, config);
+    super(finalConfig);
   }
 }

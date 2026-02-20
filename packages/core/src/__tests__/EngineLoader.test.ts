@@ -18,11 +18,19 @@ describe("EngineLoader", () => {
     };
     loader = new EngineLoader(storage);
 
+    // Mock window.location
+    vi.stubGlobal("window", {
+      location: {
+        href: "https://test.com/index.html",
+        origin: "https://test.com",
+      },
+    });
+
     // globalThis fetch mock
-    globalThis.fetch = vi.fn().mockResolvedValue({
+    globalThis.fetch = vi.fn<() => Promise<Response>>().mockResolvedValue({
       ok: true,
       arrayBuffer: async () => new TextEncoder().encode("test").buffer,
-    } as unknown as Response);
+    } as Response);
 
     // globalThis URL mock
     globalThis.URL.createObjectURL = vi.fn().mockReturnValue("blob:test");
@@ -33,6 +41,7 @@ describe("EngineLoader", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("should fetch and cache if not in storage", async () => {
@@ -91,7 +100,7 @@ describe("EngineLoader", () => {
 
   it("should allow retry after failure (inflight removal)", async () => {
     const config: IEngineSourceConfig = {
-      url: "https://fail.js",
+      url: "https://test.com/fail.js",
       type: "script",
       sri: dummySRI,
       size: 100,
@@ -142,17 +151,56 @@ describe("EngineLoader", () => {
     process.env.NODE_ENV = "production";
 
     try {
+      // コンストラクタで環境変数を読むため、再インスタンス化が必要
+      const prodLoader = new EngineLoader(storage);
       const config: IEngineSourceConfig = {
         url: "https://test.com/engine.js",
         type: "script",
         __unsafeNoSRI: true,
       };
 
-      await expect(loader.loadResource("test", config)).rejects.toThrow(
+      await expect(prodLoader.loadResource("test", config)).rejects.toThrow(
         "SRI bypass (__unsafeNoSRI) is not allowed in production",
       );
     } finally {
       process.env.NODE_ENV = originalEnv;
     }
+  });
+
+  it("should reject non-loopback HTTP URLs", async () => {
+    const config: IEngineSourceConfig = {
+      url: "http://malicious.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    await expect(loader.loadResource("test", config)).rejects.toThrow(
+      "Insecure connection (HTTP) is not allowed",
+    );
+  });
+
+  it("should reject invalid engine ids", async () => {
+    // 全て特殊文字のID
+    const engineId = "!!!@@@";
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    await expect(loader.loadResource(engineId, config)).rejects.toThrow(
+      "Invalid engine ID",
+    );
+  });
+
+  it("should handle undefined config.type as script", async () => {
+    const config = {
+      url: "https://test.com/engine.js",
+      sri: dummySRI,
+    } as unknown as IEngineSourceConfig; // type を意図的に省略
+
+    const url = await loader.loadResource("test", config);
+    expect(url).toBe("blob:test");
+    // デフォルトで JS として扱われ、オリジン検証が走る
   });
 });

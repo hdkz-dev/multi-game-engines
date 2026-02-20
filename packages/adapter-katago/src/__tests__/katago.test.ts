@@ -7,22 +7,36 @@ import {
   beforeAll,
   afterAll,
 } from "vitest";
-import { KatagoAdapter } from "../katago.js";
+import { KataGoAdapter } from "../katago.js";
 
 class MockWorker {
-  postMessage = vi.fn();
+  postMessage = vi.fn((msg: unknown) => {
+    if (
+      msg !== null &&
+      typeof msg === "object" &&
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
+    ) {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    }
+  });
   terminate = vi.fn();
-  onmessage: unknown = null;
+  onmessage: ((ev: { data: unknown }) => void) | null = null;
   onerror: unknown = null;
 }
 
-describe("KatagoAdapter", () => {
+describe("KataGoAdapter", () => {
   beforeAll(() => {
     vi.spyOn(performance, "now").mockReturnValue(0);
   });
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {
@@ -30,12 +44,12 @@ describe("KatagoAdapter", () => {
   });
 
   it("should initialize with correct metadata", () => {
-    const adapter = new KatagoAdapter();
+    const adapter = new KataGoAdapter();
     expect(adapter.id).toBe("katago");
   });
 
   it("should change status correctly on load", async () => {
-    const adapter = new KatagoAdapter();
+    const adapter = new KataGoAdapter();
     await adapter.load();
     expect(adapter.status).toBe("ready");
   });

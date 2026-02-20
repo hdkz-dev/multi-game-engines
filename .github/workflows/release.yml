@@ -29,6 +29,21 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build
+        run: pnpm run build
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Doc Sync Check
+        run: pnpm run doc-sync
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1

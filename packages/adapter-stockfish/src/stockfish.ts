@@ -1,68 +1,50 @@
+import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
 import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  ResourceMap,
-  IEngineSourceConfig,
-} from "@multi-game-engines/core";
-import {
+  UCIAdapter,
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-} from "./UCIParser.js";
-import { UCIParser } from "./UCIParser.js";
+} from "@multi-game-engines/adapter-uci";
 
-export class StockfishAdapter extends BaseAdapter<
-  IChessSearchOptions,
-  IChessSearchInfo,
-  IChessSearchResult
-> {
-  readonly id = "stockfish";
-  readonly name = "Stockfish";
-  readonly version = "16.1";
-  readonly parser = new UCIParser();
-
-  async load(loader?: IEngineLoader): Promise<void> {
-    this.emitStatusChange("loading");
-    try {
-      const configs: Record<string, IEngineSourceConfig> = {
+/**
+ * 2026 Zenith Tier: Stockfish 専用アダプター。
+ * 汎用的な UCIAdapter を拡張し、Stockfish 用のデフォルト設定を提供します。
+ */
+export class StockfishAdapter extends UCIAdapter {
+  constructor(config?: Partial<IEngineConfig>) {
+    const defaultConfig: IEngineConfig = {
+      id: "stockfish",
+      adapter: "uci",
+      name: "Stockfish",
+      version: "16.1",
+      sources: {
         main: {
           url: "https://example.com/stockfish.js",
-          sri: "sha256-dummy-main",
-          type: "worker-js" as const,
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-StockfishMainScriptHashPlaceholder",
+          type: "worker-js",
         },
         wasm: {
           url: "https://example.com/stockfish.wasm",
-          sri: "sha256-dummy-wasm",
-          type: "wasm" as const,
+          // TODO: Replace with real SRI hash before production release
+          sri: "sha384-StockfishWasmBinaryHashPlaceholder",
+          type: "wasm",
           mountPath: "stockfish.wasm",
         },
-      };
+      },
+    };
+    const finalConfig = deepMerge(defaultConfig, config);
+    super(finalConfig);
+  }
+}
 
-      const resources = loader
-        ? await loader.loadResources(this.id, configs)
-        : { main: configs.main.url, wasm: configs.wasm.url };
-
-      this.communicator = new WorkerCommunicator(resources.main);
-
-      // 依存性注入: WASM 等の Blob URL マップを Worker に送信
-      const resourceMap: ResourceMap = {};
-      for (const [key, config] of Object.entries(configs)) {
-        if (config.mountPath) {
-          resourceMap[config.mountPath] = resources[key];
-        }
-      }
-      await this.injectResources(resourceMap);
-
-      this.messageUnsubscriber = this.communicator.onMessage((data) => {
-        this.handleIncomingMessage(data);
-      });
-
-      this.emitStatusChange("ready");
-    } catch (error) {
-      this.emitStatusChange("error");
-      throw EngineError.from(error, this.id);
-    }
+// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
+declare module "@multi-game-engines/core" {
+  interface EngineRegistry {
+    stockfish: IEngine<
+      IChessSearchOptions,
+      IChessSearchInfo,
+      IChessSearchResult
+    >;
   }
 }

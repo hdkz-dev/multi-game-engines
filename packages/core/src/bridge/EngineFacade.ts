@@ -111,7 +111,10 @@ export class EngineFacade<
     if (typeof middleware === "string") {
       this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
     } else {
-      this.middlewares = this.middlewares.filter((m) => m !== middleware);
+      const targetId = middleware.id;
+      this.middlewares = this.middlewares.filter(
+        (m) => m !== middleware && (!targetId || m.id !== targetId),
+      );
     }
     return this;
   }
@@ -268,9 +271,10 @@ export class EngineFacade<
   }
 
   private isValidInfo(info: unknown): info is T_INFO {
-    // 2026: info はエンジン固有だが、少なくともオブジェクトであるか
-    // ミドルウェアが明示的に null/undefined を返さないことを確認
-    return info !== undefined && info !== null;
+    // 2026 Best Practice: 構造的型チェック (Runtime Type Checking)
+    // T_INFO はジェネリクスだが、最低限非 null のオブジェクトであることを保証する。
+    // 配列や関数は info オブジェクトとして不適切。
+    return typeof info === "object" && info !== null && !Array.isArray(info);
   }
 
   private isValidResult(res: unknown): res is T_RESULT {

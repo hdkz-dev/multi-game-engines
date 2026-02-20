@@ -33,16 +33,30 @@
     "noMove": "---",
     "standard": "2026 Engine Bridge Standard",
     "stockfishTitle": "Stockfish 16.1",
-    "yaneuraouTitle": "やねうら王 7.5.0"
+    "yaneuraouTitle": "やねうら王 7.5.0",
+    "errors": {
+      "invalidFEN": "無効な FEN です: 入力は空であってはなりません。",
+      "invalidFENStructure": "無効な FEN 構造です: 6 つのフィールドが必要です。",
+      "invalidSFEN": "無効な SFEN です: 入力は空であってはなりません。",
+      "invalidSFENStructure": "無効な SFEN 構造です: 4 つ以上のフィールドが必要です。",
+      "illegalCharacters": "不正な文字が検出されました。",
+      "networkError": "エンジンリソースの取得に失敗しました。",
+      "securityViolation": "セキュリティ違反: 不安全なリソースロードが遮断されました。",
+      "missingMainEntryPoint": "エンジンのメインエントリーポイント URL が見つかりません。"
+    }
   },
   "dashboard": {
     "title": "ZENITH DASHBOARD",
     "subtitle": "次世代ゲームインテリジェンス・ブリッジ",
     "initializingEngines": "エンジンを初期化中...",
+    "initializationFailed": "初期化失敗",
     "chessLabel": "チェス / UCI",
     "shogiLabel": "将棋 / USI",
     "engineSelector": "エンジン選択",
     "languageSelector": "言語選択",
+    "errors": {
+      "bridgeNotAvailable": "エンジンブリッジが利用できません。"
+    },
     "stats": {
       "engineRuntime": {
         "label": "エンジン実行環境",

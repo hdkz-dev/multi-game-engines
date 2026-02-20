@@ -13,8 +13,13 @@ import { EngineError } from "../errors/EngineError.js";
 export class EngineLoader implements IEngineLoader {
   private inflightLoads = new Map<string, Promise<string>>();
   private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
+  private isProduction: boolean;
 
-  constructor(private storage: IFileStorage) {}
+  constructor(private storage: IFileStorage) {
+    this.isProduction =
+      typeof process !== "undefined" &&
+      process.env?.["NODE_ENV"] === "production";
+  }
 
   private getMimeType(config: IEngineSourceConfig): string {
     switch (config.type) {
@@ -35,16 +40,43 @@ export class EngineLoader implements IEngineLoader {
     engineId: string,
     config: IEngineSourceConfig,
   ): Promise<string> {
-    const cacheKey = `${engineId}_${config.url}`;
+    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
+    if (/[^a-zA-Z0-9-_]/.test(engineId)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid engine ID: "${engineId}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+      });
+    }
+    const safeId = engineId;
+    const cacheKey = `${safeId}:${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
+    // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
+    const activeUrl = this.activeBlobs.get(cacheKey);
+    if (activeUrl) return activeUrl;
+
     const existing = this.inflightLoads.get(cacheKey);
     if (existing) return existing;
 
+    // 2026: SSR Compatibility Guard
+    if (typeof URL.createObjectURL === "undefined") {
+      return config.url;
+    }
+
     const promise = (async () => {
       try {
-        // 2026 Best Practice: HTTPS 強制 (Security Alert 対応)
-        if (config.url.startsWith("http://")) {
+        // 2026 Best Practice: HTTPS 強制 (Strict Loopback Check)
+        const base =
+          typeof window !== "undefined"
+            ? window.location.href
+            : "https://multi-game-engines.local";
+        const url = new URL(config.url, base);
+        const isLoopback =
+          url.hostname === "localhost" ||
+          url.hostname === "127.0.0.1" ||
+          url.hostname === "::1";
+
+        if (url.protocol === "http:" && !isLoopback) {
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
@@ -54,24 +86,35 @@ export class EngineLoader implements IEngineLoader {
           });
         }
 
-        const sri = config.sri;
-        const unsafeNoSRI =
-          (config as { __unsafeNoSRI?: boolean }).__unsafeNoSRI === true;
+        // 2026 Best Practice: プロトコル・オリジン検証を通過した安全な URL を以降で使用
+        const validatedUrl = url.href;
 
-        // 2026 Best Practice: 本番環境での SRI バイパスを禁止
-        const isProduction =
-          typeof process !== "undefined" &&
-          process.env?.["NODE_ENV"] === "production";
+        // 2026 Security: Validate ALL resource URLs capable of execution (JS/Wasm)
+        // Prevent bypassing checks by using obscure mime types or missing type field.
+        // We default to strictly validate ALL types except specific safe data types.
+        // This closes the hole where `config.type = "script"` could bypass validation but still execute.
+        const isSafeType =
+          config.type === "eval-data" ||
+          config.type === "asset" ||
+          config.type === "json" ||
+          config.type === "text";
+
+        if (!isSafeType) {
+          this.validateWorkerUrl(validatedUrl, engineId);
+        }
+
+        const sri = config.sri;
+        const unsafeNoSRI = config.__unsafeNoSRI === true;
 
         if (!sri && !unsafeNoSRI) {
           throw new EngineError({
-            code: EngineErrorCode.SRI_MISMATCH,
+            code: EngineErrorCode.SECURITY_ERROR,
             message: "SRI required for security verification.",
             engineId,
           });
         }
 
-        if (unsafeNoSRI && isProduction) {
+        if (unsafeNoSRI && this.isProduction) {
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
@@ -86,26 +129,27 @@ export class EngineLoader implements IEngineLoader {
           if (sri) {
             const isValid = await SecurityAdvisor.verifySRI(cached, sri);
             if (isValid) {
-              const url = URL.createObjectURL(
+              const cachedBlobUrl = URL.createObjectURL(
                 new Blob([cached], { type: this.getMimeType(config) }),
               );
-              this.updateBlobUrl(cacheKey, url);
-              return url;
+              this.updateBlobUrl(cacheKey, cachedBlobUrl);
+              return cachedBlobUrl;
             }
             await this.storage.delete(cacheKey);
           } else if (config.__unsafeNoSRI) {
             // 2026: 非本番環境かつ SRI バイパス時はキャッシュをそのまま使用可能
-            const url = URL.createObjectURL(
+            const bypassBlobUrl = URL.createObjectURL(
               new Blob([cached], { type: this.getMimeType(config) }),
             );
-            this.updateBlobUrl(cacheKey, url);
-            return url;
+            this.updateBlobUrl(cacheKey, bypassBlobUrl);
+            return bypassBlobUrl;
           }
         }
 
+        // 2026 Best Practice: 検証済み URL を使用して fetch を実行
         let data: ArrayBuffer;
         try {
-          const response = await fetch(config.url);
+          const response = await fetch(validatedUrl);
           if (!response.ok) {
             throw new EngineError({
               code: EngineErrorCode.NETWORK_ERROR,
@@ -118,7 +162,7 @@ export class EngineLoader implements IEngineLoader {
           if (err instanceof EngineError) throw err;
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,
-            message: `Network error while fetching engine resource: ${config.url}`,
+            message: `Network error while fetching engine resource: ${validatedUrl}`,
             engineId,
             originalError: err,
           });
@@ -136,11 +180,10 @@ export class EngineLoader implements IEngineLoader {
         }
 
         await this.storage.set(cacheKey, data);
-        const url = URL.createObjectURL(
-          new Blob([data], { type: this.getMimeType(config) }),
-        );
-        this.updateBlobUrl(cacheKey, url);
-        return url;
+        const blob = new Blob([data], { type: this.getMimeType(config) });
+        const blobUrl = URL.createObjectURL(blob);
+        this.updateBlobUrl(cacheKey, blobUrl);
+        return blobUrl;
       } finally {
         // 2026 Best Practice: 完了または失敗時に Map から除去し、再試行を可能にする
         this.inflightLoads.delete(cacheKey);
@@ -175,8 +218,8 @@ export class EngineLoader implements IEngineLoader {
     );
 
     const failures = settledResults.filter(
-      (r) => r.status === "rejected",
-    ) as PromiseRejectedResult[];
+      (r): r is PromiseRejectedResult => r.status === "rejected",
+    );
     if (failures.length > 0) {
       // ロールバック: 成功した分の URL を revoke する
       for (const res of settledResults) {
@@ -208,6 +251,64 @@ export class EngineLoader implements IEngineLoader {
         this.activeBlobs.delete(key);
         break;
       }
+    }
+  }
+
+  /**
+   * 2026 Best Practice: 特定のエンジンIDに関連付けられたすべての Blob リソースを解放します。
+   */
+  revokeByEngineId(engineId: string): void {
+    for (const [key, val] of this.activeBlobs.entries()) {
+      if (key.startsWith(`${engineId}:`)) {
+        URL.revokeObjectURL(val);
+        this.activeBlobs.delete(key);
+      }
+    }
+  }
+
+  /**
+   * 2026 Best Practice: Worker 実行コンテキストのオリジン検証
+   */
+  private validateWorkerUrl(url: string, engineId?: string): void {
+    if (url.startsWith("blob:")) return;
+    try {
+      const base = typeof window !== "undefined" ? window.location.href : "";
+      const parsedUrl = new URL(url, base || undefined);
+      const isLoopback =
+        parsedUrl.hostname === "localhost" ||
+        parsedUrl.hostname === "127.0.0.1" ||
+        parsedUrl.hostname === "::1";
+
+      // 本番環境ではループバックも禁止（開発者モードの混入を防ぐ）
+      if (this.isProduction && isLoopback) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Loopback resources are prohibited in production: ${url}`,
+          engineId,
+        });
+      }
+
+      const currentOrigin =
+        typeof window !== "undefined" ? window.location.origin : "";
+      const isCrossOrigin = currentOrigin && parsedUrl.origin !== currentOrigin;
+      const shouldReject = isCrossOrigin && (this.isProduction || !isLoopback);
+
+      if (shouldReject) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Cross-origin Worker scripts are prohibited for security: ${url}`,
+          engineId,
+          remediation:
+            "Host the engine worker script on the same origin or use a Blob URL via EngineLoader.",
+        });
+      }
+    } catch (e) {
+      if (e instanceof EngineError) throw e;
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Invalid resource URL (Validation Failed): ${url}`,
+        engineId,
+      });
     }
   }
 }

@@ -15,9 +15,10 @@ const config: StorybookConfig = {
     options: {},
   },
   viteFinal: async (config) => {
-    config.plugins = config.plugins || [];
-    config.plugins.push(tailwindcss());
-    return config;
+    const { mergeConfig } = await import("vite");
+    return mergeConfig(config, {
+      plugins: [tailwindcss()],
+    });
   },
   docs: {
     // Storybook 10 default

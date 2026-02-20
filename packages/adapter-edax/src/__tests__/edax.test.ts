@@ -23,6 +23,7 @@ describe("EdaxAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {

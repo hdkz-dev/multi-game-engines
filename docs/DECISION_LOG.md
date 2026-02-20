@@ -40,3 +40,7 @@
 - [ADR-028: Storybook 10 への移行と ESM 専用構成の採用](adr/028-storybook-10-esm-transition.md)
 - [ADR-029: Zenith Tier 品質標準の定義](adr/029-zenith-tier-quality-standards.md)
 - [ADR-033: フレームワーク非依存の盤面コンポーネント](adr/033-framework-agnostic-boards.md)
+- [ADR-034: UI パッケージの完全モジュール化と管理ツールの分離](adr/034-ui-modular-split-and-monitor-separation.md)
+- [ADR-035: React 19 におけるカスタム要素とプロパティの統合パターン](adr/035-react-19-custom-elements-integration.md)
+- [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](adr/036-zenith-audit-and-strict-types.md)
+- [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](adr/037-core-domain-isolation-and-lifecycle-hardening.md)

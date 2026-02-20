@@ -1,17 +1,10 @@
-import { FEN, Move } from "@multi-game-engines/core";
-export type { Move };
+import { PositionString, Move } from "@multi-game-engines/core";
+export type { Move, PositionString };
 
 /**
  * UI 正規化ミドルウェアの一意な ID。
  */
 export const UI_NORMALIZER_MIDDLEWARE_ID = "ui-normalizer" as const;
-
-/**
- * 局面表記の型（FEN またはアダプター定義の局面文字列）
- */
-export type PositionString =
-  | FEN
-  | (string & { readonly __brand: "PositionString" });
 
 /**
  * 評価値の種類
@@ -101,12 +94,12 @@ export interface EngineSearchState {
 
 /**
  * 初期状態の定義。
- * 2026 Best Practice: 呼び出し側での 'as unknown as T' を排除するため、ジェネリクスをサポート。
  * T がベース型を拡張している場合、不足している必須フィールドを overrides で補う必要があります。
  */
-export function createInitialState<
-  T extends EngineSearchState = EngineSearchState,
->(position: PositionString, overrides?: Partial<T>): T {
+export function createInitialState(
+  position: PositionString,
+  overrides?: Partial<EngineSearchState>,
+): EngineSearchState {
   const base: EngineSearchState = {
     isSearching: false,
     position,
@@ -125,6 +118,5 @@ export function createInitialState<
     _internalCounter: 0,
   };
 
-  // 2026: 型安全性を高めるため、base と overrides を明示的にマージ
-  return Object.assign(base, overrides) as T;
+  return { ...base, ...overrides };
 }

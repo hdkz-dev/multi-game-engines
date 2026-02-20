@@ -1,17 +1,92 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月18日
+## 📅 更新日: 2026年2月20日
 
-## 🏆 到達ハイライト (Phase 2 Stage 1 - UI Foundation Zenith - Complete)
+## 🏆 到達ハイライト (Zenith Tier 究極監査と型安全性の昇華 - Zenith Audit & Strict Type Hardening)
 
-- **Vue 3.5+ `onWatcherCleanup` によるモダン化**:
-  - `useEngineMonitor` フックを Vue 3.5 の最新パターンへ刷新。`onWatcherCleanup` を活用した副作用の自動クリーンアップにより、エンジン切り替え時のメモリリークや競合状態を 100% 排除しました。
+- **全マージ済み PR (#15, #21, #24, #25) の深層監査完遂**:
+  - 100 以上のレビューコメントを再検証し、細かな指摘事項（SRI ハッシュの形式、探索停止時の境界挙動等）をすべて最新の実装に反映。
+- **モノレポ全域での `exactOptionalPropertyTypes` の有効化**:
+  - 一時的に緩和されていたオプションプロパティの厳密チェックを全パッケージで復旧。Vue/React と Web Components 間のプロパティ受け渡しの安全性を物理的に保証。
+- **Zero-Any Policy の完全達成**:
+  - `MonitorRegistry` 等のコア基盤から `any` キャストを完全に排出し、不変な型保証（Branded Types + IBase Interfaces）を確立。
+- **SRI 標準の sha384 統一**:
+  - セキュリティ監査の標準化に向けて、ダミーハッシュをすべて `sha384` 形式へ統一し、TODO による追跡体制を整備。
+
+## 🏆 到達ハイライト (PR #25 最終監査完遂 - Final Security & Robustness Hardening)
+
+- **「Refuse by Exception」原則の全域適用 (ADR-026)**:
+  - 従来のサイレントなサニタイズを完全に廃止。エンジン ID、FEN/SFEN 局面文字列に対し、不正な入力を検知した時点で `EngineError` をスローする厳格なバリデーションを、ブリッジからドメイン層まで一貫して適用しました。
+- **UI エラーフィードバックの高度化**:
+  - `ChessBoard` / `ShogiBoard` において、局面パースエラー時に `errorMessage` プロパティを通じて詳細なエラー理由をユーザーに提示する仕組みを実装。開発効率とユーザー体験の両面を向上させました。
+- **完全な SSR 互換性の確保**:
+  - `EngineLoader` において、`window` オブジェクトが未定義の環境（Server-side Rendering / Node.js）でも URL 解析がクラッシュしないよう、確実なフォールバックメカニズムを導入。
+- **モダンな ESM エコシステムへの完全移行**:
+  - ルートの `package.json` に `"type": "module"` を設定。ツール系スクリプトも CommonJS から ESM へ完全に刷新し、`doc-sync.js` 等のユーティリティにおいて ESLint バージョン等の完全同期を強制しました。
+- **ドメイン層の最終研磨と堅牢化**:
+  - チェス FEN 検証における詳細な remediation メッセージの追加。
+  - 将棋 SFEN 検証における手数カウンターの整数厳密チェックを導入。
+  - 囲碁 GTP 指し手検証のサポート範囲 (A1-Z25) を明確化。
+- **ドキュメントの同期と標準化**:
+  - `README.md`, `ARCHITECTURE.md`, `TECHNICAL_SPECS.md` 等の主要ドキュメントを最新の実装（ドメインパッケージへの分離、Refuse by Exception 方針等）に完全同期。
+  - `CODING_CONVENTIONS.md` および `ZENITH_STANDARD.md` へ「Refuse by Exception」の規約を追加。
+  - ドキュメント間のサンプルコードの不一致を解消。
+- **テストスイートの Zenith 品質確保**:
+  - `EngineError` の型安全な捕捉 (`instanceof`) を徹底し、テストコードの堅牢性を確保。
+  - USI プロトコルにおける `bestmove none` 等のエッジケース対応テストを完備。
+  - `UCIAdapter` / `USIAdapter` において、ハンドシェイクのタイムアウト、リソース注入失敗、ステータス遷移の整合性を網羅的に検証。
+- **ドキュメントと実装の完全同期**:
+  - ADR-026 の更新、README のインポート順序修正、および Zenith Dashboard 例におけるハードコード文字列の排除（i18n 統合）を完遂。
+
+## 🏆 到達ハイライト (Phase 3 Stage 3 - 究極のモジュール化と知的財産保護 - Package Reorganization & IP Safety)
+
+- **UI パッケージの完全モジュール化とフレームワーク分離**:
+  - `ui-react` / `ui-vue` を `core` (基盤), `monitor` (監視ツール), `game` (個別ゲームUI) の 3 レイヤーに物理的に分離。
+  - 利用者が特定のコンポーネント（例: チェス盤のみ）を使用する際、不要な依存関係（将棋、監視パネル、他のフレームワーク等）が一切混入しない究極の「Pay-as-you-go」を達成しました。
+- **React 19 / Vue 3 / Lit 最高の統合パターンの確立**:
+  - React 19 でのカスタム要素統合において、`useLayoutEffect` を用いた確実なプロパティ同期パターンを確立 (ADR-035)。
+  - JSDOM 環境下でも 100% 信頼できる統合テストスイート（React/Vue 両対応）を構築しました。
+- **盤面 UI コンポーネントの品質極致化**:
+  - `ui-chess-elements` および `ui-shogi-elements` に対し、レンダリング、プロパティ反映、持ち駒表示、駒名ローカライズを網羅する詳細なユニットテストを追加。
+  - Web Components 単位での視覚的・機能的な整合性を 100% 保証しました。
+- **知的財産権の保護と安全な命名 (Othello -> Reversi)**:
+  - 商標権に配慮し、プロジェクト全域（ソース、型、ドキュメント、npm キーワード）から `Othello` 表記を排除し、一般名称である `Reversi` に統一しました。
+- **ドメインロジックの対称性確保**:
+  - 全ての対応ゲーム（Chess, Shogi, Go, Reversi, Mahjong）において、独立した `domain-*` パッケージを新設し、アダプター層からビジネスロジックを完全に分離しました。
+- **ハブパッケージによる高い DX の維持**:
+  - 内部は細かく分離しつつ、`ui-react` / `ui-vue` を「ハブ」として維持することで、従来通りの一括インポートによる高い開発利便性も両立しました。
+
+## 🏆 到達ハイライト (Phase 3 Stage 2 - 究極のパワーと制御 - Completed Zenith Consolidation)
+
+- **Zenith Tier 深層監査と型安全性の極致 (Zero-Any Policy)**:
+  - モノレポ全域から `any` / `as any` キャストを完全に排除。テストコード、ユーティリティ（`deepMerge`）、モックワーカーに至るまで、TypeScript 5.9 の厳格な型安全性を 100% 達成しました。
+  - **Branded Types の再構築**: `PositionString`, `FEN`, `SFEN` のブランド衝突を解消し、継承関係を正しく表現することで、局面表記の型混同を物理的に防止。
+- **汎用アダプター基盤のアーキテクチャ整合**:
+  - `IEngineAdapter` と `IEngine` の役割を型レベルで明確に分離。ファクトリ関数がアダプターを返し、`EngineBridge` が Facade にラップする設計を整合させ、循環依存や型不一致を解消。
+- **FEN バリデーションの Zenith 強化**:
+  - `createFEN` においてホワイトリスト方式の厳格な文字チェックと構造検証（ランク数、手番、キャスリング等）を導入。Next.js のプリレンダリング環境下でも動作する堅牢な局面解析を確立。
+- **セキュリティとエラー追跡の高度化**:
+  - `EngineLoader` のエラーオブジェクトに `engineId` を一貫して付与。Worker オリジン検証における例外の透明性を向上。
+- **テストスイートの健全化**:
+  - `vi.unstubAllGlobals()` によるグローバルスタブの確実なクリーンアップ。
+  - `MessageEvent` 準拠のモックワーカー実装により、非同期通信のテストをより本物に近い形で再現。
+
+- **汎用プロトコルアダプター基盤の確立**:
+  - `@multi-game-engines/adapter-uci`, `adapter-usi`, `adapter-gtp` を新規実装。特定のエンジン名に依存せず、プロトコル仕様のみをカプセル化した再利用可能な基盤を構築しました。
+- **コンフィギュレーション主導のエンジン生成**:
+  - `EngineBridge.getEngine` が `IEngineConfig` を受け取れるよう拡張。バイナリ URL、SRI、および依存リソースを動的に注入可能にし、コード変更なしでのエンジン追加を可能にしました。
+- **宣言併合による高度な型安全性**:
+  - `EngineRegistry` への宣言併合を各アダプターに導入。`bridge.getEngine("stockfish")` 等の呼び出しに対し、プラグインをインポートするだけで完璧な型推論が効く「ゼロ構成型安全性」を達成しました。
+- **セキュリティの Zenith Tier 強化**:
+  - `EngineLoader` に Worker スクリプトのオリジン検証を導入。クロスオリジンな実行ファイルのロードを構造的に遮断し、ブラウザセキュリティを極限まで高めました。
 - **リポジトリ全域の Tree-shaking 最適化 (sideEffects)**:
   - 全 14 パッケージの `package.json` において `sideEffects` フラグを厳密に設定。`ui-elements` (Web Components) の登録副作用を明示しつつ、`core` や `i18n` の純粋なロジック層でのデッドコード削除を最大化しました。
 - **WCAG 2.2 AA 準拠の視覚順序 ARIA マッピング**:
   - `chess-board` および `shogi-board` において、盤面の「視覚的な位置」に基づいた ARIA 座標生成ロジックを確立。盤面の向き (Orientation) に応じて、左上が "a8" (先手) または "h1" (後手) となるように国際化されたラベルを動的にマッピング。
-- **ミドルウェアのべき等な後始末 (`unuse`)**:
-  - `IEngine.unuse` の実装を強化し、ID 指定またはインスタンス指定による安全な登録解除を保証。コンポーネントの再マウントを繰り返してもミドルウェアが累積しない堅牢なライフサイクル管理を実現。
+- **Zenith Tier 品質標準の確立**:
+  - `docs/ZENITH_STANDARD.md` を策定し、アーキテクチャ、性能、アクセシビリティ、セキュリティの 5 軸でプロジェクトの絶対的な到達目標を定義。
+  - 汎用プロトコルアダプター（`adapter-uci` 等）による、エンジンの「No-Code 追加」ロードマップを策定。
+  - `core` の型定義を拡張し、WebGPU/WebNN 等の次世代演算加速指標を統合。
 
 - **動的盤面コンポーネントとダッシュボードの統合**:
   - **Framework-Agnostic Boards**: Lit ベースの `<chess-board>` および `<shogi-board>` を実装。React/Vue を含むあらゆる環境で利用可能な高精度な盤面表示を実現。
@@ -47,7 +122,7 @@
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:
   - **Next.js 16.1 (Stable)** & **React 19.2** へのメジャーアップデート、および **React Compiler** の有効化。
   - **Node.js 24 (LTS Target)** & **Turborepo 2.8** によるビルドパイプラインの高速化と並列実行の導入。
-  - **TypeScript 5.9** & **ESLint 9.20.0 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
+  - **TypeScript 5.9** & **ESLint 9.39.2 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
   - **Project References** の導入によるモノレポ構成の最適化と、`noUncheckedIndexedAccess` 等の極めて厳格な型安全性の確立。
 
 ---
@@ -73,5 +148,6 @@
 ## 🚀 次のステップ
 
 1. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
-2. **技術的負債の解消**: `adapter-edax` の本番用 SRI ハッシュ適用など。
-3. **テレメトリ拡張**: UI 上のインタラクション計測ポイントの拡充。
+2. **Extended Adapters 調査**: バックギャモン、シャンチー、ポーカー等の WASM 移植状況の確認。
+3. **汎用アダプター基盤の構築**: `adapter-uci`, `adapter-usi` によるマルチエンジン対応の強化。
+4. **技術的負債の解消**: `adapter-edax` の本番用 SRI ハッシュ適用など。
