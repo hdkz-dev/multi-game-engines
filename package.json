@@ -25,7 +25,7 @@
     "doc-sync": "node scripts/doc-sync.js",
     "prepare": "husky",
     "release": "pnpm build && changeset publish",
-    "ai:check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test",
+    "ai:check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e",
     "ai:release": "changeset"
   },
   "engines": {
