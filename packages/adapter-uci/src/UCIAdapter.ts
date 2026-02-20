@@ -47,10 +47,26 @@ export class UCIAdapter extends BaseAdapter<
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      const { sources } = this.config;
+      if (!loader) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "IEngineLoader is required for secure resource loading.",
+          engineId: this.id,
+          i18nKey: "engine.errors.loaderRequired",
+        });
+      }
+
+      const sources = this.config.sources;
+      if (!sources) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Engine configuration is missing 'sources' field.",
+          engineId: this.id,
+          i18nKey: "engine.errors.missingSources",
+        });
+      }
 
       // 2026 Best Practice: マルチソースの並列ロードと検証
-      // undefined なソースを除外してローダーに渡す
       const validSources: Record<string, IEngineSourceConfig> = {};
       for (const [key, value] of Object.entries(sources)) {
         if (value) {
@@ -58,15 +74,14 @@ export class UCIAdapter extends BaseAdapter<
         }
       }
 
-      const resources = loader
-        ? await loader.loadResources(this.id, validSources)
-        : { main: sources.main?.url };
+      const resources = await loader.loadResources(this.id, validSources);
 
       if (!resources["main"]) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry point URL",
+          message: "Missing main entry point after resolution",
           engineId: this.id,
+          i18nKey: "engine.errors.missingMainEntryPoint",
         });
       }
 

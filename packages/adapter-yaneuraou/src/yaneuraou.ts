@@ -1,9 +1,9 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
 import {
   USIAdapter,
-  ISHOGISearchOptions,
-  ISHOGISearchInfo,
-  ISHOGISearchResult,
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
 } from "@multi-game-engines/adapter-usi";
 
 /**
@@ -49,9 +49,9 @@ export class YaneuraouAdapter extends USIAdapter {
 declare module "@multi-game-engines/core" {
   interface EngineRegistry {
     yaneuraou: IEngine<
-      ISHOGISearchOptions,
-      ISHOGISearchInfo,
-      ISHOGISearchResult
+      IShogiSearchOptions,
+      IShogiSearchInfo,
+      IShogiSearchResult
     >;
   }
 }

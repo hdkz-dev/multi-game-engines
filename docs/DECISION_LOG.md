@@ -46,3 +46,4 @@
 - [ADR-035: React 19 におけるカスタム要素とプロパティの統合パターン](adr/035-react-19-custom-elements-integration.md)
 - [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](adr/036-zenith-audit-and-strict-types.md)
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](adr/037-core-domain-isolation-and-lifecycle-hardening.md)
+- [ADR-038: プライバシー保護のためのログ・サニタイズポリシー (Privacy-First Logging)](adr/038-privacy-first-logging.md)

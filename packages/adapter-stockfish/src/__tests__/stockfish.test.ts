@@ -8,6 +8,7 @@ import {
   afterAll,
 } from "vitest";
 import { StockfishAdapter } from "../stockfish.js";
+import { IEngineLoader } from "@multi-game-engines/core";
 
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
@@ -23,7 +24,6 @@ class MockWorker {
         }
       }, 0);
     } else if (msg === "uci") {
-      // 2026: ハンドシェイク対応
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: "uciok" });
@@ -37,8 +37,19 @@ class MockWorker {
 }
 
 describe("StockfishAdapter", () => {
+  const mockLoader = {
+    loadResource: vi.fn().mockResolvedValue("blob:mock"),
+    loadResources: vi.fn().mockResolvedValue({ main: "blob:mock" }),
+    revoke: vi.fn(),
+    revokeByEngineId: vi.fn(),
+  };
+
   beforeAll(() => {
     vi.spyOn(performance, "now").mockReturnValue(0);
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn().mockReturnValue("blob:mock"),
+      revokeObjectURL: vi.fn(),
+    });
   });
 
   afterAll(() => {
@@ -57,7 +68,7 @@ describe("StockfishAdapter", () => {
 
   it("should change status correctly on load", async () => {
     const adapter = new StockfishAdapter();
-    await adapter.load();
+    await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(adapter.status).toBe("ready");
   });
 });

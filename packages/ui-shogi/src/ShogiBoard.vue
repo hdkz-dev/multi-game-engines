@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import "./elements.js";
 import { Move } from "@multi-game-engines/core";
-import { SFEN } from "@multi-game-engines/core/shogi";
-import { ShogiPiece } from "@multi-game-engines/ui-core/shogi";
+import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
 defineProps<{
   sfen: SFEN;
-  lastMove?: Move;
-  boardLabel?: string;
-  errorMessage?: string;
-  handSenteLabel?: string;
-  handGoteLabel?: string;
-  pieceNames?: Partial<Record<ShogiPiece, string>>;
-  locale?: string;
+  lastMove?: Move | undefined;
+  boardLabel?: string | undefined;
+  errorMessage?: string | undefined;
+  handSenteLabel?: string | undefined;
+  handGoteLabel?: string | undefined;
+  pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+  locale?: string | undefined;
 }>();
 </script>
 

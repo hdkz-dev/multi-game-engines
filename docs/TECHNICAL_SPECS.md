@@ -14,18 +14,9 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 各種ゲーム固有の型（`FEN`, `SFEN`, `GOMove` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、それぞれのドメインパッケージ（`@multi-game-engines/domain-*`）で提供されています。
 
-- **FEN**: チェス局面表記（Branded string）。`@multi-game-engines/domain-chess` の `createFEN` ファクトリによる、文字種・フィールド数・手番等の厳格なバリデーション。
-- **SFEN**: 将棋局面表記（Branded string）。`@multi-game-engines/domain-shogi` の `createSFEN` ファクトリによる、駒配置、持ち駒、および手数カウンター（整数値 >= 1）の厳格なバリデーション。
-- **GOMove**: 囲碁の指し手（Branded string）。GTP 形式（A1-Z25, pass, resign）をサポート。
-- **PositionString**: `core` パッケージで提供される、ゲームに依存しない汎用局面表記の基底型。
-
-```typescript
-import { createFEN } from "@multi-game-engines/domain-chess";
-
-const pos = createFEN(
-  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-);
-```
+- **Move<T> (Hierarchical Branding)**: `core` パッケージで定義される指し手の基底型。各ドメインで `Move<"ShogiMove">` のように階層化され、基底の `Move` 型との互換性を保ちつつ、ドメイン間の誤混同をコンパイルレベルで防止します。
+- **FEN / SFEN**: 局面表記（Branded string）。`PositionString<T>` を継承し、文字種・フィールド数・手番等の厳格なバリデーションを提供。
+- **create*Move / create*Board**: 各ドメインパッケージが提供する「バリデータ兼ファクトリ」。アンセーフな `as` キャストを排除し、Refuse by Exception 原則に基づき、不正な入力に対して即座に `EngineError` をスローします。
 
 ### 1-3. ロード戦略 (Loading Strategy)
 
@@ -72,12 +63,21 @@ const pos = createFEN(
 
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
-- **GTPParser**: 囲碁用。`genmove` や `loadboard` などのコマンド生成、および `visits` や `winrate` の解析に対応。
-- **UCCIParser**: 中国将棋（Xiangqi）用。UCI ベースだが XQFEN 局面形式に対応。
-- **JSONParser (Mahjong)**: 麻雀用。構造化された JSON メッセージのパースと、再帰的なインジェクション検証。
-- **Generic Text Parsers**: Edax, gnubg, KingsRow 等の独自テキストプロトコルに対応するための柔軟な正規表現ベースのパーサー。リバーシやバックギャモン等のゲームをサポートします。
+- **GTPParser**: 囲碁用。KataGo 拡張 JSON 出力と標準 GTP 応答の両方をサポート。`visits`, `winrate`, `scoreLead`, `pv` の詳細解析に対応。
+- **KingsRowParser**: チェッカー用。`bestmove: 11-15 (eval: 0.12)` 形式のテキスト解析。
+- **GNUBGParser**: バックギャモン用。JSON プロトコルによる `equity` および勝率（Win/Gammon/Backgammon）の解析。
+- **EdaxParser**: リバーシ用。テキストベースの評価値・指し手解析。
+- **MahjongJSONParser**: 麻雀用 (Mortal)。多次元配列を含む複雑な局面データの検証と JSON 通信。
 
-### 4-1. 同一ゲーム・マルチエンジン対応 (Multi-Engine Support)
+### 4-1. コマンド・インジェクション防御 (Structural Defense)
+
+全てのパーサーは、コマンド生成の最終段階で `ProtocolValidator.assertNoInjection` を呼び出します。
+
+- **対象**: `createSearchCommand` (局面データ), `createOptionCommand` (オプション名/値)。
+- **検証内容**: 改行 (`\n`), ヌル (`\0`), セミコロン (`;`) 等の制御文字。
+- **ポリシー**: サニタイズ（除去）ではなく拒否（例外スロー）。不正な入力によるエンジンの意図しない操作を構造的に防止します。
+
+### 4-2. 同一ゲーム・マルチエンジン対応 (Multi-Engine Support)
 
 `EngineBridge` は、同一のプロトコルを使用する複数のエンジンを同時に管理可能です。
 
@@ -85,7 +85,7 @@ const pos = createFEN(
 - **ID 空間の分離**: `chess-sf-16` と `chess-sf-17` のように ID を分けることで、同一ページ内でのエンジン比較（アンサンブル分析）を実現。
 - **並列 Worker 実行**: エンジンごとに独立した Web Worker を割り当て、ブラウザのマルチコア能力を最大限活用。
 
-### 4-2. 局面・指し手解析 (Board & Move Parsers)
+### 4-3. 局面・指し手解析 (Board & Move Parsers)
 
 描画層での再利用を目的とした、軽量な局面文字列パーサーを提供します。
 

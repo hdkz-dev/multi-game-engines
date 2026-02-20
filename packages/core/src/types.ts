@@ -6,9 +6,11 @@
 export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
 /**
- * 指し手を表すブランド型（UCI/USI形式）。
+ * 指し手を表すブランド型。
+ * 各ゲームアダプターで Move<"GameMove"> のように拡張可能です。
+ * デフォルトでは全てのブランド化された指し手と互換性があります。
  */
-export type Move = Brand<string, "Move">;
+export type Move<T extends string = string> = string & { readonly __brand: T };
 
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
@@ -157,6 +159,10 @@ export interface IEngineError {
   code: EngineErrorCode;
   remediation?: string | undefined;
   engineId?: string | undefined;
+  /** 国際化対応のためのメッセージキー */
+  i18nKey?: string | undefined;
+  /** メッセージの埋め込みパラメータ */
+  i18nParams?: Record<string, string | number> | undefined;
 }
 
 /**

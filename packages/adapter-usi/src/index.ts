@@ -1,17 +1,24 @@
 export * from "./USIAdapter.js";
 export * from "./USIParser.js";
-export * from "./usi-types.js";
-
 import { USIAdapter } from "./USIAdapter.js";
 import { IEngineConfig, IEngineAdapter } from "@multi-game-engines/core";
-import { ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
-import { ISHOGISearchOptions } from "./usi-types.js";
+import {
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
+} from "./USIParser.js";
 
-/**
- * 2026 Zenith Tier: 汎用 USI アダプターのファクトリ関数。
- */
 export function createUSIAdapter(
   config: IEngineConfig,
-): IEngineAdapter<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> {
+): IEngineAdapter<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
   return new USIAdapter(config);
+}
+
+import { IEngine } from "@multi-game-engines/core";
+
+// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
+declare module "@multi-game-engines/core" {
+  interface EngineRegistry {
+    usi: IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult>;
+  }
 }

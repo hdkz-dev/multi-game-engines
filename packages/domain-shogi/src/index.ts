@@ -2,12 +2,43 @@ import {
   EngineErrorCode,
   EngineError,
   PositionString,
+  Move,
+  createMove,
 } from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
  */
 export type SFEN = PositionString<"SFEN">;
+
+/**
+ * 将棋の指し代表現 (USI形式: 7g7f, 8h2b+ 等)。
+ */
+export type ShogiMove = Move<"ShogiMove">;
+
+/**
+ * 将棋の指し手バリデータファクトリ。
+ */
+export function createShogiMove(move: string): ShogiMove {
+  if (typeof move !== "string" || move.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "Invalid ShogiMove: Input must be a non-empty string.",
+    });
+  }
+  // USI形式: 移動(7g7f), 成(8h2b+), 打(*7f), 特殊(resign, win, none, (none))
+  if (
+    !/^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$|^none$|^\(none\)$/i.test(
+      move,
+    )
+  ) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: `Invalid ShogiMove format: "${move}"`,
+    });
+  }
+  return createMove<"ShogiMove">(move);
+}
 
 /**
  * 将棋の駒識別子。

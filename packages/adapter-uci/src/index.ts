@@ -17,3 +17,12 @@ export function createUCIAdapter(
 ): IEngineAdapter<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
   return new UCIAdapter(config);
 }
+
+import { IEngine } from "@multi-game-engines/core";
+
+// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
+declare module "@multi-game-engines/core" {
+  interface EngineRegistry {
+    uci: IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult>;
+  }
+}

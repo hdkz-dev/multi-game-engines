@@ -12,7 +12,15 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@multi-game-engines/adapter-edax": "workspace:*",
+    "@multi-game-engines/adapter-gnubg": "workspace:*",
+    "@multi-game-engines/adapter-gtp": "workspace:*",
+    "@multi-game-engines/adapter-katago": "workspace:*",
+    "@multi-game-engines/adapter-kingsrow": "workspace:*",
+    "@multi-game-engines/adapter-mortal": "workspace:*",
     "@multi-game-engines/adapter-stockfish": "workspace:*",
+    "@multi-game-engines/adapter-uci": "workspace:*",
+    "@multi-game-engines/adapter-usi": "workspace:*",
     "@multi-game-engines/adapter-yaneuraou": "workspace:*",
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",

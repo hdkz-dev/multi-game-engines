@@ -12,9 +12,9 @@ import {
   IChessSearchResult,
 } from "@multi-game-engines/adapter-uci";
 import {
-  ISHOGISearchOptions,
-  ISHOGISearchInfo,
-  ISHOGISearchResult,
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
 } from "@multi-game-engines/adapter-usi";
 import { locales } from "@multi-game-engines/i18n";
 import { formatNumber } from "@multi-game-engines/ui-core";
@@ -67,9 +67,9 @@ export default function Dashboard() {
     IChessSearchResult
   > | null>(null);
   const [shogiEngine, setShogiEngine] = useState<IEngine<
-    ISHOGISearchOptions,
-    ISHOGISearchInfo,
-    ISHOGISearchResult
+    IShogiSearchOptions,
+    IShogiSearchInfo,
+    IShogiSearchResult
   > | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
 

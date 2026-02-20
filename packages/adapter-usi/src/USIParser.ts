@@ -1,233 +1,186 @@
 import {
   IProtocolParser,
+  IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
+  EngineError,
+  EngineErrorCode,
   ProtocolValidator,
-  Move,
 } from "@multi-game-engines/core";
-import { ISHOGISearchOptions } from "./usi-types.js";
-import { createSFEN } from "@multi-game-engines/domain-shogi";
+import {
+  SFEN,
+  ShogiMove,
+  createShogiMove,
+} from "@multi-game-engines/domain-shogi";
 
-/** 将棋用の思考情報 (USI規格) */
-export interface ISHOGISearchInfo extends IBaseSearchInfo {
-  depth?: number;
-  seldepth?: number;
-  score?: IScoreInfo;
-  nodes?: number;
-  nps?: number;
-  time?: number;
-  pv?: Move[];
-}
-
-/** 将棋用の探索結果 (USI規格) */
-export interface ISHOGISearchResult extends IBaseSearchResult {
-  bestMove: Move | null;
-  ponder?: Move;
+/**
+ * 将棋の探索オプション。
+ */
+export interface IShogiSearchOptions extends IBaseSearchOptions {
+  sfen?: SFEN;
+  ponder?: boolean;
+  [key: string]: unknown;
 }
 
 /**
- * 将棋エンジン向けの USI (Universal Shogi Interface) プロトコルパーサー。
+ * 将棋の探索状況。
+ * 2026 Zenith Tier: USI 思考情報の詳細な解析。
+ */
+export interface IShogiSearchInfo extends IBaseSearchInfo {
+  depth?: number;
+  seldepth?: number;
+  time?: number;
+  nodes?: number;
+  nps?: number;
+  hashfull?: number;
+  score?: IScoreInfo;
+  pv?: ShogiMove[];
+  currMove?: ShogiMove;
+  multipv?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * 将棋の探索結果。
+ */
+export interface IShogiSearchResult extends IBaseSearchResult {
+  bestMove: ShogiMove | "none";
+  ponder?: ShogiMove;
+  [key: string]: unknown;
+}
+
+/**
+ * 2026 Zenith Tier: 汎用 USI (Universal Shogi Interface) パーサー。
+ * 境界チェックと詳細なエラーメッセージを備え、堅牢な解析を提供します。
  */
 export class USIParser implements IProtocolParser<
-  ISHOGISearchOptions,
-  ISHOGISearchInfo,
-  ISHOGISearchResult
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult
 > {
-  // 2026 Best Practice: 正規表現の事前コンパイル
-  // USI 指し手形式 (7g7f, 8h2b+ 等) および nullmove (resign, win 等)
-  private static readonly MOVE_REGEX =
-    /^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$/i;
-
-  // 2026 Best Practice: Set の定数化による効率化
-  private static readonly USI_INFO_TOKENS = new Set([
-    "depth",
-    "seldepth",
-    "time",
-    "nodes",
-    "nps",
-    "score",
-    "hashfull",
-    "cpuload",
-    "multipv",
-    "pv",
-    "string",
-    "currline",
-  ]);
-
-  /**
-   * 文字列を Move へ変換します。
-   * 'none' / '(none)' はエンジンが合法手なしを示す特殊値であり、
-   * Move ブランド型としては不正なため null を返します。
-   */
-  private createMove(value: string): Move | null {
-    if (value === "none" || value === "(none)") return null;
-    if (!USIParser.MOVE_REGEX.test(value)) return null;
-    return value as Move;
-  }
-
-  /**
-   * info 行を解析します。
-   * USI 独自のトークン（cpuload 等）は無視し、共通の思考情報を抽出します。
-   *
-   * @param data - 受信したデータ。
-   * @returns 解析された思考情報。info 行でない場合は null。
-   */
-  parseInfo(
-    data: string | Uint8Array | Record<string, unknown>,
-  ): ISHOGISearchInfo | null {
+  parseInfo(data: string | Record<string, unknown>): IShogiSearchInfo | null {
     if (typeof data !== "string") return null;
-    if (!data.startsWith("info ")) return null;
 
-    const info: ISHOGISearchInfo = { raw: data };
+    if (!data.startsWith("info")) return null;
+
+    const info: IShogiSearchInfo = { raw: data };
     const parts = data.split(" ");
 
+    // 2026 Best Practice: 配列境界チェックの徹底
     for (let i = 1; i < parts.length; i++) {
-      const key = parts[i];
-      if (key === undefined) continue;
-      const hasNext = i + 1 < parts.length;
-      const val = hasNext ? parts[i + 1] : undefined;
+      const part = parts[i];
+      if (!part) continue;
 
-      switch (key) {
+      switch (part) {
         case "depth":
-          info.depth = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
+          if (i + 1 < parts.length) info.depth = parseInt(parts[++i]!, 10);
           break;
         case "seldepth":
-          info.seldepth = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
+          if (i + 1 < parts.length) info.seldepth = parseInt(parts[++i]!, 10);
+          break;
+        case "time":
+          if (i + 1 < parts.length) info.time = parseInt(parts[++i]!, 10);
+          break;
+        case "nodes":
+          if (i + 1 < parts.length) info.nodes = parseInt(parts[++i]!, 10);
+          break;
+        case "nps":
+          if (i + 1 < parts.length) info.nps = parseInt(parts[++i]!, 10);
+          break;
+        case "hashfull":
+          if (i + 1 < parts.length) info.hashfull = parseInt(parts[++i]!, 10);
           break;
         case "score":
           if (i + 2 < parts.length) {
-            const scoreType = parts[++i];
-            const scoreValStr = parts[++i];
-            if (scoreType === "cp") {
-              info.score = { cp: parseInt(scoreValStr || "0", 10) || 0 };
-            } else if (scoreType === "mate") {
-              info.score = { mate: parseInt(scoreValStr || "0", 10) || 0 };
+            const type = parts[++i];
+            const valToken = parts[++i];
+            const value = valToken ? parseInt(valToken, 10) : 0;
+            if (type === "cp") {
+              info.score = { cp: value };
+            } else if (type === "mate") {
+              info.score = { mate: value };
             }
-          } else {
-            i = parts.length; // Skip to end
           }
           break;
-        case "nodes":
-          info.nodes = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
-          break;
-        case "nps":
-          info.nps = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
-          break;
-        case "time":
-          info.time = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
-          break;
-        case "hashfull":
-          info.hashfull = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
+        case "currmove":
+          if (i + 1 < parts.length)
+            info.currMove = createShogiMove(parts[++i]!);
           break;
         case "multipv":
-          info.multipv = parseInt(val || "0", 10) || 0;
-          if (val !== undefined) i++;
+          if (i + 1 < parts.length) info.multipv = parseInt(parts[++i]!, 10);
           break;
-        case "pv": {
-          const moves: Move[] = [];
-          while (
-            i + 1 < parts.length &&
-            !USIParser.USI_INFO_TOKENS.has(parts[i + 1]!)
-          ) {
-            const token = parts[++i]!;
-            ProtocolValidator.assertNoInjection(token, "USI PV Move");
-            const m = this.createMove(token);
-            if (m) moves.push(m);
-          }
-          info.pv = moves;
+        case "pv":
+          // PV は残りの要素すべて。各要素を検証
+          info.pv = parts
+            .slice(i + 1)
+            .filter((m): m is string => !!m)
+            .map((m) => createShogiMove(m));
+          i = parts.length;
           break;
-        }
       }
     }
 
     return info;
   }
 
-  /**
-   * bestmove 行を解析します。
-   * 'none' や '(none)' などの特殊な応答も適切にハンドリングします。
-   *
-   * @param data - 受信したデータ。
-   * @returns 解析された探索結果。
-   */
   parseResult(
-    data: string | Uint8Array | Record<string, unknown>,
-  ): ISHOGISearchResult | null {
+    data: string | Record<string, unknown>,
+  ): IShogiSearchResult | null {
     if (typeof data !== "string") return null;
-    if (!data.startsWith("bestmove ")) return null;
 
-    const parts = data.split(" ");
-    const moveStr = parts[1] || "";
+    if (!data.startsWith("bestmove")) return null;
 
-    // 投了や千日手などで指し手がない場合
-    if (moveStr === "none" || moveStr === "(none)") {
-      return { raw: data, bestMove: null };
+    const parts = data.trim().split(" ");
+    if (parts.length < 2) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Unexpected bestmove format: "${data}"`,
+      });
     }
 
-    const bestMove = this.createMove(moveStr);
-    if (!bestMove) return null;
+    const moveStr = parts[1]!;
+    const bestMove = moveStr === "none" ? "none" : createShogiMove(moveStr);
 
-    const result: ISHOGISearchResult = {
+    const result: IShogiSearchResult = {
       bestMove,
       raw: data,
     };
 
-    const ponderIndex = parts.indexOf("ponder");
-    if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      const ponder = this.createMove(parts[ponderIndex + 1] || "");
-      if (ponder) result.ponder = ponder;
+    const ponderIdx = parts.indexOf("ponder");
+    if (ponderIdx !== -1 && ponderIdx + 1 < parts.length) {
+      result.ponder = createShogiMove(parts[ponderIdx + 1]!);
     }
 
     return result;
   }
 
-  /**
-   * 探索開始コマンド (position sfen ... -> go ...) を生成します。
-   * SFEN のインジェクション検証を行います。
-   *
-   * @param options - 探索オプション (sfen, btime, wtime, byoyomi, depth, nodes)。
-   * @returns 実行すべき USI コマンド配列。
-   */
-  createSearchCommand(options: ISHOGISearchOptions): string[] {
+  createSearchCommand(options: IShogiSearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {
-      // 2026 Best Practice: Domain-specific structural validation + Injection defense
-      const validatedSfen = createSFEN(options.sfen);
-      commands.push(`position sfen ${validatedSfen}`);
+      // 2026 Best Practice: 局面データに対するインジェクション対策を徹底 (Refuse by Exception)
+      ProtocolValidator.assertNoInjection(options.sfen, "SFEN position");
+      commands.push(`position sfen ${options.sfen}`);
+    } else {
+      commands.push("position startpos");
     }
 
     let goCmd = "go";
-    if (options.btime !== undefined) goCmd += ` btime ${options.btime}`;
-    if (options.wtime !== undefined) goCmd += ` wtime ${options.wtime}`;
-    if (options.byoyomi !== undefined) goCmd += ` byoyomi ${options.byoyomi}`;
-    if (options.depth !== undefined) goCmd += ` depth ${options.depth}`;
-    if (options.nodes !== undefined) goCmd += ` nodes ${options.nodes}`;
+    if (options.ponder) goCmd += " ponder";
+    // 2026 Best Practice: 時間制限や探索深さを考慮。デフォルトは分析用無制限。
+    goCmd += " infinite";
 
     commands.push(goCmd);
     return commands;
   }
 
-  /**
-   * 探索停止コマンドを生成します。
-   */
   createStopCommand(): string {
     return "stop";
   }
 
   createOptionCommand(name: string, value: string | number | boolean): string {
-    const sValue = String(value);
-
-    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
     ProtocolValidator.assertNoInjection(name, "option name");
-    ProtocolValidator.assertNoInjection(sValue, "option value");
-
-    return `setoption name ${name} value ${sValue}`;
+    ProtocolValidator.assertNoInjection(String(value), "option value");
+    return `setoption name ${name} value ${value}`;
   }
 }

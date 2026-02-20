@@ -5,7 +5,7 @@ import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { formatNumber } from "@multi-game-engines/ui-core";
 import type { IEngine } from "@multi-game-engines/core";
 import type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/adapter-uci";
-import type { ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult } from "@multi-game-engines/adapter-usi";
+import type { IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult } from "@multi-game-engines/adapter-usi";
 import { EngineMonitorPanel, EngineUIProvider, ChessBoard, ShogiBoard } from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { locales } from "@multi-game-engines/i18n";
@@ -32,7 +32,7 @@ const bridge = getBridge();
 
 // エンジンインスタンスの保持 (2026: getEngine が非同期のため)
 const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
-const shogiEngine = ref<IEngine<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> | null>(null);
+const shogiEngine = ref<IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> | null>(null);
 const initError = ref<string | null>(null);
 
 const initEngines = async () => {

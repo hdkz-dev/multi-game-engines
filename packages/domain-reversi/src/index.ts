@@ -3,12 +3,13 @@ import {
   EngineError,
   EngineErrorCode,
   ProtocolValidator,
+  Move,
 } from "@multi-game-engines/core";
 
 /** リバーシの盤面データ */
 export type ReversiBoard = Brand<string, "ReversiBoard">;
 /** リバーシの指し手 (a1-h8, PS 等) */
-export type ReversiMove = Brand<string, "ReversiMove">;
+export type ReversiMove = Move<"ReversiMove">;
 
 /**
  * リバーシ指し手形式 (a1-h8, PS (Pass) 等) を検証する正規表現。

@@ -8,6 +8,7 @@ import {
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
+  createMove,
 } from "@multi-game-engines/core";
 import { FEN, createFEN } from "@multi-game-engines/domain-chess";
 
@@ -80,7 +81,7 @@ export class UCIParser implements IProtocolParser<
    */
   private createMove(value: string): Move | null {
     if (!UCIParser.MOVE_REGEX.test(value)) return null;
-    return value as Move;
+    return createMove(value);
   }
 
   /**
@@ -225,6 +226,7 @@ export class UCIParser implements IProtocolParser<
     }
 
     // 2026 Best Practice: Domain-specific structural validation + Injection defense
+    ProtocolValidator.assertNoInjection(options.fen, "FEN position");
     const validatedFen = createFEN(options.fen);
 
     const isStartPos = validatedFen.toLowerCase() === "startpos";

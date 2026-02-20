@@ -1,0 +1,57 @@
+{
+  "name": "@multi-game-engines/adapter-kingsrow",
+  "version": "0.1.0",
+  "description": "KingsRow Checkers engine adapter for multi-game-engines ecosystem",
+  "license": "MIT",
+  "author": "multi-game-engines contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/adapter-kingsrow"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "checkers",
+    "engine",
+    "kingsrow",
+    "wasm",
+    "multi-game-engines"
+  ],
+  "dependencies": {
+    "@multi-game-engines/domain-checkers": "workspace:*"
+  },
+  "peerDependencies": {
+    "@multi-game-engines/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "eslint": "^9.39.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

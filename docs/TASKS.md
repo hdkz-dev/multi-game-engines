@@ -12,108 +12,51 @@
 
 ---
 
-## 🚀 フェーズ 2: 第1段階リリース (進行中)
+## 🚀 フェーズ 2: 第1段階リリース (完了)
 
 - [x] **SECURITY.md**: 非公開報告機能を活用したセキュリティポリシーの策定。
 - [x] **adapter-stockfish**: UCI 16.1 対応とライフサイクルテスト。
 - [x] **adapter-yaneuraou**: USI 7.5.0 対応。
 - [x] **adapter-katago**: GTP プロトコル対応（囲碁エンジン基盤）。
-- [x] **プロトコルパーサー**: 詰みスコア変換、インジェクション対策、および `startpos` キーワード対応。
-- [x] **ユニットテスト**: 計 121 ケースの網羅的検証。
-- [x] **品質保証 & 監査**: PR #1〜#24 を通じた超深層監査の完遂。全 41 スレッド、計 45 指摘事項をすべて解消（Zenith Tier）。
-- [x] **ゼロ・エニーの完遂**: プロジェクト全域における `any` / `as any` の完全排除。
-- [x] **パース・バリデーションの強化**: `UCIParser`, `USIParser`, `parseFEN`, `parseSFEN` におけるインデックス境界チェックと詳細エラーメッセージの実装完了。
-- [x] **UI 基盤アーキテクチャ**: `ui-core` (Logic) と `ui-react` (Presentation) の分離実装。
-- [x] **マルチフレームワーク UI**: `ui-vue` (Vue 3) および `ui-elements` (Web Components) の Zenith Tier 実装。
-- [x] **多言語対応 (i18n)**: 言語リソースの `packages/i18n` への分離と、全 UI アダプターへの注入。
-- [x] **契約駆動 UI**: Zod によるエンジン出力のランタイムバリデーション。
-- [x] **楽観的 UI**: `CommandDispatcher` による状態同期の安定化。
-- [x] **デザイントークン統一**: CSS Variables によるフレームワーク横断的なテーマ管理。
-- [x] **セキュリティポリシー刷新**: SRI 必須化と「Refuse by Exception」の明文化。
-- [x] **厳格な型安全性の追求 (Zenith Tier)**: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, および `Project References` の全パッケージ適用。
-- [x] **最新技術トレンドの追従 (Modernization)**:
-  - [x] Vue 3.5+ `onWatcherCleanup` による副作用管理の最新化。
-  - [x] モノレポ全域における `sideEffects` 最適化による Tree-shaking 効率の最大化。
-- [x] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 相対パス解決ロジックの実装（依存性注入パターンの適用）。
-- [x] **UIコンポーネント拡充**: 評価値の時系列グラフの実装。
-- [x] **UIコンポーネント拡充**: 思考ログの永続化表示。
-  - [x] `requestAnimationFrame` による状態更新のスロットリング実装とユニットテストによる検証 (Performance/Reliability)。
-  - [x] ネイティブ HTML `<table>` 要素による完全なセマンティクスとアクセシビリティの確保 (A11y Best Practice)。
-  - [x] ユーザー操作を妨げない「スマート・オートスクロール」ロジックの実装 (UX Improvement).
-- [x] **Node.js 24 & Turborepo 統合**: モノレポ全体のビルドパイプライン高速化と最新ランタイム環境の確立。
-- [x] **デモ**: チェスと将棋のハイブリッド検討ダッシュボード。
-  - [x] **Board UI**: 汎用的なボードコンポーネント (`<chess-board>`, `<shogi-board>`) の Web Components 実装。
-  - [x] **Real-time Integration**: エンジンの探索状況とボード表示の同期（最善手のハイライト等）。
-- [x] **超深層監査 (Zenith Tier Audit)**:
-  - [x] 全プロトコルパーサーの異常系堅牢化（境界チェック・デフォルト値補完）。
-  - [x] React/Vue 両フレームワークにおけるアクセシビリティ完全準拠 (ARIA, Focus, Live Regions)。
-  - [x] Next.js 15/React 19/Vue 3.5 最新機能への追従と最適化。
-  - [x] 全パッケージ全域にわたるドキュメント・実装の完全同期。
-  - [x] Project-wide Zero-Any Policy の完遂とブランド型の再定義。
-- [x] **究極のモジュール化とIP保護 (Modularization & IP Safety)**:
-  - [x] UI パッケージの物理分離（`core`, `monitor`, `game`）とフレームワーク独立性の確保。
-  - [x] 商標保護のための名称変更（`Othello` -> `Reversi`）の全域適用。
-  - [x] `domain-reversi`, `domain-mahjong` の新設によるドメインロジックの完全分離。
-  - [x] ハブパッケージ（`ui-react`, `ui-vue`）による統合インポート環境の整備。
-- [x] **UI 品質とフレームワーク統合の昇華 (UI Quality & Integration Excellence)**:
-  - [x] React 19 / Vue 3 / Lit における確実なプロパティ同期パターン (useLayoutEffect + Property Reflection) の確立。
-  - [x] チェス・将棋盤面コンポーネントにおける網羅的なユニット・統合テスト（100%パス）の達成。
-- [x] **PR #25 最終監査 & フォローアップ (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行、およびレビュー指摘事項（バリデーション詳細化、テスト強化）の全対応。
-- [x] **Zenith Tier 究極監査と型安全性の昇華 (Zenith Audit & Strict Type Hardening)**:
-  - [x] 全マージ済み PR (#15, #21, #24, #25) の 100 以上のレビューポイントを再監査し、実装に反映。
-  - [x] モノレポ全域での `exactOptionalPropertyTypes` の復旧と UI パッケージの型整合。
-  - [x] `MonitorRegistry` 等のコア基盤における `any` の完全排除。
-  - [x] 全エンジンアダプターにおける SRI ハッシュの `sha384` 標準化と TODO 追跡の開始。
+- [x] **ユニットテスト**: 計 150 ケース以上の網羅的検証。
+- [x] **品質保証 & 監査**: PR #1〜#25 を通じた超深層監査の完遂（Zenith Tier）。
+- [x] **マルチフレームワーク UI**: `ui-react`, `ui-vue`, `ui-elements` の物理分離と Zenith 品質実装。
+- [x] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 依存性注入パターンの確立。
+- [x] **PR #25 最終監査 & フォローアップ (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行。
+- [x] **Review Remediation (2026-02-20-extended)**:
+  - [x] **Security**: GTP/KingsRow 等での SRI 検証強制。
+  - [x] **Security**: 全コマンド生成箇所への `assertNoInjection` 適用。
+  - [x] **Privacy**: `truncateLog` による局面データの露出制限 (ADR-038)。
+  - [x] **Type Hardening**: ブランド型階層化による `GOMove`/`ShogiMove` 等の衝突解消とキャスト廃止。
+  - [x] **Reliability**: Vue ダッシュボードに SSR ガードを追加し、非同期初期化エラーを捕捉。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
+
+---
+
+## 🔥 フェーズ 3: 第2段階・究極の最適化 (進行中)
+
+- [ ] **WASM Integration**: 各エンジンの実 WASM バイナリ統合と SRI ハッシュの確定。
+  - [ ] Stockfish (Chess)
+  - [ ] やねうら王 (Shogi)
+  - [ ] KataGo (Go)
+  - [ ] Edax (Reversi)
+  - [ ] Mortal (Mahjong)
+- [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
+- [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
+- [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
+- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
+- [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+- [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
+- [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
 
 ---
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
-> 2026-02-20 更新。2026-02-19 全体レビュー ([実装計画書](implementation_plans/project-review-improvements.md)) + 2026-02-20 フォローアップレビューの結果を統合。
-> 修復計画: [review-remediation-2026-02-20.md](implementation_plans/review-remediation-2026-02-20.md)
-
-### 🔴 Critical（法的・CI整合性）
-
-- [x] **LICENSE 整備**: ルート `LICENSE` (MIT) の作成、全31パッケージへの `LICENSE` 配置、および13パッケージの `package.json` への `license` フィールド追加を完了。
-- [x] **release.yml Node.js 不整合**: `.github/workflows/release.yml` を Node.js 24 に更新し、プロジェクト全体の設定と統一。
-- [x] **不要ファイルの Git 管理**: `.gitignore` を強化し、`review_audit_raw.md` 等の作業用ファイルを Git 管理下から確実に排除。
-- [x] **`ui-react` ESLint 設定修復**: `packages/ui-react/eslint.config.mjs` を作成し、CI での lint エラー（TypeError）を解消。
-
-### Phase 2: Release Readiness (2026-02-19 Review Remediation)
-
-#### High Priority (Phase B)
-
-- [x] Create/Distribute missing README.md (20 packages)
-- [x] Add Dependabot configuration (`.github/dependabot.yml`)
-- [x] Fix root `package.json` workspaces consistency (`examples/*`)
-- [x] Mark SRI Hash updates as Phase 3 blocker
-- [x] Register SRI Placeholder locations (9 locations in 5 adapters) in technical docs
+> 2026-02-20 更新。
 
 ### 🟡 Medium（品質・保守性）
 
-- [ ] **lint warning**: `ui-vue-monitor/src/useEngineMonitor.ts` に未使用インポート `useEngineUI` が指摘されたが、最新コードでは存在しないか解決済み。要最終核認。
-- [ ] **`as unknown as` 残存**: プロダクションコード4箇所（`MonitorRegistry.ts`(2), `ResourceInjector.ts`(1), `EngineError.ts`(1)）。Zenith Standard（バリデータ関数経由）への置換を検討。
-- [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状15行のスタブ）。ARCHITECTURE.md では主要機能として記載。
-- [x] **`i18n` パッケージに `typecheck` スクリプト欠落**: `pnpm turbo typecheck` でスキップされる問題を解消。
-- [x] **`main`/`types` フィールド欠落**: 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` フィールドを追加。
-- [ ] **Storybook `as any`**: `ui-vue-monitor/stories/EngineMonitorPanel.stories.ts:16` で `as any` を使用。
-- [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
+- [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状 15 行のスタブ）。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
-- [ ] **英語版ドキュメント不足**: `docs/en/` に `ARCHITECTURE.md` と `TECHNICAL_SPECS.md` のみ。`DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` の英語版が必要。
-- [x] **.DS_Store の Git 追跡除外**: 不要な `.DS_Store` ファイルを物理的に除去し、Git の管理対象から除外。
-
----
-
-## 🔥 フェーズ 3: 第2段階・究極の最適化 (検討中)
-
-- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
-- [ ] **Cloud Engine Relay**: 低スペック端末向けに外部 GPU サーバーへ演算を委託。
-- [ ] **Engine Registry**: SRI ハッシュとバージョンを中央管理し、URL 指定を不要にする。
-- [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
-- [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
-- [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
-- [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
-- [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
-- [ ] **adapter-gnubg**: バックギャモンエンジンの基本統合と WASM ポートの調査。
-- [ ] **adapter-checkers**: チェッカーエンジンの統合とテーブルベース対応。
+- [ ] **英語版ドキュメント不足**: `docs/en/` の拡充 (`DECISION_LOG.md`, `ROADMAP.md` 等)。

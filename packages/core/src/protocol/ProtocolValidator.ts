@@ -1,5 +1,6 @@
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode } from "../types.js";
+import { EngineErrorCode, Move, PositionString } from "../types.js";
+import { truncateLog } from "../utils/Sanitizer.js";
 
 /**
  * プロトコルレベルのセキュリティバリデーションを提供するユーティリティ。
@@ -30,7 +31,7 @@ export class ProtocolValidator {
     if (regex.test(input)) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `Potential command injection detected in ${context}.`,
+        message: `Potential command injection detected in ${context}: "${truncateLog(input)}".`,
         remediation: allowSemicolon
           ? "Remove control characters (\\r, \\n, \\0, etc.) from input."
           : "Remove control characters (\\r, \\n, \\0, ;, etc.) from input.",
@@ -39,18 +40,16 @@ export class ProtocolValidator {
   }
 }
 
-import { Move, PositionString } from "../types.js";
-
 /** 汎用指し手バリデータ (2026 Zenith Tier: Refuse by Exception) */
-export function createMove(move: string): Move {
-  if (typeof move !== "string" || !/^[a-z0-9+*#=-]+$/i.test(move)) {
+export function createMove<T extends string = string>(move: string): Move<T> {
+  if (typeof move !== "string" || !/^[a-z0-9+*#=/\- ()]+$/i.test(move)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: `Invalid Move format: "${move}" contains illegal characters.`,
+      message: `Invalid Move format: "${truncateLog(move)}" contains illegal characters.`,
     });
   }
   ProtocolValidator.assertNoInjection(move, "Move");
-  return move as Move;
+  return move as Move<T>;
 }
 
 /** 汎用局面バリデータ (2026 Zenith Tier: Refuse by Exception) */
@@ -60,7 +59,7 @@ export function createPositionString<T extends string = string>(
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid PositionString: Input must be a non-empty string.",
+      message: `Invalid PositionString: Input must be a non-empty string. (Value: ${truncateLog(pos)})`,
     });
   }
   ProtocolValidator.assertNoInjection(pos, "Position");
