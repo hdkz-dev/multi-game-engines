@@ -286,6 +286,7 @@ export interface IEngineAdapter<
   readonly requiredCapabilities?: Partial<ICapabilities>;
 
   load(loader?: IEngineLoader): Promise<void>;
+  search(options: T_OPTIONS): Promise<T_RESULT>;
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
   stop(): void | Promise<void>;
   dispose(): Promise<void>;

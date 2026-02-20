@@ -407,6 +407,9 @@ importers:
       '@multi-game-engines/adapter-uci':
         specifier: workspace:*
         version: link:../adapter-uci
+      '@multi-game-engines/domain-chess':
+        specifier: workspace:*
+        version: link:../domain-chess
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*

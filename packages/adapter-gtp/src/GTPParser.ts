@@ -94,6 +94,10 @@ export class GTPParser implements IProtocolParser<
   }
 
   createSearchCommand(options: IGoSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
+    // GTP/SGF 用にセミコロンを許可
+    ProtocolValidator.assertNoInjection(options, "search options", true, true);
+
     const commands: string[] = [];
     if (options.board) {
       ProtocolValidator.assertNoInjection(options.board, "board data", true);

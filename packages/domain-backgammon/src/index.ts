@@ -82,7 +82,7 @@ export interface IBackgammonSearchInfo extends IBaseSearchInfo {
  * 探索結果。
  */
 export interface IBackgammonSearchResult extends IBaseSearchResult {
-  bestMove: BackgammonMove;
+  bestMove: BackgammonMove | null;
   equity: number;
   raw?: string | Record<string, unknown>;
   [key: string]: unknown;

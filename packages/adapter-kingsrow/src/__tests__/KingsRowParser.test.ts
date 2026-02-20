@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { KingsRowParser } from "../KingsRowParser.js";
+import { createCheckersBoard } from "@multi-game-engines/domain-checkers";
 
 beforeAll(() => {
   vi.spyOn(performance, "now").mockReturnValue(0);
@@ -51,9 +52,25 @@ describe("KingsRowParser", () => {
     expect(parser.createOptionCommand("Threads", 4)).toBe("set Threads 4");
   });
 
-  it("should throw on injection in options", () => {
+  it("should throw on injection in createSearchCommand board data", () => {
     const parser = new KingsRowParser();
-    expect(() => parser.createOptionCommand("name", "val\nstop")).toThrow();
-    expect(() => parser.createOptionCommand("name\nstop", "val")).toThrow();
+    expect(() =>
+      parser.createSearchCommand({
+        board: createCheckersBoard("11-15"),
+        // Testing injection via custom field due to index signature
+        "malicious\nkey": "data",
+      }),
+    ).toThrow(/Potential command injection/);
+  });
+
+  it("should reject injection in nested option values", () => {
+    const parser = new KingsRowParser();
+    // 制御文字を含む value
+    expect(() => parser.createOptionCommand("Threads", "4\x00")).toThrow(
+      /Potential command injection/,
+    );
+    expect(() => parser.createOptionCommand("Threads", "4\rstop")).toThrow(
+      /Potential command injection/,
+    );
   });
 });

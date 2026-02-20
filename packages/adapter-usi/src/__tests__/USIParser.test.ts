@@ -40,6 +40,22 @@ describe("USIParser", () => {
       const result = parser.parseResult("bestmove (none)");
       expect(result?.bestMove).toBe("(none)");
     });
+
+    it("should parse bestmove with ponder", () => {
+      const result = parser.parseResult("bestmove 7g7f ponder 8c8d");
+      expect(result?.bestMove).toBe("7g7f");
+      expect(result?.ponder).toBe("8c8d");
+    });
+
+    it("should throw EngineError for malformed bestmove", () => {
+      expect(() => parser.parseResult("bestmove")).toThrow();
+    });
+  });
+
+  describe("parseInfo — null cases", () => {
+    it("should return null for non-info line", () => {
+      expect(parser.parseInfo("id name YaneuraOu")).toBeNull();
+    });
   });
 
   describe("createSearchCommand", () => {
@@ -67,10 +83,46 @@ describe("USIParser", () => {
     });
 
     it("should throw error for injection in SFEN", () => {
+      // Intentional bypass using casting to test parser's internal check
+      const maliciousSfen =
+        "startpos\nquit" as unknown as import("@multi-game-engines/domain-shogi").SFEN;
+      expect(() => parser.createSearchCommand({ sfen: maliciousSfen })).toThrow(
+        /Potential command injection/,
+      );
+    });
+
+    it("should throw error for injection in custom fields (index signature)", () => {
       expect(() =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        parser.createSearchCommand({ sfen: "startpos\nquit" as any }),
+        parser.createSearchCommand({
+          "malicious\nkey": "value",
+        }),
       ).toThrow(/Potential command injection/);
+    });
+
+    it("should create ponder command without infinite", () => {
+      const commands = parser.createSearchCommand({ ponder: true });
+      expect(commands).toEqual(["position startpos", "go ponder"]);
+    });
+  });
+
+  describe("createOptionCommand", () => {
+    it("should create valid option command", () => {
+      expect(parser.createOptionCommand("Hash", 128)).toBe(
+        "setoption name Hash value 128",
+      );
+    });
+
+    it("should throw on injection in option name", () => {
+      expect(() => parser.createOptionCommand("Hash\nquit", 128)).toThrow(
+        /Potential command injection/,
+      );
+    });
+
+    it("should throw on injection in option value", () => {
+      // Testing injection via string value
+      expect(() => parser.createOptionCommand("Hash", "128\nquit")).toThrow(
+        /Potential command injection/,
+      );
     });
   });
 });

@@ -225,11 +225,15 @@ export class UCIParser implements IProtocolParser<
    * @throws {EngineError} FEN が未指定または不正な場合。
    */
   createSearchCommand(options: IChessSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック (ADR-038)
+    ProtocolValidator.assertNoInjection(options, "search options", true);
+
     if (!options.fen) {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "UCI requires a FEN position.",
         remediation: "Provide a valid FEN string in search options.",
+        i18nKey: "adapters.uci.errors.missing_fen",
       });
     }
 

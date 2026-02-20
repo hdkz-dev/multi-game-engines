@@ -63,6 +63,9 @@ export class KingsRowParser implements IProtocolParser<
   }
 
   createSearchCommand(options: ICheckersSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
+    ProtocolValidator.assertNoInjection(options, "search options", true);
+
     const commands: string[] = [];
     if (options.board) {
       ProtocolValidator.assertNoInjection(options.board, "board data");

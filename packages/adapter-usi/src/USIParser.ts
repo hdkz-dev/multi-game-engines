@@ -145,10 +145,10 @@ export class USIParser implements IProtocolParser<
   ): IShogiSearchResult | null {
     if (typeof data !== "string") return null;
 
-    if (!data.startsWith("bestmove ")) return null;
+    if (!data.startsWith("bestmove")) return null;
 
     const parts = data.trim().split(" ");
-    if (parts.length < 2) {
+    if (parts.length < 2 || (parts[0] === "bestmove" && parts.length === 1)) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Unexpected bestmove format: "${truncateLog(data)}"`,
@@ -177,6 +177,9 @@ export class USIParser implements IProtocolParser<
   }
 
   createSearchCommand(options: IShogiSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
+    ProtocolValidator.assertNoInjection(options, "search options", true);
+
     const commands: string[] = [];
     if (options.sfen) {
       // 2026 Best Practice: 局面データに対するインジェクション対策を徹底 (Refuse by Exception)

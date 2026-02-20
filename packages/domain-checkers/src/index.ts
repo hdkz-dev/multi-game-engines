@@ -8,6 +8,9 @@ import {
   createMove,
   createPositionString,
   ProtocolValidator,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
 } from "@multi-game-engines/core";
 
 /**
@@ -43,7 +46,7 @@ export function createCheckersMove(move: string): CheckersMove {
 /**
  * 探索オプション。
  */
-export interface ICheckersSearchOptions {
+export interface ICheckersSearchOptions extends IBaseSearchOptions {
   board: CheckersBoard;
   variant?: "english" | "brazilian" | "pool";
   [key: string]: unknown;
@@ -52,7 +55,7 @@ export interface ICheckersSearchOptions {
 /**
  * 探索状況。
  */
-export interface ICheckersSearchInfo {
+export interface ICheckersSearchInfo extends IBaseSearchInfo {
   eval?: number;
   depth?: number;
   pv?: CheckersMove[];
@@ -66,7 +69,7 @@ export interface ICheckersSearchInfo {
 /**
  * 探索結果。
  */
-export interface ICheckersSearchResult {
+export interface ICheckersSearchResult extends IBaseSearchResult {
   bestMove: CheckersMove | null;
   eval?: number;
   raw?: string | Record<string, unknown>;

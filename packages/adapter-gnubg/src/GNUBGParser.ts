@@ -42,8 +42,14 @@ export class GNUBGParser implements IProtocolParser<
   ): IBackgammonSearchResult | null {
     if (typeof data === "object" && data !== null) {
       if (data.type === "bestmove") {
+        const moveStr = String(data.move ?? "");
+        const bestMove =
+          moveStr === "" || moveStr === "(none)"
+            ? null
+            : createBackgammonMove(moveStr);
+
         return {
-          bestMove: createBackgammonMove(String(data.move ?? "")),
+          bestMove,
           equity: Number(data.equity) || 0,
           raw: data,
         };
@@ -53,9 +59,19 @@ export class GNUBGParser implements IProtocolParser<
     return null;
   }
 
-  createSearchCommand(_options: IBackgammonSearchOptions): string[] {
-    // gnubg の CLI コマンドを生成
-    return ["analyze"];
+  createSearchCommand(options: IBackgammonSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
+    ProtocolValidator.assertNoInjection(options, "search options", true);
+
+    const commands: string[] = [];
+    if (options.board) {
+      commands.push(`set board ${options.board.join(" ")}`);
+    }
+    if (options.dice) {
+      commands.push(`set dice ${options.dice[0]} ${options.dice[1]}`);
+    }
+    commands.push("analyze");
+    return commands;
   }
 
   createStopCommand(): string {

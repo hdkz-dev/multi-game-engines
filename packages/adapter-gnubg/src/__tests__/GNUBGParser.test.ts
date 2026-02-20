@@ -26,6 +26,15 @@ describe("GNUBGParser", () => {
     expect(result?.equity).toBe(0.05);
   });
 
+  it("should handle edge move values in parseResult", () => {
+    const parser = new GNUBGParser();
+    // Empty move or (none) handling
+    const result1 = parser.parseResult({ type: "bestmove", move: "" });
+    expect(result1?.bestMove).toBeNull();
+    const result2 = parser.parseResult({ type: "bestmove", move: "(none)" });
+    expect(result2?.bestMove).toBeNull();
+  });
+
   it("should handle invalid inputs gracefully", () => {
     const parser = new GNUBGParser();
     expect(parser.parseInfo("invalid")).toBeNull();
@@ -36,5 +45,45 @@ describe("GNUBGParser", () => {
     const parser = new GNUBGParser();
     expect(parser.createStopCommand()).toBe("stop");
     expect(parser.createOptionCommand("Threads", 2)).toBe("set Threads 2");
+  });
+
+  it("should throw on injection in createOptionCommand", () => {
+    const parser = new GNUBGParser();
+    expect(() => parser.createOptionCommand("Threads\nquit", 2)).toThrow(
+      /Potential command injection/,
+    );
+    expect(() => parser.createOptionCommand("Threads", "2\0")).toThrow(
+      /Potential command injection/,
+    );
+  });
+
+  it("should create valid search commands", () => {
+    const parser = new GNUBGParser();
+    // Use factory or proper casting if available
+    const board = Array(26).fill(
+      0,
+    ) as unknown as import("@multi-game-engines/domain-backgammon").BackgammonBoard;
+    const commands = parser.createSearchCommand({
+      board,
+      dice: [6, 5],
+    });
+    expect(commands).toContain(
+      "set board 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+    );
+    expect(commands).toContain("set dice 6 5");
+    expect(commands).toContain("analyze");
+  });
+
+  it("should throw error for injection in custom fields (index signature)", () => {
+    const parser = new GNUBGParser();
+    expect(() =>
+      parser.createSearchCommand({
+        board: Array(26).fill(
+          0,
+        ) as unknown as import("@multi-game-engines/domain-backgammon").BackgammonBoard,
+        dice: [6, 5],
+        "malicious\nkey": "value",
+      }),
+    ).toThrow(/Potential command injection/);
   });
 });

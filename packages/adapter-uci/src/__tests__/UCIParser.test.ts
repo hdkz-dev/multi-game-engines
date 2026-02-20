@@ -33,6 +33,27 @@ describe("UCIParser", () => {
       );
       expect(info?.pv).toEqual(["e2e4", "g1f3"]);
     });
+
+    it("should parse negative cp score", () => {
+      const info = parser.parseInfo("info depth 8 score cp -120 pv d7d5");
+      expect(info?.score).toEqual({ cp: -120 });
+    });
+
+    it("should parse mate score", () => {
+      const info = parser.parseInfo("info depth 5 score mate 3 pv e2e4");
+      expect(info?.score).toEqual({ mate: 3 });
+    });
+
+    it("should parse negative mate score", () => {
+      const info = parser.parseInfo("info depth 5 score mate -2 pv d7d5");
+      expect(info?.score).toEqual({ mate: -2 });
+    });
+
+    it("should parse info line without PV", () => {
+      const info = parser.parseInfo("info depth 10 score cp 50");
+      expect(info?.score).toEqual({ cp: 50 });
+      expect(info?.pv).toBeUndefined();
+    });
   });
 
   describe("parseResult", () => {
@@ -62,9 +83,50 @@ describe("UCIParser", () => {
     });
 
     it("should throw error for injection in FEN", () => {
+      // Intentional bypass using casting to test parser's internal check
+      const maliciousFen =
+        "startpos\nquit" as unknown as import("@multi-game-engines/domain-chess").FEN;
+      expect(() => parser.createSearchCommand({ fen: maliciousFen })).toThrow(
+        /Potential command injection/,
+      );
+    });
+
+    it.each(["\r", "\t", "\0"])(
+      "should throw error for control character %j in FEN",
+      (char) => {
+        // Use casting to bypass domain validation and reach the parser's check
+        const maliciousFen =
+          `rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR${char}w KQkq - 0 1` as unknown as import("@multi-game-engines/domain-chess").FEN;
+        expect(() =>
+          parser.createSearchCommand({
+            fen: maliciousFen,
+          }),
+        ).toThrow(/Potential command injection/);
+      },
+    );
+
+    it("should throw error for injection in custom fields (index signature)", () => {
       expect(() =>
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        parser.createSearchCommand({ fen: "startpos\nquit" as any }),
+        parser.createSearchCommand({
+          fen: createFEN(
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          ),
+          // Using index signature to pass malicious data safely in TS
+          "malicious\nkey": "value",
+        }),
+      ).toThrow(/Potential command injection/);
+    });
+
+    it("should throw error for nested injection", () => {
+      expect(() =>
+        parser.createSearchCommand({
+          fen: createFEN(
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          ),
+          nested: {
+            "evil\r\nkey": "data",
+          },
+        }),
       ).toThrow(/Potential command injection/);
     });
   });

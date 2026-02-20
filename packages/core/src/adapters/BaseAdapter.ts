@@ -53,6 +53,14 @@ export abstract class BaseAdapter<
   abstract load(loader?: IEngineLoader): Promise<void>;
 
   /**
+   * 2026 Best Practice: オプションを直接受け取って探索を開始するコンビニエンスメソッド。
+   */
+  async search(options: T_OPTIONS): Promise<T_RESULT> {
+    const command = this.parser.createSearchCommand(options);
+    return this.searchRaw(command).result;
+  }
+
+  /**
    * 2026 Zenith Tier: 実行環境の能力チェックを追加。
    */
   protected checkEnvironment(): void {
