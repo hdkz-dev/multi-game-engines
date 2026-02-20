@@ -100,11 +100,13 @@ export class USIParser implements IProtocolParser<
           if (i + 2 < parts.length) {
             const type = parts[++i];
             const valToken = parts[++i];
-            const value = valToken ? parseInt(valToken, 10) : 0;
-            if (type === "cp") {
-              info.score = { cp: value };
-            } else if (type === "mate") {
-              info.score = { mate: value };
+            const value = valToken ? parseInt(valToken, 10) : NaN;
+            if (Number.isFinite(value)) {
+              if (type === "cp") {
+                info.score = { cp: value };
+              } else if (type === "mate") {
+                info.score = { mate: value };
+              }
             }
           }
           break;
@@ -118,7 +120,10 @@ export class USIParser implements IProtocolParser<
           }
           break;
         case "multipv":
-          if (i + 1 < parts.length) info.multipv = parseInt(parts[++i]!, 10);
+          if (i + 1 < parts.length) {
+            const val = parseInt(parts[++i]!, 10);
+            if (Number.isFinite(val)) info.multipv = val;
+          }
           break;
         case "pv":
           // PV は残りの要素すべて。各要素を検証

@@ -1,39 +1,23 @@
-import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
-import { KingsRowParser } from "./KingsRowParser.js";
 import { KingsRowAdapter } from "./KingsRowAdapter.js";
-
+import { IEngine, IEngineConfig } from "@multi-game-engines/core";
 import {
   ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult,
 } from "@multi-game-engines/domain-checkers";
 
-// 2026 Best Practice: 内部実装を隠蔽し、公開インターフェースのみをエクスポート
-export type {
-  ICheckersSearchOptions,
-  ICheckersSearchInfo,
-  ICheckersSearchResult,
-};
-export { KingsRowParser, KingsRowAdapter };
+export { KingsRowAdapter };
+export { KingsRowParser } from "./KingsRowParser.js";
 
 /**
- * 2026 Zenith Tier: KingsRow エンジンのファクトリ関数。
- * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
+ * KingsRow エンジンのインスタンスを生成します。
  */
 export function createKingsRowEngine(
-  config: IEngineConfig,
+  config: IEngineConfig = {},
 ): IEngine<ICheckersSearchOptions, ICheckersSearchInfo, ICheckersSearchResult> {
-  const adapter = new KingsRowAdapter(config);
-  return new EngineFacade(adapter);
-}
-
-// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
-declare module "@multi-game-engines/core" {
-  interface EngineRegistry {
-    kingsrow: IEngine<
-      ICheckersSearchOptions,
-      ICheckersSearchInfo,
-      ICheckersSearchResult
-    >;
-  }
+  return new KingsRowAdapter(config) as unknown as IEngine<
+    ICheckersSearchOptions,
+    ICheckersSearchInfo,
+    ICheckersSearchResult
+  >;
 }

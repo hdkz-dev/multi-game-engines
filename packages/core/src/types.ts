@@ -377,15 +377,15 @@ export type IEngineSourceConfig = {
  */
 export interface IEngineConfig {
   /** インスタンスの一意識別子 */
-  id: string;
+  id?: string;
   /** 使用するプロトコル/アダプター型（例: 'uci', 'usi', 'gtp'） */
-  adapter: string;
+  adapter?: string;
   /** 表示名 */
   name?: string;
   /** バージョン情報 */
   version?: string;
   /** 実行リソースの定義 */
-  sources: {
+  sources?: {
     /** メインのJSローダー/エントリーポイント */
     main: IEngineSourceConfig;
     /** WASM バイナリ（オプション） */

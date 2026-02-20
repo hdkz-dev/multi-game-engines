@@ -28,20 +28,21 @@ const activeEngine = ref<EngineType>("chess");
 const locale = ref("ja");
 const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.en));
 
-const bridge = getBridge();
+const { bridge, isReady, error: bridgeError } = useEngines();
 
-// エンジンインスタンスの保持 (2026: getEngine が非同期のため)
+// エンジンインスタンスの保持 (2026: getBridge が非同期のため)
 const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
 const shogiEngine = ref<IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> | null>(null);
 const initError = ref<string | null>(null);
 
 const initEngines = async () => {
   initError.value = null;
-  if (bridge) {
+  const bridgeInstance = await getBridge();
+  if (bridgeInstance) {
     try {
       const [chess, shogi] = await Promise.all([
-        bridge.getEngine("stockfish"),
-        bridge.getEngine("yaneuraou"),
+        bridgeInstance.getEngine("stockfish"),
+        bridgeInstance.getEngine("yaneuraou"),
       ]);
       chessEngine.value = chess;
       shogiEngine.value = shogi;

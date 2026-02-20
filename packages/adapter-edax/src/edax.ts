@@ -27,8 +27,8 @@ export class EdaxAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new EdaxParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
+  constructor(config: IEngineConfig) {
+    super(config);
     this.id = config.id || "edax";
     this.name = config.name || "Edax";
     this.version = config.version || "4.4";

@@ -29,9 +29,9 @@ export class GNUBGAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new GNUBGParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "gnubg";
     this.name = config.name ?? "GNU Backgammon";
     this.version = config.version ?? "unknown";
   }

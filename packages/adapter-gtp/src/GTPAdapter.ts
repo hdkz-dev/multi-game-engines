@@ -25,9 +25,9 @@ export class GTPAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new GTPParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "gtp";
     this.name = config.name ?? "GTP Engine";
     this.version = config.version ?? "unknown";
   }

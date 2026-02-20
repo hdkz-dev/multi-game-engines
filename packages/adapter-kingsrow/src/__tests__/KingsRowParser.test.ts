@@ -30,7 +30,7 @@ describe("KingsRowParser", () => {
   it("should handle bestmove (none) correctly", () => {
     const parser = new KingsRowParser();
     const result = parser.parseResult("bestmove: (none)");
-    expect(result?.bestMove).toBe("(none)");
+    expect(result?.bestMove).toBeNull();
   });
 
   it("should handle bestmove without eval correctly", () => {

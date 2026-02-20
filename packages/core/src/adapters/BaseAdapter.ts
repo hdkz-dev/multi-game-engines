@@ -11,6 +11,7 @@ import {
   IEngineLoader,
   EngineErrorCode,
   ResourceMap,
+  IEngineConfig,
 } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -41,10 +42,16 @@ export abstract class BaseAdapter<
   protected infoController: ReadableStreamDefaultController<T_INFO> | null =
     null;
 
+  protected config: IEngineConfig;
+
   abstract readonly id: string;
   abstract readonly name: string;
   abstract readonly version: string;
   abstract readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
+
+  constructor(config: IEngineConfig = {}) {
+    this.config = config;
+  }
 
   get status(): EngineStatus {
     return this._status;

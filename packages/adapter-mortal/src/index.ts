@@ -1,37 +1,23 @@
-import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
+import { MortalAdapter } from "./mortal.js";
+import { IEngine, IEngineConfig } from "@multi-game-engines/core";
 import {
   IMahjongSearchOptions,
   IMahjongSearchInfo,
   IMahjongSearchResult,
 } from "./MahjongJSONParser.js";
-import { MortalAdapter } from "./mortal.js";
-export { MortalAdapter };
 
-// 2026 Best Practice: 内部実装を隠蔽し、公開インターフェースのみをエクスポート
-export type {
-  IMahjongSearchOptions,
-  IMahjongSearchInfo,
-  IMahjongSearchResult,
-} from "./MahjongJSONParser.js";
+export { MortalAdapter };
+export { MahjongJSONParser } from "./MahjongJSONParser.js";
 
 /**
- * 2026 Zenith Tier: Mortal エンジンのファクトリ関数。
- * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
+ * Mortal エンジンのインスタンスを生成します。
  */
 export function createMortalEngine(
-  config: IEngineConfig,
+  config: IEngineConfig = {},
 ): IEngine<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
-  const adapter = new MortalAdapter(config);
-  return new EngineFacade(adapter);
-}
-
-// 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
-declare module "@multi-game-engines/core" {
-  interface EngineRegistry {
-    mortal: IEngine<
-      IMahjongSearchOptions,
-      IMahjongSearchInfo,
-      IMahjongSearchResult
-    >;
-  }
+  return new MortalAdapter(config) as unknown as IEngine<
+    IMahjongSearchOptions,
+    IMahjongSearchInfo,
+    IMahjongSearchResult
+  >;
 }

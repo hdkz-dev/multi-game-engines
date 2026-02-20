@@ -77,11 +77,12 @@ export default function Dashboard() {
     let isMounted = true;
 
     async function initEngines() {
-      if (!bridge) return;
+      const bridgeInstance = await getBridge();
+      if (!bridgeInstance) return;
       try {
         const [chess, shogi] = await Promise.all([
-          bridge.getEngine("stockfish"),
-          bridge.getEngine("yaneuraou"),
+          bridgeInstance.getEngine("stockfish"),
+          bridgeInstance.getEngine("yaneuraou"),
         ]);
         if (isMounted) {
           setChessEngine(chess);

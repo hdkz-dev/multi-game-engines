@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { GNUBGParser } from "../GNUBGParser.js";
+import { createBackgammonBoard } from "@multi-game-engines/domain-backgammon";
 
 describe("GNUBGParser", () => {
   it("should parse info objects correctly", () => {
@@ -60,9 +61,7 @@ describe("GNUBGParser", () => {
   it("should create valid search commands", () => {
     const parser = new GNUBGParser();
     // Use factory or proper casting if available
-    const board = Array(26).fill(
-      0,
-    ) as unknown as import("@multi-game-engines/domain-backgammon").BackgammonBoard;
+    const board = createBackgammonBoard(Array(26).fill(0));
     const commands = parser.createSearchCommand({
       board,
       dice: [6, 5],
@@ -78,9 +77,7 @@ describe("GNUBGParser", () => {
     const parser = new GNUBGParser();
     expect(() =>
       parser.createSearchCommand({
-        board: Array(26).fill(
-          0,
-        ) as unknown as import("@multi-game-engines/domain-backgammon").BackgammonBoard,
+        board: createBackgammonBoard(Array(26).fill(0)),
         dice: [6, 5],
         "malicious\nkey": "value",
       }),

@@ -29,9 +29,9 @@ export class UCIAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new UCIParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "uci";
     this.name = config.name ?? "UCI Engine";
     this.version = config.version ?? "unknown";
   }

@@ -21,6 +21,28 @@ import {
 export type BackgammonBoard = Brand<number[], "BackgammonBoard">;
 
 /**
+ * バックギャモン盤面バリデータファクトリ。
+ */
+export function createBackgammonBoard(board: unknown): BackgammonBoard {
+  if (!Array.isArray(board) || board.length !== 26) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message:
+        "Invalid BackgammonBoard: Must be an array of exactly 26 numbers.",
+      i18nKey: "errors.invalid_backgammon_board",
+    });
+  }
+  if (!board.every((v) => typeof v === "number" && Number.isFinite(v))) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid BackgammonBoard: All elements must be finite numbers.",
+      i18nKey: "errors.invalid_backgammon_board",
+    });
+  }
+  return board as BackgammonBoard;
+}
+
+/**
  * バックギャモンの指し手表現（例: "24/18 18/13"）。
  */
 export type BackgammonMove = Move<"BackgammonMove">;

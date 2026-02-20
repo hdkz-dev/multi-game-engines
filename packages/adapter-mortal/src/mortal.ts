@@ -27,9 +27,9 @@ export class MortalAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new MahjongJSONParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "mortal";
     this.name = config.name ?? "Mortal";
     this.version = config.version ?? "1.0.0";
   }

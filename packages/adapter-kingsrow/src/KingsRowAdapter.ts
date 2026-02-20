@@ -29,9 +29,9 @@ export class KingsRowAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new KingsRowParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "kingsrow";
     this.name = config.name ?? "KingsRow Checkers";
     this.version = config.version ?? "unknown";
   }

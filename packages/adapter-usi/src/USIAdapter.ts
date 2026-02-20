@@ -25,9 +25,9 @@ export class USIAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new USIParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "usi";
     this.name = config.name ?? "USI Engine";
     this.version = config.version ?? "unknown";
   }

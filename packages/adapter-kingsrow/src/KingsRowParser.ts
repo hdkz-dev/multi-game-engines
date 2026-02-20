@@ -45,7 +45,7 @@ export class KingsRowParser implements IProtocolParser<
       // 形式3: "bestmove: (none)"
       if (data.includes("bestmove: (none)")) {
         return {
-          bestMove: createMove<"CheckersMove">("(none)"),
+          bestMove: null,
           raw: data,
         };
       }

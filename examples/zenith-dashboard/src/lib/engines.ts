@@ -1,6 +1,6 @@
-import { EngineBridge, truncateLog } from "@multi-game-engines/core";
-import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
-import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
+import { EngineBridge } from "@multi-game-engines/core";
+import { createStockfishEngine } from "@multi-game-engines/adapter-stockfish";
+import { createYaneuraouEngine } from "@multi-game-engines/adapter-yaneuraou";
 import { createUCIEngine } from "@multi-game-engines/adapter-uci";
 import { createUSIEngine } from "@multi-game-engines/adapter-usi";
 import { createGTPEngine } from "@multi-game-engines/adapter-gtp";
@@ -10,34 +10,34 @@ import { createGNUBGEngine } from "@multi-game-engines/adapter-gnubg";
 import { createKingsRowEngine } from "@multi-game-engines/adapter-kingsrow";
 
 let bridge: EngineBridge | null = null;
+let initPromise: Promise<EngineBridge | null> | null = null;
 
-export function getBridge() {
+export async function getBridge(): Promise<EngineBridge | null> {
   if (typeof window === "undefined") return null;
 
-  if (!bridge) {
-    bridge = new EngineBridge();
+  if (initPromise) return initPromise;
 
-    // 2026 Zenith Tier: 汎用アダプターファクトリの登録
-    // これにより、IEngineConfig を渡すだけで動的にエンジンを生成可能になります
-    bridge.registerAdapterFactory("uci", createUCIEngine);
-    bridge.registerAdapterFactory("usi", createUSIEngine);
-    bridge.registerAdapterFactory("gtp", createGTPEngine);
-    bridge.registerAdapterFactory("edax", createEdaxEngine);
-    bridge.registerAdapterFactory("mortal", createMortalEngine);
-    bridge.registerAdapterFactory("gnubg", createGNUBGEngine);
-    bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
+  initPromise = (async () => {
+    if (!bridge) {
+      bridge = new EngineBridge();
 
-    // デフォルトアダプターの登録
-    bridge.registerAdapter(new StockfishAdapter()).catch((err) => {
-      console.error(
-        `[EngineBridge] StockfishAdapter の登録に失敗しました: ${truncateLog(String(err))}`,
-      );
-    });
-    bridge.registerAdapter(new YaneuraouAdapter()).catch((err) => {
-      console.error(
-        `[EngineBridge] YaneuraouAdapter の登録に失敗しました: ${truncateLog(String(err))}`,
-      );
-    });
-  }
-  return bridge;
+      // Register generic adapter factories
+      // This allows dynamic instantiation via getEngine({ adapter: "uci", ... })
+      bridge.registerAdapterFactory("uci", createUCIEngine);
+      bridge.registerAdapterFactory("usi", createUSIEngine);
+      bridge.registerAdapterFactory("gtp", createGTPEngine);
+      bridge.registerAdapterFactory("edax", createEdaxEngine);
+      bridge.registerAdapterFactory("mortal", createMortalEngine);
+      bridge.registerAdapterFactory("gnubg", createGNUBGEngine);
+      bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
+
+      // Register specific engine factories
+      // These will be used when calling bridge.getEngine("stockfish")
+      bridge.registerAdapterFactory("stockfish", createStockfishEngine);
+      bridge.registerAdapterFactory("yaneuraou", createYaneuraouEngine);
+    }
+    return bridge;
+  })();
+
+  return initPromise;
 }

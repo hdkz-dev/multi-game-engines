@@ -43,13 +43,13 @@ export function createGOMove(move: string): GOMove {
   }
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施
   const normalized = move.toLowerCase();
-  if (!/^[a-z0-9 ]+$/.test(normalized)) {
+  if (!/^[a-z0-9]+$/.test(normalized)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid GOMove: Illegal characters detected.",
     });
   }
-  if (!/^([a-h j-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
+  if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid GOMove format: "${move}"`,
