@@ -22,6 +22,7 @@
 ### A-1. ルート LICENSE ファイルの作成
 
 - [ ] ルートに MIT ライセンスの `LICENSE` ファイルを作成。
+- [ ] 各パッケージディレクトリ（30パッケージ）に `LICENSE` ファイルをコピーし、物理的な欠落を解消。
 - [ ] `package.json` に `"license": "MIT"` フィールドが明記されていないパッケージ（13件）への追加：
   - `domain-chess`, `domain-go`, `domain-mahjong`, `domain-reversi`, `domain-shogi`
   - `ui-chess-elements`, `ui-chess-react`, `ui-chess-vue`, `ui-chess`
@@ -62,7 +63,7 @@
 
 ### B-1. 全アダプター SRI ダミーハッシュの可視化
 
-- [ ] **TASKS.md を修正**: `adapter-edax` のみの記載を**全5アダプター（9箇所）**に拡張。
+- [x] **TASKS.md を修正**: `adapter-edax` のみの記載を**全5アダプター（9箇所）**に拡張。
 - [ ] SRI ハッシュ刷新を Phase 3 のブロッカーとして明記。
 - **対象**:
   - `adapter-stockfish`: `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`（2箇所）
@@ -86,7 +87,7 @@
 
 ### B-4. ADR 欠番の整理
 
-- [ ] DECISION_LOG.md に欠番（ADR-003〜013）の注記を追加。
+- [x] DECISION_LOG.md に欠番（ADR-003〜013）の注記を追加。
   - 初期設計フェーズで採番された ADR が、リファクタリングにより統合・廃止された経緯を明記。
   - ✅ **完了** (2026-02-19)
 

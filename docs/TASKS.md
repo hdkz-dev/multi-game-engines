@@ -92,7 +92,7 @@
 ### 🟡 Medium（品質・保守性）
 
 - [ ] **lint warning**: `ui-vue-monitor/src/useEngineMonitor.ts` に未使用インポート `useEngineUI` が残存。
-- [ ] **`as unknown as` 残存**: プロダクションコード3箇所（`MonitorRegistry.ts`(2), `ResourceInjector.ts`(1), `EngineError.ts`(1)）。Zenith Standard（バリデータ関数経由）への置換を検討。
+- [ ] **`as unknown as` 残存**: プロダクションコード4箇所（`MonitorRegistry.ts`(2), `ResourceInjector.ts`(1), `EngineError.ts`(1)）。Zenith Standard（バリデータ関数経由）への置換を検討。
 - [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状15行のスタブ）。ARCHITECTURE.md では主要機能として記載。
 - [ ] **`i18n` パッケージに `typecheck` スクリプト欠落**: `pnpm turbo typecheck` でスキップされる。
 - [ ] **`main`/`types` フィールド欠落**: 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` フィールドがない。`exports` のみで ESM は問題ないが、CJS 互換性に影響。
