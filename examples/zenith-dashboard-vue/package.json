@@ -30,11 +30,11 @@
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-shogi-vue": "workspace:*",
     "@multi-game-engines/ui-vue": "workspace:*",
-    "lucide-vue-next": "^0.574.0",
+    "lucide-vue-next": "^0.575.0",
     "vue": "3.5.28"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.0.7",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
