@@ -1,28 +1,40 @@
-export * from "./GNUBGAdapter.js";
-export * from "./GNUBGParser.js";
-
 import { GNUBGAdapter } from "./GNUBGAdapter.js";
-import { IEngineConfig, IEngineAdapter } from "@multi-game-engines/core";
+import { GNUBGParser } from "./GNUBGParser.js";
+import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
 import {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
   IBackgammonSearchResult,
 } from "@multi-game-engines/domain-backgammon";
 
+export type {
+  IBackgammonSearchOptions,
+  IBackgammonSearchInfo,
+  IBackgammonSearchResult,
+};
+export { GNUBGParser, GNUBGAdapter };
+
 /**
- * 2026 Zenith Tier: GNU Backgammon アダプターのファクトリ関数。
+ * 2026 Zenith Tier: GNU Backgammon エンジンのファクトリ関数。
+ * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
  */
-export function createGNUBGAdapter(
+export function createGNUBGEngine(
   config: IEngineConfig,
-): IEngineAdapter<
+): IEngine<
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
   IBackgammonSearchResult
 > {
-  return new GNUBGAdapter(config);
+  const adapter = new GNUBGAdapter(config);
+  return new EngineFacade(adapter);
 }
 
-import { IEngine } from "@multi-game-engines/core";
+/**
+ * @deprecated Use createGNUBGEngine instead.
+ */
+export function createGNUBGAdapter(config: IEngineConfig) {
+  return new GNUBGAdapter(config);
+}
 
 // 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
 declare module "@multi-game-engines/core" {

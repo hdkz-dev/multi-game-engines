@@ -10,17 +10,12 @@ export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
  * 各ゲームアダプターで Move<"GameMove"> のように拡張可能です。
  * デフォルトでは全てのブランド化された指し手と互換性があります。
  */
-export type Move<T extends string = string> = string & { readonly __brand: T };
+export type Move<T extends string = string> = Brand<string, T>;
 
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-/**
- * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
- */
-export type PositionString<T extends string = string> = string & {
-  readonly __brand: T;
-};
+export type PositionString<T extends string = string> = Brand<string, T>;
 
 // 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 

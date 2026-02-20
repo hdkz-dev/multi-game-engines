@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { createGOMove } from "../index.js";
+
+beforeAll(() => {
+  vi.spyOn(performance, "now").mockReturnValue(0);
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 describe("Go Domain", () => {
   it("should validate move format", () => {

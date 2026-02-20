@@ -101,8 +101,15 @@ export class USIAdapter extends BaseAdapter<
   }
 }
 
-export function createUSIAdapter(
+import { IEngine, EngineFacade } from "@multi-game-engines/core";
+
+/**
+ * 2026 Zenith Tier: 汎用 USI エンジンのファクトリ関数。
+ * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
+ */
+export function createUSIEngine(
   config: IEngineConfig,
-): IEngineAdapter<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
-  return new USIAdapter(config);
+): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
+  const adapter = new USIAdapter(config);
+  return new EngineFacade(adapter);
 }

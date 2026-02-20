@@ -1,12 +1,15 @@
-export * from "./GTPAdapter.js";
-export * from "./GTPParser.js";
 import { GTPAdapter } from "./GTPAdapter.js";
 import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
 import {
+  GTPParser,
   IGoSearchOptions,
   IGoSearchInfo,
   IGoSearchResult,
 } from "./GTPParser.js";
+
+// 2026 Best Practice: 内部実装を隠蔽し、公開インターフェースのみをエクスポート
+export type { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
+export { GTPParser, GTPAdapter };
 
 /**
  * 2026 Zenith Tier: GTP エンジンのファクトリ関数。

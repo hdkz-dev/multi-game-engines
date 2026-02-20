@@ -1,19 +1,21 @@
-import { EngineBridge } from "@multi-game-engines/core";
+import { ref, readonly } from "vue";
+import { EngineBridge, truncateLog } from "@multi-game-engines/core";
 import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
 import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
-import { createUCIAdapter } from "@multi-game-engines/adapter-uci";
-import { createUSIAdapter } from "@multi-game-engines/adapter-usi";
+import { createUCIEngine } from "@multi-game-engines/adapter-uci";
+import { createUSIEngine } from "@multi-game-engines/adapter-usi";
 import { createGTPEngine } from "@multi-game-engines/adapter-gtp";
-import { createEdaxAdapter } from "@multi-game-engines/adapter-edax";
+import { createEdaxEngine } from "@multi-game-engines/adapter-edax";
 import { createMortalEngine } from "@multi-game-engines/adapter-mortal";
-import { createGNUBGAdapter } from "@multi-game-engines/adapter-gnubg";
+import { createGNUBGEngine } from "@multi-game-engines/adapter-gnubg";
 import { createKingsRowEngine } from "@multi-game-engines/adapter-kingsrow";
 
 let bridge: EngineBridge | null = null;
+const isReady = ref(false);
+const error = ref<string | null>(null);
 
 /**
  * Returns a singleton EngineBridge instance.
- * Safe to call unconditionally — ssr: false ensures this only runs on the client.
  */
 export function getBridge(): EngineBridge | null {
   if (typeof window === "undefined") return null;
@@ -22,22 +24,39 @@ export function getBridge(): EngineBridge | null {
     bridge = new EngineBridge();
 
     // 2026 Zenith Tier: 汎用アダプターファクトリの登録
-    bridge.registerAdapterFactory("uci", createUCIAdapter);
-    bridge.registerAdapterFactory("usi", createUSIAdapter);
+    bridge.registerAdapterFactory("uci", createUCIEngine);
+    bridge.registerAdapterFactory("usi", createUSIEngine);
     bridge.registerAdapterFactory("gtp", createGTPEngine);
-    bridge.registerAdapterFactory("edax", createEdaxAdapter);
+    bridge.registerAdapterFactory("edax", createEdaxEngine);
     bridge.registerAdapterFactory("mortal", createMortalEngine);
-    bridge.registerAdapterFactory("gnubg", createGNUBGAdapter);
+    bridge.registerAdapterFactory("gnubg", createGNUBGEngine);
     bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
 
-    // 2026 Zenith Tier: デフォルトアダプターの登録。
-    // 非同期で実行し、失敗時はコンソールに警告を出力します（初期化をブロックしない設計判断）。
-    bridge.registerAdapter(new StockfishAdapter()).catch((e) => {
-      console.warn("[Dashboard] Failed to register Stockfish adapter:", e);
-    });
-    bridge.registerAdapter(new YaneuraouAdapter()).catch((e) => {
-      console.warn("[Dashboard] Failed to register Yaneuraou adapter:", e);
-    });
+    // 2026 Zenith Tier: デフォルトアダプターの登録
+    Promise.all([
+      bridge.registerAdapter(new StockfishAdapter()),
+      bridge.registerAdapter(new YaneuraouAdapter()),
+    ])
+      .then(() => {
+        isReady.value = true;
+      })
+      .catch((e) => {
+        const msg = `Failed to register default adapters: ${truncateLog(String(e))}`;
+        console.warn(`[Dashboard] ${msg}`);
+        error.value = msg;
+      });
   }
   return bridge;
+}
+
+/**
+ * Vue composable to access the EngineBridge and its initialization state.
+ */
+export function useEngines() {
+  const b = getBridge();
+  return {
+    bridge: b,
+    isReady: readonly(isReady),
+    error: readonly(error),
+  };
 }

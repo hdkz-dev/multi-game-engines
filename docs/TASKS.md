@@ -18,7 +18,7 @@
 - [x] **adapter-stockfish**: UCI 16.1 対応とライフサイクルテスト。
 - [x] **adapter-yaneuraou**: USI 7.5.0 対応。
 - [x] **adapter-katago**: GTP プロトコル対応（囲碁エンジン基盤）。
-- [x] **ユニットテスト**: 計 150 ケース以上の網羅的検証。
+- [x] **ユニットテスト**: 計 160 ケース以上（15パッケージ）の網羅的検証。
 - [x] **品質保証 & 監査**: PR #1〜#25 を通じた超深層監査の完遂（Zenith Tier）。
 - [x] **マルチフレームワーク UI**: `ui-react`, `ui-vue`, `ui-elements` の物理分離と Zenith 品質実装。
 - [x] **WASM対応の高度化**: Blob URL 環境下での WASM/NNUE 依存性注入パターンの確立。

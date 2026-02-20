@@ -1,13 +1,20 @@
-export * from "./KingsRowAdapter.js";
-export * from "./KingsRowParser.js";
-
-import { KingsRowAdapter } from "./KingsRowAdapter.js";
 import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
+import { KingsRowParser } from "./KingsRowParser.js";
+import { KingsRowAdapter } from "./KingsRowAdapter.js";
+
 import {
   ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult,
 } from "@multi-game-engines/domain-checkers";
+
+// 2026 Best Practice: 内部実装を隠蔽し、公開インターフェースのみをエクスポート
+export type {
+  ICheckersSearchOptions,
+  ICheckersSearchInfo,
+  ICheckersSearchResult,
+};
+export { KingsRowParser, KingsRowAdapter };
 
 /**
  * 2026 Zenith Tier: KingsRow エンジンのファクトリ関数。

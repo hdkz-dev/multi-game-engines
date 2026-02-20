@@ -40,7 +40,7 @@ export class UCIAdapter extends BaseAdapter<
   /**
    * エンジンのリソースをロードし、Worker を初期化して 'uci' ハンドシェイクを実行します。
    *
-   * @param loader - オプションのカスタムローダー。
+   * @param loader - エンジンローダー。2026 Zenith Tier では必須です。省略されると EngineError がスローされます。
    * @returns 初期化とハンドシェイク ('uciok') 完了時に解決される Promise。
    * @throws {EngineError} リソース不足、Worker エラー、またはハンドシェイクのタイムアウト時にスローされます。
    */
@@ -120,11 +120,15 @@ export class UCIAdapter extends BaseAdapter<
   }
 }
 
+import { IEngine, EngineFacade } from "@multi-game-engines/core";
+
 /**
- * 2026 Zenith Tier: 汎用 UCI アダプターのファクトリ関数。
+ * 2026 Zenith Tier: 汎用 UCI エンジンのファクトリ関数。
+ * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
  */
-export function createUCIAdapter(
+export function createUCIEngine(
   config: IEngineConfig,
-): IEngineAdapter<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  return new UCIAdapter(config);
+): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
+  const adapter = new UCIAdapter(config);
+  return new EngineFacade(adapter);
 }

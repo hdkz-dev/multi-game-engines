@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { KingsRowParser } from "../KingsRowParser.js";
+
+beforeAll(() => {
+  vi.spyOn(performance, "now").mockReturnValue(0);
+});
+
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 describe("KingsRowParser", () => {
   it("should parse info strings correctly", () => {

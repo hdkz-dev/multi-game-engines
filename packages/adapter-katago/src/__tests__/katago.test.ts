@@ -26,10 +26,9 @@ describe("KataGoAdapter", () => {
   };
 
   beforeAll(() => {
-    vi.stubGlobal("URL", {
-      createObjectURL: vi.fn().mockReturnValue("blob:mock"),
-      revokeObjectURL: vi.fn(),
-    });
+    vi.spyOn(performance, "now").mockReturnValue(0);
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
+    vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
   });
 
   afterAll(() => {
@@ -39,6 +38,7 @@ describe("KataGoAdapter", () => {
 
   beforeEach(() => {
     vi.stubGlobal("Worker", MockWorker);
+    vi.clearAllMocks();
   });
 
   it("should initialize with correct metadata", () => {

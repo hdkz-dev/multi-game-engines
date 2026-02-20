@@ -20,6 +20,10 @@ import {
 export interface IShogiSearchOptions extends IBaseSearchOptions {
   sfen?: SFEN;
   ponder?: boolean;
+  depth?: number;
+  nodes?: number;
+  time?: number;
+  movetime?: number;
   [key: string]: unknown;
 }
 
@@ -104,18 +108,29 @@ export class USIParser implements IProtocolParser<
           }
           break;
         case "currmove":
-          if (i + 1 < parts.length)
-            info.currMove = createShogiMove(parts[++i]!);
+          if (i + 1 < parts.length) {
+            try {
+              info.currMove = createShogiMove(parts[++i]!);
+            } catch {
+              // 2026 Best Practice: 特定の指し手のパース失敗で全体の解析を止めない
+            }
+          }
           break;
         case "multipv":
           if (i + 1 < parts.length) info.multipv = parseInt(parts[++i]!, 10);
           break;
         case "pv":
           // PV は残りの要素すべて。各要素を検証
-          info.pv = parts
-            .slice(i + 1)
-            .filter((m): m is string => !!m)
-            .map((m) => createShogiMove(m));
+          info.pv = [];
+          for (let j = i + 1; j < parts.length; j++) {
+            const m = parts[j];
+            if (!m) continue;
+            try {
+              info.pv.push(createShogiMove(m));
+            } catch {
+              // 不正な指し手はスキップ
+            }
+          }
           i = parts.length;
           break;
       }
@@ -179,8 +194,8 @@ export class USIParser implements IProtocolParser<
 
     if (limits.length > 0) {
       goCmd += " " + limits.join(" ");
-    } else {
-      // 制限がない場合は分析用無制限
+    } else if (!options.ponder) {
+      // 制限がなく、ponder でもない場合は分析用無制限
       goCmd += " infinite";
     }
 

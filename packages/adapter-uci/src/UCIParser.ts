@@ -9,6 +9,7 @@ import {
   EngineError,
   EngineErrorCode,
   createMove,
+  truncateLog,
 } from "@multi-game-engines/core";
 import { FEN, createFEN } from "@multi-game-engines/domain-chess";
 
@@ -35,7 +36,7 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
 
 /** チェス用の探索結果 */
 export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move;
+  bestMove: Move | "none" | "(none)";
   ponder?: Move;
 }
 
@@ -152,7 +153,7 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser] Skipping invalid PV move token: "${token}"`,
+                `[UCIParser] Skipping invalid PV move token: "${truncateLog(token)}"`,
               );
             }
           }
@@ -191,7 +192,14 @@ export class UCIParser implements IProtocolParser<
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
-    const bestMove = this.createMove(parts[1] || "");
+    const moveStr = parts[1] || "";
+
+    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン
+    const bestMove =
+      moveStr === "none" || moveStr === "(none)"
+        ? moveStr
+        : this.createMove(moveStr);
+
     if (!bestMove) return null;
 
     const result: IChessSearchResult = {

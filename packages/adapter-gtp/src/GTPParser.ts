@@ -15,6 +15,8 @@ export interface IGoSearchOptions extends IBaseSearchOptions {
   komi?: number;
   /** 盤面データ (SGF等) */
   board?: string;
+  /** KataGo 分析インターバル (ms) */
+  kataInterval?: number;
   [key: string]: unknown;
 }
 
@@ -62,16 +64,11 @@ export class GTPParser implements IProtocolParser<
             Array.isArray(data.pv) && data.pv.length > 0
               ? data.pv
                   .filter((m): m is string => typeof m === "string" && !!m)
-                  .map((m) => createGOMove(m.toLowerCase()))
+                  .map((m) => createGOMove(m))
               : undefined,
           raw: data,
         };
       }
-      return null;
-    }
-
-    if (typeof data === "string") {
-      return null;
     }
 
     return null;
@@ -83,13 +80,12 @@ export class GTPParser implements IProtocolParser<
     // GTP 成功応答: "= A1"
     if (!data.startsWith("=")) return null;
 
-    const parts = data.trim().split(" ");
+    const parts = data.trim().split(/\s+/);
     const moveStr = parts[1];
     if (!moveStr) return null;
 
     // 2026 Best Practice: 特殊な指し手 (pass, resign) の正規化と検証
-    const normalized = moveStr.toLowerCase();
-    const bestMove = createGOMove(normalized);
+    const bestMove = createGOMove(moveStr);
 
     return {
       bestMove,

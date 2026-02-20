@@ -5,9 +5,14 @@ import {
   IMahjongSearchResult,
 } from "./MahjongJSONParser.js";
 import { MortalAdapter } from "./mortal.js";
+export { MortalAdapter };
 
-export * from "./mortal.js";
-export * from "./MahjongJSONParser.js";
+// 2026 Best Practice: 内部実装を隠蔽し、公開インターフェースのみをエクスポート
+export type {
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
+  IMahjongSearchResult,
+} from "./MahjongJSONParser.js";
 
 /**
  * 2026 Zenith Tier: Mortal エンジンのファクトリ関数。

@@ -285,20 +285,33 @@ export class EngineBridge implements IEngineBridge {
           if (factory) {
             const result = factory(idOrConfig);
             // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
-            const newAdapter =
-              result instanceof EngineFacade
-                ? (
-                    result as EngineFacade<
-                      IBaseSearchOptions,
-                      IBaseSearchInfo,
-                      IBaseSearchResult
-                    >
-                  ).getInternalAdapter()
-                : (result as IEngineAdapter<
-                    IBaseSearchOptions,
-                    IBaseSearchInfo,
-                    IBaseSearchResult
-                  >);
+            let newAdapter: IEngineAdapter<
+              IBaseSearchOptions,
+              IBaseSearchInfo,
+              IBaseSearchResult
+            >;
+
+            if (result instanceof EngineFacade) {
+              newAdapter = (
+                result as EngineFacade<
+                  IBaseSearchOptions,
+                  IBaseSearchInfo,
+                  IBaseSearchResult
+                >
+              ).getInternalAdapter();
+            } else if (this.isIEngineAdapter(result)) {
+              newAdapter = result as IEngineAdapter<
+                IBaseSearchOptions,
+                IBaseSearchInfo,
+                IBaseSearchResult
+              >;
+            } else {
+              throw new EngineError({
+                code: EngineErrorCode.INTERNAL_ERROR,
+                message: `Factory for "${idOrConfig.adapter}" returned an unsupported engine type.`,
+                engineId: id,
+              });
+            }
 
             // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
             await this.registerAdapter(newAdapter);
@@ -572,5 +585,15 @@ export class EngineBridge implements IEngineBridge {
     this.loaderPromise = null;
     this.capabilities = null;
     this.capsPromise = null;
+  }
+
+  private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
+    return (
+      typeof obj === "object" &&
+      obj !== null &&
+      "id" in obj &&
+      "searchRaw" in obj &&
+      "parser" in obj
+    );
   }
 }

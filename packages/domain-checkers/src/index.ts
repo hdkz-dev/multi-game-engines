@@ -17,6 +17,7 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
 
 /**
  * チェッカー盤面データのバリデータファクトリ。
+ * @throws {Error} インジェクション攻撃が検出された場合
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
   // 2026 Best Practice: 局面データに対するインジェクション対策を徹底
@@ -33,6 +34,9 @@ export type CheckersMove = Move<"CheckersMove">;
  * チェッカー指し手バリデータファクトリ。
  */
 export function createCheckersMove(move: string): CheckersMove {
+  if (!/^\d+-\d+$/.test(move) && move !== "(none)") {
+    throw new Error(`Invalid CheckersMove format: "${move}"`);
+  }
   return createMove<"CheckersMove">(move);
 }
 
@@ -63,7 +67,7 @@ export interface ICheckersSearchInfo {
  * 探索結果。
  */
 export interface ICheckersSearchResult {
-  bestMove: CheckersMove;
+  bestMove: CheckersMove | null;
   eval?: number;
   raw?: string | Record<string, unknown>;
   [key: string]: unknown;

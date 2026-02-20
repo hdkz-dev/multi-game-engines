@@ -53,10 +53,8 @@ describe("GTPAdapter", () => {
 
   beforeAll(() => {
     vi.spyOn(performance, "now").mockReturnValue(0);
-    vi.stubGlobal("URL", {
-      createObjectURL: vi.fn().mockReturnValue("blob:mock"),
-      revokeObjectURL: vi.fn(),
-    });
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
+    vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
   });
 
   afterAll(() => {
