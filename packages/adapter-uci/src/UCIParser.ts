@@ -9,7 +9,7 @@ import {
   EngineError,
   EngineErrorCode,
 } from "@multi-game-engines/core";
-import { FEN } from "@multi-game-engines/domain-chess";
+import { FEN, createFEN } from "@multi-game-engines/domain-chess";
 
 /** チェス用の探索オプション (UCI標準規格) */
 export interface IChessSearchOptions extends IBaseSearchOptions {
@@ -144,6 +144,8 @@ export class UCIParser implements IProtocolParser<
             !UCIParser.UCI_INFO_TOKENS.has(parts[i + 1]!)
           ) {
             const token = parts[++i]!;
+            // 2026 Best Practice: Validate even tokens from the engine (Defense in Depth)
+            ProtocolValidator.assertNoInjection(token, "PV Move");
             const m = this.createMove(token);
             if (m) {
               moves.push(m);
@@ -222,12 +224,12 @@ export class UCIParser implements IProtocolParser<
       });
     }
 
-    // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-    ProtocolValidator.assertNoInjection(options.fen, "FEN string");
+    // 2026 Best Practice: Domain-specific structural validation + Injection defense
+    const validatedFen = createFEN(options.fen);
 
-    const isStartPos = options.fen.toLowerCase() === "startpos";
+    const isStartPos = validatedFen.toLowerCase() === "startpos";
     const commands: string[] = [
-      isStartPos ? "position startpos" : `position fen ${options.fen}`,
+      isStartPos ? "position startpos" : `position fen ${validatedFen}`,
     ];
 
     let goCmd = "go";

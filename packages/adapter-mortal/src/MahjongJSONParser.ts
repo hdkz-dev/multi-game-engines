@@ -1,4 +1,8 @@
-import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  ProtocolValidator,
+  IBaseSearchOptions,
+} from "@multi-game-engines/core";
 import {
   MahjongMove,
   validateMahjongBoard,
@@ -47,13 +51,18 @@ export class MahjongJSONParser implements IProtocolParser<
       if (!this.isObject(parsed)) return null;
 
       if (parsed.type === "result") {
+        const moveValue = parsed.bestMove;
+        if (typeof moveValue !== "string") {
+          return null;
+        }
         try {
-          const bestMove = createMahjongMove(parsed.bestMove as string);
+          const bestMove = createMahjongMove(moveValue);
           return {
             raw: typeof data === "string" ? data : JSON.stringify(data),
             bestMove,
           };
-        } catch {
+        } catch (e) {
+          console.warn("[MahjongJSONParser] Invalid bestMove from engine:", e);
           return null;
         }
       }
@@ -100,8 +109,8 @@ export class MahjongJSONParser implements IProtocolParser<
   }
 }
 
-export interface IMahjongSearchOptions {
-  board: unknown;
+export interface IMahjongSearchOptions extends IBaseSearchOptions {
+  board: Record<string, unknown> | unknown[];
   signal?: AbortSignal;
   [key: string]: unknown;
 }

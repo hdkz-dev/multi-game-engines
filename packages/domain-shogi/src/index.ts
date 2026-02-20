@@ -1,9 +1,13 @@
-import { EngineErrorCode, EngineError } from "@multi-game-engines/core";
+import {
+  EngineErrorCode,
+  EngineError,
+  PositionString,
+} from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
  */
-export type SFEN = string & { readonly __brand: "SFEN" };
+export type SFEN = PositionString<"SFEN">;
 
 /**
  * 将棋の駒識別子。
@@ -78,29 +82,32 @@ export interface ParsedSFEN {
 export function createSFEN(pos: string): SFEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid SFEN: Input must be a non-empty string.",
     });
   }
   const trimmedPos = pos.trim();
-  if (!/^[0-9a-zA-Z/+\s-]+$/.test(trimmedPos)) {
+  if (!/^[0-9a-zA-Z/+ -]+$/.test(trimmedPos)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid SFEN: Illegal characters detected.",
+      remediation:
+        "SFEN should only contain board pieces [PLNSGBRK...], counts [1-9], '+', '/', '-', and spaces.",
     });
   }
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 4) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
+      remediation: "SFEN must contain: [board] [turn] [hand] [moveCount]",
     });
   }
 
   // 2nd field: Turn (b or w)
   if (!/^[bw]$/.test(fields[1]!)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
     });
   }
@@ -111,7 +118,7 @@ export function createSFEN(pos: string): SFEN {
     // Adjusting to a simpler check that covers common patterns.
     if (!/^[0-9a-zA-Z-]+$/.test(fields[2]!)) {
       throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
+        code: EngineErrorCode.SECURITY_ERROR,
         message: `Invalid SFEN hand: "${fields[2]}"`,
       });
     }
@@ -121,7 +128,7 @@ export function createSFEN(pos: string): SFEN {
   const moveCountNum = Number(fields[3]!);
   if (!Number.isInteger(moveCountNum) || moveCountNum < 1) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN move counter: "${fields[3]}"`,
     });
   }

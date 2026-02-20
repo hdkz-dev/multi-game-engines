@@ -18,6 +18,7 @@ import {
   IEngineAdapter,
   IProtocolParser,
 } from "../types.js";
+import { createPositionString } from "../protocol/ProtocolValidator.js";
 
 describe("EngineFacade", () => {
   beforeAll(() => {
@@ -56,11 +57,7 @@ describe("EngineFacade", () => {
         parseResult: vi.fn(),
         createStopCommand: vi.fn().mockReturnValue("stop-command"),
         createOptionCommand: vi.fn(),
-      } as unknown as IProtocolParser<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
+      } as unknown as IProtocolParser,
       load: vi.fn().mockImplementation(async () => {
         mockAdapter.status = "ready";
       }),
@@ -109,11 +106,17 @@ describe("EngineFacade", () => {
       stop: task1Stop,
     });
 
-    void facade.search({ board: "..." } as IBaseSearchOptions);
+    void facade.search({
+      fen: createPositionString(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      ),
+    });
     await new Promise((r) => setTimeout(r, 10));
 
     // 次の検索
-    await facade.search({ board: "..." } as IBaseSearchOptions);
+    await facade.search({
+      fen: createPositionString("8/8/8/8/8/8/8/8 w - - 0 1"),
+    });
 
     expect(task1Stop).toHaveBeenCalled();
   });
@@ -130,7 +133,11 @@ describe("EngineFacade", () => {
         .mockImplementation((res) => ({ ...res, modified: true })),
     };
     const facade = new EngineFacade(adapter, [mw]);
-    const result = await facade.search({ board: "..." } as IBaseSearchOptions);
+    const result = await facade.search({
+      fen: createPositionString(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      ),
+    });
 
     expect(mw.onCommand).toHaveBeenCalledWith(
       "search-command",

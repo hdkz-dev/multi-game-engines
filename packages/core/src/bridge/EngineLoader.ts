@@ -48,7 +48,7 @@ export class EngineLoader implements IEngineLoader {
       });
     }
     const safeId = engineId;
-    const cacheKey = `${safeId}_${config.url}`;
+    const cacheKey = `${safeId}:${config.url}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
@@ -255,6 +255,18 @@ export class EngineLoader implements IEngineLoader {
   }
 
   /**
+   * 2026 Best Practice: 特定のエンジンIDに関連付けられたすべての Blob リソースを解放します。
+   */
+  revokeByEngineId(engineId: string): void {
+    for (const [key, val] of this.activeBlobs.entries()) {
+      if (key.startsWith(`${engineId}:`)) {
+        URL.revokeObjectURL(val);
+        this.activeBlobs.delete(key);
+      }
+    }
+  }
+
+  /**
    * 2026 Best Practice: Worker 実行コンテキストのオリジン検証
    */
   private validateWorkerUrl(url: string, engineId?: string): void {
@@ -278,8 +290,10 @@ export class EngineLoader implements IEngineLoader {
 
       const currentOrigin =
         typeof window !== "undefined" ? window.location.origin : "";
+      const isCrossOrigin = currentOrigin && parsedUrl.origin !== currentOrigin;
+      const shouldReject = isCrossOrigin && (this.isProduction || !isLoopback);
 
-      if (currentOrigin && parsedUrl.origin !== currentOrigin && !isLoopback) {
+      if (shouldReject) {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Cross-origin Worker scripts are prohibited for security: ${url}`,

@@ -14,6 +14,7 @@ import {
 } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
+import { EnvironmentDiagnostics } from "../utils/EnvironmentDiagnostics.js";
 
 /**
  * すべてのエンジンアダプターの基底クラス。
@@ -50,6 +51,13 @@ export abstract class BaseAdapter<
   }
 
   abstract load(loader?: IEngineLoader): Promise<void>;
+
+  /**
+   * 2026 Zenith Tier: 実行環境の能力チェックを追加。
+   */
+  protected checkEnvironment(): void {
+    EnvironmentDiagnostics.warnIfSuboptimal();
+  }
 
   /**
    * 共通の探索実行ロジック。
@@ -126,6 +134,9 @@ export abstract class BaseAdapter<
    * Worker からのメッセージを処理します。
    */
   protected handleIncomingMessage(data: unknown): void {
+    if (this._status === "terminated" || this._status === "disposed") {
+      return;
+    }
     // 2026 Best Practice: 文字列とオブジェクトの両方をプロトコル解析に渡す
     // UCI/USI/GTP は主に文字列、Mahjong (Mortal) は JSON オブジェクトを使用。
     if (
@@ -183,6 +194,9 @@ export abstract class BaseAdapter<
       for (const cmd of command) {
         this.communicator?.postMessage(cmd);
       }
+    } else if (command instanceof Uint8Array) {
+      // 2026 Best Practice: ゼロコピー転送 (Transferable Objects)
+      this.communicator?.postMessage(command, [command.buffer]);
     } else {
       this.communicator?.postMessage(command);
     }

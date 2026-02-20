@@ -59,13 +59,18 @@
   - [x] React 19 / Vue 3 / Lit における確実なプロパティ同期パターン (useLayoutEffect + Property Reflection) の確立。
   - [x] チェス・将棋盤面コンポーネントにおける網羅的なユニット・統合テスト（100%パス）の達成。
 - [x] **PR #25 最終監査 & フォローアップ (Zenith Consolidation)**: 「Refuse by Exception」の全域適用、SSR 互換性、ESM 移行、およびレビュー指摘事項（バリデーション詳細化、テスト強化）の全対応。
+- [x] **Zenith Tier 究極監査と型安全性の昇華 (Zenith Audit & Strict Type Hardening)**:
+  - [x] 全マージ済み PR (#15, #21, #24, #25) の 100 以上のレビューポイントを再監査し、実装に反映。
+  - [x] モノレポ全域での `exactOptionalPropertyTypes` の復旧と UI パッケージの型整合。
+  - [x] `MonitorRegistry` 等のコア基盤における `any` の完全排除。
+  - [x] 全エンジンアダプターにおける SRI ハッシュの `sha384` 標準化と TODO 追跡の開始。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
-- [ ] **adapter-edax**: ダミー SRI ハッシュ (`sha256-dummy`) を本番用バイナリのハッシュ値へ置換。
+- [ ] **SRI 最終適用**: 全エンジンアダプターのダミー SRI ハッシュ (`sha384-Placeholder`) を、各プラットフォーム配信用の実効バイナリのハッシュ値へ置換。
 - [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 

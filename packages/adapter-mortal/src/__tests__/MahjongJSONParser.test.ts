@@ -51,7 +51,8 @@ describe("MahjongJSONParser", () => {
   });
 
   it("should detect injection in top-level string", () => {
-    const options = { board: "bad\ninput" };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const options = { board: "bad\ninput" } as any;
     let thrown: unknown;
     try {
       parser.createSearchCommand(options);

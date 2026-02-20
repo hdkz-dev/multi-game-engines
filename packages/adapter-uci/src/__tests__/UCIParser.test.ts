@@ -194,13 +194,16 @@ describe("UCIParser", () => {
         fen: "startpos" as FEN,
         nodes: 1000,
       });
-      expect(commands).toEqual(["position startpos", "go nodes 1000"]);
+      expect(commands).toEqual([
+        "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "go nodes 1000",
+      ]);
     });
 
     it("should throw error for injection in FEN", () => {
       expect(() =>
         parser.createSearchCommand({ fen: "startpos\nquit" as FEN }),
-      ).toThrow(/command injection/);
+      ).toThrow(/Illegal characters detected/);
     });
   });
 
@@ -251,12 +254,12 @@ describe("createFEN", () => {
     );
   });
 
-  it("should throw SECURITY_ERROR for illegal characters", () => {
+  it("should throw VALIDATION_ERROR for illegal characters", () => {
     expect(() =>
       createFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1; quit",
       ),
-    ).toThrow();
+    ).toThrow(/Illegal characters detected/);
   });
 
   it("should throw VALIDATION_ERROR for incorrect field count", () => {
