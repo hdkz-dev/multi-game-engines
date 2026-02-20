@@ -1,6 +1,7 @@
 {
   "name": "@multi-game-engines/domain-shogi",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Domain-specific Shogi logic, types, and parsing",
   "type": "module",
   "exports": {

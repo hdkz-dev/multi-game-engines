@@ -75,11 +75,10 @@
 
 ### 🔴 Critical（法的・CI整合性）
 
-- [ ] **LICENSE ファイル欠落**: ルートに MIT ライセンスファイルが存在しない。31パッケージ中30パッケージで `LICENSE` ファイルが物理的に欠落。
-- [ ] **license フィールド欠落**: 13パッケージ（`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件）で `package.json` に `license` フィールドがない。
-- [ ] **release.yml Node.js 不整合**: `.github/workflows/release.yml` が Node.js 22 を使用。`ci.yml` (24)、`.node-version` (24.13.0)、`package.json` (`>=24.0.0`) と不一致。
-- [ ] **不要ファイルの Git 管理**: `review_audit_raw.md`, `pr_review_comments*.json`, `pr_view.json`, `status.txt`, `opencode_test.txt` がリポジトリに混入。`.gitignore` への追加と `git rm --cached` が必要。
-- [ ] **`ui-react` ESLint 設定欠落**: `packages/ui-react/` に `eslint.config.mjs` が存在せず、`pnpm run lint` が `TypeError` で失敗。CI の lint チェック失敗の根本原因。
+- [x] **LICENSE 整備**: ルート `LICENSE` (MIT) の作成、全31パッケージへの `LICENSE` 配置、および13パッケージの `package.json` への `license` フィールド追加を完了。
+- [x] **release.yml Node.js 不整合**: `.github/workflows/release.yml` を Node.js 24 に更新し、プロジェクト全体の設定と統一。
+- [x] **不要ファイルの Git 管理**: `.gitignore` を強化し、`review_audit_raw.md` 等の作業用ファイルを Git 管理下から確実に排除。
+- [x] **`ui-react` ESLint 設定修復**: `packages/ui-react/eslint.config.mjs` を作成し、CI での lint エラー（TypeError）を解消。
 
 ### 🟠 High（リリース準備）
 
@@ -100,7 +99,7 @@
 - [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [ ] **英語版ドキュメント不足**: `docs/en/` に `ARCHITECTURE.md` と `TECHNICAL_SPECS.md` のみ。`DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` の英語版が必要。
-- [ ] **.DS_Store の Git 追跡除外**: `git rm --cached` による除外（現在は `.gitignore` に登録済みだが、既追跡ファイルの除外は未実施）。
+- [x] **.DS_Store の Git 追跡除外**: 不要な `.DS_Store` ファイルを物理的に除去し、Git の管理対象から除外。
 
 ---
 

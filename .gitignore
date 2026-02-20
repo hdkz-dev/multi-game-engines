@@ -38,6 +38,11 @@ coverage/
 tmp/
 storybook-static/
 *-storybook.log
+review_audit_raw.md
+pr_review_comments*.json
+pr_view.json
+status.txt
+opencode_test.txt
 
 # Turborepo
 .turbo/
