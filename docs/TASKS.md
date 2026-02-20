@@ -71,6 +71,7 @@
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
 > 2026-02-20 更新。2026-02-19 全体レビュー ([実装計画書](implementation_plans/project-review-improvements.md)) + 2026-02-20 フォローアップレビューの結果を統合。
+> 修復計画: [review-remediation-2026-02-20.md](implementation_plans/review-remediation-2026-02-20.md)
 
 ### 🔴 Critical（法的・CI整合性）
 
