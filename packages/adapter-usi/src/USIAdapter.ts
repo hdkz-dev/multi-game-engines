@@ -7,7 +7,6 @@ import {
   ResourceMap,
   IEngineConfig,
   IEngineSourceConfig,
-  IEngineAdapter,
 } from "@multi-game-engines/core";
 import {
   IShogiSearchOptions,
@@ -95,21 +94,16 @@ export class USIAdapter extends BaseAdapter<
       await usiOk;
       this.emitStatusChange("ready");
     } catch (e) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(e, this.id);
     }
   }
-}
-
-import { IEngine, EngineFacade } from "@multi-game-engines/core";
-
-/**
- * 2026 Zenith Tier: 汎用 USI エンジンのファクトリ関数。
- * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
- */
-export function createUSIEngine(
-  config: IEngineConfig,
-): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
-  const adapter = new USIAdapter(config);
-  return new EngineFacade(adapter);
 }

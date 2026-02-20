@@ -9,6 +9,7 @@ import {
 } from "vitest";
 import { KataGoAdapter } from "../index.js";
 import { IEngineLoader } from "@multi-game-engines/core";
+import { IGoSearchOptions } from "@multi-game-engines/adapter-gtp";
 
 class MockWorker {
   postMessage = vi.fn();
@@ -50,5 +51,20 @@ describe("KataGoAdapter", () => {
     const adapter = new KataGoAdapter();
     await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(adapter.status).toBe("ready");
+  });
+
+  it("should reject control characters in search options (injection guard)", () => {
+    const adapter = new KataGoAdapter();
+    const maliciousInputs = ["Q16\nquit", "Q16\0", { board: "Q16\r\nstop" }];
+
+    for (const input of maliciousInputs) {
+      expect(() =>
+        adapter.parser.createSearchCommand(
+          typeof input === "string"
+            ? { board: input }
+            : (input as unknown as IGoSearchOptions),
+        ),
+      ).toThrow(/Potential command injection/);
+    }
   });
 });

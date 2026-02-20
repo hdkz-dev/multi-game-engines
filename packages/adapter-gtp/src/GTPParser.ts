@@ -103,9 +103,13 @@ export class GTPParser implements IProtocolParser<
     if (options.size !== undefined) commands.push(`boardsize ${options.size}`);
     if (options.komi !== undefined) commands.push(`komi ${options.komi}`);
 
-    // KataGo 分析モードの開始
-    const interval = Number(options.kataInterval) || 100;
-    commands.push(`kata-analyze interval ${interval}`);
+    // KataGo 分析モードの開始 (明示的に指定された場合のみ)
+    if (
+      options.kataInterval != null &&
+      Number.isFinite(Number(options.kataInterval))
+    ) {
+      commands.push(`kata-analyze interval ${Number(options.kataInterval)}`);
+    }
 
     return commands;
   }
@@ -114,7 +118,16 @@ export class GTPParser implements IProtocolParser<
     return "stop";
   }
 
-  createOptionCommand(name: string, value: string | number | boolean): string {
+  createOptionCommand(name: string, value: unknown): string {
+    if (
+      typeof value !== "string" &&
+      typeof value !== "number" &&
+      typeof value !== "boolean"
+    ) {
+      throw new TypeError(
+        "Option value must be a primitive (string, number, or boolean)",
+      );
+    }
     ProtocolValidator.assertNoInjection(name, "option name");
     ProtocolValidator.assertNoInjection(String(value), "option value");
     return `set_option ${name} ${value}`;

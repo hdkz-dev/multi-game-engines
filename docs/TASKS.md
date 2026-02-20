@@ -29,12 +29,12 @@
   - [x] **Privacy**: `truncateLog` による局面データの露出制限 (ADR-038)。
   - [x] **Type Hardening**: ブランド型階層化による `GOMove`/`ShogiMove` 等の衝突解消とキャスト廃止。
   - [x] **Reliability**: Vue ダッシュボードに SSR ガードを追加し、非同期初期化エラーを捕捉。
-- [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 
 ---
 
 ## 🔥 フェーズ 3: 第2段階・究極の最適化 (進行中)
 
+- [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 - [ ] **WASM Integration**: 各エンジンの実 WASM バイナリ統合と SRI ハッシュの確定。
   - [ ] Stockfish (Chess)
   - [ ] やねうら王 (Shogi)

@@ -7,7 +7,6 @@ import {
   ResourceMap,
   IEngineConfig,
   IEngineSourceConfig,
-  IEngineAdapter,
 } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,
@@ -114,21 +113,16 @@ export class UCIAdapter extends BaseAdapter<
 
       this.emitStatusChange("ready");
     } catch (error) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }
   }
-}
-
-import { IEngine, EngineFacade } from "@multi-game-engines/core";
-
-/**
- * 2026 Zenith Tier: 汎用 UCI エンジンのファクトリ関数。
- * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
- */
-export function createUCIEngine(
-  config: IEngineConfig,
-): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  const adapter = new UCIAdapter(config);
-  return new EngineFacade(adapter);
 }

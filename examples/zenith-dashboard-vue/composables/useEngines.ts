@@ -33,18 +33,35 @@ export function getBridge(): EngineBridge | null {
     bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
 
     // 2026 Zenith Tier: デフォルトアダプターの登録
-    Promise.all([
-      bridge.registerAdapter(new StockfishAdapter()),
-      bridge.registerAdapter(new YaneuraouAdapter()),
-    ])
-      .then(() => {
+    const adapters = [
+      { name: "Stockfish", adapter: new StockfishAdapter() },
+      { name: "Yaneuraou", adapter: new YaneuraouAdapter() },
+    ];
+
+    let successCount = 0;
+    const errors: string[] = [];
+
+    Promise.all(
+      adapters.map(({ name, adapter }) =>
+        bridge!
+          .registerAdapter(adapter)
+          .then(() => {
+            successCount++;
+          })
+          .catch((e) => {
+            const msg = `Failed to register ${name} adapter: ${truncateLog(String(e))}`;
+            console.warn(`[Dashboard] ${msg}`);
+            errors.push(msg);
+          }),
+      ),
+    ).then(() => {
+      if (successCount > 0) {
         isReady.value = true;
-      })
-      .catch((e) => {
-        const msg = `Failed to register default adapters: ${truncateLog(String(e))}`;
-        console.warn(`[Dashboard] ${msg}`);
-        error.value = msg;
-      });
+      }
+      if (errors.length > 0) {
+        error.value = errors.join(" | ");
+      }
+    });
   }
   return bridge;
 }

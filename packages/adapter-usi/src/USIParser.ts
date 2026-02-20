@@ -7,6 +7,7 @@ import {
   EngineError,
   EngineErrorCode,
   ProtocolValidator,
+  truncateLog,
 } from "@multi-game-engines/core";
 import {
   SFEN,
@@ -66,7 +67,7 @@ export class USIParser implements IProtocolParser<
   parseInfo(data: string | Record<string, unknown>): IShogiSearchInfo | null {
     if (typeof data !== "string") return null;
 
-    if (!data.startsWith("info")) return null;
+    if (!data.startsWith("info ")) return null;
 
     const info: IShogiSearchInfo = { raw: data };
     const parts = data.split(" ");
@@ -144,13 +145,14 @@ export class USIParser implements IProtocolParser<
   ): IShogiSearchResult | null {
     if (typeof data !== "string") return null;
 
-    if (!data.startsWith("bestmove")) return null;
+    if (!data.startsWith("bestmove ")) return null;
 
     const parts = data.trim().split(" ");
     if (parts.length < 2) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Unexpected bestmove format: "${data}"`,
+        message: `Unexpected bestmove format: "${truncateLog(data)}"`,
+        i18nKey: "errors.engine.unexpectedBestmoveFormat",
       });
     }
 
@@ -164,7 +166,11 @@ export class USIParser implements IProtocolParser<
 
     const ponderIdx = parts.indexOf("ponder");
     if (ponderIdx !== -1 && ponderIdx + 1 < parts.length) {
-      result.ponder = createShogiMove(parts[ponderIdx + 1]!);
+      try {
+        result.ponder = createShogiMove(parts[ponderIdx + 1]!);
+      } catch {
+        // Ignore invalid ponder move
+      }
     }
 
     return result;

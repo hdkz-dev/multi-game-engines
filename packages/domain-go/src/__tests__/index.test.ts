@@ -17,6 +17,8 @@ describe("Go Domain", () => {
 
   it("should normalize pass/resign", () => {
     expect(createGOMove("PASS")).toBe("pass");
+    expect(createGOMove("RESIGN")).toBe("resign");
+    expect(createGOMove("resign")).toBe("resign");
   });
 
   it("should throw on invalid coordinates", () => {

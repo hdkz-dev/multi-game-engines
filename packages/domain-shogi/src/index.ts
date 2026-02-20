@@ -29,6 +29,16 @@ export function createShogiMove(move: string): ShogiMove {
     });
   }
 
+  // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
+  if (/[\r\n\t\f\v\0]/.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: `Control characters detected in move string: "${truncateLog(move)}"`,
+      i18nKey: "errors.injection_detected",
+      i18nParams: { input: truncateLog(move) },
+    });
+  }
+
   // 2026 Best Practice: USI プロトコル仕様に準拠した厳格なケース検証 (Case-sensitive)
   // 通常の指し手: 7g7f, 8h2b+ (列: 1-9, 段: a-i)
   // 打ち手: P*3d (駒は大文字 [PLNSGRB])

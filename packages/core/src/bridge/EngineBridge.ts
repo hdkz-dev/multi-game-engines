@@ -588,12 +588,13 @@ export class EngineBridge implements IEngineBridge {
   }
 
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
+    if (typeof obj !== "object" || obj === null) return false;
+    const record = obj as Record<string, unknown>;
     return (
-      typeof obj === "object" &&
-      obj !== null &&
-      "id" in obj &&
-      "searchRaw" in obj &&
-      "parser" in obj
+      typeof record["id"] === "string" &&
+      typeof record["searchRaw"] === "function" &&
+      typeof record["parser"] === "object" &&
+      record["parser"] !== null
     );
   }
 }

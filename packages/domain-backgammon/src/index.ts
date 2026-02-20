@@ -11,6 +11,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  truncateLog,
 } from "@multi-game-engines/core";
 
 /**
@@ -43,7 +44,7 @@ export function createBackgammonMove(move: string): BackgammonMove {
   if (!bgRegex.test(move)) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid backgammon move format: "${move}"`,
+      message: `Invalid backgammon move format: "${truncateLog(move)}"`,
       i18nKey: "errors.invalid_backgammon_move",
     });
   }

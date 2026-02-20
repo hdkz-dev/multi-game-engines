@@ -6,7 +6,6 @@ import {
   IEngineConfig,
   IEngineSourceConfig,
   EngineErrorCode,
-  IEngine,
 } from "@multi-game-engines/core";
 import {
   IMahjongSearchOptions,
@@ -79,23 +78,18 @@ export class MortalAdapter extends BaseAdapter<
 
       this.emitStatusChange("ready");
     } catch (error) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }
   }
-}
-
-import { EngineFacade } from "@multi-game-engines/core";
-
-/**
- * 2026 Zenith Tier: Mortal エンジンのファクトリ関数。
- * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
- */
-export function createMortalEngine(
-  config: IEngineConfig,
-): IEngine<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
-  const adapter = new MortalAdapter(config);
-  return new EngineFacade(adapter);
 }
 
 /**

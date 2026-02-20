@@ -1,4 +1,4 @@
-import { EngineBridge } from "@multi-game-engines/core";
+import { EngineBridge, truncateLog } from "@multi-game-engines/core";
 import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
 import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
 import { createUCIEngine } from "@multi-game-engines/adapter-uci";
@@ -30,14 +30,12 @@ export function getBridge() {
     // デフォルトアダプターの登録
     bridge.registerAdapter(new StockfishAdapter()).catch((err) => {
       console.error(
-        "[EngineBridge] StockfishAdapter の登録に失敗しました:",
-        err,
+        `[EngineBridge] StockfishAdapter の登録に失敗しました: ${truncateLog(String(err))}`,
       );
     });
     bridge.registerAdapter(new YaneuraouAdapter()).catch((err) => {
       console.error(
-        "[EngineBridge] YaneuraouAdapter の登録に失敗しました:",
-        err,
+        `[EngineBridge] YaneuraouAdapter の登録に失敗しました: ${truncateLog(String(err))}`,
       );
     });
   }
