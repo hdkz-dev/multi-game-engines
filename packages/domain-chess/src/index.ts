@@ -42,7 +42,7 @@ export interface ParsedFEN {
 export function createFEN(pos: string): FEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid FEN: Input must be a non-empty string.",
     });
   }
@@ -52,7 +52,7 @@ export function createFEN(pos: string): FEN {
   }
   if (!/^[0-9a-hRNBQKPpnbrqkw/ -]+$/.test(trimmedPos)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid FEN: Illegal characters detected.",
       remediation:
         "FEN should only contain digits [0-9], files [a-h], pieces [rnbqkpRNBQKP], active color [wb], '/', ' ', and '-'.",
@@ -61,7 +61,7 @@ export function createFEN(pos: string): FEN {
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 6) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN structure: Expected 6 fields, found ${fields.length}`,
     });
   }
@@ -69,7 +69,7 @@ export function createFEN(pos: string): FEN {
   // 2nd field: Active color (w or b)
   if (!/^[wb]$/.test(fields[1]!)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN turn: Expected "w" or "b", found "${fields[1]}"`,
     });
   }
@@ -77,7 +77,7 @@ export function createFEN(pos: string): FEN {
   // 4th field: En passant target square (- or a-h3/a-h6)
   if (!/^(?:-|[a-h][36])$/.test(fields[3]!)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN en passant: "${fields[3]}"`,
     });
   }
@@ -85,7 +85,7 @@ export function createFEN(pos: string): FEN {
   // 3rd field: Castling rights (K, Q, k, q or -)
   if (!/^(?:K?Q?k?q?|-)$/.test(fields[2]!) || fields[2] === "") {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN castling rights: "${fields[2]}"`,
     });
   }
@@ -94,7 +94,7 @@ export function createFEN(pos: string): FEN {
   const halfmove = Number(fields[4]!);
   if (!Number.isInteger(halfmove) || halfmove < 0) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN halfmove clock: "${fields[4]}"`,
     });
   }
@@ -103,7 +103,7 @@ export function createFEN(pos: string): FEN {
   const fullmove = Number(fields[5]!);
   if (!Number.isInteger(fullmove) || fullmove < 1) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid FEN fullmove number: "${fields[5]}"`,
     });
   }

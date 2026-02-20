@@ -63,8 +63,6 @@ export class USIParser implements IProtocolParser<
   private createMove(value: string): Move | null {
     if (value === "none" || value === "(none)") return null;
     if (!USIParser.MOVE_REGEX.test(value)) return null;
-    // 2026 Best Practice: Double-validation and injection defense
-    ProtocolValidator.assertNoInjection(value, "USI Move");
     return value as Move;
   }
 

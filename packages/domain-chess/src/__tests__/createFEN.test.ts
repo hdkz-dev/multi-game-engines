@@ -15,7 +15,7 @@ describe("createFEN verification", () => {
       createFEN(fen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Illegal characters detected");
     }
   });
@@ -26,7 +26,7 @@ describe("createFEN verification", () => {
       createFEN(fen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Invalid FEN halfmove clock");
     }
   });
@@ -37,7 +37,7 @@ describe("createFEN verification", () => {
       createFEN(fen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Invalid FEN fullmove number");
     }
   });

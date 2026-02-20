@@ -22,7 +22,7 @@ describe("createSFEN verification", () => {
       createSFEN(sfen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Illegal characters detected");
     }
   });
@@ -34,7 +34,7 @@ describe("createSFEN verification", () => {
       createSFEN(sfen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Invalid SFEN structure");
     }
   });
@@ -46,7 +46,7 @@ describe("createSFEN verification", () => {
       createSFEN(sfen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
       expect(err.message).toContain("Invalid SFEN move counter");
     }
   });

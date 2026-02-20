@@ -80,8 +80,6 @@ export class UCIParser implements IProtocolParser<
    */
   private createMove(value: string): Move | null {
     if (!UCIParser.MOVE_REGEX.test(value)) return null;
-    // 2026 Best Practice: Double-validation and injection defense
-    ProtocolValidator.assertNoInjection(value, "UCI Move");
     return value as Move;
   }
 

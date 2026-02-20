@@ -524,11 +524,8 @@ export class EngineBridge implements IEngineBridge {
       const id = a.id;
       await a.dispose();
       // 2026 Best Practice: ローダー経由でリソース (Blob URL) を明示的に解放
-      try {
-        const loader = await this.getLoader();
-        loader.revokeByEngineId(id);
-      } catch {
-        // ローダーが取得できない場合はスキップ
+      if (this.loader) {
+        this.loader.revokeByEngineId(id);
       }
     });
     await Promise.all(promises);
