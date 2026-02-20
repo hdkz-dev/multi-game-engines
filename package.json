@@ -5,6 +5,7 @@
   "description": "A bridge library for various game engines with a plugin-based architecture.",
   "workspaces": [
     "packages/*",
+    "examples/*",
     "infrastructure/cdn/cloudflare"
   ],
   "packageManager": "pnpm@10.28.2",

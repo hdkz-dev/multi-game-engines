@@ -67,7 +67,7 @@
 ### B-1. 全アダプター SRI ダミーハッシュの可視化
 
 - [x] **TASKS.md を修正**: `adapter-edax` のみの記載を**全5アダプター（9箇所）**に拡張。
-- [ ] SRI ハッシュ刷新を Phase 3 のブロッカーとして明記。
+- [x] SRI ハッシュ刷新を Phase 3 のブロッカーとして明記。
 - **対象**:
   - `adapter-stockfish`: `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`（2箇所）
   - `adapter-yaneuraou`: `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder`（3箇所）
@@ -77,16 +77,18 @@
 
 ### B-2. README の一括作成
 
-- [ ] 以下の20パッケージに、パッケージ名・目的・エクスポート一覧・使用例を含む README.md を作成：
+- [x] 以下の20パッケージに、パッケージ名・目的・エクスポート一覧・使用例を含む README.md を作成：
   - `adapter-gtp`, `adapter-uci`, `adapter-usi`
   - `domain-chess`, `domain-go`, `domain-mahjong`, `domain-reversi`, `domain-shogi`
   - `ui-chess-elements`, `ui-chess-react`, `ui-chess-vue`, `ui-chess`
   - `ui-shogi-elements`, `ui-shogi-react`, `ui-shogi-vue`, `ui-shogi`
   - `ui-react-core`, `ui-react-monitor`, `ui-vue-core`, `ui-vue-monitor`
+  - ✅ **完了** (2026-02-20)
 
 ### B-3. pnpm-workspace.yaml と package.json の整合
 
-- [ ] ルート `package.json` の `workspaces` に `"examples/*"` を追加し、`pnpm-workspace.yaml` と一致させる。
+- [x] ルート `package.json` の `workspaces` に `"examples/*"` を追加し、`pnpm-workspace.yaml` と一致させる。
+  - ✅ **完了** (2026-02-20)
 
 ### B-4. ADR 欠番の整理
 
@@ -98,8 +100,9 @@
 
 > 2026-02-20 フォローアップレビューで発見。
 
-- [ ] `.github/dependabot.yml` を作成し、npm 依存関係の自動更新を有効化。
-- [ ] GitHub Security Alerts に脆弱性2件（1 high, 1 moderate）が報告されている。
+- [x] `.github/dependabot.yml` を作成し、npm 依存関係の自動更新を有効化。
+- [x] GitHub Security Alerts に脆弱性2件（1 high, 1 moderate）が報告されていることを確認。
+  - ✅ **完了** (2026-02-20)
 
 ---
 
@@ -142,13 +145,15 @@
 
 > 2026-02-20 フォローアップレビューで発見。
 
-- [ ] `packages/i18n/package.json` に `"typecheck": "tsc --noEmit"` を追加。`turbo typecheck` でスキップされる問題を解消。
+- [x] `packages/i18n/package.json` に `"typecheck": "tsc --noEmit"` を追加。`turbo typecheck` でスキップされる問題を解消。
+  - ✅ **完了** (2026-02-20)
 
 ### C-8. `main`/`types` フィールドの追加
 
 > 2026-02-20 フォローアップレビューで発見。
 
-- [ ] 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` および `types` フィールドを追加。
+- [x] 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` および `types` フィールドを追加。
+  - ✅ **完了** (2026-02-20)
 - [ ] `exports` のみで ESM は問題ないが、CJS 互換性と一部ビルドツールの対応のため。
 
 ---
