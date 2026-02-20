@@ -39,12 +39,22 @@ export class KingsRowParser implements IProtocolParser<
     data: string | Record<string, unknown>,
   ): ICheckersSearchResult | null {
     if (typeof data === "string") {
-      // 例: "bestmove: 11-15 (eval: 0.12)"
-      const match = data.match(/bestmove: ([\d-]+) \(eval: ([-.\d]+)\)/);
+      // 2026 Best Practice: 多様な bestmove 形式に対応
+      // 形式1: "bestmove: 11-15 (eval: 0.12)"
+      // 形式2: "bestmove: 11-15"
+      // 形式3: "bestmove: (none)"
+      if (data.includes("bestmove: (none)")) {
+        return {
+          bestMove: createMove<"CheckersMove">("(none)"),
+          raw: data,
+        };
+      }
+
+      const match = data.match(/bestmove: ([\d-]+)(?: \(eval: ([-.\d]+)\))?/);
       if (match) {
         return {
           bestMove: createMove<"CheckersMove">(match[1]!),
-          eval: parseFloat(match[2]!),
+          eval: match[2] ? parseFloat(match[2]) : undefined,
           raw: data,
         };
       }

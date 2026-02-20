@@ -167,8 +167,22 @@ export class USIParser implements IProtocolParser<
 
     let goCmd = "go";
     if (options.ponder) goCmd += " ponder";
-    // 2026 Best Practice: 時間制限や探索深さを考慮。デフォルトは分析用無制限。
-    goCmd += " infinite";
+
+    // 2026 Best Practice: 各種制限パラメータの構築
+    const limits: string[] = [];
+    if (options.depth !== undefined) limits.push(`depth ${options.depth}`);
+    if (options.nodes !== undefined) limits.push(`nodes ${options.nodes}`);
+    if (options.time !== undefined)
+      limits.push(`btime ${options.time} wtime ${options.time}`);
+    if (options.movetime !== undefined)
+      limits.push(`movetime ${options.movetime}`);
+
+    if (limits.length > 0) {
+      goCmd += " " + limits.join(" ");
+    } else {
+      // 制限がない場合は分析用無制限
+      goCmd += " infinite";
+    }
 
     commands.push(goCmd);
     return commands;

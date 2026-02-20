@@ -1,20 +1,23 @@
 export * from "./GTPAdapter.js";
 export * from "./GTPParser.js";
 import { GTPAdapter } from "./GTPAdapter.js";
-import { IEngineConfig, IEngineAdapter } from "@multi-game-engines/core";
+import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
 import {
   IGoSearchOptions,
   IGoSearchInfo,
   IGoSearchResult,
 } from "./GTPParser.js";
 
-export function createGTPAdapter(
+/**
+ * 2026 Zenith Tier: GTP エンジンのファクトリ関数。
+ * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
+ */
+export function createGTPEngine(
   config: IEngineConfig,
-): IEngineAdapter<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
-  return new GTPAdapter(config);
+): IEngine<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
+  const adapter = new GTPAdapter(config);
+  return new EngineFacade(adapter);
 }
-
-import { IEngine } from "@multi-game-engines/core";
 
 // 2026 Best Practice: 宣言併合によるグローバル型安全性の提供
 declare module "@multi-game-engines/core" {

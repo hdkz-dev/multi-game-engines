@@ -239,6 +239,14 @@ export class EngineFacade<
     return () => this.telemetryListeners.delete(callback);
   }
 
+  /**
+   * 基盤レイヤー専用: 内部アダプターを取得します。
+   * @internal
+   */
+  getInternalAdapter(): IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
+    return this.adapter;
+  }
+
   emitTelemetry(telemetry: EngineTelemetry): void {
     this.adapter.emitTelemetry(telemetry);
   }

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
-import { SFEN } from "@multi-game-engines/domain-shogi";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
 
 describe("USIParser", () => {
   beforeAll(() => {
@@ -44,16 +44,32 @@ describe("USIParser", () => {
 
   describe("createSearchCommand", () => {
     it("should create valid search command with SFEN", () => {
-      const sfen =
-        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as SFEN;
+      const sfen = createSFEN(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+      );
       const commands = parser.createSearchCommand({ sfen });
-      // Default is now "go infinite"
       expect(commands).toEqual([`position sfen ${sfen}`, "go infinite"]);
+    });
+
+    it("should create search command with limits", () => {
+      const sfen = createSFEN(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+      );
+      const commands = parser.createSearchCommand({
+        sfen,
+        depth: 15,
+        time: 1000,
+      });
+      expect(commands).toEqual([
+        `position sfen ${sfen}`,
+        "go depth 15 btime 1000 wtime 1000",
+      ]);
     });
 
     it("should throw error for injection in SFEN", () => {
       expect(() =>
-        parser.createSearchCommand({ sfen: "startpos\nquit" as SFEN }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        parser.createSearchCommand({ sfen: "startpos\nquit" as any }),
       ).toThrow(/Potential command injection/);
     });
   });

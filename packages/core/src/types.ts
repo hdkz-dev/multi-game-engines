@@ -472,7 +472,9 @@ export interface IEngineBridge {
     R extends IBaseSearchResult = IBaseSearchResult,
   >(
     type: string,
-    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+    factory: (
+      config: IEngineConfig,
+    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
   ): void;
 
   unregisterAdapter(id: string): Promise<void>;

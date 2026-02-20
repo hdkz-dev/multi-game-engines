@@ -2,7 +2,13 @@
  * 2026 Zenith Tier: Backgammon Domain Implementation.
  */
 
-import { Brand, Move, createMove } from "@multi-game-engines/core";
+import {
+  Brand,
+  Move,
+  createMove,
+  EngineError,
+  EngineErrorCode,
+} from "@multi-game-engines/core";
 
 /**
  * バックギャモンの盤面表現。
@@ -19,10 +25,14 @@ export type BackgammonMove = Move<"BackgammonMove">;
  * バックギャモン指し手バリデータファクトリ。
  */
 export function createBackgammonMove(move: string): BackgammonMove {
-  // バックギャモン記法のバリデーション（簡易的な例）
-  if (!/^(\d+\/\d+)(\s+\d+\/\d+)*$/.test(move)) {
-    // 記法が特殊なため createMove のベースチェックをバイパスするか検討が必要ですが、
-    // 一旦標準バリデータを通します。
+  // 2026 Best Practice: バックギャモン記法のバリデーション
+  // bar/24, 6/off, 24/18 などをサポート
+  const bgRegex = /^((bar|\d+)\/(off|\d+))(\s+(bar|\d+)\/(off|\d+))*$/i;
+  if (!bgRegex.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid backgammon move format: "${move}"`,
+    });
   }
   return createMove<"BackgammonMove">(move);
 }

@@ -37,7 +37,7 @@ class MockWorker {
 }
 
 describe("StockfishAdapter", () => {
-  const mockLoader = {
+  const mockLoader: IEngineLoader = {
     loadResource: vi.fn().mockResolvedValue("blob:mock"),
     loadResources: vi.fn().mockResolvedValue({ main: "blob:mock" }),
     revoke: vi.fn(),
@@ -68,7 +68,7 @@ describe("StockfishAdapter", () => {
 
   it("should change status correctly on load", async () => {
     const adapter = new StockfishAdapter();
-    await adapter.load(mockLoader as unknown as IEngineLoader);
+    await adapter.load(mockLoader);
     expect(adapter.status).toBe("ready");
   });
 });

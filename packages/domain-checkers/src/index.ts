@@ -7,6 +7,7 @@ import {
   Move,
   createMove,
   createPositionString,
+  ProtocolValidator,
 } from "@multi-game-engines/core";
 
 /**
@@ -18,7 +19,9 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
  * チェッカー盤面データのバリデータファクトリ。
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
-  return createPositionString<"CheckersBoard">(pos) as CheckersBoard;
+  // 2026 Best Practice: 局面データに対するインジェクション対策を徹底
+  ProtocolValidator.assertNoInjection(pos, "CheckersBoard", true);
+  return createPositionString<"CheckersBoard">(pos);
 }
 
 /**
@@ -46,8 +49,8 @@ export interface ICheckersSearchOptions {
  * 探索状況。
  */
 export interface ICheckersSearchInfo {
-  eval: number;
-  depth: number;
+  eval?: number;
+  depth?: number;
   pv?: CheckersMove[];
   nodes?: number;
   nps?: number;
@@ -61,7 +64,7 @@ export interface ICheckersSearchInfo {
  */
 export interface ICheckersSearchResult {
   bestMove: CheckersMove;
-  eval: number;
+  eval?: number;
   raw?: string | Record<string, unknown>;
   [key: string]: unknown;
 }

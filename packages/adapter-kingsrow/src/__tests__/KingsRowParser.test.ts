@@ -18,6 +18,19 @@ describe("KingsRowParser", () => {
     expect(result?.eval).toBe(0.12);
   });
 
+  it("should handle bestmove (none) correctly", () => {
+    const parser = new KingsRowParser();
+    const result = parser.parseResult("bestmove: (none)");
+    expect(result?.bestMove).toBe("(none)");
+  });
+
+  it("should handle bestmove without eval correctly", () => {
+    const parser = new KingsRowParser();
+    const result = parser.parseResult("bestmove: 11-15");
+    expect(result?.bestMove).toBe("11-15");
+    expect(result?.eval).toBeUndefined();
+  });
+
   it("should return null for malformed strings", () => {
     const parser = new KingsRowParser();
     expect(parser.parseInfo("invalid")).toBeNull();
@@ -33,5 +46,6 @@ describe("KingsRowParser", () => {
   it("should throw on injection in options", () => {
     const parser = new KingsRowParser();
     expect(() => parser.createOptionCommand("name", "val\nstop")).toThrow();
+    expect(() => parser.createOptionCommand("name\nstop", "val")).toThrow();
   });
 });

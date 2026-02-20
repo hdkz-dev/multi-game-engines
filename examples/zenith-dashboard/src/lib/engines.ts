@@ -3,11 +3,11 @@ import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
 import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
 import { createUCIAdapter } from "@multi-game-engines/adapter-uci";
 import { createUSIAdapter } from "@multi-game-engines/adapter-usi";
-import { createGTPAdapter } from "@multi-game-engines/adapter-gtp";
+import { createGTPEngine } from "@multi-game-engines/adapter-gtp";
 import { createEdaxAdapter } from "@multi-game-engines/adapter-edax";
-import { createMortalAdapter } from "@multi-game-engines/adapter-mortal";
+import { createMortalEngine } from "@multi-game-engines/adapter-mortal";
 import { createGNUBGAdapter } from "@multi-game-engines/adapter-gnubg";
-import { createKingsRowAdapter } from "@multi-game-engines/adapter-kingsrow";
+import { createKingsRowEngine } from "@multi-game-engines/adapter-kingsrow";
 
 let bridge: EngineBridge | null = null;
 
@@ -21,11 +21,11 @@ export function getBridge() {
     // これにより、IEngineConfig を渡すだけで動的にエンジンを生成可能になります
     bridge.registerAdapterFactory("uci", createUCIAdapter);
     bridge.registerAdapterFactory("usi", createUSIAdapter);
-    bridge.registerAdapterFactory("gtp", createGTPAdapter);
+    bridge.registerAdapterFactory("gtp", createGTPEngine);
     bridge.registerAdapterFactory("edax", createEdaxAdapter);
-    bridge.registerAdapterFactory("mortal", createMortalAdapter);
+    bridge.registerAdapterFactory("mortal", createMortalEngine);
     bridge.registerAdapterFactory("gnubg", createGNUBGAdapter);
-    bridge.registerAdapterFactory("kingsrow", createKingsRowAdapter);
+    bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
 
     // デフォルトアダプターの登録
     void bridge.registerAdapter(new StockfishAdapter());

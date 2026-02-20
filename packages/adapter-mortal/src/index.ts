@@ -1,8 +1,4 @@
-import {
-  IEngineConfig,
-  IEngineAdapter,
-  IEngine,
-} from "@multi-game-engines/core";
+import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
 import {
   IMahjongSearchOptions,
   IMahjongSearchInfo,
@@ -14,16 +10,14 @@ export * from "./mortal.js";
 export * from "./MahjongJSONParser.js";
 
 /**
- * 2026 Zenith Tier: Mortal アダプターのファクトリ関数。
+ * 2026 Zenith Tier: Mortal エンジンのファクトリ関数。
+ * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
  */
-export function createMortalAdapter(
+export function createMortalEngine(
   config: IEngineConfig,
-): IEngineAdapter<
-  IMahjongSearchOptions,
-  IMahjongSearchInfo,
-  IMahjongSearchResult
-> {
-  return new MortalAdapter(config);
+): IEngine<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
+  const adapter = new MortalAdapter(config);
+  return new EngineFacade(adapter);
 }
 
 // 2026 Best Practice: 宣言併合によるグローバル型安全性の提供

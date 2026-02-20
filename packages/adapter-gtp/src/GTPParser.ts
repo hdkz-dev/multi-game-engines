@@ -61,7 +61,7 @@ export class GTPParser implements IProtocolParser<
           pv:
             Array.isArray(data.pv) && data.pv.length > 0
               ? data.pv
-                  .filter((m): m is string => typeof m === "string")
+                  .filter((m): m is string => typeof m === "string" && !!m)
                   .map((m) => createGOMove(m.toLowerCase()))
               : undefined,
           raw: data,
@@ -101,12 +101,15 @@ export class GTPParser implements IProtocolParser<
     const commands: string[] = [];
     if (options.board) {
       ProtocolValidator.assertNoInjection(options.board, "board data", true);
+      // 2026 Best Practice: 局面データが存在する場合、エンジンに反映
+      commands.push(`loadsgf ${options.board}`);
     }
     if (options.size !== undefined) commands.push(`boardsize ${options.size}`);
     if (options.komi !== undefined) commands.push(`komi ${options.komi}`);
 
     // KataGo 分析モードの開始
-    commands.push("kata-analyze interval 100");
+    const interval = Number(options.kataInterval) || 100;
+    commands.push(`kata-analyze interval ${interval}`);
 
     return commands;
   }

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { UCIParser } from "../UCIParser.js";
-import { FEN } from "@multi-game-engines/domain-chess";
+import { createFEN } from "@multi-game-engines/domain-chess";
 
 describe("UCIParser", () => {
   beforeAll(() => {
@@ -54,15 +54,17 @@ describe("UCIParser", () => {
 
   describe("createSearchCommand", () => {
     it("should create valid search command with FEN", () => {
-      const fen =
-        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
+      const fen = createFEN(
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      );
       const commands = parser.createSearchCommand({ fen, depth: 10 });
       expect(commands).toEqual([`position fen ${fen}`, "go depth 10"]);
     });
 
     it("should throw error for injection in FEN", () => {
       expect(() =>
-        parser.createSearchCommand({ fen: "startpos\nquit" as FEN }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        parser.createSearchCommand({ fen: "startpos\nquit" as any }),
       ).toThrow(/Potential command injection/);
     });
   });

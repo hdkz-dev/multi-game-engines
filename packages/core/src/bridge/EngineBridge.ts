@@ -38,7 +38,9 @@ export class EngineBridge implements IEngineBridge {
     string,
     (
       config: IEngineConfig,
-    ) => IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -97,17 +99,17 @@ export class EngineBridge implements IEngineBridge {
     R extends IBaseSearchResult,
   >(
     type: string,
-    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+    factory: (
+      config: IEngineConfig,
+    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
   ): void {
     this.adapterFactories.set(
       type,
       factory as (
         config: IEngineConfig,
-      ) => IEngineAdapter<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
+      ) =>
+        | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+        | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
     );
   }
 
@@ -281,7 +283,23 @@ export class EngineBridge implements IEngineBridge {
         if (!adapter && typeof idOrConfig !== "string") {
           const factory = this.adapterFactories.get(idOrConfig.adapter);
           if (factory) {
-            const newAdapter = factory(idOrConfig);
+            const result = factory(idOrConfig);
+            // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
+            const newAdapter =
+              result instanceof EngineFacade
+                ? (
+                    result as EngineFacade<
+                      IBaseSearchOptions,
+                      IBaseSearchInfo,
+                      IBaseSearchResult
+                    >
+                  ).getInternalAdapter()
+                : (result as IEngineAdapter<
+                    IBaseSearchOptions,
+                    IBaseSearchInfo,
+                    IBaseSearchResult
+                  >);
+
             // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
             await this.registerAdapter(newAdapter);
             newlyRegistered = true;
