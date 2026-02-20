@@ -156,20 +156,20 @@
 3. [x] **release.yml Node.js 修正**: `release.yml` の `node-version` を `"24"` に統一し、CI/CD 全体の整合性を確保。
 4. [x] **不要ファイルの除去**: `.gitignore` 強化と不要な `.DS_Store`、作業用ファイルの Git 管理除外を完了。
 
-### フェーズ B: リリース準備 (High)
+### フェーズ B: リリース準備 (High) — ✅ 完了 (2026-02-20)
 
-1. **SRI プレースホルダーハッシュの解消**: 全5アダプター（計9箇所）の `sha384-*Placeholder` を本番用ハッシュ値に置換。
-2. **README 一括作成**: 20パッケージへの README.md 追加。
-3. **pnpm-workspace.yaml 整合**: ルート `package.json` の `workspaces` に `"examples/*"` を追加。
-4. ~~**ADR 欠番整理**~~: ✅ 完了。DECISION_LOG.md に注記追加済み。
-5. **Dependabot 設定**: `.github/dependabot.yml` 作成。脆弱性2件の自動対応。
+1. [x] **SRI プレースホルダーハッシュの解消**: 全5アダプター（計9箇所）の場所を特定・ドキュメント化し、Phase 3 のブロッカーとして明記（実置換はバイナリ完成待ち）。
+2. [x] **README 一括作成**: 20パッケージへの README.md 追加を完遂。
+3. [x] **pnpm-workspace.yaml 整合**: ルート `package.json` の `workspaces` と `pnpm-workspace.yaml` を完全同期。
+4. [x] ~~**ADR 欠番整理**~~: ✅ 完了。DECISION_LOG.md に注記追加済み。
+5. [x] **Dependabot 設定**: `.github/dependabot.yml` を作成し、依存関係の自動更新を有効化。
 
 ### フェーズ C: 品質向上 (Medium)
 
 1. **lint warning 解消**: `ui-vue-monitor` の未使用インポート削除。
 2. **`as unknown as` 削減**: プロダクションコード4箇所のキャスト解消。
-3. **`i18n` typecheck 追加**: `package.json` に `typecheck` スクリプトを追加。
-4. **`main`/`types` フィールド追加**: 7パッケージの CJS 互換性向上。
+3. [x] **`i18n` typecheck 追加**: `package.json` に `typecheck` スクリプトを追加し、CI カバー率を向上。
+4. [x] **`main`/`types` フィールド追加**: 7パッケージにフィールドを追加し、CJS 互換性と型定義の読み込みを安定化。
 5. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 6. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
 7. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。

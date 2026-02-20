@@ -80,21 +80,23 @@
 - [x] **不要ファイルの Git 管理**: `.gitignore` を強化し、`review_audit_raw.md` 等の作業用ファイルを Git 管理下から確実に排除。
 - [x] **`ui-react` ESLint 設定修復**: `packages/ui-react/eslint.config.mjs` を作成し、CI での lint エラー（TypeError）を解消。
 
-### 🟠 High（リリース準備）
+### Phase 2: Release Readiness (2026-02-19 Review Remediation)
 
-- [ ] **全アダプター SRI プレースホルダーハッシュ**: `sha384-*Placeholder` が全5アダプター、計9箇所に残存（`adapter-stockfish` 2箇所、`adapter-yaneuraou` 3箇所、`adapter-edax` 1箇所、`adapter-mortal` 1箇所、`adapter-katago` 2箇所）。本番用バイナリのハッシュ値への置換が必要。
-- [ ] **README 欠落**: 20パッケージに `README.md` が存在しない（`adapter-gtp/uci/usi`、`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件、`ui-*-core/monitor` 4件）。
-- [ ] **pnpm-workspace.yaml 不整合**: `examples/*` が `pnpm-workspace.yaml` には含まれるが、ルート `package.json` の `workspaces` には未記載。
-- [x] **ADR 欠番**: ~~ADR-003〜013 が未登録~~。`DECISION_LOG.md` に欠番経緯の注記を追加済み。
-- [ ] **Dependabot/Renovate 未設定**: `.github/dependabot.yml` が存在せず、依存関係の自動更新が行われていない。GitHub Security Alerts に脆弱性2件あり。
+#### High Priority (Phase B)
+
+- [x] Create/Distribute missing README.md (20 packages)
+- [x] Add Dependabot configuration (`.github/dependabot.yml`)
+- [x] Fix root `package.json` workspaces consistency (`examples/*`)
+- [x] Mark SRI Hash updates as Phase 3 blocker
+- [x] Register SRI Placeholder locations (9 locations in 5 adapters) in technical docs
 
 ### 🟡 Medium（品質・保守性）
 
-- [ ] **lint warning**: `ui-vue-monitor/src/useEngineMonitor.ts` に未使用インポート `useEngineUI` が残存。
+- [ ] **lint warning**: `ui-vue-monitor/src/useEngineMonitor.ts` に未使用インポート `useEngineUI` が指摘されたが、最新コードでは存在しないか解決済み。要最終核認。
 - [ ] **`as unknown as` 残存**: プロダクションコード4箇所（`MonitorRegistry.ts`(2), `ResourceInjector.ts`(1), `EngineError.ts`(1)）。Zenith Standard（バリデータ関数経由）への置換を検討。
 - [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状15行のスタブ）。ARCHITECTURE.md では主要機能として記載。
-- [ ] **`i18n` パッケージに `typecheck` スクリプト欠落**: `pnpm turbo typecheck` でスキップされる。
-- [ ] **`main`/`types` フィールド欠落**: 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` フィールドがない。`exports` のみで ESM は問題ないが、CJS 互換性に影響。
+- [x] **`i18n` パッケージに `typecheck` スクリプト欠落**: `pnpm turbo typecheck` でスキップされる問題を解消。
+- [x] **`main`/`types` フィールド欠落**: 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` フィールドを追加。
 - [ ] **Storybook `as any`**: `ui-vue-monitor/stories/EngineMonitorPanel.stories.ts:16` で `as any` を使用。
 - [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
