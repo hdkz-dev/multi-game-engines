@@ -149,12 +149,12 @@
 
 > 2026-02-20 更新。2026-02-19 全体レビュー + 2026-02-20 フォローアップレビューの結果を統合。詳細は [実装計画書](implementation_plans/project-review-improvements.md) を参照。
 
-### フェーズ A: 即時対応 (Critical)
+### フェーズ A: 即時対応 (Critical) — ✅ 完了 (2026-02-20)
 
-1. **`ui-react` ESLint 設定修復**: `eslint.config.mjs` 欠落による CI lint 失敗の解消。
-2. **LICENSE ファイル整備**: ルートに MIT LICENSE を作成し、13パッケージの `license` フィールド欠落を解消。
-3. **release.yml Node.js 修正**: `release.yml` の `node-version` を `"22"` → `"24"` に修正し、CI/CD 全体の整合性を確保。
-4. **不要ファイルの除去**: `.gitignore` パターン追加 + `git rm --cached` で7ファイルを Git 管理から除外。
+1. [x] **`ui-react` ESLint 設定修復**: `eslint.config.mjs` を作成し、CI/CD パイプラインを正常化。
+2. [x] **LICENSE 整備**: ルート LICENSE 作成、全31パッケージへの LICENSE 配布、および `license` フィールド追加を完了。
+3. [x] **release.yml Node.js 修正**: `release.yml` の `node-version` を `"24"` に統一し、CI/CD 全体の整合性を確保。
+4. [x] **不要ファイルの除去**: `.gitignore` 強化と不要な `.DS_Store`、作業用ファイルの Git 管理除外を完了。
 
 ### フェーズ B: リリース準備 (High)
 
@@ -173,4 +173,4 @@
 5. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 6. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
 7. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。
-8. **.DS_Store のGit管理除外**: `git rm --cached` で既存の `.DS_Store` ファイルを除外。
+8. ~~**.DS_Store のGit管理除外**~~: ✅ 完了。物理除去とGit除外を完遂。

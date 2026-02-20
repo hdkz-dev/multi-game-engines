@@ -1,6 +1,7 @@
 {
   "name": "@multi-game-engines/ui-chess-react",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Domain-specific Chess UI components for React",
   "type": "module",
   "main": "./dist/index.js",

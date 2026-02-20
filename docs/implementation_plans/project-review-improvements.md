@@ -21,21 +21,21 @@
 
 ### A-1. ルート LICENSE ファイルの作成
 
-- [ ] ルートに MIT ライセンスの `LICENSE` ファイルを作成。
-- [ ] 各パッケージディレクトリ（30パッケージ）に `LICENSE` ファイルをコピーし、物理的な欠落を解消。
-- [ ] `package.json` に `"license": "MIT"` フィールドが明記されていないパッケージ（13件）への追加：
+- [x] ルートに MIT ライセンスの `LICENSE` ファイルを作成。
+- [x] 各パッケージディレクトリ（30パッケージ）に `LICENSE` ファイルをコピーし、物理的な欠落を解消。
+- [x] `package.json` に `"license": "MIT"` フィールドが明記されていないパッケージ（13件）への追加：
   - `domain-chess`, `domain-go`, `domain-mahjong`, `domain-reversi`, `domain-shogi`
   - `ui-chess-elements`, `ui-chess-react`, `ui-chess-vue`, `ui-chess`
   - `ui-shogi-elements`, `ui-shogi-react`, `ui-shogi-vue`, `ui-shogi`
 
 ### A-2. release.yml の Node.js バージョン修正
 
-- [ ] `.github/workflows/release.yml` の `node-version` を `"22"` → `"24"` に変更。
-- [ ] `package.json` の `engines.node` (`>=24.0.0`)、`.node-version`、`.nvmrc` (`24.13.0`) との一貫性を確認。
+- [x] `.github/workflows/release.yml` の `node-version` を `"22"` → `"24"` に変更。
+- [x] `package.json` の `engines.node` (`>=24.0.0`)、`.node-version`、`.nvmrc` (`24.13.0`) との一貫性を確認。
 
 ### A-3. 不要ファイルの除去と .gitignore 更新
 
-- [ ] `.gitignore` に以下のパターンを追加：
+- [x] `.gitignore` に以下のパターンを追加：
 
   ```text
   review_audit_raw.md
@@ -45,9 +45,12 @@
   opencode_test.txt
   ```
 
-- [ ] `git rm --cached` でこれらのファイルをGit管理から除外。
+- [x] `git rm --cached` でこれらのファイルをGit管理から除外。
+- [x] `.DS_Store` などの不要ファイルを物理的に除去。
 
 ### A-4. `ui-react` ESLint 設定の修復
+
+- [x] `packages/ui-react/eslint.config.mjs` を作成し、設定を修復。
 
 > 2026-02-20 フォローアップレビューで発見。
 

@@ -1,6 +1,7 @@
 {
   "name": "@multi-game-engines/ui-chess-elements",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Domain-specific Chess Web Components (Lit)",
   "type": "module",
   "main": "./dist/index.js",

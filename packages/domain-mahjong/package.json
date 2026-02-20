@@ -1,6 +1,7 @@
 {
   "name": "@multi-game-engines/domain-mahjong",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Domain-specific Mahjong logic, types, and validation",
   "type": "module",
   "exports": {
