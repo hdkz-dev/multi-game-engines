@@ -255,6 +255,18 @@ export class EngineLoader implements IEngineLoader {
   }
 
   /**
+   * 2026 Best Practice: 特定のエンジンIDに関連付けられたすべての Blob リソースを解放します。
+   */
+  revokeByEngineId(engineId: string): void {
+    for (const [key, val] of this.activeBlobs.entries()) {
+      if (key.startsWith(`${engineId}_`)) {
+        URL.revokeObjectURL(val);
+        this.activeBlobs.delete(key);
+      }
+    }
+  }
+
+  /**
    * 2026 Best Practice: Worker 実行コンテキストのオリジン検証
    */
   private validateWorkerUrl(url: string, engineId?: string): void {

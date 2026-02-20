@@ -21,7 +21,7 @@ export const REVERSI_MOVE_REGEX = /^([a-h][1-8]|PS)$/i;
 export function createReversiMove(move: string): ReversiMove {
   if (typeof move !== "string" || !REVERSI_MOVE_REGEX.test(move)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid ReversiMove format: "${move}"`,
     });
   }
@@ -35,7 +35,7 @@ export function createReversiMove(move: string): ReversiMove {
 export function createReversiBoard(pos: string): ReversiBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid ReversiBoard: Input must be a non-empty string.",
     });
   }

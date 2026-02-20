@@ -520,7 +520,17 @@ export class EngineBridge implements IEngineBridge {
     const pendingLoader = this.loaderPromise;
     const pendingEngines = Array.from(this.pendingEngines.values());
 
-    const promises = Array.from(this.adapters.values()).map((a) => a.dispose());
+    const promises = Array.from(this.adapters.values()).map(async (a) => {
+      const id = a.id;
+      await a.dispose();
+      // 2026 Best Practice: ローダー経由でリソース (Blob URL) を明示的に解放
+      try {
+        const loader = await this.getLoader();
+        loader.revokeByEngineId(id);
+      } catch {
+        // ローダーが取得できない場合はスキップ
+      }
+    });
     await Promise.all(promises);
 
     // 2026 Best Practice: 進行中のエンジン生成とロード処理の完了を待機（または例外吸収）

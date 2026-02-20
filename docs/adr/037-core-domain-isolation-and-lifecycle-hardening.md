@@ -37,4 +37,16 @@ Zenith Tier（最高品質標準）への最終調整において、以下の課
 
 - **ポジティブ**: アーキテクチャの純粋性が高まり、新しいゲームルール（囲碁、オセロ等）の追加時に Core を変更する必要がなくなった。
 - **ポジティブ**: 非同期競合によるメモリリークや未定義挙動が構造的に解消された。
-- **ネガティブ**: ドメイン固有の型を使用する場合、Core だけでなく該当する Domain パッケージを明示的にインポートする必要がある（ただし、これは正しい依存関係である）。
+- **ネガティブ**: ドメイン固有の型を使用する場合、Core だけでなく該当する Domain パッケージを明示的にインポートする必要がある。
+
+### 5. Zenith Tier Refinements (2026 Standards)
+
+- **Environment Diagnostics**: `EnvironmentDiagnostics` を導入し、WASM Threads に必須な COOP/COEP ヘッダーの状態を検証・警告。
+- **Resource Revocation**: `EngineLoader.revokeByEngineId` を導入し、ブリッジ破棄時に Blob URL を解放。
+- **Binary Transfer Optimization**: `BaseAdapter` において `Uint8Array` コマンドの Transferable 指定によるゼロコピー通信。
+
+## 意思決定の結果 (Consequences)
+
+- **メリット**: 極めて高い安全性、予測可能なライフサイクル、最新ブラウザ機能の最大限の活用。
+- **メリット**: メモリ効率の向上。
+- **トレードオフ**: 型定義管理のコストが僅かに増加するが、堅牢性は劇的に向上する。

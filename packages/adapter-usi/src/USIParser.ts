@@ -7,6 +7,7 @@ import {
   Move,
 } from "@multi-game-engines/core";
 import { ISHOGISearchOptions } from "./usi-types.js";
+import { createSFEN } from "@multi-game-engines/domain-shogi";
 
 /** 将棋用の思考情報 (USI規格) */
 export interface ISHOGISearchInfo extends IBaseSearchInfo {
@@ -62,6 +63,8 @@ export class USIParser implements IProtocolParser<
   private createMove(value: string): Move | null {
     if (value === "none" || value === "(none)") return null;
     if (!USIParser.MOVE_REGEX.test(value)) return null;
+    // 2026 Best Practice: Double-validation and injection defense
+    ProtocolValidator.assertNoInjection(value, "USI Move");
     return value as Move;
   }
 
@@ -135,7 +138,9 @@ export class USIParser implements IProtocolParser<
             i + 1 < parts.length &&
             !USIParser.USI_INFO_TOKENS.has(parts[i + 1]!)
           ) {
-            const m = this.createMove(parts[++i]!);
+            const token = parts[++i]!;
+            ProtocolValidator.assertNoInjection(token, "USI PV Move");
+            const m = this.createMove(token);
             if (m) moves.push(m);
           }
           info.pv = moves;
@@ -195,9 +200,9 @@ export class USIParser implements IProtocolParser<
   createSearchCommand(options: ISHOGISearchOptions): string[] {
     const commands: string[] = [];
     if (options.sfen) {
-      // 2026 Best Practice: Command Injection Prevention (Refuse by Exception)
-      ProtocolValidator.assertNoInjection(options.sfen, "SFEN string");
-      commands.push(`position sfen ${options.sfen}`);
+      // 2026 Best Practice: Domain-specific structural validation + Injection defense
+      const validatedSfen = createSFEN(options.sfen);
+      commands.push(`position sfen ${validatedSfen}`);
     }
 
     let goCmd = "go";

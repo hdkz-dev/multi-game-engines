@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
 import { createSFEN, SFEN } from "@multi-game-engines/domain-shogi";
+import { EngineError } from "@multi-game-engines/core";
 
 describe("USIParser", () => {
   beforeAll(() => {
@@ -163,12 +164,16 @@ describe("USIParser", () => {
 
   describe("createSearchCommand", () => {
     it("should throw error for injection in SFEN", () => {
-      expect(() =>
+      try {
         parser.createSearchCommand({
           sfen: "startpos\nquit" as unknown as SFEN, // 意図的に不正なキャスト
           depth: 10,
-        }),
-      ).toThrow(/command injection/);
+        });
+        expect.fail("Should have thrown");
+      } catch (e) {
+        const err = e as EngineError;
+        expect(err.message).toMatch(/Illegal characters detected/);
+      }
     });
 
     it("should create valid search command with SFEN and depth", () => {

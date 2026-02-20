@@ -414,6 +414,8 @@ export interface IEngineLoader {
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>>;
+  revoke(url: string): void;
+  revokeByEngineId(engineId: string): void;
 }
 
 /**
