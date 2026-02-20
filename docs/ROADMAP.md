@@ -52,7 +52,7 @@
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
   - [ ] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
-  - [ ] 全アダプターの SRI ダミーハッシュ (`sha256-dummy*`) 刷新。
+  - [ ] 全アダプターの SRI プレースホルダーハッシュ (`sha384-*Placeholder`) を本番用ハッシュ値へ置換。
   - [ ] 20パッケージへの README.md 追加。
   - [ ] CI (`release.yml`) の Node.js バージョン不整合の修正。
 - [ ] **Extended Adapters**:

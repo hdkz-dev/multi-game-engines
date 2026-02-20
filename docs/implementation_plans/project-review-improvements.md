@@ -2,16 +2,16 @@
 
 ## 1. 目的と概要
 
-2026年2月19日に実施したプロジェクト全体の包括的レビューにおいて、以下の3カテゴリに分類される改善事項が発見された。
+2026年2月19日に実施したプロジェクト全体の包括的レビュー、および2月20日のフォローアップレビューにおいて、以下の3カテゴリに分類される改善事項が発見された。
 本計画は、これらを重大度に基づきフェーズ分けし、計画的に解消することを目的とする。
 
 ### レビュー結果サマリ
 
-| カテゴリ                                | 件数 | 内訳                                                                                 |
-| --------------------------------------- | ---- | ------------------------------------------------------------------------------------ |
-| 🔴 Critical（法的・セキュリティリスク） | 3件  | LICENSE欠落、CI不整合、不要ファイルの混入                                            |
-| 🟠 High（品質・公開準備）               | 5件  | SRIダミー、license欠落、README欠落、workspace不整合、ADR欠番                         |
-| 🟡 Medium（整合性・保守性）             | 6件  | lint warning、コードキャスト、TODO残存、英語ドキュメント、ドキュメント同期、examples |
+| カテゴリ                                | 件数 | 内訳                                                                                         |
+| --------------------------------------- | ---- | -------------------------------------------------------------------------------------------- |
+| 🔴 Critical（法的・セキュリティリスク） | 4件  | LICENSE欠落、CI不整合、不要ファイルの混入、`ui-react` ESLint 設定欠落                        |
+| 🟠 High（品質・公開準備）               | 5件  | SRIプレースホルダー、license欠落、README欠落、workspace不整合、Dependabot未設定              |
+| 🟡 Medium（整合性・保守性）             | 8件  | lint warning、コードキャスト、TODO残存、英語ドキュメント、i18n typecheck、mainフィールド欠落 |
 
 ---
 
@@ -46,6 +46,14 @@
 
 - [ ] `git rm --cached` でこれらのファイルをGit管理から除外。
 
+### A-4. `ui-react` ESLint 設定の修復
+
+> 2026-02-20 フォローアップレビューで発見。
+
+- [ ] `packages/ui-react/eslint.config.mjs` が存在せず、`pnpm run lint` が `TypeError: Cannot set properties of undefined (setting 'defaultMeta')` で失敗。
+- [ ] ルートの `eslint.config.mjs` が `projectService: true` を使用しており、`ui-react` の `tsconfig.json` が `tsconfig.base.json` を extends していることで `@eslint/eslintrc` の互換性問題が発生。
+- [ ] CI の lint チェック失敗の根本原因。**最優先対応**。
+
 ---
 
 ## 3. フェーズ B: リリース準備 (High) — パッケージメタデータの整備
@@ -57,11 +65,11 @@
 - [ ] **TASKS.md を修正**: `adapter-edax` のみの記載を**全5アダプター（9箇所）**に拡張。
 - [ ] SRI ハッシュ刷新を Phase 3 のブロッカーとして明記。
 - **対象**:
-  - `adapter-stockfish`: `sha256-dummy-main`, `sha256-dummy-wasm`（2箇所）
-  - `adapter-yaneuraou`: `sha256-dummy-main`, `sha256-dummy-wasm`, `sha256-dummy-nnue`（3箇所）
-  - `adapter-edax`: `sha256-dummy`（1箇所）
-  - `adapter-mortal`: `sha256-dummy`（1箇所）
-  - `adapter-katago`: `sha256-dummy`（2箇所）
+  - `adapter-stockfish`: `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`（2箇所）
+  - `adapter-yaneuraou`: `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder`（3箇所）
+  - `adapter-edax`: `sha384-EdaxMainScriptHashPlaceholder`（1箇所）
+  - `adapter-mortal`: `sha384-MortalMainScriptHashPlaceholder`（1箇所）
+  - `adapter-katago`: `sha384-KataGoMainScriptHashPlaceholder`, `sha384-KataGoWasmBinaryHashPlaceholder`（2箇所）
 
 ### B-2. README の一括作成
 
@@ -80,6 +88,14 @@
 
 - [ ] DECISION_LOG.md に欠番（ADR-003〜013）の注記を追加。
   - 初期設計フェーズで採番された ADR が、リファクタリングにより統合・廃止された経緯を明記。
+  - ✅ **完了** (2026-02-19)
+
+### B-5. Dependabot 設定の追加
+
+> 2026-02-20 フォローアップレビューで発見。
+
+- [ ] `.github/dependabot.yml` を作成し、npm 依存関係の自動更新を有効化。
+- [ ] GitHub Security Alerts に脆弱性2件（1 high, 1 moderate）が報告されている。
 
 ---
 
@@ -104,7 +120,8 @@
 
 ### C-4. PROGRESS.md の「次のステップ」同期
 
-- [ ] PROGRESS.md の「🚀 次のステップ」セクションを最新の TASKS.md のステータスと一致させる。
+- [x] PROGRESS.md の「🚀 次のステップ」セクションを最新の TASKS.md のステータスと一致させる。
+  - ✅ **完了** (2026-02-20)
 
 ### C-5. 英語版ドキュメントの拡充方針
 
@@ -117,13 +134,26 @@
 
 - [ ] `git rm --cached` で既存の `.DS_Store` ファイルを追跡から除外。
 
+### C-7. `i18n` パッケージの typecheck スクリプト追加
+
+> 2026-02-20 フォローアップレビューで発見。
+
+- [ ] `packages/i18n/package.json` に `"typecheck": "tsc --noEmit"` を追加。`turbo typecheck` でスキップされる問題を解消。
+
+### C-8. `main`/`types` フィールドの追加
+
+> 2026-02-20 フォローアップレビューで発見。
+
+- [ ] 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` および `types` フィールドを追加。
+- [ ] `exports` のみで ESM は問題ないが、CJS 互換性と一部ビルドツールの対応のため。
+
 ---
 
 ## 5. 影響範囲
 
-- **破壊的変更**: なし（全てメタデータ・ドキュメントの変更のみ）。
+- **破壊的変更**: なし（全てメタデータ・ドキュメント・設定の変更のみ）。
 - **パフォーマンスへの影響**: なし。
-- **CI への影響**: フェーズ A-2（release.yml の Node.js 修正）のみ CI に影響するが、修正方向は現状の不整合解消であり、安定化に寄与。
+- **CI への影響**: フェーズ A-2（release.yml）+ A-4（ESLint 設定）が CI に影響。いずれも現状の不整合解消であり、安定化に寄与。
 
 ## 6. テスト計画
 
@@ -134,3 +164,5 @@
 ## 7. 対応履歴
 
 - 2026-02-19 : プロジェクト全体レビュー実施。本計画書の策定。
+- 2026-02-20 : PR #26 レビュー対応（パッケージ数修正: license 12→13, README 19→20）。
+- 2026-02-20 : フォローアップレビュー実施。A-4, B-5, C-4(完了), C-7, C-8 を追加。SRI ハッシュ記述を実コードと統一。B-4(ADR欠番) 完了マーク。

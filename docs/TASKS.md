@@ -70,7 +70,7 @@
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
-> 2026-02-19 プロジェクト全体レビュー ([実装計画書](implementation_plans/project-review-improvements.md)) により更新。
+> 2026-02-20 更新。2026-02-19 全体レビュー ([実装計画書](implementation_plans/project-review-improvements.md)) + 2026-02-20 フォローアップレビューの結果を統合。
 
 ### 🔴 Critical（法的・CI整合性）
 
@@ -78,23 +78,28 @@
 - [ ] **license フィールド欠落**: 13パッケージ（`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件）で `package.json` に `license` フィールドがない。
 - [ ] **release.yml Node.js 不整合**: `.github/workflows/release.yml` が Node.js 22 を使用。`ci.yml` (24)、`.node-version` (24.13.0)、`package.json` (`>=24.0.0`) と不一致。
 - [ ] **不要ファイルの Git 管理**: `review_audit_raw.md`, `pr_review_comments*.json`, `pr_view.json`, `status.txt`, `opencode_test.txt` がリポジトリに混入。`.gitignore` への追加と `git rm --cached` が必要。
+- [ ] **`ui-react` ESLint 設定欠落**: `packages/ui-react/` に `eslint.config.mjs` が存在せず、`pnpm run lint` が `TypeError` で失敗。CI の lint チェック失敗の根本原因。
 
 ### 🟠 High（リリース準備）
 
-- [ ] **全アダプター SRI ダミーハッシュ**: `sha256-dummy*` が全5アダプター、計9箇所に残存（`adapter-stockfish` 2箇所、`adapter-yaneuraou` 3箇所、`adapter-edax` 1箇所、`adapter-mortal` 1箇所、`adapter-katago` 2箇所）。本番用バイナリのハッシュ値への置換が必要。
+- [ ] **全アダプター SRI プレースホルダーハッシュ**: `sha384-*Placeholder` が全5アダプター、計9箇所に残存（`adapter-stockfish` 2箇所、`adapter-yaneuraou` 3箇所、`adapter-edax` 1箇所、`adapter-mortal` 1箇所、`adapter-katago` 2箇所）。本番用バイナリのハッシュ値への置換が必要。
 - [ ] **README 欠落**: 20パッケージに `README.md` が存在しない（`adapter-gtp/uci/usi`、`domain-*` 5件、`ui-chess*` 4件、`ui-shogi*` 4件、`ui-*-core/monitor` 4件）。
 - [ ] **pnpm-workspace.yaml 不整合**: `examples/*` が `pnpm-workspace.yaml` には含まれるが、ルート `package.json` の `workspaces` には未記載。
-- [ ] **ADR 欠番**: ADR-003〜013 が未登録。初期設計フェーズからの経緯を `DECISION_LOG.md` に注記が必要。
+- [x] **ADR 欠番**: ~~ADR-003〜013 が未登録~~。`DECISION_LOG.md` に欠番経緯の注記を追加済み。
+- [ ] **Dependabot/Renovate 未設定**: `.github/dependabot.yml` が存在せず、依存関係の自動更新が行われていない。GitHub Security Alerts に脆弱性2件あり。
 
 ### 🟡 Medium（品質・保守性）
 
 - [ ] **lint warning**: `ui-vue-monitor/src/useEngineMonitor.ts` に未使用インポート `useEngineUI` が残存。
-- [ ] **`as unknown as` 残存**: プロダクションコード3箇所（`MonitorRegistry.ts`, `ResourceInjector.ts`, `EngineError.ts`）。Zenith Standard（バリデータ関数経由）への置換を検討。
-- [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了。ARCHITECTURE.md では主要機能として記載。
+- [ ] **`as unknown as` 残存**: プロダクションコード3箇所（`MonitorRegistry.ts`(2), `ResourceInjector.ts`(1), `EngineError.ts`(1)）。Zenith Standard（バリデータ関数経由）への置換を検討。
+- [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状15行のスタブ）。ARCHITECTURE.md では主要機能として記載。
+- [ ] **`i18n` パッケージに `typecheck` スクリプト欠落**: `pnpm turbo typecheck` でスキップされる。
+- [ ] **`main`/`types` フィールド欠落**: 7パッケージ（`domain-chess/go/mahjong/reversi/shogi`, `ui-chess`, `ui-shogi`）に `main` フィールドがない。`exports` のみで ESM は問題ないが、CJS 互換性に影響。
+- [ ] **Storybook `as any`**: `ui-vue-monitor/stories/EngineMonitorPanel.stories.ts:16` で `as any` を使用。
 - [ ] **テレメトリ拡張**: UI 上のインタラクション（クリック、ホバー等）の計測ポイント拡充。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [ ] **英語版ドキュメント不足**: `docs/en/` に `ARCHITECTURE.md` と `TECHNICAL_SPECS.md` のみ。`DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` の英語版が必要。
-- [ ] **.DS_Store の Git 追跡除外**: `packages/.DS_Store` 等が既に追跡されている可能性あり。`git rm --cached` による除外。
+- [ ] **.DS_Store の Git 追跡除外**: `git rm --cached` による除外（現在は `.gitignore` に登録済みだが、既追跡ファイルの除外は未実施）。
 
 ---
 

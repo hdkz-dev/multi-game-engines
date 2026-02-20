@@ -147,26 +147,30 @@
 
 ## 🚀 次のステップ
 
-> 2026-02-19 プロジェクト全体レビューの結果に基づく。詳細は [実装計画書](implementation_plans/project-review-improvements.md) を参照。
+> 2026-02-20 更新。2026-02-19 全体レビュー + 2026-02-20 フォローアップレビューの結果を統合。詳細は [実装計画書](implementation_plans/project-review-improvements.md) を参照。
 
 ### フェーズ A: 即時対応 (Critical)
 
-1. **LICENSE ファイル整備**: ルートに MIT LICENSE を作成し、13パッケージの `license` フィールド欠落を解消。
-2. **release.yml Node.js 修正**: `release.yml` の `node-version` を `"22"` → `"24"` に修正し、CI/CD 全体の整合性を確保。
-3. **不要ファイルの除去**: `review_audit_raw.md`, `pr_review_comments*.json`, `pr_view.json`, `status.txt`, `opencode_test.txt` を `.gitignore` に追加し、Git 管理から除外。
+1. **`ui-react` ESLint 設定修復**: `eslint.config.mjs` 欠落による CI lint 失敗の解消。
+2. **LICENSE ファイル整備**: ルートに MIT LICENSE を作成し、13パッケージの `license` フィールド欠落を解消。
+3. **release.yml Node.js 修正**: `release.yml` の `node-version` を `"22"` → `"24"` に修正し、CI/CD 全体の整合性を確保。
+4. **不要ファイルの除去**: `.gitignore` パターン追加 + `git rm --cached` で7ファイルを Git 管理から除外。
 
 ### フェーズ B: リリース準備 (High)
 
-1. **SRI ダミーハッシュの解消**: 全5アダプター（計9箇所）の `sha256-dummy*` を本番用ハッシュ値に置換。
+1. **SRI プレースホルダーハッシュの解消**: 全5アダプター（計9箇所）の `sha384-*Placeholder` を本番用ハッシュ値に置換。
 2. **README 一括作成**: 20パッケージへの README.md 追加。
 3. **pnpm-workspace.yaml 整合**: ルート `package.json` の `workspaces` に `"examples/*"` を追加。
-4. **ADR 欠番整理**: DECISION_LOG.md に ADR-003〜013 の欠番経緯を注記。
+4. ~~**ADR 欠番整理**~~: ✅ 完了。DECISION_LOG.md に注記追加済み。
+5. **Dependabot 設定**: `.github/dependabot.yml` 作成。脆弱性2件の自動対応。
 
 ### フェーズ C: 品質向上 (Medium)
 
 1. **lint warning 解消**: `ui-vue-monitor` の未使用インポート削除。
-2. **`as unknown as` 削減**: プロダクションコード3箇所のキャスト解消。
-3. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
-4. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
-5. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。
-6. **.DS_Store のGit管理除外**: `git rm --cached` で既存の `.DS_Store` ファイルを除外。
+2. **`as unknown as` 削減**: プロダクションコード4箇所のキャスト解消。
+3. **`i18n` typecheck 追加**: `package.json` に `typecheck` スクリプトを追加。
+4. **`main`/`types` フィールド追加**: 7パッケージの CJS 互換性向上。
+5. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
+6. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
+7. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。
+8. **.DS_Store のGit管理除外**: `git rm --cached` で既存の `.DS_Store` ファイルを除外。
