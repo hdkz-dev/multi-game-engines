@@ -1,4 +1,3 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { ShogiBoard } from "../index.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
