@@ -21,13 +21,25 @@
 - **専門性管理**: エンジンごとの「得意局面（手番、駒数等）」に応じた動的な重み付け（Expertise-based Weighting）。
 - **非同期ストリーミング**: 複数のエンジンからストリームされる `info` (PV等) を、UI 層で視覚的に比較・統合するための正規化レイヤーの強化。
 
-### 2. Zenith Loader & OPFS (大容量データ配信)
+### 3. Mobile Native Bridge (ADR-041)
+
+- [ ] **Bridge Adapter**: `@multi-game-engines/adapter-mobile-bridge` の初期実装。
+- [ ] **Capacitor Plugin Prototype**: iOS/Android 向けネイティブプラグインのサンプル実装。
+- [ ] **Native Integration**: ネイティブ側スレッドと `IEngine` ライフサイクルの同期検証。
+
+### 4. Zenith Mobile UI & Monitors (ADR-042)
+
+- [ ] **Mobile Elements**: `@multi-game-engines/ui-mobile-elements` パッケージの新設。
+- [ ] **Energy Monitor**: モバイル固有のテレメトリ（バッテリー・温度）の表示機能。
+- [ ] **Touch Optimization**: モバイル環境での操作性向上とハプティクス対応。
+
+### 5. Zenith Loader & OPFS (大容量データ配信)
 
 - **分割検証アルゴリズム**: 大容量ファイルをチャンクごとにフェッチし、それぞれの SRI を検証。
 - **OPFS 永続化**: ダウンロード済みのバイナリを `OPFSStorage` に保存し、次回起動時を 0ms に。
 - **動的プロキシ**: Cloudflare Workers を活用したバイナリ配信と、ユーザーに近いエッジでの整合性チェック。
 
-### 3. Multi-Runtime Bridge
+### 6. Multi-Runtime Bridge
 
 - **環境自動検知**: `CapabilityDetector` を拡張し、`process.versions.node` や `Bun` の存在を検知。
 - **ネイティブフォールバック**:
