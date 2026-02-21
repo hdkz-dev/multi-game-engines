@@ -61,6 +61,8 @@ export class MockEngine implements IEngine<
     this.updateStatus("busy");
     let depth = 0;
 
+    await this.stop();
+
     this.intervalId = setInterval(
       () => {
         depth++;

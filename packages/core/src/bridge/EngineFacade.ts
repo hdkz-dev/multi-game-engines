@@ -221,7 +221,17 @@ export class EngineFacade<
     this.telemetryListeners.clear();
 
     if (this.ownAdapter && this.adapter.dispose) {
+      const id = this.adapter.id;
       await this.adapter.dispose();
+      // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
+      if (this.loaderProvider) {
+        try {
+          const loader = await this.loaderProvider();
+          loader.revokeByEngineId(id);
+        } catch {
+          // ローダーの取得に失敗した場合は無視（既にシステムが終了している可能性があるため）
+        }
+      }
     }
   }
 
