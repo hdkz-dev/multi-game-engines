@@ -43,10 +43,13 @@
   - [ ] Mortal (Mahjong)
 - [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
 - [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
+- [ ] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
+  - [x] プロトタイプと MajorityVote 実装。
+  - [ ] `BestScore`, `Weighted` 戦略の追加。
 - [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
 - [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
-- [ ] **巨大 eval-data 配信**: 数百 MB 超の評価関数ファイルを分割ダウンロード・キャッシュ管理。
+- [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
 - [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
 
 ---
@@ -57,6 +60,6 @@
 
 ### 🟡 Medium（品質・保守性）
 
-- [ ] **OPFSStorage TODO**: `navigator.storage.getDirectory()` を用いた本番実装が未完了（現状 15 行のスタブ）。
+- [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [ ] **英語版ドキュメント不足**: `docs/en/` の拡充 (`DECISION_LOG.md`, `ROADMAP.md` 等)。

@@ -1,5 +1,5 @@
 import { USIAdapter } from "./USIAdapter.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IShogiSearchOptions,
   IShogiSearchInfo,
@@ -16,9 +16,6 @@ export { IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult };
 export function createUSIEngine(
   config: IEngineConfig = {},
 ): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
-  return new USIAdapter(config) as unknown as IEngine<
-    IShogiSearchOptions,
-    IShogiSearchInfo,
-    IShogiSearchResult
-  >;
+  const adapter = new USIAdapter(config);
+  return new EngineFacade(adapter);
 }

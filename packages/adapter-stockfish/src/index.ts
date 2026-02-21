@@ -1,5 +1,5 @@
 import { StockfishAdapter } from "./stockfish.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,
   IChessSearchInfo,
@@ -14,11 +14,8 @@ export { StockfishAdapter };
 export function createStockfishEngine(
   config: IEngineConfig = {},
 ): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  return new StockfishAdapter(config) as unknown as IEngine<
-    IChessSearchOptions,
-    IChessSearchInfo,
-    IChessSearchResult
-  >;
+  const adapter = new StockfishAdapter(config);
+  return new EngineFacade(adapter);
 }
 
 export * from "@multi-game-engines/adapter-uci";

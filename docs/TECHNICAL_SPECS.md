@@ -14,7 +14,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 各種ゲーム固有の型（`FEN`, `SFEN`, `GOMove` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、それぞれのドメインパッケージ（`@multi-game-engines/domain-*`）で提供されています。
 
-- **Move<T> (Hierarchical Branding)**: `core` パッケージで定義される指し手の基底型。各ドメインで `Move<"ShogiMove">` のように階層化され、基底の `Move` 型との互換性を保ちつつ、ドメイン間の誤混同をコンパイルレベルで防止します。
+- **`Move<T>` (Hierarchical Branding)**: `core` パッケージで定義される指し手の基底型。各ドメインで `Move<"ShogiMove">` のように階層化され、基底の `Move` 型との互換性を保ちつつ、ドメイン間の誤混同をコンパイルレベルで防止します。
 - **FEN / SFEN**: 局面表記（Branded string）。`PositionString<T>` を継承し、文字種・フィールド数・手番等の厳格なバリデーションを提供。
 - **create*Move / create*Board**: 各ドメインパッケージが提供する「バリデータ兼ファクトリ」。アンセーフな `as` キャストを排除し、Refuse by Exception 原則に基づき、不正な入力に対して即座に `EngineError` をスローします。
 
@@ -57,6 +57,18 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **メッセージバッファリング**: `expectMessage` の呼び出し前に届いたメッセージも逃さず処理。
 - **例外伝播**: Worker 内部のエラーや強制終了（terminate）時の保留タスクを正確に伝送。
 
+### 3-4. Zenith Loader (大規模データ管理)
+
+- **Segmented Fetch**: 100MB を超えるバイナリを分割してダウンロードし、プログレスを詳細に表示。
+- **Segmented SRI**: 各セグメントのハッシュを検証し、途中での改竄を防止。
+- **OPFS Promotion**: ダウンロードしたバイナリを `OPFSStorage` にマウント。次回ロード時は HTTP リクエストをスキップ。
+
+### 3-5. Hybrid Bridge (マルチ環境対応)
+
+- **Environment Detection**: `navigator` オブジェクトの欠如や `process` オブジェクトの存在により実行環境を判定。
+- **Interface Consistency**: `WebWorkerAdapter` と `NativeProcessAdapter` (Node.js 用) が同一の `IEngineAdapter` インターフェースを実装。
+- **Zero-Config Switch**: 設定ファイルなしで、環境に応じた最適なバイナリ（`.wasm` vs `.exe` / `.bin`）を選択。
+
 ## 4. プロトコル解析 (2026 Best Practice)
 
 本プロジェクトは、多様なゲームプロトコルを共通の `IEngineAdapter` に抽象化します。
@@ -92,15 +104,39 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **parseFEN**: チェスの FEN 文字列をパースし、8x8 の駒配置配列と手番情報を抽出します。2026 Zenith Standard として、手番 (`turn`) フィールドを必須とし、欠落時は厳格にエラーをスローします。
 - **parseSFEN**: 将棋の SFEN 文字列をパースし、9x9 の駒配置配列、手番、および持ち駒の数を抽出します。成駒（+）の判定、持ち駒文字列の文法、および手数カウンターが正の整数（>= 1）であることを厳格に検証します。
 
-## 5. テレメトリと可観測性
+## 5. ハードウェア加速と AI 推論 (Zenith Tier)
+
+2026 年時点の最新標準に基づき、以下のハードウェア加速レイヤーを統合します。
+
+### 5-1. WebNN (Neural Network API)
+
+- **対象**: NNUE, CNN (AlphaZero 形式) の評価関数推論。
+- **デバイス選択**: `NPU` (Neural Processing Unit) を最優先し、次に `GPU`、`CPU (SIMD)` の順でフォールバック。 W3C Candidate Recommendation (2026-01) に準拠。
+- **最適化**:
+  - **量子化**: 8-bit (INT8) および 4-bit (INT4) モデルのネイティブサポートによる 2-4 倍の高速化。
+  - **Operator Fusion**: 推論グラフ内の連続する演算（例: Linear + ReLU）を単一のカーネルで実行。
+
+### 5-2. WebGPU Compute
+
+- **対象**: 並列探索アルゴリズム（MCTS 等）および汎用計算。
+- **IO Binding**: CPU-GPU 間のデータ転送を最小化するため、テンソルデータを GPU メモリ上に維持したまま連続実行。
+- **Multi-Pass Compute**: 依存関係グラフを用いてコマンドバッファを一括送信し、ドライバオーバーヘッドを低減。
+
+### 5-3. Zenith Loader (大容量データ配信)
+
+- **分割検証**: 数百 MB のデータを 5MB 単位のチャンクでフェッチ。
+- **SRI Checksum**: 各チャンクおよび結合後のバイナリ全体に対して `SHA-384` / `SHA-512` による整合性検証を実施。
+- **OPFS 永続化**: 整合性確認済みデータを `OPFSStorage` に保存し、次回起動時のロード時間を 0ms に短縮。
+
+## 6. テレメトリと可観測性
 
 - **構造化テレメトリ**: `DefaultTelemetryMiddleware` による探索パフォーマンス（ミリ秒単位）の自動計測。
 - **並行探索の識別**: `telemetryId` による、同一エンジン内での並行リクエストの完全なトラッキング。
 - **解決策の提示 (Remediation)**: 全てのエラーに `remediation` フィールドを設け、開発者やユーザーへの具体的なアクション（「HTTPS を使用してください」等）を提示します。
 
-## 6. UI 層と表現基盤 (UI & Presentation Layer)
+## 7. UI 層と表現基盤 (UI & Presentation Layer)
 
-### 6-1. Reactive Engine Store (`ui-core`)
+### 7-1. Reactive Engine Store (`ui-core`)
 
 高頻度なエンジンデータ（毎秒数百回の `info`）を効率的に扱うための状態管理基盤です。
 
@@ -112,7 +148,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **Zod 契約バリデーション**: エンジンから UI 層へ渡される全てのメッセージは `SearchInfoSchema` で実行時に検証され、不正なデータによる UI クラッシュを未然に防ぎます。
 - **プレゼンテーションロジックの分離**: `EvaluationPresenter` により、評価値の表示色やラベル生成ロジックを UI フレームワークから分離・共通化。
 
-### 6-2. React アダプター群
+### 7-2. React アダプター群
 
 - **`ui-react-core`**: React 専用の基盤（`EngineUIProvider`）。他の UI パッケージの基盤となります。
 - **`ui-react-monitor`**: エンジン監視コンポーネント（`EngineMonitorPanel` 等）と専用フック（`useEngineMonitor`）。
@@ -121,7 +157,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **Storybook 10 対応**: 最新 of Storybook エコシステム（Vite 6, Tailwind CSS v4）に完全準拠。
 - **決定論的ライフサイクル**: `useRef` によるモニターインスタンスの永続化と、`useEffect` による厳格な購読解除を徹底。React 18 以降の Strict Mode および Concurrent Rendering 下でも安全に動作します。
 
-### 6-3. Vue アダプター群
+### 7-3. Vue アダプター群
 
 - **`ui-vue-core`**: Vue 3 専用の基盤。
 - **`ui-vue-monitor`**: エンジン監視コンポーネントと `useEngineMonitor` コンポーザブル。
@@ -130,7 +166,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **Vue 3 Composition API**: `useEngineMonitor` コンポーザブルによるリアクティブな状態管理。
 - **Storybook 10 対応**: Vue 3 + Vite 環境での Storybook 統合。Tailwind CSS v4 サポート。
 
-### 6-4. Web Components アダプター (`ui-elements`)
+### 7-4. Web Components アダプター (`ui-elements`)
 
 - **Lit による実装**: 軽量で標準準拠の Web Components を提供。
 - **盤面コンポーネント (`<chess-board>`, `<shogi-board>`)**:
@@ -139,7 +175,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
   - **i18n & Error Handling**: `pieceNames` による動的な駒名称注入に加え、`error-message` プロパティにより解析失敗時のオーバーレイ表示をカスタマイズ可能。
   - **アクセシビリティ**: 局面の状況（手番、駒の配置）をスクリーンリーダーが解釈可能な形式で提供。
 
-## 7. 品質保証 (Testing Philosophy)
+## 8. 品質保証 (Testing Philosophy)
 
 - **ユニットテスト**: 主要ロジックおよびエッジケースを網羅するテスト（Core + Adapters + UI）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。

@@ -25,26 +25,32 @@ export async function getBridge(): Promise<EngineBridge | null> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    if (!bridge.value) {
-      const b = new EngineBridge();
+    try {
+      if (!bridge.value) {
+        const b = new EngineBridge();
 
-      // Register generic adapter factories
-      b.registerAdapterFactory("uci", createUCIEngine);
-      b.registerAdapterFactory("usi", createUSIEngine);
-      b.registerAdapterFactory("gtp", createGTPEngine);
-      b.registerAdapterFactory("edax", createEdaxEngine);
-      b.registerAdapterFactory("mortal", createMortalEngine);
-      b.registerAdapterFactory("gnubg", createGNUBGEngine);
-      b.registerAdapterFactory("kingsrow", createKingsRowEngine);
+        // Register generic adapter factories
+        b.registerAdapterFactory("uci", createUCIEngine);
+        b.registerAdapterFactory("usi", createUSIEngine);
+        b.registerAdapterFactory("gtp", createGTPEngine);
+        b.registerAdapterFactory("edax", createEdaxEngine);
+        b.registerAdapterFactory("mortal", createMortalEngine);
+        b.registerAdapterFactory("gnubg", createGNUBGEngine);
+        b.registerAdapterFactory("kingsrow", createKingsRowEngine);
 
-      // Register specific named engine factories
-      b.registerAdapterFactory("stockfish", createStockfishEngine);
-      b.registerAdapterFactory("yaneuraou", createYaneuraouEngine);
+        // Register specific named engine factories
+        b.registerAdapterFactory("stockfish", createStockfishEngine);
+        b.registerAdapterFactory("yaneuraou", createYaneuraouEngine);
 
-      bridge.value = b;
-      isReady.value = true;
+        bridge.value = b;
+        isReady.value = true;
+      }
+      return bridge.value;
+    } catch (e) {
+      console.error("Failed to initialize engine bridge:", e);
+      error.value = e instanceof Error ? e.message : String(e);
+      return null;
     }
-    return bridge.value;
   })();
 
   return initPromise;

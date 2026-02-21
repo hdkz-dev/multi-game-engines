@@ -1,5 +1,5 @@
 import { GTPAdapter } from "./GTPAdapter.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IGoSearchOptions,
   IGoSearchInfo,
@@ -16,9 +16,6 @@ export { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
 export function createGTPEngine(
   config: IEngineConfig = {},
 ): IEngine<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
-  return new GTPAdapter(config) as unknown as IEngine<
-    IGoSearchOptions,
-    IGoSearchInfo,
-    IGoSearchResult
-  >;
+  const adapter = new GTPAdapter(config);
+  return new EngineFacade(adapter);
 }

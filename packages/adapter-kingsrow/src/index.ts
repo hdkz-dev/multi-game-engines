@@ -1,5 +1,5 @@
 import { KingsRowAdapter } from "./KingsRowAdapter.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   ICheckersSearchOptions,
   ICheckersSearchInfo,
@@ -15,9 +15,6 @@ export { KingsRowParser } from "./KingsRowParser.js";
 export function createKingsRowEngine(
   config: IEngineConfig = {},
 ): IEngine<ICheckersSearchOptions, ICheckersSearchInfo, ICheckersSearchResult> {
-  return new KingsRowAdapter(config) as unknown as IEngine<
-    ICheckersSearchOptions,
-    ICheckersSearchInfo,
-    ICheckersSearchResult
-  >;
+  const adapter = new KingsRowAdapter(config);
+  return new EngineFacade(adapter);
 }

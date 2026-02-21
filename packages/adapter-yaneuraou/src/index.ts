@@ -1,5 +1,5 @@
 import { YaneuraouAdapter } from "./yaneuraou.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IShogiSearchOptions,
   IShogiSearchInfo,
@@ -14,11 +14,8 @@ export { YaneuraouAdapter };
 export function createYaneuraouEngine(
   config: IEngineConfig = {},
 ): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
-  return new YaneuraouAdapter(config) as unknown as IEngine<
-    IShogiSearchOptions,
-    IShogiSearchInfo,
-    IShogiSearchResult
-  >;
+  const adapter = new YaneuraouAdapter(config);
+  return new EngineFacade(adapter);
 }
 
 export * from "@multi-game-engines/adapter-usi";

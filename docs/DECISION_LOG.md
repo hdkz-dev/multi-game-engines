@@ -47,3 +47,7 @@
 - [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](adr/036-zenith-audit-and-strict-types.md)
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](adr/037-core-domain-isolation-and-lifecycle-hardening.md)
 - [ADR-038: プライバシー保護のためのログ・サニタイズポリシー (Privacy-First Logging)](adr/038-privacy-first-logging.md)
+- [2026-02-21] [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed)
+- [2026-02-21] [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed)
+- [2026-02-21] [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed)
+- [2026-02-21] [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed)

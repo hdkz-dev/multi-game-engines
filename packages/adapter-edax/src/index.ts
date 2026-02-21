@@ -1,5 +1,5 @@
 import { EdaxAdapter } from "./edax.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IReversiSearchOptions,
   IReversiSearchInfo,
@@ -16,9 +16,6 @@ export { IReversiSearchOptions, IReversiSearchInfo, IReversiSearchResult };
 export function createEdaxEngine(
   config: IEngineConfig = {},
 ): IEngine<IReversiSearchOptions, IReversiSearchInfo, IReversiSearchResult> {
-  return new EdaxAdapter(config) as unknown as IEngine<
-    IReversiSearchOptions,
-    IReversiSearchInfo,
-    IReversiSearchResult
-  >;
+  const adapter = new EdaxAdapter(config);
+  return new EngineFacade(adapter);
 }
