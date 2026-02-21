@@ -13,43 +13,52 @@ describe("GTPParser", () => {
 
   const parser = new GTPParser();
 
-  it("should parse info correctly", () => {
-    const info = parser.parseInfo("info visits 100 winrate 0.55");
+  it("should parse info from object correctly", () => {
+    const info = parser.parseInfo({ visits: 100, winrate: 0.55 });
     expect(info).not.toBeNull();
     expect(info!.visits).toBe(100);
     expect(info!.winrate).toBe(0.55);
   });
 
-  it("should parse visits only correctly", () => {
-    const info = parser.parseInfo("info visits 100");
+  it("should parse KataGo JSON info correctly", () => {
+    const data = {
+      visits: 100,
+      winrate: 0.55,
+      scoreLead: 2.5,
+      pv: ["D4", "Q16"],
+    };
+    const info = parser.parseInfo(data);
     expect(info).not.toBeNull();
     expect(info!.visits).toBe(100);
-    expect(info!.winrate).toBeUndefined();
+    expect(info!.winrate).toBe(0.55);
+    expect(info!.scoreLead).toBe(2.5);
+    expect(info!.pv).toEqual(["d4", "q16"]); // Normalized to lowercase
   });
 
-  it("should parse winrate only correctly", () => {
-    const info = parser.parseInfo("info winrate 0.55");
-    expect(info).not.toBeNull();
-    expect(info!.visits).toBeUndefined();
-    expect(info!.winrate).toBe(0.55);
+  it("should handle non-string PV entries gracefully in KataGo JSON", () => {
+    const data = {
+      visits: 50,
+      pv: ["D4", 123, null, "Q16"],
+    };
+    const info = parser.parseInfo(data as Record<string, unknown>);
+    expect(info!.pv).toEqual(["d4", "q16"]);
   });
 
   it("should return null for non-info strings", () => {
     expect(parser.parseInfo("random text")).toBeNull();
     expect(parser.parseInfo("")).toBeNull();
-    expect(parser.parseInfo({} as unknown as string)).toBeNull();
   });
 
-  it("should parse result correctly", () => {
+  it("should parse result correctly and normalize to lowercase", () => {
     const result = parser.parseResult("= D4");
     expect(result).not.toBeNull();
-    expect(result!.bestMove).toBe("D4");
+    expect(result!.bestMove).toBe("d4");
   });
 
   it("should parse result with ID correctly", () => {
     const result = parser.parseResult("=1 D4");
     expect(result).not.toBeNull();
-    expect(result!.bestMove).toBe("D4");
+    expect(result!.bestMove).toBe("d4");
   });
 
   it("should parse result with different ID correctly", () => {
@@ -67,11 +76,11 @@ describe("GTPParser", () => {
     expect(parser.parseResult("= pass")).not.toBeNull();
     expect(parser.parseResult("= resign")).not.toBeNull();
 
-    // Invalid cases
-    expect(parser.parseResult("= I1")).toBeNull(); // 'I' is skipped
-    expect(parser.parseResult("= A0")).toBeNull();
-    expect(parser.parseResult("= A26")).toBeNull();
-    expect(parser.parseResult("= @1")).toBeNull();
+    // Invalid cases (Should throw EngineError in 2026 Zenith Tier)
+    expect(() => parser.parseResult("= I1")).toThrow();
+    expect(() => parser.parseResult("= A0")).toThrow();
+    expect(() => parser.parseResult("= A26")).toThrow();
+    expect(() => parser.parseResult("= @1")).toThrow();
   });
 
   it("should throw error for injection in board data", () => {

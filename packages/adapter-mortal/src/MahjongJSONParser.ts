@@ -2,6 +2,7 @@ import {
   IProtocolParser,
   ProtocolValidator,
   IBaseSearchOptions,
+  truncateLog,
 } from "@multi-game-engines/core";
 import {
   MahjongMove,
@@ -34,7 +35,7 @@ export class MahjongJSONParser implements IProtocolParser<
     } catch (e) {
       console.warn("[MahjongJSONParser] Failed to parse info:", {
         error: e,
-        data: typeof data === "string" ? data.slice(0, 1000) : data,
+        data: truncateLog(data),
       });
       return null;
     }
@@ -69,7 +70,7 @@ export class MahjongJSONParser implements IProtocolParser<
     } catch (e) {
       console.warn("[MahjongJSONParser] Failed to parse result:", {
         error: e,
-        data: typeof data === "string" ? data.slice(0, 1000) : data,
+        data: truncateLog(data),
       });
       return null;
     }
@@ -78,6 +79,11 @@ export class MahjongJSONParser implements IProtocolParser<
 
   createSearchCommand(options: IMahjongSearchOptions): Record<string, unknown> {
     // 2026 Best Practice: JSON 形式であっても制御文字インジェクションを警戒
+    ProtocolValidator.assertNoInjection(
+      JSON.stringify(options.board),
+      "board data",
+      true,
+    );
     validateMahjongBoard(options.board);
 
     return {

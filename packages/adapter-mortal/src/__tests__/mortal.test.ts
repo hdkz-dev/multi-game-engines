@@ -8,6 +8,7 @@ import {
   afterAll,
 } from "vitest";
 import { MortalAdapter } from "../mortal.js";
+import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
 class MockWorker {
   postMessage = vi.fn();
@@ -17,6 +18,27 @@ class MockWorker {
 }
 
 describe("MortalAdapter", () => {
+  const mockConfig: IEngineConfig = {
+    id: "mortal",
+    adapter: "mortal",
+    sources: {
+      main: {
+        url: "http://localhost/mortal.js",
+        sri: "sha384-dummy",
+        type: "worker-js",
+      },
+    },
+  };
+
+  const mockLoader: IEngineLoader = {
+    loadResource: vi.fn().mockResolvedValue("blob:http://localhost/main"),
+    loadResources: vi
+      .fn()
+      .mockResolvedValue({ main: "blob:http://localhost/main" }),
+    revoke: vi.fn(),
+    revokeByEngineId: vi.fn(),
+  };
+
   beforeAll(() => {
     vi.spyOn(performance, "now").mockReturnValue(0);
   });
@@ -31,13 +53,13 @@ describe("MortalAdapter", () => {
   });
 
   it("should initialize with correct metadata", () => {
-    const adapter = new MortalAdapter();
+    const adapter = new MortalAdapter(mockConfig);
     expect(adapter.id).toBe("mortal");
   });
 
   it("should change status correctly on load", async () => {
-    const adapter = new MortalAdapter();
-    await adapter.load();
+    const adapter = new MortalAdapter(mockConfig);
+    await adapter.load(mockLoader);
     expect(adapter.status).toBe("ready");
   });
 });

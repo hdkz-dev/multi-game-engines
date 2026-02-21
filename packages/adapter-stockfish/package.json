@@ -36,7 +36,8 @@
     "@multi-game-engines/core": "^0.1.0"
   },
   "dependencies": {
-    "@multi-game-engines/adapter-uci": "workspace:*"
+    "@multi-game-engines/adapter-uci": "workspace:*",
+    "@multi-game-engines/domain-chess": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
@@ -53,6 +54,6 @@
     "lint": "eslint ."
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": "^20 || ^22 || >=24"
   }
 }

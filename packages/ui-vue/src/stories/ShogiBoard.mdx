@@ -1,0 +1,20 @@
+import { Meta, Story, Canvas, Controls } from '@storybook/blocks';
+import * as ShogiBoardStories from './ShogiBoard.stories';
+
+<Meta of={ShogiBoardStories} />
+
+# ShogiBoard (Vue)
+
+`ShogiBoard` is a domain-specific Vue component for rendering Shogi positions using SFEN.
+
+## Properties
+
+<Controls />
+
+## Examples
+
+### Default Position
+<Canvas of={ShogiBoardStories.Default} />
+
+### Hand Pieces
+<Canvas of={ShogiBoardStories.HandPieces} />

@@ -1,12 +1,12 @@
 import {
-  Brand,
   EngineError,
   EngineErrorCode,
   ProtocolValidator,
+  Move,
 } from "@multi-game-engines/core";
 
 /** 麻雀の指し手（打牌、副露等） */
-export type MahjongMove = Brand<string, "MahjongMove">;
+export type MahjongMove = Move<"MahjongMove">;
 
 /**
  * 麻雀の指し手形式（例: 1m, tsumo, riichi 等）を検証する正規表現。

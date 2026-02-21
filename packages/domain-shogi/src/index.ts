@@ -2,12 +2,61 @@ import {
   EngineErrorCode,
   EngineError,
   PositionString,
+  Move,
+  createMove,
+  truncateLog,
 } from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
  */
 export type SFEN = PositionString<"SFEN">;
+
+/**
+ * 将棋の指し代表現 (USI形式: 7g7f, 8h2b+ 等)。
+ */
+export type ShogiMove = Move<"ShogiMove">;
+
+/**
+ * 将棋の指し手バリデータファクトリ。
+ */
+export function createShogiMove(move: string): ShogiMove {
+  if (typeof move !== "string" || move.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid ShogiMove: Input must be a non-empty string.",
+      i18nKey: "errors.invalid_shogi_move",
+    });
+  }
+
+  // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
+  if (/[\r\n\t\f\v\0]/.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: `Control characters detected in move string: "${truncateLog(move)}"`,
+      i18nKey: "errors.injection_detected",
+      i18nParams: { input: truncateLog(move) },
+    });
+  }
+
+  // 2026 Best Practice: USI プロトコル仕様に準拠した厳格なケース検証 (Case-sensitive)
+  // 通常の指し手: 7g7f, 8h2b+ (列: 1-9, 段: a-i)
+  // 打ち手: P*3d (駒は大文字 [PLNSGRB])
+  // 特殊: resign, win, none, (none) (すべて小文字)
+  if (
+    !/^[1-9][a-i][1-9][a-i]\+?$|^[PLNSGRB]\*[1-9][a-i]$|^resign$|^win$|^none$|^\(none\)$/.test(
+      move,
+    )
+  ) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid ShogiMove format: "${truncateLog(move)}"`,
+      i18nKey: "errors.invalid_shogi_move_format",
+      i18nParams: { move: truncateLog(move) },
+    });
+  }
+  return createMove<"ShogiMove">(move);
+}
 
 /**
  * 将棋の駒識別子。
@@ -82,8 +131,9 @@ export interface ParsedSFEN {
 export function createSFEN(pos: string): SFEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid SFEN: Input must be a non-empty string.",
+      i18nKey: "errors.invalid_sfen_empty",
     });
   }
   const trimmedPos = pos.trim();
@@ -91,6 +141,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid SFEN: Illegal characters detected.",
+      i18nKey: "errors.invalid_sfen_chars",
       remediation:
         "SFEN should only contain board pieces [PLNSGBRK...], counts [1-9], '+', '/', '-', and spaces.",
     });
@@ -100,6 +151,8 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
+      i18nKey: "errors.invalid_sfen_structure",
+      i18nParams: { count: fields.length },
       remediation: "SFEN must contain: [board] [turn] [hand] [moveCount]",
     });
   }
@@ -109,6 +162,8 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
+      i18nKey: "errors.invalid_sfen_turn",
+      i18nParams: { turn: fields[1]! },
     });
   }
 
@@ -120,6 +175,8 @@ export function createSFEN(pos: string): SFEN {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Invalid SFEN hand: "${fields[2]}"`,
+        i18nKey: "errors.invalid_sfen_hand",
+        i18nParams: { hand: fields[2]! },
       });
     }
   }
@@ -130,6 +187,8 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid SFEN move counter: "${fields[3]}"`,
+      i18nKey: "errors.invalid_sfen_counter",
+      i18nParams: { counter: fields[3]! },
     });
   }
 

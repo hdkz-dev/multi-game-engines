@@ -42,7 +42,12 @@
       "illegalCharacters": "Illegal characters detected.",
       "networkError": "Failed to fetch engine resources.",
       "securityViolation": "Security violation: Unsafe resource loading blocked.",
-      "missingMainEntryPoint": "Engine main entry point URL is missing."
+      "missingMainEntryPoint": "Engine main entry point URL is missing.",
+      "loaderRequired": "IEngineLoader is required for secure resource loading.",
+      "missingSources": "Engine configuration is missing 'sources' field.",
+      "invalidMoveFormat": "Invalid move format: \"{move}\"",
+      "injectionDetected": "Potential command injection detected in {context}: \"{input}\"",
+      "invalidPositionString": "Invalid position string: Input must not be empty."
     }
   },
   "dashboard": {

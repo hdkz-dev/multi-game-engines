@@ -1,19 +1,21 @@
-import "@multi-game-engines/core";
+import { EdaxAdapter } from "./edax.js";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IReversiSearchOptions,
   IReversiSearchInfo,
   IReversiSearchResult,
 } from "./EdaxParser.js";
 
-declare module "@multi-game-engines/core" {
-  interface EngineRegistry {
-    edax: {
-      options: IReversiSearchOptions;
-      info: IReversiSearchInfo;
-      result: IReversiSearchResult;
-    };
-  }
-}
+export { EdaxAdapter };
+export { EdaxParser } from "./EdaxParser.js";
+export { IReversiSearchOptions, IReversiSearchInfo, IReversiSearchResult };
 
-export * from "./edax.js";
-export * from "./EdaxParser.js";
+/**
+ * Edax エンジンのインスタンスを生成します。
+ */
+export function createEdaxEngine(
+  config: IEngineConfig = {},
+): IEngine<IReversiSearchOptions, IReversiSearchInfo, IReversiSearchResult> {
+  const adapter = new EdaxAdapter(config);
+  return new EngineFacade(adapter);
+}

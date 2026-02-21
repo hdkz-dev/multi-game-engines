@@ -7,7 +7,6 @@ import {
   ResourceMap,
   IEngineConfig,
   IEngineSourceConfig,
-  IEngineAdapter,
 } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,
@@ -30,9 +29,9 @@ export class UCIAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new UCIParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "uci";
     this.name = config.name ?? "UCI Engine";
     this.version = config.version ?? "unknown";
   }
@@ -40,17 +39,33 @@ export class UCIAdapter extends BaseAdapter<
   /**
    * エンジンのリソースをロードし、Worker を初期化して 'uci' ハンドシェイクを実行します。
    *
-   * @param loader - オプションのカスタムローダー。
+   * @param loader - エンジンローダー。2026 Zenith Tier では必須です。省略されると EngineError がスローされます。
    * @returns 初期化とハンドシェイク ('uciok') 完了時に解決される Promise。
    * @throws {EngineError} リソース不足、Worker エラー、またはハンドシェイクのタイムアウト時にスローされます。
    */
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      const { sources } = this.config;
+      if (!loader) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "IEngineLoader is required for secure resource loading.",
+          engineId: this.id,
+          i18nKey: "engine.errors.loaderRequired",
+        });
+      }
+
+      const sources = this.config.sources;
+      if (!sources) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Engine configuration is missing 'sources' field.",
+          engineId: this.id,
+          i18nKey: "engine.errors.missingSources",
+        });
+      }
 
       // 2026 Best Practice: マルチソースの並列ロードと検証
-      // undefined なソースを除外してローダーに渡す
       const validSources: Record<string, IEngineSourceConfig> = {};
       for (const [key, value] of Object.entries(sources)) {
         if (value) {
@@ -58,15 +73,14 @@ export class UCIAdapter extends BaseAdapter<
         }
       }
 
-      const resources = loader
-        ? await loader.loadResources(this.id, validSources)
-        : { main: sources.main?.url };
+      const resources = await loader.loadResources(this.id, validSources);
 
       if (!resources["main"]) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry point URL",
+          message: "Missing main entry point after resolution",
           engineId: this.id,
+          i18nKey: "engine.errors.missingMainEntryPoint",
         });
       }
 
@@ -99,17 +113,16 @@ export class UCIAdapter extends BaseAdapter<
 
       this.emitStatusChange("ready");
     } catch (error) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }
   }
-}
-
-/**
- * 2026 Zenith Tier: 汎用 UCI アダプターのファクトリ関数。
- */
-export function createUCIAdapter(
-  config: IEngineConfig,
-): IEngineAdapter<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  return new UCIAdapter(config);
 }

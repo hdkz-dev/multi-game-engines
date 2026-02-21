@@ -16,7 +16,10 @@ defineProps<{
       <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
         {{ label }}
       </p>
-      <p class="text-lg font-black text-gray-900 tracking-tight leading-none mb-1">
+      <p
+        class="text-lg font-black text-gray-900 tracking-tight leading-none mb-1"
+        aria-live="polite"
+      >
         {{ value }}
       </p>
       <p class="text-[10px] text-gray-400 font-bold italic">{{ sub }}</p>

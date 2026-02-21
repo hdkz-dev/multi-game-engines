@@ -16,7 +16,7 @@ import {
   EngineRegistry,
   EngineErrorCode,
 } from "../types.js";
-import { EngineFacade } from "./EngineFacade.js";
+import { EngineFacade, INTERNAL_ADAPTER } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
 
 /**
@@ -38,7 +38,9 @@ export class EngineBridge implements IEngineBridge {
     string,
     (
       config: IEngineConfig,
-    ) => IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -97,17 +99,17 @@ export class EngineBridge implements IEngineBridge {
     R extends IBaseSearchResult,
   >(
     type: string,
-    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+    factory: (
+      config: IEngineConfig,
+    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
   ): void {
     this.adapterFactories.set(
       type,
       factory as (
         config: IEngineConfig,
-      ) => IEngineAdapter<
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
+      ) =>
+        | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+        | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
     );
   }
 
@@ -241,6 +243,13 @@ export class EngineBridge implements IEngineBridge {
 
     const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
 
+    if (!id) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: "Engine ID is required to get or create an engine instance.",
+      });
+    }
+
     // 2026 Security: Path Traversal Prevention
     // Ensure the ID (used for cache keys and storage paths) is strictly alphanumeric.
     if (!/^[a-zA-Z0-9-_]+$/.test(id)) {
@@ -279,9 +288,45 @@ export class EngineBridge implements IEngineBridge {
 
         // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
         if (!adapter && typeof idOrConfig !== "string") {
+          if (!idOrConfig.adapter) {
+            throw new EngineError({
+              code: EngineErrorCode.VALIDATION_ERROR,
+              message: `Adapter type is required to instantiate engine "${id}".`,
+              engineId: id,
+            });
+          }
           const factory = this.adapterFactories.get(idOrConfig.adapter);
           if (factory) {
-            const newAdapter = factory(idOrConfig);
+            const result = factory(idOrConfig);
+            // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
+            let newAdapter: IEngineAdapter<
+              IBaseSearchOptions,
+              IBaseSearchInfo,
+              IBaseSearchResult
+            >;
+
+            if (result instanceof EngineFacade) {
+              newAdapter = (
+                result as EngineFacade<
+                  IBaseSearchOptions,
+                  IBaseSearchInfo,
+                  IBaseSearchResult
+                >
+              )[INTERNAL_ADAPTER]();
+            } else if (this.isIEngineAdapter(result)) {
+              newAdapter = result as IEngineAdapter<
+                IBaseSearchOptions,
+                IBaseSearchInfo,
+                IBaseSearchResult
+              >;
+            } else {
+              throw new EngineError({
+                code: EngineErrorCode.INTERNAL_ERROR,
+                message: `Factory for "${idOrConfig.adapter}" returned an unsupported engine type.`,
+                engineId: id,
+              });
+            }
+
             // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
             await this.registerAdapter(newAdapter);
             newlyRegistered = true;
@@ -554,5 +599,16 @@ export class EngineBridge implements IEngineBridge {
     this.loaderPromise = null;
     this.capabilities = null;
     this.capsPromise = null;
+  }
+
+  private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
+    if (typeof obj !== "object" || obj === null) return false;
+    const record = obj as Record<string, unknown>;
+    return (
+      typeof record["id"] === "string" &&
+      typeof record["searchRaw"] === "function" &&
+      typeof record["parser"] === "object" &&
+      record["parser"] !== null
+    );
   }
 }

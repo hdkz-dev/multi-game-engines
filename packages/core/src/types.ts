@@ -6,19 +6,16 @@
 export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
 /**
- * 指し手を表すブランド型（UCI/USI形式）。
+ * 指し手を表すブランド型。
+ * 各ゲームアダプターで Move<"GameMove"> のように拡張可能です。
+ * デフォルトでは全てのブランド化された指し手と互換性があります。
  */
-export type Move = Brand<string, "Move">;
+export type Move<T extends string = string> = Brand<string, T>;
 
 /**
  * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
  */
-/**
- * 局面表記を表すブランド型（FEN またはアダプター定義の独自形式）。
- */
-export type PositionString<T extends string = string> = string & {
-  readonly __brand: T;
-};
+export type PositionString<T extends string = string> = Brand<string, T>;
 
 // 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
@@ -157,6 +154,10 @@ export interface IEngineError {
   code: EngineErrorCode;
   remediation?: string | undefined;
   engineId?: string | undefined;
+  /** 国際化対応のためのメッセージキー */
+  i18nKey?: string | undefined;
+  /** メッセージの埋め込みパラメータ */
+  i18nParams?: Record<string, string | number> | undefined;
 }
 
 /**
@@ -285,6 +286,7 @@ export interface IEngineAdapter<
   readonly requiredCapabilities?: Partial<ICapabilities>;
 
   load(loader?: IEngineLoader): Promise<void>;
+  search(options: T_OPTIONS): Promise<T_RESULT>;
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
   stop(): void | Promise<void>;
   dispose(): Promise<void>;
@@ -375,15 +377,15 @@ export type IEngineSourceConfig = {
  */
 export interface IEngineConfig {
   /** インスタンスの一意識別子 */
-  id: string;
+  id?: string;
   /** 使用するプロトコル/アダプター型（例: 'uci', 'usi', 'gtp'） */
-  adapter: string;
+  adapter?: string;
   /** 表示名 */
   name?: string;
   /** バージョン情報 */
   version?: string;
   /** 実行リソースの定義 */
-  sources: {
+  sources?: {
     /** メインのJSローダー/エントリーポイント */
     main: IEngineSourceConfig;
     /** WASM バイナリ（オプション） */
@@ -466,7 +468,9 @@ export interface IEngineBridge {
     R extends IBaseSearchResult = IBaseSearchResult,
   >(
     type: string,
-    factory: (config: IEngineConfig) => IEngineAdapter<O, I, R>,
+    factory: (
+      config: IEngineConfig,
+    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
   ): void;
 
   unregisterAdapter(id: string): Promise<void>;

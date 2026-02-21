@@ -3,6 +3,9 @@ import {
   IEngineLoader,
   WorkerCommunicator,
   EngineError,
+  IEngineConfig,
+  IEngineSourceConfig,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 import {
   IReversiSearchOptions,
@@ -11,34 +14,63 @@ import {
 } from "./EdaxParser.js";
 import { EdaxParser } from "./EdaxParser.js";
 
+/**
+ * 2026 Zenith Tier: Edax リバーシエンジンアダプター。
+ */
 export class EdaxAdapter extends BaseAdapter<
   IReversiSearchOptions,
   IReversiSearchInfo,
   IReversiSearchResult
 > {
-  readonly id = "edax";
-  readonly name = "Edax";
-  readonly version = "4.4";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
   readonly parser = new EdaxParser();
+
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id || "edax";
+    this.name = config.name || "Edax";
+    this.version = config.version || "4.4";
+  }
 
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      // WIP: URL selection logic
-      const url = "https://example.com/edax.js";
-      const config = {
-        url,
-        // TODO: Replace with real SRI hash before production release
-        sri: "sha384-EdaxMainScriptHashPlaceholder",
-        size: 0,
-        type: "worker-js" as const,
-      };
+      if (!loader) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "IEngineLoader is required for secure resource loading.",
+          engineId: this.id,
+        });
+      }
 
-      const scriptUrl = loader
-        ? await loader.loadResource(this.id, config)
-        : url;
+      const sources = this.config.sources;
+      if (!sources) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Engine configuration is missing 'sources' field.",
+          engineId: this.id,
+        });
+      }
 
-      this.communicator = new WorkerCommunicator(scriptUrl);
+      const validSources: Record<string, IEngineSourceConfig> = {};
+      for (const [key, value] of Object.entries(sources)) {
+        if (value) validSources[key] = value;
+      }
+
+      const resources = await loader.loadResources(this.id, validSources);
+      const mainUrl = resources["main"];
+
+      if (!mainUrl) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Missing main entry point after resolution",
+          engineId: this.id,
+        });
+      }
+
+      this.communicator = new WorkerCommunicator(mainUrl);
 
       this.messageUnsubscriber = this.communicator.onMessage((data) => {
         this.handleIncomingMessage(data);

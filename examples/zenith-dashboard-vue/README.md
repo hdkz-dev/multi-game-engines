@@ -3,7 +3,7 @@
 Vue 3 / Nuxt 3 版のマルチゲームエンジン分析ダッシュボード。
 `@multi-game-engines/ui-vue` パッケージを活用した例です。
 
-> React / Next.js 版は [`../zenith-dashboard`](../zenith-dashboard) を参照してください。
+> React / Next.js 版は [`../zenith-dashboard-react`](../zenith-dashboard-react) を参照してください。
 
 ## 技術スタック
 

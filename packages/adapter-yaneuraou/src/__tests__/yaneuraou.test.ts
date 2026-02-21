@@ -8,6 +8,7 @@ import {
   afterAll,
 } from "vitest";
 import { YaneuraouAdapter } from "../yaneuraou.js";
+import { IEngineLoader } from "@multi-game-engines/core";
 
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
@@ -39,8 +40,19 @@ class MockWorker {
 }
 
 describe("YaneuraouAdapter", () => {
+  const mockLoader = {
+    loadResource: vi.fn().mockResolvedValue("blob:mock"),
+    loadResources: vi.fn().mockResolvedValue({ main: "blob:mock" }),
+    revoke: vi.fn(),
+    revokeByEngineId: vi.fn(),
+  };
+
   beforeAll(() => {
     vi.spyOn(performance, "now").mockReturnValue(0);
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn().mockReturnValue("blob:mock"),
+      revokeObjectURL: vi.fn(),
+    });
   });
 
   afterAll(() => {
@@ -59,7 +71,7 @@ describe("YaneuraouAdapter", () => {
 
   it("should change status correctly on load", async () => {
     const adapter = new YaneuraouAdapter();
-    await adapter.load();
+    await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(adapter.status).toBe("ready");
   });
 });

@@ -7,7 +7,7 @@ import {
   SFEN,
   createSFEN,
 } from "@multi-game-engines/domain-shogi";
-import { Move, createMove } from "@multi-game-engines/core";
+import { Move, createMove, truncateLog } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 const KANJI_SYMBOLS: Record<ShogiPiece, string> = {
@@ -136,7 +136,10 @@ export class ShogiBoard extends LitElement {
       this._sfen = createSFEN(value);
       this.errorMessage = ""; // Clear error on success
     } catch (e) {
-      console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
+      console.warn(
+        `[ShogiBoard] Invalid SFEN attribute: ${truncateLog(value)}`,
+        e,
+      );
       this.errorMessage =
         e instanceof Error ? e.message : "Invalid SFEN position";
     }
@@ -158,7 +161,10 @@ export class ShogiBoard extends LitElement {
     try {
       this._lastMove = !value || value === "" ? "" : createMove(value);
     } catch (e) {
-      console.warn(`[ShogiBoard] Invalid move attribute: ${value}`, e);
+      console.warn(
+        `[ShogiBoard] Invalid move attribute: ${truncateLog(value)}`,
+        e,
+      );
       this._lastMove = "";
     }
     this.requestUpdate("lastMove", old);
