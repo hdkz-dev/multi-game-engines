@@ -125,6 +125,10 @@ export class EngineFacade<
     return this;
   }
 
+  /**
+   * エンジンをロードし、初期化します。
+   * 必要なリソースのフェッチ、Worker の起動、および能力検証を行います。
+   */
   async load(): Promise<void> {
     if (this.status !== "uninitialized") return;
     if (this.loadPromise) return this.loadPromise;
@@ -151,6 +155,13 @@ export class EngineFacade<
     return this.loadPromise;
   }
 
+  /**
+   * 指定されたオプションで探索を実行します。
+   * エンジンが未ロードの場合は、戦略に基づいて自動的にロードします。
+   *
+   * @param options - 探索オプション (FEN, 深さ, 時間制限など)。
+   * @returns 探索結果 (最善手など)。
+   */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (
       this.status === "uninitialized" &&

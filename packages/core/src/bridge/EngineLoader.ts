@@ -36,6 +36,14 @@ export class EngineLoader implements IEngineLoader {
     }
   }
 
+  /**
+   * 単一のエンジンリソースをフェッチ、検証、キャッシュ、および Blob URL 化します。
+   *
+   * @param engineId - リソースを所有するエンジンの ID。
+   * @param config - リソース設定 (URL, SRI, タイプ等)。
+   * @returns 生成された Blob URL。
+   * @throws {EngineError} 検証失敗、ネットワークエラー、またはセキュリティ違反の場合。
+   */
   async loadResource(
     engineId: string,
     config: IEngineSourceConfig,
@@ -202,6 +210,13 @@ export class EngineLoader implements IEngineLoader {
     this.activeBlobs.set(cacheKey, newUrl);
   }
 
+  /**
+   * 複数のリソースを一括でロードします。アトミック性を保証し、一部が失敗した場合は全てロールバックします。
+   *
+   * @param engineId - エンジン ID。
+   * @param configs - キーとリソース設定のマップ。
+   * @returns キーと Blob URL のマップ。
+   */
   async loadResources(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
@@ -243,6 +258,11 @@ export class EngineLoader implements IEngineLoader {
     return results;
   }
 
+  /**
+   * 指定された Blob URL を無効化し、内部管理マップから削除します。
+   *
+   * @param url - 無効化する Blob URL。
+   */
   revoke(url: string): void {
     URL.revokeObjectURL(url);
     // マップからも削除
