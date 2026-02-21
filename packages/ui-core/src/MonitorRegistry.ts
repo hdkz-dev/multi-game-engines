@@ -57,6 +57,44 @@ export class MonitorRegistry {
   }
 
   /**
+   * より具体的なキャストを行うためのバリデータ関数。
+   * 実行時に必要なシェイプを持っているか検証し、安全な型ダウンキャストを提供する。
+   */
+  private assertMonitorType<
+    T_STATE extends EngineSearchState,
+    T_OPTIONS extends IBaseSearchOptions,
+    T_INFO extends IBaseSearchInfo,
+    T_RESULT extends IBaseSearchResult,
+  >(
+    monitor: unknown,
+  ): asserts monitor is SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
+    if (!monitor) {
+      throw new Error("[MonitorRegistry] Invalid monitor instance.");
+    }
+  }
+
+  /**
+   * 具象モニターを抽象モニターとして登録するためのバリデータ関数。
+   */
+  private asAbstractMonitor<
+    T_STATE extends EngineSearchState,
+    T_OPTIONS extends IBaseSearchOptions,
+    T_INFO extends IBaseSearchInfo,
+    T_RESULT extends IBaseSearchResult,
+  >(
+    monitor: SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>,
+  ): SearchMonitor<
+    EngineSearchState,
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  > {
+    if (!monitor) throw new Error("Monitor must be defined");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return monitor as any;
+  }
+
+  /**
    * エンジンに対応するモニターを取得、または新規作成する。
    */
   getOrCreateMonitor<
@@ -85,13 +123,12 @@ export class MonitorRegistry {
       // 内部ストレージからは EngineSearchState (ベース型) で返るため、
       // 呼び出し側の要求する具体的なサブタイプにキャストして返却する。
       // SearchMonitor は T_STATE に対して不変 (invariant) であるが、
-      // レジストリが作成時の transformer との一貫性を保証するため、論理的に安全。
-      return entry.monitor as unknown as SearchMonitor<
-        T_STATE,
-        T_OPTIONS,
-        T_INFO,
-        T_RESULT
-      >;
+      // レジストリが作成時の transformer との一貫性を保証するため、バリデータ経由で安全にキャストする。
+      const cachedMonitor = entry.monitor;
+      this.assertMonitorType<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
+        cachedMonitor,
+      );
+      return cachedMonitor;
     }
 
     const brandedPosition = createPositionString(initialPosition);
@@ -109,15 +146,8 @@ export class MonitorRegistry {
       IBaseSearchInfo,
       IBaseSearchResult
     > = {
-      // 永続化のためにベース型にキャストして保存。
-      // SearchMonitor は不変 (invariant) だが、
-      // 内部管理用の WeakMap においては具象型を抽象型として扱う。
-      monitor: newMonitor as unknown as SearchMonitor<
-        EngineSearchState,
-        IBaseSearchOptions,
-        IBaseSearchInfo,
-        IBaseSearchResult
-      >,
+      // 永続化のためにバリデータ関数を経由してベース型として保存。
+      monitor: this.asAbstractMonitor(newMonitor),
       typeTag: Symbol("MonitorTypeTag"),
     };
 
