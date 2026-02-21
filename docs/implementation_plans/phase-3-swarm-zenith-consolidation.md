@@ -18,28 +18,28 @@
 ### 1. Swarm 統合 (Ensemble Adapter)
 
 - **多様な合議戦略**: `MajorityVote` に加え、`BestScore` (評価値ベース), `WeightedAverage` (重み付き平均) を実装。
-- **専門性管理**: エンジンごとの「得意局面（手番、駒数等）」に応じた動的な重み付け（Expertise-based Weighting）。
+- **専門性管理 (Expertise Mapping)**: 各サブエンジンの特性（序盤・終盤等）を **Capability Vector** として管理し、局面の動的特徴量に基づいて重みを調整。
 - **非同期ストリーミング**: 複数のエンジンからストリームされる `info` (PV等) を、UI 層で視覚的に比較・統合するための正規化レイヤーの強化。
 
-### 3. Mobile Native Bridge (ADR-041)
+### 2. Mobile Native Bridge (ADR-041)
 
 - [ ] **Bridge Adapter**: `@multi-game-engines/adapter-mobile-bridge` の初期実装。
 - [ ] **Capacitor Plugin Prototype**: iOS/Android 向けネイティブプラグインのサンプル実装。
 - [ ] **Native Integration**: ネイティブ側スレッドと `IEngine` ライフサイクルの同期検証。
 
-### 4. Zenith Mobile UI & Monitors (ADR-042)
+### 3. Zenith Mobile UI & Monitors (ADR-042)
 
 - [ ] **Mobile Elements**: `@multi-game-engines/ui-mobile-elements` パッケージの新設。
 - [ ] **Energy Monitor**: モバイル固有のテレメトリ（バッテリー・温度）の表示機能。
 - [ ] **Touch Optimization**: モバイル環境での操作性向上とハプティクス対応。
 
-### 5. Zenith Loader & OPFS (大容量データ配信)
+### 4. Zenith Loader & OPFS (大容量データ配信)
 
 - **分割検証アルゴリズム**: 大容量ファイルをチャンクごとにフェッチし、それぞれの SRI を検証。
 - **OPFS 永続化**: ダウンロード済みのバイナリを `OPFSStorage` に保存し、次回起動時を 0ms に。
 - **動的プロキシ**: Cloudflare Workers を活用したバイナリ配信と、ユーザーに近いエッジでの整合性チェック。
 
-### 6. Multi-Runtime Bridge
+### 5. Multi-Runtime Bridge
 
 - **環境自動検知**: `CapabilityDetector` を拡張し、`process.versions.node` や `Bun` の存在を検知。
 - **ネイティブフォールバック**:
@@ -47,10 +47,11 @@
   - Desktop/Node 環境: `child_process` 経由で OS ネイティブバイナリを実行。
 - **透明なインターフェース**: 利用者は実行環境を意識せず、単一の `IEngine` API で最高性能を享受。
 
-### 4. ハードウェア加速 (WebNN/WebGPU)
+### 6. ハードウェア加速 (WebNN/WebGPU)
 
+- **WebNN 加速**: **NPU** (Neural Processing Unit) を最優先としたデバイス選択アルゴリズムの実装。W3C 2026 CR に準拠。
+- **WebGPU 最適化**: **IO Binding** によるデータ転送最小化と、**Multi-Pass Compute** による演算効率の向上。
 - **抽象化レイヤー**: `core` パッケージに `IAccelerator` 定義を追加。
-- **エンジンの対応**: `adapter-katago` (GPU必須) 等において、WebNN バックエンドを優先的に試行するロジックの実装。
 
 ## マイルストーン
 
