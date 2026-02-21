@@ -31,6 +31,18 @@ export class ResourceInjector {
   private static readyCallbacks: (() => void)[] = [];
 
   /**
+   * WorkerGlobalScope の型ガード
+   */
+  private static isWorkerScope(obj: unknown): obj is WorkerGlobalScope {
+    return (
+      typeof obj === "object" &&
+      obj !== null &&
+      "postMessage" in obj &&
+      typeof (obj as { postMessage?: unknown }).postMessage === "function"
+    );
+  }
+
+  /**
    * メッセージを監視し、リソース注入コマンドを処理します。
    * @param onMessage 既存の onmessage ハンドラがある場合に渡すと、リソース注入以外のメッセージを委譲します。
    */
@@ -57,9 +69,8 @@ export class ResourceInjector {
 
         // 注入完了をホストに通知（ハンドシェイク）
         if (typeof self !== "undefined") {
-          const workerScope = self as unknown as WorkerGlobalScope;
-          if (typeof workerScope.postMessage === "function") {
-            workerScope.postMessage({
+          if (this.isWorkerScope(self)) {
+            self.postMessage({
               type: "MG_RESOURCES_READY",
             });
           }
@@ -78,12 +89,9 @@ export class ResourceInjector {
 
     if (typeof globalThis.addEventListener === "function") {
       globalThis.addEventListener("message", handler);
-    } else if (typeof self !== "undefined") {
-      const workerScope = self as unknown as WorkerGlobalScope;
+    } else if (typeof self !== "undefined" && this.isWorkerScope(self)) {
       // 2026 Best Practice: ランタイムガードによる安全な代入
-      if ("onmessage" in workerScope) {
-        workerScope.onmessage = handler;
-      }
+      self.onmessage = handler;
     }
   }
 

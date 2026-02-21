@@ -116,9 +116,9 @@
 
 ### C-2. プロダクションコードの `as unknown as` 削除
 
-- [ ] `packages/ui-core/src/MonitorRegistry.ts` — バリデータ関数経由に置換。
-- [ ] `packages/core/src/workers/ResourceInjector.ts` — 型ガード導入を検討。
-- [ ] `packages/core/src/errors/EngineError.ts` — Error Cause API の型制約に対応。
+- [x] `packages/ui-core/src/MonitorRegistry.ts` — バリデータ関数経由に置換。
+- [x] `packages/core/src/workers/ResourceInjector.ts` — 型ガード導入を検討。
+- [x] `packages/core/src/errors/EngineError.ts` — Error Cause API の型制約に対応。
 
 ### C-3. OPFSStorage の TODO 解消
 

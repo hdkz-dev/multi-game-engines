@@ -28,7 +28,8 @@ export class EngineError extends Error {
   public readonly i18nParams?: Record<string, string | number> | undefined;
 
   constructor(opts: IEngineErrorOptions) {
-    super(opts.message);
+    // 2026 Best Practice: Error Cause API の活用
+    super(opts.message, { cause: opts.originalError });
     this.name = "EngineError";
     this.code = opts.code;
     this.engineId = opts.engineId;
@@ -38,11 +39,14 @@ export class EngineError extends Error {
     this.i18nParams = opts.i18nParams;
 
     // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
-    const errorConstructor = Error as unknown as {
-      captureStackTrace?: (target: object, constructor?: unknown) => void;
-    };
-    if (typeof errorConstructor.captureStackTrace === "function") {
-      errorConstructor.captureStackTrace(this, EngineError);
+    if (
+      "captureStackTrace" in Error &&
+      typeof (Error as { captureStackTrace?: unknown }).captureStackTrace ===
+        "function"
+    ) {
+      (
+        Error as { captureStackTrace: (t: object, c?: unknown) => void }
+      ).captureStackTrace(this, EngineError);
     }
   }
 
