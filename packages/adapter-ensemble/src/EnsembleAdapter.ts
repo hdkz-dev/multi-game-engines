@@ -114,10 +114,23 @@ export class EnsembleAdapter<
     return () => unsubs.forEach((u) => u());
   }
 
-  onStatusChange(_callback: (status: EngineStatus) => void): () => void {
-    // 自身のステータス変更を通知
-    // 2026-02-21: 実際の通知ロジックが必要だが、プロトタイプでは空
-    return () => {};
+  onStatusChange(callback: (status: EngineStatus) => void): () => void {
+    const unsubs = this.engines.map((e) =>
+      e.onStatusChange(() => {
+        // いずれかのエンジンが status 変更されたら。
+        // アンサンブルとしての統合ステータスを計算して通知
+        const statuses = this.engines.map((eng) => eng.status);
+        if (statuses.some((s) => s === "error")) {
+          this.status = "error";
+        } else if (statuses.some((s) => s === "busy")) {
+          this.status = "busy";
+        } else if (statuses.every((s) => s === "ready")) {
+          this.status = "ready";
+        }
+        callback(this.status);
+      }),
+    );
+    return () => unsubs.forEach((u) => u());
   }
 
   onTelemetry(callback: (telemetry: EngineTelemetry) => void): () => void {

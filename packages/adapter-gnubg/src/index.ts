@@ -1,5 +1,5 @@
 import { GNUBGAdapter } from "./GNUBGAdapter.js";
-import { IEngine, IEngineConfig } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
@@ -19,9 +19,6 @@ export function createGNUBGEngine(
   IBackgammonSearchInfo,
   IBackgammonSearchResult
 > {
-  return new GNUBGAdapter(config) as unknown as IEngine<
-    IBackgammonSearchOptions,
-    IBackgammonSearchInfo,
-    IBackgammonSearchResult
-  >;
+  const adapter = new GNUBGAdapter(config);
+  return new EngineFacade(adapter);
 }

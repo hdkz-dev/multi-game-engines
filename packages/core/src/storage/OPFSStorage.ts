@@ -50,7 +50,8 @@ export class OPFSStorage implements IFileStorage {
 
   async clear(): Promise<void> {
     const root = await this.getDirectory();
-    // @ts-expect-error: FileSystemDirectoryHandle has an async iterator in modern browsers
+    // @ts-expect-error: FileSystemDirectoryHandle.keys() はモダンブラウザで非同期イテレータを返しますが、
+    // 一部の古い TS DOM lib では定義されていないため、型エラーを抑制します。
     for await (const name of root.keys()) {
       await root.removeEntry(name, { recursive: true });
     }
