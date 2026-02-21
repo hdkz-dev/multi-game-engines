@@ -1,4 +1,3 @@
-import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 import { ChessBoard } from "../index.js";
 import { createFEN } from "@multi-game-engines/domain-chess";
