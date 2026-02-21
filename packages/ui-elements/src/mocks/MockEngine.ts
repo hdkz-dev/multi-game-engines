@@ -58,10 +58,9 @@ export class MockEngine implements IEngine<
       throw this.lastError;
     }
 
+    await this.stop();
     this.updateStatus("busy");
     let depth = 0;
-
-    await this.stop();
 
     this.intervalId = setInterval(
       () => {

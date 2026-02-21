@@ -352,6 +352,8 @@ export type IEngineSourceType =
   | "eval-data"
   | "native"
   | "webgpu-compute"
+  | "json"
+  | "text"
   | "asset";
 
 /**
@@ -462,15 +464,9 @@ export interface IEngineBridge {
   /**
    * 汎用アダプター用のファクトリ（クラス）を登録します。
    */
-  registerAdapterFactory<
-    O extends IBaseSearchOptions = IBaseSearchOptions,
-    I extends IBaseSearchInfo = IBaseSearchInfo,
-    R extends IBaseSearchResult = IBaseSearchResult,
-  >(
+  registerAdapterFactory(
     type: string,
-    factory: (
-      config: IEngineConfig,
-    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
+    factory: (config: IEngineConfig) => unknown,
   ): void;
 
   unregisterAdapter(id: string): Promise<void>;

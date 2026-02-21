@@ -56,7 +56,7 @@ export class EngineLoader implements IEngineLoader {
       });
     }
     const safeId = engineId;
-    const cacheKey = `${safeId}:${encodeURIComponent(config.url)}`;
+    const cacheKey = `${safeId}-${encodeURIComponent(config.url)}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
@@ -68,7 +68,12 @@ export class EngineLoader implements IEngineLoader {
 
     // 2026: SSR Compatibility Guard
     if (typeof URL.createObjectURL === "undefined") {
-      return config.url;
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message:
+          "EngineLoader requires a browser environment with Blob URL support.",
+        engineId,
+      });
     }
 
     const promise = (async () => {
@@ -279,7 +284,7 @@ export class EngineLoader implements IEngineLoader {
    */
   revokeByEngineId(engineId: string): void {
     for (const [key, val] of this.activeBlobs.entries()) {
-      if (key.startsWith(`${engineId}:`)) {
+      if (key.startsWith(`${engineId}-`)) {
         URL.revokeObjectURL(val);
         this.activeBlobs.delete(key);
       }

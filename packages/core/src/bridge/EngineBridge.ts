@@ -36,11 +36,7 @@ export class EngineBridge implements IEngineBridge {
   >();
   private adapterFactories = new Map<
     string,
-    (
-      config: IEngineConfig,
-    ) =>
-      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+    (config: IEngineConfig) => unknown
   >();
   private engineInstances = new Map<
     string,
@@ -91,25 +87,15 @@ export class EngineBridge implements IEngineBridge {
    * これにより、`getEngine` に設定オブジェクトを渡すだけで、事前にインスタンス化することなくエンジンを利用可能になります。
    *
    * @param type - アダプターの種類識別子（例: "uci", "usi"）。IEngineConfig.adapter と一致させる必要があります。
-   * @param factory - 設定を受け取りアダプターを返す関数。
+   * @param factory - 設定を受け取りアダプターまたはエンジンを返す関数。
    */
-  registerAdapterFactory<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
+  registerAdapterFactory(
     type: string,
-    factory: (
-      config: IEngineConfig,
-    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
+    factory: (config: IEngineConfig) => unknown,
   ): void {
     this.adapterFactories.set(
       type,
-      factory as (
-        config: IEngineConfig,
-      ) =>
-        | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-        | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      factory as (config: IEngineConfig) => unknown,
     );
   }
 

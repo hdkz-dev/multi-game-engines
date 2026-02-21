@@ -38,7 +38,13 @@
       "invalidFEN": "無効な FEN です: 入力は空であってはなりません。",
       "invalidFENStructure": "無効な FEN 構造です: 6 つのフィールドが必要です。",
       "invalidSFEN": "無効な SFEN です: 入力は空であってはなりません。",
-      "invalidSFENStructure": "無効な SFEN 構造です: 4 つ以上のフィールドが必要です。",
+      "invalidSFENStructure": "無効な SFEN 構造です: 4 つのフィールドが必要です。",
+      "invalidGOBoard": "無効な囲碁盤面です: 入力は空であってはなりません。",
+      "invalidGOMove": "無効な囲碁の指し手形式です: \"{move}\"",
+      "invalidMahjongMove": "無効な麻雀の指し手形式です: \"{move}\"",
+      "invalidReversiBoard": "無効なリバーシ盤面です: 入力は空であってはなりません。",
+      "invalidReversiMove": "無効なリバーシの指し手形式です: \"{move}\"",
+      "nestedTooDeep": "データ構造が深すぎます: {path}",
       "illegalCharacters": "不正な文字が検出されました。",
       "networkError": "エンジンリソースの取得に失敗しました。",
       "securityViolation": "セキュリティ違反: 不安全なリソースロードが遮断されました。",
@@ -59,6 +65,10 @@
     "shogiLabel": "将棋 / USI",
     "engineSelector": "エンジン選択",
     "languageSelector": "言語選択",
+    "language": {
+      "en": "英語 (EN)",
+      "ja": "日本語 (JA)"
+    },
     "errors": {
       "bridgeNotAvailable": "エンジンブリッジが利用できません。"
     },

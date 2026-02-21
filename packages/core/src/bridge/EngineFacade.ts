@@ -231,9 +231,11 @@ export class EngineFacade<
     this.resultListeners.clear();
     this.telemetryListeners.clear();
 
-    if (this.ownAdapter && this.adapter.dispose) {
-      const id = this.adapter.id;
-      await this.adapter.dispose();
+    if (this.ownAdapter) {
+      const id = this.id;
+      if (this.adapter.dispose) {
+        await this.adapter.dispose();
+      }
       // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
       if (this.loaderProvider) {
         try {

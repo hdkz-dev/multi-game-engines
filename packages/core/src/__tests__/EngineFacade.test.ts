@@ -205,4 +205,18 @@ describe("EngineFacade", () => {
 
     expect(loadCount).toBe(1);
   });
+
+  it("dispose() がアダプターを破棄し、リソースを解放すること", async () => {
+    const mockLoader = {
+      revokeByEngineId: vi.fn(),
+    } as unknown as IEngineLoader;
+    const loaderProvider = vi.fn().mockResolvedValue(mockLoader);
+    const facade = new EngineFacade(adapter, [], loaderProvider);
+
+    await facade.dispose();
+
+    expect(adapter.dispose).toHaveBeenCalled();
+    expect(loaderProvider).toHaveBeenCalled();
+    expect(mockLoader.revokeByEngineId).toHaveBeenCalledWith(adapter.id);
+  });
 });

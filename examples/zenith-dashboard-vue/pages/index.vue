@@ -183,7 +183,7 @@ const nps = computed(() => {
               ]"
               @click="locale = 'en'"
             >
-              EN
+              {{ localeData.dashboard.language.en }}
             </button>
             <button
               :aria-pressed="locale === 'ja'"
@@ -193,7 +193,7 @@ const nps = computed(() => {
               ]"
               @click="locale = 'ja'"
             >
-              JA
+              {{ localeData.dashboard.language.ja }}
             </button>
           </div>
 

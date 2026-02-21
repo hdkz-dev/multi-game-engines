@@ -250,7 +250,7 @@ export default function Dashboard() {
                     : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                EN
+                {localeData.dashboard.language.en}
               </button>
               <button
                 onClick={() => setLocale("ja")}
@@ -261,7 +261,7 @@ export default function Dashboard() {
                     : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                JA
+                {localeData.dashboard.language.ja}
               </button>
             </div>
 
@@ -344,7 +344,7 @@ export default function Dashboard() {
                 key="chess-panel"
                 engine={chessEngine}
                 searchOptions={chessOptions}
-                title={localeData.engine.stockfishTitle || "Stockfish 16.1"}
+                title={localeData.engine.stockfishTitle}
                 className="h-full"
               />
             )}
@@ -353,7 +353,7 @@ export default function Dashboard() {
                 key="shogi-panel"
                 engine={shogiEngine}
                 searchOptions={shogiOptions}
-                title={localeData.engine.yaneuraouTitle || "Yaneuraou 7.5.0"}
+                title={localeData.engine.yaneuraouTitle}
                 className="h-full"
               />
             )}

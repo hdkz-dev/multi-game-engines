@@ -24,6 +24,11 @@ export class IndexedDBStorage implements IFileStorage {
         }
       };
 
+      request.onblocked = () => {
+        this.dbPromise = null;
+        reject(new Error("IndexedDB open blocked by another connection"));
+      };
+
       request.onsuccess = () => {
         const db = request.result;
         this.db = db;

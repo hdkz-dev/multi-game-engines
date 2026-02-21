@@ -34,6 +34,11 @@ export default [
         { "argsIgnorePattern": "^_" },
       ],
     },
+    settings: {
+      next: {
+        rootDir: "examples/zenith-dashboard-react",
+      },
+    },
   },
   // Storybook 用の設定を個別に定義（互換性エラーを避けるため、configs を直接展開）
   {

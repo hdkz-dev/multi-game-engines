@@ -15,6 +15,7 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       include: ["src/**/*"],
+      exclude: ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"],
     }),
   ],
   esbuild: {

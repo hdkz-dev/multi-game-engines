@@ -133,7 +133,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid SFEN: Input must be a non-empty string.",
-      i18nKey: "errors.invalid_sfen_empty",
+      i18nKey: "engine.errors.invalidSFEN",
     });
   }
   const trimmedPos = pos.trim();
@@ -141,7 +141,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid SFEN: Illegal characters detected.",
-      i18nKey: "errors.invalid_sfen_chars",
+      i18nKey: "engine.errors.illegalCharacters",
       remediation:
         "SFEN should only contain board pieces [PLNSGBRK...], counts [1-9], '+', '/', '-', and spaces.",
     });
@@ -149,9 +149,9 @@ export function createSFEN(pos: string): SFEN {
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 4) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
-      i18nKey: "errors.invalid_sfen_structure",
+      i18nKey: "engine.errors.invalidSFENStructure",
       i18nParams: { count: fields.length },
       remediation: "SFEN must contain: [board] [turn] [hand] [moveCount]",
     });
@@ -160,34 +160,29 @@ export function createSFEN(pos: string): SFEN {
   // 2nd field: Turn (b or w)
   if (!/^[bw]$/.test(fields[1]!)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
-      i18nKey: "errors.invalid_sfen_turn",
-      i18nParams: { turn: fields[1]! },
+      i18nKey: "engine.errors.invalidSFEN",
     });
   }
 
   // 3rd field: Hand pieces (e.g., 2P3k or -)
-  if (!/^(?:(?:[1-9][0-9]*[PLNSGBRKplnsgbrk]+)+|-)$/.test(fields[2]!)) {
-    // Note: USI standard for hand pieces can be complex, but usually it is [count][piece][count][piece]...
-    // Adjusting to a simpler check that covers common patterns.
-    if (!/^[0-9a-zA-Z-]+$/.test(fields[2]!)) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: `Invalid SFEN hand: "${fields[2]}"`,
-        i18nKey: "errors.invalid_sfen_hand",
-        i18nParams: { hand: fields[2]! },
-      });
-    }
+  if (!/^(?:(?:[1-9][0-9]*)?[PLNSGBRKplnsgbrk])+$|^-$/.test(fields[2]!)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid SFEN hand: "${fields[2]}"`,
+      i18nKey: "engine.errors.invalidSFEN",
+      i18nParams: { hand: fields[2]! },
+    });
   }
 
   // 4th field: Move counter (>= 1)
   const moveCountNum = Number(fields[3]!);
   if (!Number.isInteger(moveCountNum) || moveCountNum < 1) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN move counter: "${fields[3]}"`,
-      i18nKey: "errors.invalid_sfen_counter",
+      i18nKey: "engine.errors.invalidSFEN",
       i18nParams: { counter: fields[3]! },
     });
   }

@@ -29,7 +29,11 @@ export class OPFSStorage implements IFileStorage {
       await writable.write(data);
       await writable.close();
     } catch (error) {
-      await writable.abort();
+      try {
+        await writable.abort();
+      } catch {
+        // abort 失敗は二次的エラーのため抑制し、元のエラーを優先する
+      }
       throw error;
     }
   }

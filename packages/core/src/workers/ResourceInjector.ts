@@ -40,8 +40,9 @@ export class ResourceInjector {
       "postMessage" in obj &&
       typeof (obj as { postMessage?: unknown }).postMessage === "function" &&
       "onmessage" in obj &&
-      // Window と区別するため、importScripts の存在を確認 (Worker固有)
-      "importScripts" in obj
+      // Window (self === window) には document が存在するが、Worker スコープには存在しない。
+      // importScripts は Module Worker では存在しないため、判定には使用しない。
+      !("document" in obj)
     );
   }
 
