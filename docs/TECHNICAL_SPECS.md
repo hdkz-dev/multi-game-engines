@@ -14,7 +14,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 各種ゲーム固有の型（`FEN`, `SFEN`, `GOMove` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、それぞれのドメインパッケージ（`@multi-game-engines/domain-*`）で提供されています。
 
-- **Move<T> (Hierarchical Branding)**: `core` パッケージで定義される指し手の基底型。各ドメインで `Move<"ShogiMove">` のように階層化され、基底の `Move` 型との互換性を保ちつつ、ドメイン間の誤混同をコンパイルレベルで防止します。
+- **`Move<T>` (Hierarchical Branding)**: `core` パッケージで定義される指し手の基底型。各ドメインで `Move<"ShogiMove">` のように階層化され、基底の `Move` 型との互換性を保ちつつ、ドメイン間の誤混同をコンパイルレベルで防止します。
 - **FEN / SFEN**: 局面表記（Branded string）。`PositionString<T>` を継承し、文字種・フィールド数・手番等の厳格なバリデーションを提供。
 - **create*Move / create*Board**: 各ドメインパッケージが提供する「バリデータ兼ファクトリ」。アンセーフな `as` キャストを排除し、Refuse by Exception 原則に基づき、不正な入力に対して即座に `EngineError` をスローします。
 
@@ -56,6 +56,18 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 - **メッセージバッファリング**: `expectMessage` の呼び出し前に届いたメッセージも逃さず処理。
 - **例外伝播**: Worker 内部のエラーや強制終了（terminate）時の保留タスクを正確に伝送。
+
+### 3-4. Zenith Loader (大規模データ管理)
+
+- **Segmented Fetch**: 100MB を超えるバイナリを分割してダウンロードし、プログレスを詳細に表示。
+- **Segmented SRI**: 各セグメントのハッシュを検証し、途中での改竄を防止。
+- **OPFS Promotion**: ダウンロードしたバイナリを `OPFSStorage` にマウント。次回ロード時は HTTP リクエストをスキップ。
+
+### 3-5. Hybrid Bridge (マルチ環境対応)
+
+- **Environment Detection**: `navigator` オブジェクトの欠如や `process` オブジェクトの存在により実行環境を判定。
+- **Interface Consistency**: `WebWorkerAdapter` と `NativeProcessAdapter` (Node.js 用) が同一の `IEngineAdapter` インターフェースを実装。
+- **Zero-Config Switch**: 設定ファイルなしで、環境に応じた最適なバイナリ（`.wasm` vs `.exe` / `.bin`）を選択。
 
 ## 4. プロトコル解析 (2026 Best Practice)
 

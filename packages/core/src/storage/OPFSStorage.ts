@@ -1,15 +1,58 @@
 import { IFileStorage } from "../types.js";
 
+/**
+ * Origin Private File System (OPFS) を使用したファイルストレージ実装。
+ * 2026年時点でのブラウザ標準 API を使用し、バイナリデータの高速な読み書きを実現します。
+ */
 export class OPFSStorage implements IFileStorage {
-  async get(_key: string): Promise<ArrayBuffer | null> {
-    // Mock implementation
-    // TODO: Implement actual OPFS access using navigator.storage.getDirectory() for production usage.
-    return null;
+  private async getDirectory(): Promise<FileSystemDirectoryHandle> {
+    return await navigator.storage.getDirectory();
   }
-  async set(_key: string, _data: ArrayBuffer): Promise<void> {}
-  async delete(_key: string): Promise<void> {}
-  async has(_key: string): Promise<boolean> {
-    return false;
+
+  async get(key: string): Promise<ArrayBuffer | null> {
+    try {
+      const root = await this.getDirectory();
+      const fileHandle = await root.getFileHandle(key);
+      const file = await fileHandle.getFile();
+      return await file.arrayBuffer();
+    } catch {
+      // ファイルが存在しない、またはアクセス権限がない場合は null を返す
+      return null;
+    }
   }
-  async clear(): Promise<void> {}
+
+  async set(key: string, data: ArrayBuffer): Promise<void> {
+    const root = await this.getDirectory();
+    const fileHandle = await root.getFileHandle(key, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(data);
+    await writable.close();
+  }
+
+  async delete(key: string): Promise<void> {
+    try {
+      const root = await this.getDirectory();
+      await root.removeEntry(key);
+    } catch {
+      // ファイルが存在しない場合は何もしない
+    }
+  }
+
+  async has(key: string): Promise<boolean> {
+    try {
+      const root = await this.getDirectory();
+      await root.getFileHandle(key);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async clear(): Promise<void> {
+    const root = await this.getDirectory();
+    // @ts-expect-error: FileSystemDirectoryHandle has an async iterator in modern browsers
+    for await (const name of root.keys()) {
+      await root.removeEntry(name, { recursive: true });
+    }
+  }
 }
