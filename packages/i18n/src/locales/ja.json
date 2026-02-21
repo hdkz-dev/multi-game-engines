@@ -42,7 +42,12 @@
       "illegalCharacters": "不正な文字が検出されました。",
       "networkError": "エンジンリソースの取得に失敗しました。",
       "securityViolation": "セキュリティ違反: 不安全なリソースロードが遮断されました。",
-      "missingMainEntryPoint": "エンジンのメインエントリーポイント URL が見つかりません。"
+      "missingMainEntryPoint": "エンジンのメインエントリーポイント URL が見つかりません。",
+      "loaderRequired": "安全なリソースロードのために IEngineLoader が必要です。",
+      "missingSources": "エンジン構成に 'sources' フィールドがありません。",
+      "invalidMoveFormat": "指し手の形式が無効です: \"{move}\"",
+      "injectionDetected": "{context} で潜在的なコマンドインジェクションが検出されました: \"{input}\"",
+      "invalidPositionString": "局面文字列が無効です: 入力は空であってはなりません。"
     }
   },
   "dashboard": {

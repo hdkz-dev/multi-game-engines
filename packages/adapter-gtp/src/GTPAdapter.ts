@@ -4,87 +4,87 @@ import {
   WorkerCommunicator,
   EngineError,
   EngineErrorCode,
-  ResourceMap,
   IEngineConfig,
+  IEngineAdapter,
   IEngineSourceConfig,
 } from "@multi-game-engines/core";
 import {
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult,
+  IGoSearchOptions,
+  IGoSearchInfo,
+  IGoSearchResult,
   GTPParser,
 } from "./GTPParser.js";
 
-/**
- * 2026 Zenith Tier: 汎用 GTP (Go Text Protocol) アダプター。
- */
 export class GTPAdapter extends BaseAdapter<
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult
+  IGoSearchOptions,
+  IGoSearchInfo,
+  IGoSearchResult
 > {
   readonly id: string;
   readonly name: string;
   readonly version: string;
   readonly parser = new GTPParser();
 
-  constructor(private config: IEngineConfig) {
-    super();
-    this.id = config.id;
+  constructor(config: IEngineConfig) {
+    super(config);
+    this.id = config.id ?? "gtp";
     this.name = config.name ?? "GTP Engine";
     this.version = config.version ?? "unknown";
   }
 
-  /**
-   * エンジンのリソースをロードし、Worker を初期化します。
-   *
-   * @param loader - オプションのカスタムローダー。省略時はデフォルトのリソース解決ロジックが使用されます。
-   * @returns 初期化完了時に解決される Promise。
-   * @throws {EngineError} 必須リソースの欠落や Worker の起動失敗時にスローされます。
-   */
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      const { sources } = this.config;
+      if (!loader) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "IEngineLoader is required for secure resource loading.",
+          engineId: this.id,
+          i18nKey: "engine.errors.loaderRequired",
+        });
+      }
+
+      const sources = this.config.sources;
+      if (!sources) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: "Engine configuration is missing 'sources' field.",
+          engineId: this.id,
+          i18nKey: "engine.errors.missingSources",
+        });
+      }
 
       const validSources: Record<string, IEngineSourceConfig> = {};
       for (const [key, value] of Object.entries(sources)) {
         if (value) validSources[key] = value;
       }
 
-      const resources = loader
-        ? await loader.loadResources(this.id, validSources)
-        : { main: sources.main?.url };
+      const resources = await loader.loadResources(this.id, validSources);
+      const mainUrl = resources["main"];
 
-      if (!resources["main"]) {
+      if (!mainUrl) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry point URL",
+          message: "Missing main entry point after resolution",
           engineId: this.id,
+          i18nKey: "engine.errors.missingMainEntryPoint",
         });
       }
 
-      this.communicator = new WorkerCommunicator(resources["main"]);
-
-      const resourceMap: ResourceMap = {};
-      for (const [key, source] of Object.entries(sources)) {
-        if (source?.mountPath && resources[key]) {
-          resourceMap[source.mountPath] = resources[key]!;
-        }
-      }
-
-      if (Object.keys(resourceMap).length > 0) {
-        await this.injectResources(resourceMap);
-      }
-
-      this.messageUnsubscriber = this.communicator.onMessage((data) => {
-        this.handleIncomingMessage(data);
-      });
-
+      this.communicator = new WorkerCommunicator(mainUrl);
+      this.messageUnsubscriber = this.communicator.onMessage((data) =>
+        this.handleIncomingMessage(data),
+      );
       this.emitStatusChange("ready");
-    } catch (error) {
+    } catch (e) {
       this.emitStatusChange("error");
-      throw EngineError.from(error, this.id);
+      throw EngineError.from(e, this.id);
     }
   }
+}
+
+export function createGTPAdapter(
+  config: IEngineConfig,
+): IEngineAdapter<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
+  return new GTPAdapter(config);
 }

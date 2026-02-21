@@ -6,7 +6,7 @@ import {
   FEN,
   createFEN,
 } from "@multi-game-engines/domain-chess";
-import { Move, createMove } from "@multi-game-engines/core";
+import { Move, createMove, truncateLog } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 const PIECE_SVG: Record<ChessPiece, string> = {
@@ -86,7 +86,10 @@ export class ChessBoard extends LitElement {
       this._fen = createFEN(value);
       this.errorMessage = "";
     } catch (e) {
-      console.warn(`[ChessBoard] Invalid FEN attribute: ${value}`, e);
+      console.warn(
+        `[ChessBoard] Invalid FEN attribute: ${truncateLog(value)}`,
+        e,
+      );
       this.errorMessage =
         e instanceof Error ? e.message : "Invalid FEN position";
     }

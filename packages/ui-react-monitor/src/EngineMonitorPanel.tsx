@@ -117,6 +117,29 @@ export function EngineMonitorPanel<
     return "";
   }, [status, bestPV, strings]);
 
+  const errorMessage = useMemo(() => {
+    const err = engine.lastError;
+    if (!err) return strings.errorDefaultRemediation;
+
+    if (err.i18nKey) {
+      const parts = err.i18nKey.split(".");
+      const key = parts[parts.length - 1];
+      const errors = strings.errors as Record<string, string> | undefined;
+      if (key && errors?.[key]) {
+        let msg = errors[key]!;
+        if (err.i18nParams) {
+          Object.entries(err.i18nParams).forEach(([k, v]) => {
+            // 2026 Best Practice: プレースホルダーの全置換
+            msg = msg.split(`{${k}}`).join(String(v));
+          });
+        }
+        return msg;
+      }
+    }
+
+    return err.remediation || strings.errorDefaultRemediation;
+  }, [engine.lastError, strings]);
+
   return (
     <section
       className={cn(
@@ -182,9 +205,7 @@ export function EngineMonitorPanel<
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-red-500 bg-red-50/30">
             <AlertCircle className="w-12 h-12 mb-4 animate-bounce motion-reduce:animate-none" />
             <h3 className="font-bold mb-1">{strings.errorTitle}</h3>
-            <p className="text-xs text-red-400 max-w-[240px]">
-              {engine.lastError?.remediation || strings.errorDefaultRemediation}
-            </p>
+            <p className="text-xs text-red-400 max-w-[240px]">{errorMessage}</p>
           </div>
         ) : (
           <>

@@ -46,6 +46,15 @@
 
 - [ ] **Build Pipeline**: Emscripten / Rust 最適化ビルド（SIMD128, Multithreading）の自動化。
 - [x] **Turborepo 統合**: 並列実行とキャッシュによる高速なビルドパイプラインの確立。
+- [ ] **Hardware Acceleration (Zenith Standard)**:
+  - **WebNN**: NPU/GPU を活用した NNUE 高速推論の統合 (W3C 2026 CR 準拠)。
+  - **WebGPU Compute**: 並列探索アルゴリズムの GPU へのオフロード。
+- [ ] **Swarm (Ensemble) Architecture**:
+  - **アンサンブル・アダプター**: 複数エンジンによる合議システムの実装。
+  - **エキスパート・マッピング**: 各エンジンの特性（序盤・終盤等）に応じた動的な重み付け指し手選定。
+- [ ] **Mobile & Hybrid Bridge (Native Power)**:
+  - **Hybrid Bridge**: 環境（Browser/Node/Desktop）応じた WASM/Native バイナリの透過的切替。
+  - **Mobile Native Bridge**: Capacitor/Cordova プラグインによる、モバイル OS ネイティブ環境での最高性能エンジン実行。
 - [x] **Modular Split**: UI パッケージの物理分離（core/monitor/game）による「Pay-as-you-go」アーキテクチャの完成。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。

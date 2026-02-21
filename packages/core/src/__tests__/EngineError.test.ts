@@ -58,4 +58,27 @@ describe("EngineError", () => {
     expect(wrapped.code).toBe(EngineErrorCode.SECURITY_ERROR);
     expect(wrapped.remediation).toBeDefined();
   });
+
+  it("should support i18nKey and i18nParams", () => {
+    const error = new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Validation failed",
+      i18nKey: "engine.errors.invalidMoveFormat",
+      i18nParams: { move: "7g7f" },
+    });
+
+    expect(error.i18nKey).toBe("engine.errors.invalidMoveFormat");
+    expect(error.i18nParams).toEqual({ move: "7g7f" });
+  });
+
+  it("should propagate i18n properties via from()", () => {
+    const source = new EngineError({
+      code: EngineErrorCode.NETWORK_ERROR,
+      message: "failed",
+      i18nKey: "errors.network",
+    });
+    const wrapped = EngineError.from(source, "new-id");
+    expect(wrapped.i18nKey).toBe("errors.network");
+    expect(wrapped.engineId).toBe("new-id");
+  });
 });

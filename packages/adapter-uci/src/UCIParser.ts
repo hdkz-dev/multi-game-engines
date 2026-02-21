@@ -8,6 +8,8 @@ import {
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
+  createMove,
+  truncateLog,
 } from "@multi-game-engines/core";
 import { FEN, createFEN } from "@multi-game-engines/domain-chess";
 
@@ -34,7 +36,7 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
 
 /** チェス用の探索結果 */
 export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move;
+  bestMove: Move | "none" | "(none)";
   ponder?: Move;
 }
 
@@ -80,7 +82,7 @@ export class UCIParser implements IProtocolParser<
    */
   private createMove(value: string): Move | null {
     if (!UCIParser.MOVE_REGEX.test(value)) return null;
-    return value as Move;
+    return createMove(value);
   }
 
   /**
@@ -151,7 +153,7 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser] Skipping invalid PV move token: "${token}"`,
+                `[UCIParser] Skipping invalid PV move token: "${truncateLog(token)}"`,
               );
             }
           }
@@ -190,7 +192,14 @@ export class UCIParser implements IProtocolParser<
     if (!line.startsWith("bestmove ")) return null;
 
     const parts = line.split(" ");
-    const bestMove = this.createMove(parts[1] || "");
+    const moveStr = parts[1] || "";
+
+    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン
+    const bestMove =
+      moveStr === "none" || moveStr === "(none)"
+        ? moveStr
+        : this.createMove(moveStr);
+
     if (!bestMove) return null;
 
     const result: IChessSearchResult = {
@@ -216,15 +225,20 @@ export class UCIParser implements IProtocolParser<
    * @throws {EngineError} FEN が未指定または不正な場合。
    */
   createSearchCommand(options: IChessSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック (ADR-038)
+    ProtocolValidator.assertNoInjection(options, "search options", true);
+
     if (!options.fen) {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "UCI requires a FEN position.",
         remediation: "Provide a valid FEN string in search options.",
+        i18nKey: "adapters.uci.errors.missing_fen",
       });
     }
 
     // 2026 Best Practice: Domain-specific structural validation + Injection defense
+    ProtocolValidator.assertNoInjection(options.fen, "FEN position");
     const validatedFen = createFEN(options.fen);
 
     const isStartPos = validatedFen.toLowerCase() === "startpos";

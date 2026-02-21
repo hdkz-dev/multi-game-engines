@@ -11,6 +11,7 @@ import {
   IEngineLoader,
   EngineErrorCode,
   ResourceMap,
+  IEngineConfig,
 } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -41,16 +42,30 @@ export abstract class BaseAdapter<
   protected infoController: ReadableStreamDefaultController<T_INFO> | null =
     null;
 
+  protected config: IEngineConfig;
+
   abstract readonly id: string;
   abstract readonly name: string;
   abstract readonly version: string;
   abstract readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
+
+  constructor(config: IEngineConfig = {}) {
+    this.config = config;
+  }
 
   get status(): EngineStatus {
     return this._status;
   }
 
   abstract load(loader?: IEngineLoader): Promise<void>;
+
+  /**
+   * 2026 Best Practice: オプションを直接受け取って探索を開始するコンビニエンスメソッド。
+   */
+  async search(options: T_OPTIONS): Promise<T_RESULT> {
+    const command = this.parser.createSearchCommand(options);
+    return this.searchRaw(command).result;
+  }
 
   /**
    * 2026 Zenith Tier: 実行環境の能力チェックを追加。

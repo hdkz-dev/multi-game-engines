@@ -38,12 +38,7 @@ export const EngineUIProvider: React.FC<EngineUIProviderProps> = ({
   );
 
   const value = useMemo(() => ({ strings }), [strings]);
-
-  return (
-    <EngineUIContext.Provider value={value}>
-      {children}
-    </EngineUIContext.Provider>
-  );
+  return <EngineUIContext value={value}>{children}</EngineUIContext>;
 };
 
 /**

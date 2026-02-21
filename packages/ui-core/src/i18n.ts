@@ -36,6 +36,8 @@ export interface EngineUIStrings {
   moveAriaLabel: (move: string) => string;
   engineVersion: (name: string, version: string) => string;
   engineBridgeStandard: (year: number) => string;
+  /** ローカライズされた詳細エラーメッセージのマップ */
+  errors?: Record<string, string> | undefined;
 }
 
 /**
@@ -43,7 +45,8 @@ export interface EngineUIStrings {
  */
 export interface RawLocaleData {
   engine: {
-    [key: string]: string;
+    errors?: Record<string, string>;
+    [key: string]: unknown;
   };
 }
 
@@ -65,7 +68,8 @@ export function createUIStrings(data: unknown): EngineUIStrings {
   }
 
   const e = data.engine;
-  const t = (key: string, fallback: string) => e[key] || fallback;
+  const t = (key: string, fallback: string) =>
+    (e[key] as string | undefined) || fallback;
 
   return {
     title: t("title", "Engine"),
@@ -118,5 +122,6 @@ export function createUIStrings(data: unknown): EngineUIStrings {
         "{year}",
         year.toString(),
       ),
+    errors: e.errors,
   };
 }

@@ -119,6 +119,30 @@ const handleStop = async () => {
 const handleMoveClick = (move: string) => {
   emit("moveClick", move);
 };
+
+const errorMessage = computed(() => {
+  const err = props.engine.lastError;
+  if (!err) return strings.value.errorDefaultRemediation;
+
+  if (err.i18nKey) {
+    // 2026 Best Practice: i18n リソースからの動的取得
+    const parts = err.i18nKey.split(".");
+    const key = parts[parts.length - 1];
+    const errors = strings.value.errors as Record<string, string> | undefined;
+    if (key && errors?.[key]) {
+      let msg = errors[key]!;
+      // パラメータ置換 (例: {move} -> "7g7f")
+      if (err.i18nParams) {
+        Object.entries(err.i18nParams).forEach(([k, v]) => {
+          msg = msg.split(`{${k}}`).join(String(v));
+        });
+      }
+      return msg;
+    }
+  }
+
+  return err.remediation || strings.value.errorDefaultRemediation;
+});
 </script>
 
 <template>
@@ -148,6 +172,9 @@ const handleMoveClick = (move: string) => {
           ]"
           :title="status"
         />
+        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+          {{ status === 'busy' ? strings.searching : strings.ready }}
+        </span>
       </div>
 
       <div class="flex items-center gap-2">
@@ -185,7 +212,7 @@ const handleMoveClick = (move: string) => {
         </div>
         <h3 class="font-bold text-lg mb-1">{{ strings.errorTitle }}</h3>
         <p class="text-sm text-gray-600 max-w-[240px] leading-relaxed">
-          {{ engine.lastError?.remediation || strings.errorDefaultRemediation }}
+          {{ errorMessage }}
         </p>
       </div>
 
@@ -310,6 +337,18 @@ const handleMoveClick = (move: string) => {
         </div>
       </template>
     </div>
+
+    <!-- Footer -->
+    <footer
+      class="px-4 py-2 bg-gray-50/80 border-t border-gray-200 text-[9px] text-gray-400 flex justify-between font-medium"
+    >
+      <span class="truncate mr-4">
+        {{ strings.engineVersion(engine.name, engine.version) }}
+      </span>
+      <span class="flex-shrink-0">
+        {{ strings.engineBridgeStandard(2026) }}
+      </span>
+    </footer>
   </section>
 </template>
 

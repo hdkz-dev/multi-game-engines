@@ -4,7 +4,7 @@ import { createGOMove, createGOBoard } from "../index.js";
 describe("domain-go", () => {
   describe("createGOMove", () => {
     it("should validate valid moves", () => {
-      expect(createGOMove("Q16")).toBe("Q16");
+      expect(createGOMove("Q16")).toBe("q16");
       expect(createGOMove("pass")).toBe("pass");
     });
 

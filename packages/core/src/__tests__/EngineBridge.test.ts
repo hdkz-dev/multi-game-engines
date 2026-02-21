@@ -11,6 +11,7 @@ import {
   MiddlewarePriority,
   Move,
 } from "../types.js";
+import { createMove } from "../protocol/ProtocolValidator.js";
 
 describe("EngineBridge", () => {
   beforeAll(() => {
@@ -44,6 +45,9 @@ describe("EngineBridge", () => {
       IBaseSearchResult
     >,
     load: vi.fn().mockResolvedValue(undefined),
+    search: vi.fn().mockResolvedValue({
+      bestMove: createMove("e2e4"),
+    }),
     searchRaw: vi.fn().mockImplementation(() => ({
       info: (async function* () {
         yield { depth: 1 } as IBaseSearchInfo;

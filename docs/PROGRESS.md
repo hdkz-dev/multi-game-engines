@@ -1,6 +1,42 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月20日
+## 📅 更新日: 2026年2月21日 (実装担当: Antigravity Swarm Integration)
+
+## 🏆 到達ハイライト (2026-02-21 OPFS 実装と Swarm 設計思想の統合)
+
+- **高性能 OPFS ストレージの本番実装**: `core` パッケージに `OPFSStorage` を実装し、WASM バイナリの高速キャッシュを可能に。
+- **Swarm デザインの統合開始**: `antigravity-swarm` の思想を取り入れ、マルチエージェント/マルチエンジン協調の設計を開始。
+- **アンサンブル・アダプター (@multi-game-engines/adapter-ensemble) のプロトタイプ実装**: 複数のエンジンを束ねて合議制で最善手を決定する実験的アダプターを新設。
+
+## 🏆 到達ハイライト (2026-02-20 セキュリティ・プライバシー修復 & 拡張アダプター統合)
+
+- **プライバシー保護ログの導入 (ADR-038: Privacy-First Logging)**:
+  - エンジンパースエラー時に入力データ（局面等）が全量露出しないよう、`truncateLog` ユーティリティによるサニタイズを全パッケージに適用。
+- **SRI 検証の全アダプター強制**:
+  - `GTPAdapter`, `KingsRowAdapter` 等を含む全ての新規アダプターにおいて、`IEngineLoader` による SRI ハッシュ検証を必須化。セキュリティ・バイパス経路を完全に封鎖。
+- **コマンド・インジェクション攻撃への構造的防御**:
+  - `USIParser` (SFEN) および `GTPParser` (Board data) において、`ProtocolValidator.assertNoInjection` を適用し、不正な制御文字によるコマンド実行リスクを排除。
+- **型安全性の昇華 (Type Hardening)**:
+  - `Move<T>` の階層化ブランド型を導入し、`ShogiMove`, `GOMove` などのドメイン間での型混同を防ぎつつ、共通の `Move` 型との互換性を確保。アンセーフな `as` キャストを全廃。
+- **エラーハンドリングの多言語化 (i18n)**:
+  - `EngineError` に `i18nKey` フィールドを新設。アダプター層の抽象的なエラーが UI 層で各言語の適切なメッセージに自動変換される一気通貫のフローを構築。
+- **新規 5 アダプターのプロトタイプ完遂**:
+  - 囲碁 (`KataGo`), チェッカー (`KingsRow`), バックギャモン (`GNUBG`), 麻雀 (`Mortal`), リバーシ (`Edax`) の 5 つのプロトコルパーサーとアダプター基盤を Zenith 品質で実装。
+
+## 🏆 到達ハイライト (2026-02-20 セキュリティ・プライバシー修復 & 拡張アダプター統合)
+
+- **プライバシー保護ログの導入 (ADR-038: Privacy-First Logging)**:
+  - エンジンパースエラー時に入力データ（局面等）が全量露出しないよう、`truncateLog` ユーティリティによるサニタイズを全パッケージに適用。
+- **SRI 検証の全アダプター強制**:
+  - `GTPAdapter`, `KingsRowAdapter` 等を含む全ての新規アダプターにおいて、`IEngineLoader` による SRI ハッシュ検証を必須化。セキュリティ・バイパス経路を完全に封鎖。
+- **コマンド・インジェクション攻撃への構造的防御**:
+  - `USIParser` (SFEN) および `GTPParser` (Board data) において、`ProtocolValidator.assertNoInjection` を適用し、不正な制御文字によるコマンド実行リスクを排除。
+- **型安全性の昇華 (Type Hardening)**:
+  - `Move<T>` の階層化ブランド型を導入し、`ShogiMove`, `GOMove` などのドメイン間での型混同を防ぎつつ、共通の `Move` 型との互換性を確保。アンセーフな `as` キャストを全廃。
+- **エラーハンドリングの多言語化 (i18n)**:
+  - `EngineError` に `i18nKey` フィールドを新設。アダプター層の抽象的なエラーが UI 層で各言語の適切なメッセージに自動変換される一気通貫のフローを構築。
+- **新規 5 アダプターのプロトタイプ完遂**:
+  - 囲碁 (`KataGo`), チェッカー (`KingsRow`), バックギャモン (`GNUBG`), 麻雀 (`Mortal`), リバーシ (`Edax`) の 5 つのプロトコルパーサーとアダプター基盤を Zenith 品質で実装。
 
 ## 🏆 到達ハイライト (Zenith Tier 究極監査と型安全性の昇華 - Zenith Audit & Strict Type Hardening)
 
@@ -76,7 +112,7 @@
 - **コンフィギュレーション主導のエンジン生成**:
   - `EngineBridge.getEngine` が `IEngineConfig` を受け取れるよう拡張。バイナリ URL、SRI、および依存リソースを動的に注入可能にし、コード変更なしでのエンジン追加を可能にしました。
 - **宣言併合による高度な型安全性**:
-  - `EngineRegistry` への宣言併合を各アダプターに導入。`bridge.getEngine("stockfish")` 等の呼び出しに対し、プラグインをインポートするだけで完璧な型推論が効く「ゼロ構成型安全性」を達成しました。
+  - `EngineRegistry` へ宣言併合を各アダプターに導入。`bridge.getEngine("stockfish")` 等の呼び出しに対し、プラグインをインポートするだけで完璧な型推論が効く「ゼロ構成型安全性」を達成しました。
 - **セキュリティの Zenith Tier 強化**:
   - `EngineLoader` に Worker スクリプトのオリジン検証を導入。クロスオリジンな実行ファイルのロードを構造的に遮断し、ブラウザセキュリティを極限まで高めました。
 - **リポジトリ全域の Tree-shaking 最適化 (sideEffects)**:

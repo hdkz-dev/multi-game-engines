@@ -8,9 +8,12 @@ export interface IEngineErrorOptions {
   originalError?: unknown;
   /**
    * 解決策の提示 (開発者向けデバッグ情報)
-   * 将来的にユーザーへ表示する場合は i18n キーへの置き換えを検討してください。
    */
   remediation?: string | undefined;
+  /** 国際化対応のためのメッセージキー */
+  i18nKey?: string | undefined;
+  /** メッセージの埋め込みパラメータ */
+  i18nParams?: Record<string, string | number> | undefined;
 }
 
 /**
@@ -21,6 +24,8 @@ export class EngineError extends Error {
   public readonly engineId?: string | undefined;
   public readonly originalError?: unknown;
   public readonly remediation?: string | undefined;
+  public readonly i18nKey?: string | undefined;
+  public readonly i18nParams?: Record<string, string | number> | undefined;
 
   constructor(opts: IEngineErrorOptions) {
     super(opts.message);
@@ -29,6 +34,8 @@ export class EngineError extends Error {
     this.engineId = opts.engineId;
     this.originalError = opts.originalError;
     this.remediation = opts.remediation;
+    this.i18nKey = opts.i18nKey;
+    this.i18nParams = opts.i18nParams;
 
     // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
     const errorConstructor = Error as unknown as {
@@ -49,6 +56,8 @@ export class EngineError extends Error {
           engineId,
           originalError: error.originalError,
           remediation: error.remediation,
+          i18nKey: error.i18nKey,
+          i18nParams: error.i18nParams,
         });
       }
       return error;

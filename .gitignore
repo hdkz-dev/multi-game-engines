@@ -48,3 +48,8 @@ opencode_test.txt
 .turbo/
 pr_feedback.json
 mcp_config.json
+
+# Playwright / Testing
+playwright-report/
+test-results/
+blob-report/

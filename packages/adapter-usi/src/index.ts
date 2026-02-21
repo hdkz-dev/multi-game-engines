@@ -1,17 +1,21 @@
-export * from "./USIAdapter.js";
-export * from "./USIParser.js";
-export * from "./usi-types.js";
-
 import { USIAdapter } from "./USIAdapter.js";
-import { IEngineConfig, IEngineAdapter } from "@multi-game-engines/core";
-import { ISHOGISearchInfo, ISHOGISearchResult } from "./USIParser.js";
-import { ISHOGISearchOptions } from "./usi-types.js";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
+import {
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
+} from "./USIParser.js";
+
+export { USIAdapter };
+export { USIParser } from "./USIParser.js";
+export { IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult };
 
 /**
- * 2026 Zenith Tier: 汎用 USI アダプターのファクトリ関数。
+ * USI エンジンのインスタンスを生成します。
  */
-export function createUSIAdapter(
-  config: IEngineConfig,
-): IEngineAdapter<ISHOGISearchOptions, ISHOGISearchInfo, ISHOGISearchResult> {
-  return new USIAdapter(config);
+export function createUSIEngine(
+  config: IEngineConfig = {},
+): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
+  const adapter = new USIAdapter(config);
+  return new EngineFacade(adapter);
 }

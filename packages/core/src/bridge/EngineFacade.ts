@@ -15,6 +15,12 @@ import {
 import { EngineError } from "../errors/EngineError.js";
 
 /**
+ * @internal
+ * 内部アダプターへのアクセス用 Symbol。
+ */
+export const INTERNAL_ADAPTER = Symbol("INTERNAL_ADAPTER");
+
+/**
  * エンジンとの対話を抽象化し、共通機能を提供するファサードクラス。
  */
 export class EngineFacade<
@@ -237,6 +243,14 @@ export class EngineFacade<
   onTelemetry(callback: (telemetry: EngineTelemetry) => void) {
     this.telemetryListeners.add(callback);
     return () => this.telemetryListeners.delete(callback);
+  }
+
+  /**
+   * 基盤レイヤー専用: 内部アダプターを取得します。
+   * @internal
+   */
+  [INTERNAL_ADAPTER](): IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
+    return this.adapter;
   }
 
   emitTelemetry(telemetry: EngineTelemetry): void {

@@ -29,7 +29,7 @@ The board components will be implemented as Web Components (Lit) in `@multi-game
 - `@multi-game-engines/ui-react`: Export `ChessBoard` and `ShogiBoard` React wrappers.
 - `@multi-game-engines/ui-vue`: Export `ChessBoard` and `ShogiBoard` Vue wrappers.
 
-## 3. Dashboard Integration (`examples/zenith-dashboard`)
+## 3. Dashboard Integration (`examples/zenith-dashboard-react`)
 
 - Replace the `ChessGrid` / `ShogiGrid` placeholders with actual `<chess-board>` / `<shogi-board>`.
 - Connect engine's best move output to the board's highlight property.

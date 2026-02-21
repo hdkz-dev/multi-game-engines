@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { watch } from "vue";
+import { createUIStrings } from "@multi-game-engines/ui-core";
 import { provideEngineUI } from "./useEngineUI.js";
 
 const props = defineProps<{
@@ -6,7 +8,15 @@ const props = defineProps<{
 }>();
 
 // provideEngineUI 内部で reactive な strings を作成・提供
-provideEngineUI(props.localeData);
+const { strings } = provideEngineUI(props.localeData);
+
+// props.localeData の変更を監視して strings を更新
+watch(
+  () => props.localeData,
+  (newData) => {
+    strings.value = createUIStrings(newData);
+  },
+);
 </script>
 
 <template>

@@ -6,12 +6,12 @@ import { ChessPiece } from "@multi-game-engines/domain-chess";
 
 defineProps<{
   fen: FEN;
-  lastMove?: Move;
-  orientation?: "white" | "black";
-  boardLabel?: string;
-  errorMessage?: string;
-  pieceNames?: Partial<Record<ChessPiece, string>>;
-  locale?: string;
+  lastMove?: Move | undefined;
+  orientation?: "white" | "black" | undefined;
+  boardLabel?: string | undefined;
+  errorMessage?: string | undefined;
+  pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+  locale?: string | undefined;
 }>();
 </script>
 

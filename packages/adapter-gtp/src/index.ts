@@ -1,16 +1,21 @@
-export * from "./GTPAdapter.js";
-export * from "./GTPParser.js";
-
 import { GTPAdapter } from "./GTPAdapter.js";
-import { IEngineConfig, IEngineAdapter } from "@multi-game-engines/core";
+import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult,
+  IGoSearchOptions,
+  IGoSearchInfo,
+  IGoSearchResult,
 } from "./GTPParser.js";
 
-export function createGTPAdapter(
-  config: IEngineConfig,
-): IEngineAdapter<IGOSearchOptions, IGOSearchInfo, IGOSearchResult> {
-  return new GTPAdapter(config);
+export { GTPAdapter };
+export { GTPParser } from "./GTPParser.js";
+export { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
+
+/**
+ * GTP エンジンのインスタンスを生成します。
+ */
+export function createGTPEngine(
+  config: IEngineConfig = {},
+): IEngine<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
+  const adapter = new GTPAdapter(config);
+  return new EngineFacade(adapter);
 }

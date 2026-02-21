@@ -1,141 +1,139 @@
 import {
   IProtocolParser,
-  ProtocolValidator,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  ProtocolValidator,
 } from "@multi-game-engines/core";
-import { GOBoard, GOMove, createGOMove } from "@multi-game-engines/domain-go";
+import { GOMove, createGOMove } from "@multi-game-engines/domain-go";
 
-export interface IGOSearchOptions extends IBaseSearchOptions {
-  board: GOBoard;
-  color: "black" | "white" | "B" | "W";
-}
-
-export interface IGOSearchInfo extends IBaseSearchInfo {
-  winrate?: number;
-}
-
-export interface IGOSearchResult extends IBaseSearchResult {
-  bestMove: GOMove;
+/**
+ * 囲碁の探索オプション。
+ */
+export interface IGoSearchOptions extends IBaseSearchOptions {
+  size?: number;
+  komi?: number;
+  /** 盤面データ (SGF等) */
+  board?: string;
+  /** KataGo 分析インターバル (ms) */
+  kataInterval?: number;
+  [key: string]: unknown;
 }
 
 /**
- * 囲碁エンジン向けの GTP (Go Text Protocol) プロトコルパーサー。
+ * 囲碁の探索状況。
+ * 2026 Zenith Tier: KataGo 拡張 GTP を含む詳細な情報。
+ */
+export interface IGoSearchInfo extends IBaseSearchInfo {
+  winrate?: number;
+  visits?: number;
+  scoreLead?: number;
+  pv?: GOMove[];
+  /** ヒートマップ（各点の支配率/重要度） */
+  ownerMap?: number[];
+  [key: string]: unknown;
+}
+
+/**
+ * 囲碁の探索結果。
+ */
+export interface IGoSearchResult extends IBaseSearchResult {
+  bestMove: GOMove;
+  [key: string]: unknown;
+}
+
+/**
+ * 2026 Zenith Tier: 汎用 GTP (Go Text Protocol) パーサー。
+ * KataGo 拡張 (JSON Output) をネイティブサポートします。
  */
 export class GTPParser implements IProtocolParser<
-  IGOSearchOptions,
-  IGOSearchInfo,
-  IGOSearchResult
+  IGoSearchOptions,
+  IGoSearchInfo,
+  IGoSearchResult
 > {
-  // 2026 Best Practice: 正規表現の事前コンパイル
-  private static readonly VISITS_REGEX = /visits (\d+)/;
-  private static readonly WINRATE_REGEX = /winrate ([\d.]+)/;
-  private static readonly WHITESPACE_REGEX = /\s+/;
-  private static readonly DIGITS_ONLY_REGEX = /^\d+$/;
-
-  /**
-   * 文字列を GOMove へ変換します。
-   */
-  private parseMove(value: string): GOMove | null {
-    try {
-      return createGOMove(value);
-    } catch {
-      return null;
+  parseInfo(data: string | Record<string, unknown>): IGoSearchInfo | null {
+    if (typeof data === "object" && data !== null) {
+      // KataGo 拡張 JSON 出力
+      if ("visits" in data || "winrate" in data) {
+        return {
+          visits: Number(data.visits) || 0,
+          winrate: Number(data.winrate) || 0,
+          scoreLead:
+            typeof data.scoreLead === "number" ? data.scoreLead : undefined,
+          pv:
+            Array.isArray(data.pv) && data.pv.length > 0
+              ? data.pv
+                  .filter((m): m is string => typeof m === "string" && !!m)
+                  .map((m) => createGOMove(m))
+              : undefined,
+          raw: data,
+        };
+      }
     }
-  }
 
-  /**
-   * エンジンからの info 行を解析し、構造化された探索情報を返します。
-   * GTP プロトコルでは標準的な info コマンドは定義されていませんが、
-   * KataGo 等の拡張 (visits, winrate) に対応しています。
-   *
-   * @param data - 解析対象の行データ。
-   * @returns 解析された探索情報。info 行でない場合は null。
-   */
-  parseInfo(
-    data: string | Uint8Array | Record<string, unknown>,
-  ): IGOSearchInfo | null {
-    if (typeof data !== "string") return null;
-    if (!data.startsWith("info")) return null;
-
-    const visitsMatch = data.match(GTPParser.VISITS_REGEX);
-    const winrateMatch = data.match(GTPParser.WINRATE_REGEX);
-
-    if (visitsMatch || winrateMatch) {
-      return {
-        raw: data,
-        visits: visitsMatch ? parseInt(visitsMatch[1]!, 10) : undefined,
-        winrate: winrateMatch ? parseFloat(winrateMatch[1]!) : undefined,
-      };
-    }
     return null;
   }
 
-  /**
-   * エンジンからの最終結果 (genmove の応答) を解析します。
-   *
-   * @param data - 解析対象の行データ。
-   * @returns 解析された探索結果。応答でない場合は null。
-   */
-  parseResult(
-    data: string | Uint8Array | Record<string, unknown>,
-  ): IGOSearchResult | null {
+  parseResult(data: string | Record<string, unknown>): IGoSearchResult | null {
     if (typeof data !== "string") return null;
+
+    // GTP 成功応答: "= A1"
     if (!data.startsWith("=")) return null;
 
-    const tokens = data.substring(1).trim().split(GTPParser.WHITESPACE_REGEX);
-    if (tokens.length === 0 || (tokens.length === 1 && tokens[0] === ""))
-      return null;
+    const parts = data.trim().split(/\s+/);
+    const moveStr = parts[1];
+    if (!moveStr) return null;
 
-    let moveStr = tokens[0]!;
-    if (GTPParser.DIGITS_ONLY_REGEX.test(moveStr)) {
-      if (tokens.length < 2) return null;
-      moveStr = tokens[1]!;
-    }
-
-    const bestMove = this.parseMove(moveStr);
-    if (!bestMove) return null;
+    // 2026 Best Practice: 特殊な指し手 (pass, resign) の正規化と検証
+    const bestMove = createGOMove(moveStr);
 
     return {
-      raw: data,
       bestMove,
+      raw: data,
     };
   }
 
-  /**
-   * 探索オプションに基づいて GTP コマンドシーケンスを生成します。
-   *
-   * @param options - 探索オプション (盤面、手番など)。
-   * @returns 実行すべき GTP コマンドの配列 (例: ["loadboard ...", "genmove black"])。
-   * @throws {EngineError} インジェクション攻撃の可能性がある不正な入力が含まれる場合。
-   */
-  createSearchCommand(options: IGOSearchOptions): string[] {
+  createSearchCommand(options: IGoSearchOptions): string[] {
+    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
+    // GTP/SGF 用にセミコロンを許可
+    ProtocolValidator.assertNoInjection(options, "search options", true, true);
+
     const commands: string[] = [];
-    const sBoard = String(options.board);
+    if (options.board) {
+      ProtocolValidator.assertNoInjection(options.board, "board data", true);
+      // 2026 Best Practice: 局面データが存在する場合、エンジンに反映
+      commands.push(`loadsgf ${options.board}`);
+    }
+    if (options.size !== undefined) commands.push(`boardsize ${options.size}`);
+    if (options.komi !== undefined) commands.push(`komi ${options.komi}`);
 
-    ProtocolValidator.assertNoInjection(sBoard, "board data", true);
-    commands.push(`loadboard ${sBoard}`);
+    // KataGo 分析モードの開始 (明示的に指定された場合のみ)
+    if (
+      options.kataInterval != null &&
+      Number.isFinite(Number(options.kataInterval))
+    ) {
+      commands.push(`kata-analyze interval ${Number(options.kataInterval)}`);
+    }
 
-    const sColor = String(options.color);
-    ProtocolValidator.assertNoInjection(sColor, "color", true);
-
-    const normalized = sColor.toLowerCase();
-    const color =
-      normalized === "white" || normalized === "w" ? "white" : "black";
-
-    commands.push(`genmove ${color}`);
     return commands;
   }
 
   createStopCommand(): string {
-    return "quit";
+    return "stop";
   }
 
-  createOptionCommand(name: string, value: string | number | boolean): string {
-    const sValue = String(value);
-    ProtocolValidator.assertNoInjection(name, "option name", true);
-    ProtocolValidator.assertNoInjection(sValue, "option value", true);
-    return `set_option ${name} ${sValue}`;
+  createOptionCommand(name: string, value: unknown): string {
+    if (
+      typeof value !== "string" &&
+      typeof value !== "number" &&
+      typeof value !== "boolean"
+    ) {
+      throw new TypeError(
+        "Option value must be a primitive (string, number, or boolean)",
+      );
+    }
+    ProtocolValidator.assertNoInjection(name, "option name");
+    ProtocolValidator.assertNoInjection(String(value), "option value");
+    return `set_option ${name} ${value}`;
   }
 }
