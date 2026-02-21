@@ -56,6 +56,13 @@ type EngineType = "chess" | "shogi";
 const CHESS_MULTI_PV = 3;
 const SHOGI_MULTI_PV = 2;
 
+/**
+ * Renders the Zenith Hybrid Analysis Dashboard UI and manages engine initialization and state.
+ *
+ * Initializes a bridge and loads both chess and shogi engines, presents loading and error states while initializing, and displays interactive controls to switch locale and active engine, live engine monitoring, and game boards once engines are ready.
+ *
+ * @returns The rendered dashboard JSX element containing header controls, hero stats, engine monitor panel, and game board/insights.
+ */
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>("chess");
   const { locale, setLocale } = useLocale();
