@@ -93,9 +93,10 @@ export default function Dashboard() {
             id: "stockfish",
             adapter: "stockfish",
             sources: {
+              // 2026: E2E tests use a mock engine for deterministic results and faster execution.
               main: {
                 url: "/mock-stockfish.js",
-                sri: "sha384-Gaf5sWleDqzoKZQ45PoRquF1CoenpoGzXH/GRJa1oy/Hxl57gOV8iSw4bMfdIamf",
+                sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
                 type: "worker-js",
               },
               wasm: {

@@ -49,9 +49,10 @@ const initEngines = async () => {
           id: "stockfish",
           adapter: "stockfish",
           sources: {
+            // 2026: E2E environments leverage lightweight mocks for stable test state.
             main: {
               url: "/mock-stockfish.js",
-              sri: "sha384-Gaf5sWleDqzoKZQ45PoRquF1CoenpoGzXH/GRJa1oy/Hxl57gOV8iSw4bMfdIamf",
+              sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
               type: "worker-js",
             },
             wasm: {

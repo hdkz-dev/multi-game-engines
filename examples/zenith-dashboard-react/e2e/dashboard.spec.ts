@@ -1,21 +1,18 @@
 import { test, expect } from "@playwright/test";
 
-test("dashboard loads and initializes engines", async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto("/");
-
-  // Wait for initial load
   await page.waitForLoadState("networkidle");
-
-  // Switch to English to match assertions (using more specific selector)
+  // Switch to English to match assertions
   await page.click('button:has-text("EN")');
-
-  // Verify language switched (optional but good for robustness)
   await expect(page.locator("text=Ready")).toBeVisible({ timeout: 10000 });
+});
 
+test("dashboard loads and initializes engines", async ({ page }) => {
   // Check title
   await expect(page).toHaveTitle(/Zenith Hybrid Analysis Dashboard/);
 
-  // Wait for bridge initialization (engines might take time to load WASM)
+  // Wait for bridge initialization
   const bridgeStatus = page.locator("text=2026 Engine Bridge Standard");
   await expect(bridgeStatus).toBeVisible({ timeout: 15000 });
 
@@ -24,16 +21,30 @@ test("dashboard loads and initializes engines", async ({ page }) => {
 });
 
 test("dashboard engine search lifecycle", async ({ page }) => {
-  await page.goto("/");
-  await page.waitForLoadState("networkidle");
-  await page.click('button:has-text("EN")');
-  await expect(page.locator("text=Ready")).toBeVisible({ timeout: 10000 });
-  await page.getByRole("button", { name: "START", exact: true }).click();
-  const stopButton = page.getByRole("button", { name: "STOP", exact: true });
+  const enginePanel = page
+    .locator("section, div")
+    .filter({ hasText: /Stockfish/i })
+    .first();
+  const startButton = enginePanel.getByRole("button", { name: /START/i });
+  await startButton.click();
+  const stopButton = enginePanel.getByRole("button", { name: /STOP/i });
   await expect(stopButton).toBeVisible({ timeout: 10000 });
-  await page.waitForTimeout(2000);
-  await page.click('button:has-text("STOP")');
-  await expect(
-    page.getByRole("button", { name: "START", exact: true }),
-  ).toBeVisible({ timeout: 10000 });
+
+  // Wait for 'Searching...' status in this panel
+  await expect(enginePanel.getByText(/Searching.../i).first()).toBeVisible({
+    timeout: 10000,
+  });
+
+  // Wait for unique score from mock (+0.15 for cp 15)
+  await expect(enginePanel.getByText("+0.15").first()).toBeVisible({
+    timeout: 10000,
+  });
+
+  // Wait for search progress (best move appearing)
+  await expect(enginePanel.getByText("e2e4").first()).toBeVisible({
+    timeout: 10000,
+  });
+
+  await stopButton.click();
+  await expect(startButton).toBeVisible({ timeout: 10000 });
 });

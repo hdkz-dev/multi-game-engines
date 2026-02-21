@@ -1,17 +1,15 @@
 import { test, expect } from "@playwright/test";
 
-test("vue dashboard loads and initializes engines", async ({ page }) => {
+test.beforeEach(async ({ page }) => {
   await page.goto("/");
-
-  // Wait for initial load
   await page.waitForLoadState("networkidle");
-
   // Switch to English to match assertions
   await page.getByRole("button", { name: "EN", exact: true }).click();
+  // Wait for initial Ready status
+  await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 15000 });
+});
 
-  // Verify language switched
-  await expect(page.getByText("Ready")).toBeVisible({ timeout: 15000 });
-
+test("vue dashboard loads and initializes engines", async ({ page }) => {
   // Check title (Nuxt uses useHead)
   await expect(page).toHaveTitle(/Zenith Hybrid Analysis Dashboard/);
 
@@ -25,41 +23,41 @@ test("vue dashboard loads and initializes engines", async ({ page }) => {
 });
 
 test("vue dashboard engine search lifecycle", async ({ page }) => {
-  await page.goto("/");
-  await page.waitForLoadState("networkidle");
-  await page.getByRole("button", { name: "EN", exact: true }).click();
+  // 2. Start search
+  const enginePanel = page
+    .locator("section, div")
+    .filter({ hasText: /Stockfish/i })
+    .first();
+  const startButton = enginePanel.getByRole("button", { name: /START/i });
+  await startButton.click();
+  const stopButton = enginePanel.getByRole("button", { name: /STOP/i });
+  await expect(stopButton).toBeVisible({ timeout: 10000 });
 
-  // Wait for initial Ready status
-  await expect(page.locator("header").getByText(/Ready/i)).toBeVisible({
+  // 2.5 Wait for 'Searching...' status
+  await expect(enginePanel.getByText(/Searching.../i).first()).toBeVisible({
     timeout: 10000,
   });
 
-  // 1. Start search (be explicit about the role and text)
-  await page.getByRole("button", { name: "START", exact: true }).click();
+  // 2.5.5 Wait for unique score (+0.15)
+  await expect(enginePanel.getByText("+0.15").first()).toBeVisible({
+    timeout: 10000,
+  });
 
-  // 2. Verify search started by checking for STOP button
-  const stopButton = page.getByRole("button", { name: "STOP", exact: true });
-  await expect(stopButton).toBeVisible({ timeout: 10000 });
+  // 2.6 Wait for search progress (best move appearing)
+  await expect(enginePanel.getByText("e2e4").first()).toBeVisible({
+    timeout: 10000,
+  });
 
-  // 2.5 Wait a bit for search to actually start and UI to stabilize
-  await page.waitForTimeout(2000);
-
-  // 3. Stop search (using direct text selector which might be more resilient to DOM shifts)
-  await page.click('button:has-text("STOP")');
+  // 3. Stop search
+  await stopButton.click();
 
   // 4. Verify status returns to Ready (START button reappears)
-  await expect(
-    page.getByRole("button", { name: "START", exact: true }),
-  ).toBeVisible({
+  await expect(startButton).toBeVisible({
     timeout: 10000,
   });
 });
 
 test("vue dashboard engine switching", async ({ page }) => {
-  await page.goto("/");
-  await page.waitForLoadState("networkidle");
-  await page.getByRole("button", { name: "EN", exact: true }).click();
-
   // 1. Initial engine should be Chess
   await expect(page.getByText(/Stockfish 16.1/i)).toBeVisible();
 
@@ -67,7 +65,7 @@ test("vue dashboard engine switching", async ({ page }) => {
   await page.getByRole("button", { name: /SHOGI/i }).click();
   await expect(page.getByText(/Yaneuraou 7.5.0/i)).toBeVisible();
 
-  // 3. Verify Shogi board elements (labels are in aria-label)
+  // 3. Verify Shogi board elements
   const senteHand = page.getByLabel(/Sente Hand/i);
-  await expect(senteHand).toBeDefined();
+  await expect(senteHand).toBeVisible();
 });
