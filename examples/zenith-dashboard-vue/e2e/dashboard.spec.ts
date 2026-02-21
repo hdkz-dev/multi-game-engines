@@ -34,7 +34,7 @@ test("vue dashboard engine search lifecycle", async ({ page }) => {
   await expect(stopButton).toBeVisible({ timeout: 10000 });
 
   // 2.5 Wait for 'Searching...' status
-  await expect(enginePanel.getByText(/Searching.../i).first()).toBeVisible({
+  await expect(enginePanel.getByText(/Searching\.\.\./i).first()).toBeVisible({
     timeout: 10000,
   });
 

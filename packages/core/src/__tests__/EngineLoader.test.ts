@@ -203,4 +203,36 @@ describe("EngineLoader", () => {
     expect(url).toBe("blob:test");
     // デフォルトで JS として扱われ、オリジン検証が走る
   });
+
+  it("should revoke resources by engine ID", async () => {
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    // Load multiple resources for the same engine
+    await loader.loadResource("engine-1", config);
+    await loader.loadResource("engine-1", {
+      ...config,
+      url: "https://test.com/worker.js",
+    });
+    // Load a resource for a different engine
+    await loader.loadResource("engine-2", config);
+
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(3);
+
+    // Revoke resources for engine-1
+    loader.revokeByEngineId("engine-1");
+
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+    // engine-2's resource should still be active
+    const activeBlobs = (
+      loader as unknown as { activeBlobs: Map<string, string> }
+    ).activeBlobs;
+    expect(activeBlobs.size).toBe(1);
+    expect(activeBlobs.has(`engine-2:${encodeURIComponent(config.url)}`)).toBe(
+      true,
+    );
+  });
 });

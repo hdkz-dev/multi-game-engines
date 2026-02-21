@@ -31,7 +31,7 @@ test("dashboard engine search lifecycle", async ({ page }) => {
   await expect(stopButton).toBeVisible({ timeout: 10000 });
 
   // Wait for 'Searching...' status in this panel
-  await expect(enginePanel.getByText(/Searching.../i).first()).toBeVisible({
+  await expect(enginePanel.getByText(/Searching\.\.\./i).first()).toBeVisible({
     timeout: 10000,
   });
 
