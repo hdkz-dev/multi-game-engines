@@ -23,21 +23,6 @@
 - **新規 5 アダプターのプロトタイプ完遂**:
   - 囲碁 (`KataGo`), チェッカー (`KingsRow`), バックギャモン (`GNUBG`), 麻雀 (`Mortal`), リバーシ (`Edax`) の 5 つのプロトコルパーサーとアダプター基盤を Zenith 品質で実装。
 
-## 🏆 到達ハイライト (2026-02-20 セキュリティ・プライバシー修復 & 拡張アダプター統合)
-
-- **プライバシー保護ログの導入 (ADR-038: Privacy-First Logging)**:
-  - エンジンパースエラー時に入力データ（局面等）が全量露出しないよう、`truncateLog` ユーティリティによるサニタイズを全パッケージに適用。
-- **SRI 検証の全アダプター強制**:
-  - `GTPAdapter`, `KingsRowAdapter` 等を含む全ての新規アダプターにおいて、`IEngineLoader` による SRI ハッシュ検証を必須化。セキュリティ・バイパス経路を完全に封鎖。
-- **コマンド・インジェクション攻撃への構造的防御**:
-  - `USIParser` (SFEN) および `GTPParser` (Board data) において、`ProtocolValidator.assertNoInjection` を適用し、不正な制御文字によるコマンド実行リスクを排除。
-- **型安全性の昇華 (Type Hardening)**:
-  - `Move<T>` の階層化ブランド型を導入し、`ShogiMove`, `GOMove` などのドメイン間での型混同を防ぎつつ、共通の `Move` 型との互換性を確保。アンセーフな `as` キャストを全廃。
-- **エラーハンドリングの多言語化 (i18n)**:
-  - `EngineError` に `i18nKey` フィールドを新設。アダプター層の抽象的なエラーが UI 層で各言語の適切なメッセージに自動変換される一気通貫のフローを構築。
-- **新規 5 アダプターのプロトタイプ完遂**:
-  - 囲碁 (`KataGo`), チェッカー (`KingsRow`), バックギャモン (`GNUBG`), 麻雀 (`Mortal`), リバーシ (`Edax`) の 5 つのプロトコルパーサーとアダプター基盤を Zenith 品質で実装。
-
 ## 🏆 到達ハイライト (Zenith Tier 究極監査と型安全性の昇華 - Zenith Audit & Strict Type Hardening)
 
 - **全マージ済み PR (#15, #21, #24, #25) の深層監査完遂**:
@@ -158,7 +143,7 @@
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:
   - **Next.js 16.1 (Stable)** & **React 19.2** へのメジャーアップデート、および **React Compiler** の有効化。
   - **Node.js 24 (LTS Target)** & **Turborepo 2.8** によるビルドパイプラインの高速化と並列実行の導入。
-  - **TypeScript 5.9** & **ESLint 9.39.2 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
+  - **TypeScript 5.9** & **ESLint 10.0.1 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
   - **Project References** の導入によるモノレポ構成の最適化と、`noUncheckedIndexedAccess` 等の極めて厳格な型安全性の確立。
 
 ---
