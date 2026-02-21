@@ -188,7 +188,7 @@
 ### フェーズ C: 品質向上 (Medium)
 
 1. **lint warning 解消**: `ui-vue-monitor` の未使用インポート削除。
-2. **`as unknown as` 削減**: プロダクションコード4箇所のキャスト解消。
+2. [x] **`as unknown as` 削減**: プロダクションコード4箇所のキャスト解消。
 3. [x] **`i18n` typecheck 追加**: `package.json` に `typecheck` スクリプトを追加し、CI カバー率を向上。
 4. [x] **`main`/`types` フィールド追加**: 7パッケージにフィールドを追加し、CJS 互換性と型定義の読み込みを安定化。
 5. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
