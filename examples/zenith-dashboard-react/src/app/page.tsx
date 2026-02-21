@@ -89,7 +89,22 @@ export default function Dashboard() {
             IChessSearchOptions,
             IChessSearchInfo,
             IChessSearchResult
-          >({ id: "stockfish", adapter: "stockfish" }),
+          >({
+            id: "stockfish",
+            adapter: "stockfish",
+            sources: {
+              main: {
+                url: "/mock-stockfish.js",
+                sri: "sha384-Gaf5sWleDqzoKZQ45PoRquF1CoenpoGzXH/GRJa1oy/Hxl57gOV8iSw4bMfdIamf",
+                type: "worker-js",
+              },
+              wasm: {
+                url: "/mock-stockfish.wasm",
+                sri: "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb",
+                type: "wasm",
+              },
+            },
+          }),
           bridgeInstance.getEngine<
             IShogiSearchOptions,
             IShogiSearchInfo,
@@ -135,6 +150,7 @@ export default function Dashboard() {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       ),
       multipv: CHESS_MULTI_PV,
+      depth: 99,
     }),
     [],
   );
