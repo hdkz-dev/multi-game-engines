@@ -103,7 +103,7 @@ describe("StockfishAdapter", () => {
       fen: createFEN("startpos"),
       depth: 10,
     });
-    expect(result.bestMove).toBe("(none)");
+    expect(result.bestMove).toBeNull();
   });
 
   it("should reject position strings containing control characters", async () => {

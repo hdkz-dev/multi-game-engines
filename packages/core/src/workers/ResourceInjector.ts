@@ -38,7 +38,10 @@ export class ResourceInjector {
       typeof obj === "object" &&
       obj !== null &&
       "postMessage" in obj &&
-      typeof (obj as { postMessage?: unknown }).postMessage === "function"
+      typeof (obj as { postMessage?: unknown }).postMessage === "function" &&
+      "onmessage" in obj &&
+      // Window と区別するため、importScripts の存在を確認 (Worker固有)
+      "importScripts" in obj
     );
   }
 

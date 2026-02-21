@@ -36,7 +36,7 @@ describe("CapabilityDetector", () => {
     const OriginalWasm = globalThis.WebAssembly;
     vi.stubGlobal("WebAssembly", {
       ...OriginalWasm,
-      Memory: vi.fn(),
+      Memory: class {},
     });
 
     const caps = await CapabilityDetector.detect();
@@ -46,9 +46,11 @@ describe("CapabilityDetector", () => {
   it("should detect absence of Wasm Threads support when memory fails", async () => {
     vi.stubGlobal("MessageChannel", class {});
     vi.stubGlobal("WebAssembly", {
-      Memory: vi.fn().mockImplementation(() => {
-        throw new Error("unsupported");
-      }),
+      Memory: class {
+        constructor() {
+          throw new Error("unsupported");
+        }
+      },
     });
 
     const caps = await CapabilityDetector.detect();

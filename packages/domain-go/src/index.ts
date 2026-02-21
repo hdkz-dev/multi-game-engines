@@ -51,7 +51,7 @@ export function createGOMove(move: string): GOMove {
   }
   if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid GOMove format: "${move}"`,
     });
   }

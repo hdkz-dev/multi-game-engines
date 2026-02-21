@@ -1,5 +1,19 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
+## 🏆 到達ハイライト (2026-02-22 PR #37 超深層監査とビルド警告の完全排除)
+
+- **Worker 判定の極致化 (Security & Reliability)**:
+  - `ResourceInjector` において `importScripts` の存在を検証する厳格な `isWorkerScope` 型ガードを導入。`window` オブジェクトの誤認による `postMessage` クラッシュを物理的に遮断しました。
+- **プロトコルのヌル安全正規化 (Zenith Tier Type Safety)**:
+  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化して返却するよう設計を刷新。マジックストリングを型定義から排除し、100% ヌル安全な探索結果処理を実現しました。
+- **ビルドパイプラインの警告ゼロ化 (Clean Build Initiative)**:
+  - **Turbo 警告の解消**: `cdn-worker` にダミー出力を追加し、ビルドキャッシュの一貫性を保証。
+  - **SWC 警告の解消**: `ui-elements` に `@swc/core` を導入し、デコレータ処理の最適化と警告排除を同時に達成。
+  - **pnpm 警告の解消**: `@parcel/watcher` 等の必須ビルドスクリプトを `onlyBuiltDependencies` へ明示的に追加。
+  - **Vitest 警告の解消**: `WebAssembly.Memory` のモック手法をクラスベースへ移行し、内部的な実装警告を一掃。
+- **ドメインロジックの厳密化**:
+  - `domain-go` における指し手フォーマットエラーを `VALIDATION_ERROR` に適正化。セマンティクスに基づいた正確な例外設計を完遂しました。
+
 ## 📅 更新日: 2026年2月21日 (実装担当: Antigravity Swarm Integration)
 
 ## 🏆 到達ハイライト (2026-02-21 OPFS 実装と Swarm 設計思想の統合)

@@ -36,7 +36,7 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
 
 /** チェス用の探索結果 */
 export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move | "none" | "(none)";
+  bestMove: Move | null;
   ponder?: Move;
 }
 
@@ -194,13 +194,15 @@ export class UCIParser implements IProtocolParser<
     const parts = line.split(" ");
     const moveStr = parts[1] || "";
 
-    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン
-    const bestMove =
-      moveStr === "none" || moveStr === "(none)"
-        ? moveStr
-        : this.createMove(moveStr);
-
-    if (!bestMove) return null;
+    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン (null move)
+    // これらを null として正規化して返すことで、型安全性を向上させる
+    let bestMove: Move | null;
+    if (moveStr === "none" || moveStr === "(none)") {
+      bestMove = null;
+    } else {
+      bestMove = this.createMove(moveStr);
+      if (!bestMove) return null; // Invalid format -> Parse failure
+    }
 
     const result: IChessSearchResult = {
       bestMove,

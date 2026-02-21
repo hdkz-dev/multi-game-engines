@@ -7,7 +7,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "emitDecoratorMetadata": false,
     "useDefineForClassFields": false,
     "esModuleInterop": true,
     "skipLibCheck": true,

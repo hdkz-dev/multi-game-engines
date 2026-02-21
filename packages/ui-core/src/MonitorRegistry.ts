@@ -68,7 +68,16 @@ export class MonitorRegistry {
   >(
     monitor: unknown,
   ): asserts monitor is SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
-    if (!monitor) {
+    if (
+      !monitor ||
+      typeof monitor !== "object" ||
+      !("startMonitoring" in monitor) ||
+      typeof (monitor as { startMonitoring: unknown }).startMonitoring !==
+        "function" ||
+      !("stopMonitoring" in monitor) ||
+      typeof (monitor as { stopMonitoring: unknown }).stopMonitoring !==
+        "function"
+    ) {
       throw new Error("[MonitorRegistry] Invalid monitor instance.");
     }
   }

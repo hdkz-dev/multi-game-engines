@@ -34,8 +34,11 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
       "esbuild",
       "sharp",
+      "unrs-resolver",
       "workerd"
     ],
     "overrides": {
@@ -58,7 +61,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write",
-      "eslint --fix"
+      "eslint --fix --no-warn-ignored"
     ],
     "*.{json,md,html}": [
       "prettier --write"

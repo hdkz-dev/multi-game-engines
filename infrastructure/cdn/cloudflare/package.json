@@ -2,7 +2,7 @@
   "name": "@multi-game-engines/cdn-worker",
   "private": true,
   "scripts": {
-    "build": "echo 'No build step'",
+    "build": "mkdir -p dist && echo 'No build step' > dist/.placeholder",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "typecheck": "tsc --noEmit"

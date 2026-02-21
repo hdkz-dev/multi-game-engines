@@ -33,12 +33,12 @@ describe("USIParser", () => {
 
     it("should handle bestmove none correctly", () => {
       const result = parser.parseResult("bestmove none");
-      expect(result?.bestMove).toBe("none");
+      expect(result?.bestMove).toBeNull();
     });
 
     it("should handle bestmove (none) correctly", () => {
       const result = parser.parseResult("bestmove (none)");
-      expect(result?.bestMove).toBe("(none)");
+      expect(result?.bestMove).toBeNull();
     });
 
     it("should parse bestmove with ponder", () => {

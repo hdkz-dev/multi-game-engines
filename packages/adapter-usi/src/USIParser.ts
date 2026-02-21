@@ -50,7 +50,7 @@ export interface IShogiSearchInfo extends IBaseSearchInfo {
  * 将棋の探索結果。
  */
 export interface IShogiSearchResult extends IBaseSearchResult {
-  bestMove: ShogiMove | "none";
+  bestMove: ShogiMove | null;
   ponder?: ShogiMove;
   [key: string]: unknown;
 }
@@ -162,7 +162,10 @@ export class USIParser implements IProtocolParser<
     }
 
     const moveStr = parts[1]!;
-    const bestMove = moveStr === "none" ? "none" : createShogiMove(moveStr);
+    const bestMove =
+      moveStr === "none" || moveStr === "(none)"
+        ? null
+        : createShogiMove(moveStr);
 
     const result: IShogiSearchResult = {
       bestMove,

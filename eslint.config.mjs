@@ -13,6 +13,7 @@ export default [
       "**/*.config.mjs",
       "**/*.config.js",
       "**/next-env.d.ts",
+      "fixtures/shared-mocks/**",
     ],
   },
   eslint.configs.recommended,
