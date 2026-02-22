@@ -43,11 +43,7 @@
     ],
     "overrides": {
       "@rushstack/ts-command-line": "5.2.0",
-      "@microsoft/api-extractor": "7.56.3",
-      "eslint-plugin-import": "2.32.0",
-      "eslint-plugin-react": "7.37.5",
-      "eslint-plugin-react-hooks": "7.0.1",
-      "eslint-plugin-jsx-a11y": "6.10.2"
+      "@microsoft/api-extractor": "7.56.3"
     }
   },
   "devDependencies": {
