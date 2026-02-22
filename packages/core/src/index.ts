@@ -24,5 +24,8 @@ export {
   createPositionString,
 } from "./protocol/ProtocolValidator.js";
 
+// ストレージ
+export { createFileStorage } from "./storage/index.js";
+
 // 標準ミドルウェア
 export * from "./middlewares/index.js";

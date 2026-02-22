@@ -72,4 +72,5 @@
   - [x] **Security**: USI パーサーへの PV/BestMove インジェクション対策適用。
   - [x] **Stability**: E2E テストの `networkidle` 排除と Locator 絞り込み。
   - [x] **Release**: `.changeset` によるリリースノート自動化準備。
+  - [x] **API**: `ValidI18nKey` や `createFileStorage` 等の公開 API 整備 (Public API Polish)。
   - [x] **Documentation**: ADR-001〜045 の全エントリの形式統一とインデックス整理。 (2026-02-23)
