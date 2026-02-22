@@ -233,6 +233,8 @@ export class EngineFacade<
 
     if (this.ownAdapter) {
       const id = this.id;
+      // 2026 Best Practice: IEngineAdapter requires dispose(), but we check for runtime safety
+      // to prevent crashes if an invalid adapter object is injected.
       if (this.adapter.dispose) {
         await this.adapter.dispose();
       }
