@@ -62,6 +62,12 @@ describe("UCIParser", () => {
       expect(result?.bestMove).toBe("e2e4");
     });
 
+    it("should handle bestmove none correctly", () => {
+      const result = parser.parseResult("bestmove none");
+      expect(result).not.toBeNull();
+      expect(result!.bestMove).toBeNull();
+    });
+
     it("should handle bestmove (none) correctly", () => {
       const result = parser.parseResult("bestmove (none)");
       expect(result?.bestMove).toBeNull();
