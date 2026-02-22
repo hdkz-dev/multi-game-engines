@@ -144,15 +144,17 @@ export class EngineLoader implements IEngineLoader {
         const cached = await this.storage.get(cacheKey);
         if (cached) {
           if (sri) {
-            const isValid = await SecurityAdvisor.verifySRI(cached, sri);
-            if (isValid) {
+            try {
+              await SecurityAdvisor.assertSRI(cached, sri);
               const cachedBlobUrl = URL.createObjectURL(
                 new Blob([cached], { type: this.getMimeType(config) }),
               );
               this.updateBlobUrl(cacheKey, cachedBlobUrl);
               return cachedBlobUrl;
+            } catch {
+              // SRI 不一致ならキャッシュを破棄して再取得へ進む
+              await this.storage.delete(cacheKey);
             }
-            await this.storage.delete(cacheKey);
           } else if (config.__unsafeNoSRI) {
             // 2026: 非本番環境かつ SRI バイパス時はキャッシュをそのまま使用可能
             const bypassBlobUrl = URL.createObjectURL(
@@ -186,14 +188,7 @@ export class EngineLoader implements IEngineLoader {
         }
 
         if (sri) {
-          const isValid = await SecurityAdvisor.verifySRI(data, sri);
-          if (!isValid) {
-            throw new EngineError({
-              code: EngineErrorCode.SRI_MISMATCH,
-              message: "SRI Mismatch",
-              engineId,
-            });
-          }
+          await SecurityAdvisor.assertSRI(data, sri);
         }
 
         await this.storage.set(cacheKey, data);
