@@ -28,7 +28,7 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
-    "lit": "^3.2.1"
+    "lit": "^3.3.2"
   },
   "devDependencies": {
     "@multi-game-engines/ui-core": "workspace:*",
