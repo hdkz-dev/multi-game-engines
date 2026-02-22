@@ -50,3 +50,7 @@
 - [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](adr/044-eslint-v9-pinning.md)
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](adr/045-absolute-zenith-audit.md)
 - [2026-02-21] [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed)
+- [2026-02-21] [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed)
+- [2026-02-21] [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed)
+- [2026-02-21] [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed)
+- [2026-02-21] [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed)

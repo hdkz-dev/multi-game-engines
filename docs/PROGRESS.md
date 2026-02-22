@@ -4,25 +4,33 @@
 
 ## 🏆 到達ハイライト (2026-02-23 PR #38 超深層監査と整合性同期)
 
-- **Worker 判定の極致化 (Security & Reliability)**:
-  - `ResourceInjector` において `importScripts` ではなく `!document` を検証する厳格な `isWorkerScope` 型ガードを導入。Module Worker への対応と Window オブジェクトの誤認防止を両立しました。
+- **Absolute Zenith Quality Audit の完遂**:
+  - 全 61 件のレビュー指摘事項を「最奥地」まで再検証。リソースリーク、非同期安全、型契約の不整合を完全に解消しました。
+- **リソース管理の極致的な堅牢化**:
+  - `EngineLoader` の ID 衝突問題をセパレータの `:` 復帰により解決。`IndexedDBStorage` に `onblocked` タイムアウトを導入し、マルチタブ環境での可用性を保証。
+- **E2E テストの完全な安定化**:
+  - 不安定な `networkidle` を排除し、UI 要素ベースの精密な待機アサーションに刷新。複数エンジン混在時の Locator 競合を解消しました。
 - **プロトコルのヌル安全正規化 (Zenith Tier Type Safety)**:
-  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化して返却するよう設計を刷新。マジックストリングを型定義から排除し、100% ヌル安全な探索結果処理を実現しました。
+  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化して返却するよう設計を刷新。
+  - `GTPParser` において `resign` を `bestMove: null` に正規化し、意味的な整合性を確保しました。
 - **ビルドパイプラインの警告ゼロ化 (Clean Build Initiative)**:
-  - **Turbo 警告の解消**: `cdn-worker` にダミー出力を追加し、ビルドキャッシュの一貫性を保証。
-  - **SWC 警告の解消**: `ui-elements` に `@swc/core` を導入し、デコレータ処理の最適化と警告排除を同時に達成。
-  - **pnpm 警告の解消**: `@parcel/watcher` 等の必須ビルドスクリプトを `onlyBuiltDependencies` へ明示的に追加。
-  - **Vitest 警告の解消**: `WebAssembly.Memory` のモック手法をクラスベースへ移行し、内部的な実装警告を一掃。
+  - **ESLint 9.39.3 ピン留め**: ADR-044 を策定し、モノレポ環境での設定の安定性を物理的に保証。
+  - **非同期安全ルール有効化**: `@typescript-eslint/no-floating-promises` を適用し、Promise 処理漏れを静的に一掃しました。
 - **ドメインロジックの厳密化**:
-  - `domain-go`, `domain-mahjong`, `domain-reversi` におけるバリデーションを強化。i18n キーへの移行とインジェクションチェックの先行実施により、堅牢性を最大化しました。
+  - `domain-go` におけるバリデーション順序を `typeof` 先行に是正。i18n キーへの完全移行と、ハードコードされた型名の自然言語化を完遂しました。
 
 ## 📅 更新日: 2026年2月21日 (実装担当: Antigravity Swarm Integration)
 
 ## 🏆 到達ハイライト (2026-02-21 OPFS 実装と Swarm 設計思想の統合)
 
-- **高性能 OPFS ストレージの本番実装**: `core` パッケージに `OPFSStorage` を実装し、WASM バイナリの高速キャッシュを可能に。
-- **Swarm デザインの統合開始**: `antigravity-swarm` の思想を取り入れ、マルチエージェント/マルチエンジン協調の設計を開始。
-- **アンサンブル・アダプター (@multi-game-engines/adapter-ensemble) のプロトタイプ実装**: 複数のエンジンを束ねて合議制で最善手を決定する実験的アダプターを新設。
+- **リソースインジェクター ハンドシェイク プロトコル (ADR-043)**:
+  - `ResourceInjector` によるリソース注入の完了を Worker 外から検知可能にする `MG_INJECT_RESOURCES` / `MG_RESOURCES_READY` ハンドシェイクを実装。初期化時のレースコンディションを根本的に解消しました。
+- **高性能 OPFS ストレージの本番実装 (ADR-039)**:
+  - `core` パッケージに `OPFSStorage` を実装し、WASM バイナリの高速キャッシュを可能に。
+- **Swarm デザインの統合開始 (ADR-040〜042)**:
+  - `antigravity-swarm` の思想を取り入れ、マルチエージェント/マルチエンジン協調の設計を開始。アンサンブル・アダプターのプロトタイプを新設。
+- **ビルド警告の完全排除**:
+  - Turbo, SWC, pnpm, Vitest における既存の警告をすべて解消し、クリーンな開発環境を確立。
 
 ## 🏆 到達ハイライト (2026-02-20 セキュリティ・プライバシー修復 & 拡張アダプター統合)
 
