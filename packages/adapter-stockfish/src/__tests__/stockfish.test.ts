@@ -41,12 +41,14 @@ describe("StockfishAdapter", () => {
   let mockLoader: IEngineLoader;
 
   beforeAll(() => {
+    vi.useFakeTimers();
     vi.spyOn(performance, "now").mockReturnValue(0);
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
     vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
   });
 
   afterAll(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
   });
@@ -69,7 +71,9 @@ describe("StockfishAdapter", () => {
 
   it("should change status correctly on load", async () => {
     const adapter = new StockfishAdapter();
-    await adapter.load(mockLoader);
+    const loadPromise = adapter.load(mockLoader);
+    await vi.runAllTimersAsync();
+    await loadPromise;
     expect(adapter.status).toBe("ready");
   });
 
@@ -78,17 +82,13 @@ describe("StockfishAdapter", () => {
     class NoneWorker extends MockWorker {
       constructor() {
         super();
+        const originalPostMessage = this.postMessage;
         this.postMessage = vi.fn((msg: unknown) => {
+          originalPostMessage(msg);
           if (msg === "go depth 10") {
             setTimeout(() => {
               if (typeof this.onmessage === "function") {
                 this.onmessage({ data: "bestmove (none)" });
-              }
-            }, 0);
-          } else if (msg === "uci") {
-            setTimeout(() => {
-              if (typeof this.onmessage === "function") {
-                this.onmessage({ data: "uciok" });
               }
             }, 0);
           }
@@ -98,17 +98,25 @@ describe("StockfishAdapter", () => {
     vi.stubGlobal("Worker", NoneWorker);
 
     const adapter = new StockfishAdapter();
-    await adapter.load(mockLoader);
-    const result = await adapter.search({
+    const loadPromise = adapter.load(mockLoader);
+    await vi.runAllTimersAsync();
+    await loadPromise;
+
+    const searchPromise = adapter.search({
       fen: createFEN("startpos"),
       depth: 10,
     });
-    expect(result.bestMove).toBe("(none)");
+    await vi.runAllTimersAsync();
+    const result = await searchPromise;
+    expect(result.bestMove).toBeNull();
   });
 
   it("should reject position strings containing control characters", async () => {
     const adapter = new StockfishAdapter();
-    await adapter.load(mockLoader);
+    const loadPromise = adapter.load(mockLoader);
+    await vi.runAllTimersAsync();
+    await loadPromise;
+
     await expect(
       adapter.search({
         fen: createFEN("startpos"),

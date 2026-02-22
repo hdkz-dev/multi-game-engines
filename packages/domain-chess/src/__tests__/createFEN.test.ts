@@ -9,7 +9,8 @@ describe("createFEN verification", () => {
     expect(() => createFEN(fen)).not.toThrow();
   });
 
-  it("should throw VALIDATION_ERROR for illegal characters", () => {
+  it("should throw SECURITY_ERROR for illegal characters", () => {
+    expect.assertions(2);
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1!";
     try {
       createFEN(fen);
@@ -26,7 +27,7 @@ describe("createFEN verification", () => {
       createFEN(fen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
       expect(err.message).toContain("Invalid FEN halfmove clock");
     }
   });
@@ -37,7 +38,7 @@ describe("createFEN verification", () => {
       createFEN(fen);
     } catch (e) {
       const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
       expect(err.message).toContain("Invalid FEN fullmove number");
     }
   });

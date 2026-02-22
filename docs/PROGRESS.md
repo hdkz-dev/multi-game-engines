@@ -1,5 +1,21 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
+## 📅 更新日: 2026年2月21日 (実装担当: PR `#38` 最終調整)
+
+## 🏆 到達ハイライト (2026-02-21 PR #38 超深層監査とビルド警告の完全排除)
+
+- **Worker 判定の極致化 (Security & Reliability)**:
+  - `ResourceInjector` において `importScripts` ではなく `!document` を検証する厳格な `isWorkerScope` 型ガードを導入。Module Worker への対応と Window オブジェクトの誤認防止を両立しました。
+- **プロトコルのヌル安全正規化 (Zenith Tier Type Safety)**:
+  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化して返却するよう設計を刷新。マジックストリングを型定義から排除し、100% ヌル安全な探索結果処理を実現しました。
+- **ビルドパイプラインの警告ゼロ化 (Clean Build Initiative)**:
+  - **Turbo 警告の解消**: `cdn-worker` にダミー出力を追加し、ビルドキャッシュの一貫性を保証。
+  - **SWC 警告の解消**: `ui-elements` に `@swc/core` を導入し、デコレータ処理の最適化と警告排除を同時に達成。
+  - **pnpm 警告の解消**: `@parcel/watcher` 等の必須ビルドスクリプトを `onlyBuiltDependencies` へ明示的に追加。
+  - **Vitest 警告の解消**: `WebAssembly.Memory` のモック手法をクラスベースへ移行し、内部的な実装警告を一掃。
+- **ドメインロジックの厳密化**:
+  - `domain-go`, `domain-mahjong`, `domain-reversi` におけるバリデーションを強化。i18n キーへの移行とインジェクションチェックの先行実施により、堅牢性を最大化しました。
+
 ## 📅 更新日: 2026年2月21日 (実装担当: Antigravity Swarm Integration)
 
 ## 🏆 到達ハイライト (2026-02-21 OPFS 実装と Swarm 設計思想の統合)
@@ -143,7 +159,7 @@
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:
   - **Next.js 16.1 (Stable)** & **React 19.2** へのメジャーアップデート、および **React Compiler** の有効化。
   - **Node.js 24 (LTS Target)** & **Turborepo 2.8** によるビルドパイプラインの高速化と並列実行の導入。
-  - **TypeScript 5.9** & **ESLint 10.0.1 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
+  - **TypeScript 5.9** & **ESLint 9.39.3 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
   - **Project References** の導入によるモノレポ構成の最適化と、`noUncheckedIndexedAccess` 等の極めて厳格な型安全性の確立。
 
 ---

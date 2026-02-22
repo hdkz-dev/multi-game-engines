@@ -38,7 +38,7 @@ export interface IGoSearchInfo extends IBaseSearchInfo {
  * 囲碁の探索結果。
  */
 export interface IGoSearchResult extends IBaseSearchResult {
-  bestMove: GOMove;
+  bestMove: GOMove | null;
   [key: string]: unknown;
 }
 

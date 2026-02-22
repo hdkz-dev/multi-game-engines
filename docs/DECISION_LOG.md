@@ -51,3 +51,4 @@
 - [2026-02-21] [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed)
 - [2026-02-21] [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed)
 - [2026-02-21] [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed)
+- [2026-02-21] [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed)

@@ -60,10 +60,10 @@
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
-  - [ ] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
-  - [ ] 全アダプターの SRI プレースホルダーハッシュ (`sha384-*Placeholder`) を本番用ハッシュ値へ置換。
-  - [ ] 20パッケージへの README.md 追加。
-  - [ ] CI (`release.yml`) の Node.js バージョン不整合の修正。
+  - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
+  - [ ] **[BLOCKER]** 全アダプターの SRI プレースホルダーハッシュ (`sha384-*Placeholder`) を本番用ハッシュ値へ置換 (Binary Release Required)。
+  - [x] 20パッケージへの README.md 追加。
+  - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
 - [ ] **Extended Adapters**:
   - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), リバーシ (Edax)。
   - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。

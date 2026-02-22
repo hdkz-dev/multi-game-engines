@@ -17,14 +17,21 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       include: ["src/**/*"],
+      exclude: [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.spec.tsx",
+        "**/__tests__/**",
+      ],
     }),
   ],
   build: {
     lib: {
       entry: {
-        elements: resolve(__dirname, "src/elements.ts"),
-        react: resolve(__dirname, "src/react.tsx"),
-        vue: resolve(__dirname, "src/vue.ts"),
+        elements: resolve(import.meta.dirname, "src/elements.ts"),
+        react: resolve(import.meta.dirname, "src/react.tsx"),
+        vue: resolve(import.meta.dirname, "src/vue.ts"),
       },
       name: "UIShogi",
       formats: ["es"],

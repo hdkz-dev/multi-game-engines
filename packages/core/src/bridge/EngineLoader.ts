@@ -13,6 +13,7 @@ import { EngineError } from "../errors/EngineError.js";
 export class EngineLoader implements IEngineLoader {
   private inflightLoads = new Map<string, Promise<string>>();
   private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
+  private activeBlobsByUrl = new Map<string, string>(); // blobUrl -> cacheKey
   private isProduction: boolean;
 
   constructor(private storage: IFileStorage) {
@@ -36,6 +37,14 @@ export class EngineLoader implements IEngineLoader {
     }
   }
 
+  /**
+   * 単一のエンジンリソースをフェッチ、検証、キャッシュ、および Blob URL 化します。
+   *
+   * @param engineId - リソースを所有するエンジンの ID。
+   * @param config - リソース設定 (URL, SRI, タイプ等)。
+   * @returns 生成された Blob URL。
+   * @throws {EngineError} 検証失敗、ネットワークエラー、またはセキュリティ違反の場合。
+   */
   async loadResource(
     engineId: string,
     config: IEngineSourceConfig,
@@ -48,7 +57,7 @@ export class EngineLoader implements IEngineLoader {
       });
     }
     const safeId = engineId;
-    const cacheKey = `${safeId}:${config.url}`;
+    const cacheKey = `${safeId}-${encodeURIComponent(config.url)}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
@@ -59,8 +68,16 @@ export class EngineLoader implements IEngineLoader {
     if (existing) return existing;
 
     // 2026: SSR Compatibility Guard
-    if (typeof URL.createObjectURL === "undefined") {
-      return config.url;
+    if (
+      typeof URL === "undefined" ||
+      typeof URL.createObjectURL !== "function"
+    ) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message:
+          "EngineLoader requires a browser environment with Blob URL support.",
+        engineId,
+      });
     }
 
     const promise = (async () => {
@@ -198,10 +215,19 @@ export class EngineLoader implements IEngineLoader {
     const oldUrl = this.activeBlobs.get(cacheKey);
     if (oldUrl) {
       URL.revokeObjectURL(oldUrl);
+      this.activeBlobsByUrl.delete(oldUrl);
     }
     this.activeBlobs.set(cacheKey, newUrl);
+    this.activeBlobsByUrl.set(newUrl, cacheKey);
   }
 
+  /**
+   * 複数のリソースを一括でロードします。アトミック性を保証し、一部が失敗した場合は全てロールバックします。
+   *
+   * @param engineId - エンジン ID。
+   * @param configs - キーとリソース設定のマップ。
+   * @returns キーと Blob URL のマップ。
+   */
   async loadResources(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
@@ -229,9 +255,14 @@ export class EngineLoader implements IEngineLoader {
       }
       const firstFailure = failures[0];
       if (firstFailure) {
-        throw firstFailure.reason;
+        throw EngineError.from(firstFailure.reason);
       }
-      throw new Error("Unknown error during resource loading");
+      // 2026 Best Practice: 到達不能コードだが型安全のために EngineError を投げる
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "Unknown error during resource loading",
+        engineId,
+      });
     }
 
     for (const res of settledResults) {
@@ -243,14 +274,17 @@ export class EngineLoader implements IEngineLoader {
     return results;
   }
 
+  /**
+   * 指定された Blob URL を無効化し、内部管理マップから削除します。
+   *
+   * @param url - 無効化する Blob URL。
+   */
   revoke(url: string): void {
-    URL.revokeObjectURL(url);
-    // マップからも削除
-    for (const [key, val] of this.activeBlobs.entries()) {
-      if (val === url) {
-        this.activeBlobs.delete(key);
-        break;
-      }
+    const cacheKey = this.activeBlobsByUrl.get(url);
+    if (cacheKey) {
+      URL.revokeObjectURL(url);
+      this.activeBlobs.delete(cacheKey);
+      this.activeBlobsByUrl.delete(url);
     }
   }
 
@@ -259,9 +293,10 @@ export class EngineLoader implements IEngineLoader {
    */
   revokeByEngineId(engineId: string): void {
     for (const [key, val] of this.activeBlobs.entries()) {
-      if (key.startsWith(`${engineId}:`)) {
+      if (key.startsWith(`${engineId}-`)) {
         URL.revokeObjectURL(val);
         this.activeBlobs.delete(key);
+        this.activeBlobsByUrl.delete(val);
       }
     }
   }

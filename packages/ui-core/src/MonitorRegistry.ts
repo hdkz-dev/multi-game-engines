@@ -68,7 +68,28 @@ export class MonitorRegistry {
   >(
     monitor: unknown,
   ): asserts monitor is SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
-    if (!monitor) {
+    if (
+      !monitor ||
+      typeof monitor !== "object" ||
+      !("startMonitoring" in monitor) ||
+      typeof (monitor as { startMonitoring: unknown }).startMonitoring !==
+        "function" ||
+      !("stopMonitoring" in monitor) ||
+      typeof (monitor as { stopMonitoring: unknown }).stopMonitoring !==
+        "function" ||
+      !("subscribe" in monitor) ||
+      typeof (monitor as { subscribe: unknown }).subscribe !== "function" ||
+      !("getSnapshot" in monitor) ||
+      typeof (monitor as { getSnapshot: unknown }).getSnapshot !== "function" ||
+      !("search" in monitor) ||
+      typeof (monitor as { search: unknown }).search !== "function" ||
+      !("stop" in monitor) ||
+      typeof (monitor as { stop: unknown }).stop !== "function" ||
+      !("getState" in monitor) ||
+      typeof (monitor as { getState: unknown }).getState !== "function" ||
+      !("getStatus" in monitor) ||
+      typeof (monitor as { getStatus: unknown }).getStatus !== "function"
+    ) {
       throw new Error("[MonitorRegistry] Invalid monitor instance.");
     }
   }
@@ -90,8 +111,12 @@ export class MonitorRegistry {
     IBaseSearchResult
   > {
     if (!monitor) throw new Error("Monitor must be defined");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return monitor as any;
+    return monitor as unknown as SearchMonitor<
+      EngineSearchState,
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
   }
 
   /**

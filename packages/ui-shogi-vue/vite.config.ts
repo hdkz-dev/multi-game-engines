@@ -15,11 +15,19 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       include: ["src/**/*"],
+      exclude: [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.spec.tsx",
+        "**/*.tsx",
+        "**/__tests__/**",
+      ],
     }),
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(import.meta.dirname, "src/index.ts"),
       name: "UIShogiVue",
       fileName: "index",
       formats: ["es"],

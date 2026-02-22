@@ -50,7 +50,7 @@ export interface IShogiSearchInfo extends IBaseSearchInfo {
  * 将棋の探索結果。
  */
 export interface IShogiSearchResult extends IBaseSearchResult {
-  bestMove: ShogiMove | "none";
+  bestMove: ShogiMove | null;
   ponder?: ShogiMove;
   [key: string]: unknown;
 }
@@ -112,10 +112,13 @@ export class USIParser implements IProtocolParser<
           break;
         case "currmove":
           if (i + 1 < parts.length) {
+            const token = parts[++i]!;
             try {
-              info.currMove = createShogiMove(parts[++i]!);
+              info.currMove = createShogiMove(token);
             } catch {
-              // 2026 Best Practice: 特定の指し手のパース失敗で全体の解析を止めない
+              console.warn(
+                `[USIParser] Skipping invalid currmove token: "${truncateLog(token)}"`,
+              );
             }
           }
           break;
@@ -134,7 +137,9 @@ export class USIParser implements IProtocolParser<
             try {
               info.pv.push(createShogiMove(m));
             } catch {
-              // 不正な指し手はスキップ
+              console.warn(
+                `[USIParser] Skipping invalid PV move token: "${truncateLog(m)}"`,
+              );
             }
           }
           i = parts.length;
@@ -162,7 +167,10 @@ export class USIParser implements IProtocolParser<
     }
 
     const moveStr = parts[1]!;
-    const bestMove = moveStr === "none" ? "none" : createShogiMove(moveStr);
+    const bestMove =
+      moveStr === "none" || moveStr === "(none)"
+        ? null
+        : createShogiMove(moveStr);
 
     const result: IShogiSearchResult = {
       bestMove,

@@ -1,12 +1,12 @@
 import js from "@eslint/js";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import typescriptParser from "@typescript-eslint/parser";
+import tseslint from "typescript-eslint";
 import vue from "eslint-plugin-vue";
 import vueParser from "vue-eslint-parser";
 import prettier from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   ...vue.configs["flat/recommended"],
   prettier,
   {
@@ -14,12 +14,10 @@ export default [
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: typescriptParser,
+        parser: tseslint.parser,
         sourceType: "module",
+        extraFileExtensions: [".vue"],
       },
-    },
-    plugins: {
-      "@typescript-eslint": typescriptEslint,
     },
     rules: {
       "vue/multi-word-component-names": "off",

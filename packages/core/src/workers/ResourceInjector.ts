@@ -38,7 +38,11 @@ export class ResourceInjector {
       typeof obj === "object" &&
       obj !== null &&
       "postMessage" in obj &&
-      typeof (obj as { postMessage?: unknown }).postMessage === "function"
+      typeof (obj as { postMessage?: unknown }).postMessage === "function" &&
+      "onmessage" in obj &&
+      // Window (self === window) には document が存在するが、Worker スコープには存在しない。
+      // importScripts は Module Worker では存在しないため、判定には使用しない。
+      !("document" in obj)
     );
   }
 

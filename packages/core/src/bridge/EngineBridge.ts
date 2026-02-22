@@ -36,11 +36,7 @@ export class EngineBridge implements IEngineBridge {
   >();
   private adapterFactories = new Map<
     string,
-    (
-      config: IEngineConfig,
-    ) =>
-      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+    (config: IEngineConfig) => unknown
   >();
   private engineInstances = new Map<
     string,
@@ -91,26 +87,13 @@ export class EngineBridge implements IEngineBridge {
    * これにより、`getEngine` に設定オブジェクトを渡すだけで、事前にインスタンス化することなくエンジンを利用可能になります。
    *
    * @param type - アダプターの種類識別子（例: "uci", "usi"）。IEngineConfig.adapter と一致させる必要があります。
-   * @param factory - 設定を受け取りアダプターを返す関数。
+   * @param factory - 設定を受け取りアダプターまたはエンジンを返す関数。
    */
-  registerAdapterFactory<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
+  registerAdapterFactory(
     type: string,
-    factory: (
-      config: IEngineConfig,
-    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
+    factory: (config: IEngineConfig) => unknown,
   ): void {
-    this.adapterFactories.set(
-      type,
-      factory as (
-        config: IEngineConfig,
-      ) =>
-        | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-        | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
-    );
+    this.adapterFactories.set(type, factory);
   }
 
   /**
@@ -187,7 +170,11 @@ export class EngineBridge implements IEngineBridge {
         for (const unsub of unsubs) unsub();
       }
       this.adapterUnsubscribers.delete(id);
-      await adapter.dispose();
+      try {
+        await adapter.dispose();
+      } catch (err) {
+        console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+      }
     }
     this.adapters.delete(id);
     this.engineInstances.delete(id);
@@ -604,11 +591,16 @@ export class EngineBridge implements IEngineBridge {
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
     const record = obj as Record<string, unknown>;
+    const parser = record["parser"];
+    if (typeof parser !== "object" || parser === null) return false;
+
+    const p = parser as Record<string, unknown>;
     return (
       typeof record["id"] === "string" &&
       typeof record["searchRaw"] === "function" &&
-      typeof record["parser"] === "object" &&
-      record["parser"] !== null
+      typeof p["createSearchCommand"] === "function" &&
+      typeof p["parseInfo"] === "function" &&
+      typeof p["parseResult"] === "function"
     );
   }
 }

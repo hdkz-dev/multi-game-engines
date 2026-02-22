@@ -205,4 +205,30 @@ describe("EngineFacade", () => {
 
     expect(loadCount).toBe(1);
   });
+
+  it("dispose() がアダプターを破棄し、リソースを解放すること", async () => {
+    const mockLoader = {
+      revokeByEngineId: vi.fn(),
+    } as unknown as IEngineLoader;
+    const loaderProvider = vi.fn().mockResolvedValue(mockLoader);
+    const facade = new EngineFacade(adapter, [], loaderProvider);
+
+    await facade.dispose();
+
+    expect(adapter.dispose).toHaveBeenCalled();
+    expect(loaderProvider).toHaveBeenCalled();
+    expect(mockLoader.revokeByEngineId).toHaveBeenCalledWith(adapter.id);
+  });
+
+  it("dispose() が loaderProvider() の例外を握りつぶすこと", async () => {
+    const loaderProvider = vi
+      .fn()
+      .mockRejectedValue(new Error("loader unavailable"));
+    const facade = new EngineFacade(adapter, [], loaderProvider);
+
+    // 例外がスローされないこと
+    await expect(facade.dispose()).resolves.toBeUndefined();
+    expect(adapter.dispose).toHaveBeenCalled();
+    expect(loaderProvider).toHaveBeenCalled();
+  });
 });

@@ -25,8 +25,17 @@ export class OPFSStorage implements IFileStorage {
     const root = await this.getDirectory();
     const fileHandle = await root.getFileHandle(key, { create: true });
     const writable = await fileHandle.createWritable();
-    await writable.write(data);
-    await writable.close();
+    try {
+      await writable.write(data);
+      await writable.close();
+    } catch (error) {
+      try {
+        await writable.abort();
+      } catch {
+        // abort 失敗は二次的エラーのため抑制し、元のエラーを優先する
+      }
+      throw error;
+    }
   }
 
   async delete(key: string): Promise<void> {

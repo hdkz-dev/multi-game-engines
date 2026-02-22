@@ -40,9 +40,8 @@ export class EngineError extends Error {
 
     // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
     if (
-      "captureStackTrace" in Error &&
       typeof (Error as { captureStackTrace?: unknown }).captureStackTrace ===
-        "function"
+      "function"
     ) {
       (
         Error as { captureStackTrace: (t: object, c?: unknown) => void }

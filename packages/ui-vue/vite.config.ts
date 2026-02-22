@@ -15,6 +15,7 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       include: ["src/**/*"],
+      exclude: ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"],
     }),
   ],
   esbuild: {
@@ -24,8 +25,8 @@ export default defineConfig({
     minify: "esbuild",
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
-        hooks: resolve(__dirname, "src/hooks.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
+        hooks: resolve(import.meta.dirname, "src/hooks.ts"),
       },
       name: "UIVue",
       formats: ["es", "cjs"],
