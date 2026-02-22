@@ -2,9 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
-  // Switch to English to match assertions
-  await page.getByRole("button", { name: "EN", exact: true }).click();
+  // Switch to English to match assertions (using regex to match "英語 (EN)" in JA locale)
+  const enButton = page.getByRole("button", { name: /EN/ });
+  await enButton.waitFor({ state: "visible", timeout: 15000 });
+  await enButton.click();
   // Wait for initial Ready status
   await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 15000 });
 });
