@@ -25,7 +25,7 @@ export default defineConfig({
     },
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
       },
       name: "UIVueMonitor",
       formats: ["es", "cjs"],

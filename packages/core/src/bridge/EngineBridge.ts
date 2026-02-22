@@ -170,7 +170,11 @@ export class EngineBridge implements IEngineBridge {
         for (const unsub of unsubs) unsub();
       }
       this.adapterUnsubscribers.delete(id);
-      await adapter.dispose();
+      try {
+        await adapter.dispose();
+      } catch (err) {
+        console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+      }
     }
     this.adapters.delete(id);
     this.engineInstances.delete(id);

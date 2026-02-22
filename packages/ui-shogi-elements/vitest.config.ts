@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: [
-      resolve(__dirname, "../../fixtures/shared-mocks/lit-setup.ts"),
+      resolve(import.meta.dirname, "../../fixtures/shared-mocks/lit-setup.ts"),
     ],
   },
 });
