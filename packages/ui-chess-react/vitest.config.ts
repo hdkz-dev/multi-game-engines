@@ -1,8 +1,11 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "path";
 
 export default defineConfig({
   test: {
     environment: "jsdom",
-    setupFiles: ["../../fixtures/shared-mocks/lit-setup.ts"],
+    setupFiles: [
+      resolve(__dirname, "../../fixtures/shared-mocks/lit-setup.ts"),
+    ],
   },
 });

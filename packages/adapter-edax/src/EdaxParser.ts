@@ -90,6 +90,6 @@ export interface IReversiSearchInfo {
 
 export interface IReversiSearchResult {
   raw: string;
-  bestMove: ReversiMove;
+  bestMove: ReversiMove | null;
   [key: string]: unknown;
 }

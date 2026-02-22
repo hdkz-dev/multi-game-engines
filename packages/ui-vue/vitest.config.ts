@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "path";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
@@ -6,6 +7,6 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./src/__tests__/setup.ts"],
+    setupFiles: [resolve(__dirname, "./src/__tests__/setup.ts")],
   },
 });

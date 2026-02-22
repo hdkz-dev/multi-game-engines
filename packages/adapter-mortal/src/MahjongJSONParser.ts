@@ -129,6 +129,6 @@ export interface IMahjongSearchInfo {
 
 export interface IMahjongSearchResult {
   raw: string;
-  bestMove: MahjongMove;
+  bestMove: MahjongMove | null;
   [key: string]: unknown;
 }
