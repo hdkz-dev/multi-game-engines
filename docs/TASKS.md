@@ -64,4 +64,10 @@
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [ ] **英語版ドキュメント不足**: `docs/en/` の拡充 (`DECISION_LOG.md`, `ROADMAP.md` 等)。
 - [x] **Dashboard E2E デバッグ & 修復**: Dashboard (React/Vue) の E2E テストにおける SRI ミスマッチと初期化タイムアウトの解消。(2026-02-21)
-- [ ] **PR #38 深度監査 & 警告一掃**: 過去の全レビュー指摘（Worker判定、型ガード、プロトコル正規化、i18n統合）の完遂とビルド警告の完全排除。(Waiting for Merge)
+- [ ] **PR #38 Absolute Zenith Audit & 整合性同期**:
+  - [x] **Reliability**: `EngineLoader` の ID 衝突防止 (セパレータ復帰) と `IndexedDB` ハング防止。
+  - [x] **Type Safety**: `isIEngineAdapter` 検証の完備と `registerAdapterFactory` の契約適正化。
+  - [x] **Protocol**: GTP `resign` の null 正規化と Go バリデーション順序の是正。
+  - [x] **Stability**: E2E テストの `networkidle` 排除と Locator 絞り込みによる堅牢化。
+  - [x] **Async Safety**: ESLint `no-floating-promises` の全域適用。
+  - [x] **Documentation**: ADR-044, ADR-045 の策定。 (2026-02-23)
