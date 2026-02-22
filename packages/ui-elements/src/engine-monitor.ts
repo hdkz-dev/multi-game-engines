@@ -308,7 +308,7 @@ export class EngineMonitorElement extends LitElement {
   }
 
   private _focusActiveTab() {
-    this.updateComplete.then(() => {
+    void this.updateComplete.then(() => {
       const nextTab = this.shadowRoot?.querySelector<HTMLElement>(
         `#tab-${this._activeTab}`,
       );
