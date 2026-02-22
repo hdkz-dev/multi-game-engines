@@ -7,12 +7,7 @@ export default [
     ignores: ["dist", "node_modules", "storybook-static", ".turbo"],
   },
   {
+    ...reactHooks.configs.flat.recommended,
     files: ["**/*.ts", "**/*.tsx"],
-    plugins: {
-      "react-hooks": reactHooks,
-    },
-    rules: {
-      ...reactHooks.configs.recommended.rules,
-    },
   },
 ];

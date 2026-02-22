@@ -162,7 +162,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
-      i18nKey: "engine.errors.invalidSFEN",
+      i18nKey: "engine.errors.invalidSFENTurn",
     });
   }
 
@@ -171,7 +171,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN hand: "${fields[2]}"`,
-      i18nKey: "engine.errors.invalidSFEN",
+      i18nKey: "engine.errors.invalidSFENHand",
       i18nParams: { hand: fields[2]! },
     });
   }
@@ -182,7 +182,7 @@ export function createSFEN(pos: string): SFEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN move counter: "${fields[3]}"`,
-      i18nKey: "engine.errors.invalidSFEN",
+      i18nKey: "engine.errors.invalidSFENMoveCounter",
       i18nParams: { counter: fields[3]! },
     });
   }

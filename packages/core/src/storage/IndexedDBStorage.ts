@@ -66,7 +66,7 @@ export class IndexedDBStorage implements IFileStorage {
       const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
       const request = store.get(key);
 
-      request.onsuccess = () => resolve(request.result || null);
+      request.onsuccess = () => resolve(request.result ?? null);
       request.onerror = () => reject(request.error);
     });
   }

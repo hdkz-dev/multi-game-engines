@@ -168,6 +168,13 @@ export class EngineFacade<
       this.loadingStrategy === "on-demand"
     ) {
       await this.load();
+      if ((this.status as EngineStatus) !== "ready") {
+        throw new EngineError({
+          code: EngineErrorCode.NOT_READY,
+          message: `Engine failed to initialize on-demand (Status: ${this.status})`,
+          engineId: this.id,
+        });
+      }
     }
 
     if (this.activeTaskStop) {

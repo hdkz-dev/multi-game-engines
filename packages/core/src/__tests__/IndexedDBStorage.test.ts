@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import "fake-indexeddb/auto";
-import { forceCloseDatabase } from "fake-indexeddb";
+import { forceCloseDatabase, IDBFactory } from "fake-indexeddb";
 import { IndexedDBStorage } from "../storage/IndexedDBStorage.js";
 
 describe("IndexedDBStorage", () => {
   let storage: IndexedDBStorage;
 
   beforeEach(() => {
+    // テスト間のDB状態をリセット
+    globalThis.indexedDB = new IDBFactory();
     storage = new IndexedDBStorage();
     // 2026 Best Practice: 決定性向上のためのモック
     vi.spyOn(performance, "now").mockReturnValue(0);
@@ -83,6 +85,7 @@ describe("IndexedDBStorage", () => {
 
     // 再オープンされるはず
     await storage.set("key2", new Uint8Array([2]).buffer);
+    expect(await storage.has("key1")).toBe(true); // 再オープン後もkey1が保持される
     expect(await storage.has("key2")).toBe(true);
   });
 });

@@ -16,29 +16,47 @@ describe("createSFEN verification", () => {
   });
 
   it("should throw SECURITY_ERROR for illegal characters", () => {
-    expect.assertions(2);
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1!";
     try {
       createSFEN(sfen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-      expect(err.message).toContain("Illegal characters detected");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        expect(e.message).toContain("Illegal characters detected");
+      }
     }
   });
 
   it("should throw VALIDATION_ERROR for invalid structure", () => {
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b -";
-    expect(() => createSFEN(sfen)).toThrow(EngineError);
-    expect(() => createSFEN(sfen)).toThrow("Invalid SFEN structure");
+    try {
+      createSFEN(sfen);
+    } catch (e) {
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.message).toContain("Invalid SFEN structure");
+      }
+    }
   });
 
   it("should throw VALIDATION_ERROR for invalid move counter", () => {
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 0";
-    expect(() => createSFEN(sfen)).toThrow(EngineError);
-    expect(() => createSFEN(sfen)).toThrow("Invalid SFEN move counter");
+    try {
+      createSFEN(sfen);
+    } catch (e) {
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.message).toContain("Invalid SFEN move counter");
+      }
+    }
   });
 });

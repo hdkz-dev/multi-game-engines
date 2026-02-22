@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local", "tsconfig.base.json"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "lint", "typecheck"],
+      "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "storybook-static/**", ".output/**"]
     },
     "test": {
