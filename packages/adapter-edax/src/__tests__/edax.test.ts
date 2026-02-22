@@ -36,6 +36,7 @@ describe("EdaxAdapter", () => {
       .fn()
       .mockResolvedValue({ main: "blob:http://localhost/main" }),
     revoke: vi.fn(),
+    revokeAll: vi.fn(),
     revokeByEngineId: vi.fn(),
   };
 

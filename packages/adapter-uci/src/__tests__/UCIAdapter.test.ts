@@ -39,6 +39,7 @@ describe("UCIAdapter", () => {
     loadResource: vi.fn().mockResolvedValue("blob:mock"),
     loadResources: vi.fn().mockResolvedValue({ main: "blob:mock" }),
     revoke: vi.fn(),
+    revokeAll: vi.fn(),
     revokeByEngineId: vi.fn(),
   };
 

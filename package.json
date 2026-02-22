@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "description": "A bridge library for various game engines with a plugin-based architecture.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git"
+  },
   "workspaces": [
     "packages/*",
     "examples/*",

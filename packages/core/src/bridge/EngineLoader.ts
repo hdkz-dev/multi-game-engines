@@ -284,6 +284,18 @@ export class EngineLoader implements IEngineLoader {
   }
 
   /**
+   * 2026 Best Practice: このローダーが生成したすべての Blob リソースを解放します。
+   * EngineBridge の dispose 時に呼び出され、メモリリークを完全に防ぎます。
+   */
+  revokeAll(): void {
+    for (const url of this.activeBlobs.values()) {
+      URL.revokeObjectURL(url);
+    }
+    this.activeBlobs.clear();
+    this.activeBlobsByUrl.clear();
+  }
+
+  /**
    * 2026 Best Practice: 特定のエンジンIDに関連付けられたすべての Blob リソースを解放します。
    */
   revokeByEngineId(engineId: string): void {

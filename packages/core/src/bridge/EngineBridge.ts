@@ -573,12 +573,14 @@ export class EngineBridge implements IEngineBridge {
           console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
         }
       }
-      // 2026 Best Practice: 破棄失敗時も Blob URL リソースは強制的に解放
-      if (this.loader) {
-        this.loader.revokeByEngineId(id);
-      }
     });
     await Promise.all(promises);
+
+    // 2026 Best Practice: 破棄失敗時も Blob URL リソースは強制的に解放 (Leak Prevention)
+    // 個別の ID に依存せず、このブリッジコンテキストで生成された全 Blob を一括消去する。
+    if (this.loader) {
+      this.loader.revokeAll();
+    }
 
     // 2026 Best Practice: 進行中のエンジン生成とロード処理の完了を待機（または例外吸収）
     await Promise.all([

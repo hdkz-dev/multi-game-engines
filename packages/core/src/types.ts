@@ -419,6 +419,7 @@ export interface IEngineLoader {
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>>;
   revoke(url: string): void;
+  revokeAll(): void;
   revokeByEngineId(engineId: string): void;
 }
 
