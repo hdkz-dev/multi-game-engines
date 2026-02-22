@@ -24,19 +24,21 @@ type Story = StoryObj<typeof EngineMonitorPanel>;
 /**
  * 基本的な表示と操作のテスト
  */
+const InteractivePanel = () => {
+  const engine = React.useMemo(() => new MockEngine(), []);
+  return (
+    <div style={{ width: "400px", height: "600px" }}>
+      <EngineMonitorPanel
+        engine={engine}
+        searchOptions={{}}
+        title="Best Practice Monitor"
+      />
+    </div>
+  );
+};
+
 export const Interactive: Story = {
-  render: () => {
-    const engine = React.useMemo(() => new MockEngine(), []);
-    return (
-      <div style={{ width: "400px", height: "600px" }}>
-        <EngineMonitorPanel
-          engine={engine}
-          searchOptions={{}}
-          title="Best Practice Monitor"
-        />
-      </div>
-    );
-  },
+  render: () => <InteractivePanel />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 

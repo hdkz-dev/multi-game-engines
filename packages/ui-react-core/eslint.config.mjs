@@ -4,9 +4,6 @@ import reactHooks from "eslint-plugin-react-hooks";
 export default [
   ...rootConfig,
   {
-    ignores: ["dist", "node_modules", "storybook-static", ".turbo"],
-  },
-  {
     files: ["**/*.ts", "**/*.tsx"],
     plugins: {
       "react-hooks": reactHooks,
