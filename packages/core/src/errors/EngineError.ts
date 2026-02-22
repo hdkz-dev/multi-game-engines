@@ -37,6 +37,10 @@ export type ValidI18nKey =
   | "engine.errors.invalidSfenRankWidth"
   | "engine.errors.invalidShogiMove"
   | "engine.errors.invalidMahjongMove"
+  | "adapters.uci.errors.missing_fen"
+  | "adapters.usi.errors.missing_fen"
+  | "adapters.gtp.errors.invalid_response"
+  | "adapters.ensemble.errors.no_results"
   | (string & {});
 
 /** エンジンエラーの構築オプション */
