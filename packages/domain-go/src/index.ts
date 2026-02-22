@@ -17,7 +17,6 @@ export type GOMove = Move<"GOMove">;
  * 囲碁盤面データのバリデータファクトリ。
  */
 export function createGOBoard(pos: string): GOBoard {
-  ProtocolValidator.assertNoInjection(pos, "GOBoard");
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -25,6 +24,7 @@ export function createGOBoard(pos: string): GOBoard {
       i18nKey: "engine.errors.invalidGOBoard",
     });
   }
+  ProtocolValidator.assertNoInjection(pos, "GOBoard");
   if (!/^[a-zA-Z0-9.\- ]+$/.test(pos)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
@@ -39,7 +39,6 @@ export function createGOBoard(pos: string): GOBoard {
  * 囲碁指し手のバリデータファクトリ。
  */
 export function createGOMove(move: string): GOMove {
-  ProtocolValidator.assertNoInjection(move, "GOMove");
   if (typeof move !== "string" || move.trim().length === 0) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -47,6 +46,7 @@ export function createGOMove(move: string): GOMove {
       i18nKey: "engine.errors.invalidGOMove",
     });
   }
+  ProtocolValidator.assertNoInjection(move, "GOMove");
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施
   const normalized = move.toLowerCase();
   if (!/^[a-z0-9]+$/.test(normalized)) {

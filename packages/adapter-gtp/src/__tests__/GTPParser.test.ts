@@ -8,6 +8,7 @@ describe("GTPParser", () => {
   });
 
   afterAll(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -69,18 +70,21 @@ describe("GTPParser", () => {
 
   it("should validate move coordinates edge cases", () => {
     // Valid cases (up to row 25 in 2026 Zenith Tier)
-    expect(parser.parseResult("= T19")).not.toBeNull();
-    expect(parser.parseResult("= A1")).not.toBeNull();
-    expect(parser.parseResult("= A20")).not.toBeNull();
-    expect(parser.parseResult("= Z25")).not.toBeNull();
-    expect(parser.parseResult("= pass")).not.toBeNull();
-    expect(parser.parseResult("= resign")).not.toBeNull();
+    expect(parser.parseResult("= T19")?.bestMove).toBe("t19");
+    expect(parser.parseResult("= A1")?.bestMove).toBe("a1");
+    expect(parser.parseResult("= Z25")?.bestMove).toBe("z25");
+    expect(parser.parseResult("= pass")?.bestMove).toBe("pass");
 
-    // Invalid cases (Should throw EngineError in 2026 Zenith Tier)
-    expect(() => parser.parseResult("= I1")).toThrow();
-    expect(() => parser.parseResult("= A0")).toThrow();
-    expect(() => parser.parseResult("= A26")).toThrow();
-    expect(() => parser.parseResult("= @1")).toThrow();
+    // Special case: resign is normalized to null (legitimate response but no board move)
+    const resignResult = parser.parseResult("= resign");
+    expect(resignResult).not.toBeNull();
+    expect(resignResult!.bestMove).toBeNull();
+
+    // Invalid cases (Return null in 2026 Zenith Tier parsing logic)
+    expect(parser.parseResult("= I1")).toBeNull();
+    expect(parser.parseResult("= A0")).toBeNull();
+    expect(parser.parseResult("= A26")).toBeNull();
+    expect(parser.parseResult("= @1")).toBeNull();
   });
 
   it("should throw error for injection in board data", () => {

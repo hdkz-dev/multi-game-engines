@@ -47,10 +47,6 @@
 - [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](adr/036-zenith-audit-and-strict-types.md)
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](adr/037-core-domain-isolation-and-lifecycle-hardening.md)
 - [ADR-038: プライバシー保護のためのログ・サニタイズポリシー (Privacy-First Logging)](adr/038-privacy-first-logging.md)
+- [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](adr/044-eslint-v9-pinning.md)
+- [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](adr/045-absolute-zenith-audit.md)
 - [2026-02-21] [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed)
-- [2026-02-21] [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed)
-- [2026-02-21] [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed)
-- [2026-02-21] [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed)
-- [2026-02-21] [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed)
-- [2026-02-23] ESLint を v9.39.3 にピン留め。v10 でのモノレポ設定検索の破壊的変更および Node 要件引き上げへの対応。
-- [2026-02-23] Absolute Zenith Quality Audit 完了。エラーポリシーの SECURITY/VALIDATION 分離、EngineBridge の安全性、全ドメインの i18n 詳細化を完遂。

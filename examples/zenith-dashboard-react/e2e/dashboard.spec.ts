@@ -2,12 +2,19 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
   // Switch to English to match assertions (match exact "EN" or localized "英語 (EN)")
   const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
-  await expect(page.getByText("Ready", { exact: true })).toBeVisible({
+
+  // EN ロケールに切り替わったことを英語固有のラベルで確認
+  await expect(
+    page.getByRole("heading", { name: /ZENITH DASHBOARD/i }),
+  ).toBeVisible({
+    timeout: 10000,
+  });
+
+  await expect(page.getByText("Ready", { exact: true }).first()).toBeVisible({
     timeout: 10000,
   });
 });
@@ -20,8 +27,11 @@ test("dashboard loads and initializes engines", async ({ page }) => {
   const bridgeStatus = page.locator("text=2026 Engine Bridge Standard");
   await expect(bridgeStatus).toBeVisible({ timeout: 15000 });
 
-  // Verify Chess engine status becomes 'ready'
-  await expect(page.getByText(/^ready$/i)).toHaveCount(1, {
+  // Verify Chess engine status becomes 'ready' within its specific panel
+  const chessPanel = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
+  await expect(chessPanel.getByText(/^ready$/i)).toHaveCount(1, {
     timeout: 15000,
   });
 });

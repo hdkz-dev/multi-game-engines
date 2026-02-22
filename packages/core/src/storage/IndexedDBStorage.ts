@@ -16,6 +16,7 @@ export class IndexedDBStorage implements IFileStorage {
 
     this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, 1);
+      let blockedTimer: ReturnType<typeof setTimeout> | null = null;
 
       request.onupgradeneeded = () => {
         const db = request.result;
@@ -25,11 +26,17 @@ export class IndexedDBStorage implements IFileStorage {
       };
 
       request.onblocked = () => {
-        this.dbPromise = null;
-        reject(new Error("IndexedDB open blocked by another connection"));
+        // 2026 Best Practice: ブロックは一時的な可能性があるため、タイムアウト待機を導入
+        if (!blockedTimer) {
+          blockedTimer = setTimeout(() => {
+            this.dbPromise = null;
+            reject(new Error("IndexedDB open blocked by another connection"));
+          }, 10000);
+        }
       };
 
       request.onsuccess = () => {
+        if (blockedTimer) clearTimeout(blockedTimer);
         const db = request.result;
         this.db = db;
 
@@ -48,6 +55,7 @@ export class IndexedDBStorage implements IFileStorage {
       };
 
       request.onerror = () => {
+        if (blockedTimer) clearTimeout(blockedTimer);
         this.dbPromise = null;
         reject(request.error);
       };

@@ -81,6 +81,7 @@ export class UCIParser implements IProtocolParser<
    */
   private createMove(value: string): Move | null {
     if (!UCIParser.MOVE_REGEX.test(value)) return null;
+    if (value === "0000") return null; // ヌルムーブを null に正規化
     return createMove(value);
   }
 

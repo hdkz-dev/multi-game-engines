@@ -31,7 +31,7 @@ const InteractivePanel = () => {
       <EngineMonitorPanel
         engine={engine}
         searchOptions={{}}
-        title="Best Practice Monitor"
+        title="Engine Analysis"
       />
     </div>
   );

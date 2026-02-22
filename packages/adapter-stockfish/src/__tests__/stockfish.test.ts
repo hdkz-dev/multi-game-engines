@@ -41,8 +41,7 @@ describe("StockfishAdapter", () => {
   let mockLoader: IEngineLoader;
 
   beforeAll(() => {
-    vi.useFakeTimers();
-    vi.spyOn(performance, "now").mockReturnValue(0);
+    vi.useFakeTimers({ now: 0 });
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
     vi.spyOn(URL, "revokeObjectURL").mockReturnValue(undefined);
   });

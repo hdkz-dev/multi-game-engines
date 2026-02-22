@@ -2,13 +2,20 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  await page.waitForLoadState("networkidle");
   // Switch to English to match assertions (using regex to match "英語 (EN)" in JA locale or exact "EN")
   const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
+
+  // EN ロケールに切り替わったことを英語固有のラベルで確認
+  await expect(
+    page.getByRole("heading", { name: /ZENITH DASHBOARD/i }),
+  ).toBeVisible({
+    timeout: 10000,
+  });
+
   // Wait for initial Ready status
-  await expect(page.getByText("Ready", { exact: true })).toBeVisible({
+  await expect(page.getByText("Ready", { exact: true }).first()).toBeVisible({
     timeout: 15000,
   });
 });
@@ -22,8 +29,11 @@ test("vue dashboard loads and initializes engines", async ({ page }) => {
     timeout: 15000,
   });
 
-  // Verify engine status becomes 'Ready'
-  await expect(page.getByText(/^ready$/i)).toHaveCount(1, {
+  // Verify engine status becomes 'Ready' within its specific panel
+  const activePanel = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
+  await expect(activePanel.getByText(/^ready$/i)).toHaveCount(1, {
     timeout: 15000,
   });
 });

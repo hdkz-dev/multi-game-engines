@@ -317,7 +317,7 @@ export class EngineBridge implements IEngineBridge {
             } else {
               throw new EngineError({
                 code: EngineErrorCode.INTERNAL_ERROR,
-                message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, searchRaw, or parser methods).`,
+                message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, name, version, status, load, search, searchRaw, stop, setOption, dispose, or parser methods).`,
                 engineId: id,
               });
             }
@@ -614,13 +614,17 @@ export class EngineBridge implements IEngineBridge {
       typeof r["name"] === "string" &&
       typeof r["version"] === "string" &&
       typeof r["status"] === "string" &&
+      typeof r["load"] === "function" &&
+      typeof r["search"] === "function" &&
       typeof r["searchRaw"] === "function" &&
       typeof r["stop"] === "function" &&
+      typeof r["setOption"] === "function" &&
       typeof r["dispose"] === "function" &&
       typeof r["onSearchResult"] === "function" &&
       typeof r["onStatusChange"] === "function" &&
       typeof r["onProgress"] === "function" &&
       typeof r["onTelemetry"] === "function" &&
+      typeof r["emitTelemetry"] === "function" &&
       typeof parser["createSearchCommand"] === "function" &&
       typeof parser["parseInfo"] === "function" &&
       typeof parser["parseResult"] === "function"

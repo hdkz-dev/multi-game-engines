@@ -231,7 +231,7 @@ describe("EngineLoader", () => {
       loader as unknown as { activeBlobs: Map<string, string> }
     ).activeBlobs;
     expect(activeBlobs.size).toBe(1);
-    expect(activeBlobs.has(`engine-2-${encodeURIComponent(config.url)}`)).toBe(
+    expect(activeBlobs.has(`engine-2:${encodeURIComponent(config.url)}`)).toBe(
       true,
     );
   });

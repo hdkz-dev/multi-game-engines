@@ -5,6 +5,6 @@ export default [
   ...rootConfig,
   {
     ...reactHooks.configs.flat.recommended,
-    files: ["**/*.ts", "**/*.tsx"],
+    files: ["src/react.tsx", "src/react/**/*.ts", "src/react/**/*.tsx"],
   },
 ];
