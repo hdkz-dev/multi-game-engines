@@ -9,7 +9,8 @@ describe("createFEN verification", () => {
     expect(() => createFEN(fen)).not.toThrow();
   });
 
-  it("should throw VALIDATION_ERROR for illegal characters", () => {
+  it("should throw SECURITY_ERROR for illegal characters", () => {
+    expect.assertions(2);
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1!";
     try {
       createFEN(fen);

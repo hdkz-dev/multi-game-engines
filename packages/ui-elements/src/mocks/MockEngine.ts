@@ -67,8 +67,8 @@ export class MockEngine implements IEngine<
         depth++;
         const info: ExtendedSearchInfo = {
           depth,
-          nodes: depth * 1000 + Math.floor(Math.random() * 100),
-          nps: 50000 + Math.floor(Math.random() * 5000),
+          nodes: depth * 1000 + (depth % 100),
+          nps: 50000 + (depth % 5000),
           time: depth * 100,
           multipv: 1,
           score: { cp: depth * 5 },
@@ -79,7 +79,7 @@ export class MockEngine implements IEngine<
         if (depth >= 10) {
           const result: IBaseSearchResult = { bestMove: createMove("e2e4") };
           this.resultListeners.forEach((l) => l(result));
-          void this.stop();
+          void this.stop().catch((e) => console.error(e));
         }
       },
       100 + (this.options.latency || 0),
@@ -92,8 +92,8 @@ export class MockEngine implements IEngine<
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+      this.updateStatus("ready");
     }
-    this.updateStatus("ready");
   }
 
   use(

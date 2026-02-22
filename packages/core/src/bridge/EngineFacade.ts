@@ -130,8 +130,8 @@ export class EngineFacade<
    * 必要なリソースのフェッチ、Worker の起動、および能力検証を行います。
    */
   async load(): Promise<void> {
-    if (this.status !== "uninitialized") return;
     if (this.loadPromise) return this.loadPromise;
+    if (this.status !== "uninitialized") return;
 
     this.loadPromise = (async () => {
       try {
@@ -236,7 +236,11 @@ export class EngineFacade<
       // 2026 Best Practice: IEngineAdapter requires dispose(), but we check for runtime safety
       // to prevent crashes if an invalid adapter object is injected.
       if (this.adapter.dispose) {
-        await this.adapter.dispose();
+        try {
+          await this.adapter.dispose();
+        } catch (err) {
+          console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);
+        }
       }
       // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
       if (this.loaderProvider) {

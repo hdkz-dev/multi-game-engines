@@ -79,10 +79,11 @@ export class IndexedDBStorage implements IFileStorage {
         "readwrite",
       );
       const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      const request = store.put(data, key);
+      store.put(data, key);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 
@@ -94,10 +95,11 @@ export class IndexedDBStorage implements IFileStorage {
         "readwrite",
       );
       const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      const request = store.delete(key);
+      store.delete(key);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 
@@ -124,10 +126,11 @@ export class IndexedDBStorage implements IFileStorage {
         "readwrite",
       );
       const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      const request = store.clear();
+      store.clear();
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 }

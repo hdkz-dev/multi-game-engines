@@ -166,8 +166,8 @@ export function createSFEN(pos: string): SFEN {
     });
   }
 
-  // 3rd field: Hand pieces (e.g., 2P3k or -)
-  if (!/^(?:(?:[1-9][0-9]*)?[PLNSGBRKplnsgbrk])+$|^-$/.test(fields[2]!)) {
+  // 3rd field: Hand pieces (e.g., 2P3p or -)
+  if (!/^(?:(?:[1-9][0-9]*)?[PLNSGBRplnsgbr])+$|^-$/.test(fields[2]!)) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid SFEN hand: "${fields[2]}"`,

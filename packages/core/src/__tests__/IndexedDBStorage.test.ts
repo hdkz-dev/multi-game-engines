@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import "fake-indexeddb/auto";
+import { forceCloseDatabase } from "fake-indexeddb";
 import { IndexedDBStorage } from "../storage/IndexedDBStorage.js";
 
 describe("IndexedDBStorage", () => {
@@ -9,6 +10,10 @@ describe("IndexedDBStorage", () => {
     storage = new IndexedDBStorage();
     // 2026 Best Practice: 決定性向上のためのモック
     vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should set and get data", async () => {
@@ -55,10 +60,9 @@ describe("IndexedDBStorage", () => {
     const db = await (
       storage as unknown as { getDB(): Promise<IDBDatabase> }
     ).getDB();
-    db.close();
-
-    // onclose イベントをシミュレート
-    if (db.onclose) db.onclose(new Event("close"));
+    // fake-indexeddb の公式 API で異常クローズをシミュレート
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    forceCloseDatabase(db as any);
 
     // 次の操作で再オープンされるはず
     await storage.set("key2", new Uint8Array([2]).buffer);

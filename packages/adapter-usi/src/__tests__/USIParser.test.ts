@@ -99,6 +99,16 @@ describe("USIParser", () => {
       ).toThrow(/Potential command injection/);
     });
 
+    it("should throw error for nested injection", () => {
+      expect(() =>
+        parser.createSearchCommand({
+          nested: {
+            "evil\r\nkey": "data",
+          },
+        }),
+      ).toThrow(/Potential command injection/);
+    });
+
     it("should create ponder command without infinite", () => {
       const commands = parser.createSearchCommand({ ponder: true });
       expect(commands).toEqual(["position startpos", "go ponder"]);

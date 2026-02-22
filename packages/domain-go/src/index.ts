@@ -44,7 +44,7 @@ export function createGOMove(move: string): GOMove {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid GOMove: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidPositionString",
+      i18nKey: "engine.errors.invalidGOMove",
     });
   }
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施

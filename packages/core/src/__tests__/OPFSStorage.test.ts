@@ -75,6 +75,24 @@ describe("OPFSStorage", () => {
       "Write error",
     );
     expect(mockWritable.abort).toHaveBeenCalled();
+    expect(mockWritable.close).not.toHaveBeenCalled();
+  });
+
+  it("should abort if write fails and abort fails", async () => {
+    const mockData = new Uint8Array([4, 5, 6]).buffer;
+    const mockWritable = {
+      write: vi.fn().mockRejectedValue(new Error("Write error")),
+      close: vi.fn(),
+      abort: vi.fn().mockRejectedValue(new Error("Abort error")),
+    };
+    mockDirHandle.getFileHandle.mockResolvedValue(mockFileHandle);
+    mockFileHandle.createWritable.mockResolvedValue(mockWritable);
+
+    await expect(storage.set("test-key", mockData)).rejects.toThrow(
+      "Write error",
+    );
+    expect(mockWritable.abort).toHaveBeenCalled();
+    expect(mockWritable.close).not.toHaveBeenCalled();
   });
 
   it("should delete entry from OPFS", async () => {

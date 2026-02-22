@@ -2,7 +2,7 @@
   "name": "@multi-game-engines/cdn-worker",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && echo 'No build step' > dist/.placeholder",
+    "build": "node -e \"const fs=require('fs'); if(!fs.existsSync('dist')) fs.mkdirSync('dist'); fs.writeFileSync('dist/.placeholder', 'No build step');\"",
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "typecheck": "tsc --noEmit"

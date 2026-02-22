@@ -249,7 +249,7 @@ export class EngineLoader implements IEngineLoader {
       }
       const firstFailure = failures[0];
       if (firstFailure) {
-        throw firstFailure.reason;
+        throw EngineError.from(firstFailure.reason);
       }
       throw new Error("Unknown error during resource loading");
     }

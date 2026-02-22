@@ -78,17 +78,13 @@ describe("StockfishAdapter", () => {
     class NoneWorker extends MockWorker {
       constructor() {
         super();
+        const originalPostMessage = this.postMessage;
         this.postMessage = vi.fn((msg: unknown) => {
+          originalPostMessage(msg);
           if (msg === "go depth 10") {
             setTimeout(() => {
               if (typeof this.onmessage === "function") {
                 this.onmessage({ data: "bestmove (none)" });
-              }
-            }, 0);
-          } else if (msg === "uci") {
-            setTimeout(() => {
-              if (typeof this.onmessage === "function") {
-                this.onmessage({ data: "uciok" });
               }
             }, 0);
           }

@@ -93,10 +93,7 @@ export class EngineBridge implements IEngineBridge {
     type: string,
     factory: (config: IEngineConfig) => unknown,
   ): void {
-    this.adapterFactories.set(
-      type,
-      factory as (config: IEngineConfig) => unknown,
-    );
+    this.adapterFactories.set(type, factory);
   }
 
   /**
@@ -590,11 +587,15 @@ export class EngineBridge implements IEngineBridge {
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
     const record = obj as Record<string, unknown>;
+    const parser = record["parser"] as Record<string, unknown> | undefined;
     return (
       typeof record["id"] === "string" &&
       typeof record["searchRaw"] === "function" &&
-      typeof record["parser"] === "object" &&
-      record["parser"] !== null
+      typeof parser === "object" &&
+      parser !== null &&
+      typeof parser["createSearchCommand"] === "function" &&
+      typeof parser["parseInfo"] === "function" &&
+      typeof parser["parseResult"] === "function"
     );
   }
 }

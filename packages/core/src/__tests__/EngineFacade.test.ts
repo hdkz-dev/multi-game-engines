@@ -219,4 +219,16 @@ describe("EngineFacade", () => {
     expect(loaderProvider).toHaveBeenCalled();
     expect(mockLoader.revokeByEngineId).toHaveBeenCalledWith(adapter.id);
   });
+
+  it("dispose() が loaderProvider() の例外を握りつぶすこと", async () => {
+    const loaderProvider = vi
+      .fn()
+      .mockRejectedValue(new Error("loader unavailable"));
+    const facade = new EngineFacade(adapter, [], loaderProvider);
+
+    // 例外がスローされないこと
+    await expect(facade.dispose()).resolves.toBeUndefined();
+    expect(adapter.dispose).toHaveBeenCalled();
+    expect(loaderProvider).toHaveBeenCalled();
+  });
 });
