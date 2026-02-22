@@ -90,7 +90,9 @@ export class MonitorRegistry {
       !("getStatus" in monitor) ||
       typeof (monitor as { getStatus: unknown }).getStatus !== "function"
     ) {
-      throw new Error("[MonitorRegistry] Invalid monitor instance.");
+      throw new Error(
+        "[MonitorRegistry] Invalid monitor instance. Ensure it implements the required SearchMonitor interface.",
+      );
     }
   }
 
@@ -110,7 +112,7 @@ export class MonitorRegistry {
     IBaseSearchInfo,
     IBaseSearchResult
   > {
-    if (!monitor) throw new Error("Monitor must be defined");
+    if (!monitor) throw new Error("[MonitorRegistry] Monitor must be defined");
     return monitor as unknown as SearchMonitor<
       EngineSearchState,
       IBaseSearchOptions,
@@ -133,7 +135,9 @@ export class MonitorRegistry {
     transformer: (state: T_STATE, info: T_INFO) => T_STATE,
   ): SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
     if (!engine) {
-      throw new Error("[MonitorRegistry] Engine instance is required.");
+      throw new Error(
+        "[MonitorRegistry] Engine instance is required to create a monitor.",
+      );
     }
     // 2026 Best Practice: 抽象インターフェースへのキャスト。
     // IEngine は共変的に扱えるプロパティのみを持つため、IBase へのキャストは安全。

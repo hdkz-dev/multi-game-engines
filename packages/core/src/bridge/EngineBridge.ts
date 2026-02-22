@@ -530,7 +530,11 @@ export class EngineBridge implements IEngineBridge {
         const caps = await this.checkCapabilities();
 
         if (this.disposed) {
-          throw new Error("EngineBridge already disposed");
+          throw new EngineError({
+            code: EngineErrorCode.INTERNAL_ERROR,
+            message: "EngineBridge already disposed",
+            i18nKey: "engine.errors.bridgeDisposed",
+          });
         }
 
         const loader = new EngineLoader(createFileStorage(caps));

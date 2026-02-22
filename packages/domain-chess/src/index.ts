@@ -141,7 +141,13 @@ export function parseFEN(fen: FEN): ParsedFEN {
   const turn = parts[1] as "w" | "b";
 
   const rows = position.split("/");
-  if (rows.length !== 8) throw new Error("Invalid FEN: Expected 8 ranks");
+  if (rows.length !== 8) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid FEN: Expected 8 ranks",
+      i18nKey: "engine.errors.invalidFenRanks",
+    });
+  }
 
   const board: (ChessPiece | null)[][] = [];
   for (let r = 0; r < 8; r++) {
@@ -153,9 +159,23 @@ export function parseFEN(fen: FEN): ParsedFEN {
         for (let i = 0; i < emptyCount; i++) boardRow.push(null);
       } else if (isValidChessPiece(char)) {
         boardRow.push(char);
-      } else throw new Error("Invalid FEN character");
+      } else {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: `Invalid FEN character: ${char}`,
+          i18nKey: "engine.errors.invalidFenChar",
+          i18nParams: { char },
+        });
+      }
     }
-    if (boardRow.length !== 8) throw new Error("Invalid FEN rank width");
+    if (boardRow.length !== 8) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid FEN rank width at rank ${8 - r}: expected 8, got ${boardRow.length}`,
+        i18nKey: "engine.errors.invalidFenRankWidth",
+        i18nParams: { rank: 8 - r, expected: 8, actual: boardRow.length },
+      });
+    }
     board.push(boardRow);
   }
   return { board, turn };

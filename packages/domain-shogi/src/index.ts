@@ -208,7 +208,13 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
   const handStr = parts[2] || "-";
 
   const rows = position.split("/");
-  if (rows.length !== 9) throw new Error("Invalid SFEN: Expected 9 ranks");
+  if (rows.length !== 9) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid SFEN: Expected 9 ranks",
+      i18nKey: "engine.errors.invalidSfenRanks",
+    });
+  }
 
   const board: (ShogiPiece | null)[][] = [];
   for (let r = 0; r < 9; r++) {
@@ -226,13 +232,34 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
         if (isValidShogiPiece(piece)) {
           boardRow.push(piece);
           i += 2;
-        } else throw new Error("Invalid SFEN piece");
+        } else {
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: `Invalid SFEN piece: ${piece}`,
+            i18nKey: "engine.errors.invalidSfenPiece",
+            i18nParams: { piece },
+          });
+        }
       } else if (isValidShogiPiece(char)) {
         boardRow.push(char);
         i++;
-      } else throw new Error("Invalid SFEN character");
+      } else {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: `Invalid SFEN character: ${char}`,
+          i18nKey: "engine.errors.invalidSfenChar",
+          i18nParams: { char },
+        });
+      }
     }
-    if (boardRow.length !== 9) throw new Error("Invalid SFEN rank width");
+    if (boardRow.length !== 9) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Invalid SFEN rank width at rank ${r + 1}: expected 9, got ${boardRow.length}`,
+        i18nKey: "engine.errors.invalidSfenRankWidth",
+        i18nParams: { rank: r + 1, expected: 9, actual: boardRow.length },
+      });
+    }
     board.push(boardRow);
   }
 
