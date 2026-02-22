@@ -66,8 +66,10 @@
 - [x] **Dashboard E2E デバッグ & 修復**: Dashboard (React/Vue) の E2E テストにおける SRI ミスマッチと初期化タイムアウトの解消。(2026-02-21)
 - [ ] **PR #38 Absolute Zenith Audit & 整合性同期**:
   - [x] **Reliability**: `EngineLoader` の ID 衝突防止 (セパレータ復帰) と `IndexedDB` ハング防止。
-  - [x] **Type Safety**: `isIEngineAdapter` 検証の完備と `registerAdapterFactory` の契約適正化。
-  - [x] **Protocol**: GTP `resign` の null 正規化と Go バリデーション順序の是正。
-  - [x] **Stability**: E2E テストの `networkidle` 排除と Locator 絞り込みによる堅牢化。
-  - [x] **Async Safety**: ESLint `no-floating-promises` の全域適用。
-  - [x] **Documentation**: ADR-044, ADR-045 の策定。 (2026-02-23)
+  - [x] **Leak Prevention**: `revokeAll()` 実装による Blob URL メモリリークの完全排除。
+  - [x] **Type Safety**: `isIEngineAdapter` 検証の完備と `ValidI18nKey` によるエラーキーの型保証。
+  - [x] **i18n**: `en.json` / `ja.json` への全エラーキーの完全同期。
+  - [x] **Security**: USI パーサーへの PV/BestMove インジェクション対策適用。
+  - [x] **Stability**: E2E テストの `networkidle` 排除と Locator 絞り込み。
+  - [x] **Release**: `.changeset` によるリリースノート自動化準備。
+  - [x] **Documentation**: ADR-001〜045 の全エントリの形式統一とインデックス整理。 (2026-02-23)

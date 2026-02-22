@@ -6,16 +6,22 @@
 
 - **Absolute Zenith Quality Audit の完遂**:
   - 全 61 件のレビュー指摘事項を「最奥地」まで再検証。リソースリーク、非同期安全、型契約の不整合を完全に解消しました。
+- **翻訳データの 100% 同期 (i18n Persistence)**:
+  - `core` で定義した全 15 種類の新しいエラーキーに対し、`en.json` / `ja.json` の翻訳を完備。実行時の例外フィードバックを Zenith 品質で保証しました。
 - **リソース管理の極致的な堅牢化**:
-  - `EngineLoader` の ID 衝突問題をセパレータの `:` 復帰により解決。`IndexedDBStorage` に `onblocked` タイムアウトを導入し、マルチタブ環境での可用性を保証。
+  - `EngineLoader` の ID 衝突問題をセパレータの `:` 復帰により解決。
+  - `revokeAll()` の実装と `EngineBridge.dispose()` への統合により、Blob URL のメモリリークを物理的に遮断。
+  - `IndexedDBStorage` に `onblocked` タイムアウトを導入し、マルチタブ環境でのハングを防止。
 - **E2E テストの完全な安定化**:
   - 不安定な `networkidle` を排除し、UI 要素ベースの精密な待機アサーションに刷新。複数エンジン混在時の Locator 競合を解消しました。
 - **プロトコルのヌル安全正規化 (Zenith Tier Type Safety)**:
-  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化して返却するよう設計を刷新。
+  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化。
   - `GTPParser` において `resign` を `bestMove: null` に正規化し、意味的な整合性を確保しました。
 - **ビルドパイプラインの警告ゼロ化 (Clean Build Initiative)**:
   - **ESLint 9.39.3 ピン留め**: ADR-044 を策定し、モノレポ環境での設定の安定性を物理的に保証。
   - **非同期安全ルール有効化**: `@typescript-eslint/no-floating-promises` を適用し、Promise 処理漏れを静的に一掃しました。
+- **リリースプロセスの確立**:
+  - `.changeset` を導入し、Zenith Tier アップデートの内容を自動リリースノートへ反映可能な状態に整備。
 - **ドメインロジックの厳密化**:
   - `domain-go` におけるバリデーション順序を `typeof` 先行に是正。i18n キーへの完全移行と、ハードコードされた型名の自然言語化を完遂しました。
 
