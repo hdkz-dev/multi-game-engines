@@ -53,7 +53,7 @@ export function createFEN(pos: string): FEN {
   }
   if (!/^[0-9a-hRNBQKPpnbrqkw/ -]+$/.test(trimmedPos)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid FEN: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
       remediation:

@@ -9,37 +9,45 @@ describe("createFEN verification", () => {
     expect(() => createFEN(fen)).not.toThrow();
   });
 
-  it("should throw SECURITY_ERROR for illegal characters", () => {
-    expect.assertions(2);
+  it("should throw VALIDATION_ERROR for illegal characters", () => {
+    expect.assertions(3);
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1!";
     try {
       createFEN(fen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-      expect(err.message).toContain("Illegal characters detected");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.message).toContain("Illegal characters detected");
+      }
     }
   });
 
   it("should throw VALIDATION_ERROR for invalid halfmove clock (non-integer)", () => {
+    expect.assertions(3);
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 1a 1";
     try {
       createFEN(fen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-      expect(err.message).toContain("Invalid FEN halfmove clock");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.message).toContain("Invalid FEN halfmove clock");
+      }
     }
   });
 
   it("should throw VALIDATION_ERROR for invalid fullmove number (less than 1)", () => {
+    expect.assertions(3);
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
     try {
       createFEN(fen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-      expect(err.message).toContain("Invalid FEN fullmove number");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.message).toContain("Invalid FEN fullmove number");
+      }
     }
   });
 });

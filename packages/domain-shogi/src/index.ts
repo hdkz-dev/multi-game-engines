@@ -32,7 +32,7 @@ export function createShogiMove(move: string): ShogiMove {
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Control characters detected in move string: "${truncateLog(move)}"`,
       i18nKey: "errors.injection_detected",
       i18nParams: { input: truncateLog(move) },
@@ -139,7 +139,7 @@ export function createSFEN(pos: string): SFEN {
   const trimmedPos = pos.trim();
   if (!/^[0-9a-zA-Z/+ -]+$/.test(trimmedPos)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid SFEN: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
       remediation:

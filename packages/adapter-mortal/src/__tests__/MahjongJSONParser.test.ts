@@ -61,7 +61,7 @@ describe("MahjongJSONParser", () => {
     }
     expect(thrown).toBeInstanceOf(EngineError);
     if (thrown instanceof EngineError) {
-      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+      expect(thrown.code).toBe(EngineErrorCode.VALIDATION_ERROR);
     }
   });
 

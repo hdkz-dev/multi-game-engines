@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { createReversiMove } from "../index.js";
+import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 beforeAll(() => {
   vi.spyOn(performance, "now").mockReturnValue(0);
@@ -15,7 +16,16 @@ describe("Reversi Domain", () => {
     expect(move).toBe("d3");
   });
 
-  it("should throw on invalid injection characters", () => {
-    expect(() => createReversiMove("d3\0")).toThrow();
+  it("should throw VALIDATION_ERROR on invalid injection characters", () => {
+    let err: unknown;
+    try {
+      createReversiMove("d3\0");
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(EngineError);
+    if (err instanceof EngineError) {
+      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+    }
   });
 });

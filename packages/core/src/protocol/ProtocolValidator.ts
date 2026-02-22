@@ -33,7 +33,7 @@ export class ProtocolValidator {
         : ProtocolValidator.STRICT_REGEX;
       if (regex.test(input)) {
         throw new EngineError({
-          code: EngineErrorCode.SECURITY_ERROR,
+          code: EngineErrorCode.VALIDATION_ERROR,
           message: `Potential command injection detected in ${context}: "${truncateLog(input)}".`,
           remediation: allowSemicolon
             ? "Remove control characters (\\r, \\n, \\0, etc.) from input."
@@ -79,7 +79,7 @@ export class ProtocolValidator {
 export function createMove<T extends string = string>(move: string): Move<T> {
   if (typeof move !== "string" || !/^[a-z0-9+*#=/\- ()]+$/i.test(move)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid Move format: "${truncateLog(move)}" contains illegal characters.`,
     });
   }
@@ -93,7 +93,7 @@ export function createPositionString<T extends string = string>(
 ): PositionString<T> {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid PositionString: Input must be a non-empty string. (Value: ${truncateLog(pos)})`,
     });
   }

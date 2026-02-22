@@ -309,7 +309,7 @@ export class EngineBridge implements IEngineBridge {
             } else {
               throw new EngineError({
                 code: EngineErrorCode.INTERNAL_ERROR,
-                message: `Factory for "${idOrConfig.adapter}" returned an unsupported engine type.`,
+                message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, searchRaw, or parser methods).`,
                 engineId: id,
               });
             }
