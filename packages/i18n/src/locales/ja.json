@@ -42,26 +42,60 @@
       "invalidFENCastling": "無効な FEN キャスリング権利です: \"{rights}\"",
       "invalidFENHalfmove": "無効な FEN ハーフムーブクロックです: \"{clock}\"",
       "invalidFENFullmove": "無効な FEN 手数カウンタです: \"{move}\"",
+      "invalidFenRanks": "無効な FEN です: 8 段必要です。",
+      "invalidFenRow": "無効な FEN です: 行データが不足しています。",
+      "invalidFenChar": "無効な FEN 文字です: \"{char}\"",
+      "invalidFenRankWidth": "無効な FEN です (第 {rank} 段): {expected} マス必要ですが、{actual} マスしかありません。",
       "invalidSFEN": "無効な SFEN です: 入力は空であってはなりません。",
       "invalidSFENStructure": "無効な SFEN 構造です: 4 つのフィールドが必要です。",
       "invalidSFENTurn": "無効な SFEN 手番です: \"b\" または \"w\" が必要です。",
       "invalidSFENHand": "無効な SFEN 持ち駒です: \"{hand}\"",
       "invalidSFENMoveCounter": "無効な SFEN 手数カウンタです: \"{counter}\"",
+      "invalidSfenRanks": "無効な SFEN です: 9 段必要です。",
+      "invalidSfenPiece": "無効な SFEN 駒文字です: \"{piece}\"",
+      "invalidSfenChar": "無効な SFEN 文字です: \"{char}\"",
+      "invalidSfenRankWidth": "無効な SFEN です (第 {rank} 段): 9 マス必要ですが、{actual} マスしかありません。",
       "invalidGOBoard": "無効な囲碁盤面です: 入力は空であってはなりません。",
       "invalidGOMove": "無効な囲碁の指し手形式です: \"{move}\"",
       "invalidMahjongMove": "無効な麻雀の指し手形式です: \"{move}\"",
+      "invalidShogiMove": "無効な将棋の指し手形式です: \"{move}\"",
       "invalidReversiBoard": "無効なリバーシ盤面です: 入力は空であってはなりません。",
       "invalidReversiMove": "無効なリバーシの指し手形式です: \"{move}\"",
       "nestedTooDeep": "データ構造が深すぎます: {path}",
       "illegalCharacters": "不正な文字が検出されました。",
       "networkError": "エンジンリソースの取得に失敗しました。",
       "securityViolation": "セキュリティ違反: 不安全なリソースロードが遮断されました。",
+      "sriMismatch": "セキュリティ違反: リソースの整合性 (SRI) 検証に失敗しました。",
+      "bridgeDisposed": "エンジンブリッジは既に破棄されています。",
+      "notReady": "エンジンが要求された操作を実行できる状態ではありません。",
       "missingMainEntryPoint": "エンジンのメインエントリーポイント URL が見つかりません。",
       "loaderRequired": "安全なリソースロードのために IEngineLoader が必要です。",
       "missingSources": "エンジン構成に 'sources' フィールドがありません。",
       "invalidMoveFormat": "指し手の形式が無効です: \"{move}\"",
       "injectionDetected": "{context} で潜在的なコマンドインジェクションが検出されました: \"{input}\"",
       "invalidPositionString": "局面文字列が無効です: 入力は空であってはなりません。"
+    },
+    "adapters": {
+      "uci": {
+        "errors": {
+          "missing_fen": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
+        }
+      },
+      "usi": {
+        "errors": {
+          "missing_fen": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
+        }
+      },
+      "gtp": {
+        "errors": {
+          "invalid_response": "GTP エンジンから無効な応答を受信しました。"
+        }
+      },
+      "ensemble": {
+        "errors": {
+          "no_results": "合議するためのエンジン実行結果が存在しません。"
+        }
+      }
     }
   },
   "dashboard": {

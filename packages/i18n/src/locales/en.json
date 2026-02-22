@@ -42,26 +42,60 @@
       "invalidFENCastling": "Invalid FEN castling rights: \"{rights}\"",
       "invalidFENHalfmove": "Invalid FEN halfmove clock: \"{clock}\"",
       "invalidFENFullmove": "Invalid FEN fullmove number: \"{move}\"",
+      "invalidFenRanks": "Invalid FEN: Expected 8 ranks.",
+      "invalidFenRow": "Invalid FEN: Row must be defined.",
+      "invalidFenChar": "Invalid FEN character: \"{char}\"",
+      "invalidFenRankWidth": "Invalid FEN rank width at rank {rank}: expected {expected}, got {actual}",
       "invalidSFEN": "Invalid SFEN: Input must not be empty.",
       "invalidSFENStructure": "Invalid SFEN structure: 4 fields required.",
       "invalidSFENTurn": "Invalid SFEN turn: Expected \"b\" or \"w\".",
       "invalidSFENHand": "Invalid SFEN hand pieces: \"{hand}\"",
       "invalidSFENMoveCounter": "Invalid SFEN move counter: \"{counter}\"",
+      "invalidSfenRanks": "Invalid SFEN: Expected 9 ranks.",
+      "invalidSfenPiece": "Invalid SFEN piece: \"{piece}\"",
+      "invalidSfenChar": "Invalid SFEN character: \"{char}\"",
+      "invalidSfenRankWidth": "Invalid SFEN rank width at rank {rank}: expected 9, got {actual}",
       "invalidGOBoard": "Invalid Go board: Input must not be empty.",
       "invalidGOMove": "Invalid Go move format: \"{move}\"",
       "invalidMahjongMove": "Invalid Mahjong move format: \"{move}\"",
+      "invalidShogiMove": "Invalid Shogi move format: \"{move}\"",
       "invalidReversiBoard": "Invalid Reversi board: Input must not be empty.",
       "invalidReversiMove": "Invalid Reversi move format: \"{move}\"",
       "nestedTooDeep": "Data structure is too deeply nested at: {path}",
       "illegalCharacters": "Illegal characters detected.",
       "networkError": "Failed to fetch engine resources.",
       "securityViolation": "Security violation: Unsafe resource loading blocked.",
+      "sriMismatch": "Security violation: Resource integrity (SRI) mismatch detected.",
+      "bridgeDisposed": "Engine bridge has already been disposed.",
+      "notReady": "Engine is not ready for the requested operation.",
       "missingMainEntryPoint": "Engine main entry point URL is missing.",
       "loaderRequired": "IEngineLoader is required for secure resource loading.",
       "missingSources": "Engine configuration is missing 'sources' field.",
       "invalidMoveFormat": "Invalid move format: \"{move}\"",
       "injectionDetected": "Potential command injection detected in {context}: \"{input}\"",
       "invalidPositionString": "Invalid position string: Input must not be empty."
+    },
+    "adapters": {
+      "uci": {
+        "errors": {
+          "missing_fen": "UCI protocol requires a FEN position string."
+        }
+      },
+      "usi": {
+        "errors": {
+          "missing_fen": "USI protocol requires a SFEN position string."
+        }
+      },
+      "gtp": {
+        "errors": {
+          "invalid_response": "Invalid response received from GTP engine."
+        }
+      },
+      "ensemble": {
+        "errors": {
+          "no_results": "No engine results available to aggregate."
+        }
+      }
     }
   },
   "dashboard": {

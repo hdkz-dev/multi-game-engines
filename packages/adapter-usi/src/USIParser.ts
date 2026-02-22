@@ -135,6 +135,8 @@ export class USIParser implements IProtocolParser<
             const m = parts[j];
             if (!m) continue;
             try {
+              // 2026 Best Practice: PV 内部の指し手に対してもインジェクションチェックを強制
+              ProtocolValidator.assertNoInjection(m, "PV Move");
               info.pv.push(createShogiMove(m));
             } catch {
               console.warn(
@@ -162,11 +164,15 @@ export class USIParser implements IProtocolParser<
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Unexpected bestmove format: "${truncateLog(data)}"`,
-        i18nKey: "errors.engine.unexpectedBestmoveFormat",
+        i18nKey: "engine.errors.invalidMoveFormat",
       });
     }
 
     const moveStr = parts[1]!;
+    if (moveStr !== "none" && moveStr !== "(none)") {
+      ProtocolValidator.assertNoInjection(moveStr, "BestMove");
+    }
+
     const bestMove =
       moveStr === "none" || moveStr === "(none)"
         ? null
