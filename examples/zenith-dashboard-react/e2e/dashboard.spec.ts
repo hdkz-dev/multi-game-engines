@@ -2,11 +2,14 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
+  await page.waitForLoadState("networkidle");
   // Switch to English to match assertions (match exact "EN" or localized "英語 (EN)")
   const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
-  await expect(page.locator("text=Ready")).toBeVisible({ timeout: 10000 });
+  await expect(page.getByText("Ready", { exact: true })).toBeVisible({
+    timeout: 10000,
+  });
 });
 
 test("dashboard loads and initializes engines", async ({ page }) => {
@@ -18,21 +21,28 @@ test("dashboard loads and initializes engines", async ({ page }) => {
   await expect(bridgeStatus).toBeVisible({ timeout: 15000 });
 
   // Verify Chess engine status becomes 'ready'
-  await expect(page.locator("text=ready")).toHaveCount(1, { timeout: 15000 });
+  await expect(page.getByText(/^ready$/i)).toHaveCount(1, {
+    timeout: 15000,
+  });
 });
 
 test("dashboard engine search lifecycle", async ({ page }) => {
+  // Filter the Stockfish engine panel specifically
   const enginePanel = page
-    .locator("section, div")
-    .filter({ hasText: /Stockfish/i })
-    .first();
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
   const startButton = enginePanel.getByRole("button", { name: /START/i });
   await startButton.click();
   const stopButton = enginePanel.getByRole("button", { name: /STOP/i });
   await expect(stopButton).toBeVisible({ timeout: 10000 });
 
-  // Wait for 'Searching...' status in this panel
-  await expect(enginePanel.getByText(/Searching\.\.\./i).first()).toBeVisible({
+  // Wait for 'Searching...' status in this panel - narrowing to status role to avoid duplicates
+  await expect(
+    enginePanel
+      .getByRole("status")
+      .getByText("Searching...", { exact: true })
+      .first(),
+  ).toBeVisible({
     timeout: 10000,
   });
 

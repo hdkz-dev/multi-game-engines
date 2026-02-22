@@ -51,6 +51,7 @@ describe("MahjongJSONParser", () => {
   });
 
   it("should detect injection in top-level string", () => {
+    expect.assertions(2);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options = { board: "bad\ninput" } as any;
     let thrown: unknown;
@@ -61,19 +62,39 @@ describe("MahjongJSONParser", () => {
     }
     expect(thrown).toBeInstanceOf(EngineError);
     if (thrown instanceof EngineError) {
-      expect(thrown.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
     }
   });
 
   it("should detect injection in nested object", () => {
+    expect.assertions(2);
     const options = { board: { hand: ["1m", "bad\rinput"] } };
-    expect(() => parser.createSearchCommand(options)).toThrow(EngineError);
+    let thrown: unknown;
+    try {
+      parser.createSearchCommand(options);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    if (thrown instanceof EngineError) {
+      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+    }
   });
 
   it("should detect injection in deep nested object", () => {
+    expect.assertions(2);
     const options = {
       board: { players: [{ name: "p1", history: ["good", "bad\0"] }] },
     };
-    expect(() => parser.createSearchCommand(options)).toThrow(EngineError);
+    let thrown: unknown;
+    try {
+      parser.createSearchCommand(options);
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toBeInstanceOf(EngineError);
+    if (thrown instanceof EngineError) {
+      expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+    }
   });
 });

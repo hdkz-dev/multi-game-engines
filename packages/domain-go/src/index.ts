@@ -27,7 +27,7 @@ export function createGOBoard(pos: string): GOBoard {
   }
   if (!/^[a-zA-Z0-9.\- ]+$/.test(pos)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid GOBoard: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
     });
@@ -51,7 +51,7 @@ export function createGOMove(move: string): GOMove {
   const normalized = move.toLowerCase();
   if (!/^[a-z0-9]+$/.test(normalized)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid GOMove: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
     });

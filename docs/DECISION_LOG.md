@@ -52,3 +52,5 @@
 - [2026-02-21] [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed)
 - [2026-02-21] [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed)
 - [2026-02-21] [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed)
+- [2026-02-23] ESLint を v9.39.3 にピン留め。v10 でのモノレポ設定検索の破壊的変更および Node 要件引き上げへの対応。
+- [2026-02-23] Absolute Zenith Quality Audit 完了。エラーポリシーの SECURITY/VALIDATION 分離、EngineBridge の安全性、全ドメインの i18n 詳細化を完遂。

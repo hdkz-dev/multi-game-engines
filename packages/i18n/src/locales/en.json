@@ -37,6 +37,11 @@
     "errors": {
       "invalidFEN": "Invalid FEN: Input must not be empty.",
       "invalidFENStructure": "Invalid FEN structure: 6 fields required.",
+      "invalidFENTurn": "Invalid FEN turn: Expected \"w\" or \"b\".",
+      "invalidFENEnPassant": "Invalid FEN en passant: \"{square}\"",
+      "invalidFENCastling": "Invalid FEN castling rights: \"{rights}\"",
+      "invalidFENHalfmove": "Invalid FEN halfmove clock: \"{clock}\"",
+      "invalidFENFullmove": "Invalid FEN fullmove number: \"{move}\"",
       "invalidSFEN": "Invalid SFEN: Input must not be empty.",
       "invalidSFENStructure": "Invalid SFEN structure: 4 fields required.",
       "invalidSFENTurn": "Invalid SFEN turn: Expected \"b\" or \"w\".",

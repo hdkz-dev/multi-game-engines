@@ -51,7 +51,7 @@ export interface IShogiSearchInfo extends IBaseSearchInfo {
  */
 export interface IShogiSearchResult extends IBaseSearchResult {
   bestMove: ShogiMove | null;
-  ponder?: ShogiMove;
+  ponder?: ShogiMove | null;
   [key: string]: unknown;
 }
 
@@ -179,10 +179,15 @@ export class USIParser implements IProtocolParser<
 
     const ponderIdx = parts.indexOf("ponder");
     if (ponderIdx !== -1 && ponderIdx + 1 < parts.length) {
-      try {
-        result.ponder = createShogiMove(parts[ponderIdx + 1]!);
-      } catch {
-        // Ignore invalid ponder move
+      const ponderToken = parts[ponderIdx + 1]!;
+      if (ponderToken === "none" || ponderToken === "(none)") {
+        result.ponder = null;
+      } else {
+        try {
+          result.ponder = createShogiMove(ponderToken);
+        } catch {
+          // Ignore invalid ponder move
+        }
       }
     }
 

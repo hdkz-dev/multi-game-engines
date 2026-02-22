@@ -36,7 +36,11 @@ export class EngineBridge implements IEngineBridge {
   >();
   private adapterFactories = new Map<
     string,
-    (config: IEngineConfig) => unknown
+    (
+      config: IEngineConfig,
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -91,7 +95,11 @@ export class EngineBridge implements IEngineBridge {
    */
   registerAdapterFactory(
     type: string,
-    factory: (config: IEngineConfig) => unknown,
+    factory: (
+      config: IEngineConfig,
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
   ): void {
     this.adapterFactories.set(type, factory);
   }
@@ -552,10 +560,16 @@ export class EngineBridge implements IEngineBridge {
     const pendingLoader = this.loaderPromise;
     const pendingEngines = Array.from(this.pendingEngines.values());
 
-    const promises = Array.from(this.adapters.values()).map(async (a) => {
-      const id = a.id;
-      await a.dispose();
-      // 2026 Best Practice: ローダー経由でリソース (Blob URL) を明示的に解放
+    const promises = Array.from(this.adapters.keys()).map(async (id) => {
+      const adapter = this.adapters.get(id);
+      if (adapter) {
+        try {
+          await adapter.dispose();
+        } catch (err) {
+          console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+        }
+      }
+      // 2026 Best Practice: 破棄失敗時も Blob URL リソースは強制的に解放
       if (this.loader) {
         this.loader.revokeByEngineId(id);
       }
@@ -590,17 +604,26 @@ export class EngineBridge implements IEngineBridge {
 
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
-    const record = obj as Record<string, unknown>;
-    const parser = record["parser"];
-    if (typeof parser !== "object" || parser === null) return false;
+    const r = obj as Record<string, unknown>;
+    const p = r["parser"];
+    if (typeof p !== "object" || p === null) return false;
 
-    const p = parser as Record<string, unknown>;
+    const parser = p as Record<string, unknown>;
     return (
-      typeof record["id"] === "string" &&
-      typeof record["searchRaw"] === "function" &&
-      typeof p["createSearchCommand"] === "function" &&
-      typeof p["parseInfo"] === "function" &&
-      typeof p["parseResult"] === "function"
+      typeof r["id"] === "string" &&
+      typeof r["name"] === "string" &&
+      typeof r["version"] === "string" &&
+      typeof r["status"] === "string" &&
+      typeof r["searchRaw"] === "function" &&
+      typeof r["stop"] === "function" &&
+      typeof r["dispose"] === "function" &&
+      typeof r["onSearchResult"] === "function" &&
+      typeof r["onStatusChange"] === "function" &&
+      typeof r["onProgress"] === "function" &&
+      typeof r["onTelemetry"] === "function" &&
+      typeof parser["createSearchCommand"] === "function" &&
+      typeof parser["parseInfo"] === "function" &&
+      typeof parser["parseResult"] === "function"
     );
   }
 }

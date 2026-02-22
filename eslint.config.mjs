@@ -33,6 +33,7 @@ export default [
         "warn",
         { "argsIgnorePattern": "^_" },
       ],
+      "@typescript-eslint/no-floating-promises": "error",
     },
     settings: {
       next: {

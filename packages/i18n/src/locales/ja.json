@@ -37,6 +37,11 @@
     "errors": {
       "invalidFEN": "無効な FEN です: 入力は空であってはなりません。",
       "invalidFENStructure": "無効な FEN 構造です: 6 つのフィールドが必要です。",
+      "invalidFENTurn": "無効な FEN 手番です: \"w\" または \"b\" が必要です。",
+      "invalidFENEnPassant": "無効な FEN アンパッサン形式です: \"{square}\"",
+      "invalidFENCastling": "無効な FEN キャスリング権利です: \"{rights}\"",
+      "invalidFENHalfmove": "無効な FEN ハーフムーブクロックです: \"{clock}\"",
+      "invalidFENFullmove": "無効な FEN 手数カウンタです: \"{move}\"",
       "invalidSFEN": "無効な SFEN です: 入力は空であってはなりません。",
       "invalidSFENStructure": "無効な SFEN 構造です: 4 つのフィールドが必要です。",
       "invalidSFENTurn": "無効な SFEN 手番です: \"b\" または \"w\" が必要です。",

@@ -15,7 +15,7 @@ describe("createSFEN verification", () => {
     expect(() => createSFEN(sfen)).not.toThrow();
   });
 
-  it("should throw VALIDATION_ERROR for illegal characters", () => {
+  it("should throw SECURITY_ERROR for illegal characters", () => {
     expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1!";
@@ -24,7 +24,7 @@ describe("createSFEN verification", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(EngineError);
       if (e instanceof EngineError) {
-        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.code).toBe(EngineErrorCode.SECURITY_ERROR);
         expect(e.message).toContain("Illegal characters detected");
       }
     }

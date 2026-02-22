@@ -16,7 +16,8 @@ describe("Reversi Domain", () => {
     expect(move).toBe("d3");
   });
 
-  it("should throw VALIDATION_ERROR on invalid injection characters", () => {
+  it("should throw SECURITY_ERROR on invalid injection characters", () => {
+    expect.assertions(2);
     let err: unknown;
     try {
       createReversiMove("d3\0");
@@ -25,7 +26,7 @@ describe("Reversi Domain", () => {
     }
     expect(err).toBeInstanceOf(EngineError);
     if (err instanceof EngineError) {
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
     }
   });
 });

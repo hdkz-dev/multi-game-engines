@@ -9,6 +9,7 @@ describe("Mahjong Domain", () => {
   });
 
   it("should throw VALIDATION_ERROR on invalid move", () => {
+    expect.assertions(2);
     let err: unknown;
     try {
       createMahjongMove("invalid");
@@ -26,7 +27,8 @@ describe("Mahjong Domain", () => {
     expect(() => validateMahjongBoard(board)).not.toThrow();
   });
 
-  it("should throw VALIDATION_ERROR on injection in board strings", () => {
+  it("should throw SECURITY_ERROR on injection in board strings", () => {
+    expect.assertions(2);
     const board = { tiles: ["1m\nstop"] };
     let err: unknown;
     try {
@@ -36,7 +38,7 @@ describe("Mahjong Domain", () => {
     }
     expect(err).toBeInstanceOf(EngineError);
     if (err instanceof EngineError) {
-      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
     }
   });
 });

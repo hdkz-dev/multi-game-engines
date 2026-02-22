@@ -2,12 +2,15 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
+  await page.waitForLoadState("networkidle");
   // Switch to English to match assertions (using regex to match "英語 (EN)" in JA locale or exact "EN")
   const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
   // Wait for initial Ready status
-  await expect(page.getByText(/Ready/i)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText("Ready", { exact: true })).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 test("vue dashboard loads and initializes engines", async ({ page }) => {
@@ -20,22 +23,28 @@ test("vue dashboard loads and initializes engines", async ({ page }) => {
   });
 
   // Verify engine status becomes 'Ready'
-  await expect(page.getByText("Ready")).toHaveCount(1, { timeout: 15000 });
+  await expect(page.getByText(/^ready$/i)).toHaveCount(1, {
+    timeout: 15000,
+  });
 });
 
 test("vue dashboard engine search lifecycle", async ({ page }) => {
   // 2. Start search
   const enginePanel = page
-    .locator("section, div")
-    .filter({ hasText: /Stockfish/i })
-    .first();
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
   const startButton = enginePanel.getByRole("button", { name: /START/i });
   await startButton.click();
   const stopButton = enginePanel.getByRole("button", { name: /STOP/i });
   await expect(stopButton).toBeVisible({ timeout: 10000 });
 
-  // 2.5 Wait for 'Searching...' status
-  await expect(enginePanel.getByText(/Searching\.\.\./i).first()).toBeVisible({
+  // 2.5 Wait for 'Searching...' status - narrowing to status role to avoid duplicates
+  await expect(
+    enginePanel
+      .getByRole("status")
+      .getByText("Searching...", { exact: true })
+      .first(),
+  ).toBeVisible({
     timeout: 10000,
   });
 

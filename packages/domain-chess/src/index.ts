@@ -53,7 +53,7 @@ export function createFEN(pos: string): FEN {
   }
   if (!/^[0-9a-hRNBQKPpnbrqkw/ -]+$/.test(trimmedPos)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid FEN: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
       remediation:
@@ -74,7 +74,7 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid FEN turn: Expected "w" or "b", found "${fields[1]}"`,
-      i18nKey: "engine.errors.invalidFEN", // Generic fallback if specific key missing
+      i18nKey: "engine.errors.invalidFENTurn",
     });
   }
 
@@ -83,7 +83,8 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid FEN en passant: "${fields[3]}"`,
-      i18nKey: "engine.errors.invalidFEN",
+      i18nKey: "engine.errors.invalidFENEnPassant",
+      i18nParams: { square: fields[3]! },
     });
   }
 
@@ -97,7 +98,8 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid FEN castling rights: "${castling}"`,
-      i18nKey: "engine.errors.invalidFEN",
+      i18nKey: "engine.errors.invalidFENCastling",
+      i18nParams: { rights: castling },
     });
   }
 
@@ -107,7 +109,8 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid FEN halfmove clock: "${fields[4]}"`,
-      i18nKey: "engine.errors.invalidFEN",
+      i18nKey: "engine.errors.invalidFENHalfmove",
+      i18nParams: { clock: fields[4]! },
     });
   }
 
@@ -117,7 +120,8 @@ export function createFEN(pos: string): FEN {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid FEN fullmove number: "${fields[5]}"`,
-      i18nKey: "engine.errors.invalidFEN",
+      i18nKey: "engine.errors.invalidFENFullmove",
+      i18nParams: { move: fields[5]! },
     });
   }
 

@@ -172,7 +172,10 @@ const errorMessage = computed(() => {
           ]"
           :title="status"
         />
-        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+        <span
+          class="text-[10px] text-gray-400 uppercase font-bold tracking-tight"
+          role="status"
+        >
           {{ status === 'busy' ? strings.searching : strings.ready }}
         </span>
       </div>

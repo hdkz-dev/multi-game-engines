@@ -25,17 +25,17 @@ export function createShogiMove(move: string): ShogiMove {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid ShogiMove: Input must be a non-empty string.",
-      i18nKey: "errors.invalid_shogi_move",
+      i18nKey: "engine.errors.invalidShogiMove",
     });
   }
 
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: `Control characters detected in move string: "${truncateLog(move)}"`,
-      i18nKey: "errors.injection_detected",
-      i18nParams: { input: truncateLog(move) },
+      i18nKey: "engine.errors.injectionDetected",
+      i18nParams: { context: "Move", input: truncateLog(move) },
     });
   }
 
@@ -51,7 +51,7 @@ export function createShogiMove(move: string): ShogiMove {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid ShogiMove format: "${truncateLog(move)}"`,
-      i18nKey: "errors.invalid_shogi_move_format",
+      i18nKey: "engine.errors.invalidMoveFormat",
       i18nParams: { move: truncateLog(move) },
     });
   }
@@ -139,7 +139,7 @@ export function createSFEN(pos: string): SFEN {
   const trimmedPos = pos.trim();
   if (!/^[0-9a-zA-Z/+ -]+$/.test(trimmedPos)) {
     throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
+      code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid SFEN: Illegal characters detected.",
       i18nKey: "engine.errors.illegalCharacters",
       remediation:

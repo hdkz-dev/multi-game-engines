@@ -37,7 +37,7 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
 /** チェス用の探索結果 */
 export interface IChessSearchResult extends IBaseSearchResult {
   bestMove: Move | null;
-  ponder?: Move;
+  ponder?: Move | null;
 }
 
 /**
@@ -210,8 +210,17 @@ export class UCIParser implements IProtocolParser<
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      const ponder = this.createMove(parts[ponderIndex + 1] || "");
-      if (ponder) result.ponder = ponder;
+      const ponderStr = parts[ponderIndex + 1] || "";
+      if (
+        ponderStr === "none" ||
+        ponderStr === "(none)" ||
+        ponderStr === "0000"
+      ) {
+        result.ponder = null;
+      } else {
+        const ponder = this.createMove(ponderStr);
+        if (ponder) result.ponder = ponder;
+      }
     }
 
     return result;
