@@ -69,6 +69,30 @@ describe("StockfishAdapter", () => {
     expect(adapter.id).toBe("stockfish");
   });
 
+  it("should use provided registry config if available", async () => {
+    const customConfig = {
+      sources: {
+        main: {
+          url: "custom-stockfish.js",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+          type: "worker-js" as const,
+        },
+      },
+    };
+    const adapter = new StockfishAdapter(customConfig);
+
+    const loadPromise = adapter.load(mockLoader);
+    await vi.runAllTimersAsync();
+    await loadPromise;
+
+    expect(mockLoader.loadResources).toHaveBeenCalledWith(
+      "stockfish",
+      expect.objectContaining({
+        main: expect.objectContaining({ url: "custom-stockfish.js" }),
+      }),
+    );
+  });
+
   it("should change status correctly on load", async () => {
     const adapter = new StockfishAdapter();
     const loadPromise = adapter.load(mockLoader);
