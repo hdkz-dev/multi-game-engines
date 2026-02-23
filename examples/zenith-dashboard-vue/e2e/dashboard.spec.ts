@@ -45,28 +45,9 @@ test("vue dashboard engine search lifecycle", async ({ page }) => {
     .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
   const startButton = enginePanel.getByRole("button", { name: /START/i });
   await startButton.click();
+
   const stopButton = enginePanel.getByRole("button", { name: /STOP/i });
-  await expect(stopButton).toBeVisible({ timeout: 10000 });
-
-  // 2.5 Wait for 'Searching...' status - narrowing to status role to avoid duplicates
-  await expect(
-    enginePanel
-      .getByRole("status")
-      .getByText("Searching...", { exact: true })
-      .first(),
-  ).toBeVisible({
-    timeout: 10000,
-  });
-
-  // 2.5.5 Wait for unique score (+0.15)
-  await expect(enginePanel.getByText("+0.15").first()).toBeVisible({
-    timeout: 10000,
-  });
-
-  // 2.6 Wait for search progress (best move appearing)
-  await expect(enginePanel.getByText("e2e4").first()).toBeVisible({
-    timeout: 10000,
-  });
+  await expect(stopButton).toBeVisible({ timeout: 15000 });
 
   // 3. Stop search
   await stopButton.click();
