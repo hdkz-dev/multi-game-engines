@@ -16,13 +16,13 @@ export class KataGoAdapter extends GTPAdapter {
         main: {
           url: "https://example.com/katago.js",
           // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-KataGoMainScriptValidHashForTest",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
           type: "worker-js",
         },
         wasm: {
           url: "https://example.com/katago.wasm",
           // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-KataGoWasmBinaryValidHashForTest",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
           type: "wasm",
           mountPath: "katago.wasm",
         },

@@ -39,7 +39,7 @@ describe("EdaxAdapter", () => {
     sources: {
       main: {
         url: "http://localhost/edax.js",
-        sri: "sha384-dummy",
+        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         type: "worker-js",
       },
     },

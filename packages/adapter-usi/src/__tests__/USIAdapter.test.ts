@@ -42,7 +42,11 @@ describe("USIAdapter", () => {
     id: "test-engine",
     adapter: "usi",
     sources: {
-      main: { url: "engine.js", sri: "sha384-mock", type: "worker-js" },
+      main: {
+        url: "engine.js",
+        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        type: "worker-js",
+      },
     },
   };
 

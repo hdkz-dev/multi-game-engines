@@ -65,7 +65,10 @@ export abstract class BaseAdapter<
     const sources = this.config.sources;
     if (!sources) return;
 
-    const sriPattern = /^sha(?:256|384|512)-[A-Za-z0-9+/]+={0,2}$/;
+    // 2026 Best Practice: SRI ハッシュのアルゴリズムに応じた正確な Base64 長さを検証。
+    // sha256: 44 chars, sha384: 64 chars, sha512: 88 chars.
+    const sriPattern =
+      /^sha256-[A-Za-z0-9+/]{43}=?$|^sha384-[A-Za-z0-9+/]{64}$|^sha512-[A-Za-z0-9+/]{86}={0,2}$/;
 
     for (const [key, source] of Object.entries(sources)) {
       const sri = source?.sri;

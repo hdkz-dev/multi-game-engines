@@ -354,6 +354,8 @@ export class EngineBridge implements IEngineBridge {
             code: EngineErrorCode.INTERNAL_ERROR,
             message: `Engine adapter not found or factory not registered: ${id}`,
             engineId: id,
+            i18nKey: "engine.errors.adapterNotFound",
+            i18nParams: { id },
             remediation:
               typeof idOrConfig !== "string"
                 ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`

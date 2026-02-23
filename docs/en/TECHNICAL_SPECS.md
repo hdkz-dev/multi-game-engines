@@ -75,9 +75,18 @@ Lightweight parsers for UI-layer reuse.
 ## 5. Telemetry & Observability
 
 - **Structured Telemetry**: Automatic measurement of search performance via `DefaultTelemetryMiddleware`.
+- **Privacy-First Logging (ADR-038)**: To prevent PII leakage in logs, `truncateLog` utility automatically limits position-related strings to the first ~20 characters while maintaining context for debugging.
 - **Remediation**: All errors include `remediation` fields with specific recovery actions.
 
 ## 6. UI & Presentation Foundation
+
+### 6-0. Resource Loading Strategy (EngineLoader)
+
+To bypass the "Blob Origin" constraint that prohibits relative URL resolution inside Workers in certain browsers:
+
+- **Dependency Injection**: Engines do not use `importScripts` or `fetch` for their own binary files (.wasm, .nnue).
+- **Blob Injection**: The `EngineLoader` fetches and hashes all resources at the main-thread level, then injects the resulting Blob URLs directly into the Worker environment during initialization (ADR-043).
+- **Auto-Revocation**: Loader automatically tracks Blob URL lifecycles to prevent memory leaks.
 
 ### 6-1. Reactive Engine Store (`ui-core`)
 

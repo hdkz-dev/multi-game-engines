@@ -86,6 +86,7 @@
       "insecureConnection": "不安全な接続 (HTTP) は、機密性の高いエンジンファイルには許可されていません。",
       "sriRequired": "セキュリティ検証のために SRI が必要です。",
       "adapterFactoryInvalidReturn": "\"{adapter}\" のファクトリが無効なオブジェクトを返しました。",
+      "adapterNotFound": "\"{id}\" のエンジンアダプターが見つからないか、ファクトリが登録されていません。",
       "resourceLoadUnknown": "エンジン \"{engineId}\" のリソースロード中に不明なエラーが発生しました。"
     }
   },

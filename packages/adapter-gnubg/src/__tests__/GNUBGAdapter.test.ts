@@ -39,7 +39,7 @@ describe("GNUBGAdapter", () => {
     sources: {
       main: {
         url: "http://localhost/gnubg.js",
-        sri: "sha384-dummy",
+        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         type: "worker-js",
       },
     },

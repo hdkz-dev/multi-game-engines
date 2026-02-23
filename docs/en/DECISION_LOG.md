@@ -14,7 +14,7 @@ This document is an index to the ADRs (Architecture Decision Records) that recor
 - [ADR-031: Strict TypeScript Monorepo and Project References](./adr/031-strict-typescript-monorepo.md) (Accepted - 2026-02-18)
 - [ADR-032: Migration to 2026 Q1 Tech Stack (Zenith Tier)](./adr/032-zenith-tech-stack-2026.md) (Accepted - 2026-02-18)
 - [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed - 2026-02-21)
-- [ADR-046: Standardization of Directory Structures and Naming Conventions](./adr/046-structure-standardization.md) (Completed - 2026-02-23)
+- [ADR-046: Standardization of Directory Structures and Naming Conventions](./adr/046-structure-standardization.md) (Accepted - Pending Merge)
 
 ## 📦 Resource Management & Security
 

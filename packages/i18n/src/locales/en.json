@@ -86,6 +86,7 @@
       "insecureConnection": "Insecure connection (HTTP) is not allowed for sensitive engine files.",
       "sriRequired": "SRI required for security verification.",
       "adapterFactoryInvalidReturn": "Factory for \"{adapter}\" returned an invalid object.",
+      "adapterNotFound": "Engine adapter not found or factory not registered for \"{id}\".",
       "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\"."
     }
   },

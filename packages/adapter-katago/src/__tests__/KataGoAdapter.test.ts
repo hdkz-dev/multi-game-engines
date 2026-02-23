@@ -55,12 +55,12 @@ describe("KataGoAdapter", () => {
         main: {
           url: "test.js",
           type: "worker-js",
-          sri: "sha384-UmVhbFNSSUhhc2hGb3JUZXN0aW5nUHVycG9zZXMxMjM0NTY3ODkw",
+          sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         },
         wasm: {
           url: "test.wasm",
           type: "wasm",
-          sri: "sha384-V2FzbU1vY2tIYXNoRm9yVGVzdGluZ1B1cnBvc2VzMTIzNDU2Nzg5MA==",
+          sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         },
       },
     });
@@ -74,7 +74,7 @@ describe("KataGoAdapter", () => {
         main: {
           url: "test.js",
           type: "worker-js",
-          sri: "sha384-KataGoMainScriptHashPlaceholder",
+          sri: "sha384-ThisIsAPlaceholderSRIHashThatShouldBeRejectedByValidation64Chars",
         },
       },
     });

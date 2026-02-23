@@ -11,7 +11,10 @@
 
 - Support for Chess (Stockfish), Shogi (Yaneuraou), Go (KataGo), Reversi (Edax), and Mahjong (Mortal).
 - Cross-framework UI Components (React, Vue, Web Components).
-- **Zenith Tier Refinement (PR #38)**: Complete audit and architectural hardening.
+- **Zenith Tier Refinement (PR #38)**:
+  - **Standardization (ADR-046)**: Uniform directory structure and naming conventions across monorepo.
+  - **Security (Handshake Protocol)**: Standardized resource injection in Workers (ADR-043).
+  - **Observability (Privacy-First Logging)**: Safe telemetry with `truncateLog` (ADR-038).
 
 ## 🔥 Phase 3: Ultimate Optimization (Upcoming)
 

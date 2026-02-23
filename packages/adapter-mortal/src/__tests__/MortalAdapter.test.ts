@@ -39,7 +39,7 @@ describe("MortalAdapter", () => {
     sources: {
       main: {
         url: "http://localhost/mortal.js",
-        sri: "sha384-dummy",
+        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         type: "worker-js",
       },
     },

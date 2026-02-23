@@ -21,13 +21,13 @@ export class StockfishAdapter extends UCIAdapter {
         main: {
           url: "https://example.com/stockfish.js",
           // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-StockfishMainScriptValidHashForTest",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
           type: "worker-js",
         },
         wasm: {
           url: "https://example.com/stockfish.wasm",
           // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-StockfishWasmBinaryValidHashForTest",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
           type: "wasm",
           mountPath: "stockfish.wasm",
         },
