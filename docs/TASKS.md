@@ -56,7 +56,13 @@
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
-> 2026-02-23 更新。
+### 2026-02-23 更新 (実装担当: エンジンレジストリ導入)
+
+- [ ] [Registry] ADR-047 に基づくプラグイン可能なエンジンレジストリの実装
+  - [x] Phase 1: 基盤構築 (IEngineRegistry, EngineBridge.addRegistry)
+  - [ ] Phase 2: 公式レジストリの実装 (@multi-game-engines/registry)
+  - [ ] Phase 3: アダプターのリファクタリング (ハードコードの排除)
+  - [ ] Phase 4: 検証と自動化 (SRI計算ツール)
 
 ### 🟡 Medium（品質・保守性）
 

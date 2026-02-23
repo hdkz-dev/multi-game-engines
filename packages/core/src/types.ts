@@ -424,6 +424,25 @@ export interface IEngineLoader {
 }
 
 /**
+ * エンジンメタデータレジストリ。
+ */
+export interface IEngineRegistry {
+  /**
+   * 指定されたエンジンIDとバージョンのリソース設定を解決します。
+   * 見つからない場合は null を返します。
+   */
+  resolve(
+    id: string,
+    version?: string,
+  ): Record<string, IEngineSourceConfig> | null;
+
+  /**
+   * このレジストリがサポートしているエンジン ID の一覧を取得します。
+   */
+  getSupportedEngines(): string[];
+}
+
+/**
  * エンジン・ブリッジ。
  */
 export interface IEngineBridge {
@@ -469,6 +488,12 @@ export interface IEngineBridge {
     type: string,
     factory: (config: IEngineConfig) => unknown,
   ): void;
+
+  /**
+   * メタデータ解決のためのレジストリを追加します。
+   * 後から追加されたレジストリが優先的に検索されます。
+   */
+  addRegistry(registry: IEngineRegistry): void;
 
   unregisterAdapter(id: string): Promise<void>;
   onGlobalStatusChange(

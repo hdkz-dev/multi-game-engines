@@ -1,0 +1,100 @@
+{
+  "version": "1.0.0",
+  "engines": {
+    "stockfish": {
+      "name": "Stockfish",
+      "adapter": "uci",
+      "latest": "16.1",
+      "versions": {
+        "16.1": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.example.com/stockfish/16.1/stockfish.js",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "worker-js"
+            },
+            "wasm": {
+              "url": "https://cdn.example.com/stockfish/16.1/stockfish.wasm",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "wasm"
+            }
+          }
+        }
+      }
+    },
+    "yaneuraou": {
+      "name": "Yaneuraou",
+      "adapter": "usi",
+      "latest": "7.5",
+      "versions": {
+        "7.5": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.example.com/yaneuraou/7.5/yaneuraou.js",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "worker-js"
+            },
+            "wasm": {
+              "url": "https://cdn.example.com/yaneuraou/7.5/yaneuraou.wasm",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "wasm"
+            }
+          }
+        }
+      }
+    },
+    "katago": {
+      "name": "KataGo",
+      "adapter": "gtp",
+      "latest": "1.14",
+      "versions": {
+        "1.14": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.example.com/katago/1.14/katago.js",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "worker-js"
+            },
+            "wasm": {
+              "url": "https://cdn.example.com/katago/1.14/katago.wasm",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "wasm"
+            }
+          }
+        }
+      }
+    },
+    "edax": {
+      "name": "Edax",
+      "adapter": "edax",
+      "latest": "4.4",
+      "versions": {
+        "4.4": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.example.com/edax/4.4/edax.js",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "worker-js"
+            }
+          }
+        }
+      }
+    },
+    "mortal": {
+      "name": "Mortal",
+      "adapter": "mortal",
+      "latest": "1.0",
+      "versions": {
+        "1.0": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.example.com/mortal/1.0/mortal.js",
+              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "type": "worker-js"
+            }
+          }
+        }
+      }
+    }
+  }
+}

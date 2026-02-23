@@ -13,6 +13,7 @@ import {
   IEngineLoader,
   IEngine,
   IEngineConfig,
+  IEngineRegistry,
   EngineRegistry,
   EngineErrorCode,
 } from "../types.js";
@@ -42,6 +43,7 @@ export class EngineBridge implements IEngineBridge {
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
       | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
+  private registries: IEngineRegistry[] = [];
   private engineInstances = new Map<
     string,
     WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>
@@ -102,6 +104,15 @@ export class EngineBridge implements IEngineBridge {
       | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
   ): void {
     this.adapterFactories.set(type, factory);
+  }
+
+  /**
+   * メタデータ解決のためのレジストリを追加します。
+   * 後から追加されたレジストリが優先的に検索されます。
+   */
+  addRegistry(registry: IEngineRegistry): void {
+    // 2026 Best Practice: LIFO 順でレジストリを管理し、ユーザー定義を優先
+    this.registries.unshift(registry);
   }
 
   /**
@@ -290,18 +301,14 @@ export class EngineBridge implements IEngineBridge {
         let adapter = this.adapters.get(id);
         let newlyRegistered = false;
 
+        // 2026 Best Practice: メタデータの解決 (Decentralized Registry)
+        const resolvedConfig = this.resolveEngineConfig(idOrConfig);
+
         // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
-        if (!adapter && typeof idOrConfig !== "string") {
-          if (!idOrConfig.adapter) {
-            throw new EngineError({
-              code: EngineErrorCode.VALIDATION_ERROR,
-              message: `Adapter type is required to instantiate engine "${id}".`,
-              engineId: id,
-            });
-          }
-          const factory = this.adapterFactories.get(idOrConfig.adapter);
+        if (!adapter && resolvedConfig.adapter) {
+          const factory = this.adapterFactories.get(resolvedConfig.adapter);
           if (factory) {
-            const result = factory(idOrConfig);
+            const result = factory(resolvedConfig);
             // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
             let newAdapter: IEngineAdapter<
               IBaseSearchOptions,
@@ -326,10 +333,10 @@ export class EngineBridge implements IEngineBridge {
             } else {
               throw new EngineError({
                 code: EngineErrorCode.INTERNAL_ERROR,
-                message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, name, version, status, load, search, searchRaw, stop, setOption, dispose, or parser methods).`,
+                message: `Factory for "${resolvedConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, name, version, status, load, search, searchRaw, stop, setOption, dispose, or parser methods).`,
                 engineId: id,
                 i18nKey: "engine.errors.adapterFactoryInvalidReturn",
-                i18nParams: { adapter: idOrConfig.adapter },
+                i18nParams: { adapter: resolvedConfig.adapter },
               });
             }
 
@@ -358,7 +365,7 @@ export class EngineBridge implements IEngineBridge {
             i18nParams: { id },
             remediation:
               typeof idOrConfig !== "string"
-                ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
+                ? `Ensure registerAdapterFactory('${resolvedConfig.adapter}', ... ) is called before getEngine.`
                 : "Register the adapter instance first or provide a full IEngineConfig.",
           });
         }
@@ -421,6 +428,53 @@ export class EngineBridge implements IEngineBridge {
 
     this.pendingEngines.set(id, enginePromise);
     return enginePromise as Promise<IEngine<O, I, R>>;
+  }
+
+  /**
+   * レジストリチェーンを走査して設定を解決します。
+   */
+  private resolveEngineConfig(
+    idOrConfig: string | IEngineConfig,
+  ): IEngineConfig {
+    const config: IEngineConfig =
+      typeof idOrConfig === "string" ? { id: idOrConfig } : { ...idOrConfig };
+
+    const id = config.id!;
+    const version = config.version;
+
+    // 既に sources が完全に揃っている場合は何もしない
+    if (config.sources?.main) {
+      return config;
+    }
+
+    // レジストリを順番に検索
+    for (const registry of this.registries) {
+      const resolvedSources = registry.resolve(id, version);
+      if (resolvedSources) {
+        // 見つかった場合、既存の設定を優先しつつ補完する
+        const mergedSources = {
+          ...resolvedSources,
+          ...(config.sources || {}),
+        };
+
+        // 2026 Best Practice: IEngineConfig.sources の型（main を必須とする）に適合させる。
+        // registry.resolve は Record<string, IEngineSourceConfig> を返すが、
+        // 少なくとも 'main' が含まれていることを前提とする（またはバリデーション）。
+        if (mergedSources["main"]) {
+          config.sources = mergedSources as Required<IEngineConfig>["sources"];
+        }
+
+        // アダプタータイプが未指定なら推論を試みる (レジストリがメタデータとして持っている想定)
+        // 現在の IEngineRegistry インターフェースには adapter 取得がないが、
+        // 慣習として id を adapter 名としてフォールバックする
+        if (!config.adapter) {
+          config.adapter = id;
+        }
+        break;
+      }
+    }
+
+    return config;
   }
 
   /**
