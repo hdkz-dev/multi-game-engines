@@ -31,4 +31,17 @@ export class KataGoAdapter extends GTPAdapter {
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);
   }
+
+  async load(
+    loader?: import("@multi-game-engines/core").IEngineLoader,
+  ): Promise<void> {
+    const mainSri = this.config.sources?.["main"]?.sri;
+    if (mainSri && mainSri.includes("Placeholder")) {
+      throw new Error(
+        "KataGoAdapter: Default configuration contains placeholder SRI hashes. " +
+          "Please provide valid 'sources' with real SRI hashes in the constructor.",
+      );
+    }
+    return super.load(loader);
+  }
 }

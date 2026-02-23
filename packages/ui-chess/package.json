@@ -1,9 +1,9 @@
 {
   "name": "@multi-game-engines/ui-chess",
   "version": "0.1.0",
-  "license": "MIT",
   "description": "Domain-specific Chess UI components for all frameworks",
   "type": "module",
+  "license": "MIT",
   "types": "./dist/index.d.ts",
   "exports": {
     "./elements": {
@@ -60,5 +60,15 @@
     "vitest": "^4.0.18",
     "vue": "3.5.28"
   },
-  "main": "./dist/index.js"
+  "main": "./dist/index.js",
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-chess"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

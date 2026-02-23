@@ -1,9 +1,9 @@
 {
   "name": "@multi-game-engines/domain-chess",
   "version": "0.1.0",
-  "license": "MIT",
   "description": "Domain-specific Chess logic, types, and parsing",
   "type": "module",
+  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -25,5 +25,15 @@
     "vitest": "^4.0.18"
   },
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/domain-chess"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

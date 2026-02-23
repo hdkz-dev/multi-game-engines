@@ -2,14 +2,14 @@
   "name": "@multi-game-engines/adapter-usi",
   "version": "0.1.0",
   "description": "Generic USI (Universal Shogi Interface) adapter for multi-game-engines ecosystem",
+  "type": "module",
   "license": "MIT",
-  "author": "multi-game-engines contributors",
+  "author": "hdkz-dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-usi"
   },
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -53,5 +53,9 @@
   },
   "engines": {
     "node": "^20 || ^22 || >=24"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

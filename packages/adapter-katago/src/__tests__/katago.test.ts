@@ -49,7 +49,16 @@ describe("KataGoAdapter", () => {
   });
 
   it("should change status correctly on load", async () => {
-    const adapter = new KataGoAdapter();
+    // Provide non-placeholder SRI to bypass validation check
+    const adapter = new KataGoAdapter({
+      sources: {
+        main: {
+          url: "test.js",
+          type: "worker-js",
+          sri: "sha384-valid-mock-hash",
+        },
+      },
+    });
     await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(adapter.status).toBe("ready");
   });
