@@ -6,6 +6,13 @@ import { MockEngine } from "../mocks/MockEngine.js";
 // --- Component Layer ---
 const EngineMonitorView = () => {
   const engine = useMemo(() => new MockEngine(), []);
+
+  React.useEffect(() => {
+    return () => {
+      void engine.dispose();
+    };
+  }, [engine]);
+
   const { state, status, monitor } = useEngineMonitor(engine);
 
   return (

@@ -8,9 +8,16 @@ describe("domain-go", () => {
       expect(createGOMove("pass")).toBe("pass");
     });
 
-    it("should throw on invalid moves", () => {
-      expect(() => createGOMove("Z99")).toThrow();
-      expect(() => createGOMove("Q16\n")).toThrow();
+    it("should throw on invalid moves (Validation Error)", () => {
+      // Invalid format
+      expect(() => createGOMove("Z99")).toThrow(/Invalid GOMove format/);
+    });
+
+    it("should throw on injection (Security Error)", () => {
+      // Control characters
+      expect(() => createGOMove("Q16\n")).toThrow(
+        /Potential command injection/,
+      );
     });
   });
 
@@ -19,8 +26,14 @@ describe("domain-go", () => {
       expect(createGOBoard("board-data")).toBe("board-data");
     });
 
-    it("should throw on injection", () => {
-      expect(() => createGOBoard("board\nquit")).toThrow();
+    it("should throw on empty input", () => {
+      expect(() => createGOBoard("")).toThrow(/Invalid GOBoard/);
+    });
+
+    it("should throw on injection (Security Error)", () => {
+      expect(() => createGOBoard("board\nquit")).toThrow(
+        /Potential command injection/,
+      );
     });
   });
 });

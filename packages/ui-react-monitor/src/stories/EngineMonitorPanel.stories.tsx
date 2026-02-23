@@ -26,6 +26,13 @@ type Story = StoryObj<typeof EngineMonitorPanel>;
  */
 const InteractivePanel = () => {
   const engine = React.useMemo(() => new MockEngine(), []);
+
+  React.useEffect(() => {
+    return () => {
+      void engine.dispose();
+    };
+  }, [engine]);
+
   return (
     <div style={{ width: "400px", height: "600px" }}>
       <EngineMonitorPanel
