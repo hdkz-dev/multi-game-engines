@@ -63,9 +63,11 @@ describe("IndexedDBStorage", () => {
       storage as unknown as { getDB(): Promise<IDBDatabase> }
     ).getDB();
     // fake-indexeddb の公式 API で異常クローズをシミュレート
-    // Note: 型定義の問題により as any を使用
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    forceCloseDatabase(db as any);
+    // Note: fake-indexeddb v6 の型定義の不備（インスタンスではなくクラスを要求する）を
+    // 回避するため、型定義に合わせたキャストを使用。
+    forceCloseDatabase(
+      db as unknown as Parameters<typeof forceCloseDatabase>[0],
+    );
 
     // 次の操作で再オープンされるはず
     await storage.set("key2", new Uint8Array([2]).buffer);

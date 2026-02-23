@@ -61,10 +61,10 @@ describe("i18n Type Synchronization", () => {
     "engine.errors.invalidCheckersBoard",
     "engine.errors.invalidCheckersMove",
     "engine.errors.notReady",
-    "adapters.uci.errors.missing_fen",
-    "adapters.usi.errors.missing_fen",
-    "adapters.gtp.errors.invalid_response",
-    "adapters.ensemble.errors.no_results",
+    "adapters.uci.errors.missingFEN",
+    "adapters.usi.errors.missingFEN",
+    "adapters.gtp.errors.invalidResponse",
+    "adapters.ensemble.errors.noResults",
   ];
 
   const enKeys = new Set(flattenKeys(locales.en));

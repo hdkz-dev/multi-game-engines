@@ -256,7 +256,7 @@ export class UCIParser implements IProtocolParser<
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "UCI requires a FEN position.",
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey: "adapters.uci.errors.missing_fen",
+        i18nKey: "adapters.uci.errors.missingFEN",
       });
     }
 

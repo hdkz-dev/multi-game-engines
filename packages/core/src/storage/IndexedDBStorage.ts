@@ -29,7 +29,9 @@ export class IndexedDBStorage implements IFileStorage {
         // 2026 Best Practice: ブロックは一時的な可能性があるため、短時間のタイムアウト待機を導入
         if (!blockedTimer) {
           blockedTimer = setTimeout(() => {
-            this.dbPromise = null;
+            if (this.dbPromise === promise) {
+              this.dbPromise = null;
+            }
             reject(
               new Error(
                 "IndexedDB open blocked by another connection. Please close other tabs.",
@@ -40,32 +42,41 @@ export class IndexedDBStorage implements IFileStorage {
       };
 
       request.onsuccess = () => {
-        if (blockedTimer) clearTimeout(blockedTimer);
+        if (blockedTimer) {
+          clearTimeout(blockedTimer);
+          blockedTimer = null;
+        }
         const db = request.result;
         this.db = db;
 
         // 2026 Best Practice: 接続が無効になったらキャッシュをクリア
         db.onclose = () => {
-          this.db = null;
-          this.dbPromise = null;
+          if (this.db === db) this.db = null;
+          if (this.dbPromise === promise) this.dbPromise = null;
         };
         db.onversionchange = () => {
           db.close();
-          this.db = null;
-          this.dbPromise = null;
+          if (this.db === db) this.db = null;
+          if (this.dbPromise === promise) this.dbPromise = null;
         };
 
         resolve(db);
       };
 
       request.onerror = () => {
-        if (blockedTimer) clearTimeout(blockedTimer);
-        this.dbPromise = null;
+        if (blockedTimer) {
+          clearTimeout(blockedTimer);
+          blockedTimer = null;
+        }
+        if (this.dbPromise === promise) {
+          this.dbPromise = null;
+        }
         reject(request.error);
       };
     });
 
-    return this.dbPromise;
+    const promise = this.dbPromise;
+    return promise;
   }
 
   async get(key: string): Promise<ArrayBuffer | null> {
@@ -78,7 +89,21 @@ export class IndexedDBStorage implements IFileStorage {
       const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
       const request = store.get(key);
 
-      request.onsuccess = () => resolve(request.result ?? null);
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result instanceof ArrayBuffer) {
+          resolve(result);
+        } else if (result === undefined || result === null) {
+          resolve(null);
+        } else {
+          // 2026 Best Practice: 期待しない型（any）のデータに対する防御的検証
+          reject(
+            new TypeError(
+              `IndexedDB: Expected ArrayBuffer but got ${typeof result} for key "${key}"`,
+            ),
+          );
+        }
+      };
       request.onerror = () => reject(request.error);
     });
   }

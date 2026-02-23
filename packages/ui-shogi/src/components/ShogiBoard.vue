@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import "../elements.js";
+import "../elements";
 import { Move } from "@multi-game-engines/core";
 import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
@@ -24,6 +24,6 @@ defineProps<{
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
     :locale="locale"
-    .pieceNames="pieceNames"
+    :piece-names="pieceNames"
   ></shogi-board>
 </template>

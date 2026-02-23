@@ -84,28 +84,30 @@
       "invalidPositionString": "Invalid position string: Input must not be empty.",
       "invalidEngineId": "Invalid engine ID: \"{id}\". Only alphanumeric characters, hyphens, and underscores are allowed.",
       "insecureConnection": "Insecure connection (HTTP) is not allowed for sensitive engine files.",
-      "sriRequired": "SRI required for security verification."
+      "sriRequired": "SRI required for security verification.",
+      "adapterFactoryInvalidReturn": "Factory for \"{adapter}\" returned an invalid object.",
+      "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\"."
     }
   },
   "adapters": {
     "uci": {
       "errors": {
-        "missing_fen": "UCI protocol requires a FEN position string."
+        "missingFEN": "UCI protocol requires a FEN position string."
       }
     },
     "usi": {
       "errors": {
-        "missing_fen": "USI protocol requires a SFEN position string."
+        "missingFEN": "USI protocol requires a SFEN position string."
       }
     },
     "gtp": {
       "errors": {
-        "invalid_response": "Invalid response received from GTP engine."
+        "invalidResponse": "Invalid response received from GTP engine."
       }
     },
     "ensemble": {
       "errors": {
-        "no_results": "No engine results available to aggregate."
+        "noResults": "No engine results available to aggregate."
       }
     }
   },

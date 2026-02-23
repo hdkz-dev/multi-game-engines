@@ -1,7 +1,15 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { truncateLog } from "../Sanitizer.js";
 
 describe("Sanitizer: truncateLog", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should not truncate strings shorter than maxLength", () => {
     expect(truncateLog("short", 10)).toBe("short");
   });

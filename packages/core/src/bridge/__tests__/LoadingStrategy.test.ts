@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import {
   IEngineAdapter,
@@ -8,6 +8,14 @@ import {
 } from "../../types.js";
 
 describe("Loading Strategies", () => {
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   const createMockAdapter = () =>
     ({
       id: "test",

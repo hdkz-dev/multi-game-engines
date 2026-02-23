@@ -7,7 +7,6 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "sideEffects": [
-    "./src/index.ts",
     "./dist/index.js"
   ],
   "exports": {

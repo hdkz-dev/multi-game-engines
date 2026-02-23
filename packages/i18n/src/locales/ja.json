@@ -84,28 +84,30 @@
       "invalidPositionString": "局面文字列が無効です: 入力は空であってはなりません。",
       "invalidEngineId": "エンジン ID が無効です: \"{id}\"。英数字、ハイフン、アンダースコアのみが許可されています。",
       "insecureConnection": "不安全な接続 (HTTP) は、機密性の高いエンジンファイルには許可されていません。",
-      "sriRequired": "セキュリティ検証のために SRI が必要です。"
+      "sriRequired": "セキュリティ検証のために SRI が必要です。",
+      "adapterFactoryInvalidReturn": "\"{adapter}\" のファクトリが無効なオブジェクトを返しました。",
+      "resourceLoadUnknown": "エンジン \"{engineId}\" のリソースロード中に不明なエラーが発生しました。"
     }
   },
   "adapters": {
     "uci": {
       "errors": {
-        "missing_fen": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
+        "missingFEN": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
       }
     },
     "usi": {
       "errors": {
-        "missing_fen": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
+        "missingFEN": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
       }
     },
     "gtp": {
       "errors": {
-        "invalid_response": "GTP エンジンから無効な応答を受信しました。"
+        "invalidResponse": "GTP エンジンから無効な応答を受信しました。"
       }
     },
     "ensemble": {
       "errors": {
-        "no_results": "合議するためのエンジン実行結果が存在しません。"
+        "noResults": "合議するための engine 実行結果が存在しません。"
       }
     }
   },

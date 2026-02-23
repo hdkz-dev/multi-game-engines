@@ -69,8 +69,8 @@ export class OPFSStorage implements IFileStorage {
         await root.removeEntry(name, { recursive: true });
       }
     } else {
-      console.warn(
-        "[OPFSStorage] Directory iteration not supported in this browser.",
+      throw new Error(
+        "[OPFSStorage] Directory iteration (keys()) is not supported in this environment. Cannot clear storage.",
       );
     }
   }

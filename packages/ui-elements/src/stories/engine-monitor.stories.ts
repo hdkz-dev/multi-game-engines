@@ -13,20 +13,34 @@ const meta: Meta = {
   title: "Components/EngineMonitor",
   component: "engine-monitor",
   tags: ["autodocs"],
+  decorators: [
+    (story, { id }) => {
+      // 2026 Best Practice: ストーリーごとに独立したエンジンインスタンスを管理し、
+      // ドキュメント表示時（複数ストーリー同時レンダリング）の競合を防ぐ。
+      const engineId = `engine-${id}`;
+      if (!globalThis.__engine_cache__) {
+        globalThis.__engine_cache__ = new Map();
+      }
+      if (!globalThis.__engine_cache__.has(engineId)) {
+        globalThis.__engine_cache__.set(engineId, new MockEngine());
+      }
+      const engine = globalThis.__engine_cache__.get(engineId);
+
+      // 注意: Web Components ストーリーではコンポーネントの破棄タイミングを
+      // 精密にフックするのが難しいため、グローバルキャッシュ方式を採用。
+      // 必要に応じて HMR 時等にクリーンアップ。
+
+      return story({ args: { ...meta.args, engine } });
+    },
+  ],
 };
+
+declare global {
+  var __engine_cache__: Map<string, MockEngine>;
+}
 
 export default meta;
 type Story = StoryObj;
-
-let activeMockEngine: MockEngine | null = null;
-
-const getMockEngine = () => {
-  if (activeMockEngine) {
-    void activeMockEngine.dispose();
-  }
-  activeMockEngine = new MockEngine();
-  return activeMockEngine;
-};
 
 interface StoryArgs {
   engine: IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
@@ -37,19 +51,15 @@ interface StoryArgs {
 
 export const Interactive: Story = {
   args: {
-    // args will be populated in render to avoid static initialization
     searchOptions: { fen: "startpos" },
     panelTitle: "Stockfish 16.1 (Web Component)",
   },
   render: (args: unknown) => {
     const a = args as StoryArgs;
-    // Ensure we have a fresh engine for the story, cleaning up previous one
-    const engine = a.engine || getMockEngine();
-
     return html`
       <div style="max-width: 400px; height: 600px;">
         <engine-monitor
-          .engine="${engine}"
+          .engine="${a.engine}"
           .searchOptions="${a.searchOptions}"
           .panelTitle="${a.panelTitle}"
         ></engine-monitor>
@@ -65,11 +75,10 @@ export const English: Story = {
   },
   render: (args: unknown) => {
     const a = args as StoryArgs;
-    const engine = a.engine || getMockEngine();
     return html`
       <div style="max-width: 400px; height: 600px;">
         <engine-monitor
-          .engine="${engine}"
+          .engine="${a.engine}"
           .searchOptions="${a.searchOptions}"
           .locale="${a.locale}"
         ></engine-monitor>

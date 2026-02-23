@@ -61,7 +61,7 @@ describe("EnsembleAdapter", () => {
       expect.objectContaining({
         code: "VALIDATION_ERROR",
         engineId: "majority-vote",
-        i18nKey: "adapters.ensemble.errors.no_results",
+        i18nKey: "adapters.ensemble.errors.noResults",
       }),
     );
   });

@@ -44,6 +44,7 @@ export class MortalAdapter extends BaseAdapter<
           code: EngineErrorCode.VALIDATION_ERROR,
           message: "IEngineLoader is required for secure resource loading.",
           engineId: this.id,
+          i18nKey: "engine.errors.loaderRequired",
         });
       }
 
@@ -53,6 +54,7 @@ export class MortalAdapter extends BaseAdapter<
           code: EngineErrorCode.VALIDATION_ERROR,
           message: "Engine configuration is missing 'sources' field.",
           engineId: this.id,
+          i18nKey: "engine.errors.missingSources",
         });
       }
 
@@ -69,6 +71,7 @@ export class MortalAdapter extends BaseAdapter<
           code: EngineErrorCode.VALIDATION_ERROR,
           message: "Missing main entry point after resolution",
           engineId: this.id,
+          i18nKey: "engine.errors.missingMainEntryPoint",
         });
       }
 

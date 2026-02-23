@@ -328,6 +328,8 @@ export class EngineBridge implements IEngineBridge {
                 code: EngineErrorCode.INTERNAL_ERROR,
                 message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, name, version, status, load, search, searchRaw, stop, setOption, dispose, or parser methods).`,
                 engineId: id,
+                i18nKey: "engine.errors.adapterFactoryInvalidReturn",
+                i18nParams: { adapter: idOrConfig.adapter },
               });
             }
 

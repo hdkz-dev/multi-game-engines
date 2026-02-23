@@ -22,12 +22,12 @@
   },
   "license": "MIT",
   "sideEffects": [
-    "src/engine-monitor.ts",
-    "src/evaluation-graph.ts",
-    "src/pv-list.ts",
-    "src/search-log.ts",
-    "src/score-badge.ts",
-    "src/engine-stats.ts",
+    "src/components/engine-monitor.ts",
+    "src/components/evaluation-graph.ts",
+    "src/components/pv-list.ts",
+    "src/components/search-log.ts",
+    "src/components/score-badge.ts",
+    "src/components/engine-stats.ts",
     "dist/*.js"
   ],
   "dependencies": {

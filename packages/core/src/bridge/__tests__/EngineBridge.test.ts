@@ -173,4 +173,65 @@ describe("EngineBridge", () => {
     expect(mwGlobal.onCommand).toHaveBeenCalled();
     expect(mwSpecificA.onCommand).not.toHaveBeenCalled();
   });
+
+  describe("dispose()", () => {
+    it("bridge.dispose() が全アダプターを破棄し、ローダーをクリーンアップすること", async () => {
+      const bridge = new EngineBridge();
+      const adapter1 = createMockAdapter("engine1");
+      const adapter2 = createMockAdapter("engine2");
+
+      await bridge.registerAdapter(adapter1);
+      await bridge.registerAdapter(adapter2);
+
+      // Mock loader
+      const mockLoader = {
+        revokeAll: vi.fn(),
+        revokeByEngineId: vi.fn(),
+      };
+      (bridge as unknown as { loader: unknown }).loader = mockLoader;
+
+      await bridge.dispose();
+
+      expect(adapter1.dispose).toHaveBeenCalled();
+      expect(adapter2.dispose).toHaveBeenCalled();
+      expect(mockLoader.revokeAll).toHaveBeenCalled();
+    });
+
+    it("アダプターの破棄に失敗しても、ローダーのクリーンアップが実行されること", async () => {
+      const bridge = new EngineBridge();
+      const adapter = createMockAdapter("engine1");
+      adapter.dispose = vi.fn().mockRejectedValue(new Error("disposal failed"));
+
+      await bridge.registerAdapter(adapter);
+
+      const mockLoader = {
+        revokeAll: vi.fn(),
+        revokeByEngineId: vi.fn(),
+      };
+      (bridge as unknown as { loader: unknown }).loader = mockLoader;
+
+      await bridge.dispose();
+
+      expect(adapter.dispose).toHaveBeenCalled();
+      expect(mockLoader.revokeAll).toHaveBeenCalled();
+    });
+
+    it("複数回 dispose() を呼んでも安全であること (Idempotency)", async () => {
+      const bridge = new EngineBridge();
+      const adapter = createMockAdapter("engine1");
+      await bridge.registerAdapter(adapter);
+
+      const mockLoader = {
+        revokeAll: vi.fn(),
+        revokeByEngineId: vi.fn(),
+      };
+      (bridge as unknown as { loader: unknown }).loader = mockLoader;
+
+      await bridge.dispose();
+      await bridge.dispose();
+
+      expect(adapter.dispose).toHaveBeenCalledTimes(1);
+      expect(mockLoader.revokeAll).toHaveBeenCalledTimes(1);
+    });
+  });
 });

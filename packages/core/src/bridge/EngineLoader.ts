@@ -252,8 +252,12 @@ export class EngineLoader implements IEngineLoader {
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>> {
     // 2026 Best Practice: Config の指紋（ハッシュ）を含めてデデュプリケーション
-    // 同一 ID でも異なる設定（URL/SRI）が渡された際の競合を完全に防ぎます。
-    const configHash = JSON.stringify(configs);
+    // JavaScript オブジェクトのキーの順序は保証されないため、ソートしてから文字列化して決定性を確保。
+    const configHash = JSON.stringify(
+      Object.keys(configs)
+        .sort()
+        .map((k) => [k, configs[k]]),
+    );
     const batchKey = `${engineId}:${configHash}`;
 
     const existing = this.inflightBatchLoads.get(batchKey);
@@ -308,6 +312,8 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Unknown error during resource loading",
         engineId,
+        i18nKey: "engine.errors.resourceLoadUnknown",
+        i18nParams: { engineId },
       });
     }
 

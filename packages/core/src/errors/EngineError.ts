@@ -48,10 +48,10 @@ export type ValidI18nKey =
   | "engine.errors.invalidBackgammonMove"
   | "engine.errors.invalidCheckersBoard"
   | "engine.errors.invalidCheckersMove"
-  | "adapters.uci.errors.missing_fen"
-  | "adapters.usi.errors.missing_fen"
-  | "adapters.gtp.errors.invalid_response"
-  | "adapters.ensemble.errors.no_results"
+  | "adapters.uci.errors.missingFEN"
+  | "adapters.usi.errors.missingFEN"
+  | "adapters.gtp.errors.invalidResponse"
+  | "adapters.ensemble.errors.noResults"
   | (string & {});
 
 /** エンジンエラーの構築オプション */

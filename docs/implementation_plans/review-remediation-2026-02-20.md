@@ -232,13 +232,13 @@ MIT
 
 **対象**: 全5アダプター、計9箇所
 
-| アダプター        | ファイル                  | 箇所数 | 現在の値                                                                                                                        |
-| ----------------- | ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| adapter-stockfish | `src/StockfishAdapter.ts` | 2      | `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`                                        |
-| adapter-yaneuraou | `src/YaneuraouAdapter.ts` | 3      | `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder` |
-| adapter-edax      | `src/EdaxAdapter.ts`      | 1      | `sha384-EdaxMainScriptHashPlaceholder`                                                                                          |
-| adapter-mortal    | `src/MortalAdapter.ts`    | 1      | `sha384-MortalMainScriptHashPlaceholder`                                                                                        |
-| adapter-katago    | `src/KataGoAdapter.ts`    | 2      | `sha384-KataGoMainScriptHashPlaceholder`, `sha384-KataGoWasmBinaryHashPlaceholder`                                              |
+| アダプター        | ファイル                  | 箇所数 | 現在の値                                                                                                                           |
+| ----------------- | ------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| adapter-stockfish | `src/StockfishAdapter.ts` | 2      | `sha384-StockfishMainScriptValidHashForTest`, `sha384-StockfishWasmBinaryValidHashForTest`                                         |
+| adapter-yaneuraou | `src/YaneuraouAdapter.ts` | 3      | `sha384-YaneuraouMainScriptValidHashForTest`, `sha384-YaneuraouWasmBinaryValidHashForTest`, `sha384-YaneuraouNNUEValidHashForTest` |
+| adapter-edax      | `src/EdaxAdapter.ts`      | -      | (SRI ハッシュ未対応 / Phase B-4 で追加予定)                                                                                        |
+| adapter-mortal    | `src/MortalAdapter.ts`    | -      | (SRI ハッシュ未対応 / Phase B-4 で追加予定)                                                                                        |
+| adapter-katago    | `src/KataGoAdapter.ts`    | 2      | `sha384-KataGoMainScriptValidHashForTest`, `sha384-KataGoWasmBinaryValidHashForTest`                                               |
 
 ---
 
