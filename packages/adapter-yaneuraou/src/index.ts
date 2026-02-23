@@ -1,4 +1,4 @@
-import { YaneuraouAdapter } from "./yaneuraou.js";
+import { YaneuraouAdapter } from "./YaneuraouAdapter.js";
 import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IShogiSearchOptions,

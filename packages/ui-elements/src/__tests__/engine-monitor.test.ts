@@ -7,8 +7,8 @@ import {
   beforeAll,
   afterAll,
 } from "vitest";
-import "../engine-monitor.js";
-import { EngineMonitorElement } from "../engine-monitor.js";
+import "../components/engine-monitor.js";
+import { EngineMonitorElement } from "../components/engine-monitor.js";
 
 describe("EngineMonitorElement", () => {
   beforeAll(() => {

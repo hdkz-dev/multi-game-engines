@@ -137,7 +137,8 @@ export class USIParser implements IProtocolParser<
             try {
               // 2026 Best Practice: PV 内部の指し手に対してもインジェクションチェックを強制
               ProtocolValidator.assertNoInjection(m, "PV Move");
-              info.pv.push(createShogiMove(m));
+              const move = createShogiMove(m);
+              info.pv.push(move);
             } catch {
               console.warn(
                 `[USIParser] Skipping invalid PV move token: "${truncateLog(m)}"`,

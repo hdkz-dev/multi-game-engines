@@ -1,6 +1,6 @@
+/* global console, process */
 import fs from "fs";
 import path from "path";
-/* global console, process */
 
 /**
  * sync-mcp-tokens.js

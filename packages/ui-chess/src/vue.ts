@@ -1,1 +1,1 @@
-export { default as ChessBoard } from "./ChessBoard.vue";
+export { default as ChessBoard } from "./components/ChessBoard.vue";

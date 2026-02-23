@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
+import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
 import { MockEngine } from "../mocks/MockEngine.js";
 import { within, userEvent, expect, waitFor } from "storybook/test";
 

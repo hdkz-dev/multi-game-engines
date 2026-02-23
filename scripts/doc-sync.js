@@ -1,10 +1,10 @@
+/* global console, process */
 /**
  * doc-sync.js
  * 2026 Zenith Tier: Documentation and Implementation Sync Validator.
  * Currently verifies the existence and basic structure of key technical documents.
  * Future: Integrate with TypeDoc to compare generated API references with Markdown files.
  */
-/* global console, process */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";

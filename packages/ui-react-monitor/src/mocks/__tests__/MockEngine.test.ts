@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { MockEngine } from "../MockEngine.js";
-import { IBaseSearchOptions } from "@multi-game-engines/core";
 
 describe("MockEngine", () => {
   let engine: MockEngine;
 
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({
+      toFake: [
+        "setTimeout",
+        "clearTimeout",
+        "setInterval",
+        "clearInterval",
+        "Date",
+      ],
+    });
     engine = new MockEngine();
   });
 
@@ -18,13 +25,13 @@ describe("MockEngine", () => {
   it("should transition status from busy to ready when starting a new search", async () => {
     // Start first search
     // MockEngine.search returns immediately but starts an interval
-    await engine.search({ depth: 10 } as IBaseSearchOptions);
+    await engine.search({ depth: 10 });
 
     // Now it should be busy
     expect(engine.status).toBe("busy");
 
     // Start second search while first is busy
-    await engine.search({ depth: 20 } as IBaseSearchOptions);
+    await engine.search({ depth: 20 });
 
     // Should still be busy (restarted)
     expect(engine.status).toBe("busy");
@@ -41,15 +48,17 @@ describe("MockEngine", () => {
     const stopSpy = vi.spyOn(engine, "stop");
 
     // First search
-    await engine.search({} as IBaseSearchOptions);
+    await engine.search({});
     expect(engine.status).toBe("busy");
+    // Clear initial call from first search to focus on restart behavior
+    stopSpy.mockClear();
 
     // Second search: should call stop (ready) then become busy again
-    await engine.search({} as IBaseSearchOptions);
+    await engine.search({});
     expect(engine.status).toBe("busy");
 
     // stop() must be called to reset the engine before the new search
-    expect(stopSpy).toHaveBeenCalled();
+    expect(stopSpy).toHaveBeenCalledTimes(1);
 
     // History should contain: ready (init) -> busy -> ready (via stop) -> busy
     // Filter out initial 'ready' if needed, but here we check the flow

@@ -48,8 +48,8 @@ export class EdaxParser implements IProtocolParser<
         bestMove,
       };
     } catch {
-      // パースエラー時も生データは返すことでデバッグ可能にする
-      return null;
+      // パースエラー時も生データを返すことでデバッグ可能にする
+      return { raw: data, bestMove: null };
     }
   }
 

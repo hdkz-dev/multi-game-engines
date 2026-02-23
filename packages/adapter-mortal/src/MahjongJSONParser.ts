@@ -31,19 +31,23 @@ export class MahjongJSONParser implements IProtocolParser<
           ? (parsed.evaluations as unknown[])
               .filter(
                 (e): e is Record<string, unknown> =>
-                  typeof e === "object" &&
-                  e !== null &&
-                  typeof (e as Record<string, unknown>)["move"] === "string" &&
-                  typeof (e as Record<string, unknown>)["ev"] === "number",
+                  typeof e === "object" && e !== null,
               )
-              .map((e) => ({
-                move: (e as Record<string, unknown>)["move"] as MahjongMove,
-                ev: (e as Record<string, unknown>)["ev"] as number,
-                prob:
-                  typeof (e as Record<string, unknown>)["prob"] === "number"
-                    ? ((e as Record<string, unknown>)["prob"] as number)
-                    : undefined,
-              }))
+              .map((e) => {
+                try {
+                  const moveValue = e["move"];
+                  if (typeof moveValue !== "string") return null;
+                  const move = createMahjongMove(moveValue);
+                  return {
+                    move,
+                    ev: typeof e["ev"] === "number" ? e["ev"] : 0,
+                    prob: typeof e["prob"] === "number" ? e["prob"] : undefined,
+                  };
+                } catch {
+                  return null;
+                }
+              })
+              .filter((e): e is NonNullable<typeof e> => e !== null)
           : undefined;
 
         return {
@@ -73,15 +77,21 @@ export class MahjongJSONParser implements IProtocolParser<
 
       if (parsed.type === "result") {
         const moveValue = parsed.bestMove;
+        const raw = typeof data === "string" ? data : JSON.stringify(data);
+
+        // 2026 Best Practice: null/undefined は正当な「指し手なし（和了・流局等）」として扱う
+        // これにより、インターフェース IMahjongSearchResult の bestMove: MahjongMove | null と整合します。
+        if (moveValue === null || moveValue === undefined) {
+          return { raw, bestMove: null };
+        }
+
         if (typeof moveValue !== "string") {
           return null;
         }
+
         try {
           const bestMove = createMahjongMove(moveValue);
-          return {
-            raw: typeof data === "string" ? data : JSON.stringify(data),
-            bestMove,
-          };
+          return { raw, bestMove };
         } catch (e) {
           console.warn("[MahjongJSONParser] Invalid bestMove from engine:", e);
           return null;

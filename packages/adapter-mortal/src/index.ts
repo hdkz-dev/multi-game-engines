@@ -1,4 +1,4 @@
-import { MortalAdapter } from "./mortal.js";
+import { MortalAdapter } from "./MortalAdapter.js";
 import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IMahjongSearchOptions,

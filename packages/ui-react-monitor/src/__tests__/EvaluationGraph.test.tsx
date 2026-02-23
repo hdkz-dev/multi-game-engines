@@ -1,7 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { EvaluationGraph } from "../EvaluationGraph.js";
+import { EvaluationGraph } from "../components/EvaluationGraph.js";
 import { IEvaluationHistoryEntry } from "@multi-game-engines/ui-core";
 
 describe("EvaluationGraph", () => {

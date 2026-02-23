@@ -73,6 +73,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 本プロジェクトは、多様なゲームプロトコルを共通の `IEngineAdapter` に抽象化します。
 
+- **物理構造の標準化**: 全てのアダプターは `{Name}Adapter.ts` (ライフサイクル管理) と `{Name}Parser.ts` (解析ロジック) の分離、および `src/components/` (UI系の場合) への集約を標準とします (ADR-046)。
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
 - **GTPParser**: 囲碁用。KataGo 拡張 JSON 出力と標準 GTP 応答の両方をサポート。`visits`, `winrate`, `scoreLead`, `pv` の詳細解析に対応。
@@ -140,6 +141,12 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 高頻度なエンジンデータ（毎秒数百回の `info`）を効率的に扱うための状態管理基盤です。
 
+- **モジュール構造**:
+  - `src/state/`: `EngineStore` (状態保持), `SearchStateTransformer` (正規化マージ), `SubscriptionManager` (購読管理)。
+  - `src/monitor/`: `SearchMonitor` (監視コア), `MonitorRegistry` (インスタンス管理), `EvaluationPresenter` (表示用ロジック)。
+  - `src/dispatch/`: `CommandDispatcher` (命令送出), `Middleware` (加工レイヤー)。
+  - `src/validation/`: `SearchInfoSchema` (Zod による契約定義)。
+  - `src/styles/`: `theme.css` (全フレームワーク共通のデザインシステム基盤)。
 - **Adaptive Throttling**:
   - **RAF 同期モード**: デフォルトで `requestAnimationFrame` に同期し、ブラウザの再描画周期（通常 60fps）を超えた無駄な通知を自動的に破棄します。
   - **時間ベース Throttling**: `throttleMs` オプションにより、特定のミリ秒間隔での更新強制も可能です。

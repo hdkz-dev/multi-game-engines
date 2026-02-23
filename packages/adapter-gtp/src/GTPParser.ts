@@ -64,7 +64,14 @@ export class GTPParser implements IProtocolParser<
             Array.isArray(data.pv) && data.pv.length > 0
               ? data.pv
                   .filter((m): m is string => typeof m === "string" && !!m)
-                  .map((m) => createGOMove(m))
+                  .map((m) => {
+                    try {
+                      return createGOMove(m);
+                    } catch {
+                      return null;
+                    }
+                  })
+                  .filter((m): m is NonNullable<typeof m> => m !== null)
               : undefined,
           raw: data,
         };

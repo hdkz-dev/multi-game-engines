@@ -50,7 +50,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "@vitejs/plugin-vue": "^6.0.4",
-    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-hooks": "7.0.0",
     "lit": "^3.3.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -60,7 +60,6 @@
     "vitest": "^4.0.18",
     "vue": "3.5.28"
   },
-  "main": "./dist/index.js",
   "author": "hdkz-dev",
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-import { EdaxAdapter } from "./edax.js";
+import { EdaxAdapter } from "./EdaxAdapter.js";
 import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IReversiSearchOptions,

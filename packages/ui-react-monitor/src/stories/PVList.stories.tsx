@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { PVList } from "../PVList.js";
+import { PVList } from "../components/PVList.js";
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import { createMove } from "@multi-game-engines/core";
 

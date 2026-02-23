@@ -75,8 +75,10 @@ Native support for **UCI (Universal Chess Interface)**, **USI (Universal Shogi I
 3.  **Proactive Memory Management (Blob URL)**: `EngineLoader` automatically tracks Blob URL lifecycles and provides "Auto-Revocation" to explicitly `revoke` old resources when the same engine is reloaded.
 4.  **Security First (SRI & Integrity)**: SRI hash validation is mandatory for all external binaries. Supports W3C standard multi-hash formats.
 5.  **Strict Input Validation**: To prevent protocol-level command injection, we use "Refuse by Exception" instead of sanitization. Inputs with illegal control characters are blocked before reaching the engine.
-6.  **Modern Error Handling (Error Cause API)**: Low-level failures are wrapped in `EngineError` using the `Error Cause API`, with `remediation` fields providing actionable recovery guidance for developers.
-7.  **WASM & Binary Strategy**:
+6.  **Privacy-First Logging**: To prevent sensitive position data (FEN/SFEN) from leaking in error logs, the `truncateLog` utility automatically limits position strings to the first ~20 characters (ADR-038).
+7.  **Modern Error Handling (Error Cause API)**:
+    Low-level failures are wrapped in `EngineError` using the `Error Cause API`, with `remediation` fields providing actionable recovery guidance for developers.
+8.  **WASM & Binary Strategy**:
     - **Blob URL Constraints**: Fetching additional resources (.wasm, .nnue) via relative paths inside Workers is prohibited due to Blob Origin opacity.
     - **Dependency Injection**: Adapters must load binaries via `EngineLoader` and inject Blob URLs during Worker initialization.
 
@@ -88,8 +90,11 @@ The project provides a high-performance, accessible UI foundation for delivering
 
 To avoid framework lock-in and support 2026 standards, the UI layer is separated into:
 
-1.  **Reactive Core (`ui-core`)**: Framework-agnostic business logic, state management, and requestAnimationFrame (RAF)-based throttling for high-frequency updates.
-    - **Generic State Support**: `SearchMonitor` and `createInitialState` now support custom state types via generics, allowing applications to extend the base engine state while maintaining 100% type safety and eliminating unsafe casts.
+1.  **Reactive Core (`ui-core`)**:
+    - **Role**: Framework-agnostic business logic, state management, and requestAnimationFrame (RAF)-based throttling for high-frequency updates.
+    - **Directory Structure**: Organized into functional subdirectories: `src/state/` (Store/Transformer), `src/monitor/` (SearchCore/Registry), `src/dispatch/` (Command/Middleware), `src/validation/` (Zod schemas), and `src/styles/` (shared theme.css).
+    - **Generic State Support**:
+      `SearchMonitor` and `createInitialState` now support custom state types via generics, allowing applications to extend the base engine state while maintaining 100% type safety and eliminating unsafe casts.
 2.  **Localization Layer (`i18n`)**: Pure language resources and type-safe interfaces.
 3.  **Framework Adapters (Modular Split)**:
     - **`ui-*-core`**: Foundation for each framework (i18n Provider, basic UI context).
@@ -107,7 +112,9 @@ Data reaching the UI layer is validated at runtime using Zod schemas within `ui-
 The system provides features to visualize engine thinking processes through board rendering.
 
 - **Position Parsers**: FEN (Chess) and SFEN (Shogi) parsers in `ui-core` convert engine strings into renderable grid arrays and hand objects.
-- **Reusable Board Components**: `<chess-board>` and `<shogi-board>` components in `ui-elements` leverage CSS Grid for efficient rendering.
+- **Encapsulated Components (Best Practice)**: In all UI packages, visual components are consolidated into `src/components/`. The package root entry point (`src/index.ts`) acts as a thin export layer, hiding internal structure changes from users (ADR-046).
+- **Reusable Board Components**:
+  `<chess-board>` and `<shogi-board>` components in `ui-elements` leverage CSS Grid for efficient rendering.
 - **Accessibility & i18n**: All pieces include `aria-label` localized via the `pieceNames` property.
 - **Optimization (Code Splitting)**: UI components and hooks support subpath exports (e.g., `@multi-game-engines/ui-react/hooks`) for optimal bundle sizes.
 - **Real-time Sync**: Automatic highlighting of the current best move on the board synchronized with engine state.

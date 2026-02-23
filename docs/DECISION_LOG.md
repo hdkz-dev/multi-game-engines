@@ -15,6 +15,7 @@
 - [ADR-032: 2026年Q1最新技術スタック (Zenith Tier) への移行](./adr/032-zenith-tech-stack-2026.md) (Accepted - 2026-02-18)
 - [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed - 2026-02-21)
 - [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed - 2026-02-21)
+- [ADR-046: Standardization of Directory Structures and Naming Conventions](./adr/046-structure-standardization.md) (Completed - 2026-02-23)
 
 ## 📦 リソース管理とセキュリティ (Resources & Security)
 

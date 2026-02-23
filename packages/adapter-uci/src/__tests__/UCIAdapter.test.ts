@@ -12,7 +12,18 @@ import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
-    if (msg === "uci") {
+    if (
+      msg !== null &&
+      typeof msg === "object" &&
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
+    ) {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    } else if (msg === "uci") {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: "id name TestEngine" });

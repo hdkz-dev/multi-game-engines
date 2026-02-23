@@ -24,7 +24,16 @@
 ### 1.4. Domain-Driven Modular Isolation (Pay-as-you-go)
 
 - **基準**: 特定のゲーム（チェス、将棋、囲碁等）に依存するロジックや型定義は、必ずサブパス（例: `/chess`, `/shogi`）に隔離し、トップレベルのエントリポイントから直接エクスポートしてはならない。
-- **実装**: アプリケーションが `import ... from "@multi-game-engines/ui-react/shogi"` と記述した際、チェスや囲碁のコードが 1 バイトもバンドルに含まれないことを物理的に保証する。
+- **実装**: アプリケーションが `import ... from "@multi-game-engines/ui-react/shogi"` と記述した際、チェスや碁のコードが 1 バイトもバンドルに含まれないことを物理的に保証する。
+
+### 1.5. Uniform Directory Structure (Predictable Refactoring)
+
+- **基準**: モノレポ全域でファイル配置と命名規則を完全に統一する (ADR-046)。
+- **実装**:
+  - **UI**: コンポーネントは `src/components/`、スタイルは `src/styles/` に集約。`src/index.ts` は詳細を隠蔽。
+  - **Adapters**: `{Name}Adapter.ts` と `{Name}Parser.ts` の命名規則を厳守。
+  - **Tests**: `__tests__` フォルダを対象コードの直下に配置（Colocation）。
+  - **Distribution**: `exports` によるエントリポイント制御を必須とし、不要な `main` フィールドを排除。
 
 ---
 

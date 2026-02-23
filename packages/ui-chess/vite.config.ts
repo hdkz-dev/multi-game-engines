@@ -16,6 +16,7 @@ export default defineConfig({
     react(),
     dts({
       insertTypesEntry: true,
+      staticImport: true,
       include: ["src/**/*"],
       exclude: [
         "**/*.test.ts",

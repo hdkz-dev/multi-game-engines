@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import EngineMonitorPanel from "../EngineMonitorPanel.vue";
+import EngineMonitorPanel from "../components/EngineMonitorPanel.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { MockEngine } from "../mocks/MockEngine.js";
 import { locales } from "@multi-game-engines/i18n";

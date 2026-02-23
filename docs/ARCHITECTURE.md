@@ -123,8 +123,15 @@ stockfish.search({ fen, depth: 20 });
 
 1. **Reactive Core (`ui-core`)**:
    - **役割**: フレームワーク非依存のビジネスロジック。
-   - **機能**: エンジンからの高頻度な `info` ストリームの正規化（Zod によるランタイム検証）、状態管理、および `requestAnimationFrame` (RAF) を用いた描画リクエストの間引き。評価値の表示ロジック（`EvaluationPresenter`）もここに集約されています。
-   - **Generic State Support**: `SearchMonitor` と `createInitialState` は、ジェネリクスによってアプリケーション固有の状態拡張をサポートします。これにより、ベースの状態型を安全に拡張しつつ、`as unknown as` キャストを排除した 100% 型安全な開発が可能です。
+   - **ディレクトリ構造**:
+     - `src/state/`: 状態管理（Store）、変換ロジック（Transformer）、購読管理。
+     - `src/monitor/`: 探索監視ロジック、表示用プレゼンター。
+     - `src/dispatch/`: コマンド送出、ミドルウェア。
+     - `src/validation/`: Zod スキーマによる通信データの実行時検証。
+     - `src/i18n/`: UI 固有の多言語化基盤。
+     - `src/styles/`: 全フレームワーク共有の CSS 変数・テーマ定義 (`theme.css`)。
+   - **Generic State Support**:
+     `SearchMonitor` と `createInitialState` は、ジェネリクスによってアプリケーション固有の状態拡張をサポートします。これにより、ベースの状態型を安全に拡張しつつ、`as unknown as` キャストを排除した 100% 型安全な開発が可能です。
 2. **Localization Layer (`i18n`)**:
    - **役割**: 純粋な言語リソースの提供。
    - **機能**: JSON ベースの辞書管理と、型安全なインターフェース定義。UI 層とは疎結合に保たれます。
@@ -150,7 +157,10 @@ UI 上での全ての操作（探索開始・停止等）およびエンジン�
 
 - **局面パーサー**: FEN（チェス）や SFEN（将棋）を、描画に適した 2次元配列および持ち駒オブジェクトに変換します。このロジックは `ui-core` に実装されており、特定の描画エンジンに依存しません。
 
-- **再利用可能なボードコンポーネント**: `ui-elements` で提供される `<chess-board>` や `<shogi-board>` は、内部で局面パーサーを利用し、CSS Grid によって効率的に再描画を行います。
+- **コンポーネントの物理集約 (Best Practice)**: 全ての UI パッケージ（`ui-chess`, `ui-shogi`, `ui-*-monitor`）において、主要なレンダリング部品は `src/components/` フォルダに集約されています。パッケージのルートエントリポイント (`src/index.ts`) は、これらの内部コンポーネントを再エクスポートする薄い層として機能し、内部構造の変更が利用者に影響しないよう隠蔽（Encapsulation）を徹底しています。
+
+- **再利用可能なボードコンポーネント**:
+  `ui-elements` で提供される `<chess-board>` や `<shogi-board>` は、内部で局面パーサーを利用し、CSS Grid によって効率的に再描画を行います。
 
 - **アクセシビリティと多言語対応**: 全ての駒には `aria-label` が付与され、`pieceNames` プロパティを通じて各国語にローカライズされた駒名称を提供可能です。また、`error-message` 属性により、解析失敗時のメッセージも完全にカスタマイズ可能です。
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import PVList from "../PVList.vue";
+import PVList from "../components/PVList.vue";
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import { createMove } from "@multi-game-engines/core";
 

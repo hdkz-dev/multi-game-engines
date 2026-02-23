@@ -232,13 +232,13 @@ MIT
 
 **対象**: 全5アダプター、計9箇所
 
-| アダプター        | ファイル           | 箇所数 | 現在の値                                                                                                                        |
-| ----------------- | ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| adapter-stockfish | `src/stockfish.ts` | 2      | `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`                                        |
-| adapter-yaneuraou | `src/yaneuraou.ts` | 3      | `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder` |
-| adapter-edax      | `src/edax.ts`      | 1      | `sha384-EdaxMainScriptHashPlaceholder`                                                                                          |
-| adapter-mortal    | `src/mortal.ts`    | 1      | `sha384-MortalMainScriptHashPlaceholder`                                                                                        |
-| adapter-katago    | `src/katago.ts`    | 2      | `sha384-KataGoMainScriptHashPlaceholder`, `sha384-KataGoWasmBinaryHashPlaceholder`                                              |
+| アダプター        | ファイル                  | 箇所数 | 現在の値                                                                                                                        |
+| ----------------- | ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| adapter-stockfish | `src/StockfishAdapter.ts` | 2      | `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`                                        |
+| adapter-yaneuraou | `src/YaneuraouAdapter.ts` | 3      | `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder` |
+| adapter-edax      | `src/EdaxAdapter.ts`      | 1      | `sha384-EdaxMainScriptHashPlaceholder`                                                                                          |
+| adapter-mortal    | `src/MortalAdapter.ts`    | 1      | `sha384-MortalMainScriptHashPlaceholder`                                                                                        |
+| adapter-katago    | `src/KataGoAdapter.ts`    | 2      | `sha384-KataGoMainScriptHashPlaceholder`, `sha384-KataGoWasmBinaryHashPlaceholder`                                              |
 
 ---
 

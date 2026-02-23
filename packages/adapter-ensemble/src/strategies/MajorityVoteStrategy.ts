@@ -21,6 +21,7 @@ export class MajorityVoteStrategy<
         code: EngineErrorCode.VALIDATION_ERROR,
         message: "No results to aggregate",
         i18nKey: "adapters.ensemble.errors.no_results",
+        engineId: this.id,
       });
     }
 

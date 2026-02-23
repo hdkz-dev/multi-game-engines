@@ -62,8 +62,9 @@ export class EnsembleAdapter<
       this.status = "ready";
     } catch (error) {
       this.status = "error";
-      this.lastError = EngineError.from(error, this.id);
-      throw error;
+      const engineError = EngineError.from(error, this.id);
+      this.lastError = engineError;
+      throw engineError;
     }
   }
 

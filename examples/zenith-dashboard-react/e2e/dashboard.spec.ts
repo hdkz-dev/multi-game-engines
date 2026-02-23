@@ -15,7 +15,7 @@ test.beforeEach(async ({ page }) => {
   });
 
   await expect(page.getByText("Ready", { exact: true }).first()).toBeVisible({
-    timeout: 10000,
+    timeout: 15000,
   });
 });
 

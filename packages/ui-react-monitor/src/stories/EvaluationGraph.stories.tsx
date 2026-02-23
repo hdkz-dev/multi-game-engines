@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { EvaluationGraph } from "../EvaluationGraph.js";
+import { EvaluationGraph } from "../components/EvaluationGraph.js";
 
 const meta: Meta<typeof EvaluationGraph> = {
   title: "Atoms/EvaluationGraph",

@@ -9,7 +9,9 @@ const EngineMonitorView = () => {
 
   React.useEffect(() => {
     return () => {
-      void engine.dispose();
+      engine.dispose().catch((err) => {
+        console.error("[SearchMonitor.stories] Failed to dispose engine:", err);
+      });
     };
   }, [engine]);
 

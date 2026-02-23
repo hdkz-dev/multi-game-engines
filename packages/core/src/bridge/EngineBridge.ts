@@ -40,7 +40,7 @@ export class EngineBridge implements IEngineBridge {
       config: IEngineConfig,
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -99,7 +99,7 @@ export class EngineBridge implements IEngineBridge {
       config: IEngineConfig,
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
   ): void {
     this.adapterFactories.set(type, factory);
   }
@@ -532,7 +532,7 @@ export class EngineBridge implements IEngineBridge {
 
         if (this.disposed) {
           throw new EngineError({
-            code: EngineErrorCode.INTERNAL_ERROR,
+            code: EngineErrorCode.LIFECYCLE_ERROR,
             message: "EngineBridge already disposed",
             i18nKey: "engine.errors.bridgeDisposed",
           });

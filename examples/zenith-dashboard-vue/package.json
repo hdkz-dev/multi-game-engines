@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ../../scripts/copy-shared-mocks.mjs && nuxt dev",
     "build": "node ../../scripts/copy-shared-mocks.mjs && nuxt build",
-    "generate": "nuxt generate",
+    "generate": "node ../../scripts/copy-shared-mocks.mjs && nuxt generate",
     "preview": "nuxt preview",
     "test:e2e": "node ../../scripts/copy-shared-mocks.mjs && playwright test",
     "lint": "eslint .",

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Engine monitoring and management components for Vue 3",
   "type": "module",
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {

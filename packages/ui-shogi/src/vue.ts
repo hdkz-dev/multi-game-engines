@@ -1,1 +1,1 @@
-export { default as ShogiBoard } from "./ShogiBoard.vue";
+export { default as ShogiBoard } from "./components/ShogiBoard.vue";

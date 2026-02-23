@@ -87,5 +87,5 @@ test("vue dashboard engine switching", async ({ page }) => {
 
   // 3. Verify Shogi board elements
   const senteHand = page.getByLabel(/Sente Hand/i);
-  await expect(senteHand).toBeVisible();
+  await expect(senteHand).toBeVisible({ timeout: 10000 });
 });

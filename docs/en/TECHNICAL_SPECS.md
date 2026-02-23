@@ -57,6 +57,7 @@ The main consumer API.
 
 ## 4. Protocol Parsing (2026 Best Practice)
 
+- **Structural Standardization**: All adapters follow the separation of `{Name}Adapter.ts` (lifecycle) and `{Name}Parser.ts` (logic), with UI components consolidated into `src/components/` (ADR-046).
 - **UCIParser**: Chess protocol with factor 10,000 `mate` score conversion.
 - **USIParser**: Shogi protocol with time control and `startpos` keyword support.
 - **GTPParser**: Go protocol supporting `genmove`, `visits`, and `winrate`.
@@ -82,7 +83,14 @@ Lightweight parsers for UI-layer reuse.
 
 High-frequency state management foundation.
 
-- **Adaptive Throttling**: Synchronizes with `requestAnimationFrame` by default.
+- **Modular Structure**:
+  - `src/state/`: `EngineStore`, `SearchStateTransformer`, `SubscriptionManager`.
+  - `src/monitor/`: `SearchMonitor`, `MonitorRegistry`, `EvaluationPresenter`.
+  - `src/dispatch/`: `CommandDispatcher`, `Middleware`.
+  - `src/validation/`: Zod contract definitions.
+  - `src/styles/`: Shared theme foundation (`theme.css`).
+- **Adaptive Throttling**:
+  Synchronizes with `requestAnimationFrame` by default.
 - **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering tears.
 - **Zod Contract Validation**: Validates all engine messages via `SearchInfoSchema` at runtime.
 - **EvaluationPresenter**: Separates display logic (colors, labels) from UI frameworks.

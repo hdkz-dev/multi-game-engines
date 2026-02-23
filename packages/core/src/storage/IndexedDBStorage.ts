@@ -26,12 +26,16 @@ export class IndexedDBStorage implements IFileStorage {
       };
 
       request.onblocked = () => {
-        // 2026 Best Practice: ブロックは一時的な可能性があるため、タイムアウト待機を導入
+        // 2026 Best Practice: ブロックは一時的な可能性があるため、短時間のタイムアウト待機を導入
         if (!blockedTimer) {
           blockedTimer = setTimeout(() => {
             this.dbPromise = null;
-            reject(new Error("IndexedDB open blocked by another connection"));
-          }, 10000);
+            reject(
+              new Error(
+                "IndexedDB open blocked by another connection. Please close other tabs.",
+              ),
+            );
+          }, 3000);
         }
       };
 

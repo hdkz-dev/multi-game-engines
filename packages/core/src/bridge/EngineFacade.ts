@@ -240,14 +240,11 @@ export class EngineFacade<
 
     if (this.ownAdapter) {
       const id = this.id;
-      // 2026 Best Practice: IEngineAdapter requires dispose(), but we check for runtime safety
-      // to prevent crashes if an invalid adapter object is injected.
-      if (this.adapter.dispose) {
-        try {
-          await this.adapter.dispose();
-        } catch (err) {
-          console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);
-        }
+      // 2026 Best Practice: IEngineAdapter requires dispose()
+      try {
+        await this.adapter.dispose();
+      } catch (err) {
+        console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);
       }
       // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
       if (this.loaderProvider) {

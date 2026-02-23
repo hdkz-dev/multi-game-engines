@@ -713,8 +713,8 @@ importers:
         specifier: ^6.0.4
         version: 6.0.4(vite@7.3.1(@types/node@25.3.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.28(typescript@5.9.3))
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       lit:
         specifier: ^3.3.2
         version: 3.3.2
@@ -790,8 +790,8 @@ importers:
         specifier: ^19.2.14
         version: 19.2.14
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
@@ -1038,8 +1038,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
@@ -1117,8 +1117,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
@@ -1172,8 +1172,8 @@ importers:
         specifier: ^6.0.4
         version: 6.0.4(vite@7.3.1(@types/node@25.3.0)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.28(typescript@5.9.3))
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       lit:
         specifier: ^3.3.2
         version: 3.3.2
@@ -1249,8 +1249,8 @@ importers:
         specifier: ^19.2.14
         version: 19.2.14
       eslint-plugin-react-hooks:
-        specifier: ^7.0.1
-        version: 7.0.1(eslint@9.39.3(jiti@2.6.1))
+        specifier: 7.0.0
+        version: 7.0.0(eslint@9.39.3(jiti@2.6.1))
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0
