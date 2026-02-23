@@ -35,7 +35,8 @@
     "@multi-game-engines/core": "^0.1.0"
   },
   "dependencies": {
-    "@multi-game-engines/adapter-usi": "workspace:*"
+    "@multi-game-engines/adapter-usi": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",

@@ -27,6 +27,7 @@
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*",
     "@multi-game-engines/ui-chess-vue": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-shogi-vue": "workspace:*",

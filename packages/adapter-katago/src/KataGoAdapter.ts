@@ -1,4 +1,5 @@
 import { IEngineConfig, deepMerge } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
 
 /**
@@ -7,26 +8,15 @@ import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
  */
 export class KataGoAdapter extends GTPAdapter {
   constructor(config?: Partial<IEngineConfig>) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("katago") || {};
+
     const defaultConfig: IEngineConfig = {
       id: "katago",
       adapter: "gtp",
       name: "KataGo",
       version: "1.15.0",
-      sources: {
-        main: {
-          url: "https://example.com/katago.js",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "worker-js",
-        },
-        wasm: {
-          url: "https://example.com/katago.wasm",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "wasm",
-          mountPath: "katago.wasm",
-        },
-      },
+      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

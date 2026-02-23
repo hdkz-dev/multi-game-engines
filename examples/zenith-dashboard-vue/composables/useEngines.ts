@@ -1,5 +1,6 @@
 import { ref, readonly, shallowRef } from "vue";
 import { EngineBridge } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
 import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
 import { UCIAdapter } from "@multi-game-engines/adapter-uci";
@@ -28,6 +29,9 @@ export async function getBridge(): Promise<EngineBridge | null> {
     try {
       if (!bridge.value) {
         const b = new EngineBridge();
+
+        // 2026 Best Practice: セントラルレジストリを登録
+        b.addRegistry(OfficialRegistry);
 
         // Register generic adapter factories
         b.registerAdapterFactory("uci", (config) => new UCIAdapter(config));

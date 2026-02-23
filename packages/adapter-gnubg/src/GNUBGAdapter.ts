@@ -9,6 +9,7 @@ import {
   IEngineAdapter,
   ResourceMap,
 } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
@@ -29,11 +30,18 @@ export class GNUBGAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new GNUBGParser();
 
-  constructor(config: IEngineConfig) {
-    super(config);
-    this.id = config.id ?? "gnubg";
-    this.name = config.name ?? "GNU Backgammon";
-    this.version = config.version ?? "unknown";
+  constructor(config: IEngineConfig = {}) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("gnubg", config.version);
+    const finalConfig = {
+      ...config,
+      sources: { ...registrySources, ...(config.sources || {}) },
+    } as IEngineConfig;
+
+    super(finalConfig);
+    this.id = finalConfig.id ?? "gnubg";
+    this.name = finalConfig.name ?? "GNU Backgammon";
+    this.version = finalConfig.version ?? "unknown";
   }
 
   async load(loader?: IEngineLoader): Promise<void> {

@@ -32,7 +32,8 @@
     "multi-game-engines"
   ],
   "dependencies": {
-    "@multi-game-engines/domain-backgammon": "workspace:*"
+    "@multi-game-engines/domain-backgammon": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"

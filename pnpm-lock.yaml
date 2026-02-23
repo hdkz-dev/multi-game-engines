@@ -87,6 +87,9 @@ importers:
       '@multi-game-engines/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../../packages/registry
       '@multi-game-engines/ui-chess-react':
         specifier: workspace:*
         version: link:../../packages/ui-chess-react
@@ -208,6 +211,9 @@ importers:
       '@multi-game-engines/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../../packages/registry
       '@multi-game-engines/ui-chess-vue':
         specifier: workspace:*
         version: link:../../packages/ui-chess-vue
@@ -293,6 +299,9 @@ importers:
       '@multi-game-engines/domain-reversi':
         specifier: workspace:*
         version: link:../domain-reversi
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -333,6 +342,9 @@ importers:
       '@multi-game-engines/domain-backgammon':
         specifier: workspace:*
         version: link:../domain-backgammon
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -377,6 +389,9 @@ importers:
       '@multi-game-engines/adapter-gtp':
         specifier: workspace:*
         version: link:../adapter-gtp
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -399,6 +414,9 @@ importers:
       '@multi-game-engines/domain-checkers':
         specifier: workspace:*
         version: link:../domain-checkers
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -421,6 +439,9 @@ importers:
       '@multi-game-engines/domain-mahjong':
         specifier: workspace:*
         version: link:../domain-mahjong
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -446,6 +467,9 @@ importers:
       '@multi-game-engines/domain-chess':
         specifier: workspace:*
         version: link:../domain-chess
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*
@@ -512,6 +536,9 @@ importers:
       '@multi-game-engines/adapter-usi':
         specifier: workspace:*
         version: link:../adapter-usi
+      '@multi-game-engines/registry':
+        specifier: workspace:*
+        version: link:../registry
     devDependencies:
       '@multi-game-engines/core':
         specifier: workspace:*

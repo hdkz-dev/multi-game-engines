@@ -7,9 +7,9 @@
 ### 1. エンジンレジストリの導入 (ADR-047)
 
 - [x] Phase 1: 基盤構築 (IEngineRegistry, Resolution Chain)
-- [ ] Phase 2: 公式レジストリパッケージの実装 (@multi-game-engines/registry)
-- [ ] Phase 3: アダプターのリファクタリング
-- [ ] Phase 4: 検証と自動化
+- [x] Phase 2: 公式レジストリパッケージの実装 (@multi-game-engines/registry)
+- [x] Phase 3: アダプターのリファクタリング
+- [x] Phase 4: 検証と自動化 (SRI計算ツール)
 
 ## 🏆 到達ハイライト (2026-02-23 PR #38 超深層監査と整合性同期)
 

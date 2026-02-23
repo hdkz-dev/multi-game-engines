@@ -7,6 +7,7 @@ import {
   IEngineSourceConfig,
   EngineErrorCode,
 } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   IReversiSearchOptions,
   IReversiSearchInfo,
@@ -27,11 +28,18 @@ export class EdaxAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new EdaxParser();
 
-  constructor(config: IEngineConfig) {
-    super(config);
-    this.id = config.id || "edax";
-    this.name = config.name || "Edax";
-    this.version = config.version || "4.4";
+  constructor(config: IEngineConfig = {}) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("edax", config.version);
+    const finalConfig = {
+      ...config,
+      sources: { ...registrySources, ...(config.sources || {}) },
+    } as IEngineConfig;
+
+    super(finalConfig);
+    this.id = finalConfig.id || "edax";
+    this.name = finalConfig.name || "Edax";
+    this.version = finalConfig.version || "4.4";
   }
 
   async load(loader?: IEngineLoader): Promise<void> {

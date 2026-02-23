@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@multi-game-engines/adapter-uci": "workspace:*",
-    "@multi-game-engines/domain-chess": "workspace:*"
+    "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",

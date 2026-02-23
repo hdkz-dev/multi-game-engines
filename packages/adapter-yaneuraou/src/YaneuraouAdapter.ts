@@ -1,4 +1,5 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   USIAdapter,
   IShogiSearchOptions,
@@ -12,33 +13,15 @@ import {
  */
 export class YaneuraouAdapter extends USIAdapter {
   constructor(config?: Partial<IEngineConfig>) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("yaneuraou") || {};
+
     const defaultConfig: IEngineConfig = {
       id: "yaneuraou",
       adapter: "usi",
       name: "Yaneuraou",
       version: "7.5.0",
-      sources: {
-        main: {
-          url: "https://example.com/yaneuraou.js",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "worker-js",
-        },
-        wasm: {
-          url: "https://example.com/yaneuraou.wasm",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "wasm",
-          mountPath: "yaneuraou.wasm",
-        },
-        nnue: {
-          url: "https://example.com/nnue.bin",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "eval-data",
-          mountPath: "nnue.bin",
-        },
-      },
+      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

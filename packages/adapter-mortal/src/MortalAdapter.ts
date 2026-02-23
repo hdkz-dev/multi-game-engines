@@ -7,6 +7,7 @@ import {
   IEngineSourceConfig,
   EngineErrorCode,
 } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   IMahjongSearchOptions,
   IMahjongSearchInfo,
@@ -27,11 +28,18 @@ export class MortalAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new MahjongJSONParser();
 
-  constructor(config: IEngineConfig) {
-    super(config);
-    this.id = config.id ?? "mortal";
-    this.name = config.name ?? "Mortal";
-    this.version = config.version ?? "1.0.0";
+  constructor(config: IEngineConfig = {}) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("mortal", config.version);
+    const finalConfig = {
+      ...config,
+      sources: { ...registrySources, ...(config.sources || {}) },
+    } as IEngineConfig;
+
+    super(finalConfig);
+    this.id = finalConfig.id ?? "mortal";
+    this.name = finalConfig.name ?? "Mortal";
+    this.version = finalConfig.version ?? "1.0.0";
   }
 
   async load(loader?: IEngineLoader): Promise<void> {

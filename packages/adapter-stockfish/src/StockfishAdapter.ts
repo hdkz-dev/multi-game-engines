@@ -1,4 +1,5 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   UCIAdapter,
   IChessSearchOptions,
@@ -12,26 +13,15 @@ import {
  */
 export class StockfishAdapter extends UCIAdapter {
   constructor(config?: Partial<IEngineConfig>) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve("stockfish") || {};
+
     const defaultConfig: IEngineConfig = {
       id: "stockfish",
       adapter: "uci",
       name: "Stockfish",
       version: "16.1",
-      sources: {
-        main: {
-          url: "https://example.com/stockfish.js",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "worker-js",
-        },
-        wasm: {
-          url: "https://example.com/stockfish.wasm",
-          // SECURITY: Ensure SRI hash is updated for production binaries
-          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
-          type: "wasm",
-          mountPath: "stockfish.wasm",
-        },
-      },
+      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

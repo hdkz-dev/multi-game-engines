@@ -9,6 +9,7 @@ import {
   IEngineAdapter,
   ResourceMap,
 } from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
 import {
   ICheckersSearchOptions,
   ICheckersSearchInfo,
@@ -29,11 +30,21 @@ export class KingsRowAdapter extends BaseAdapter<
   readonly version: string;
   readonly parser = new KingsRowParser();
 
-  constructor(config: IEngineConfig) {
-    super(config);
-    this.id = config.id ?? "kingsrow";
-    this.name = config.name ?? "KingsRow Checkers";
-    this.version = config.version ?? "unknown";
+  constructor(config: IEngineConfig = {}) {
+    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
+    const registrySources = OfficialRegistry.resolve(
+      "kingsrow",
+      config.version,
+    );
+    const finalConfig = {
+      ...config,
+      sources: { ...registrySources, ...(config.sources || {}) },
+    } as IEngineConfig;
+
+    super(finalConfig);
+    this.id = finalConfig.id ?? "kingsrow";
+    this.name = finalConfig.name ?? "KingsRow Checkers";
+    this.version = finalConfig.version ?? "unknown";
   }
 
   async load(loader?: IEngineLoader): Promise<void> {
