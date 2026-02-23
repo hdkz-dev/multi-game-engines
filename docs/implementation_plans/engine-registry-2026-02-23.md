@@ -8,28 +8,28 @@ ADR-047 に基づき、エンジンのメタデータ（URL/SRI）を集中管�
 
 ### Phase 1: 基盤構築 (Base Infrastructure)
 
-- [ ] `packages/core`: `IEngineRegistry` インターフェースの定義。
-- [ ] `packages/core`: `EngineBridge` に `addRegistry` メソッドを追加し、解決チェーンを実装。
-- [ ] `packages/registry`: 新規パッケージのスカフォールディング (`package.json`, `tsconfig.json`)。
-- [ ] `packages/registry`: `engines.json` のスキーマ定義と初期データの作成。
+- [x] `packages/core`: `IEngineRegistry` インターフェースの定義。
+- [x] `packages/core`: `EngineBridge` に `addRegistry` メソッドを追加し、解決チェーンを実装。
+- [x] `packages/registry`: 新規パッケージのスカフォールディング (`package.json`, `tsconfig.json`)。
+- [x] `packages/registry`: `engines.json` のスキーマ定義と初期データの作成。
 
 ### Phase 2: 公式レジストリの実装
 
-- [ ] `packages/registry`: `StaticRegistry` クラスの実装。
-- [ ] `packages/core`: デフォルトで `StaticRegistry` を使用するように `EngineBridge` を更新。
+- [x] `packages/registry`: `StaticRegistry` クラスの実装。
+- [x] `packages/core`: デフォルトで `StaticRegistry` を使用するように `EngineBridge` を更新。（注: アプリケーション層で登録する方式を採用し、結合度を維持）
 
 ### Phase 3: アダプターのリファクタリング
 
-- [ ] `packages/adapter-stockfish`: ハードコードを削除し、レジストリを参照するように変更。
-- [ ] `packages/adapter-yaneuraou`: 同上。
-- [ ] `packages/adapter-katago`: 同上。
-- [ ] `packages/adapter-edax`: 同上。
-- [ ] `packages/adapter-mortal`: 同上。
+- [x] `packages/adapter-stockfish`: ハードコードを削除し、レジストリを参照するように変更。
+- [x] `packages/adapter-yaneuraou`: 同上。
+- [x] `packages/adapter-katago`: 同上。
+- [x] `packages/adapter-edax`: 同上。
+- [x] `packages/adapter-mortal`: 同上。
 
 ### Phase 4: 検証と自動化
 
-- [ ] `scripts/calculate-sri.ts`: URL から SRI ハッシュを自動生成するツールの作成。
-- [ ] E2E テストでの動作確認（レジストリ経由でのロード）。
+- [x] `scripts/calculate-sri.ts`: URL から SRI ハッシュを自動生成するツールの作成。
+- [x] E2E テストでの動作確認（レジストリ経由でのロード）。
 
 ## 完了定義 (Done Criteria)
 
