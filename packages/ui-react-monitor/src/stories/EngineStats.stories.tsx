@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { EngineStats } from "../EngineStats.js";
+import { EngineStats } from "../components/EngineStats.js";
 
 const meta: Meta<typeof EngineStats> = {
   title: "Molecules/EngineStats",

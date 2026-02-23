@@ -6,11 +6,25 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- **Zenith Tier Quality**: Enhanced core components with rigorous type safety and best practices.
-- **Subscription ID Management**: Added `unuse` to `IEngine` for middleware cleanup and made `SubscriptionManager` idempotent.
-- **Enhanced Board Localization**: Localized default labels and error messages in `<chess-board>` and `<shogi-board>` using shared i18n resources.
-- **StatCard (Vue)**: Added missing `StatCard` component to the Vue dashboard for UX parity with React.
-- **Ref-based Props (React)**: Switched to `useRef` for passing complex objects (like `pieceNames`) to custom elements in React 19.
+- **Standardized Directory Structure (ADR-046)**: Reorganized all 39 packages into a predictable, best-practice layout. Consolidated components into `src/components/`, styles into `src/styles/`, and modularized `ui-core`.
+- **Adapter Naming Symmetry**: Renamed all engine adapters to `{Name}Adapter.ts` (e.g., `StockfishAdapter`, `KataGoAdapter`) for project-wide consistency.
+- **Privacy-First Logging (ADR-038)**: Implemented automated log truncation for sensitive position data (FEN/SFEN) to prevent PII/SPI leaks in diagnostics.
+- **Resource Injector Handshake (ADR-043)**: Introduced a reliable host-worker handshake protocol (`MG_INJECT_RESOURCES` -> `MG_RESOURCES_READY`) to ensure flawless WASM initialization.
+- **Generic State Expansion**: Enabled application-specific state extensions in `SearchMonitor` and `createInitialState` via TypeScript generics, achieving 100% type-safe custom dashboards.
+- **Subscription Manager**: Centralized multi-subscription lifecycle management with atomic, idempotent cleanup.
+
+### Changed
+
+- **Absolute Zenith Audit**: Addressed over 94 review comments across the entire monorepo, elevating every package to 2026 "Zenith Tier" standards.
+- **Distribution Polish**: Optimized `package.json` by prioritizing `exports` and removing redundant `main` fields. Configured `vite-plugin-dts` for flat declaration output.
+- **Security Hardening**: Enforced strict SRI validation across all adapters, including cross-origin pre-check and placeholder detection.
+- **Deterministic Testing**: Modernized test infrastructure with `performance.now` mocking and explicit fake timer targets for 100% deterministic CI results.
+
+### Fixed
+
+- **Resource Lifecycle**: Fixed potential memory leaks in `EngineLoader` by implementing snapshot-based rollbacks and ensuring atomic Blob URL revocation.
+- **Protocol Normalization**: Unified edge cases in USI/UCI and Mahjong protocols (e.g., handling "none" as `null` for `bestMove`) to ensure type safety.
+- **Dependency Versioning**: Pinned `eslint` and `react-hooks` versions to resolve transitive resolution bugs in monorepo environments.
 
 ## [Unreleased - Zenith Tier Initial] - 2026-02-18
 

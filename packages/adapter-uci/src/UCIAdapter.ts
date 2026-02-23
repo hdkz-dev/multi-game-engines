@@ -46,6 +46,8 @@ export class UCIAdapter extends BaseAdapter<
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
+      this.validateSources();
+
       if (!loader) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,

@@ -33,12 +33,12 @@ describe("USIParser", () => {
 
     it("should handle bestmove none correctly", () => {
       const result = parser.parseResult("bestmove none");
-      expect(result?.bestMove).toBe("none");
+      expect(result?.bestMove).toBeNull();
     });
 
     it("should handle bestmove (none) correctly", () => {
       const result = parser.parseResult("bestmove (none)");
-      expect(result?.bestMove).toBe("(none)");
+      expect(result?.bestMove).toBeNull();
     });
 
     it("should parse bestmove with ponder", () => {
@@ -95,6 +95,16 @@ describe("USIParser", () => {
       expect(() =>
         parser.createSearchCommand({
           "malicious\nkey": "value",
+        }),
+      ).toThrow(/Potential command injection/);
+    });
+
+    it("should throw error for nested injection", () => {
+      expect(() =>
+        parser.createSearchCommand({
+          nested: {
+            "evil\r\nkey": "data",
+          },
         }),
       ).toThrow(/Potential command injection/);
     });

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import SearchLog from "../SearchLog.vue";
+import SearchLog from "../components/SearchLog.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { locales } from "@multi-game-engines/i18n";
 import { createMove } from "@multi-game-engines/core";

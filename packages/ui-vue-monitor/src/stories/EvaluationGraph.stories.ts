@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
-import EvaluationGraph from "../EvaluationGraph.vue";
+import EvaluationGraph from "../components/EvaluationGraph.vue";
 
 const meta: Meta<typeof EvaluationGraph> = {
   title: "Atoms/EvaluationGraph",

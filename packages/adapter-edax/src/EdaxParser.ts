@@ -34,6 +34,13 @@ export class EdaxParser implements IProtocolParser<
     if (!data.startsWith("move ")) return null;
 
     const moveStr = data.slice(5).trim();
+    if (!moveStr) return null;
+
+    // Reversi 強制パス: エンジン応答は有効だが board move なし
+    if (moveStr.toLowerCase() === "pass") {
+      return { raw: data, bestMove: null };
+    }
+
     try {
       const bestMove = createReversiMove(moveStr);
       return {
@@ -41,7 +48,8 @@ export class EdaxParser implements IProtocolParser<
         bestMove,
       };
     } catch {
-      return null;
+      // パースエラー時も生データを返すことでデバッグ可能にする
+      return { raw: data, bestMove: null };
     }
   }
 
@@ -90,6 +98,6 @@ export interface IReversiSearchInfo {
 
 export interface IReversiSearchResult {
   raw: string;
-  bestMove: ReversiMove;
+  bestMove: ReversiMove | null;
   [key: string]: unknown;
 }

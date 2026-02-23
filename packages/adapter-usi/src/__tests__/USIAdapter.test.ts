@@ -12,7 +12,18 @@ import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
-    if (msg === "usi") {
+    if (
+      msg !== null &&
+      typeof msg === "object" &&
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
+    ) {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    } else if (msg === "usi") {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: "id name TestEngine" });
@@ -31,7 +42,11 @@ describe("USIAdapter", () => {
     id: "test-engine",
     adapter: "usi",
     sources: {
-      main: { url: "engine.js", sri: "sha384-mock", type: "worker-js" },
+      main: {
+        url: "engine.js",
+        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        type: "worker-js",
+      },
     },
   };
 
@@ -39,6 +54,7 @@ describe("USIAdapter", () => {
     loadResource: vi.fn().mockResolvedValue("blob:mock"),
     loadResources: vi.fn().mockResolvedValue({ main: "blob:mock" }),
     revoke: vi.fn(),
+    revokeAll: vi.fn(),
     revokeByEngineId: vi.fn(),
   };
 

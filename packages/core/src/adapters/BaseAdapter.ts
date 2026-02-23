@@ -57,6 +57,34 @@ export abstract class BaseAdapter<
     return this._status;
   }
 
+  /**
+   * 2026 Best Practice: リソースソースの SRI ハッシュを検証します。
+   * プレースホルダーの検出と形式チェックを一括で行います。
+   */
+  protected validateSources(): void {
+    const sources = this.config.sources;
+    if (!sources) return;
+
+    // 2026 Best Practice: SRI ハッシュのアルゴリズムに応じた正確な Base64 長さを検証。
+    // sha256: 44 chars, sha384: 64 chars, sha512: 88 chars.
+    const sriPattern =
+      /^sha256-[A-Za-z0-9+/]{43}=?$|^sha384-[A-Za-z0-9+/]{64}$|^sha512-[A-Za-z0-9+/]{86}={0,2}$/;
+
+    for (const [key, source] of Object.entries(sources)) {
+      const sri = source?.sri;
+      if (sri && (!sriPattern.test(sri) || /placeholder/i.test(sri))) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: `Engine Adapter "${this.id}": Source "${key}" has an invalid or placeholder SRI hash: "${sri}"`,
+          i18nKey: "engine.errors.sriMismatch",
+          remediation:
+            "Provide a valid Base64-encoded SRI hash for all engine resources in the constructor config.",
+          engineId: this.id,
+        });
+      }
+    }
+  }
+
   abstract load(loader?: IEngineLoader): Promise<void>;
 
   /**

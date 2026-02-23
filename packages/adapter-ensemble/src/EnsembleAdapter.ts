@@ -6,6 +6,7 @@ import {
   IEngineError,
   EngineTelemetry,
   EngineErrorCode,
+  EngineError,
   IMiddleware,
 } from "@multi-game-engines/core";
 
@@ -61,22 +62,20 @@ export class EnsembleAdapter<
       this.status = "ready";
     } catch (error) {
       this.status = "error";
-      if (error instanceof Error) {
-        this.lastError = {
-          code: EngineErrorCode.INTERNAL_ERROR,
-          message: error.message,
-          engineId: this.id,
-        };
-      }
-      throw error;
+      const engineError = EngineError.from(error, this.id);
+      this.lastError = engineError;
+      throw engineError;
     }
   }
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.status !== "ready") {
-      throw new Error(
-        `Ensemble engine ${this.id} is not ready (status: ${this.status})`,
-      );
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: `Ensemble engine ${this.id} is not ready (status: ${this.status})`,
+        i18nKey: "engine.errors.notReady",
+        engineId: this.id,
+      });
     }
 
     this.status = "busy";
@@ -90,7 +89,9 @@ export class EnsembleAdapter<
       return aggregated;
     } catch (error) {
       this.status = "error";
-      throw error;
+      const engineError = EngineError.from(error, this.id);
+      this.lastError = engineError;
+      throw engineError;
     }
   }
 

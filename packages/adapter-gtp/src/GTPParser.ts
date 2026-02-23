@@ -38,7 +38,7 @@ export interface IGoSearchInfo extends IBaseSearchInfo {
  * 囲碁の探索結果。
  */
 export interface IGoSearchResult extends IBaseSearchResult {
-  bestMove: GOMove;
+  bestMove: GOMove | null;
   [key: string]: unknown;
 }
 
@@ -64,7 +64,14 @@ export class GTPParser implements IProtocolParser<
             Array.isArray(data.pv) && data.pv.length > 0
               ? data.pv
                   .filter((m): m is string => typeof m === "string" && !!m)
-                  .map((m) => createGOMove(m))
+                  .map((m) => {
+                    try {
+                      return createGOMove(m);
+                    } catch {
+                      return null;
+                    }
+                  })
+                  .filter((m): m is NonNullable<typeof m> => m !== null)
               : undefined,
           raw: data,
         };
@@ -84,13 +91,24 @@ export class GTPParser implements IProtocolParser<
     const moveStr = parts[1];
     if (!moveStr) return null;
 
-    // 2026 Best Practice: 特殊な指し手 (pass, resign) の正規化と検証
-    const bestMove = createGOMove(moveStr);
+    // 2026 Best Practice: 特殊な指し手 (resign) の正規化
+    // resign は有効な応答だが盤面上の指し手はないため null に変換
+    if (moveStr.toLowerCase() === "resign") {
+      return {
+        bestMove: null,
+        raw: data,
+      };
+    }
 
-    return {
-      bestMove,
-      raw: data,
-    };
+    try {
+      const bestMove = createGOMove(moveStr);
+      return {
+        bestMove,
+        raw: data,
+      };
+    } catch {
+      return null;
+    }
   }
 
   createSearchCommand(options: IGoSearchOptions): string[] {

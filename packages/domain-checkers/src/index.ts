@@ -11,6 +11,8 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  EngineError,
+  EngineErrorCode,
 } from "@multi-game-engines/core";
 
 /**
@@ -23,7 +25,13 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
  * @throws {Error} インジェクション攻撃が検出された場合
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
-  // 2026 Best Practice: 局面データに対するインジェクション対策を徹底
+  if (typeof pos !== "string" || pos.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid CheckersBoard: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidCheckersBoard",
+    });
+  }
   ProtocolValidator.assertNoInjection(pos, "CheckersBoard", true);
   return createPositionString<"CheckersBoard">(pos);
 }
@@ -37,8 +45,21 @@ export type CheckersMove = Move<"CheckersMove">;
  * チェッカー指し手バリデータファクトリ。
  */
 export function createCheckersMove(move: string): CheckersMove {
+  if (typeof move !== "string" || move.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid CheckersMove: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidCheckersMove",
+    });
+  }
+  ProtocolValidator.assertNoInjection(move, "CheckersMove");
   if (!/^\d+-\d+$/.test(move) && move !== "(none)") {
-    throw new Error(`Invalid CheckersMove format: "${move}"`);
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid CheckersMove format: "${move}"`,
+      i18nKey: "engine.errors.invalidCheckersMove",
+      i18nParams: { move },
+    });
   }
   return createMove<"CheckersMove">(move);
 }

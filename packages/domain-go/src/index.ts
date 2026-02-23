@@ -5,6 +5,7 @@ import {
   Move,
   createMove,
   createPositionString,
+  ProtocolValidator,
 } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
@@ -18,14 +19,17 @@ export type GOMove = Move<"GOMove">;
 export function createGOBoard(pos: string): GOBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid GOBoard: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidGOBoard",
     });
   }
+  ProtocolValidator.assertNoInjection(pos, "GOBoard");
   if (!/^[a-zA-Z0-9.\- ]+$/.test(pos)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid GOBoard: Illegal characters detected.",
+      i18nKey: "engine.errors.illegalCharacters",
     });
   }
   return createPositionString<"GOBoard">(pos) as GOBoard;
@@ -37,22 +41,27 @@ export function createGOBoard(pos: string): GOBoard {
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid GOMove: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidGOMove",
     });
   }
+  ProtocolValidator.assertNoInjection(move, "GOMove");
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施
   const normalized = move.toLowerCase();
   if (!/^[a-z0-9]+$/.test(normalized)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid GOMove: Illegal characters detected.",
+      i18nKey: "engine.errors.illegalCharacters",
     });
   }
   if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid GOMove format: "${move}"`,
+      i18nKey: "engine.errors.invalidGOMove",
+      i18nParams: { move },
     });
   }
   return createMove<"GOMove">(normalized);

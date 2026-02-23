@@ -1,14 +1,14 @@
 import { ref, readonly, shallowRef } from "vue";
 import { EngineBridge } from "@multi-game-engines/core";
-import { createStockfishEngine } from "@multi-game-engines/adapter-stockfish";
-import { createYaneuraouEngine } from "@multi-game-engines/adapter-yaneuraou";
-import { createUCIEngine } from "@multi-game-engines/adapter-uci";
-import { createUSIEngine } from "@multi-game-engines/adapter-usi";
-import { createGTPEngine } from "@multi-game-engines/adapter-gtp";
-import { createEdaxEngine } from "@multi-game-engines/adapter-edax";
-import { createMortalEngine } from "@multi-game-engines/adapter-mortal";
-import { createGNUBGEngine } from "@multi-game-engines/adapter-gnubg";
-import { createKingsRowEngine } from "@multi-game-engines/adapter-kingsrow";
+import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
+import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
+import { UCIAdapter } from "@multi-game-engines/adapter-uci";
+import { USIAdapter } from "@multi-game-engines/adapter-usi";
+import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
+import { EdaxAdapter } from "@multi-game-engines/adapter-edax";
+import { MortalAdapter } from "@multi-game-engines/adapter-mortal";
+import { GNUBGAdapter } from "@multi-game-engines/adapter-gnubg";
+import { KingsRowAdapter } from "@multi-game-engines/adapter-kingsrow";
 
 // Use shallowRef for non-POJO class instances to avoid overhead
 const bridge = shallowRef<EngineBridge | null>(null);
@@ -30,17 +30,29 @@ export async function getBridge(): Promise<EngineBridge | null> {
         const b = new EngineBridge();
 
         // Register generic adapter factories
-        b.registerAdapterFactory("uci", createUCIEngine);
-        b.registerAdapterFactory("usi", createUSIEngine);
-        b.registerAdapterFactory("gtp", createGTPEngine);
-        b.registerAdapterFactory("edax", createEdaxEngine);
-        b.registerAdapterFactory("mortal", createMortalEngine);
-        b.registerAdapterFactory("gnubg", createGNUBGEngine);
-        b.registerAdapterFactory("kingsrow", createKingsRowEngine);
+        b.registerAdapterFactory("uci", (config) => new UCIAdapter(config));
+        b.registerAdapterFactory("usi", (config) => new USIAdapter(config));
+        b.registerAdapterFactory("gtp", (config) => new GTPAdapter(config));
+        b.registerAdapterFactory("edax", (config) => new EdaxAdapter(config));
+        b.registerAdapterFactory(
+          "mortal",
+          (config) => new MortalAdapter(config),
+        );
+        b.registerAdapterFactory("gnubg", (config) => new GNUBGAdapter(config));
+        b.registerAdapterFactory(
+          "kingsrow",
+          (config) => new KingsRowAdapter(config),
+        );
 
         // Register specific named engine factories
-        b.registerAdapterFactory("stockfish", createStockfishEngine);
-        b.registerAdapterFactory("yaneuraou", createYaneuraouEngine);
+        b.registerAdapterFactory(
+          "stockfish",
+          (config) => new StockfishAdapter(config),
+        );
+        b.registerAdapterFactory(
+          "yaneuraou",
+          (config) => new YaneuraouAdapter(config),
+        );
 
         bridge.value = b;
         isReady.value = true;
@@ -61,7 +73,7 @@ export async function getBridge(): Promise<EngineBridge | null> {
  */
 export function useEngines() {
   // Trigger initialization
-  getBridge();
+  void getBridge();
 
   return {
     getBridge,

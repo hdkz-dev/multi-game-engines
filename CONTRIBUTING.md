@@ -27,6 +27,20 @@
 - 全ユニットテスト
 - ドキュメント同期チェック（doc-sync）
 
+## 構造標準化 / Structural Standardization (ADR-046)
+
+[JP] コードの整合性を維持するため、以下のディレクトリ構造を厳守してください：
+
+- **UI パッケージ**: 全てのコンポーネントは `src/components/` に、スタイルは `src/styles/` に配置してください。
+- **アダプター**: `{Name}Adapter.ts` と `{Name}Parser.ts` の命名規則を守ってください。
+- **テスト**: テストファイルは対象コードの直下の `__tests__/` フォルダに配置してください。
+
+[EN] To maintain consistency, please strictly adhere to the following directory structures:
+
+- **UI Packages**: All components must be placed in `src/components/`, and styles in `src/styles/`.
+- **Adapters**: Follow the naming convention `{Name}Adapter.ts` and `{Name}Parser.ts`.
+- **Tests**: Test files must be placed in a `__tests__/` folder adjacent to the code they test.
+
 [EN] Automated checks are executed upon commit using **Husky** and **lint-staged**. Commits will be aborted unless the following checks pass:
 
 - Security scan (Checking for secrets)

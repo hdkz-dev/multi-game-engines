@@ -12,8 +12,14 @@ import { EngineError } from "../errors/EngineError.js";
  */
 export class EngineLoader implements IEngineLoader {
   private inflightLoads = new Map<string, Promise<string>>();
+  private inflightBatchLoads = new Map<
+    string,
+    Promise<Record<string, string>>
+  >();
   private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
+  private activeBlobsByUrl = new Map<string, string>(); // blobUrl -> cacheKey
   private isProduction: boolean;
+  private disposed = false;
 
   constructor(private storage: IFileStorage) {
     this.isProduction =
@@ -36,19 +42,37 @@ export class EngineLoader implements IEngineLoader {
     }
   }
 
+  /**
+   * 単一のエンジンリソースをフェッチ、検証、キャッシュ、および Blob URL 化します。
+   *
+   * @param engineId - リソースを所有するエンジンの ID。
+   * @param config - リソース設定 (URL, SRI, タイプ等)。
+   * @returns 生成された Blob URL。
+   * @throws {EngineError} 検証失敗、ネットワークエラー、またはセキュリティ違反の場合。
+   */
   async loadResource(
     engineId: string,
     config: IEngineSourceConfig,
   ): Promise<string> {
+    if (this.disposed) {
+      throw new EngineError({
+        code: EngineErrorCode.LIFECYCLE_ERROR,
+        message: "EngineLoader has been disposed.",
+        engineId,
+        i18nKey: "engine.errors.disposed",
+      });
+    }
     // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
     if (/[^a-zA-Z0-9-_]/.test(engineId)) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${engineId}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id: engineId },
       });
     }
     const safeId = engineId;
-    const cacheKey = `${safeId}:${config.url}`;
+    const cacheKey = `${safeId}:${encodeURIComponent(config.url)}`;
 
     // 2026 Best Practice: アトミックロック (Promise を先に Map に入れてから非同期実行)
     // その前に、既に有効な Blob URL があればそれを返す（無駄な IO と Revocation を回避）
@@ -59,7 +83,10 @@ export class EngineLoader implements IEngineLoader {
     if (existing) return existing;
 
     // 2026: SSR Compatibility Guard
-    if (typeof URL.createObjectURL === "undefined") {
+    if (
+      typeof URL === "undefined" ||
+      typeof URL.createObjectURL !== "function"
+    ) {
       return config.url;
     }
 
@@ -82,6 +109,7 @@ export class EngineLoader implements IEngineLoader {
             message:
               "Insecure connection (HTTP) is not allowed for sensitive engine files.",
             engineId,
+            i18nKey: "engine.errors.insecureConnection",
             remediation: "Use HTTPS for all engine resource URLs.",
           });
         }
@@ -111,6 +139,7 @@ export class EngineLoader implements IEngineLoader {
             code: EngineErrorCode.SECURITY_ERROR,
             message: "SRI required for security verification.",
             engineId,
+            i18nKey: "engine.errors.sriRequired",
           });
         }
 
@@ -127,15 +156,25 @@ export class EngineLoader implements IEngineLoader {
         const cached = await this.storage.get(cacheKey);
         if (cached) {
           if (sri) {
-            const isValid = await SecurityAdvisor.verifySRI(cached, sri);
-            if (isValid) {
+            try {
+              await SecurityAdvisor.assertSRI(cached, sri);
               const cachedBlobUrl = URL.createObjectURL(
                 new Blob([cached], { type: this.getMimeType(config) }),
               );
               this.updateBlobUrl(cacheKey, cachedBlobUrl);
               return cachedBlobUrl;
+            } catch (err) {
+              // 2026 Best Practice: SRI 不一致（SRI_MISMATCH）のみキャッシュを破棄
+              if (
+                err instanceof EngineError &&
+                err.code === EngineErrorCode.SRI_MISMATCH
+              ) {
+                await this.storage.delete(cacheKey);
+              } else {
+                // それ以外のエラー（DB不具合等）はそのまま上に流す
+                throw err;
+              }
             }
-            await this.storage.delete(cacheKey);
           } else if (config.__unsafeNoSRI) {
             // 2026: 非本番環境かつ SRI バイパス時はキャッシュをそのまま使用可能
             const bypassBlobUrl = URL.createObjectURL(
@@ -169,14 +208,7 @@ export class EngineLoader implements IEngineLoader {
         }
 
         if (sri) {
-          const isValid = await SecurityAdvisor.verifySRI(data, sri);
-          if (!isValid) {
-            throw new EngineError({
-              code: EngineErrorCode.SRI_MISMATCH,
-              message: "SRI Mismatch",
-              engineId,
-            });
-          }
+          await SecurityAdvisor.assertSRI(data, sri);
         }
 
         await this.storage.set(cacheKey, data);
@@ -195,21 +227,66 @@ export class EngineLoader implements IEngineLoader {
   }
 
   private updateBlobUrl(cacheKey: string, newUrl: string): void {
+    if (this.disposed) {
+      URL.revokeObjectURL(newUrl);
+      return;
+    }
     const oldUrl = this.activeBlobs.get(cacheKey);
     if (oldUrl) {
       URL.revokeObjectURL(oldUrl);
+      this.activeBlobsByUrl.delete(oldUrl);
     }
     this.activeBlobs.set(cacheKey, newUrl);
+    this.activeBlobsByUrl.set(newUrl, cacheKey);
   }
 
+  /**
+   * 複数のリソースを一括でロードします。アトミック性を保証し、一部が失敗した場合は全てロールバックします。
+   *
+   * @param engineId - エンジン ID。
+   * @param configs - キーとリソース設定のマップ。
+   * @returns キーと Blob URL のマップ。
+   */
   async loadResources(
+    engineId: string,
+    configs: Record<string, IEngineSourceConfig>,
+  ): Promise<Record<string, string>> {
+    // 2026 Best Practice: Config の指紋（ハッシュ）を含めてデデュプリケーション
+    // JavaScript オブジェクトのキーの順序は保証されないため、ソートしてから文字列化して決定性を確保。
+    const configHash = JSON.stringify(
+      Object.keys(configs)
+        .sort()
+        .map((k) => [k, configs[k]]),
+    );
+    const batchKey = `${engineId}:${configHash}`;
+
+    const existing = this.inflightBatchLoads.get(batchKey);
+    if (existing) return existing;
+
+    const promise = (async () => {
+      try {
+        return await this._loadResourcesImpl(engineId, configs);
+      } finally {
+        this.inflightBatchLoads.delete(batchKey);
+      }
+    })();
+
+    this.inflightBatchLoads.set(batchKey, promise);
+    return promise;
+  }
+
+  private async _loadResourcesImpl(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
     const entries = Object.entries(configs);
 
-    // 2026 Best Practice: Promise.allSettled を使用して部分的な失敗時のリークを防止
+    // 2026 Best Practice: ロールバック用に既存の有効な Blob URL セットを保持。
+    // これにより、ロールバック時に「今回のロードで新しく生成されたもの」のみを特定して解放できます。
+    const preExistingUrls = new Set(this.activeBlobs.values());
+
+    // 2026 Best Practice: Promise.allSettled を使用して原子性と部分的なリーク防止を両立。
     const settledResults = await Promise.allSettled(
       entries.map(async ([key, config]) => {
         const url = await this.loadResource(engineId, config);
@@ -221,17 +298,23 @@ export class EngineLoader implements IEngineLoader {
       (r): r is PromiseRejectedResult => r.status === "rejected",
     );
     if (failures.length > 0) {
-      // ロールバック: 成功した分の URL を revoke する
+      // ロールバック: 今回のバッチで新しく生成された URL のみ revoke する（既存分は維持）
       for (const res of settledResults) {
-        if (res.status === "fulfilled") {
+        if (res.status === "fulfilled" && !preExistingUrls.has(res.value.url)) {
           this.revoke(res.value.url);
         }
       }
       const firstFailure = failures[0];
       if (firstFailure) {
-        throw firstFailure.reason;
+        throw EngineError.from(firstFailure.reason);
       }
-      throw new Error("Unknown error during resource loading");
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "Unknown error during resource loading",
+        engineId,
+        i18nKey: "engine.errors.resourceLoadUnknown",
+        i18nParams: { engineId },
+      });
     }
 
     for (const res of settledResults) {
@@ -243,15 +326,33 @@ export class EngineLoader implements IEngineLoader {
     return results;
   }
 
+  /**
+   * 指定された Blob URL を無効化し、内部管理マップから削除します。
+   *
+   * @param url - 無効化する Blob URL。
+   */
   revoke(url: string): void {
-    URL.revokeObjectURL(url);
-    // マップからも削除
-    for (const [key, val] of this.activeBlobs.entries()) {
-      if (val === url) {
-        this.activeBlobs.delete(key);
-        break;
-      }
+    const cacheKey = this.activeBlobsByUrl.get(url);
+    if (cacheKey) {
+      URL.revokeObjectURL(url);
+      this.activeBlobs.delete(cacheKey);
+      this.activeBlobsByUrl.delete(url);
     }
+  }
+
+  /**
+   * 2026 Best Practice: このローダーが生成したすべての Blob リソースを解放します。
+   * EngineBridge の dispose 時に呼び出され、メモリリークを完全に防ぎます。
+   */
+  revokeAll(): void {
+    this.disposed = true;
+    for (const url of this.activeBlobs.values()) {
+      URL.revokeObjectURL(url);
+    }
+    this.activeBlobs.clear();
+    this.activeBlobsByUrl.clear();
+    this.inflightLoads.clear();
+    this.inflightBatchLoads.clear();
   }
 
   /**
@@ -262,6 +363,7 @@ export class EngineLoader implements IEngineLoader {
       if (key.startsWith(`${engineId}:`)) {
         URL.revokeObjectURL(val);
         this.activeBlobs.delete(key);
+        this.activeBlobsByUrl.delete(val);
       }
     }
   }
@@ -290,7 +392,9 @@ export class EngineLoader implements IEngineLoader {
 
       const currentOrigin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const isCrossOrigin = currentOrigin && parsedUrl.origin !== currentOrigin;
+      const isCrossOrigin = !!(
+        currentOrigin && parsedUrl.origin !== currentOrigin
+      );
       const shouldReject = isCrossOrigin && (this.isProduction || !isLoopback);
 
       if (shouldReject) {

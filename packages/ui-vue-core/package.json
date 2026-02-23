@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Core Vue 3 primitives and context for multi-game engines",
   "type": "module",
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -47,6 +46,16 @@
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.18",
     "vue": "3.5.28",
-    "vue-tsc": "^3.2.4"
-  }
+    "vue-tsc": "^3.2.5"
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-vue-core"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

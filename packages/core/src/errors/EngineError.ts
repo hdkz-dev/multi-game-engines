@@ -1,5 +1,62 @@
 import { EngineErrorCode } from "../types.js";
 
+/**
+ * 許可された i18n キーのリスト。
+ * 注意: i18n パッケージとの完全同期は保証できないため、主要なキーのみを列挙し、
+ * その他は `string` (テンプレートリテラル型による緩和) を許容する。
+ */
+export type ValidI18nKey =
+  | "engine.errors.initializationFailed"
+  | "engine.errors.workerError"
+  | "engine.errors.timeout"
+  | "engine.errors.disposed"
+  | "engine.errors.sriMismatch"
+  | "engine.errors.invalidEngineId"
+  | "engine.errors.insecureConnection"
+  | "engine.errors.sriRequired"
+  | "engine.errors.invalidFEN"
+  | "engine.errors.invalidSFEN"
+  | "engine.errors.invalidMoveFormat"
+  | "engine.errors.injectionDetected"
+  | "engine.errors.bridgeDisposed"
+  | "engine.errors.illegalCharacters"
+  | "engine.errors.invalidFENStructure"
+  | "engine.errors.invalidFENTurn"
+  | "engine.errors.invalidFENEnPassant"
+  | "engine.errors.invalidFENCastling"
+  | "engine.errors.invalidFENHalfmove"
+  | "engine.errors.invalidFENFullmove"
+  | "engine.errors.invalidSFENStructure"
+  | "engine.errors.invalidSFENTurn"
+  | "engine.errors.invalidSFENHand"
+  | "engine.errors.invalidSFENMoveCounter"
+  | "engine.errors.invalidFenRanks"
+  | "engine.errors.invalidFenRow"
+  | "engine.errors.invalidFenChar"
+  | "engine.errors.invalidFenRankWidth"
+  | "engine.errors.invalidSfenRanks"
+  | "engine.errors.invalidSfenPiece"
+  | "engine.errors.invalidSfenChar"
+  | "engine.errors.invalidSfenRankWidth"
+  | "engine.errors.invalidShogiMove"
+  | "engine.errors.invalidMahjongMove"
+  | "engine.errors.invalidGOBoard"
+  | "engine.errors.invalidGOMove"
+  | "engine.errors.invalidReversiBoard"
+  | "engine.errors.invalidReversiMove"
+  | "engine.errors.invalidBackgammonBoard"
+  | "engine.errors.invalidBackgammonMove"
+  | "engine.errors.invalidCheckersBoard"
+  | "engine.errors.invalidCheckersMove"
+  | "engine.errors.adapterFactoryInvalidReturn"
+  | "engine.errors.adapterNotFound"
+  | "engine.errors.resourceLoadUnknown"
+  | "adapters.uci.errors.missingFEN"
+  | "adapters.usi.errors.missingFEN"
+  | "adapters.gtp.errors.invalidResponse"
+  | "adapters.ensemble.errors.noResults"
+  | (string & {});
+
 /** エンジンエラーの構築オプション */
 export interface IEngineErrorOptions {
   code: EngineErrorCode;
@@ -11,7 +68,7 @@ export interface IEngineErrorOptions {
    */
   remediation?: string | undefined;
   /** 国際化対応のためのメッセージキー */
-  i18nKey?: string | undefined;
+  i18nKey?: ValidI18nKey | undefined;
   /** メッセージの埋め込みパラメータ */
   i18nParams?: Record<string, string | number> | undefined;
 }
@@ -24,7 +81,7 @@ export class EngineError extends Error {
   public readonly engineId?: string | undefined;
   public readonly originalError?: unknown;
   public readonly remediation?: string | undefined;
-  public readonly i18nKey?: string | undefined;
+  public readonly i18nKey?: ValidI18nKey | undefined;
   public readonly i18nParams?: Record<string, string | number> | undefined;
 
   constructor(opts: IEngineErrorOptions) {
@@ -40,9 +97,8 @@ export class EngineError extends Error {
 
     // 2026 Best Practice: クリーンなスタックトレースの確保 (V8 環境)
     if (
-      "captureStackTrace" in Error &&
       typeof (Error as { captureStackTrace?: unknown }).captureStackTrace ===
-        "function"
+      "function"
     ) {
       (
         Error as { captureStackTrace: (t: object, c?: unknown) => void }

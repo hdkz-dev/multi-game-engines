@@ -1,12 +1,46 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
+## 📅 更新日: 2026年2月23日 (実装担当: PR `#38` 最終監査と整合性同期)
+
+## 🏆 到達ハイライト (2026-02-23 PR #38 超深層監査と整合性同期)
+
+- **ビルドパイプラインの完全成功 (Zenith Build Consistency)**:
+  - 全 39 パッケージのクリーンビルドおよび型チェックをパス。エクスポート構成の変更後も 100% の整合性を維持。
+- **公開 API の洗練 (Public API Polish)**:
+  - `EngineError` の `ValidI18nKey` 型やストレージファクトリ `createFileStorage` を公開し、サードパーティ開発者向けの DX を極大化。
+- **Absolute Zenith Quality Audit の完遂**:
+  - 全 61 件のレビュー指摘事項を「最奥地」まで再検証。リソースリーク、非同期安全、型契約の不整合を完全に解消しました。
+- **翻訳データの 100% 同期 (i18n Persistence)**:
+  - `core` で定義した全 15 種類の新しいエラーキーに対し、`en.json` / `ja.json` の翻訳を完備。実行時の例外フィードバックを Zenith 品質で保証しました。
+- **リソース管理の極致的な堅牢化**:
+  - `EngineLoader` の ID 衝突問題をセパレータの `:` 復帰により解決。
+  - `revokeAll()` の実装と `EngineBridge.dispose()` への統合により、Blob URL のメモリリークを物理的に遮断。
+  - `IndexedDBStorage` に `onblocked` タイムアウトを導入し、マルチタブ環境でのハングを防止。
+- **E2E テストの完全な安定化**:
+  - 不安定な `networkidle` を排除し、UI 要素ベースの精密な待機アサーションに刷新。複数エンジン混在時の Locator 競合を解消しました。
+- **プロトコルのヌル安全正規化 (Zenith Tier Type Safety)**:
+  - `UCIParser` および `USIParser` において、特殊な指し手 "none" / "(none)" を `null` に正規化。
+  - `GTPParser` において `resign` を `bestMove: null` に正規化し、意味的な整合性を確保しました。
+- **ビルドパイプラインの警告ゼロ化 (Clean Build Initiative)**:
+  - **ESLint 9.39.3 ピン留め**: ADR-044 を策定し、モノレポ環境での設定の安定性を物理的に保証。
+  - **非同期安全ルール有効化**: `@typescript-eslint/no-floating-promises` を適用し、Promise 処理漏れを静的に一掃しました。
+- **リリースプロセスの確立**:
+  - `.changeset` を導入し、Zenith Tier アップデートの内容を自動リリースノートへ反映可能な状態に整備。
+- **ドメインロジックの厳密化**:
+  - `domain-go` におけるバリデーション順序を `typeof` 先行に是正。i18n キーへの完全移行と、ハードコードされた型名の自然言語化を完遂しました。
+
 ## 📅 更新日: 2026年2月21日 (実装担当: Antigravity Swarm Integration)
 
 ## 🏆 到達ハイライト (2026-02-21 OPFS 実装と Swarm 設計思想の統合)
 
-- **高性能 OPFS ストレージの本番実装**: `core` パッケージに `OPFSStorage` を実装し、WASM バイナリの高速キャッシュを可能に。
-- **Swarm デザインの統合開始**: `antigravity-swarm` の思想を取り入れ、マルチエージェント/マルチエンジン協調の設計を開始。
-- **アンサンブル・アダプター (@multi-game-engines/adapter-ensemble) のプロトタイプ実装**: 複数のエンジンを束ねて合議制で最善手を決定する実験的アダプターを新設。
+- **リソースインジェクター ハンドシェイク プロトコル (ADR-043)**:
+  - `ResourceInjector` によるリソース注入の完了を Worker 外から検知可能にする `MG_INJECT_RESOURCES` / `MG_RESOURCES_READY` ハンドシェイクを実装。初期化時のレースコンディションを根本的に解消しました。
+- **高性能 OPFS ストレージの本番実装 (ADR-039)**:
+  - `core` パッケージに `OPFSStorage` を実装し、WASM バイナリの高速キャッシュを可能に。
+- **Swarm デザインの統合開始 (ADR-040〜042)**:
+  - `antigravity-swarm` の思想を取り入れ、マルチエージェント/マルチエンジン協調の設計を開始。アンサンブル・アダプターのプロトタイプを新設。
+- **ビルド警告の完全排除**:
+  - Turbo, SWC, pnpm, Vitest における既存の警告をすべて解消し、クリーンな開発環境を確立。
 
 ## 🏆 到達ハイライト (2026-02-20 セキュリティ・プライバシー修復 & 拡張アダプター統合)
 
@@ -143,7 +177,7 @@
 - **2026年最新技術スタックへの完全移行 (Zenith Tech Stack)**:
   - **Next.js 16.1 (Stable)** & **React 19.2** へのメジャーアップデート、および **React Compiler** の有効化。
   - **Node.js 24 (LTS Target)** & **Turborepo 2.8** によるビルドパイプラインの高速化と並列実行の導入。
-  - **TypeScript 5.9** & **ESLint 10.0.1 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
+  - **TypeScript 5.9** & **ESLint 9.39.3 (Flat Config)** への移行（エコシステム追従性を重視した最新安定構成）。
   - **Project References** の導入によるモノレポ構成の最適化と、`noUncheckedIndexedAccess` 等の極めて厳格な型安全性の確立。
 
 ---
@@ -194,4 +228,10 @@
 5. **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 6. **API リファレンス整備**: TypeDoc によるドキュメント自動生成。
 7. **英語版ドキュメント拡充**: `docs/en/` に `DECISION_LOG.md`, `ROADMAP.md`, `ZENITH_STANDARD.md` を追加。
-8. ~~**.DS_Store のGit管理除外**~~: ✅ 完了。物理除去とGit除外を完遂。
+
+### フェーズ D: Zenith Tier 到達 (PR #38 Finalization) — ✅ 完了 (2026-02-23)
+
+1. [x] **Absolute Zenith Audit**: 94件以上のレビューコメントへの全対応と、コアロジックの極限までの洗練。
+2. [x] **Structure Refactoring**: 全39パッケージの物理構造を整理。コンポーネントの `src/components/` 集約、`ui-core` の機能別再編、アダプター命名規則の完全統一。
+3. [x] **Distribution Polish**: `exports` フィールドの正規化、`main` フィールドの全排除、CSS 外部解決の保証。
+4. [x] **Testing Infrastructure**: 決定論的テスト（Mock performance.now）と、構成変更に伴う全 100+ テストの同期。

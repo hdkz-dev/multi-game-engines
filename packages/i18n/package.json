@@ -22,8 +22,19 @@
   "license": "MIT",
   "sideEffects": false,
   "devDependencies": {
+    "@multi-game-engines/core": "workspace:*",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
-  }
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/i18n"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

@@ -36,8 +36,8 @@ export interface IChessSearchInfo extends IBaseSearchInfo {
 
 /** チェス用の探索結果 */
 export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move | "none" | "(none)";
-  ponder?: Move;
+  bestMove: Move | null;
+  ponder?: Move | null;
 }
 
 /**
@@ -49,9 +49,8 @@ export class UCIParser implements IProtocolParser<
   IChessSearchResult
 > {
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
-  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000, (none)) をサポート。
-  private static readonly MOVE_REGEX =
-    /^([a-h][1-8][a-h][1-8][nbrq]?|0000|\(none\)|none)$/;
+  // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
+  private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
 
   // 2026 Best Practice: Set の定数化による GC 負荷の軽減
   private static readonly UCI_INFO_TOKENS = new Set([
@@ -82,6 +81,7 @@ export class UCIParser implements IProtocolParser<
    */
   private createMove(value: string): Move | null {
     if (!UCIParser.MOVE_REGEX.test(value)) return null;
+    if (value === "0000") return null; // ヌルムーブを null に正規化
     return createMove(value);
   }
 
@@ -153,7 +153,7 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser] Skipping invalid PV move token: "${truncateLog(token)}"`,
+                `[UCIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(token)}" in response: "${truncateLog(line)}"`,
               );
             }
           }
@@ -194,13 +194,15 @@ export class UCIParser implements IProtocolParser<
     const parts = line.split(" ");
     const moveStr = parts[1] || "";
 
-    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン
-    const bestMove =
-      moveStr === "none" || moveStr === "(none)"
-        ? moveStr
-        : this.createMove(moveStr);
-
-    if (!bestMove) return null;
+    // 2026 Best Practice: "none" / "(none)" は UCI における特殊な指し手トークン (null move)
+    // これらを null として正規化して返すことで、型安全性を向上させる
+    let bestMove: Move | null;
+    if (moveStr === "none" || moveStr === "(none)" || moveStr === "0000") {
+      bestMove = null;
+    } else {
+      bestMove = this.createMove(moveStr);
+      if (!bestMove) return null; // Invalid format -> Parse failure
+    }
 
     const result: IChessSearchResult = {
       bestMove,
@@ -209,8 +211,29 @@ export class UCIParser implements IProtocolParser<
 
     const ponderIndex = parts.indexOf("ponder");
     if (ponderIndex !== -1 && ponderIndex + 1 < parts.length) {
-      const ponder = this.createMove(parts[ponderIndex + 1] || "");
-      if (ponder) result.ponder = ponder;
+      const ponderStr = parts[ponderIndex + 1] || "";
+      if (
+        ponderStr === "none" ||
+        ponderStr === "(none)" ||
+        ponderStr === "0000"
+      ) {
+        result.ponder = null;
+      } else {
+        try {
+          ProtocolValidator.assertNoInjection(ponderStr, "PonderMove");
+          const ponder = this.createMove(ponderStr);
+          if (ponder) {
+            result.ponder = ponder;
+          } else {
+            console.warn(
+              `[UCIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderStr)}" in response: "${truncateLog(line)}"`,
+            );
+            result.ponder = null;
+          }
+        } catch {
+          result.ponder = null;
+        }
+      }
     }
 
     return result;
@@ -233,7 +256,7 @@ export class UCIParser implements IProtocolParser<
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "UCI requires a FEN position.",
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey: "adapters.uci.errors.missing_fen",
+        i18nKey: "adapters.uci.errors.missingFEN",
       });
     }
 

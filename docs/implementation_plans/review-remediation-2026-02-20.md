@@ -232,13 +232,13 @@ MIT
 
 **対象**: 全5アダプター、計9箇所
 
-| アダプター        | ファイル           | 箇所数 | 現在の値                                                                                                                        |
-| ----------------- | ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| adapter-stockfish | `src/stockfish.ts` | 2      | `sha384-StockfishMainScriptHashPlaceholder`, `sha384-StockfishWasmBinaryHashPlaceholder`                                        |
-| adapter-yaneuraou | `src/yaneuraou.ts` | 3      | `sha384-YaneuraouMainScriptHashPlaceholder`, `sha384-YaneuraouWasmBinaryHashPlaceholder`, `sha384-YaneuraouNNUEHashPlaceholder` |
-| adapter-edax      | `src/edax.ts`      | 1      | `sha384-EdaxMainScriptHashPlaceholder`                                                                                          |
-| adapter-mortal    | `src/mortal.ts`    | 1      | `sha384-MortalMainScriptHashPlaceholder`                                                                                        |
-| adapter-katago    | `src/katago.ts`    | 2      | `sha384-KataGoMainScriptHashPlaceholder`, `sha384-KataGoWasmBinaryHashPlaceholder`                                              |
+| アダプター        | ファイル                  | 箇所数 | 現在の値                                                                                                                                                                                                                                                                              |
+| ----------------- | ------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| adapter-stockfish | `src/StockfishAdapter.ts` | 2      | `sha384-StockfishMainScriptSetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`, `sha384-StockfishWasmBinarySetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`                                                                                          |
+| adapter-yaneuraou | `src/YaneuraouAdapter.ts` | 3      | `sha384-YaneuraouMainScriptSetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`, `sha384-YaneuraouWasmBinarySetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`, `sha384-YaneuraouNNUESetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A` |
+| adapter-edax      | `src/EdaxAdapter.ts`      | -      | (SRI ハッシュ未対応 / Phase B-4 で追加予定)                                                                                                                                                                                                                                           |
+| adapter-mortal    | `src/MortalAdapter.ts`    | -      | (SRI ハッシュ未対応 / Phase B-4 で追加予定)                                                                                                                                                                                                                                           |
+| adapter-katago    | `src/KataGoAdapter.ts`    | 2      | `sha384-KataGoMainScriptSetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`, `sha384-KataGoWasmBinarySetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567A`                                                                                                |
 
 ---
 

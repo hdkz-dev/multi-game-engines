@@ -1,13 +1,13 @@
 import { EngineBridge } from "@multi-game-engines/core";
-import { createStockfishEngine } from "@multi-game-engines/adapter-stockfish";
-import { createYaneuraouEngine } from "@multi-game-engines/adapter-yaneuraou";
-import { createUCIEngine } from "@multi-game-engines/adapter-uci";
-import { createUSIEngine } from "@multi-game-engines/adapter-usi";
-import { createGTPEngine } from "@multi-game-engines/adapter-gtp";
-import { createEdaxEngine } from "@multi-game-engines/adapter-edax";
-import { createMortalEngine } from "@multi-game-engines/adapter-mortal";
-import { createGNUBGEngine } from "@multi-game-engines/adapter-gnubg";
-import { createKingsRowEngine } from "@multi-game-engines/adapter-kingsrow";
+import { StockfishAdapter } from "@multi-game-engines/adapter-stockfish";
+import { YaneuraouAdapter } from "@multi-game-engines/adapter-yaneuraou";
+import { UCIAdapter } from "@multi-game-engines/adapter-uci";
+import { USIAdapter } from "@multi-game-engines/adapter-usi";
+import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
+import { EdaxAdapter } from "@multi-game-engines/adapter-edax";
+import { MortalAdapter } from "@multi-game-engines/adapter-mortal";
+import { GNUBGAdapter } from "@multi-game-engines/adapter-gnubg";
+import { KingsRowAdapter } from "@multi-game-engines/adapter-kingsrow";
 
 let bridge: EngineBridge | null = null;
 let initPromise: Promise<EngineBridge | null> | null = null;
@@ -23,18 +23,36 @@ export async function getBridge(): Promise<EngineBridge | null> {
 
       // Register generic adapter factories
       // This allows dynamic instantiation via getEngine({ adapter: "uci", ... })
-      bridge.registerAdapterFactory("uci", createUCIEngine);
-      bridge.registerAdapterFactory("usi", createUSIEngine);
-      bridge.registerAdapterFactory("gtp", createGTPEngine);
-      bridge.registerAdapterFactory("edax", createEdaxEngine);
-      bridge.registerAdapterFactory("mortal", createMortalEngine);
-      bridge.registerAdapterFactory("gnubg", createGNUBGEngine);
-      bridge.registerAdapterFactory("kingsrow", createKingsRowEngine);
+      bridge.registerAdapterFactory("uci", (config) => new UCIAdapter(config));
+      bridge.registerAdapterFactory("usi", (config) => new USIAdapter(config));
+      bridge.registerAdapterFactory("gtp", (config) => new GTPAdapter(config));
+      bridge.registerAdapterFactory(
+        "edax",
+        (config) => new EdaxAdapter(config),
+      );
+      bridge.registerAdapterFactory(
+        "mortal",
+        (config) => new MortalAdapter(config),
+      );
+      bridge.registerAdapterFactory(
+        "gnubg",
+        (config) => new GNUBGAdapter(config),
+      );
+      bridge.registerAdapterFactory(
+        "kingsrow",
+        (config) => new KingsRowAdapter(config),
+      );
 
       // Register specific engine factories
       // These will be used when calling bridge.getEngine("stockfish")
-      bridge.registerAdapterFactory("stockfish", createStockfishEngine);
-      bridge.registerAdapterFactory("yaneuraou", createYaneuraouEngine);
+      bridge.registerAdapterFactory(
+        "stockfish",
+        (config) => new StockfishAdapter(config),
+      );
+      bridge.registerAdapterFactory(
+        "yaneuraou",
+        (config) => new YaneuraouAdapter(config),
+      );
     }
     return bridge;
   })();

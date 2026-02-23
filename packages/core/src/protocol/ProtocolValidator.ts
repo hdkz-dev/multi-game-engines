@@ -35,6 +35,7 @@ export class ProtocolValidator {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Potential command injection detected in ${context}: "${truncateLog(input)}".`,
+          i18nKey: "engine.errors.illegalCharacters",
           remediation: allowSemicolon
             ? "Remove control characters (\\r, \\n, \\0, etc.) from input."
             : "Remove control characters (\\r, \\n, \\0, ;, etc.) from input.",

@@ -89,7 +89,23 @@ export default function Dashboard() {
             IChessSearchOptions,
             IChessSearchInfo,
             IChessSearchResult
-          >({ id: "stockfish", adapter: "stockfish" }),
+          >({
+            id: "stockfish",
+            adapter: "stockfish",
+            sources: {
+              // 2026: E2E tests use a mock engine for deterministic results and faster execution.
+              main: {
+                url: "/mock-stockfish.js",
+                sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
+                type: "worker-js",
+              },
+              wasm: {
+                url: "/mock-stockfish.wasm",
+                sri: "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb",
+                type: "wasm",
+              },
+            },
+          }),
           bridgeInstance.getEngine<
             IShogiSearchOptions,
             IShogiSearchInfo,
@@ -135,6 +151,7 @@ export default function Dashboard() {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       ),
       multipv: CHESS_MULTI_PV,
+      depth: 99,
     }),
     [],
   );
@@ -233,7 +250,7 @@ export default function Dashboard() {
                     : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                EN
+                {localeData.dashboard.language.en}
               </button>
               <button
                 onClick={() => setLocale("ja")}
@@ -244,7 +261,7 @@ export default function Dashboard() {
                     : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                JA
+                {localeData.dashboard.language.ja}
               </button>
             </div>
 
@@ -327,7 +344,7 @@ export default function Dashboard() {
                 key="chess-panel"
                 engine={chessEngine}
                 searchOptions={chessOptions}
-                title={localeData.engine.stockfishTitle || "Stockfish 16.1"}
+                title={localeData.engine.stockfishTitle}
                 className="h-full"
               />
             )}
@@ -336,7 +353,7 @@ export default function Dashboard() {
                 key="shogi-panel"
                 engine={shogiEngine}
                 searchOptions={shogiOptions}
-                title={localeData.engine.yaneuraouTitle || "Yaneuraou 7.5.0"}
+                title={localeData.engine.yaneuraouTitle}
                 className="h-full"
               />
             )}

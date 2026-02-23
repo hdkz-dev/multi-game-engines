@@ -1,9 +1,9 @@
 {
   "name": "@multi-game-engines/ui-shogi",
   "version": "0.1.0",
-  "license": "MIT",
   "description": "Domain-specific Shogi UI components for all frameworks",
   "type": "module",
+  "license": "MIT",
   "types": "./dist/index.d.ts",
   "exports": {
     "./elements": {
@@ -26,7 +26,7 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "lit": "^3.2.1",
+    "lit": "^3.3.2",
     "react": ">=18.0.0",
     "vue": ">=3.3.0"
   },
@@ -46,11 +46,12 @@
   },
   "devDependencies": {
     "@types/node": "^25.3.0",
-    "@types/react": "^19.2.3",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "@vitejs/plugin-vue": "^6.0.4",
-    "lit": "^3.2.1",
+    "eslint-plugin-react-hooks": "7.0.0",
+    "lit": "^3.3.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "typescript": "^5.9.3",
@@ -59,5 +60,14 @@
     "vitest": "^4.0.18",
     "vue": "3.5.28"
   },
-  "main": "./dist/index.js"
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-shogi"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

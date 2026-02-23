@@ -2,14 +2,14 @@
   "name": "@multi-game-engines/adapter-gtp",
   "version": "0.1.0",
   "description": "Generic GTP (Go Text Protocol) adapter for multi-game-engines ecosystem",
+  "type": "module",
   "license": "MIT",
-  "author": "multi-game-engines contributors",
+  "author": "hdkz-dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-gtp"
   },
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "eslint": "^10.0.1",
+    "eslint": "^9.39.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
@@ -55,5 +55,9 @@
   },
   "engines": {
     "node": ">=22.0.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

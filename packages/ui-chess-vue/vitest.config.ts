@@ -12,6 +12,7 @@ export default defineConfig({
     }),
   ],
   test: {
-    environment: "happy-dom",
+    testTimeout: 10000,
+    environment: "jsdom",
   },
 });

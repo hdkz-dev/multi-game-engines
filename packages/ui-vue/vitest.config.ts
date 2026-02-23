@@ -1,11 +1,13 @@
 import { defineConfig } from "vitest/config";
+import { resolve } from "path";
 import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   plugins: [vue()],
   test: {
+    testTimeout: 10000,
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./src/__tests__/setup.ts"],
+    setupFiles: [resolve(import.meta.dirname, "./src/__tests__/setup.ts")],
   },
 });

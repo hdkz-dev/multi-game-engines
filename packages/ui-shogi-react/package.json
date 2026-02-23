@@ -1,10 +1,9 @@
 {
   "name": "@multi-game-engines/ui-shogi-react",
   "version": "0.1.0",
-  "license": "MIT",
   "description": "Domain-specific Shogi UI components for React",
   "type": "module",
-  "main": "./dist/index.js",
+  "license": "MIT",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -29,12 +28,23 @@
     "@multi-game-engines/ui-shogi-elements": "workspace:*"
   },
   "devDependencies": {
-    "@testing-library/react": "^16.2.0",
-    "@types/react": "^19.2.3",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "eslint-plugin-react-hooks": "7.0.0",
     "jsdom": "^28.1.0",
     "react": "^19.2.4",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
-  }
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-shogi-react"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

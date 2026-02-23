@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { ScoreBadge } from "../ScoreBadge.js";
+import { ScoreBadge } from "../components/ScoreBadge.js";
 import { EngineUIProvider } from "@multi-game-engines/ui-react-core";
 
 /**

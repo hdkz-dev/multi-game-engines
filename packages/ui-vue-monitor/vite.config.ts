@@ -14,7 +14,15 @@ export default defineConfig({
     }),
     dts({
       insertTypesEntry: true,
+      staticImport: true,
       include: ["src/**/*"],
+      exclude: [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.spec.tsx",
+        "**/__tests__/**",
+      ],
     }),
   ],
   build: {
@@ -24,7 +32,7 @@ export default defineConfig({
     },
     lib: {
       entry: {
-        index: resolve(__dirname, "src/index.ts"),
+        index: resolve(import.meta.dirname, "src/index.ts"),
       },
       name: "UIVueMonitor",
       formats: ["es", "cjs"],

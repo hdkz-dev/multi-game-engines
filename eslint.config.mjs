@@ -13,6 +13,7 @@ export default [
       "**/*.config.mjs",
       "**/*.config.js",
       "**/next-env.d.ts",
+      "fixtures/shared-mocks/**",
     ],
   },
   eslint.configs.recommended,
@@ -32,6 +33,12 @@ export default [
         "warn",
         { "argsIgnorePattern": "^_" },
       ],
+      "@typescript-eslint/no-floating-promises": "error",
+    },
+    settings: {
+      next: {
+        rootDir: "examples/zenith-dashboard-react",
+      },
     },
   },
   // Storybook 用の設定を個別に定義（互換性エラーを避けるため、configs を直接展開）

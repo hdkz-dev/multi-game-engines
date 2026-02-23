@@ -1,12 +1,14 @@
 {
   "name": "@multi-game-engines/ui-shogi-elements",
   "version": "0.1.0",
-  "license": "MIT",
   "description": "Domain-specific Shogi Web Components (Lit)",
   "type": "module",
-  "main": "./dist/index.js",
+  "license": "MIT",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "./dist/index.js"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,7 +26,7 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
     "@multi-game-engines/i18n": "workspace:*",
-    "lit": "^3.2.1"
+    "lit": "^3.3.2"
   },
   "devDependencies": {
     "@multi-game-engines/ui-core": "workspace:*",
@@ -32,5 +34,15 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
-  }
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-shogi-elements"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

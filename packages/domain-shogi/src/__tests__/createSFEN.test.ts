@@ -11,43 +11,52 @@ describe("createSFEN verification", () => {
 
   it("should accept SFEN with hand pieces", () => {
     const sfen =
-      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 2P3k 1";
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b 2P3p 1";
     expect(() => createSFEN(sfen)).not.toThrow();
   });
 
-  it("should throw VALIDATION_ERROR for illegal characters", () => {
+  it("should throw SECURITY_ERROR for illegal characters", () => {
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1!";
     try {
       createSFEN(sfen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-      expect(err.message).toContain("Illegal characters detected");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        expect(e.i18nKey).toBe("engine.errors.illegalCharacters");
+      }
     }
   });
 
   it("should throw VALIDATION_ERROR for invalid structure", () => {
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b -";
     try {
       createSFEN(sfen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-      expect(err.message).toContain("Invalid SFEN structure");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.i18nKey).toBe("engine.errors.invalidSFENStructure");
+      }
     }
   });
 
   it("should throw VALIDATION_ERROR for invalid move counter", () => {
+    expect.assertions(3);
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 0";
     try {
       createSFEN(sfen);
     } catch (e) {
-      const err = e as EngineError;
-      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-      expect(err.message).toContain("Invalid SFEN move counter");
+      expect(e).toBeInstanceOf(EngineError);
+      if (e instanceof EngineError) {
+        expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+        expect(e.i18nKey).toBe("engine.errors.invalidSFENMoveCounter");
+      }
     }
   });
 });

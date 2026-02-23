@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import { createGOMove } from "../index.js";
+import { createGOMove, createGOBoard } from "../index.js";
+import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 beforeAll(() => {
   vi.spyOn(performance, "now").mockReturnValue(0);
@@ -21,7 +22,31 @@ describe("Go Domain", () => {
     expect(createGOMove("resign")).toBe("resign");
   });
 
-  it("should throw on invalid coordinates", () => {
-    expect(() => createGOMove("I1")).toThrow();
+  it("should throw VALIDATION_ERROR on invalid coordinates", () => {
+    expect.assertions(2);
+    let err: unknown;
+    try {
+      createGOMove("I1");
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(EngineError);
+    if (err instanceof EngineError) {
+      expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+    }
+  });
+
+  it("should throw SECURITY_ERROR on illegal characters in board", () => {
+    expect.assertions(2);
+    let err: unknown;
+    try {
+      createGOBoard("A1;B2");
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(EngineError);
+    if (err instanceof EngineError) {
+      expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+    }
   });
 });

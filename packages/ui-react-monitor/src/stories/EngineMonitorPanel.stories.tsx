@@ -1,6 +1,6 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
+import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
 import { MockEngine } from "../mocks/MockEngine.js";
 import { within, userEvent, expect, waitFor } from "storybook/test";
 
@@ -24,19 +24,24 @@ type Story = StoryObj<typeof EngineMonitorPanel>;
 /**
  * 基本的な表示と操作のテスト
  */
+const InteractivePanel = () => {
+  const engine = React.useMemo(() => new MockEngine(), []);
+
+  React.useEffect(() => {
+    return () => {
+      void engine.dispose();
+    };
+  }, [engine]);
+
+  return (
+    <div style={{ width: "400px", height: "600px" }}>
+      <EngineMonitorPanel engine={engine} searchOptions={{}} />
+    </div>
+  );
+};
+
 export const Interactive: Story = {
-  render: () => {
-    const engine = React.useMemo(() => new MockEngine(), []);
-    return (
-      <div style={{ width: "400px", height: "600px" }}>
-        <EngineMonitorPanel
-          engine={engine}
-          searchOptions={{}}
-          title="Best Practice Monitor"
-        />
-      </div>
-    );
-  },
+  render: () => <InteractivePanel />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 

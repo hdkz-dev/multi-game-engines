@@ -27,9 +27,33 @@ export class MahjongJSONParser implements IProtocolParser<
       if (!this.isObject(parsed)) return null;
 
       if (parsed.type === "info") {
+        const evaluations = Array.isArray(parsed.evaluations)
+          ? (parsed.evaluations as unknown[])
+              .filter(
+                (e): e is Record<string, unknown> =>
+                  typeof e === "object" && e !== null,
+              )
+              .map((e) => {
+                try {
+                  const moveValue = e["move"];
+                  if (typeof moveValue !== "string") return null;
+                  const move = createMahjongMove(moveValue);
+                  return {
+                    move,
+                    ev: typeof e["ev"] === "number" ? e["ev"] : 0,
+                    prob: typeof e["prob"] === "number" ? e["prob"] : undefined,
+                  };
+                } catch {
+                  return null;
+                }
+              })
+              .filter((e): e is NonNullable<typeof e> => e !== null)
+          : undefined;
+
         return {
           raw: typeof data === "string" ? data : JSON.stringify(data),
           thinking: String(parsed.thinking ?? ""),
+          evaluations,
         };
       }
     } catch (e) {
@@ -53,15 +77,21 @@ export class MahjongJSONParser implements IProtocolParser<
 
       if (parsed.type === "result") {
         const moveValue = parsed.bestMove;
+        const raw = typeof data === "string" ? data : JSON.stringify(data);
+
+        // 2026 Best Practice: null/undefined は正当な「指し手なし（和了・流局等）」として扱う
+        // これにより、インターフェース IMahjongSearchResult の bestMove: MahjongMove | null と整合します。
+        if (moveValue === null || moveValue === undefined) {
+          return { raw, bestMove: null };
+        }
+
         if (typeof moveValue !== "string") {
           return null;
         }
+
         try {
           const bestMove = createMahjongMove(moveValue);
-          return {
-            raw: typeof data === "string" ? data : JSON.stringify(data),
-            bestMove,
-          };
+          return { raw, bestMove };
         } catch (e) {
           console.warn("[MahjongJSONParser] Invalid bestMove from engine:", e);
           return null;
@@ -124,11 +154,16 @@ export interface IMahjongSearchOptions extends IBaseSearchOptions {
 export interface IMahjongSearchInfo {
   raw: string;
   thinking: string;
+  evaluations?: {
+    move: MahjongMove;
+    ev: number;
+    prob?: number;
+  }[];
   [key: string]: unknown;
 }
 
 export interface IMahjongSearchResult {
   raw: string;
-  bestMove: MahjongMove;
+  bestMove: MahjongMove | null;
   [key: string]: unknown;
 }

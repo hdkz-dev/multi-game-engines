@@ -36,18 +36,80 @@
     "yaneuraouTitle": "Yaneuraou 7.5.0",
     "errors": {
       "invalidFEN": "Invalid FEN: Input must not be empty.",
-      "invalidFENStructure": "Invalid FEN structure: At least 4 fields required.",
+      "invalidFENStructure": "Invalid FEN structure: 6 fields required.",
+      "invalidFENTurn": "Invalid FEN turn: Expected \"w\" or \"b\".",
+      "invalidFENEnPassant": "Invalid FEN en passant: \"{square}\"",
+      "invalidFENCastling": "Invalid FEN castling rights: \"{rights}\"",
+      "invalidFENHalfmove": "Invalid FEN halfmove clock: \"{clock}\"",
+      "invalidFENFullmove": "Invalid FEN fullmove number: \"{move}\"",
+      "invalidFenRanks": "Invalid FEN: Expected 8 ranks.",
+      "invalidFenRow": "Invalid FEN: Row must be defined.",
+      "invalidFenChar": "Invalid FEN character: \"{char}\"",
+      "invalidFenRankWidth": "Invalid FEN rank width at rank {rank}: expected {expected}, got {actual}",
       "invalidSFEN": "Invalid SFEN: Input must not be empty.",
-      "invalidSFENStructure": "Invalid SFEN structure: At least 4 fields required.",
+      "invalidSFENStructure": "Invalid SFEN structure: 4 fields required.",
+      "invalidSFENTurn": "Invalid SFEN turn: Expected \"b\" or \"w\".",
+      "invalidSFENHand": "Invalid SFEN hand pieces: \"{hand}\"",
+      "invalidSFENMoveCounter": "Invalid SFEN move counter: \"{counter}\"",
+      "invalidSfenRanks": "Invalid SFEN: Expected 9 ranks.",
+      "invalidSfenPiece": "Invalid SFEN piece: \"{piece}\"",
+      "invalidSfenChar": "Invalid SFEN character: \"{char}\"",
+      "invalidSfenRankWidth": "Invalid SFEN rank width at rank {rank}: expected 9, got {actual}",
+      "invalidGOBoard": "Invalid Go board: Input must not be empty.",
+      "invalidGOMove": "Invalid Go move format: \"{move}\"",
+      "invalidMahjongMove": "Invalid Mahjong move format: \"{move}\"",
+      "invalidShogiMove": "Invalid Shogi move format: \"{move}\"",
+      "invalidReversiBoard": "Invalid Reversi board: Input must not be empty.",
+      "invalidReversiMove": "Invalid Reversi move format: \"{move}\"",
+      "invalidBackgammonBoard": "Invalid Backgammon board: Input must be an array of exactly 26 numbers.",
+      "invalidBackgammonMove": "Invalid Backgammon move format: \"{move}\"",
+      "invalidCheckersBoard": "Invalid Checkers board: Input must not be empty.",
+      "invalidCheckersMove": "Invalid Checkers move format: \"{move}\"",
+      "initializationFailed": "Engine initialization failed.",
+      "workerError": "Worker error occurred: {message}",
+      "timeout": "Operation timed out.",
+      "disposed": "Engine instance is disposed.",
+      "nestedTooDeep": "Data structure is too deeply nested at: {path}",
       "illegalCharacters": "Illegal characters detected.",
       "networkError": "Failed to fetch engine resources.",
       "securityViolation": "Security violation: Unsafe resource loading blocked.",
+      "sriMismatch": "Security violation: Resource integrity (SRI) mismatch detected.",
+      "bridgeDisposed": "Engine bridge has already been disposed.",
+      "notReady": "Engine is not ready for the requested operation.",
       "missingMainEntryPoint": "Engine main entry point URL is missing.",
       "loaderRequired": "IEngineLoader is required for secure resource loading.",
       "missingSources": "Engine configuration is missing 'sources' field.",
       "invalidMoveFormat": "Invalid move format: \"{move}\"",
       "injectionDetected": "Potential command injection detected in {context}: \"{input}\"",
-      "invalidPositionString": "Invalid position string: Input must not be empty."
+      "invalidPositionString": "Invalid position string: Input must not be empty.",
+      "invalidEngineId": "Invalid engine ID: \"{id}\". Only alphanumeric characters, hyphens, and underscores are allowed.",
+      "insecureConnection": "Insecure connection (HTTP) is not allowed for sensitive engine files.",
+      "sriRequired": "SRI required for security verification.",
+      "adapterFactoryInvalidReturn": "Factory for \"{adapter}\" returned an invalid object.",
+      "adapterNotFound": "Engine adapter not found or factory not registered for \"{id}\".",
+      "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\"."
+    }
+  },
+  "adapters": {
+    "uci": {
+      "errors": {
+        "missingFEN": "UCI protocol requires a FEN position string."
+      }
+    },
+    "usi": {
+      "errors": {
+        "missingFEN": "USI protocol requires a SFEN position string."
+      }
+    },
+    "gtp": {
+      "errors": {
+        "invalidResponse": "Invalid response received from GTP engine."
+      }
+    },
+    "ensemble": {
+      "errors": {
+        "noResults": "No engine results available to aggregate."
+      }
     }
   },
   "dashboard": {
@@ -59,6 +121,10 @@
     "shogiLabel": "SHOGI / USI",
     "engineSelector": "Engine selector",
     "languageSelector": "Language selector",
+    "language": {
+      "en": "English (EN)",
+      "ja": "Japanese (JA)"
+    },
     "errors": {
       "bridgeNotAvailable": "Engine bridge is not available."
     },

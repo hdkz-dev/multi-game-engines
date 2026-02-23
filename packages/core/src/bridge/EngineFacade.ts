@@ -125,9 +125,13 @@ export class EngineFacade<
     return this;
   }
 
+  /**
+   * エンジンをロードし、初期化します。
+   * 必要なリソースのフェッチ、Worker の起動、および能力検証を行います。
+   */
   async load(): Promise<void> {
-    if (this.status !== "uninitialized") return;
     if (this.loadPromise) return this.loadPromise;
+    if (this.status !== "uninitialized") return;
 
     this.loadPromise = (async () => {
       try {
@@ -151,12 +155,26 @@ export class EngineFacade<
     return this.loadPromise;
   }
 
+  /**
+   * 指定されたオプションで探索を実行します。
+   * エンジンが未ロードの場合は、戦略に基づいて自動的にロードします。
+   *
+   * @param options - 探索オプション (FEN, 深さ, 時間制限など)。
+   * @returns 探索結果 (最善手など)。
+   */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (
       this.status === "uninitialized" &&
       this.loadingStrategy === "on-demand"
     ) {
       await this.load();
+      if ((this.status as EngineStatus) !== "ready") {
+        throw new EngineError({
+          code: EngineErrorCode.NOT_READY,
+          message: `Engine failed to initialize on-demand (Status: ${this.status})`,
+          engineId: this.id,
+        });
+      }
     }
 
     if (this.activeTaskStop) {
@@ -220,8 +238,23 @@ export class EngineFacade<
     this.resultListeners.clear();
     this.telemetryListeners.clear();
 
-    if (this.ownAdapter && this.adapter.dispose) {
-      await this.adapter.dispose();
+    if (this.ownAdapter) {
+      const id = this.id;
+      // 2026 Best Practice: IEngineAdapter requires dispose()
+      try {
+        await this.adapter.dispose();
+      } catch (err) {
+        console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);
+      }
+      // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
+      if (this.loaderProvider) {
+        try {
+          const loader = await this.loaderProvider();
+          loader.revokeByEngineId(id);
+        } catch {
+          // ローダーの取得に失敗した場合は無視（既にシステムが終了している可能性があるため）
+        }
+      }
     }
   }
 

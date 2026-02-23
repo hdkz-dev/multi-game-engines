@@ -18,13 +18,22 @@ export const MAHJONG_MOVE_REGEX =
  * 文字列を MahjongMove へ変換し、厳密に検証します。
  */
 export function createMahjongMove(move: string): MahjongMove {
-  if (typeof move !== "string" || !MAHJONG_MOVE_REGEX.test(move)) {
+  if (typeof move !== "string" || move.trim().length === 0) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid MahjongMove format: "${move}"`,
+      message: "Invalid MahjongMove: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidMahjongMove",
     });
   }
   ProtocolValidator.assertNoInjection(move, "MahjongMove");
+  if (!MAHJONG_MOVE_REGEX.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid MahjongMove format: "${move}"`,
+      i18nKey: "engine.errors.invalidMahjongMove",
+      i18nParams: { move },
+    });
+  }
   return move as MahjongMove;
 }
 
@@ -42,6 +51,8 @@ export function validateMahjongBoard(board: unknown): void {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Mahjong board data is too deeply nested at: ${path}`,
+        i18nKey: "engine.errors.nestedTooDeep",
+        i18nParams: { path },
       });
     }
     if (typeof value === "string") {

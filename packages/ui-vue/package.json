@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "description": "Vue 3 components for multi-game engines (Hub Package)",
   "type": "module",
-  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -19,7 +21,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/hooks.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts src/hooks.ts --format cjs,esm --dts --sourcemap",
     "dev": "tsup src/index.ts --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
@@ -58,5 +60,15 @@
     "vite": "^7.3.1",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.18"
-  }
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

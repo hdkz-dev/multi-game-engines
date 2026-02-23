@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import EngineStats from "../EngineStats.vue";
+import EngineStats from "../components/EngineStats.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { locales } from "@multi-game-engines/i18n";
 

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 // Import components
-import { EngineMonitorPanel } from "../EngineMonitorPanel.js";
+import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
 import {
   IEngine,
   IBaseSearchOptions,

@@ -1,4 +1,5 @@
-import { ISecurityStatus } from "../types.js";
+import { ISecurityStatus, EngineErrorCode } from "../types.js";
+import { EngineError } from "../errors/EngineError.js";
 
 /**
  * SRI検証やCOOP/COEPヘッダーの診断を提供します。
@@ -32,6 +33,21 @@ export class SecurityAdvisor {
    * W3C勧告に基づいたマルチハッシュSRI検証。
    * 最強のアルゴリズムを優先して検証します。
    */
+  /**
+   * SRI ハッシュを検証し、一致しない場合は例外をスローします。
+   * Refuse by Exception 原則に基づく厳格な検証メソッドです。
+   */
+  static async assertSRI(data: ArrayBuffer, sri: string): Promise<void> {
+    const isValid = await this.verifySRI(data, sri);
+    if (!isValid) {
+      throw new EngineError({
+        code: EngineErrorCode.SRI_MISMATCH,
+        message: "SRI hash verification failed.",
+        i18nKey: "engine.errors.sriMismatch",
+      });
+    }
+  }
+
   static async verifySRI(data: ArrayBuffer, sri: string): Promise<boolean> {
     if (!SecurityAdvisor.isValidSRI(sri)) return false;
 

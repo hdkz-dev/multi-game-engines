@@ -20,13 +20,22 @@ export const REVERSI_MOVE_REGEX = /^([a-h][1-8]|PS)$/i;
  * 文字列を ReversiMove へ変換し、厳密に検証します。
  */
 export function createReversiMove(move: string): ReversiMove {
-  if (typeof move !== "string" || !REVERSI_MOVE_REGEX.test(move)) {
+  if (typeof move !== "string" || move.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
-      message: `Invalid ReversiMove format: "${move}"`,
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid ReversiMove: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidReversiMove",
     });
   }
   ProtocolValidator.assertNoInjection(move, "ReversiMove");
+  if (!REVERSI_MOVE_REGEX.test(move)) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid ReversiMove format: "${move}"`,
+      i18nKey: "engine.errors.invalidReversiMove",
+      i18nParams: { move },
+    });
+  }
   return move as ReversiMove;
 }
 
@@ -36,8 +45,9 @@ export function createReversiMove(move: string): ReversiMove {
 export function createReversiBoard(pos: string): ReversiBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
     throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
+      code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid ReversiBoard: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidReversiBoard",
     });
   }
   ProtocolValidator.assertNoInjection(pos, "ReversiBoard");

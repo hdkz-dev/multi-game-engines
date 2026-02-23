@@ -57,6 +57,7 @@ The main consumer API.
 
 ## 4. Protocol Parsing (2026 Best Practice)
 
+- **Structural Standardization**: All adapters follow the separation of `{Name}Adapter.ts` (lifecycle) and `{Name}Parser.ts` (logic), with UI components consolidated into `src/components/` (ADR-046).
 - **UCIParser**: Chess protocol with factor 10,000 `mate` score conversion.
 - **USIParser**: Shogi protocol with time control and `startpos` keyword support.
 - **GTPParser**: Go protocol supporting `genmove`, `visits`, and `winrate`.
@@ -74,15 +75,31 @@ Lightweight parsers for UI-layer reuse.
 ## 5. Telemetry & Observability
 
 - **Structured Telemetry**: Automatic measurement of search performance via `DefaultTelemetryMiddleware`.
+- **Privacy-First Logging (ADR-038)**: To prevent PII leakage in logs, `truncateLog` utility automatically limits position-related strings to the first ~20 characters while maintaining context for debugging.
 - **Remediation**: All errors include `remediation` fields with specific recovery actions.
 
 ## 6. UI & Presentation Foundation
+
+### 6-0. Resource Loading Strategy (EngineLoader)
+
+To bypass the "Blob Origin" constraint that prohibits relative URL resolution inside Workers in certain browsers:
+
+- **Dependency Injection**: Engines do not use `importScripts` or `fetch` for their own binary files (.wasm, .nnue).
+- **Blob Injection**: The `EngineLoader` fetches and hashes all resources at the main-thread level, then injects the resulting Blob URLs directly into the Worker environment during initialization (ADR-043).
+- **Auto-Revocation**: Loader automatically tracks Blob URL lifecycles to prevent memory leaks.
 
 ### 6-1. Reactive Engine Store (`ui-core`)
 
 High-frequency state management foundation.
 
-- **Adaptive Throttling**: Synchronizes with `requestAnimationFrame` by default.
+- **Modular Structure**:
+  - `src/state/`: `EngineStore`, `SearchStateTransformer`, `SubscriptionManager`.
+  - `src/monitor/`: `SearchMonitor`, `MonitorRegistry`, `EvaluationPresenter`.
+  - `src/dispatch/`: `CommandDispatcher`, `Middleware`.
+  - `src/validation/`: Zod contract definitions.
+  - `src/styles/`: Shared theme foundation (`theme.css`).
+- **Adaptive Throttling**:
+  Synchronizes with `requestAnimationFrame` by default.
 - **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering tears.
 - **Zod Contract Validation**: Validates all engine messages via `SearchInfoSchema` at runtime.
 - **EvaluationPresenter**: Separates display logic (colors, labels) from UI frameworks.

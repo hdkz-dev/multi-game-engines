@@ -1,4 +1,8 @@
-import { IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  IBaseSearchResult,
+  EngineError,
+  EngineErrorCode,
+} from "@multi-game-engines/core";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
 
 /**
@@ -13,7 +17,12 @@ export class MajorityVoteStrategy<
 
   aggregateResults(results: T_RESULT[]): T_RESULT {
     if (results.length === 0) {
-      throw new Error("No results to aggregate");
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: "No results to aggregate",
+        i18nKey: "adapters.ensemble.errors.noResults",
+        engineId: this.id,
+      });
     }
 
     const voteMap = new Map<string, { count: number; result: T_RESULT }>();

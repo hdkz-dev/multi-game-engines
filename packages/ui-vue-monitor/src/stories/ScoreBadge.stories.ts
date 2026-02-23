@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import ScoreBadge from "../ScoreBadge.vue";
+import ScoreBadge from "../components/ScoreBadge.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { locales } from "@multi-game-engines/i18n";
 

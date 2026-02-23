@@ -13,12 +13,34 @@ const meta: Meta = {
   title: "Components/EngineMonitor",
   component: "engine-monitor",
   tags: ["autodocs"],
+  decorators: [
+    (story, { id }) => {
+      // 2026 Best Practice: ストーリーごとに独立したエンジンインスタンスを管理し、
+      // ドキュメント表示時（複数ストーリー同時レンダリング）の競合を防ぐ。
+      const engineId = `engine-${id}`;
+      if (!globalThis.__engine_cache__) {
+        globalThis.__engine_cache__ = new Map();
+      }
+      if (!globalThis.__engine_cache__.has(engineId)) {
+        globalThis.__engine_cache__.set(engineId, new MockEngine());
+      }
+      const engine = globalThis.__engine_cache__.get(engineId);
+
+      // 注意: Web Components ストーリーではコンポーネントの破棄タイミングを
+      // 精密にフックするのが難しいため、グローバルキャッシュ方式を採用。
+      // 必要に応じて HMR 時等にクリーンアップ。
+
+      return story({ args: { ...meta.args, engine } });
+    },
+  ],
 };
+
+declare global {
+  var __engine_cache__: Map<string, MockEngine>;
+}
 
 export default meta;
 type Story = StoryObj;
-
-const mockEngine = new MockEngine();
 
 interface StoryArgs {
   engine: IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
@@ -29,7 +51,6 @@ interface StoryArgs {
 
 export const Interactive: Story = {
   args: {
-    engine: mockEngine,
     searchOptions: { fen: "startpos" },
     panelTitle: "Stockfish 16.1 (Web Component)",
   },
@@ -49,7 +70,6 @@ export const Interactive: Story = {
 
 export const English: Story = {
   args: {
-    engine: mockEngine,
     searchOptions: { fen: "startpos" },
     locale: "en",
   },

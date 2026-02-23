@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
-import EngineMonitorPanel from "../EngineMonitorPanel.vue";
+import EngineMonitorPanel from "../components/EngineMonitorPanel.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { MockEngine } from "../mocks/MockEngine.js";
 import { locales } from "@multi-game-engines/i18n";
@@ -10,10 +10,11 @@ import {
   IBaseSearchResult,
 } from "@multi-game-engines/core";
 
-const meta: Meta = {
+const meta: Meta<typeof EngineMonitorPanel> = {
   title: "Components/EngineMonitorPanel",
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  component: EngineMonitorPanel as any,
+  component: EngineMonitorPanel as NonNullable<
+    Meta<typeof EngineMonitorPanel>["component"]
+  >,
   tags: ["autodocs"],
   decorators: [
     () => ({

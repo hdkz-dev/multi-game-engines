@@ -1,4 +1,4 @@
-import { StockfishAdapter } from "./stockfish.js";
+import { StockfishAdapter } from "./StockfishAdapter.js";
 import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
 import {
   IChessSearchOptions,

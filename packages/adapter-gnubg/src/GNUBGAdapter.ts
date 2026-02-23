@@ -39,6 +39,8 @@ export class GNUBGAdapter extends BaseAdapter<
   async load(loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
     try {
+      this.validateSources();
+
       if (!loader) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
@@ -96,6 +98,14 @@ export class GNUBGAdapter extends BaseAdapter<
       // gnubg の初期化待ちロジックがあればここに追加
       this.emitStatusChange("ready");
     } catch (error) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }

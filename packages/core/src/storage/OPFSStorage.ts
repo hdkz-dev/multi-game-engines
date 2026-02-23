@@ -25,8 +25,17 @@ export class OPFSStorage implements IFileStorage {
     const root = await this.getDirectory();
     const fileHandle = await root.getFileHandle(key, { create: true });
     const writable = await fileHandle.createWritable();
-    await writable.write(data);
-    await writable.close();
+    try {
+      await writable.write(data);
+      await writable.close();
+    } catch (error) {
+      try {
+        await writable.abort();
+      } catch {
+        // abort 失敗は二次的エラーのため抑制し、元のエラーを優先する
+      }
+      throw error;
+    }
   }
 
   async delete(key: string): Promise<void> {
@@ -50,10 +59,19 @@ export class OPFSStorage implements IFileStorage {
 
   async clear(): Promise<void> {
     const root = await this.getDirectory();
-    // @ts-expect-error: FileSystemDirectoryHandle.keys() はモダンブラウザで非同期イテレータを返しますが、
-    // 一部の古い TS DOM lib では定義されていないため、型エラーを抑制します。
-    for await (const name of root.keys()) {
-      await root.removeEntry(name, { recursive: true });
+    // 2026 Best Practice: Feature detection for non-standard iterator without using 'any'
+    const rootWithKeys = root as FileSystemDirectoryHandle & {
+      keys?(): AsyncIterable<string>;
+    };
+
+    if (typeof rootWithKeys.keys === "function") {
+      for await (const name of rootWithKeys.keys()) {
+        await root.removeEntry(name, { recursive: true });
+      }
+    } else {
+      throw new Error(
+        "[OPFSStorage] Directory iteration (keys()) is not supported in this environment. Cannot clear storage.",
+      );
     }
   }
 }

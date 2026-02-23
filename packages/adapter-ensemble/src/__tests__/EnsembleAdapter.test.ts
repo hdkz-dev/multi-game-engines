@@ -54,4 +54,15 @@ describe("EnsembleAdapter", () => {
     expect(e2.search).toHaveBeenCalled();
     expect(e3.search).toHaveBeenCalled();
   });
+
+  it("should throw EngineError when no results to aggregate in MajorityVoteStrategy", () => {
+    const strategy = new MajorityVoteStrategy();
+    expect(() => strategy.aggregateResults([])).toThrow(
+      expect.objectContaining({
+        code: "VALIDATION_ERROR",
+        engineId: "majority-vote",
+        i18nKey: "adapters.ensemble.errors.noResults",
+      }),
+    );
+  });
 });

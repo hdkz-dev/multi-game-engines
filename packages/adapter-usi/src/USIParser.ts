@@ -50,8 +50,8 @@ export interface IShogiSearchInfo extends IBaseSearchInfo {
  * 将棋の探索結果。
  */
 export interface IShogiSearchResult extends IBaseSearchResult {
-  bestMove: ShogiMove | "none";
-  ponder?: ShogiMove;
+  bestMove: ShogiMove | null;
+  ponder?: ShogiMove | null;
   [key: string]: unknown;
 }
 
@@ -112,10 +112,13 @@ export class USIParser implements IProtocolParser<
           break;
         case "currmove":
           if (i + 1 < parts.length) {
+            const token = parts[++i]!;
             try {
-              info.currMove = createShogiMove(parts[++i]!);
+              info.currMove = createShogiMove(token);
             } catch {
-              // 2026 Best Practice: 特定の指し手のパース失敗で全体の解析を止めない
+              console.warn(
+                `[USIParser.parseInfo] Skipping invalid "currmove" token: "${truncateLog(token)}" in response: "${truncateLog(data)}"`,
+              );
             }
           }
           break;
@@ -132,9 +135,14 @@ export class USIParser implements IProtocolParser<
             const m = parts[j];
             if (!m) continue;
             try {
-              info.pv.push(createShogiMove(m));
+              // 2026 Best Practice: PV 内部の指し手に対してもインジェクションチェックを強制
+              ProtocolValidator.assertNoInjection(m, "PV Move");
+              const move = createShogiMove(m);
+              info.pv.push(move);
             } catch {
-              // 不正な指し手はスキップ
+              console.warn(
+                `[USIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(m)}" in response: "${truncateLog(data)}"`,
+              );
             }
           }
           i = parts.length;
@@ -157,12 +165,19 @@ export class USIParser implements IProtocolParser<
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Unexpected bestmove format: "${truncateLog(data)}"`,
-        i18nKey: "errors.engine.unexpectedBestmoveFormat",
+        i18nKey: "engine.errors.invalidMoveFormat",
       });
     }
 
     const moveStr = parts[1]!;
-    const bestMove = moveStr === "none" ? "none" : createShogiMove(moveStr);
+    if (moveStr !== "none" && moveStr !== "(none)") {
+      ProtocolValidator.assertNoInjection(moveStr, "BestMove");
+    }
+
+    const bestMove =
+      moveStr === "none" || moveStr === "(none)"
+        ? null
+        : createShogiMove(moveStr);
 
     const result: IShogiSearchResult = {
       bestMove,
@@ -171,10 +186,19 @@ export class USIParser implements IProtocolParser<
 
     const ponderIdx = parts.indexOf("ponder");
     if (ponderIdx !== -1 && ponderIdx + 1 < parts.length) {
-      try {
-        result.ponder = createShogiMove(parts[ponderIdx + 1]!);
-      } catch {
-        // Ignore invalid ponder move
+      const ponderToken = parts[ponderIdx + 1]!;
+      if (ponderToken === "none" || ponderToken === "(none)") {
+        result.ponder = null;
+      } else {
+        try {
+          ProtocolValidator.assertNoInjection(ponderToken, "PonderMove");
+          result.ponder = createShogiMove(ponderToken);
+        } catch {
+          console.warn(
+            `[USIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderToken)}" in response: "${truncateLog(data)}"`,
+          );
+          result.ponder = null;
+        }
       }
     }
 

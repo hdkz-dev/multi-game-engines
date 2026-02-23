@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Framework-agnostic Web Components for multi-game engines",
   "type": "module",
-  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -23,12 +22,12 @@
   },
   "license": "MIT",
   "sideEffects": [
-    "src/engine-monitor.ts",
-    "src/evaluation-graph.ts",
-    "src/pv-list.ts",
-    "src/search-log.ts",
-    "src/score-badge.ts",
-    "src/engine-stats.ts",
+    "src/components/engine-monitor.ts",
+    "src/components/evaluation-graph.ts",
+    "src/components/pv-list.ts",
+    "src/components/search-log.ts",
+    "src/components/score-badge.ts",
+    "src/components/engine-stats.ts",
     "dist/*.js"
   ],
   "dependencies": {
@@ -37,7 +36,7 @@
     "@multi-game-engines/ui-chess-elements": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-shogi-elements": "workspace:*",
-    "lit": "^3.2.1"
+    "lit": "^3.3.2"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.2.10",
@@ -45,11 +44,22 @@
     "@storybook/addon-links": "10.2.10",
     "@storybook/web-components": "10.2.10",
     "@storybook/web-components-vite": "10.2.10",
+    "@swc/core": "^1.15.11",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
     "storybook": "10.2.10",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
-  }
+  },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/ui-elements"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
 }

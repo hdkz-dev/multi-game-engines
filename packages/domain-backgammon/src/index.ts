@@ -29,14 +29,14 @@ export function createBackgammonBoard(board: unknown): BackgammonBoard {
       code: EngineErrorCode.VALIDATION_ERROR,
       message:
         "Invalid BackgammonBoard: Must be an array of exactly 26 numbers.",
-      i18nKey: "errors.invalid_backgammon_board",
+      i18nKey: "engine.errors.invalidBackgammonBoard",
     });
   }
   if (!board.every((v) => typeof v === "number" && Number.isFinite(v))) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid BackgammonBoard: All elements must be finite numbers.",
-      i18nKey: "errors.invalid_backgammon_board",
+      i18nKey: "engine.errors.invalidBackgammonBoard",
     });
   }
   return board as BackgammonBoard;
@@ -51,12 +51,20 @@ export type BackgammonMove = Move<"BackgammonMove">;
  * バックギャモン指し手バリデータファクトリ。
  */
 export function createBackgammonMove(move: string): BackgammonMove {
+  if (typeof move !== "string" || move.trim().length === 0) {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Invalid BackgammonMove: Input must be a non-empty string.",
+      i18nKey: "engine.errors.invalidBackgammonMove",
+    });
+  }
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Control characters detected in move string.",
-      i18nKey: "errors.injection_detected",
+      i18nKey: "engine.errors.injectionDetected",
+      i18nParams: { context: "Move", input: truncateLog(move) },
     });
   }
 
@@ -67,7 +75,8 @@ export function createBackgammonMove(move: string): BackgammonMove {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid backgammon move format: "${truncateLog(move)}"`,
-      i18nKey: "errors.invalid_backgammon_move",
+      i18nKey: "engine.errors.invalidBackgammonMove",
+      i18nParams: { move: truncateLog(move) },
     });
   }
   return createMove<"BackgammonMove">(move);

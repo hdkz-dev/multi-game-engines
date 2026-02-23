@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SearchLog } from "../SearchLog.js";
+import { SearchLog } from "../components/SearchLog.js";
 import { EngineUIProvider } from "@multi-game-engines/ui-react-core";
 import { locales } from "@multi-game-engines/i18n";
 import { createMove } from "@multi-game-engines/core";

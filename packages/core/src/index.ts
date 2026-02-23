@@ -15,7 +15,7 @@ export { WorkerCommunicator } from "./workers/index.js";
 
 // ユーティリティ
 export { CapabilityDetector, SecurityAdvisor } from "./capabilities/index.js";
-export { EngineError } from "./errors/index.js";
+export * from "./errors/index.js";
 export { ProtocolValidator } from "./protocol/index.js";
 export { deepMerge } from "./utils/index.js";
 export { truncateLog } from "./utils/Sanitizer.js";
@@ -23,6 +23,9 @@ export {
   createMove,
   createPositionString,
 } from "./protocol/ProtocolValidator.js";
+
+// ストレージ
+export { createFileStorage } from "./storage/index.js";
 
 // 標準ミドルウェア
 export * from "./middlewares/index.js";

@@ -40,7 +40,7 @@ export class EngineBridge implements IEngineBridge {
       config: IEngineConfig,
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
   >();
   private engineInstances = new Map<
     string,
@@ -91,26 +91,17 @@ export class EngineBridge implements IEngineBridge {
    * これにより、`getEngine` に設定オブジェクトを渡すだけで、事前にインスタンス化することなくエンジンを利用可能になります。
    *
    * @param type - アダプターの種類識別子（例: "uci", "usi"）。IEngineConfig.adapter と一致させる必要があります。
-   * @param factory - 設定を受け取りアダプターを返す関数。
+   * @param factory - 設定を受け取りアダプターまたはエンジンを返す関数。
    */
-  registerAdapterFactory<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(
+  registerAdapterFactory(
     type: string,
     factory: (
       config: IEngineConfig,
-    ) => IEngineAdapter<O, I, R> | IEngine<O, I, R>,
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
   ): void {
-    this.adapterFactories.set(
-      type,
-      factory as (
-        config: IEngineConfig,
-      ) =>
-        | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-        | IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
-    );
+    this.adapterFactories.set(type, factory);
   }
 
   /**
@@ -145,6 +136,8 @@ export class EngineBridge implements IEngineBridge {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid adapter ID: "${adapter.id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id: adapter.id },
       });
     }
     const id = adapter.id;
@@ -187,10 +180,19 @@ export class EngineBridge implements IEngineBridge {
         for (const unsub of unsubs) unsub();
       }
       this.adapterUnsubscribers.delete(id);
-      await adapter.dispose();
+      try {
+        await adapter.dispose();
+      } catch (err) {
+        console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+      }
+      // 2026 Best Practice: アダプター登録解除時に Blob URL リソースも明示的に解放
+      if (this.loader) {
+        this.loader.revokeByEngineId(id);
+      }
     }
     this.adapters.delete(id);
     this.engineInstances.delete(id);
+    this.pendingEngines.delete(id);
   }
 
   getEngine<K extends keyof EngineRegistry>(
@@ -256,6 +258,8 @@ export class EngineBridge implements IEngineBridge {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id },
       });
     }
 
@@ -322,8 +326,10 @@ export class EngineBridge implements IEngineBridge {
             } else {
               throw new EngineError({
                 code: EngineErrorCode.INTERNAL_ERROR,
-                message: `Factory for "${idOrConfig.adapter}" returned an unsupported engine type.`,
+                message: `Factory for "${idOrConfig.adapter}" returned an object that does not implement IEngineAdapter (missing required id, name, version, status, load, search, searchRaw, stop, setOption, dispose, or parser methods).`,
                 engineId: id,
+                i18nKey: "engine.errors.adapterFactoryInvalidReturn",
+                i18nParams: { adapter: idOrConfig.adapter },
               });
             }
 
@@ -348,6 +354,8 @@ export class EngineBridge implements IEngineBridge {
             code: EngineErrorCode.INTERNAL_ERROR,
             message: `Engine adapter not found or factory not registered: ${id}`,
             engineId: id,
+            i18nKey: "engine.errors.adapterNotFound",
+            i18nParams: { id },
             remediation:
               typeof idOrConfig !== "string"
                 ? `Ensure registerAdapterFactory('${idOrConfig.adapter}', ... ) is called before getEngine.`
@@ -535,7 +543,11 @@ export class EngineBridge implements IEngineBridge {
         const caps = await this.checkCapabilities();
 
         if (this.disposed) {
-          throw new Error("EngineBridge already disposed");
+          throw new EngineError({
+            code: EngineErrorCode.LIFECYCLE_ERROR,
+            message: "EngineBridge already disposed",
+            i18nKey: "engine.errors.bridgeDisposed",
+          });
         }
 
         const loader = new EngineLoader(createFileStorage(caps));
@@ -565,27 +577,36 @@ export class EngineBridge implements IEngineBridge {
     const pendingLoader = this.loaderPromise;
     const pendingEngines = Array.from(this.pendingEngines.values());
 
-    const promises = Array.from(this.adapters.values()).map(async (a) => {
-      const id = a.id;
-      await a.dispose();
-      // 2026 Best Practice: ローダー経由でリソース (Blob URL) を明示的に解放
-      if (this.loader) {
-        this.loader.revokeByEngineId(id);
+    // 2026 Best Practice: アダプターのイベントリスナーを破棄前に解除
+    // これにより、破棄中に発生したイベントがブリッジ経由で通知されるのを防ぎます。
+    for (const unsubs of this.adapterUnsubscribers.values()) {
+      for (const unsub of unsubs) unsub();
+    }
+    this.adapterUnsubscribers.clear();
+
+    const promises = Array.from(this.adapters.keys()).map(async (id) => {
+      const adapter = this.adapters.get(id);
+      if (adapter) {
+        try {
+          await adapter.dispose();
+        } catch (err) {
+          console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+        }
       }
     });
     await Promise.all(promises);
+
+    // 2026 Best Practice: 破棄失敗時も Blob URL リソースは強制的に解放 (Leak Prevention)
+    // 個別の ID に依存せず、このブリッジコンテキストで生成された全 Blob を一括消去する。
+    if (this.loader) {
+      this.loader.revokeAll();
+    }
 
     // 2026 Best Practice: 進行中のエンジン生成とロード処理の完了を待機（または例外吸収）
     await Promise.all([
       ...pendingEngines.map((p) => p.catch(() => {})),
       pendingLoader ? pendingLoader.catch(() => {}) : Promise.resolve(),
     ]);
-
-    // アダプターのイベントリスナーを確実に解除
-    for (const unsubs of this.adapterUnsubscribers.values()) {
-      for (const unsub of unsubs) unsub();
-    }
-    this.adapterUnsubscribers.clear();
 
     this.adapters.clear();
     this.engineInstances.clear();
@@ -603,12 +624,30 @@ export class EngineBridge implements IEngineBridge {
 
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
-    const record = obj as Record<string, unknown>;
+    const r = obj as Record<string, unknown>;
+    const parser = r["parser"];
+    if (typeof parser !== "object" || parser === null) return false;
+
+    const p = parser as Record<string, unknown>;
     return (
-      typeof record["id"] === "string" &&
-      typeof record["searchRaw"] === "function" &&
-      typeof record["parser"] === "object" &&
-      record["parser"] !== null
+      typeof r["id"] === "string" &&
+      typeof r["name"] === "string" &&
+      typeof r["version"] === "string" &&
+      typeof r["status"] === "string" &&
+      typeof r["load"] === "function" &&
+      typeof r["search"] === "function" &&
+      typeof r["searchRaw"] === "function" &&
+      typeof r["stop"] === "function" &&
+      typeof r["setOption"] === "function" &&
+      typeof r["dispose"] === "function" &&
+      typeof r["onSearchResult"] === "function" &&
+      typeof r["onStatusChange"] === "function" &&
+      typeof r["onProgress"] === "function" &&
+      typeof r["onTelemetry"] === "function" &&
+      typeof r["emitTelemetry"] === "function" &&
+      typeof p["createSearchCommand"] === "function" &&
+      typeof p["parseInfo"] === "function" &&
+      typeof p["parseResult"] === "function"
     );
   }
 }
