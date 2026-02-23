@@ -12,6 +12,10 @@ import { EngineError } from "../errors/EngineError.js";
  */
 export class EngineLoader implements IEngineLoader {
   private inflightLoads = new Map<string, Promise<string>>();
+  private inflightBatchLoads = new Map<
+    string,
+    Promise<Record<string, string>>
+  >();
   private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
   private activeBlobsByUrl = new Map<string, string>(); // blobUrl -> cacheKey
   private isProduction: boolean;
@@ -224,6 +228,25 @@ export class EngineLoader implements IEngineLoader {
    * @returns キーと Blob URL のマップ。
    */
   async loadResources(
+    engineId: string,
+    configs: Record<string, IEngineSourceConfig>,
+  ): Promise<Record<string, string>> {
+    const existing = this.inflightBatchLoads.get(engineId);
+    if (existing) return existing;
+
+    const promise = (async () => {
+      try {
+        return await this._loadResourcesImpl(engineId, configs);
+      } finally {
+        this.inflightBatchLoads.delete(engineId);
+      }
+    })();
+
+    this.inflightBatchLoads.set(engineId, promise);
+    return promise;
+  }
+
+  private async _loadResourcesImpl(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>> {

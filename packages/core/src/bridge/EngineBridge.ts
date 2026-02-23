@@ -186,6 +186,7 @@ export class EngineBridge implements IEngineBridge {
     }
     this.adapters.delete(id);
     this.engineInstances.delete(id);
+    this.pendingEngines.delete(id);
   }
 
   getEngine<K extends keyof EngineRegistry>(

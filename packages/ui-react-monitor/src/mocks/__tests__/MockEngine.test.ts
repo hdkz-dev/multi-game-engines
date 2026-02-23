@@ -35,17 +35,39 @@ describe("MockEngine", () => {
   });
 
   it("should verify status sequence during search restart", async () => {
+    const statusHistory: string[] = [];
+    engine.onStatusChange((s) => statusHistory.push(s));
+
     const stopSpy = vi.spyOn(engine, "stop");
 
     // First search
     await engine.search({} as IBaseSearchOptions);
     expect(engine.status).toBe("busy");
 
-    // Second search
+    // Second search: should call stop (ready) then become busy again
     await engine.search({} as IBaseSearchOptions);
+    expect(engine.status).toBe("busy");
 
     // stop() must be called to reset the engine before the new search
     expect(stopSpy).toHaveBeenCalled();
+
+    // History should contain: ready (init) -> busy -> ready (via stop) -> busy
+    // Filter out initial 'ready' if needed, but here we check the flow
+    expect(statusHistory).toContain("busy");
+    expect(statusHistory).toContain("ready");
+
+    const busyIndices = statusHistory
+      .map((s, i) => (s === "busy" ? i : -1))
+      .filter((i) => i !== -1);
+    const readyIndices = statusHistory
+      .map((s, i) => (s === "ready" ? i : -1))
+      .filter((i) => i !== -1);
+
+    // There should be a 'ready' state between two 'busy' states during restart
+    expect(busyIndices.length).toBeGreaterThanOrEqual(2);
+    expect(
+      readyIndices.some((r) => r > busyIndices[0]! && r < busyIndices[1]!),
+    ).toBe(true);
   });
 
   it("should handle rapid sequential search calls correctly", async () => {

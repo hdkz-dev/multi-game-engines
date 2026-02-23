@@ -27,9 +27,29 @@ export class MahjongJSONParser implements IProtocolParser<
       if (!this.isObject(parsed)) return null;
 
       if (parsed.type === "info") {
+        const evaluations = Array.isArray(parsed.evaluations)
+          ? (parsed.evaluations as unknown[])
+              .filter(
+                (e): e is Record<string, unknown> =>
+                  typeof e === "object" &&
+                  e !== null &&
+                  typeof (e as Record<string, unknown>)["move"] === "string" &&
+                  typeof (e as Record<string, unknown>)["ev"] === "number",
+              )
+              .map((e) => ({
+                move: (e as Record<string, unknown>)["move"] as MahjongMove,
+                ev: (e as Record<string, unknown>)["ev"] as number,
+                prob:
+                  typeof (e as Record<string, unknown>)["prob"] === "number"
+                    ? ((e as Record<string, unknown>)["prob"] as number)
+                    : undefined,
+              }))
+          : undefined;
+
         return {
           raw: typeof data === "string" ? data : JSON.stringify(data),
           thinking: String(parsed.thinking ?? ""),
+          evaluations,
         };
       }
     } catch (e) {
@@ -124,6 +144,11 @@ export interface IMahjongSearchOptions extends IBaseSearchOptions {
 export interface IMahjongSearchInfo {
   raw: string;
   thinking: string;
+  evaluations?: {
+    move: MahjongMove;
+    ev: number;
+    prob?: number;
+  }[];
   [key: string]: unknown;
 }
 
