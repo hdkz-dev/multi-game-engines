@@ -18,7 +18,15 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-const mockEngine = new MockEngine();
+let activeMockEngine: MockEngine | null = null;
+
+const getMockEngine = () => {
+  if (activeMockEngine) {
+    void activeMockEngine.dispose();
+  }
+  activeMockEngine = new MockEngine();
+  return activeMockEngine;
+};
 
 interface StoryArgs {
   engine: IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>;
@@ -29,16 +37,19 @@ interface StoryArgs {
 
 export const Interactive: Story = {
   args: {
-    engine: mockEngine,
+    // args will be populated in render to avoid static initialization
     searchOptions: { fen: "startpos" },
     panelTitle: "Stockfish 16.1 (Web Component)",
   },
   render: (args: unknown) => {
     const a = args as StoryArgs;
+    // Ensure we have a fresh engine for the story, cleaning up previous one
+    const engine = a.engine || getMockEngine();
+
     return html`
       <div style="max-width: 400px; height: 600px;">
         <engine-monitor
-          .engine="${a.engine}"
+          .engine="${engine}"
           .searchOptions="${a.searchOptions}"
           .panelTitle="${a.panelTitle}"
         ></engine-monitor>
@@ -49,16 +60,16 @@ export const Interactive: Story = {
 
 export const English: Story = {
   args: {
-    engine: mockEngine,
     searchOptions: { fen: "startpos" },
     locale: "en",
   },
   render: (args: unknown) => {
     const a = args as StoryArgs;
+    const engine = a.engine || getMockEngine();
     return html`
       <div style="max-width: 400px; height: 600px;">
         <engine-monitor
-          .engine="${a.engine}"
+          .engine="${engine}"
           .searchOptions="${a.searchOptions}"
           .locale="${a.locale}"
         ></engine-monitor>

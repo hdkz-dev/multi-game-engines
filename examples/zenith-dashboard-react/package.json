@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cp ../../fixtures/shared-mocks/mock-stockfish.js public/ && next dev",
-    "build": "cp ../../fixtures/shared-mocks/mock-stockfish.js public/ && next build",
+    "dev": "node ../../scripts/copy-shared-mocks.mjs && next dev",
+    "build": "node ../../scripts/copy-shared-mocks.mjs && next build",
     "start": "next start",
-    "test:e2e": "cp ../../fixtures/shared-mocks/mock-stockfish.js public/ && playwright test",
+    "test:e2e": "node ../../scripts/copy-shared-mocks.mjs && playwright test",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
