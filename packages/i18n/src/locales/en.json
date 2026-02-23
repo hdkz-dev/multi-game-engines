@@ -61,6 +61,10 @@
       "invalidShogiMove": "Invalid Shogi move format: \"{move}\"",
       "invalidReversiBoard": "Invalid Reversi board: Input must not be empty.",
       "invalidReversiMove": "Invalid Reversi move format: \"{move}\"",
+      "initializationFailed": "Engine initialization failed.",
+      "workerError": "Worker error occurred: {message}",
+      "timeout": "Operation timed out.",
+      "disposed": "Engine instance is disposed.",
       "nestedTooDeep": "Data structure is too deeply nested at: {path}",
       "illegalCharacters": "Illegal characters detected.",
       "networkError": "Failed to fetch engine resources.",
@@ -74,27 +78,27 @@
       "invalidMoveFormat": "Invalid move format: \"{move}\"",
       "injectionDetected": "Potential command injection detected in {context}: \"{input}\"",
       "invalidPositionString": "Invalid position string: Input must not be empty."
+    }
+  },
+  "adapters": {
+    "uci": {
+      "errors": {
+        "missing_fen": "UCI protocol requires a FEN position string."
+      }
     },
-    "adapters": {
-      "uci": {
-        "errors": {
-          "missing_fen": "UCI protocol requires a FEN position string."
-        }
-      },
-      "usi": {
-        "errors": {
-          "missing_fen": "USI protocol requires a SFEN position string."
-        }
-      },
-      "gtp": {
-        "errors": {
-          "invalid_response": "Invalid response received from GTP engine."
-        }
-      },
-      "ensemble": {
-        "errors": {
-          "no_results": "No engine results available to aggregate."
-        }
+    "usi": {
+      "errors": {
+        "missing_fen": "USI protocol requires a SFEN position string."
+      }
+    },
+    "gtp": {
+      "errors": {
+        "invalid_response": "Invalid response received from GTP engine."
+      }
+    },
+    "ensemble": {
+      "errors": {
+        "no_results": "No engine results available to aggregate."
       }
     }
   },

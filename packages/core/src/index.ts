@@ -15,7 +15,7 @@ export { WorkerCommunicator } from "./workers/index.js";
 
 // ユーティリティ
 export { CapabilityDetector, SecurityAdvisor } from "./capabilities/index.js";
-export { EngineError } from "./errors/index.js";
+export * from "./errors/index.js";
 export { ProtocolValidator } from "./protocol/index.js";
 export { deepMerge } from "./utils/index.js";
 export { truncateLog } from "./utils/Sanitizer.js";

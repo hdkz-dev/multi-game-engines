@@ -61,6 +61,10 @@
       "invalidShogiMove": "無効な将棋の指し手形式です: \"{move}\"",
       "invalidReversiBoard": "無効なリバーシ盤面です: 入力は空であってはなりません。",
       "invalidReversiMove": "無効なリバーシの指し手形式です: \"{move}\"",
+      "initializationFailed": "エンジンの初期化に失敗しました。",
+      "workerError": "Worker エラーが発生しました: {message}",
+      "timeout": "操作がタイムアウトしました。",
+      "disposed": "エンジンインスタンスは破棄されています。",
       "nestedTooDeep": "データ構造が深すぎます: {path}",
       "illegalCharacters": "不正な文字が検出されました。",
       "networkError": "エンジンリソースの取得に失敗しました。",
@@ -74,27 +78,27 @@
       "invalidMoveFormat": "指し手の形式が無効です: \"{move}\"",
       "injectionDetected": "{context} で潜在的なコマンドインジェクションが検出されました: \"{input}\"",
       "invalidPositionString": "局面文字列が無効です: 入力は空であってはなりません。"
+    }
+  },
+  "adapters": {
+    "uci": {
+      "errors": {
+        "missing_fen": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
+      }
     },
-    "adapters": {
-      "uci": {
-        "errors": {
-          "missing_fen": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
-        }
-      },
-      "usi": {
-        "errors": {
-          "missing_fen": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
-        }
-      },
-      "gtp": {
-        "errors": {
-          "invalid_response": "GTP エンジンから無効な応答を受信しました。"
-        }
-      },
-      "ensemble": {
-        "errors": {
-          "no_results": "合議するためのエンジン実行結果が存在しません。"
-        }
+    "usi": {
+      "errors": {
+        "missing_fen": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
+      }
+    },
+    "gtp": {
+      "errors": {
+        "invalid_response": "GTP エンジンから無効な応答を受信しました。"
+      }
+    },
+    "ensemble": {
+      "errors": {
+        "no_results": "合議するためのエンジン実行結果が存在しません。"
       }
     }
   },
