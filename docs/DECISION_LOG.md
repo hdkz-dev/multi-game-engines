@@ -15,7 +15,7 @@
 - [ADR-032: 2026年Q1最新技術スタック (Zenith Tier) への移行](./adr/032-zenith-tech-stack-2026.md) (Accepted - 2026-02-18)
 - [ADR-040: Ensemble Adapter Architecture](./adr/040-ensemble-adapter-architecture.md) (Proposed - 2026-02-21)
 - [ADR-041: Mobile Native Bridge Architecture](./adr/041-mobile-native-bridge-architecture.md) (Proposed - 2026-02-21)
-- [ADR-046: Standardization of Directory Structures and Naming Conventions](./adr/046-structure-standardization.md) (Completed - 2026-02-23)
+- [ADR-046: Standardization of Directory Structures and Naming Conventions](./adr/046-structure-standardization.md) (Pending Merge - 2026-02-23)
 
 ## 📦 リソース管理とセキュリティ (Resources & Security)
 
@@ -24,7 +24,7 @@
 - [ADR-038: プライバシー保護のためのログ・サニタイズポリシー (Privacy-First Logging)](./adr/038-privacy-first-logging.md) (Accepted - 2026-02-20)
 - [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed - 2026-02-21)
 - [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed - 2026-02-21)
-- [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Completed - 2026-02-23)
+- [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Pending Merge - 2026-02-23)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 
@@ -42,7 +42,7 @@
 
 - [ADR-016: 段階的なリリース戦略](./adr/016-two-stage-release.md) (Accepted - 2026-02-11)
 - [ADR-017: ネイティブブリッジの統合方針](./adr/017-native-integration.md) (Accepted - 2026-02-12)
-- [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Completed - 2026-02-23)
+- [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 

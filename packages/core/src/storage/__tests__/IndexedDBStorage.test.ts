@@ -63,6 +63,7 @@ describe("IndexedDBStorage", () => {
       storage as unknown as { getDB(): Promise<IDBDatabase> }
     ).getDB();
     // fake-indexeddb の公式 API で異常クローズをシミュレート
+    // Note: 型定義の問題により as any を使用
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     forceCloseDatabase(db as any);
 

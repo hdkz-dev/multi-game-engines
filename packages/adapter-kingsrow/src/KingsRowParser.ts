@@ -1,12 +1,9 @@
-import {
-  IProtocolParser,
-  ProtocolValidator,
-  createMove,
-} from "@multi-game-engines/core";
+import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
 import {
   ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult,
+  createCheckersMove,
 } from "@multi-game-engines/domain-checkers";
 
 /**
@@ -38,23 +35,32 @@ export class KingsRowParser implements IProtocolParser<
   parseResult(
     data: string | Record<string, unknown>,
   ): ICheckersSearchResult | null {
-    if (typeof data === "string") {
-      // 2026 Best Practice: 多様な bestmove 形式に対応
-      // 形式1: "bestmove: 11-15 (eval: 0.12)"
-      // 形式2: "bestmove: 11-15"
-      // 形式3: "bestmove: (none)"
-      if (data.includes("bestmove: (none)")) {
+    if (typeof data !== "string") return null;
+
+    // 2026 Best Practice: 多様な bestmove 形式に対応
+    // 形式1: "bestmove: 11-15 (eval: 0.12)"
+    // 形式2: "bestmove: 11-15"
+    // 形式3: "bestmove: (none)"
+    if (data.includes("bestmove: (none)") || data.includes("bestmove: none")) {
+      return {
+        bestMove: null,
+        raw: data,
+      };
+    }
+
+    const match = data.match(/bestmove: ([\d-]+)(?: \(eval: ([-.\d]+)\))?/);
+    if (match) {
+      try {
+        const moveToken = match[1]!;
+        ProtocolValidator.assertNoInjection(moveToken, "BestMove");
         return {
-          bestMove: null,
+          bestMove: createCheckersMove(moveToken),
+          eval: match[2] ? parseFloat(match[2]) : undefined,
           raw: data,
         };
-      }
-
-      const match = data.match(/bestmove: ([\d-]+)(?: \(eval: ([-.\d]+)\))?/);
-      if (match) {
+      } catch {
         return {
-          bestMove: createMove<"CheckersMove">(match[1]!),
-          eval: match[2] ? parseFloat(match[2]) : undefined,
+          bestMove: null,
           raw: data,
         };
       }

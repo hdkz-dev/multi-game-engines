@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createGOMove, createGOBoard } from "../index.js";
+import { EngineError, EngineErrorCode } from "@multi-game-engines/core";
 
 describe("domain-go", () => {
   describe("createGOMove", () => {
@@ -10,14 +11,28 @@ describe("domain-go", () => {
 
     it("should throw on invalid moves (Validation Error)", () => {
       // Invalid format
-      expect(() => createGOMove("Z99")).toThrow(/Invalid GOMove format/);
+      try {
+        createGOMove("Z99");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(EngineError);
+        if (err instanceof EngineError) {
+          expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+          expect(err.message).toMatch(/Invalid GOMove format/);
+        }
+      }
     });
 
     it("should throw on injection (Security Error)", () => {
       // Control characters
-      expect(() => createGOMove("Q16\n")).toThrow(
-        /Potential command injection/,
-      );
+      try {
+        createGOMove("Q16\n");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(EngineError);
+        if (err instanceof EngineError) {
+          expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+          expect(err.message).toMatch(/Potential command injection/);
+        }
+      }
     });
   });
 
@@ -27,13 +42,27 @@ describe("domain-go", () => {
     });
 
     it("should throw on empty input", () => {
-      expect(() => createGOBoard("")).toThrow(/Invalid GOBoard/);
+      try {
+        createGOBoard("");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(EngineError);
+        if (err instanceof EngineError) {
+          expect(err.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+          expect(err.message).toMatch(/Invalid GOBoard/);
+        }
+      }
     });
 
     it("should throw on injection (Security Error)", () => {
-      expect(() => createGOBoard("board\nquit")).toThrow(
-        /Potential command injection/,
-      );
+      try {
+        createGOBoard("board\nquit");
+      } catch (err: unknown) {
+        expect(err).toBeInstanceOf(EngineError);
+        if (err instanceof EngineError) {
+          expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
+          expect(err.message).toMatch(/Potential command injection/);
+        }
+      }
     });
   });
 });

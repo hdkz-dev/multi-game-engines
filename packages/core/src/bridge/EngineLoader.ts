@@ -59,6 +59,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.LIFECYCLE_ERROR,
         message: "EngineLoader has been disposed.",
         engineId,
+        i18nKey: "engine.errors.disposed",
       });
     }
     // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
@@ -66,6 +67,8 @@ export class EngineLoader implements IEngineLoader {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${engineId}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id: engineId },
       });
     }
     const safeId = engineId;
@@ -84,12 +87,7 @@ export class EngineLoader implements IEngineLoader {
       typeof URL === "undefined" ||
       typeof URL.createObjectURL !== "function"
     ) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message:
-          "EngineLoader requires a browser environment with Blob URL support.",
-        engineId,
-      });
+      return config.url;
     }
 
     const promise = (async () => {
@@ -111,6 +109,7 @@ export class EngineLoader implements IEngineLoader {
             message:
               "Insecure connection (HTTP) is not allowed for sensitive engine files.",
             engineId,
+            i18nKey: "engine.errors.insecureConnection",
             remediation: "Use HTTPS for all engine resource URLs.",
           });
         }
@@ -140,6 +139,7 @@ export class EngineLoader implements IEngineLoader {
             code: EngineErrorCode.SECURITY_ERROR,
             message: "SRI required for security verification.",
             engineId,
+            i18nKey: "engine.errors.sriRequired",
           });
         }
 

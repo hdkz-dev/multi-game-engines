@@ -98,6 +98,14 @@ export class KingsRowAdapter extends BaseAdapter<
       // KingsRow の初期化待ちロジックがあればここに追加
       this.emitStatusChange("ready");
     } catch (error) {
+      if (this.messageUnsubscriber) {
+        this.messageUnsubscriber();
+        this.messageUnsubscriber = null;
+      }
+      if (this.communicator) {
+        this.communicator.terminate();
+        this.communicator = null;
+      }
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }

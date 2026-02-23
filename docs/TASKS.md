@@ -64,7 +64,7 @@
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [ ] **英語版ドキュメント不足**: `docs/en/` の拡充 (`DECISION_LOG.md`, `ROADMAP.md` 等)。
 - [x] **Dashboard E2E デバッグ & 修復**: Dashboard (React/Vue) の E2E テストにおける SRI ミスマッチと初期化タイムアウトの解消。(2026-02-21)
-- [x] **PR #38 Absolute Zenith Audit & 整合性同期**:
+- [x] **PR #38 Absolute Zenith Audit & 整合性同期**: (2026-02-23)
   - [x] **Reliability**: `EngineLoader` の ID 衝突防止 (セパレータ復帰) と `IndexedDB` ハング防止。
   - [x] **Leak Prevention**: `revokeAll()` 実装による Blob URL メモリリークの完全排除。
   - [x] **Type Safety**: `isIEngineAdapter` 検証の完備と `ValidI18nKey` によるエラーキーの型保証。
@@ -81,4 +81,4 @@
     - [x] **Domain**: Mahjong での指し手なし（null）の正規化。
     - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
     - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
-    - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。 (2026-02-23)
+    - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。

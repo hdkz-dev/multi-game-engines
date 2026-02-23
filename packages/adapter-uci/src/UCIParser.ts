@@ -153,7 +153,7 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser] Skipping invalid PV move token: "${truncateLog(token)}"`,
+                `[UCIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(token)}" in response: "${truncateLog(line)}"`,
               );
             }
           }
@@ -219,8 +219,20 @@ export class UCIParser implements IProtocolParser<
       ) {
         result.ponder = null;
       } else {
-        const ponder = this.createMove(ponderStr);
-        if (ponder) result.ponder = ponder;
+        try {
+          ProtocolValidator.assertNoInjection(ponderStr, "PonderMove");
+          const ponder = this.createMove(ponderStr);
+          if (ponder) {
+            result.ponder = ponder;
+          } else {
+            console.warn(
+              `[UCIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderStr)}" in response: "${truncateLog(line)}"`,
+            );
+            result.ponder = null;
+          }
+        } catch {
+          result.ponder = null;
+        }
       }
     }
 

@@ -238,4 +238,56 @@ describe("EngineLoader", () => {
     loader.revokeByEngineId("engine-2");
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(3);
   });
+
+  it("should rollback and revoke ONLY new URLs on batch failure", async () => {
+    const configs: Record<string, IEngineSourceConfig> = {
+      existing: {
+        url: "https://test.com/existing.js",
+        type: "script",
+        sri: dummySRI,
+      },
+      newOne: {
+        url: "https://test.com/new.js",
+        type: "script",
+        sri: dummySRI,
+      },
+      failing: {
+        url: "https://test.com/fail.js",
+        type: "script",
+        sri: dummySRI,
+      },
+    };
+
+    // 1. まず1つだけ正常にロードしてキャッシュさせる
+    vi.mocked(globalThis.URL.createObjectURL).mockReturnValueOnce(
+      "blob:existing",
+    );
+    await loader.loadResource("test", configs.existing!);
+    const revokeSpy = vi.mocked(globalThis.URL.revokeObjectURL);
+    revokeSpy.mockClear();
+
+    // 2回目以降の createObjectURL の戻り値を分ける
+    vi.mocked(globalThis.URL.createObjectURL)
+      .mockReturnValueOnce("blob:new")
+      .mockReturnValueOnce("blob:fail");
+
+    // 2. バッチロードを実行。3つ目のリソースを失敗させる
+    vi.mocked(fetch).mockImplementation(async (url) => {
+      if (url.toString().includes("fail.js")) {
+        return { ok: false, status: 500 } as Response;
+      }
+      return {
+        ok: true,
+        arrayBuffer: async () => new TextEncoder().encode("test").buffer,
+      } as Response;
+    });
+
+    await expect(loader.loadResources("test", configs)).rejects.toThrow();
+
+    // 3. 検証:
+    // - "existing" は既にあったので revoke されないはず
+    // - "newOne" は新しく作られたので revoke されるはず
+    expect(revokeSpy).toHaveBeenCalledWith("blob:new");
+    expect(revokeSpy).not.toHaveBeenCalledWith("blob:existing");
+  });
 });

@@ -117,7 +117,7 @@ export class USIParser implements IProtocolParser<
               info.currMove = createShogiMove(token);
             } catch {
               console.warn(
-                `[USIParser] Skipping invalid currmove token: "${truncateLog(token)}"`,
+                `[USIParser.parseInfo] Skipping invalid "currmove" token: "${truncateLog(token)}" in response: "${truncateLog(data)}"`,
               );
             }
           }
@@ -141,7 +141,7 @@ export class USIParser implements IProtocolParser<
               info.pv.push(move);
             } catch {
               console.warn(
-                `[USIParser] Skipping invalid PV move token: "${truncateLog(m)}"`,
+                `[USIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(m)}" in response: "${truncateLog(data)}"`,
               );
             }
           }
@@ -191,9 +191,13 @@ export class USIParser implements IProtocolParser<
         result.ponder = null;
       } else {
         try {
+          ProtocolValidator.assertNoInjection(ponderToken, "PonderMove");
           result.ponder = createShogiMove(ponderToken);
         } catch {
-          // Ignore invalid ponder move
+          console.warn(
+            `[USIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderToken)}" in response: "${truncateLog(data)}"`,
+          );
+          result.ponder = null;
         }
       }
     }

@@ -16,7 +16,13 @@ export default defineConfig({
       insertTypesEntry: true,
       staticImport: true,
       include: ["src/**/*"],
-      exclude: ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"],
+      exclude: [
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.test.tsx",
+        "**/*.spec.tsx",
+        "**/__tests__/**",
+      ],
     }),
   ],
   build: {

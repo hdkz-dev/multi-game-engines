@@ -35,11 +35,7 @@ const InteractivePanel = () => {
 
   return (
     <div style={{ width: "400px", height: "600px" }}>
-      <EngineMonitorPanel
-        engine={engine}
-        searchOptions={{}}
-        title="Engine Analysis"
-      />
+      <EngineMonitorPanel engine={engine} searchOptions={{}} />
     </div>
   );
 };

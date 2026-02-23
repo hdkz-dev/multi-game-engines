@@ -1,4 +1,4 @@
-/* eslint-env node */
+/* global console */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,19 +28,24 @@ const packages = fs.readdirSync(PACKAGES_DIR);
 for (const pkgName of packages) {
   const pkgPath = path.join(PACKAGES_DIR, pkgName, 'package.json');
   if (fs.existsSync(pkgPath)) {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    
-    pkg.author = commonMetadata.author;
-    pkg.license = commonMetadata.license;
-    pkg.repository = { ...commonMetadata.repository, directory: `packages/${pkgName}` };
-    pkg.bugs = commonMetadata.bugs;
-    pkg.homepage = commonMetadata.homepage;
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      
+      pkg.author = commonMetadata.author;
+      pkg.license = commonMetadata.license;
+      pkg.repository = { ...commonMetadata.repository, directory: `packages/${pkgName}` };
+      pkg.bugs = commonMetadata.bugs;
+      pkg.homepage = commonMetadata.homepage;
 
-    // ソート順
-    const { name, version, description, type, ...rest } = pkg;
-    const ordered = { name, version, description, type, ...rest };
+      // 2026 Best Practice: package.json のキー順序を固定して可読性を向上。
+      // 未定義のフィールド（description, type 等）は JSON.stringify により自動的に除外されます。
+      const { name, version, description, type, ...rest } = pkg;
+      const ordered = { name, version, description, type, ...rest };
 
-    fs.writeFileSync(pkgPath, JSON.stringify(ordered, null, 2) + '\n');
-    console.log(`Polished metadata for ${pkgName}`);
+      fs.writeFileSync(pkgPath, JSON.stringify(ordered, null, 2) + '\n');
+      console.log(`Polished metadata for ${pkgName}`);
+    } catch (err) {
+      console.error(`[polish-metadata] Failed to process ${pkgName}:`, err);
+    }
   }
 }

@@ -47,9 +47,9 @@ describe("StockfishAdapter", () => {
   });
 
   afterAll(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+    vi.useRealTimers();
   });
 
   beforeEach(() => {

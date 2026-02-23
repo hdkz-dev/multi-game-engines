@@ -136,6 +136,8 @@ export class EngineBridge implements IEngineBridge {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid adapter ID: "${adapter.id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id: adapter.id },
       });
     }
     const id = adapter.id;
@@ -182,6 +184,10 @@ export class EngineBridge implements IEngineBridge {
         await adapter.dispose();
       } catch (err) {
         console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
+      }
+      // 2026 Best Practice: アダプター登録解除時に Blob URL リソースも明示的に解放
+      if (this.loader) {
+        this.loader.revokeByEngineId(id);
       }
     }
     this.adapters.delete(id);
@@ -252,6 +258,8 @@ export class EngineBridge implements IEngineBridge {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
+        i18nKey: "engine.errors.invalidEngineId",
+        i18nParams: { id },
       });
     }
 
@@ -565,6 +573,13 @@ export class EngineBridge implements IEngineBridge {
     const pendingLoader = this.loaderPromise;
     const pendingEngines = Array.from(this.pendingEngines.values());
 
+    // 2026 Best Practice: アダプターのイベントリスナーを破棄前に解除
+    // これにより、破棄中に発生したイベントがブリッジ経由で通知されるのを防ぎます。
+    for (const unsubs of this.adapterUnsubscribers.values()) {
+      for (const unsub of unsubs) unsub();
+    }
+    this.adapterUnsubscribers.clear();
+
     const promises = Array.from(this.adapters.keys()).map(async (id) => {
       const adapter = this.adapters.get(id);
       if (adapter) {
@@ -589,12 +604,6 @@ export class EngineBridge implements IEngineBridge {
       pendingLoader ? pendingLoader.catch(() => {}) : Promise.resolve(),
     ]);
 
-    // アダプターのイベントリスナーを確実に解除
-    for (const unsubs of this.adapterUnsubscribers.values()) {
-      for (const unsub of unsubs) unsub();
-    }
-    this.adapterUnsubscribers.clear();
-
     this.adapters.clear();
     this.engineInstances.clear();
     this.pendingEngines.clear();
@@ -612,10 +621,10 @@ export class EngineBridge implements IEngineBridge {
   private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
     const r = obj as Record<string, unknown>;
-    const p = r["parser"];
-    if (typeof p !== "object" || p === null) return false;
+    const parser = r["parser"];
+    if (typeof parser !== "object" || parser === null) return false;
 
-    const parser = p as Record<string, unknown>;
+    const p = parser as Record<string, unknown>;
     return (
       typeof r["id"] === "string" &&
       typeof r["name"] === "string" &&
@@ -632,9 +641,9 @@ export class EngineBridge implements IEngineBridge {
       typeof r["onProgress"] === "function" &&
       typeof r["onTelemetry"] === "function" &&
       typeof r["emitTelemetry"] === "function" &&
-      typeof parser["createSearchCommand"] === "function" &&
-      typeof parser["parseInfo"] === "function" &&
-      typeof parser["parseResult"] === "function"
+      typeof p["createSearchCommand"] === "function" &&
+      typeof p["parseInfo"] === "function" &&
+      typeof p["parseResult"] === "function"
     );
   }
 }

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted / Completed (2026-02-23)
+Accepted / Pending Merge (2026-02-23)
 
 ## Context
 
