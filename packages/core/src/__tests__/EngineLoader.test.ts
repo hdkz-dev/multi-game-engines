@@ -226,13 +226,16 @@ describe("EngineLoader", () => {
     loader.revokeByEngineId("engine-1");
 
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
-    // engine-2's resource should still be active
-    const activeBlobs = (
-      loader as unknown as { activeBlobs: Map<string, string> }
-    ).activeBlobs;
-    expect(activeBlobs.size).toBe(1);
-    expect(activeBlobs.has(`engine-2:${encodeURIComponent(config.url)}`)).toBe(
-      true,
-    );
+
+    // engine-2's resources should NOT be revoked yet
+    // engine-1 had 2 resources, engine-2 had 1. Total created = 3. Total revoked = 2.
+    // The specific blob for engine-2 should not have been passed to revokeObjectURL yet.
+    // We assume the blob URLs are predictable or we can check what was NOT called.
+    // Since we mock return "blob:test" for all, we can't distinguish by URL value alone in this mock setup.
+    // However, we can verifying the count is correct (2 calls for engine-1).
+
+    // Now revoke engine-2
+    loader.revokeByEngineId("engine-2");
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(3);
   });
 });

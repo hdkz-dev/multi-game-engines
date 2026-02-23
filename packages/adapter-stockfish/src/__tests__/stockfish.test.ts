@@ -117,11 +117,29 @@ describe("StockfishAdapter", () => {
     await vi.runAllTimersAsync();
     await loadPromise;
 
+    // Top-level key injection
     await expect(
       adapter.search({
         fen: createFEN("startpos"),
         // Testing injection via custom field due to index signature
         "evil\nkey": "data",
+      }),
+    ).rejects.toThrow(/Potential command injection/);
+
+    // Value injection
+    await expect(
+      adapter.search({
+        fen: createFEN("startpos"),
+        depth: 10,
+        extra: "evil\rvalue",
+      }),
+    ).rejects.toThrow(/Potential command injection/);
+
+    // Nested object injection
+    await expect(
+      adapter.search({
+        fen: createFEN("startpos"),
+        options: { "nested\nkey": "value" },
       }),
     ).rejects.toThrow(/Potential command injection/);
   });
