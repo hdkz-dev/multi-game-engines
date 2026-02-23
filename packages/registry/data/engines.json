@@ -4,18 +4,18 @@
     "stockfish": {
       "name": "Stockfish",
       "adapter": "uci",
-      "latest": "16.1",
+      "latest": "16.0",
       "versions": {
-        "16.1": {
+        "16.0": {
           "assets": {
             "main": {
-              "url": "https://cdn.example.com/stockfish/16.1/stockfish.js",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16.js",
+              "sri": "sha384-bCh+jjHqO5/k1PVx7yJktl7cuplMcT1TDIfN7BbAjNTZHu9wDlApzTehK3HzbfR8",
               "type": "worker-js"
             },
             "wasm": {
-              "url": "https://cdn.example.com/stockfish/16.1/stockfish.wasm",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+              "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16.wasm",
+              "sri": "sha384-ScF6ZY1hx3CQtkWXLNFo7FVn1rMTyNGdfl7ZznGyTP+n9sDwGmS8ECn5WeJjuMK7",
               "type": "wasm"
             }
           }
@@ -30,12 +30,12 @@
         "7.5": {
           "assets": {
             "main": {
-              "url": "https://cdn.example.com/yaneuraou/7.5/yaneuraou.js",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             },
             "wasm": {
-              "url": "https://cdn.example.com/yaneuraou/7.5/yaneuraou.wasm",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "wasm"
             }
@@ -51,12 +51,12 @@
         "1.14": {
           "assets": {
             "main": {
-              "url": "https://cdn.example.com/katago/1.14/katago.js",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.js",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             },
             "wasm": {
-              "url": "https://cdn.example.com/katago/1.14/katago.wasm",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.wasm",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "wasm"
             }
@@ -72,7 +72,7 @@
         "4.4": {
           "assets": {
             "main": {
-              "url": "https://cdn.example.com/edax/4.4/edax.js",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             }
@@ -88,7 +88,7 @@
         "1.0": {
           "assets": {
             "main": {
-              "url": "https://cdn.example.com/mortal/1.0/mortal.js",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
               "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             }
