@@ -1,4 +1,10 @@
-import { IEngineRegistry, IEngineSourceConfig } from "@multi-game-engines/core";
+import {
+  IEngineRegistry,
+  IEngineSourceConfig,
+  EngineError,
+  EngineErrorCode,
+  I18nKey,
+} from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
 import { t as translate } from "@multi-game-engines/i18n";
 import { z } from "zod";
@@ -50,8 +56,9 @@ export class StaticRegistry implements IEngineRegistry {
     // 2026 Best Practice: 起動時または登録時に Zod で構造を厳密に検証
     const result = EngineManifestSchema.safeParse(data);
     if (!result.success) {
+      const i18nKey = "engine.errors.registry.invalidManifest" as I18nKey;
       console.warn(
-        translate("engine.errors.registry.invalidManifest", {
+        translate(i18nKey, {
           error: result.error.message,
         }),
       );
@@ -123,12 +130,15 @@ export class RemoteRegistry extends StaticRegistry {
       try {
         const response = await fetch(this.url, { signal: controller.signal });
         if (!response.ok) {
-          throw new Error(
-            translate("engine.errors.registry.fetchFailed", {
+          const i18nKey = "engine.errors.registry.fetchFailed" as I18nKey;
+          throw new EngineError({
+            code: EngineErrorCode.NETWORK_ERROR,
+            message: translate(i18nKey, {
               url: this.url,
               status: response.statusText,
             }),
-          );
+            i18nKey,
+          });
         }
 
         // 2026 Zenith Tier: リモートマニフェスト自体の SRI 検証
@@ -143,24 +153,30 @@ export class RemoteRegistry extends StaticRegistry {
         // 2026 Zenith Tier: Zod による厳密なスキーマバリデーション
         const result = EngineManifestSchema.safeParse(parsed);
         if (!result.success) {
-          throw new Error(
-            translate("engine.errors.registry.invalidFormat", {
+          const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey, {
               url: this.url,
               error: result.error.message,
             }),
-          );
+            i18nKey,
+          });
         }
 
         this.data = result.data;
         this.loaded = true;
       } catch (error) {
         if ((error as Error).name === "AbortError") {
-          throw new Error(
-            translate("engine.errors.registry.timeout", {
+          const i18nKey = "engine.errors.registry.timeout" as I18nKey;
+          throw new EngineError({
+            code: EngineErrorCode.NETWORK_ERROR,
+            message: translate(i18nKey, {
               url: this.url,
               timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
             }),
-          );
+            i18nKey,
+          });
         }
         throw error;
       } finally {
@@ -181,7 +197,12 @@ export class RemoteRegistry extends StaticRegistry {
   ): Promise<void> {
     const parts = expectedSri.split("-");
     if (parts.length !== 2) {
-      throw new Error(`[RemoteRegistry] Invalid SRI format: ${expectedSri}`);
+      const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `[RemoteRegistry] Invalid SRI format: ${expectedSri}`,
+        i18nKey,
+      });
     }
 
     const [algo, expectedHash] = parts;
@@ -191,7 +212,12 @@ export class RemoteRegistry extends StaticRegistry {
     else if (algo === "sha384") cryptoAlgo = "SHA-384";
     else if (algo === "sha512") cryptoAlgo = "SHA-512";
     else {
-      throw new Error(`[RemoteRegistry] Unsupported SRI algorithm: ${algo}`);
+      const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `[RemoteRegistry] Unsupported SRI algorithm: ${algo}`,
+        i18nKey,
+      });
     }
 
     const hashBuffer = await globalThis.crypto.subtle.digest(
@@ -203,9 +229,12 @@ export class RemoteRegistry extends StaticRegistry {
     const actualHash = btoa(hashString);
 
     if (actualHash !== expectedHash) {
-      throw new Error(
-        translate("engine.errors.registry.sriMismatch", { url: this.url }),
-      );
+      const i18nKey = "engine.errors.registry.sriMismatch" as I18nKey;
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: translate(i18nKey, { url: this.url }),
+        i18nKey,
+      });
     }
   }
 
@@ -214,7 +243,8 @@ export class RemoteRegistry extends StaticRegistry {
     version?: string,
   ): Record<string, IEngineSourceConfig> | null {
     if (!this.loaded) {
-      console.warn(translate("engine.errors.registry.notLoaded", { id }));
+      const i18nKey = "engine.errors.registry.notLoaded" as I18nKey;
+      console.warn(translate(i18nKey, { id }));
       return null;
     }
     return super.resolve(id, version);
