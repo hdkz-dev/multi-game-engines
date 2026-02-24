@@ -23,8 +23,8 @@
     "*.css"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --external @multi-game-engines/* src/hooks.ts --format cjs,esm --dts && pnpm exec tailwindcss -i src/styles/tailwind.css -o dist/index.css",
-    "dev": "tsup src/index.ts --external @multi-game-engines/* --format cjs,esm --watch --dts",
+    "build": "tsup --external @multi-game-engines/* && pnpm exec tailwindcss -i src/styles/tailwind.css -o dist/index.css",
+    "dev": "tsup --external @multi-game-engines/* --watch",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

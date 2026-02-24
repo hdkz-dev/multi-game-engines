@@ -13,8 +13,8 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.tsx --external @multi-game-engines/*x --format esm --dts --clean",
-    "dev": "tsup src/index.ts --external @multi-game-engines/*x --format esm --watch --dts",
+    "build": "tsup src/index.tsx --external @multi-game-engines/* --format esm --dts --clean",
+    "dev": "tsup src/index.tsx --external @multi-game-engines/* --format esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
