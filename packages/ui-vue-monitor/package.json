@@ -37,8 +37,8 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@storybook/vue3": "10.2.10",
-    "@storybook/vue3-vite": "10.2.10",
+    "@storybook/vue3": "10.2.11",
+    "@storybook/vue3-vite": "10.2.11",
     "@types/node": "^25.3.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",

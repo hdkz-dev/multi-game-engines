@@ -39,15 +39,15 @@
     "lit": "^3.3.2"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.10",
-    "@storybook/addon-docs": "10.2.10",
-    "@storybook/addon-links": "10.2.10",
-    "@storybook/web-components": "10.2.10",
-    "@storybook/web-components-vite": "10.2.10",
-    "@swc/core": "^1.15.11",
+    "@storybook/addon-a11y": "10.2.11",
+    "@storybook/addon-docs": "10.2.11",
+    "@storybook/addon-links": "10.2.11",
+    "@storybook/web-components": "10.2.11",
+    "@storybook/web-components-vite": "10.2.11",
+    "@swc/core": "^1.15.13",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
-    "storybook": "10.2.10",
+    "storybook": "10.2.11",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
