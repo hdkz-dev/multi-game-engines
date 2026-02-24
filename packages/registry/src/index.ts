@@ -90,6 +90,8 @@ export class RemoteRegistry extends StaticRegistry {
   private expectedSri: string | undefined;
   private loaded = false;
 
+  private loadingPromise: Promise<void> | null = null;
+
   constructor(url: string, expectedSri?: string) {
     super({ version: "0.0.0", engines: {} }); // 初期状態は最小限の有効な構造
     this.url = url;
@@ -105,60 +107,69 @@ export class RemoteRegistry extends StaticRegistry {
 
   /**
    * 外部マニフェストをロードします。
+   * 同時呼び出し時は、実行中のリクエストを共有します。
    */
   async load(): Promise<void> {
-    const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort(),
-      RemoteRegistry.FETCH_TIMEOUT_MS,
-    );
+    if (this.loaded) return;
+    if (this.loadingPromise) return this.loadingPromise;
 
-    try {
-      const response = await fetch(this.url, { signal: controller.signal });
-      if (!response.ok) {
-        throw new Error(
-          translate("engine.errors.registry.fetchFailed", {
-            url: this.url,
-            status: response.statusText,
-          }),
-        );
+    this.loadingPromise = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(
+        () => controller.abort(),
+        RemoteRegistry.FETCH_TIMEOUT_MS,
+      );
+
+      try {
+        const response = await fetch(this.url, { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error(
+            translate("engine.errors.registry.fetchFailed", {
+              url: this.url,
+              status: response.statusText,
+            }),
+          );
+        }
+
+        // 2026 Zenith Tier: リモートマニフェスト自体の SRI 検証
+        const body = await response.arrayBuffer();
+        if (this.expectedSri) {
+          await this.verifySri(body, this.expectedSri);
+        }
+
+        const decoder = new TextDecoder();
+        const parsed: unknown = JSON.parse(decoder.decode(body));
+
+        // 2026 Zenith Tier: Zod による厳密なスキーマバリデーション
+        const result = EngineManifestSchema.safeParse(parsed);
+        if (!result.success) {
+          throw new Error(
+            translate("engine.errors.registry.invalidFormat", {
+              url: this.url,
+              error: result.error.message,
+            }),
+          );
+        }
+
+        this.data = result.data;
+        this.loaded = true;
+      } catch (error) {
+        if ((error as Error).name === "AbortError") {
+          throw new Error(
+            translate("engine.errors.registry.timeout", {
+              url: this.url,
+              timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
+            }),
+          );
+        }
+        throw error;
+      } finally {
+        clearTimeout(timer);
+        this.loadingPromise = null;
       }
+    })();
 
-      // 2026 Zenith Tier: リモートマニフェスト自体の SRI 検証
-      const body = await response.arrayBuffer();
-      if (this.expectedSri) {
-        await this.verifySri(body, this.expectedSri);
-      }
-
-      const decoder = new TextDecoder();
-      const parsed: unknown = JSON.parse(decoder.decode(body));
-
-      // 2026 Zenith Tier: Zod による厳密なスキーマバリデーション
-      const result = EngineManifestSchema.safeParse(parsed);
-      if (!result.success) {
-        throw new Error(
-          translate("engine.errors.registry.invalidFormat", {
-            url: this.url,
-            error: result.error.message,
-          }),
-        );
-      }
-
-      this.data = result.data;
-      this.loaded = true;
-    } catch (error) {
-      if ((error as Error).name === "AbortError") {
-        throw new Error(
-          translate("engine.errors.registry.timeout", {
-            url: this.url,
-            timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
-          }),
-        );
-      }
-      throw error;
-    } finally {
-      clearTimeout(timer);
-    }
+    return this.loadingPromise;
   }
 
   /**
