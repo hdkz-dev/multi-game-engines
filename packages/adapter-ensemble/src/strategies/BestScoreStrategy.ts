@@ -22,7 +22,7 @@ export class BestScoreStrategy<
     if (results.length === 0) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: "No results to aggregate",
+        message: "No search results provided for aggregation",
         i18nKey: "adapters.ensemble.errors.noResults",
       });
     }
@@ -34,9 +34,17 @@ export class BestScoreStrategy<
       const score = result.score as IScoreInfo | undefined;
       if (!score) continue;
 
-      // cp (センチポーン) または winrate (勝率) を優先的に評価
-      const currentScore =
-        score.cp !== undefined ? score.cp : (score.winrate ?? -Infinity);
+      // 2026 Best Practice: 詰み(mate) > センチポーン(cp) > 勝率(winrate) の順で優先評価
+      let currentScore = -Infinity;
+      if (score.mate !== undefined) {
+        // 詰みスコアを極めて高い値に変換（手数が短いほど高評価）
+        currentScore =
+          score.mate > 0 ? 1000000 - score.mate : -1000000 - score.mate;
+      } else if (score.cp !== undefined) {
+        currentScore = score.cp;
+      } else {
+        currentScore = score.winrate ?? -Infinity;
+      }
 
       if (currentScore > maxScore) {
         maxScore = currentScore;

@@ -31,12 +31,10 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "wasm"
             }
           }
@@ -52,12 +50,10 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.js",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.wasm",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "wasm"
             }
           }
@@ -73,7 +69,6 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             }
           }
@@ -89,7 +84,6 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
-              "sri": "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
               "type": "worker-js"
             }
           }

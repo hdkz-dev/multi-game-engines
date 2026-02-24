@@ -19,13 +19,21 @@ export class WeightedStrategy<
 
   constructor(weights: Record<string, number> = {}) {
     this.weights = weights;
+    // TODO: EnsembleAdapter のインターフェースを Map<id, result> に拡張するまで、
+    // 重み付けは均等 (1.0) として扱われるため、警告を表示。
+    if (Object.keys(weights).length > 0) {
+      console.warn(
+        "[WeightedStrategy] Engine-specific weights are not yet applied. " +
+          "All engines are weighted uniformly until the aggregate interface is updated to include engine IDs.",
+      );
+    }
   }
 
   aggregateResults(results: T_RESULT[]): T_RESULT {
     if (results.length === 0) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: "No results to aggregate",
+        message: "No search results provided for aggregation",
         i18nKey: "adapters.ensemble.errors.noResults",
       });
     }
@@ -35,11 +43,13 @@ export class WeightedStrategy<
     let winnerMove: string | null = null;
 
     for (const result of results) {
+      // 2026 Best Practice: bestMove が存在しない場合は投票から除外 (Silent contamination prevention)
+      if (result.bestMove === null || result.bestMove === undefined) continue;
+
       const move = String(result.bestMove);
       // 注意: WeightedStrategy はエンジン ID ごとの重みが必要だが、
       // aggregateResults(results[]) シグネチャでは個別の ID が失われているため、
-      // ここでは暫定的に全結果を等しく扱うか、result に ID を含める必要がある。
-      // TODO: EnsembleAdapter 側で ID 付きの結果を渡せるようにインターフェースを見直す
+      // 現状は全結果を等しく (1.0) 扱う。
       const weight = 1.0;
 
       const currentWeight = (voteCounts.get(move) || 0) + weight;
@@ -52,9 +62,11 @@ export class WeightedStrategy<
     }
 
     // 勝者の指し手を持つ最初のエントリを返す
-    for (const result of results) {
-      if (String(result.bestMove) === winnerMove) {
-        return result;
+    if (winnerMove) {
+      for (const result of results) {
+        if (result.bestMove && String(result.bestMove) === winnerMove) {
+          return result;
+        }
       }
     }
 

@@ -15,6 +15,18 @@ describe("BestScoreStrategy", () => {
     expect(winner.bestMove).toBe("a2a4");
   });
 
+  it("should prioritize mate scores over centipawn scores", () => {
+    const strategy = new BestScoreStrategy();
+    const results: IBaseSearchResult[] = [
+      { bestMove: "a2a3", score: { cp: 2000 } }, // High CP
+      { bestMove: "a2a4", score: { mate: 5 } }, // Mate in 5
+      { bestMove: "h2h3", score: { mate: 2 } }, // Mate in 2 (Better than mate in 5)
+    ];
+
+    const winner = strategy.aggregateResults(results);
+    expect(winner.bestMove).toBe("h2h3");
+  });
+
   it("should select the move with the highest winrate if cp is missing", () => {
     const strategy = new BestScoreStrategy();
     const results: IBaseSearchResult[] = [

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { RemoteRegistry } from "../index.js";
 
 describe("RemoteRegistry", () => {
@@ -26,6 +26,10 @@ describe("RemoteRegistry", () => {
     vi.stubGlobal("fetch", vi.fn());
   });
 
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("should fetch and resolve remote engines after load", async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
@@ -40,7 +44,10 @@ describe("RemoteRegistry", () => {
 
     await registry.load();
 
-    expect(fetch).toHaveBeenCalledWith(mockUrl);
+    expect(fetch).toHaveBeenCalledWith(
+      mockUrl,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(registry.getSupportedEngines()).toContain("remote");
 
     const remote = registry.resolve("remote");

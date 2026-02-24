@@ -16,4 +16,17 @@ describe("WeightedStrategy", () => {
     const winner = strategy.aggregateResults(results);
     expect(winner.bestMove).toBe("a2a3");
   });
+
+  it("should ignore results with null or undefined bestMove", () => {
+    const strategy = new WeightedStrategy();
+
+    const results: IBaseSearchResult[] = [
+      { bestMove: null },
+      { bestMove: undefined },
+      { bestMove: "e2e4" },
+    ];
+
+    const winner = strategy.aggregateResults(results);
+    expect(winner.bestMove).toBe("e2e4");
+  });
 });

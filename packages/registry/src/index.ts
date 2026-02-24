@@ -8,7 +8,15 @@ export class StaticRegistry implements IEngineRegistry {
   protected data: Record<string, unknown>;
 
   constructor(data: unknown = enginesData) {
-    this.data = data as Record<string, unknown>;
+    // 2026 Best Practice: 実行時のデータ型検証 (Robustness)
+    if (data === null || typeof data !== "object" || Array.isArray(data)) {
+      console.warn(
+        "[StaticRegistry] Invalid data format. Falling back to bundled engines data.",
+      );
+      this.data = enginesData as Record<string, unknown>;
+    } else {
+      this.data = data as Record<string, unknown>;
+    }
   }
 
   resolve(
@@ -43,6 +51,7 @@ export class StaticRegistry implements IEngineRegistry {
  * 実行時に外部 URL からマニフェストを取得する動的エンジンレジストリ。
  */
 export class RemoteRegistry extends StaticRegistry {
+  private static readonly FETCH_TIMEOUT_MS = 10_000;
   private url: string;
   private loaded = false;
 
@@ -55,14 +64,46 @@ export class RemoteRegistry extends StaticRegistry {
    * 外部マニフェストをロードします。
    */
   async load(): Promise<void> {
-    const response = await fetch(this.url);
-    if (!response.ok) {
-      throw new Error(
-        `[RemoteRegistry] Failed to fetch manifest from ${this.url}: ${response.statusText}`,
-      );
+    const controller = new AbortController();
+    const timer = setTimeout(
+      () => controller.abort(),
+      RemoteRegistry.FETCH_TIMEOUT_MS,
+    );
+
+    try {
+      const response = await fetch(this.url, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(
+          `[RemoteRegistry] Failed to fetch manifest from ${this.url}: ${response.statusText}`,
+        );
+      }
+
+      const parsed: unknown = await response.json();
+
+      // 2026 Best Practice: 簡易スキーマ検証 (Discriminated Union / Zod 等の代替)
+      if (
+        parsed === null ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed) ||
+        !("engines" in parsed)
+      ) {
+        throw new Error(
+          `[RemoteRegistry] Invalid manifest format from ${this.url}. Missing "engines" field.`,
+        );
+      }
+
+      this.data = parsed as Record<string, unknown>;
+      this.loaded = true;
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        throw new Error(
+          `[RemoteRegistry] Timeout fetching manifest from ${this.url} after ${RemoteRegistry.FETCH_TIMEOUT_MS}ms`,
+        );
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
     }
-    this.data = (await response.json()) as Record<string, unknown>;
-    this.loaded = true;
   }
 
   override resolve(
