@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import {
   parseSFEN,
   ShogiPiece,
@@ -20,7 +20,8 @@ function isGotePiece(piece: ShogiPiece): boolean {
 }
 
 /**
- * A framework-agnostic Shogi board component.
+ * A framework-agnostic Shogi board component with high accessibility.
+ * Supports Roving Tabindex for keyboard navigation.
  * @element shogi-board
  */
 @customElement("shogi-board")
@@ -151,6 +152,12 @@ export class ShogiBoard extends LitElement {
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
 
+  /**
+   * 2026 Zenith Tier: Roving Tabindex state.
+   */
+  @state()
+  private _focusedIndex = 0;
+
   private _getLocalizedStrings() {
     const data = this.locale === "ja" ? locales.ja : locales.en;
     return {
@@ -186,6 +193,44 @@ export class ShogiBoard extends LitElement {
     const rank = rankChar.charCodeAt(0) - 97;
     if (file < 0 || file >= 9 || rank < 0 || rank >= 9) return -1;
     return rank * 9 + file;
+  }
+
+  private _handleKeyDown(e: KeyboardEvent) {
+    let newIndex = this._focusedIndex;
+    const row = Math.floor(this._focusedIndex / 9);
+    const col = this._focusedIndex % 9;
+
+    switch (e.key) {
+      case "ArrowUp":
+        newIndex = Math.max(0, this._focusedIndex - 9);
+        break;
+      case "ArrowDown":
+        newIndex = Math.min(80, this._focusedIndex + 9);
+        break;
+      case "ArrowLeft":
+        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        break;
+      case "ArrowRight":
+        newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
+        break;
+      case "Home":
+        newIndex = row * 9;
+        break;
+      case "End":
+        newIndex = row * 9 + 8;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    this._focusedIndex = newIndex;
+    void this.updateComplete.then(() => {
+      const el = this.shadowRoot?.querySelector(
+        `[data-index="${newIndex}"]`,
+      ) as HTMLElement;
+      el?.focus();
+    });
   }
 
   override render() {
@@ -232,9 +277,11 @@ export class ShogiBoard extends LitElement {
           <div
             class="square ${isHighlighted ? "highlight" : ""}"
             data-square="${usiFile}${String.fromCharCode(97 + r)}"
+            data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
-            tabindex="0"
+            tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
+            @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
               ? html`<span
@@ -250,7 +297,7 @@ export class ShogiBoard extends LitElement {
     }
 
     return html`
-      <div class="container">
+      <div class="container" @keydown="${this._handleKeyDown}">
         <div class="hand gote" aria-label="${strings.handGoteLabel}">
           ${this._renderHand(hand, "gote", strings)}
         </div>

@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import {
   parseFEN,
   ChessPiece,
@@ -24,6 +24,11 @@ const PIECE_SVG: Record<ChessPiece, string> = {
   k: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
 };
 
+/**
+ * A framework-agnostic Chess board component with high accessibility.
+ * Supports Roving Tabindex for keyboard navigation.
+ * @element chess-board
+ */
 @customElement("chess-board")
 export class ChessBoard extends LitElement {
   static override styles = css`
@@ -120,6 +125,12 @@ export class ChessBoard extends LitElement {
   @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
     {};
 
+  /**
+   * 2026 Zenith Tier: Roving Tabindex state.
+   */
+  @state()
+  private _focusedIndex = 0;
+
   private _getLocalizedStrings() {
     const data = this.locale === "ja" ? locales.ja : locales.en;
     return {
@@ -148,6 +159,44 @@ export class ChessBoard extends LitElement {
     const rank = 8 - parseInt(algebraic[1]!, 10);
     if (file < 0 || file >= 8 || rank < 0 || rank >= 8) return -1;
     return rank * 8 + file;
+  }
+
+  private _handleKeyDown(e: KeyboardEvent) {
+    let newIndex = this._focusedIndex;
+    const row = Math.floor(this._focusedIndex / 8);
+    const col = this._focusedIndex % 8;
+
+    switch (e.key) {
+      case "ArrowUp":
+        newIndex = Math.max(0, this._focusedIndex - 8);
+        break;
+      case "ArrowDown":
+        newIndex = Math.min(63, this._focusedIndex + 8);
+        break;
+      case "ArrowLeft":
+        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        break;
+      case "ArrowRight":
+        newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
+        break;
+      case "Home":
+        newIndex = row * 8;
+        break;
+      case "End":
+        newIndex = row * 8 + 7;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    this._focusedIndex = newIndex;
+    void this.updateComplete.then(() => {
+      const el = this.shadowRoot?.querySelector(
+        `[data-index="${newIndex}"]`,
+      ) as HTMLElement;
+      el?.focus();
+    });
   }
 
   override render() {
@@ -191,15 +240,17 @@ export class ChessBoard extends LitElement {
               ? "highlight"
               : ""}"
             data-square="${algebraicFile}${algebraicRank}"
+            data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
-            tabindex="0"
+            tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
+            @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
               ? html`<img
                   class="piece"
                   src="${PIECE_SVG[piece]}"
-                  alt="${pieceName}"
+                  alt=""
                   aria-hidden="true"
                 />`
               : ""}
@@ -211,6 +262,7 @@ export class ChessBoard extends LitElement {
       class="board"
       role="grid"
       aria-label="${strings.boardLabel}"
+      @keydown="${this._handleKeyDown}"
     >
       ${squares}
     </div>`;
