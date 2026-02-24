@@ -1,14 +1,20 @@
 import { GTPAdapter } from "./GTPAdapter.js";
-import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
-import {
+import { EngineFacade } from "@multi-game-engines/core";
+import type {
+  IEngine,
+  IEngineConfig,
+  IEngineSourceConfig,
+} from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
+import type {
   IGoSearchOptions,
   IGoSearchInfo,
   IGoSearchResult,
-} from "./GTPParser.js";
+} from "@multi-game-engines/domain-go";
 
 export { GTPAdapter };
 export { GTPParser } from "./GTPParser.js";
-export { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
+export type { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
 
 /**
  * GTP エンジンのインスタンスを生成します。
@@ -16,6 +22,18 @@ export { IGoSearchOptions, IGoSearchInfo, IGoSearchResult };
 export function createGTPEngine(
   config: IEngineConfig = {},
 ): IEngine<IGoSearchOptions, IGoSearchInfo, IGoSearchResult> {
-  const adapter = new GTPAdapter(config);
+  // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
+  const registrySources =
+    OfficialRegistry.resolve(config.id || "katago", config.version) || {};
+
+  const mergedConfig: IEngineConfig = {
+    ...config,
+    sources: {
+      ...(registrySources as Record<string, IEngineSourceConfig>),
+      ...(config.sources || {}),
+    } as Required<IEngineConfig>["sources"],
+  };
+
+  const adapter = new GTPAdapter(mergedConfig);
   return new EngineFacade(adapter);
 }

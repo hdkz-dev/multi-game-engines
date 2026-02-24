@@ -15,7 +15,7 @@ describe("createBackgammonMove", () => {
 
   it("should throw for invalid move formats", () => {
     expect(() => createBackgammonMove("invalid")).toThrow(
-      /Invalid backgammon move format/,
+      /Invalid Backgammon move format/,
     );
     expect(() => createBackgammonMove("24-18")).toThrow();
     expect(() => createBackgammonMove("24/")).toThrow();

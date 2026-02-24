@@ -1,44 +1,20 @@
 import {
   IProtocolParser,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  IScoreInfo,
   Move,
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
+  I18nKey,
   createMove,
   truncateLog,
 } from "@multi-game-engines/core";
-import { FEN, createFEN } from "@multi-game-engines/domain-chess";
-
-/** チェス用の探索オプション (UCI標準規格) */
-export interface IChessSearchOptions extends IBaseSearchOptions {
-  fen?: FEN;
-  depth?: number;
-  time?: number;
-  nodes?: number;
-}
-
-/** チェス用の思考情報 */
-export interface IChessSearchInfo extends IBaseSearchInfo {
-  depth?: number;
-  seldepth?: number;
-  score?: IScoreInfo;
-  nodes?: number;
-  nps?: number;
-  time?: number;
-  pv?: Move[];
-  hashfull?: number;
-  multipv?: number;
-}
-
-/** チェス用の探索結果 */
-export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move | null;
-  ponder?: Move | null;
-}
+import { t as translate } from "@multi-game-engines/i18n";
+import {
+  createFEN,
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "@multi-game-engines/domain-chess";
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
@@ -153,7 +129,10 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(token)}" in response: "${truncateLog(line)}"`,
+                translate("parsers.uci.invalidPvMove", {
+                  token: truncateLog(token),
+                  line: truncateLog(line),
+                }),
               );
             }
           }
@@ -226,7 +205,10 @@ export class UCIParser implements IProtocolParser<
             result.ponder = ponder;
           } else {
             console.warn(
-              `[UCIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderStr)}" in response: "${truncateLog(line)}"`,
+              translate("parsers.uci.invalidPonder", {
+                token: truncateLog(ponderStr),
+                line: truncateLog(line),
+              }),
             );
             result.ponder = null;
           }
@@ -252,11 +234,12 @@ export class UCIParser implements IProtocolParser<
     ProtocolValidator.assertNoInjection(options, "search options", true);
 
     if (!options.fen) {
+      const i18nKey = "adapters.uci.errors.missingFEN" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
-        message: "UCI requires a FEN position.",
+        message: translate(i18nKey),
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey: "adapters.uci.errors.missingFEN",
+        i18nKey,
       });
     }
 

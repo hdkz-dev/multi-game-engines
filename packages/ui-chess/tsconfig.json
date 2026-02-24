@@ -1,19 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "outDir": "./dist",
     "jsx": "react-jsx",
     "experimentalDecorators": true,
-    "useDefineForClassFields": false,
-    "outDir": "./dist",
-    "types": ["vitest/globals"]
+    "useDefineForClassFields": false
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../i18n" },
-    { "path": "../ui-core" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }

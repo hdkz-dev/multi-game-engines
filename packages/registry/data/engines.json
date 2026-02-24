@@ -31,11 +31,13 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js",
-              "type": "worker-js"
+              "type": "worker-js",
+              "__unsafeNoSRI": true
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
-              "type": "wasm"
+              "type": "wasm",
+              "__unsafeNoSRI": true
             }
           }
         }
@@ -50,11 +52,13 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.js",
-              "type": "worker-js"
+              "type": "worker-js",
+              "__unsafeNoSRI": true
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.wasm",
-              "type": "wasm"
+              "type": "wasm",
+              "__unsafeNoSRI": true
             }
           }
         }
@@ -69,7 +73,40 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
-              "type": "worker-js"
+              "type": "worker-js",
+              "__unsafeNoSRI": true
+            }
+          }
+        }
+      }
+    },
+    "gnubg": {
+      "name": "GNU Backgammon",
+      "adapter": "gnubg",
+      "latest": "1.06",
+      "versions": {
+        "1.06": {
+          "assets": {
+            "main": {
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.06/gnubg.js",
+              "type": "worker-js",
+              "__unsafeNoSRI": true
+            }
+          }
+        }
+      }
+    },
+    "kingsrow": {
+      "name": "KingsRow",
+      "adapter": "kingsrow",
+      "latest": "1.61",
+      "versions": {
+        "1.61": {
+          "assets": {
+            "main": {
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/kingsrow/1.61/kingsrow.js",
+              "type": "worker-js",
+              "__unsafeNoSRI": true
             }
           }
         }
@@ -84,7 +121,8 @@
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
-              "type": "worker-js"
+              "type": "worker-js",
+              "__unsafeNoSRI": true
             }
           }
         }

@@ -1,5 +1,5 @@
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode, Move, PositionString } from "../types.js";
+import { EngineErrorCode, Move, PositionString, I18nKey } from "../types.js";
 import { truncateLog } from "../utils/Sanitizer.js";
 
 /**
@@ -32,10 +32,13 @@ export class ProtocolValidator {
         ? ProtocolValidator.LOOSE_REGEX
         : ProtocolValidator.STRICT_REGEX;
       if (regex.test(input)) {
+        const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+        const i18nParams = { context, input: truncateLog(input) };
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Potential command injection detected in ${context}: "${truncateLog(input)}".`,
-          i18nKey: "engine.errors.illegalCharacters",
+          i18nKey,
+          i18nParams,
           remediation: allowSemicolon
             ? "Remove control characters (\\r, \\n, \\0, etc.) from input."
             : "Remove control characters (\\r, \\n, \\0, ;, etc.) from input.",
@@ -79,9 +82,13 @@ export class ProtocolValidator {
 /** 汎用指し手バリデータ (2026 Zenith Tier: Refuse by Exception) */
 export function createMove<T extends string = string>(move: string): Move<T> {
   if (typeof move !== "string" || !/^[a-z0-9+*#=/\- ()]+$/i.test(move)) {
+    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: `Invalid Move format: "${truncateLog(move)}" contains illegal characters.`,
+      i18nKey,
+      i18nParams,
     });
   }
   ProtocolValidator.assertNoInjection(move, "Move");
@@ -93,9 +100,11 @@ export function createPositionString<T extends string = string>(
   pos: string,
 ): PositionString<T> {
   if (typeof pos !== "string" || pos.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidPositionString" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: `Invalid PositionString: Input must be a non-empty string. (Value: ${truncateLog(pos)})`,
+      message: "Invalid PositionString: Input must be a non-empty string.",
+      i18nKey,
     });
   }
   ProtocolValidator.assertNoInjection(pos, "Position");

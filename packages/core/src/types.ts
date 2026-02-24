@@ -154,11 +154,17 @@ export interface IEngineError {
   code: EngineErrorCode;
   remediation?: string | undefined;
   engineId?: string | undefined;
-  /** 国際化対応のためのメッセージキー */
-  i18nKey?: string | undefined;
+  /** 国際化対応のためのメッセージキー（Branded Type） */
+  i18nKey?: I18nKey | undefined;
   /** メッセージの埋め込みパラメータ */
   i18nParams?: Record<string, string | number> | undefined;
 }
+
+/**
+ * 国際化対応のための翻訳キーを表すブランド型。
+ * 実装（@multi-game-engines/i18n）によって具体的な文字列リテラルの型が提供される。
+ */
+export type I18nKey = Brand<string, "I18nKey">;
 
 /**
  * テレメトリ関連。
@@ -387,20 +393,22 @@ export interface IEngineConfig {
   /** バージョン情報 */
   version?: string;
   /** 実行リソースの定義 */
-  sources?: {
-    /** メインのJSローダー/エントリーポイント */
-    main: IEngineSourceConfig;
-    /** WASM バイナリ（オプション） */
-    wasm?: IEngineSourceConfig;
-    /** ニューラルネットワークの重みファイル等（オプション） */
-    eval?: IEngineSourceConfig;
-    /** 追加の任意リソース */
-    [key: string]: IEngineSourceConfig | undefined;
-  };
+  sources?:
+    | {
+        /** メインのJSローダー/エントリーポイント */
+        main: IEngineSourceConfig;
+        /** WASM バイナリ（オプション） */
+        wasm?: IEngineSourceConfig | undefined;
+        /** ニューラルネットワークの重みファイル等（オプション） */
+        eval?: IEngineSourceConfig | undefined;
+        /** 追加の任意リソース */
+        [key: string]: IEngineSourceConfig | undefined;
+      }
+    | undefined;
   /** エンジン起動時のデフォルトオプション */
-  options?: Record<string, unknown>;
+  options?: Record<string, unknown> | undefined;
   /** 必須とされる環境能力 */
-  requiredCapabilities?: Partial<ICapabilities>;
+  requiredCapabilities?: Partial<ICapabilities> | undefined;
 }
 
 /**

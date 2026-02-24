@@ -11,13 +11,14 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --minify --clean",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@multi-game-engines/core": "workspace:*"
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.1",

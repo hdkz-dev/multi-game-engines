@@ -1,5 +1,5 @@
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode } from "../types.js";
+import { EngineErrorCode, I18nKey } from "../types.js";
 
 /**
  * Web Worker との通信をカプセル化し、バッファリングと期待メッセージの待機機能を提供します。
@@ -66,9 +66,13 @@ export class WorkerCommunicator {
       "Unknown worker error";
     console.error("Worker error:", message);
 
+    const i18nKey = "engine.errors.workerError" as I18nKey;
+    const i18nParams = { message };
     const error = new EngineError({
       code: EngineErrorCode.INTERNAL_ERROR,
       message: `Worker execution error: ${message}`,
+      i18nKey,
+      i18nParams,
     });
 
     for (const exp of this.expectations) {
@@ -130,10 +134,12 @@ export class WorkerCommunicator {
 
       if (options.timeoutMs) {
         timerId = setTimeout(() => {
+          const i18nKey = "engine.errors.timeout" as I18nKey;
           wrappedReject(
             new EngineError({
               code: EngineErrorCode.SEARCH_TIMEOUT,
               message: "Message expectation timed out",
+              i18nKey,
               remediation:
                 "Check if the engine worker is hanging or if the command sequence is correct.",
             }),
@@ -149,9 +155,11 @@ export class WorkerCommunicator {
 
   terminate(): void {
     this.worker.terminate();
+    const i18nKey = "engine.errors.disposed" as I18nKey;
     const error = new EngineError({
       code: EngineErrorCode.LIFECYCLE_ERROR,
       message: "Worker terminated",
+      i18nKey,
       remediation:
         "This occurs during engine disposal or forced reset. If unexpected, check for resource exhaustion.",
     });

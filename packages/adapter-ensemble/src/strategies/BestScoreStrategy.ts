@@ -1,12 +1,26 @@
 import {
-  IBaseSearchOptions,
-  IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
   EngineError,
   EngineErrorCode,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
+
+/**
+ * 2026 Best Practice: IScoreInfo の型ガード。
+ */
+const isScoreInfo = (value: unknown): value is IScoreInfo => {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.cp === "number" ||
+    typeof v.mate === "number" ||
+    typeof v.points === "number" ||
+    typeof v.winrate === "number"
+  );
+};
 
 /**
  * 各エンジンの評価値（score.cp または score.winrate）を比較し、
@@ -18,12 +32,14 @@ export class BestScoreStrategy<
 > implements IEnsembleStrategy<T_INFO, T_RESULT> {
   readonly id = "best-score";
 
-  aggregateResults(results: T_RESULT[]): T_RESULT {
+  aggregateResults(resultsMap: Map<string, T_RESULT>): T_RESULT {
+    const results = Array.from(resultsMap.values());
     if (results.length === 0) {
+      const i18nKey = "adapters.ensemble.errors.noResults" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: "No search results provided for aggregation",
-        i18nKey: "adapters.ensemble.errors.noResults",
+        message: translate(i18nKey),
+        i18nKey,
       });
     }
 
@@ -31,7 +47,7 @@ export class BestScoreStrategy<
     let maxScore = -Infinity;
 
     for (const result of results) {
-      const score = result.score as IScoreInfo | undefined;
+      const score = isScoreInfo(result.score) ? result.score : undefined;
       if (!score) continue;
 
       // 2026 Best Practice: 詰み(mate) > センチポーン(cp) > 勝率(winrate) の順で優先評価

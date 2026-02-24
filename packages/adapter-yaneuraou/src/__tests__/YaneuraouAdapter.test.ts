@@ -66,12 +66,20 @@ describe("YaneuraouAdapter", () => {
   });
 
   it("should initialize with correct metadata", () => {
-    const adapter = new YaneuraouAdapter();
+    const adapter = new YaneuraouAdapter({
+      sources: {
+        main: { url: "http://mock", __unsafeNoSRI: true, type: "worker-js" },
+      },
+    });
     expect(adapter.id).toBe("yaneuraou");
   });
 
   it("should change status correctly on load", async () => {
-    const adapter = new YaneuraouAdapter();
+    const adapter = new YaneuraouAdapter({
+      sources: {
+        main: { url: "http://mock", __unsafeNoSRI: true, type: "worker-js" },
+      },
+    });
     await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(adapter.status).toBe("ready");
   });

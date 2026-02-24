@@ -1,18 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "jsx": "react-jsx",
     "outDir": "./dist",
-    "types": ["vitest/globals"]
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../ui-core" },
-    { "path": "../ui-react-core" },
-    { "path": "../ui-react-monitor" },
-    { "path": "../ui-chess-react" },
-    { "path": "../ui-shogi-react" }
-  ],
-  "include": ["src/**/*", ".storybook/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }

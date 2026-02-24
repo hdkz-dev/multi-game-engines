@@ -1,16 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "jsx": "preserve",
-    "outDir": "./dist"
+    "jsxImportSource": "vue",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../i18n" },
-    { "path": "../ui-core" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }

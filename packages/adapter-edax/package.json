@@ -32,7 +32,7 @@
     "multi-game-engines"
   ],
   "dependencies": {
-    "@multi-game-engines/domain-reversi": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*",
     "@multi-game-engines/registry": "workspace:*"
   },
   "peerDependencies": {
@@ -40,14 +40,15 @@
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/domain-reversi": "workspace:*",
     "eslint": "^9.39.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint ."

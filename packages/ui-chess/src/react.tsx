@@ -5,7 +5,7 @@ import { Move } from "@multi-game-engines/core";
 import { FEN } from "@multi-game-engines/domain-chess";
 import { ChessPiece } from "@multi-game-engines/domain-chess";
 
-declare module "react/jsx-runtime" {
+declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {

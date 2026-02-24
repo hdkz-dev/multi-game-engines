@@ -1,8 +1,9 @@
 import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
 import {
-  ReversiBoard,
-  ReversiMove,
   createReversiMove,
+  IReversiSearchOptions,
+  IReversiSearchInfo,
+  IReversiSearchResult,
 } from "@multi-game-engines/domain-reversi";
 
 export class EdaxParser implements IProtocolParser<
@@ -18,7 +19,7 @@ export class EdaxParser implements IProtocolParser<
     if (!data.includes("depth")) return null;
 
     const match = data.match(EdaxParser.DEPTH_REGEX);
-    if (match) {
+    if (match && match[1]) {
       return {
         raw: data,
         depth: parseInt(match[1], 10),
@@ -81,23 +82,4 @@ export class EdaxParser implements IProtocolParser<
 
     return `set ${name} ${sValue}`;
   }
-}
-
-export interface IReversiSearchOptions {
-  board: ReversiBoard;
-  depth?: number;
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
-
-export interface IReversiSearchInfo {
-  raw: string;
-  depth: number;
-  [key: string]: unknown;
-}
-
-export interface IReversiSearchResult {
-  raw: string;
-  bestMove: ReversiMove | null;
-  [key: string]: unknown;
 }

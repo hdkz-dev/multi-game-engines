@@ -2,9 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "src",
+    "paths": {
+      "@multi-game-engines/core": ["../core/dist/index.d.ts"],
+      "@multi-game-engines/i18n": ["../i18n/dist/index.d.ts"]
+    }
   },
   "references": [{ "path": "../core" }, { "path": "../i18n" }],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"]
 }

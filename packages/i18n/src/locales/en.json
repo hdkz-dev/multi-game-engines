@@ -87,7 +87,15 @@
       "sriRequired": "SRI required for security verification.",
       "adapterFactoryInvalidReturn": "Factory for \"{adapter}\" returned an invalid object.",
       "adapterNotFound": "Engine adapter not found or factory not registered for \"{id}\".",
-      "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\"."
+      "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\".",
+      "registry": {
+        "invalidManifest": "Invalid manifest data. Falling back to bundled defaults. Details: {error}",
+        "fetchFailed": "Failed to fetch manifest from {url}: {status}",
+        "invalidFormat": "Invalid manifest format from {url}: {error}",
+        "timeout": "Timeout fetching manifest from {url} after {timeout}ms",
+        "sriMismatch": "Security violation: Manifest integrity (SRI) mismatch detected for {url}.",
+        "notLoaded": "[RemoteRegistry] resolve() called before load() for engine \"{id}\". Returning null."
+      }
     }
   },
   "adapters": {
@@ -109,6 +117,25 @@
     "ensemble": {
       "errors": {
         "noResults": "No engine results available to aggregate."
+      },
+      "weighted": {
+        "initialized": "[WeightedStrategy] Initialized with weights for: {engines}",
+        "noWeight": "[WeightedStrategy] No weight defined for engine \"{id}\". Using default 1.0."
+      }
+    },
+    "parsers": {
+      "generic": {
+        "invalidOptionValue": "Option value must be a primitive (string, number, or boolean)",
+        "parseError": "[{parser}] Failed to parse {type}: {error}"
+      },
+      "uci": {
+        "invalidPvMove": "[UCIParser.parseInfo] Skipping invalid \"pv\" move token: \"{token}\" in response: \"{line}\"",
+        "invalidPonder": "[UCIParser.parseResult] Skipping invalid \"ponder\" token: \"{token}\" in response: \"{line}\""
+      },
+      "usi": {
+        "invalidCurrMove": "[USIParser.parseInfo] Skipping invalid \"currmove\" token: \"{token}\" in response: \"{line}\"",
+        "invalidPvMove": "[USIParser.parseInfo] Skipping invalid \"pv\" move token: \"{token}\" in response: \"{line}\"",
+        "invalidPonder": "[USIParser.parseResult] Skipping invalid \"ponder\" token: \"{token}\" in response: \"{line}\""
       }
     }
   },

@@ -4,7 +4,7 @@ import { ShogiBoard as ShogiBoardElement } from "@multi-game-engines/ui-shogi-el
 import { Move } from "@multi-game-engines/core";
 import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
-declare module "react/jsx-runtime" {
+declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {

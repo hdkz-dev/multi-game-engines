@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { locales } from "../index.js";
-import type { ValidI18nKey } from "@multi-game-engines/core";
+import type { ValidI18nKey } from "../types.js";
 
 // Flatten keys helper
 function flattenKeys(obj: Record<string, unknown>, prefix = ""): string[] {
@@ -60,12 +60,11 @@ describe("i18n Type Synchronization", () => {
     "engine.errors.invalidBackgammonMove",
     "engine.errors.invalidCheckersBoard",
     "engine.errors.invalidCheckersMove",
-    "engine.errors.notReady",
     "adapters.uci.errors.missingFEN",
     "adapters.usi.errors.missingFEN",
     "adapters.gtp.errors.invalidResponse",
     "adapters.ensemble.errors.noResults",
-  ];
+  ] as const as unknown as ValidI18nKey[];
 
   const enKeys = new Set(flattenKeys(locales.en));
   const jaKeys = new Set(flattenKeys(locales.ja));

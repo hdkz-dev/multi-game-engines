@@ -1,11 +1,10 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
-import { OfficialRegistry } from "@multi-game-engines/registry";
+import { USIAdapter } from "@multi-game-engines/adapter-usi";
 import {
-  USIAdapter,
   IShogiSearchOptions,
   IShogiSearchInfo,
   IShogiSearchResult,
-} from "@multi-game-engines/adapter-usi";
+} from "@multi-game-engines/domain-shogi";
 
 /**
  * 2026 Zenith Tier: やねうら王専用アダプター。
@@ -13,15 +12,11 @@ import {
  */
 export class YaneuraouAdapter extends USIAdapter {
   constructor(config?: Partial<IEngineConfig>) {
-    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
-    const registrySources = OfficialRegistry.resolve("yaneuraou") || {};
-
     const defaultConfig: IEngineConfig = {
       id: "yaneuraou",
       adapter: "usi",
       name: "Yaneuraou",
       version: "7.5.0",
-      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

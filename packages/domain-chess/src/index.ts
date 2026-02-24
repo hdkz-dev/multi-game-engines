@@ -2,12 +2,52 @@ import {
   EngineErrorCode,
   EngineError,
   PositionString,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  IScoreInfo,
+  Move,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 
 /**
  * Branded Type for FEN (Forsyth-Edwards Notation) strings.
  */
 export type FEN = PositionString<"FEN">;
+
+/**
+ * チェス用の探索オプション。
+ */
+export interface IChessSearchOptions extends IBaseSearchOptions {
+  fen?: FEN | undefined;
+  depth?: number | undefined;
+  time?: number | undefined;
+  nodes?: number | undefined;
+}
+
+/**
+ * チェス用の思考情報。
+ */
+export interface IChessSearchInfo extends IBaseSearchInfo {
+  depth?: number | undefined;
+  seldepth?: number | undefined;
+  score?: IScoreInfo | undefined;
+  nodes?: number | undefined;
+  nps?: number | undefined;
+  time?: number | undefined;
+  pv?: Move[] | undefined;
+  hashfull?: number | undefined;
+  multipv?: number | undefined;
+}
+
+/**
+ * チェス用の探索結果。
+ */
+export interface IChessSearchResult extends IBaseSearchResult {
+  bestMove: Move | null;
+  ponder?: Move | null | undefined;
+}
 
 /**
  * チェスの駒識別子。
@@ -41,10 +81,11 @@ export interface ParsedFEN {
  */
 export function createFEN(pos: string): FEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidFEN" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid FEN: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidFEN",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   const trimmedPos = pos.trim();
@@ -52,39 +93,44 @@ export function createFEN(pos: string): FEN {
     return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
   }
   if (!/^[0-9a-hRNBQKPpnbrqkw/ -]+$/.test(trimmedPos)) {
+    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid FEN: Illegal characters detected.",
-      i18nKey: "engine.errors.illegalCharacters",
+      message: translate(i18nKey),
+      i18nKey,
       remediation:
         "FEN should only contain digits [0-9], files [a-h], pieces [rnbqkpRNBQKP], active color [wb], '/', ' ', and '-'.",
     });
   }
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 6) {
+    const i18nKey = "engine.errors.invalidFENStructure" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN structure: Expected 6 fields, found ${fields.length}`,
-      i18nKey: "engine.errors.invalidFENStructure",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
   // 2nd field: Active color (w or b)
   if (!/^[wb]$/.test(fields[1]!)) {
+    const i18nKey = "engine.errors.invalidFENTurn" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN turn: Expected "w" or "b", found "${fields[1]}"`,
-      i18nKey: "engine.errors.invalidFENTurn",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
   // 4th field: En passant target square (- or a-h3/a-h6)
   if (!/^(?:-|[a-h][36])$/.test(fields[3]!)) {
+    const i18nKey = "engine.errors.invalidFENEnPassant" as I18nKey;
+    const i18nParams = { square: fields[3]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN en passant: "${fields[3]}"`,
-      i18nKey: "engine.errors.invalidFENEnPassant",
-      i18nParams: { square: fields[3]! },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
@@ -95,33 +141,39 @@ export function createFEN(pos: string): FEN {
     (castling === "-" || new Set(castling).size === castling.length);
 
   if (!isValidCastling) {
+    const i18nKey = "engine.errors.invalidFENCastling" as I18nKey;
+    const i18nParams = { rights: castling };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN castling rights: "${castling}"`,
-      i18nKey: "engine.errors.invalidFENCastling",
-      i18nParams: { rights: castling },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
   // 5th field: Halfmove clock (>= 0)
   const halfmove = Number(fields[4]!);
   if (!Number.isInteger(halfmove) || halfmove < 0) {
+    const i18nKey = "engine.errors.invalidFENHalfmove" as I18nKey;
+    const i18nParams = { clock: fields[4]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN halfmove clock: "${fields[4]}"`,
-      i18nKey: "engine.errors.invalidFENHalfmove",
-      i18nParams: { clock: fields[4]! },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
   // 6th field: Fullmove number (>= 1)
   const fullmove = Number(fields[5]!);
   if (!Number.isInteger(fullmove) || fullmove < 1) {
+    const i18nKey = "engine.errors.invalidFENFullmove" as I18nKey;
+    const i18nParams = { move: fields[5]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid FEN fullmove number: "${fields[5]}"`,
-      i18nKey: "engine.errors.invalidFENFullmove",
-      i18nParams: { move: fields[5]! },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
@@ -142,10 +194,11 @@ export function parseFEN(fen: FEN): ParsedFEN {
 
   const rows = position.split("/");
   if (rows.length !== 8) {
+    const i18nKey = "engine.errors.invalidFenRanks" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid FEN: Expected 8 ranks",
-      i18nKey: "engine.errors.invalidFenRanks",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
@@ -160,20 +213,24 @@ export function parseFEN(fen: FEN): ParsedFEN {
       } else if (isValidChessPiece(char)) {
         boardRow.push(char);
       } else {
+        const i18nKey = "engine.errors.invalidFenChar" as I18nKey;
+        const i18nParams = { char };
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: `Invalid FEN character: ${char}`,
-          i18nKey: "engine.errors.invalidFenChar",
-          i18nParams: { char },
+          message: translate(i18nKey, i18nParams),
+          i18nKey,
+          i18nParams,
         });
       }
     }
     if (boardRow.length !== 8) {
+      const i18nKey = "engine.errors.invalidFenRankWidth" as I18nKey;
+      const i18nParams = { rank: 8 - r, expected: 8, actual: boardRow.length };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid FEN rank width at rank ${8 - r}: expected 8, got ${boardRow.length}`,
-        i18nKey: "engine.errors.invalidFenRankWidth",
-        i18nParams: { rank: 8 - r, expected: 8, actual: boardRow.length },
+        message: translate(i18nKey, i18nParams),
+        i18nKey,
+        i18nParams,
       });
     }
     board.push(boardRow);

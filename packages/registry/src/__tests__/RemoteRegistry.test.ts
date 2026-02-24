@@ -4,15 +4,18 @@ import { RemoteRegistry } from "../index.js";
 describe("RemoteRegistry", () => {
   const mockUrl = "https://example.com/engines.json";
   const mockData = {
+    version: "1.0.0",
     engines: {
       remote: {
+        name: "Remote Engine",
+        adapter: "uci",
         latest: "1.0",
         versions: {
           "1.0": {
             assets: {
               main: {
-                url: "remote.js",
-                sri: "sha384-remote",
+                url: "https://example.com/remote.js",
+                sri: "sha384-bCh+jjHqO5/k1PVx7yJktl7cuplMcT1TDIfN7BbAjNTZHu9wDlApzTehK3HzbfR8",
                 type: "worker-js",
               },
             },
@@ -31,9 +34,10 @@ describe("RemoteRegistry", () => {
   });
 
   it("should fetch and resolve remote engines after load", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
-      json: async () => mockData,
+      arrayBuffer: async () => encodedData.buffer,
     } as Response);
 
     const registry = new RemoteRegistry(mockUrl);
@@ -52,7 +56,29 @@ describe("RemoteRegistry", () => {
 
     const remote = registry.resolve("remote");
     expect(remote).not.toBeNull();
-    expect(remote?.["main"]?.url).toBe("remote.js");
+    expect(remote?.["main"]?.url).toBe("https://example.com/remote.js");
+  });
+
+  it("should verify SRI hash if provided", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
+    // SHA-384 hash of the mockData JSON string (approximate for test)
+    const hashBuffer = await crypto.subtle.digest("SHA-384", encodedData);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const expectedSri = "sha384-" + btoa(String.fromCharCode(...hashArray));
+
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl, expectedSri);
+    await registry.load();
+    expect(registry.isLoaded).toBe(true);
+
+    // Mismatch case
+    const wrongSri = "sha384-wronghash";
+    const invalidRegistry = new RemoteRegistry(mockUrl, wrongSri);
+    await expect(invalidRegistry.load()).rejects.toThrow(/Manifest integrity/);
   });
 
   it("should throw error if fetch fails", async () => {

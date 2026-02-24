@@ -1,16 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "jsx": "preserve",
-    "outDir": "./dist"
+    "jsxImportSource": "vue",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@multi-game-engines/ui-vue-core": ["../ui-vue-core/src/index.ts"]
+    }
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../ui-core" },
-    { "path": "../ui-vue-core" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }

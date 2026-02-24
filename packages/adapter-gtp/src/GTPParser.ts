@@ -1,46 +1,11 @@
+import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 import {
-  IProtocolParser,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  ProtocolValidator,
-} from "@multi-game-engines/core";
-import { GOMove, createGOMove } from "@multi-game-engines/domain-go";
-
-/**
- * 囲碁の探索オプション。
- */
-export interface IGoSearchOptions extends IBaseSearchOptions {
-  size?: number;
-  komi?: number;
-  /** 盤面データ (SGF等) */
-  board?: string;
-  /** KataGo 分析インターバル (ms) */
-  kataInterval?: number;
-  [key: string]: unknown;
-}
-
-/**
- * 囲碁の探索状況。
- * 2026 Zenith Tier: KataGo 拡張 GTP を含む詳細な情報。
- */
-export interface IGoSearchInfo extends IBaseSearchInfo {
-  winrate?: number;
-  visits?: number;
-  scoreLead?: number;
-  pv?: GOMove[];
-  /** ヒートマップ（各点の支配率/重要度） */
-  ownerMap?: number[];
-  [key: string]: unknown;
-}
-
-/**
- * 囲碁の探索結果。
- */
-export interface IGoSearchResult extends IBaseSearchResult {
-  bestMove: GOMove | null;
-  [key: string]: unknown;
-}
+  createGOMove,
+  IGoSearchOptions,
+  IGoSearchInfo,
+  IGoSearchResult,
+} from "@multi-game-engines/domain-go";
 
 /**
  * 2026 Zenith Tier: 汎用 GTP (Go Text Protocol) パーサー。
@@ -146,9 +111,7 @@ export class GTPParser implements IProtocolParser<
       typeof value !== "number" &&
       typeof value !== "boolean"
     ) {
-      throw new TypeError(
-        "Option value must be a primitive (string, number, or boolean)",
-      );
+      throw new TypeError(translate("parsers.generic.invalidOptionValue"));
     }
     ProtocolValidator.assertNoInjection(name, "option name");
     ProtocolValidator.assertNoInjection(String(value), "option value");

@@ -1,13 +1,15 @@
 import {
   IProtocolParser,
   ProtocolValidator,
-  IBaseSearchOptions,
   truncateLog,
 } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 import {
-  MahjongMove,
   validateMahjongBoard,
   createMahjongMove,
+  IMahjongSearchOptions,
+  IMahjongSearchInfo,
+  IMahjongSearchResult,
 } from "@multi-game-engines/domain-mahjong";
 
 export class MahjongJSONParser implements IProtocolParser<
@@ -57,10 +59,14 @@ export class MahjongJSONParser implements IProtocolParser<
         };
       }
     } catch (e) {
-      console.warn("[MahjongJSONParser] Failed to parse info:", {
-        error: e,
-        data: truncateLog(data),
-      });
+      console.warn(
+        translate("parsers.generic.parseError", {
+          parser: "MahjongJSONParser",
+          type: "info",
+          error: String(e),
+        }),
+        { data: truncateLog(data) },
+      );
       return null;
     }
     return null;
@@ -80,7 +86,6 @@ export class MahjongJSONParser implements IProtocolParser<
         const raw = typeof data === "string" ? data : JSON.stringify(data);
 
         // 2026 Best Practice: null/undefined は正当な「指し手なし（和了・流局等）」として扱う
-        // これにより、インターフェース IMahjongSearchResult の bestMove: MahjongMove | null と整合します。
         if (moveValue === null || moveValue === undefined) {
           return { raw, bestMove: null };
         }
@@ -93,15 +98,25 @@ export class MahjongJSONParser implements IProtocolParser<
           const bestMove = createMahjongMove(moveValue);
           return { raw, bestMove };
         } catch (e) {
-          console.warn("[MahjongJSONParser] Invalid bestMove from engine:", e);
+          console.warn(
+            translate("parsers.generic.parseError", {
+              parser: "MahjongJSONParser",
+              type: "bestMove",
+              error: String(e),
+            }),
+          );
           return null;
         }
       }
     } catch (e) {
-      console.warn("[MahjongJSONParser] Failed to parse result:", {
-        error: e,
-        data: truncateLog(data),
-      });
+      console.warn(
+        translate("parsers.generic.parseError", {
+          parser: "MahjongJSONParser",
+          type: "result",
+          error: String(e),
+        }),
+        { data: truncateLog(data) },
+      );
       return null;
     }
     return null;
@@ -143,27 +158,4 @@ export class MahjongJSONParser implements IProtocolParser<
       value: sValue,
     };
   }
-}
-
-export interface IMahjongSearchOptions extends IBaseSearchOptions {
-  board: Record<string, unknown> | unknown[];
-  signal?: AbortSignal;
-  [key: string]: unknown;
-}
-
-export interface IMahjongSearchInfo {
-  raw: string;
-  thinking: string;
-  evaluations?: {
-    move: MahjongMove;
-    ev: number;
-    prob?: number;
-  }[];
-  [key: string]: unknown;
-}
-
-export interface IMahjongSearchResult {
-  raw: string;
-  bestMove: MahjongMove | null;
-  [key: string]: unknown;
 }

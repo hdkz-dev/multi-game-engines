@@ -1,15 +1,16 @@
 import {
   BaseAdapter,
+  IEngineAdapter,
   IEngineLoader,
   WorkerCommunicator,
   EngineError,
   EngineErrorCode,
   IEngineConfig,
   IEngineSourceConfig,
-  IEngineAdapter,
   ResourceMap,
+  I18nKey,
 } from "@multi-game-engines/core";
-import { OfficialRegistry } from "@multi-game-engines/registry";
+import { t as translate } from "@multi-game-engines/i18n";
 import {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
@@ -31,17 +32,10 @@ export class GNUBGAdapter extends BaseAdapter<
   readonly parser = new GNUBGParser();
 
   constructor(config: IEngineConfig = {}) {
-    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
-    const registrySources = OfficialRegistry.resolve("gnubg", config.version);
-    const finalConfig = {
-      ...config,
-      sources: { ...registrySources, ...(config.sources || {}) },
-    } as IEngineConfig;
-
-    super(finalConfig);
-    this.id = finalConfig.id ?? "gnubg";
-    this.name = finalConfig.name ?? "GNU Backgammon";
-    this.version = finalConfig.version ?? "unknown";
+    super(config);
+    this.id = config.id ?? "gnubg";
+    this.name = config.name ?? "GNU Backgammon";
+    this.version = config.version ?? "1.07";
   }
 
   async load(loader?: IEngineLoader): Promise<void> {
@@ -50,21 +44,23 @@ export class GNUBGAdapter extends BaseAdapter<
       this.validateSources();
 
       if (!loader) {
+        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "IEngineLoader is required for secure resource loading.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.loaderRequired",
+          i18nKey,
         });
       }
 
       const sources = this.config.sources;
       if (!sources) {
+        const i18nKey = "engine.errors.missingSources" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Engine configuration is missing 'sources' field.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingSources",
+          i18nKey,
         });
       }
 
@@ -78,11 +74,12 @@ export class GNUBGAdapter extends BaseAdapter<
       const resources = await loader.loadResources(this.id, validSources);
 
       if (!resources["main"]) {
+        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry point after resolution",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingMainEntryPoint",
+          i18nKey,
         });
       }
 

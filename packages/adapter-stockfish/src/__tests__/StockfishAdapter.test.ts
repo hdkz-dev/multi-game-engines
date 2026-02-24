@@ -39,6 +39,15 @@ class MockWorker {
 
 describe("StockfishAdapter", () => {
   let mockLoader: IEngineLoader;
+  const mockConfig = {
+    sources: {
+      main: {
+        url: "stockfish.js",
+        __unsafeNoSRI: true as const,
+        type: "worker-js" as const,
+      },
+    },
+  };
 
   beforeAll(() => {
     vi.useFakeTimers({ now: 0 });
@@ -65,7 +74,7 @@ describe("StockfishAdapter", () => {
   });
 
   it("should initialize with correct metadata", () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     expect(adapter.id).toBe("stockfish");
   });
 
@@ -94,7 +103,7 @@ describe("StockfishAdapter", () => {
   });
 
   it("should change status correctly on load", async () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;
@@ -121,7 +130,7 @@ describe("StockfishAdapter", () => {
     }
     vi.stubGlobal("Worker", NoneWorker);
 
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;
@@ -136,7 +145,7 @@ describe("StockfishAdapter", () => {
   });
 
   it("should reject position strings containing control characters", async () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;

@@ -1,59 +1,18 @@
 import {
   IProtocolParser,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  IScoreInfo,
   EngineError,
   EngineErrorCode,
+  I18nKey,
   ProtocolValidator,
   truncateLog,
 } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 import {
-  SFEN,
-  ShogiMove,
   createShogiMove,
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
 } from "@multi-game-engines/domain-shogi";
-
-/**
- * 将棋の探索オプション。
- */
-export interface IShogiSearchOptions extends IBaseSearchOptions {
-  sfen?: SFEN;
-  ponder?: boolean;
-  depth?: number;
-  nodes?: number;
-  time?: number;
-  movetime?: number;
-  [key: string]: unknown;
-}
-
-/**
- * 将棋の探索状況。
- * 2026 Zenith Tier: USI 思考情報の詳細な解析。
- */
-export interface IShogiSearchInfo extends IBaseSearchInfo {
-  depth?: number;
-  seldepth?: number;
-  time?: number;
-  nodes?: number;
-  nps?: number;
-  hashfull?: number;
-  score?: IScoreInfo;
-  pv?: ShogiMove[];
-  currMove?: ShogiMove;
-  multipv?: number;
-  [key: string]: unknown;
-}
-
-/**
- * 将棋の探索結果。
- */
-export interface IShogiSearchResult extends IBaseSearchResult {
-  bestMove: ShogiMove | null;
-  ponder?: ShogiMove | null;
-  [key: string]: unknown;
-}
 
 /**
  * 2026 Zenith Tier: 汎用 USI (Universal Shogi Interface) パーサー。
@@ -117,7 +76,10 @@ export class USIParser implements IProtocolParser<
               info.currMove = createShogiMove(token);
             } catch {
               console.warn(
-                `[USIParser.parseInfo] Skipping invalid "currmove" token: "${truncateLog(token)}" in response: "${truncateLog(data)}"`,
+                translate("parsers.usi.invalidCurrMove" as I18nKey, {
+                  token: truncateLog(token),
+                  line: truncateLog(data),
+                }),
               );
             }
           }
@@ -141,7 +103,10 @@ export class USIParser implements IProtocolParser<
               info.pv.push(move);
             } catch {
               console.warn(
-                `[USIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(m)}" in response: "${truncateLog(data)}"`,
+                translate("parsers.usi.invalidPvMove" as I18nKey, {
+                  token: truncateLog(m),
+                  line: truncateLog(data),
+                }),
               );
             }
           }
@@ -162,10 +127,13 @@ export class USIParser implements IProtocolParser<
 
     const parts = data.trim().split(" ");
     if (parts.length < 2 || (parts[0] === "bestmove" && parts.length === 1)) {
+      const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+      const i18nParams = { move: truncateLog(data) };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Unexpected bestmove format: "${truncateLog(data)}"`,
-        i18nKey: "engine.errors.invalidMoveFormat",
+        message: translate(i18nKey, i18nParams),
+        i18nKey,
+        i18nParams,
       });
     }
 
@@ -195,7 +163,10 @@ export class USIParser implements IProtocolParser<
           result.ponder = createShogiMove(ponderToken);
         } catch {
           console.warn(
-            `[USIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderToken)}" in response: "${truncateLog(data)}"`,
+            translate("parsers.usi.invalidPonder", {
+              token: truncateLog(ponderToken),
+              line: truncateLog(data),
+            }),
           );
           result.ponder = null;
         }

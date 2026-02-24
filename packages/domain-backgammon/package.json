@@ -20,13 +20,16 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --minify --clean",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint ."
   },
-  "devDependencies": {
+  "dependencies": {
     "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n": "workspace:*"
+  },
+  "devDependencies": {
     "eslint": "^9.39.3",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

@@ -3,6 +3,7 @@ import {
   IEngineSourceConfig,
   IFileStorage,
   EngineErrorCode,
+  I18nKey,
 } from "../types.js";
 import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -22,9 +23,10 @@ export class EngineLoader implements IEngineLoader {
   private disposed = false;
 
   constructor(private storage: IFileStorage) {
-    this.isProduction =
-      typeof process !== "undefined" &&
-      process.env?.["NODE_ENV"] === "production";
+    const g = globalThis as unknown as {
+      process?: { env?: Record<string, string> };
+    };
+    this.isProduction = g.process?.env?.["NODE_ENV"] === "production";
   }
 
   private getMimeType(config: IEngineSourceConfig): string {
@@ -55,20 +57,24 @@ export class EngineLoader implements IEngineLoader {
     config: IEngineSourceConfig,
   ): Promise<string> {
     if (this.disposed) {
+      const i18nKey = "engine.errors.disposed" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.LIFECYCLE_ERROR,
         message: "EngineLoader has been disposed.",
         engineId,
-        i18nKey: "engine.errors.disposed",
+        i18nKey,
       });
     }
     // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
     if (/[^a-zA-Z0-9-_]/.test(engineId)) {
+      const i18nKey = "engine.errors.invalidEngineId" as I18nKey;
+      const i18nParams = { id: engineId };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${engineId}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
-        i18nKey: "engine.errors.invalidEngineId",
-        i18nParams: { id: engineId },
+        engineId,
+        i18nKey,
+        i18nParams,
       });
     }
     const safeId = engineId;
@@ -104,12 +110,13 @@ export class EngineLoader implements IEngineLoader {
           url.hostname === "::1";
 
         if (url.protocol === "http:" && !isLoopback) {
+          const i18nKey = "engine.errors.insecureConnection" as I18nKey;
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
               "Insecure connection (HTTP) is not allowed for sensitive engine files.",
             engineId,
-            i18nKey: "engine.errors.insecureConnection",
+            i18nKey,
             remediation: "Use HTTPS for all engine resource URLs.",
           });
         }
@@ -135,11 +142,12 @@ export class EngineLoader implements IEngineLoader {
         const unsafeNoSRI = config.__unsafeNoSRI === true;
 
         if (!sri && !unsafeNoSRI) {
+          const i18nKey = "engine.errors.sriRequired" as I18nKey;
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message: "SRI required for security verification.",
             engineId,
-            i18nKey: "engine.errors.sriRequired",
+            i18nKey,
           });
         }
 
@@ -188,21 +196,28 @@ export class EngineLoader implements IEngineLoader {
         // 2026 Best Practice: 検証済み URL を使用して fetch を実行
         let data: ArrayBuffer;
         try {
-          const response = await fetch(validatedUrl);
+          // 2026 Zenith Tier: 30s timeout for all resource fetches
+          const response = await fetch(validatedUrl, {
+            signal: AbortSignal.timeout(30_000),
+          });
           if (!response.ok) {
+            const i18nKey = "engine.errors.networkError" as I18nKey;
             throw new EngineError({
               code: EngineErrorCode.NETWORK_ERROR,
               message: `Failed to fetch engine: ${response.statusText} (${response.status})`,
               engineId,
+              i18nKey,
             });
           }
           data = await response.arrayBuffer();
         } catch (err) {
           if (err instanceof EngineError) throw err;
+          const i18nKey = "engine.errors.networkError" as I18nKey;
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,
             message: `Network error while fetching engine resource: ${validatedUrl}`,
             engineId,
+            i18nKey,
             originalError: err,
           });
         }
@@ -308,12 +323,14 @@ export class EngineLoader implements IEngineLoader {
       if (firstFailure) {
         throw EngineError.from(firstFailure.reason);
       }
+      const i18nKey = "engine.errors.resourceLoadUnknown" as I18nKey;
+      const i18nParams = { engineId };
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Unknown error during resource loading",
         engineId,
-        i18nKey: "engine.errors.resourceLoadUnknown",
-        i18nParams: { engineId },
+        i18nKey,
+        i18nParams,
       });
     }
 
@@ -383,10 +400,12 @@ export class EngineLoader implements IEngineLoader {
 
       // 本番環境ではループバックも禁止（開発者モードの混入を防ぐ）
       if (this.isProduction && isLoopback) {
+        const i18nKey = "engine.errors.securityViolation" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
-          message: `Loopback resources are prohibited in production: ${url}`,
+          message: "Loopback resources are prohibited in production",
           engineId,
+          i18nKey,
         });
       }
 
@@ -398,20 +417,24 @@ export class EngineLoader implements IEngineLoader {
       const shouldReject = isCrossOrigin && (this.isProduction || !isLoopback);
 
       if (shouldReject) {
+        const i18nKey = "engine.errors.securityViolation" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
-          message: `Cross-origin Worker scripts are prohibited for security: ${url}`,
+          message: "Cross-origin Worker scripts are prohibited for security",
           engineId,
+          i18nKey,
           remediation:
             "Host the engine worker script on the same origin or use a Blob URL via EngineLoader.",
         });
       }
     } catch (e) {
       if (e instanceof EngineError) throw e;
+      const i18nKey = "engine.errors.securityViolation" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Invalid resource URL (Validation Failed): ${url}`,
         engineId,
+        i18nKey,
       });
     }
   }

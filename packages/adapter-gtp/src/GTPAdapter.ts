@@ -7,13 +7,15 @@ import {
   IEngineConfig,
   IEngineAdapter,
   IEngineSourceConfig,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { t as translate } from "@multi-game-engines/i18n";
 import {
   IGoSearchOptions,
   IGoSearchInfo,
   IGoSearchResult,
-  GTPParser,
-} from "./GTPParser.js";
+} from "@multi-game-engines/domain-go";
+import { GTPParser } from "./GTPParser.js";
 
 export class GTPAdapter extends BaseAdapter<
   IGoSearchOptions,
@@ -38,21 +40,23 @@ export class GTPAdapter extends BaseAdapter<
       this.validateSources();
 
       if (!loader) {
+        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "IEngineLoader is required for secure resource loading.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.loaderRequired",
+          i18nKey,
         });
       }
 
       const sources = this.config.sources;
       if (!sources) {
+        const i18nKey = "engine.errors.missingSources" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Engine configuration is missing 'sources' field.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingSources",
+          i18nKey,
         });
       }
 
@@ -65,11 +69,12 @@ export class GTPAdapter extends BaseAdapter<
       const mainUrl = resources["main"];
 
       if (!mainUrl) {
+        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry point after resolution",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingMainEntryPoint",
+          i18nKey,
         });
       }
 

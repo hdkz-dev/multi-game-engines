@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --tsconfig tsconfig.build.json",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format cjs,esm --dts --tsconfig tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

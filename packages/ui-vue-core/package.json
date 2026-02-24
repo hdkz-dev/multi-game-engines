@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vue-tsc --emitDeclarationOnly --declaration --composite false",
     "dev": "vite build --watch",
     "lint": "eslint .",
     "test": "vitest run",

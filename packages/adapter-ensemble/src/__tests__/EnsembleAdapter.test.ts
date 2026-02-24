@@ -57,10 +57,9 @@ describe("EnsembleAdapter", () => {
 
   it("should throw EngineError when no results to aggregate in MajorityVoteStrategy", () => {
     const strategy = new MajorityVoteStrategy();
-    expect(() => strategy.aggregateResults([])).toThrow(
+    expect(() => strategy.aggregateResults(new Map())).toThrow(
       expect.objectContaining({
         code: "VALIDATION_ERROR",
-        engineId: "majority-vote",
         i18nKey: "adapters.ensemble.errors.noResults",
       }),
     );

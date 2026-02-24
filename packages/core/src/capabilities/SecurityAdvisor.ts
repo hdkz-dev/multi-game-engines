@@ -1,4 +1,4 @@
-import { ISecurityStatus, EngineErrorCode } from "../types.js";
+import { ISecurityStatus, EngineErrorCode, I18nKey } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 /**
@@ -40,10 +40,11 @@ export class SecurityAdvisor {
   static async assertSRI(data: ArrayBuffer, sri: string): Promise<void> {
     const isValid = await this.verifySRI(data, sri);
     if (!isValid) {
+      const i18nKey = "engine.errors.sriMismatch" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SRI_MISMATCH,
         message: "SRI hash verification failed.",
-        i18nKey: "engine.errors.sriMismatch",
+        i18nKey,
       });
     }
   }
@@ -107,7 +108,11 @@ export class SecurityAdvisor {
     // 2026 Best Practice: ブラウザ環境でのみヘッダー診断を試行
     if (typeof window !== "undefined" && typeof fetch !== "undefined") {
       try {
-        const response = await fetch(window.location.href, { method: "HEAD" });
+        // 2026: 5s timeout for diagnostics fetch
+        const response = await fetch(window.location.href, {
+          method: "HEAD",
+          signal: AbortSignal.timeout(5000),
+        });
         const coop = response.headers.get("cross-origin-opener-policy");
         const coep = response.headers.get("cross-origin-embedder-policy");
 

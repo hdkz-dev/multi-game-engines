@@ -2,7 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "src",
+    "paths": {
+      "@multi-game-engines/core": ["../core/dist/index.d.ts"],
+      "@multi-game-engines/i18n": ["../i18n/dist/index.d.ts"]
+    }
   },
-  "include": ["src"]
+  "references": [{ "path": "../core" }, { "path": "../i18n" }],
+  "include": ["src/**/*", "data/**/*.json"],
+  "exclude": ["node_modules", "dist"]
 }

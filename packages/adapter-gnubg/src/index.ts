@@ -1,16 +1,21 @@
 import { GNUBGAdapter } from "./GNUBGAdapter.js";
-import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
-import {
+import { EngineFacade } from "@multi-game-engines/core";
+import type {
+  IEngine,
+  IEngineConfig,
+  IEngineSourceConfig,
+} from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
+import type {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
   IBackgammonSearchResult,
 } from "@multi-game-engines/domain-backgammon";
 
 export { GNUBGAdapter };
-export { GNUBGParser } from "./GNUBGParser.js";
 
 /**
- * GNUBG エンジンのインスタンスを生成します。
+ * GNU Backgammon エンジンのインスタンスを生成します。
  */
 export function createGNUBGEngine(
   config: IEngineConfig = {},
@@ -19,6 +24,17 @@ export function createGNUBGEngine(
   IBackgammonSearchInfo,
   IBackgammonSearchResult
 > {
-  const adapter = new GNUBGAdapter(config);
+  // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
+  const registrySources =
+    OfficialRegistry.resolve("gnubg", config.version) || {};
+  const mergedConfig: IEngineConfig = {
+    ...config,
+    sources: {
+      ...(registrySources as Record<string, IEngineSourceConfig>),
+      ...(config.sources || {}),
+    } as Required<IEngineConfig>["sources"],
+  };
+
+  const adapter = new GNUBGAdapter(mergedConfig);
   return new EngineFacade(adapter);
 }

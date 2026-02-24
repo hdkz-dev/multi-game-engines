@@ -1,11 +1,17 @@
 import { UCIAdapter } from "./UCIAdapter.js";
-import { IEngineConfig, IEngine, EngineFacade } from "@multi-game-engines/core";
-import {
-  UCIParser,
+import { EngineFacade } from "@multi-game-engines/core";
+import type {
+  IEngineConfig,
+  IEngine,
+  IEngineSourceConfig,
+} from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
+import { UCIParser } from "./UCIParser.js";
+import type {
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-} from "./UCIParser.js";
+} from "@multi-game-engines/domain-chess";
 
 export type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult };
 export { UCIParser, UCIAdapter };
@@ -15,9 +21,21 @@ export { UCIParser, UCIAdapter };
  * EngineFacade でラップし、純粋な IEngine インターフェースを返します。
  */
 export function createUCIEngine(
-  config: IEngineConfig,
+  config: IEngineConfig = {},
 ): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  const adapter = new UCIAdapter(config);
+  // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
+  const registrySources =
+    OfficialRegistry.resolve(config.id || "stockfish", config.version) || {};
+
+  const mergedConfig: IEngineConfig = {
+    ...config,
+    sources: {
+      ...(registrySources as Record<string, IEngineSourceConfig>),
+      ...(config.sources || {}),
+    } as Required<IEngineConfig>["sources"],
+  };
+
+  const adapter = new UCIAdapter(mergedConfig);
   return new EngineFacade(adapter);
 }
 

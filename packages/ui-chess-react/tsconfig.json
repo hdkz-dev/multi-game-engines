@@ -1,16 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "outDir": "./dist",
     "jsx": "react-jsx",
-    "outDir": "./dist"
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../domain-chess" },
-    { "path": "../ui-chess-elements" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
 }
