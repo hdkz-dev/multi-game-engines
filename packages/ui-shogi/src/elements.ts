@@ -297,11 +297,16 @@ export class ShogiBoard extends LitElement {
     }
 
     return html`
-      <div class="container" @keydown="${this._handleKeyDown}">
+      <div class="container">
         <div class="hand gote" aria-label="${strings.handGoteLabel}">
           ${this._renderHand(hand, "gote", strings)}
         </div>
-        <div class="board" role="grid" aria-label="${strings.boardLabel}">
+        <div
+          class="board"
+          role="grid"
+          aria-label="${strings.boardLabel}"
+          @keydown="${this._handleKeyDown}"
+        >
           ${squares}
         </div>
         <div class="hand sente" aria-label="${strings.handSenteLabel}">

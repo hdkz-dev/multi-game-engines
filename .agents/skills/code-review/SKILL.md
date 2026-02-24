@@ -29,23 +29,21 @@ When user asks to:
 ### 1. Check Prerequisites
 
 ```bash
+# Verify inside a Git repository first
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "NOT_A_GIT_REPO"; exit 1; }
+
 coderabbit --version 2>/dev/null || echo "NOT_INSTALLED"
 coderabbit auth status 2>&1
 ```
 
-**If CLI not installed**, tell user:
+**If not in a Git repo**, tell user:
+"CodeRabbit CLI must be run from within an initialized Git repository. Please run this command from inside your project directory."
 
-```text
-Please install CodeRabbit CLI first:
-curl -fsSL https://cli.coderabbit.ai/install.sh | sh
-```
+**If CLI not installed**, tell user:
+"Please install CodeRabbit CLI first: curl -fsSL https://cli.coderabbit.ai/install.sh | sh"
 
 **If not authenticated**, tell user:
-
-```text
-Please authenticate first:
-coderabbit auth login
-```
+"Please authenticate first: coderabbit auth login"
 
 ### 2. Run Review
 
@@ -63,17 +61,17 @@ coderabbit review --plain
 
 **Options:**
 
-| Flag             | Description                            |
-| ---------------- | -------------------------------------- |
-| `-t all`         | All changes (default)                  |
-| `-t committed`   | Committed changes only                 |
-| `-t uncommitted` | Uncommitted changes only               |
-| `--base main`    | Compare against specific branch        |
-| `--base-commit`  | Compare against specific commit hash   |
-| `--prompt-only`  | Minimal output optimized for AI agents |
-| `--plain`        | Detailed feedback with fix suggestions |
+| Flag                | Description                             |
+| ------------------- | --------------------------------------- |
+| --type all          | All changes (default)                   |
+| --type committed    | Committed changes only                  |
+| --type uncommitted  | Uncommitted (staged + unstaged) changes |
+| --base <branch>     | Compare against specific branch         |
+| --base-commit <sha> | Compare against specific commit hash    |
+| --prompt-only       | Minimal output optimized for AI agents  |
+| --plain             | Detailed feedback with fix suggestions  |
 
-**Shorthand:** `cr` is an alias for `coderabbit`:
+**Shorthand:** `cr` is an alias for `coderabbit` (manually configured via `alias cr=coderabbit`):
 
 ```bash
 cr review --prompt-only
@@ -98,14 +96,14 @@ When user requests implementation + review:
 3. Create task list from findings
 4. Fix critical and warning issues systematically
 5. Re-run review to verify fixes
-6. Repeat until clean or only info-level issues remain
+6. **Limit:** Repeat the cycle at most **2 times**. If minor issues remain after the second run, complete the task and notify the user.
 
 ### 5. Review Specific Changes
 
-**Review only uncommitted changes:**
+**Review uncommitted changes (staged and unstaged):**
 
 ```bash
-cr review --prompt-only -t uncommitted
+cr review --prompt-only --type uncommitted
 ```
 
 **Review against a branch:**
@@ -117,7 +115,8 @@ cr review --prompt-only --base main
 **Review a specific commit range:**
 
 ```bash
-cr review --prompt-only --base-commit abc123
+# Note: Use --type committed to focus on commit history
+cr review --prompt-only --type committed --base-commit abc123
 ```
 
 ## Documentation
