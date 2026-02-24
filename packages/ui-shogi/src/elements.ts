@@ -69,6 +69,11 @@ export class ShogiBoard extends LitElement {
       border: 0.5px solid rgba(0, 0, 0, 0.1);
       font-size: clamp(0.8rem, 6cqi, 2rem);
       position: relative;
+      outline-offset: -2px;
+    }
+    .square:focus-visible {
+      outline: 2px solid var(--board-focus-color, #2563eb);
+      z-index: 1;
     }
     .square.highlight {
       background-color: var(--board-highlight-color, rgba(255, 255, 0, 0.4));
@@ -229,6 +234,7 @@ export class ShogiBoard extends LitElement {
             data-square="${usiFile}${String.fromCharCode(97 + r)}"
             role="gridcell"
             aria-label="${ariaLabel}"
+            tabindex="0"
           >
             ${piece
               ? html`<span

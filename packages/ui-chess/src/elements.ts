@@ -47,6 +47,11 @@ export class ChessBoard extends LitElement {
       align-items: center;
       justify-content: center;
       position: relative;
+      outline-offset: -2px;
+    }
+    .square:focus-visible {
+      outline: 2px solid var(--board-focus-color, #2563eb);
+      z-index: 2;
     }
     .square.light {
       background-color: var(--board-light-square, #ebecd0);
@@ -188,6 +193,7 @@ export class ChessBoard extends LitElement {
             data-square="${algebraicFile}${algebraicRank}"
             role="gridcell"
             aria-label="${ariaLabel}"
+            tabindex="0"
           >
             ${piece
               ? html`<img
