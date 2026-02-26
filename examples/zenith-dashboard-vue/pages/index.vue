@@ -4,12 +4,33 @@ import { createFEN } from "@multi-game-engines/domain-chess";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { formatNumber } from "@multi-game-engines/ui-core";
 import type { IEngine } from "@multi-game-engines/core";
-import type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/adapter-uci";
-import type { IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult } from "@multi-game-engines/adapter-usi";
-import { EngineMonitorPanel, EngineUIProvider, ChessBoard, ShogiBoard } from "@multi-game-engines/ui-vue";
+import type {
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "@multi-game-engines/adapter-uci";
+import type {
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult,
+} from "@multi-game-engines/adapter-usi";
+import {
+  EngineMonitorPanel,
+  EngineUIProvider,
+  ChessBoard,
+  ShogiBoard,
+} from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { locales } from "@multi-game-engines/i18n";
-import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "lucide-vue-next";
+import {
+  LayoutGrid,
+  Sword,
+  Trophy,
+  Zap,
+  Globe,
+  Cpu,
+  Gauge,
+} from "lucide-vue-next";
 import { getBridge } from "../composables/useEngines";
 
 useHead({
@@ -26,13 +47,23 @@ useHead({
 type EngineType = "chess" | "shogi";
 const activeEngine = ref<EngineType>("chess");
 const locale = ref("ja");
-const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.en));
+const localeData = computed(() =>
+  locale.value === "ja" ? locales.ja : locales.en,
+);
 
 const { bridge } = useEngines();
 
 // エンジンインスタンスの保持 (2026: getBridge が非同期のため)
-const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
-const shogiEngine = ref<IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> | null>(null);
+const chessEngine = ref<IEngine<
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult
+> | null>(null);
+const shogiEngine = ref<IEngine<
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult
+> | null>(null);
 const initError = ref<string | null>(null);
 
 const initEngines = async () => {
@@ -86,9 +117,7 @@ onMounted(initEngines);
 
 // チェス用の設定
 const chessOptions = {
-  fen: createFEN(
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-  ),
+  fen: createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
   multipv: 3,
   depth: 99,
 };
@@ -152,17 +181,25 @@ const nps = computed(() => {
   </div>
 
   <EngineUIProvider v-else :locale-data="localeData">
-    <main class="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30">
+    <main
+      class="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30"
+    >
       <!-- Header Area -->
-      <header class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header
+        class="flex flex-col md:flex-row md:items-end justify-between gap-6"
+      >
         <div class="space-y-1">
-          <h1 class="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
+          <h1
+            class="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3"
+          >
             <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
               <LayoutGrid class="w-8 h-8 text-white" aria-hidden="true" />
             </div>
             {{ localeData.dashboard.title }}
           </h1>
-          <p class="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] ml-1">
+          <p
+            class="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] ml-1"
+          >
             {{ localeData.dashboard.subtitle }}
           </p>
         </div>
@@ -179,7 +216,9 @@ const nps = computed(() => {
               :aria-pressed="locale === 'en'"
               :class="[
                 'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
-                locale === 'en' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
+                locale === 'en'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-400 hover:text-gray-600',
               ]"
               @click="locale = 'en'"
             >
@@ -189,7 +228,9 @@ const nps = computed(() => {
               :aria-pressed="locale === 'ja'"
               :class="[
                 'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
-                locale === 'ja' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
+                locale === 'ja'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-400 hover:text-gray-600',
               ]"
               @click="locale = 'ja'"
             >
@@ -208,12 +249,15 @@ const nps = computed(() => {
                 'flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all',
                 activeEngine === 'chess'
                   ? 'bg-blue-600 shadow-md shadow-blue-200 text-white'
-                  : 'text-gray-400 hover:text-gray-600'
+                  : 'text-gray-400 hover:text-gray-600',
               ]"
               @click="activeEngine = 'chess'"
             >
               <Trophy
-                :class="['w-4 h-4', { 'animate-bounce': activeEngine === 'chess' }]"
+                :class="[
+                  'w-4 h-4',
+                  { 'animate-bounce': activeEngine === 'chess' },
+                ]"
                 aria-hidden="true"
               />
               {{ localeData.dashboard.chessLabel }}
@@ -224,12 +268,15 @@ const nps = computed(() => {
                 'flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all',
                 activeEngine === 'shogi'
                   ? 'bg-blue-600 shadow-md shadow-blue-200 text-white'
-                  : 'text-gray-400 hover:text-gray-600'
+                  : 'text-gray-400 hover:text-gray-600',
               ]"
               @click="activeEngine = 'shogi'"
             >
               <Sword
-                :class="['w-4 h-4', { 'animate-bounce': activeEngine === 'shogi' }]"
+                :class="[
+                  'w-4 h-4',
+                  { 'animate-bounce': activeEngine === 'shogi' },
+                ]"
                 aria-hidden="true"
               />
               {{ localeData.dashboard.shogiLabel }}
@@ -297,10 +344,16 @@ const nps = computed(() => {
 
         <div class="lg:col-span-8 xl:col-span-9 space-y-6">
           <!-- Game Board Area -->
-          <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50 aspect-video flex flex-col items-center justify-center relative overflow-hidden group">
-            <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
+          <div
+            class="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50 aspect-video flex flex-col items-center justify-center relative overflow-hidden group"
+          >
+            <div
+              class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10"
+            />
 
-            <div class="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4">
+            <div
+              class="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4"
+            >
               <ChessBoard
                 v-if="activeEngine === 'chess'"
                 :fen="chessOptions.fen"
@@ -327,8 +380,12 @@ const nps = computed(() => {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+            <div
+              class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <h3
+                class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2"
+              >
                 <span class="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
                 {{ localeData.dashboard.technicalInsight.title }}
               </h3>
@@ -336,25 +393,35 @@ const nps = computed(() => {
                 {{ localeData.dashboard.technicalInsight.description }}
               </p>
             </div>
-            <div class="bg-gray-900 p-8 rounded-3xl border border-gray-800 shadow-2xl">
-              <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
+            <div
+              class="bg-gray-900 p-8 rounded-3xl border border-gray-800 shadow-2xl"
+            >
+              <h3
+                class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4"
+              >
                 {{ localeData.dashboard.zenithFeatures.title }}
               </h3>
               <ul class="text-sm space-y-3">
                 <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <div
+                    class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center"
+                  >
                     <Zap class="w-3 h-3 text-green-500" />
                   </div>
                   {{ localeData.dashboard.zenithFeatures.multiPv }}
                 </li>
                 <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <div
+                    class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center"
+                  >
                     <Zap class="w-3 h-3 text-green-500" />
                   </div>
                   {{ localeData.dashboard.zenithFeatures.reactiveState }}
                 </li>
                 <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <div
+                    class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center"
+                  >
                     <Zap class="w-3 h-3 text-green-500" />
                   </div>
                   {{ localeData.dashboard.zenithFeatures.contractUi }}

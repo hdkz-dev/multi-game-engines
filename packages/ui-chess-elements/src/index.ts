@@ -1,12 +1,12 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import {
   parseFEN,
   ChessPiece,
   FEN,
   createFEN,
 } from "@multi-game-engines/domain-chess";
-import { Move, createMove, truncateLog } from "@multi-game-engines/core";
+import { Move, createMove } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
 
 const PIECE_SVG: Record<ChessPiece, string> = {
@@ -24,6 +24,11 @@ const PIECE_SVG: Record<ChessPiece, string> = {
   k: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
 };
 
+/**
+ * A framework-agnostic Chess board component with high accessibility.
+ * Supports Roving Tabindex for keyboard navigation.
+ * @element chess-board
+ */
 @customElement("chess-board")
 export class ChessBoard extends LitElement {
   static override styles = css`
@@ -47,6 +52,11 @@ export class ChessBoard extends LitElement {
       align-items: center;
       justify-content: center;
       position: relative;
+      outline-offset: -2px;
+    }
+    .square:focus-visible {
+      outline: 2px solid var(--board-focus-color, #2563eb);
+      z-index: 2;
     }
     .square.light {
       background-color: var(--board-light-square, #ebecd0);
@@ -84,45 +94,42 @@ export class ChessBoard extends LitElement {
     const old = this._fen;
     try {
       this._fen = createFEN(value);
-      this.errorMessage = "";
-    } catch (e) {
-      console.warn(
-        `[ChessBoard] Invalid FEN attribute: ${truncateLog(value)}`,
-        e,
-      );
-      this.errorMessage =
-        e instanceof Error ? e.message : "Invalid FEN position";
+    } catch {
+      /* Ignore */
     }
     this.requestUpdate("fen", old);
   }
 
   private _lastMove: Move | "" = "";
   @property({ type: String, attribute: "last-move", reflect: true })
-  get lastMove(): Move | "" | undefined {
+  get lastMove(): Move | "" {
     return this._lastMove;
   }
-  set lastMove(value: string | undefined) {
+  set lastMove(value: string) {
     const old = this._lastMove;
     try {
-      this._lastMove = !value || value === "" ? "" : createMove(value);
+      this._lastMove = value === "" ? "" : createMove(value);
     } catch {
       this._lastMove = "";
     }
     this.requestUpdate("lastMove", old);
   }
 
-  @property({ type: String, reflect: true }) locale: string | undefined = "en";
-  @property({ type: String, reflect: true }) orientation:
-    | "white"
-    | "black"
-    | undefined = "white";
+  @property({ type: String, reflect: true }) locale = "en";
+  @property({ type: String, reflect: true }) orientation: "white" | "black" =
+    "white";
   @property({ type: String, attribute: "board-label", reflect: true })
-  boardLabel: string | undefined = "";
+  boardLabel = "";
   @property({ type: String, attribute: "error-message", reflect: true })
-  errorMessage: string | undefined = "";
-  @property({ type: Object }) pieceNames:
-    | Partial<Record<ChessPiece, string>>
-    | undefined = {};
+  errorMessage = "";
+  @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
+    {};
+
+  /**
+   * 2026 Zenith Tier: Roving Tabindex state.
+   */
+  @state()
+  private _focusedIndex = 0;
 
   private _getLocalizedStrings() {
     const data = this.locale === "ja" ? locales.ja : locales.en;
@@ -154,16 +161,53 @@ export class ChessBoard extends LitElement {
     return rank * 8 + file;
   }
 
+  private _handleKeyDown(e: KeyboardEvent) {
+    let newIndex = this._focusedIndex;
+    const row = Math.floor(this._focusedIndex / 8);
+    const col = this._focusedIndex % 8;
+
+    switch (e.key) {
+      case "ArrowUp":
+        newIndex = Math.max(0, this._focusedIndex - 8);
+        break;
+      case "ArrowDown":
+        newIndex = Math.min(63, this._focusedIndex + 8);
+        break;
+      case "ArrowLeft":
+        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        break;
+      case "ArrowRight":
+        newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
+        break;
+      case "Home":
+        newIndex = row * 8;
+        break;
+      case "End":
+        newIndex = row * 8 + 7;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    this._focusedIndex = newIndex;
+    void this.updateComplete.then(() => {
+      const el = this.shadowRoot?.querySelector(
+        `[data-index="${newIndex}"]`,
+      ) as HTMLElement;
+      el?.focus();
+    });
+  }
+
   override render() {
     const strings = this._getLocalizedStrings();
     let board: (ChessPiece | null)[][];
     try {
-      ({ board } = parseFEN(this.fen));
+      const parsed = parseFEN(this.fen);
+      board = parsed.board;
     } catch {
       return html`<div class="board" role="alert">
-        <div class="error-overlay">
-          ${this.errorMessage || strings.errorMessage}
-        </div>
+        <div class="error-overlay">${strings.errorMessage}</div>
       </div>`;
     }
     const highlightedSquares = new Set<number>();
@@ -185,7 +229,7 @@ export class ChessBoard extends LitElement {
         const isDark = (rankIndex + fileIndex) % 2 !== 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
         const pieceName = piece
-          ? this.pieceNames?.[piece] || strings.pieceNames[piece]
+          ? this.pieceNames[piece] || strings.pieceNames[piece]
           : "";
         const ariaLabel = piece
           ? strings.squarePieceLabel(algebraicFile, algebraicRank, pieceName)
@@ -196,14 +240,17 @@ export class ChessBoard extends LitElement {
               ? "highlight"
               : ""}"
             data-square="${algebraicFile}${algebraicRank}"
+            data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
+            tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
+            @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
               ? html`<img
                   class="piece"
                   src="${PIECE_SVG[piece]}"
-                  alt="${pieceName}"
+                  alt=""
                   aria-hidden="true"
                 />`
               : ""}
@@ -215,6 +262,7 @@ export class ChessBoard extends LitElement {
       class="board"
       role="grid"
       aria-label="${strings.boardLabel}"
+      @keydown="${this._handleKeyDown}"
     >
       ${squares}
     </div>`;

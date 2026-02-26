@@ -23,7 +23,7 @@ async function calculateSRI(url) {
 
 async function main() {
   console.log(`Refreshing SRI hashes in ${ENGINES_JSON_PATH}...`);
-  
+
   const data = JSON.parse(fs.readFileSync(ENGINES_JSON_PATH, "utf-8"));
   let updatedCount = 0;
   let errorCount = 0;
@@ -51,7 +51,11 @@ async function main() {
   }
 
   if (updatedCount > 0) {
-    fs.writeFileSync(ENGINES_JSON_PATH, JSON.stringify(data, null, 2) + "\n", "utf-8");
+    fs.writeFileSync(
+      ENGINES_JSON_PATH,
+      JSON.stringify(data, null, 2) + "\n",
+      "utf-8",
+    );
     console.log(`\nSuccess: Updated ${updatedCount} assets.`);
   } else {
     console.log("\nNo updates needed.");
@@ -64,7 +68,7 @@ async function main() {
   }
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error("Fatal error:", err);
   process.exit(1);
 });

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, onUpdated, nextTick } from 'vue';
-import { SearchLogEntry, formatNumber, formatTime } from '@multi-game-engines/ui-core';
-import { useEngineUI } from '@multi-game-engines/ui-vue-core';
-import ScoreBadge from './ScoreBadge.vue';
+import { ref, watch, onUpdated, nextTick } from "vue";
+import {
+  SearchLogEntry,
+  formatNumber,
+  formatTime,
+} from "@multi-game-engines/ui-core";
+import { useEngineUI } from "@multi-game-engines/ui-vue-core";
+import ScoreBadge from "./ScoreBadge.vue";
 
 interface Props {
   log: SearchLogEntry[];
@@ -10,11 +14,11 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  autoScroll: true
+  autoScroll: true,
 });
 
 const emit = defineEmits<{
-  (e: 'move-click', move: string): void;
+  (e: "move-click", move: string): void;
 }>();
 
 const { strings } = useEngineUI();
@@ -38,7 +42,10 @@ const scrollToBottom = async () => {
   }
 };
 
-watch(() => props.log.length, scrollToBottom, { immediate: true, flush: 'post' });
+watch(() => props.log.length, scrollToBottom, {
+  immediate: true,
+  flush: "post",
+});
 </script>
 
 <template>
@@ -50,21 +57,39 @@ watch(() => props.log.length, scrollToBottom, { immediate: true, flush: 'post' }
     @scroll="handleScroll"
   >
     <table class="min-w-full text-xs font-mono border-collapse table-fixed">
-      <caption class="sr-only">{{ strings.searchLog }}</caption>
+      <caption class="sr-only">
+        {{
+          strings.searchLog
+        }}
+      </caption>
       <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm">
-        <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-          <th scope="col" class="p-2 w-12 text-center border-b border-gray-200">{{ strings.depth || 'D' }}</th>
-          <th scope="col" class="p-2 w-20 text-center border-b border-gray-200">{{ strings.score || 'Score' }}</th>
-          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.time || 'Time' }}</th>
-          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.nodes || 'Nodes' }}</th>
-          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">{{ strings.nps || 'NPS' }}</th>
-          <th scope="col" class="p-2 text-left border-b border-gray-200 w-auto">{{ strings.pv || 'PV' }}</th>
+        <tr
+          class="text-[10px] font-bold text-gray-500 uppercase tracking-wider"
+        >
+          <th scope="col" class="p-2 w-12 text-center border-b border-gray-200">
+            {{ strings.depth || "D" }}
+          </th>
+          <th scope="col" class="p-2 w-20 text-center border-b border-gray-200">
+            {{ strings.score || "Score" }}
+          </th>
+          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">
+            {{ strings.time || "Time" }}
+          </th>
+          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">
+            {{ strings.nodes || "Nodes" }}
+          </th>
+          <th scope="col" class="p-2 w-16 text-right border-b border-gray-200">
+            {{ strings.nps || "NPS" }}
+          </th>
+          <th scope="col" class="p-2 text-left border-b border-gray-200 w-auto">
+            {{ strings.pv || "PV" }}
+          </th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-50 bg-white">
         <tr v-if="log.length === 0">
           <td colspan="6" class="py-8 text-center text-gray-400 italic">
-            {{ strings.searching || 'Searching...' }}
+            {{ strings.searching || "Searching..." }}
           </td>
         </tr>
         <tr
@@ -96,7 +121,7 @@ watch(() => props.log.length, scrollToBottom, { immediate: true, flush: 'post' }
             </div>
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
-            {{ formatTime(entry.time) }}{{ strings.timeUnitSeconds || 's' }}
+            {{ formatTime(entry.time) }}{{ strings.timeUnitSeconds || "s" }}
           </td>
           <td class="p-2 text-right text-gray-500 tabular-nums">
             {{ formatNumber(entry.nodes) }}

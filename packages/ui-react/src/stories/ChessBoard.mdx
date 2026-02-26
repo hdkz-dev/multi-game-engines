@@ -1,5 +1,5 @@
-import { Meta, Story, Canvas, Controls } from '@storybook/blocks';
-import * as ChessBoardStories from './ChessBoard.stories';
+import { Meta, Story, Canvas, Controls } from "@storybook/blocks";
+import * as ChessBoardStories from "./ChessBoard.stories";
 
 <Meta of={ChessBoardStories} />
 
@@ -15,16 +15,19 @@ It is built on top of Web Components for maximum portability but exposed as a Re
 ## Examples
 
 ### Default Position
+
 The standard starting position.
 
 <Canvas of={ChessBoardStories.Default} />
 
 ### Orientation
+
 You can flip the board to see it from Black's perspective.
 
 <Canvas of={ChessBoardStories.BlackOrientation} />
 
 ### Custom Piece Names
+
 For accessibility or specific terminology, you can override piece names.
 
 <Canvas of={ChessBoardStories.CustomPieces} />

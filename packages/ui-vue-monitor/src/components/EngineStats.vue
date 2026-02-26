@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { SearchStatistics, formatNumber, formatTime } from "@multi-game-engines/ui-core";
+import {
+  SearchStatistics,
+  formatNumber,
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
 import { useEngineUI } from "@multi-game-engines/ui-vue-core";
 
@@ -26,7 +30,9 @@ const { strings } = useEngineUI();
     <div class="flex flex-col gap-1">
       <div class="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
         <Layers class="w-4 h-4" />
-        <span v-if="stats.visits && stats.visits > 0">{{ strings.visits }}</span>
+        <span v-if="stats.visits && stats.visits > 0">{{
+          strings.visits
+        }}</span>
         <span v-else>{{ strings.depth }}</span>
       </div>
       <div class="text-sm font-bold text-gray-900 font-mono">

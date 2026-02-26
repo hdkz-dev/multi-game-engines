@@ -1,5 +1,5 @@
 import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import {
   parseSFEN,
   ShogiPiece,
@@ -7,39 +7,8 @@ import {
   SFEN,
   createSFEN,
 } from "@multi-game-engines/domain-shogi";
-import { Move, createMove, truncateLog } from "@multi-game-engines/core";
+import { Move, createMove } from "@multi-game-engines/core";
 import { locales } from "@multi-game-engines/i18n";
-
-const KANJI_SYMBOLS: Record<ShogiPiece, string> = {
-  P: "歩",
-  L: "香",
-  N: "桂",
-  S: "銀",
-  G: "金",
-  B: "角",
-  R: "飛",
-  K: "王", // Sente King usually "玉", Gote King "王". Standardizing to King generic or context aware? Usually Board handles specific King. SFEN K/k.
-  p: "歩",
-  l: "香",
-  n: "桂",
-  s: "銀",
-  g: "金",
-  b: "角",
-  r: "飛",
-  k: "王",
-  "+P": "と",
-  "+L": "成香",
-  "+N": "成桂",
-  "+S": "成銀",
-  "+B": "馬",
-  "+R": "龍",
-  "+p": "と",
-  "+l": "成香",
-  "+n": "成桂",
-  "+s": "成銀",
-  "+b": "馬",
-  "+r": "龍",
-};
 
 /**
  * Returns true if the piece belongs to Gote (White).
@@ -51,7 +20,8 @@ function isGotePiece(piece: ShogiPiece): boolean {
 }
 
 /**
- * A framework-agnostic Shogi board component.
+ * A framework-agnostic Shogi board component with high accessibility.
+ * Supports Roving Tabindex for keyboard navigation.
  * @element shogi-board
  */
 @customElement("shogi-board")
@@ -100,6 +70,11 @@ export class ShogiBoard extends LitElement {
       border: 0.5px solid rgba(0, 0, 0, 0.1);
       font-size: clamp(0.8rem, 6cqi, 2rem);
       position: relative;
+      outline-offset: -2px;
+    }
+    .square:focus-visible {
+      outline: 2px solid var(--board-focus-color, #2563eb);
+      z-index: 1;
     }
     .square.highlight {
       background-color: var(--board-highlight-color, rgba(255, 255, 0, 0.4));
@@ -134,14 +109,8 @@ export class ShogiBoard extends LitElement {
     const old = this._sfen;
     try {
       this._sfen = createSFEN(value);
-      this.errorMessage = ""; // Clear error on success
     } catch (e) {
-      console.warn(
-        `[ShogiBoard] Invalid SFEN attribute: ${truncateLog(value)}`,
-        e,
-      );
-      this.errorMessage =
-        e instanceof Error ? e.message : "Invalid SFEN position";
+      console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
     }
     this.requestUpdate("sfen", old);
   }
@@ -152,42 +121,42 @@ export class ShogiBoard extends LitElement {
    * Last move to highlight (e.g., "7g7f" or "P*5e").
    */
   @property({ type: String, attribute: "last-move", reflect: true })
-  get lastMove(): Move | "" | undefined {
+  get lastMove(): Move | "" {
     return this._lastMove;
   }
 
-  set lastMove(value: string | undefined) {
+  set lastMove(value: string) {
     const old = this._lastMove;
     try {
-      this._lastMove = !value || value === "" ? "" : createMove(value);
+      this._lastMove = value === "" ? "" : createMove(value);
     } catch (e) {
-      console.warn(
-        `[ShogiBoard] Invalid move attribute: ${truncateLog(value)}`,
-        e,
-      );
+      console.warn(`[ShogiBoard] Invalid move attribute: ${value}`, e);
       this._lastMove = "";
     }
     this.requestUpdate("lastMove", old);
   }
 
   @property({ type: String, reflect: true })
-  locale: string | undefined = "en";
+  locale = "en";
 
   @property({ type: String, attribute: "board-label", reflect: true })
-  boardLabel: string | undefined = "";
+  boardLabel = "";
   @property({ type: String, attribute: "hand-sente-label", reflect: true })
-  handSenteLabel: string | undefined = "";
+  handSenteLabel = "";
   @property({ type: String, attribute: "hand-gote-label", reflect: true })
-  handGoteLabel: string | undefined = "";
+  handGoteLabel = "";
 
   @property({ type: String, attribute: "error-message", reflect: true })
-  errorMessage: string | undefined = "";
+  errorMessage = "";
 
   @property({ type: Object })
-  pieceNames: Partial<Record<ShogiPiece, string>> | undefined = {};
+  pieceNames: Partial<Record<ShogiPiece, string>> = {};
 
-  @property({ type: Object })
-  pieceSymbols: Partial<Record<ShogiPiece, string>> | undefined = {};
+  /**
+   * 2026 Zenith Tier: Roving Tabindex state.
+   */
+  @state()
+  private _focusedIndex = 0;
 
   private _getLocalizedStrings() {
     const data = this.locale === "ja" ? locales.ja : locales.en;
@@ -226,6 +195,44 @@ export class ShogiBoard extends LitElement {
     return rank * 9 + file;
   }
 
+  private _handleKeyDown(e: KeyboardEvent) {
+    let newIndex = this._focusedIndex;
+    const row = Math.floor(this._focusedIndex / 9);
+    const col = this._focusedIndex % 9;
+
+    switch (e.key) {
+      case "ArrowUp":
+        newIndex = Math.max(0, this._focusedIndex - 9);
+        break;
+      case "ArrowDown":
+        newIndex = Math.min(80, this._focusedIndex + 9);
+        break;
+      case "ArrowLeft":
+        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        break;
+      case "ArrowRight":
+        newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
+        break;
+      case "Home":
+        newIndex = row * 9;
+        break;
+      case "End":
+        newIndex = row * 9 + 8;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    this._focusedIndex = newIndex;
+    void this.updateComplete.then(() => {
+      const el = this.shadowRoot?.querySelector(
+        `[data-index="${newIndex}"]`,
+      ) as HTMLElement;
+      el?.focus();
+    });
+  }
+
   override render() {
     const strings = this._getLocalizedStrings();
     let board: (ShogiPiece | null)[][];
@@ -236,9 +243,7 @@ export class ShogiBoard extends LitElement {
     } catch {
       return html`
         <div class="container" role="alert">
-          <div class="error-overlay">
-            ${this.errorMessage || strings.errorMessage}
-          </div>
+          <div class="error-overlay">${strings.errorMessage}</div>
         </div>
       `;
     }
@@ -261,29 +266,29 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const displayFile = usiFile;
         const displayRank = r + 1;
-        const pieceName = piece
-          ? this.pieceNames?.[piece] || strings.pieceNames[piece]
-          : "";
-        const pieceSymbol = piece
-          ? this.pieceSymbols?.[piece] || KANJI_SYMBOLS[piece] || pieceName
+        const pieceLabel = piece
+          ? this.pieceNames[piece] || strings.pieceNames[piece]
           : "";
         const ariaLabel = piece
-          ? strings.squarePieceLabel(displayFile, displayRank, pieceName)
+          ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
           : strings.squareLabel(displayFile, displayRank);
 
         squares.push(html`
           <div
             class="square ${isHighlighted ? "highlight" : ""}"
             data-square="${usiFile}${String.fromCharCode(97 + r)}"
+            data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
+            tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
+            @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
               ? html`<span
                   class="piece ${isGote ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
-                  >${pieceSymbol}</span
+                  >${pieceLabel}</span
                 >`
               : ""}
           </div>
@@ -296,7 +301,12 @@ export class ShogiBoard extends LitElement {
         <div class="hand gote" aria-label="${strings.handGoteLabel}">
           ${this._renderHand(hand, "gote", strings)}
         </div>
-        <div class="board" role="grid" aria-label="${strings.boardLabel}">
+        <div
+          class="board"
+          role="grid"
+          aria-label="${strings.boardLabel}"
+          @keydown="${this._handleKeyDown}"
+        >
           ${squares}
         </div>
         <div class="hand sente" aria-label="${strings.handSenteLabel}">
@@ -318,20 +328,15 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const name = this.pieceNames?.[p as ShogiPiece] || strings.pieceNames[p];
-      const symbol =
-        this.pieceSymbols?.[p as ShogiPiece] ||
-        KANJI_SYMBOLS[p as ShogiPiece] ||
-        name;
-
+      const label = this.pieceNames[p as ShogiPiece] || strings.pieceNames[p];
       const ariaLabel =
         count > 1
           ? strings.handPieceCount
-              .replace("{piece}", name)
+              .replace("{piece}", label)
               .replace("{count}", String(count))
-          : name;
-      return html`<span title="${name}" aria-label="${ariaLabel}"
-        >${symbol}${count > 1 ? count : ""}</span
+          : label;
+      return html`<span title="${label}" aria-label="${ariaLabel}"
+        >${label}${count > 1 ? count : ""}</span
       >`;
     });
   }

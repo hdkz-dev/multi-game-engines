@@ -3,10 +3,10 @@ name: Refresh Engine SRI Hashes
 on:
   push:
     paths:
-      - 'packages/registry/data/engines.json'
-      - 'scripts/refresh-engine-sris.mjs'
+      - "packages/registry/data/engines.json"
+      - "scripts/refresh-engine-sris.mjs"
   schedule:
-    - cron: '0 0 * * 0' # 毎週日曜日に定期チェック
+    - cron: "0 0 * * 0" # 毎週日曜日に定期チェック
   workflow_dispatch: # 手動実行も許可
 
 jobs:

@@ -51,7 +51,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
 
   React.useLayoutEffect(() => {
     if (ref.current) {
-      ref.current.pieceNames = pieceNames;
+      ref.current.pieceNames = pieceNames ?? {};
     }
   }, [pieceNames]);
 

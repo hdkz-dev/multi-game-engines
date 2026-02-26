@@ -33,7 +33,7 @@ export default [
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { "argsIgnorePattern": "^_" },
+        { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-floating-promises": "error",
     },
