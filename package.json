@@ -24,7 +24,8 @@
     "lint": "turbo lint",
     "lint:fix": "turbo lint -- --fix",
     "typecheck": "turbo typecheck",
-    "build": "turbo build",
+    "sri:refresh": "node scripts/refresh-engine-sris.mjs",
+    "build": "pnpm sri:refresh && turbo build",
     "clean": "find . -type d \\( -name \"dist\" -o -name \".next\" -o -name \".output\" -o -name \".nuxt\" -o -name \"storybook-static\" \\) -not -path \"*/node_modules/*\" -exec rm -rf {} +",
     "clean:deps": "rm -rf node_modules **/node_modules pnpm-lock.yaml",
     "format": "prettier --write .",
@@ -34,7 +35,7 @@
     "doc-sync": "node scripts/doc-sync.js",
     "prepare": "husky",
     "release": "pnpm build && changeset publish",
-    "ai:check": "pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e",
+    "ai:check": "pnpm sri:refresh && pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e",
     "ai:release": "changeset"
   },
   "engines": {

@@ -1,17 +1,28 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月26日 (実装担当: Federated i18n Architecture)
+## 📅 更新日: 2026年2月27日 (実装担当: Advanced Development Skills Integration)
 
 ## 📈 稼働中のタスク
 
-### 1. Federated i18n Architecture の完遂 (Zenith Tier)
+### 1. Advanced Development Skills Integration (品質・効率強化)
 
-- [x] 言語リソースの物理パッケージ分離 (`i18n-core`, `common`, `chess`, `shogi`, `engines`, `dashboard`)
-- [x] 全 45 パッケージの完全移行と旧 `packages/i18n` の削除
-- [x] Zero-Any Policy に基づく再帰的 `DeepRecord` 型による型安全化
-- [x] 全テストスイートの同期とスナップショット更新
+- [x] 統合計画の策定 (`docs/implementation_plans/20260227_advanced_skills_integration.md`)
+- [x] Playwright E2E テストの拡充 (並列探索、ロケール切り替え等のケース追加)
+- [x] ビルドプロセスへの SRI 自動再計算 (`sri:refresh`) の統合
+- [ ] Jules / Subagent ワークフローのドキュメント化と実運用開始
+- [ ] Changesets によるリリースオートメーションの強化
 
-## 🏆 到達ハイライト (2026-02-26 Federated i18n Architecture)
+## 🏆 到達ハイライト (2026-02-27 Advanced Development Skills Integration)
+
+- **E2E 検証の高度化**:
+  - React/Vue 両ダッシュボードにおいて、Stockfish と やねうら王を同時に動かす「並列探索テスト」を導入。並列実行時の状態隔離と UI の整合性を自動検証可能に。
+  - ロケール切り替え（EN/JA）のライフサイクルテストを追加し、i18n パッケージ分離後の実行時整合性を保証。
+- **Security & SRI の自動担保**:
+  - `pnpm build` および `pnpm ai:check` の一環として、リモートバイナリの SRI ハッシュを自動的に再計算し `engines.json` を更新するパイプラインを構築。ハッシュの更新漏れによる実行時エラーを物理的に排除。
+- **アーキテクチャ・ガードの強化**:
+  - `awesome-claude-skills` の知見を取り入れ、ADR-050 を策定。エージェントによる開発の並列性と品質を両立させる体制を整備。
+
+## 📅 更新日: 2026年2月26日 (実装担当: Federated i18n Architecture)
 
 - **物理的ドメイン隔離の達成**:
   - 各ゲームドメイン（Chess, Shogi 等）が自身の言語リソースのみをパッケージとして依存する「Pay-as-you-go」アーキテクチャを確立。

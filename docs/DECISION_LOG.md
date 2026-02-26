@@ -46,6 +46,7 @@
 - [ADR-016: 段階的なリリース戦略](./adr/016-two-stage-release.md) (Accepted - 2026-02-11)
 - [ADR-017: ネイティブブリッジの統合方針](./adr/017-native-integration.md) (Accepted - 2026-02-12)
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
+- [ADR-050: Advanced Development Skills Integration](./adr/050-advanced-dev-skills-integration.md) (Proposed - 2026-02-27)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 
