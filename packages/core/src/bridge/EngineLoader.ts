@@ -152,11 +152,13 @@ export class EngineLoader implements IEngineLoader {
         }
 
         if (unsafeNoSRI && this.isProduction) {
+          const i18nKey = "engine.errors.sriBypassNotAllowed" as I18nKey;
           throw new EngineError({
             code: EngineErrorCode.SECURITY_ERROR,
             message:
               "SRI bypass (__unsafeNoSRI) is not allowed in production environment.",
             engineId,
+            i18nKey,
             remediation: "Provide a valid SRI hash for all engine resources.",
           });
         }

@@ -87,16 +87,34 @@ describe("USIParser", () => {
       const maliciousSfen =
         "startpos\nquit" as unknown as import("@multi-game-engines/domain-shogi").SFEN;
       expect(() => parser.createSearchCommand({ sfen: maliciousSfen })).toThrow(
-        /Potential command injection/,
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
       );
     });
+
+    it.each(["\r", "\t", "\0"])(
+      "should throw error for control character %j in SFEN",
+      (char) => {
+        // Use casting to bypass domain validation and reach the parser's check
+        const maliciousSfen =
+          `lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL${char}b - 1` as unknown as import("@multi-game-engines/domain-shogi").SFEN;
+        expect(() =>
+          parser.createSearchCommand({
+            sfen: maliciousSfen,
+          }),
+        ).toThrow(
+          expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+        );
+      },
+    );
 
     it("should throw error for injection in custom fields (index signature)", () => {
       expect(() =>
         parser.createSearchCommand({
           "malicious\nkey": "value",
         }),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should throw error for nested injection", () => {
@@ -106,7 +124,9 @@ describe("USIParser", () => {
             "evil\r\nkey": "data",
           },
         }),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should create ponder command without infinite", () => {
@@ -124,7 +144,7 @@ describe("USIParser", () => {
 
     it("should throw on injection in option name", () => {
       expect(() => parser.createOptionCommand("Hash\nquit", 128)).toThrow(
-        /Potential command injection/,
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
       );
     });
 

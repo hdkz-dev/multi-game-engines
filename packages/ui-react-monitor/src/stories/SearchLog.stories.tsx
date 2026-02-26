@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { SearchLog } from "../components/SearchLog.js";
 import { EngineUIProvider } from "@multi-game-engines/ui-react-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 import { createMove } from "@multi-game-engines/core";
 
 const meta: Meta<typeof SearchLog> = {
@@ -9,7 +9,7 @@ const meta: Meta<typeof SearchLog> = {
   component: SearchLog,
   decorators: [
     (Story) => (
-      <EngineUIProvider localeData={locales.en}>
+      <EngineUIProvider localeData={commonLocales.en!}>
         <div className="p-4 bg-gray-100 min-h-[500px]">
           <Story />
         </div>

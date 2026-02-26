@@ -1,0 +1,34 @@
+{
+  "pieces": {
+    "P": "White Pawn",
+    "N": "White Knight",
+    "B": "White Bishop",
+    "R": "White Rook",
+    "Q": "White Queen",
+    "K": "White King",
+    "p": "Black Pawn",
+    "n": "Black Knight",
+    "b": "Black Bishop",
+    "r": "Black Rook",
+    "q": "Black Queen",
+    "k": "Black King"
+  },
+  "errors": {
+    "invalidFEN": "Invalid FEN: Input must not be empty.",
+    "invalidFENStructure": "Invalid FEN structure: 6 fields required.",
+    "invalidFENTurn": "Invalid FEN turn: Expected \"w\" or \"b\".",
+    "invalidFENEnPassant": "Invalid FEN en passant: \"{square}\"",
+    "invalidFENCastling": "Invalid FEN castling rights: \"{rights}\"",
+    "invalidFENHalfmove": "Invalid FEN halfmove clock: \"{clock}\"",
+    "invalidFENFullmove": "Invalid FEN fullmove number: \"{move}\"",
+    "invalidFenRanks": "Invalid FEN: Expected 8 ranks.",
+    "invalidFenRow": "Invalid FEN: Row must be defined.",
+    "invalidFenChar": "Invalid FEN character: \"{char}\"",
+    "invalidFenRankWidth": "Invalid FEN rank width at rank {rank}: expected {expected}, got {actual}",
+    "missingFEN": "UCI protocol requires a FEN position string."
+  },
+  "parser": {
+    "invalidPvMove": "[UCIParser.parseInfo] Skipping invalid \"pv\" move token: \"{token}\" in response: \"{line}\"",
+    "invalidPonder": "[UCIParser.parseResult] Skipping invalid \"ponder\" token: \"{token}\" in response: \"{line}\""
+  }
+}

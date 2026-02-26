@@ -40,4 +40,21 @@ describe("ChessBoard.vue", () => {
     expect(el.locale).toBe("ja");
     expect(el.boardLabel).toBe("テストボード");
   });
+
+  it("passes custom piece names to custom element", () => {
+    const fen = createFEN(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    );
+    const pieceNames = { P: "Soldier", p: "soldier" };
+    const wrapper = mount(ChessBoardComponent, {
+      props: {
+        fen,
+        pieceNames,
+      },
+    });
+
+    const board = wrapper.find("chess-board");
+    const el = board.element as ChessBoardElement;
+    expect(el.pieceNames.P).toBe("Soldier");
+  });
 });

@@ -10,7 +10,6 @@
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/domain-backgammon"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -27,7 +26,7 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*"
+    "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
     "eslint": "^9.39.3",

@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createBackgammonMove } from "../index.js";
+import { EngineError } from "@multi-game-engines/core";
 
 describe("createBackgammonMove", () => {
   it("should create valid backgammon moves", () => {
@@ -14,9 +15,15 @@ describe("createBackgammonMove", () => {
   });
 
   it("should throw for invalid move formats", () => {
-    expect(() => createBackgammonMove("invalid")).toThrow(
-      /Invalid Backgammon move format/,
-    );
+    try {
+      createBackgammonMove("invalid");
+    } catch (e) {
+      if (e instanceof EngineError) {
+        expect(e.i18nKey).toBe("engine.errors.invalidBackgammonMove");
+      } else {
+        throw e;
+      }
+    }
     expect(() => createBackgammonMove("24-18")).toThrow();
     expect(() => createBackgammonMove("24/")).toThrow();
   });

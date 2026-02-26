@@ -4,7 +4,7 @@ import {
   PrincipalVariation,
   createUIStrings,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 import "./score-badge.js";
 
 @customElement("pv-list")
@@ -75,7 +75,7 @@ export class PVListElement extends LitElement {
 
   render() {
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
 
     if (this.pvs.length === 0) {

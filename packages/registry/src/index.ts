@@ -6,7 +6,10 @@ import {
   I18nKey,
 } from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
-import { t as translate } from "@multi-game-engines/i18n";
+import {
+  tEngines as translate,
+  EnginesKey,
+} from "@multi-game-engines/i18n-engines";
 import { z } from "zod";
 
 /**
@@ -56,7 +59,7 @@ export class StaticRegistry implements IEngineRegistry {
     // 2026 Best Practice: 起動時または登録時に Zod で構造を厳密に検証
     const result = EngineManifestSchema.safeParse(data);
     if (!result.success) {
-      const i18nKey = "engine.errors.registry.invalidManifest" as I18nKey;
+      const i18nKey: EnginesKey = "registry.invalidManifest";
       console.warn(
         translate(i18nKey, {
           error: result.error.message,
@@ -130,14 +133,14 @@ export class RemoteRegistry extends StaticRegistry {
       try {
         const response = await fetch(this.url, { signal: controller.signal });
         if (!response.ok) {
-          const i18nKey = "engine.errors.registry.fetchFailed" as I18nKey;
+          const i18nKey: EnginesKey = "registry.fetchFailed";
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,
             message: translate(i18nKey, {
               url: this.url,
               status: response.statusText,
             }),
-            i18nKey,
+            i18nKey: i18nKey as unknown as I18nKey,
           });
         }
 
@@ -153,14 +156,14 @@ export class RemoteRegistry extends StaticRegistry {
         // 2026 Zenith Tier: Zod による厳密なスキーマバリデーション
         const result = EngineManifestSchema.safeParse(parsed);
         if (!result.success) {
-          const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
+          const i18nKey: EnginesKey = "registry.invalidFormat";
           throw new EngineError({
             code: EngineErrorCode.VALIDATION_ERROR,
             message: translate(i18nKey, {
               url: this.url,
               error: result.error.message,
             }),
-            i18nKey,
+            i18nKey: i18nKey as unknown as I18nKey,
           });
         }
 
@@ -168,14 +171,14 @@ export class RemoteRegistry extends StaticRegistry {
         this.loaded = true;
       } catch (error) {
         if ((error as Error).name === "AbortError") {
-          const i18nKey = "engine.errors.registry.timeout" as I18nKey;
+          const i18nKey: EnginesKey = "registry.timeout";
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,
             message: translate(i18nKey, {
               url: this.url,
               timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
             }),
-            i18nKey,
+            i18nKey: i18nKey as unknown as I18nKey,
           });
         }
         throw error;
@@ -197,11 +200,9 @@ export class RemoteRegistry extends StaticRegistry {
   ): Promise<void> {
     const parts = expectedSri.split("-");
     if (parts.length !== 2) {
-      const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[RemoteRegistry] Invalid SRI format: ${expectedSri}`,
-        i18nKey,
       });
     }
 
@@ -212,11 +213,9 @@ export class RemoteRegistry extends StaticRegistry {
     else if (algo === "sha384") cryptoAlgo = "SHA-384";
     else if (algo === "sha512") cryptoAlgo = "SHA-512";
     else {
-      const i18nKey = "engine.errors.registry.invalidFormat" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[RemoteRegistry] Unsupported SRI algorithm: ${algo}`,
-        i18nKey,
       });
     }
 
@@ -224,16 +223,14 @@ export class RemoteRegistry extends StaticRegistry {
       cryptoAlgo,
       buffer,
     );
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashString = String.fromCharCode(...hashArray);
-    const actualHash = btoa(hashString);
+    const actualHash = btoa(String.fromCharCode(...new Uint8Array(hashBuffer)));
 
     if (actualHash !== expectedHash) {
-      const i18nKey = "engine.errors.registry.sriMismatch" as I18nKey;
+      const i18nKey: EnginesKey = "registry.sriMismatch";
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { url: this.url }),
-        i18nKey,
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
   }
@@ -243,7 +240,7 @@ export class RemoteRegistry extends StaticRegistry {
     version?: string,
   ): Record<string, IEngineSourceConfig> | null {
     if (!this.loaded) {
-      const i18nKey = "engine.errors.registry.notLoaded" as I18nKey;
+      const i18nKey: EnginesKey = "registry.notLoaded";
       console.warn(translate(i18nKey, { id }));
       return null;
     }

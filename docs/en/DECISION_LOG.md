@@ -22,6 +22,9 @@ This document is an index to the ADRs (Architecture Decision Records) that recor
 - [ADR-038: Privacy-First Logging Policy](./adr/038-privacy-first-logging.md) (Accepted - 2026-02-20)
 - [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed - 2026-02-21)
 - [ADR-043: ResourceInjector Handshake Protocol](./adr/043-resource-injector-handshake.md) (Completed - 2026-02-21)
+- [ADR-047: Pluggable Engine Metadata Registry](./adr/047-pluggable-engine-registry.md) (Completed - 2026-02-24)
+- [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
+- [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
 
 ## 🎨 UI & Presentation
 

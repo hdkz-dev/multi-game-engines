@@ -27,6 +27,7 @@
 - [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Pending Merge - 2026-02-23)
 - [ADR-047: Pluggable Engine Metadata Registry](./adr/047-pluggable-engine-registry.md) (Completed - 2026-02-24)
 - [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
+- [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 

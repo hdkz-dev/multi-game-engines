@@ -8,7 +8,7 @@ import {
   IBaseSearchResult,
   I18nKey,
 } from "@multi-game-engines/core";
-import { t as translate } from "@multi-game-engines/i18n";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /** 麻雀の指し手（打牌、副露等） */
 export type MahjongMove = Move<"MahjongMove">;

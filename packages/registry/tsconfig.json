@@ -5,10 +5,10 @@
     "rootDir": "src",
     "paths": {
       "@multi-game-engines/core": ["../core/dist/index.d.ts"],
-      "@multi-game-engines/i18n": ["../i18n/dist/index.d.ts"]
+      "@multi-game-engines/i18n-engines": ["../i18n-engines/src/index.ts"]
     }
   },
-  "references": [{ "path": "../core" }, { "path": "../i18n" }],
+  "references": [{ "path": "../core" }, { "path": "../i18n-engines" }],
   "include": ["src/**/*", "data/**/*.json"],
   "exclude": ["node_modules", "dist"]
 }

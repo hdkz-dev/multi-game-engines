@@ -39,16 +39,12 @@ describe("MahjongJSONParser 堅牢性", () => {
     expect(parser.parseResult(data)).toBeNull();
   });
 
-  it("非常に深くネストされた盤面データでエラーを投げること", () => {
-    const deepBoard: Record<string, unknown> = {};
-    let current: unknown = deepBoard;
-    for (let i = 0; i < 20; i++) {
-      const next = {};
-      (current as Record<string, unknown>)["inner"] = next;
-      current = next;
-    }
-    expect(() => parser.createSearchCommand({ board: deepBoard })).toThrow(
-      /too deeply nested/,
+  it("制御文字を含む不正な盤面データでエラーを投げること", () => {
+    const maliciousBoard = {
+      hand: ["1m\nquit"],
+    };
+    expect(() => parser.createSearchCommand({ board: maliciousBoard })).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
     );
   });
 });

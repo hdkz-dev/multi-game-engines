@@ -4,11 +4,11 @@ import {
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
-  I18nKey,
   createMove,
   truncateLog,
+  I18nKey,
 } from "@multi-game-engines/core";
-import { t as translate } from "@multi-game-engines/i18n";
+import { tChess as translate, ChessKey } from "@multi-game-engines/i18n-chess";
 import {
   createFEN,
   IChessSearchOptions,
@@ -19,11 +19,10 @@ import {
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<
-  IChessSearchOptions,
-  IChessSearchInfo,
-  IChessSearchResult
-> {
+export class UCIParser
+  implements
+    IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult>
+{
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
   // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
   private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
@@ -129,7 +128,7 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                translate("parsers.uci.invalidPvMove", {
+                translate("parser.invalidPvMove", {
                   token: truncateLog(token),
                   line: truncateLog(line),
                 }),
@@ -205,7 +204,7 @@ export class UCIParser implements IProtocolParser<
             result.ponder = ponder;
           } else {
             console.warn(
-              translate("parsers.uci.invalidPonder", {
+              translate("parser.invalidPonder", {
                 token: truncateLog(ponderStr),
                 line: truncateLog(line),
               }),
@@ -234,12 +233,12 @@ export class UCIParser implements IProtocolParser<
     ProtocolValidator.assertNoInjection(options, "search options", true);
 
     if (!options.fen) {
-      const i18nKey = "adapters.uci.errors.missingFEN" as I18nKey;
+      const i18nKey: ChessKey = "errors.missingFEN";
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: translate(i18nKey),
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey,
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 

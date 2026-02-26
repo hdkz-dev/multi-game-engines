@@ -1,0 +1,34 @@
+{
+  "pieces": {
+    "P": "白 歩兵",
+    "N": "白 騎士",
+    "B": "白 僧正",
+    "R": "白 城塞",
+    "Q": "白 女王",
+    "K": "白 国王",
+    "p": "黒 歩兵",
+    "n": "黒 騎士",
+    "b": "黒 僧正",
+    "r": "黒 城塞",
+    "q": "黒 女王",
+    "k": "黒 国王"
+  },
+  "errors": {
+    "invalidFEN": "無効な FEN です: 入力は空であってはなりません。",
+    "invalidFENStructure": "無効な FEN 構造です: 6 つのフィールドが必要です。",
+    "invalidFENTurn": "無効な FEN 手番です: \"w\" または \"b\" が必要です。",
+    "invalidFENEnPassant": "無効な FEN アンパッサン形式です: \"{square}\"",
+    "invalidFENCastling": "無効な FEN キャスリング権利です: \"{rights}\"",
+    "invalidFENHalfmove": "無効な FEN ハーフムーブクロックです: \"{clock}\"",
+    "invalidFENFullmove": "無効な FEN 手数カウンタです: \"{move}\"",
+    "invalidFenRanks": "無効な FEN です: 8 段必要です。",
+    "invalidFenRow": "無効な FEN です: 行データが不足しています。",
+    "invalidFenChar": "無効な FEN 文字です: \"{char}\"",
+    "invalidFenRankWidth": "無効な FEN です (第 {rank} 段): {expected} マス必要ですが、{actual} マスしかありません。",
+    "missingFEN": "UCI プロトコルには FEN 形式の局面文字列が必要です。"
+  },
+  "parser": {
+    "invalidPvMove": "[UCIParser.parseInfo] 無効な \"pv\" 着手トークンをスキップしました: \"{token}\" (応答: \"{line}\")",
+    "invalidPonder": "[UCIParser.parseResult] 無効な \"ponder\" トークンをスキップしました: \"{token}\" (応答: \"{line}\")"
+  }
+}

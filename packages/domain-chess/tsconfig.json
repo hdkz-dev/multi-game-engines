@@ -5,9 +5,9 @@
     "rootDir": "src",
     "paths": {
       "@multi-game-engines/core": ["../core/dist/index.d.ts"],
-      "@multi-game-engines/i18n": ["../i18n/dist/index.d.ts"]
+      "@multi-game-engines/i18n-common": ["../i18n-common/src/index.ts"]
     }
   },
-  "references": [{ "path": "../core" }, { "path": "../i18n" }],
+  "references": [{ "path": "../core" }, { "path": "../i18n-common" }],
   "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"]
 }

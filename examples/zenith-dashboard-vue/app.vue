@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { EngineUIProvider } from "@multi-game-engines/ui-vue";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
-const enLocale = locales.en;
+const enLocale = commonLocales.en;
 </script>
 
 <template>

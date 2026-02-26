@@ -6,7 +6,7 @@
   },
   "references": [
     { "path": "../core" },
-    { "path": "../i18n" },
+    { "path": "../i18n-common" },
     { "path": "../registry" },
     { "path": "../domain-backgammon" }
   ],

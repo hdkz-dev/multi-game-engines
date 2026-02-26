@@ -78,7 +78,9 @@ describe("RemoteRegistry", () => {
     // Mismatch case
     const wrongSri = "sha384-wronghash";
     const invalidRegistry = new RemoteRegistry(mockUrl, wrongSri);
-    await expect(invalidRegistry.load()).rejects.toThrow(/Manifest integrity/);
+    await expect(invalidRegistry.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "registry.sriMismatch" }),
+    );
   });
 
   it("should throw error if fetch fails", async () => {
@@ -88,6 +90,8 @@ describe("RemoteRegistry", () => {
     } as Response);
 
     const registry = new RemoteRegistry(mockUrl);
-    await expect(registry.load()).rejects.toThrow(/Failed to fetch/);
+    await expect(registry.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "registry.fetchFailed" }),
+    );
   });
 });

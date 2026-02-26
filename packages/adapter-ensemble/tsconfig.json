@@ -6,7 +6,7 @@
     "composite": false,
     "paths": {
       "@multi-game-engines/core": ["../core/src/index.ts"],
-      "@multi-game-engines/i18n": ["../i18n/src/index.ts"]
+      "@multi-game-engines/i18n-engines": ["../i18n-engines/src/index.ts"]
     }
   },
   "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],

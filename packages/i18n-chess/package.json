@@ -1,0 +1,31 @@
+{
+  "name": "@multi-game-engines/i18n-chess",
+  "version": "0.1.0",
+  "description": "Chess-specific localized strings for multi-game engines",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm && tsc -p tsconfig.build.json --emitDeclarationOnly --declarationDir dist",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "dependencies": {
+    "@multi-game-engines/i18n-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

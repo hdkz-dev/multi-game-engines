@@ -7,7 +7,7 @@ import {
   createFEN,
 } from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
-import { locales } from "@multi-game-engines/i18n";
+import { chessLocales } from "@multi-game-engines/i18n-chess";
 
 const PIECE_SVG: Record<ChessPiece, string> = {
   P: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22.5 9c-2.21 0-4 1.79-4 4 0 .89.36 1.7.94 2.28C19.15 15.59 19 15.79 19 16c0 .55.45 1 1 1h7c.55 0 1-.45 1-1 0-.21-.15-.41-.44-.72.58-.58.94-1.39.94-2.28 0-2.21-1.79-4-4-4h-2.5zM23 29.5c-4.42 0-8 1.57-8 3.5h16c0-1.93-3.58-3.5-8-3.5z' fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
@@ -115,7 +115,7 @@ export class ChessBoard extends LitElement {
     this.requestUpdate("lastMove", old);
   }
 
-  @property({ type: String }) locale = "en";
+  @property({ type: String, reflect: true }) locale = "en";
   @property({ type: String, reflect: true }) orientation: "white" | "black" =
     "white";
   @property({ type: String, attribute: "board-label", reflect: true })
@@ -132,24 +132,19 @@ export class ChessBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings() {
-    const data = this.locale === "ja" ? locales.ja : locales.en;
+    const data = (
+      this.locale === "ja" ? chessLocales.ja : chessLocales.en
+    ) as Record<string, unknown>;
+    const boardTitle = this.locale === "ja" ? "ゲームボード" : "Chess Board";
+    const errors = (data.errors || {}) as Record<string, string>;
+    const pieces = (data.pieces || {}) as Record<string, string>;
+
     return {
-      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
-      errorMessage:
-        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
-      pieceNames: data.dashboard.gameBoard.chessPieces as Record<
-        ChessPiece,
-        string
-      >,
-      squareLabel: (f: string, r: number) =>
-        data.dashboard.gameBoard.squareLabel
-          .replace("{file}", f)
-          .replace("{rank}", String(r)),
-      squarePieceLabel: (f: string, r: number, p: string) =>
-        data.dashboard.gameBoard.squarePieceLabel
-          .replace("{file}", f)
-          .replace("{rank}", String(r))
-          .replace("{piece}", p),
+      boardLabel: this.boardLabel || boardTitle,
+      errorMessage: this.errorMessage || errors.invalidFEN || "",
+      pieceNames: pieces as Record<ChessPiece, string>,
+      squareLabel: (f: string, r: number) => `${f}${r}`,
+      squarePieceLabel: (f: string, r: number, p: string) => `${p} at ${f}${r}`,
     };
   }
 

@@ -87,6 +87,8 @@ describe("UCIAdapter", () => {
 
   it("should throw EngineError if loader is missing", async () => {
     const adapter = new UCIAdapter(config);
-    await expect(adapter.load()).rejects.toThrow(/IEngineLoader is required/);
+    await expect(adapter.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.loaderRequired" }),
+    );
   });
 });

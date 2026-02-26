@@ -18,7 +18,7 @@ describe("createFEN verification", () => {
       expect(e).toBeInstanceOf(EngineError);
       if (e instanceof EngineError) {
         expect(e.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(e.message).toContain("Illegal characters detected");
+        expect(e.i18nKey).toBe("engine.errors.illegalCharacters");
       }
     }
   });
@@ -32,7 +32,7 @@ describe("createFEN verification", () => {
       expect(e).toBeInstanceOf(EngineError);
       if (e instanceof EngineError) {
         expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-        expect(e.message).toContain("Invalid FEN halfmove clock");
+        expect(e.i18nKey).toBe("engine.errors.invalidFENHalfmove");
       }
     }
   });
@@ -46,7 +46,7 @@ describe("createFEN verification", () => {
       expect(e).toBeInstanceOf(EngineError);
       if (e instanceof EngineError) {
         expect(e.code).toBe(EngineErrorCode.VALIDATION_ERROR);
-        expect(e.message).toContain("Invalid FEN fullmove number");
+        expect(e.i18nKey).toBe("engine.errors.invalidFENFullmove");
       }
     }
   });

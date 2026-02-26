@@ -87,6 +87,8 @@ describe("USIAdapter", () => {
 
   it("should throw EngineError if loader is missing", async () => {
     const adapter = new USIAdapter(config);
-    await expect(adapter.load()).rejects.toThrow(/IEngineLoader is required/);
+    await expect(adapter.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.loaderRequired" }),
+    );
   });
 });

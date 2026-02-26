@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  // Switch to English to match assertions (using regex to match "英語 (EN)" in JA locale or exact "EN")
-  const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
+  // Switch to English to match assertions (match "English (EN)", "英語 (EN)", or just "EN")
+  const enButton = page.getByRole("button", { name: /English \(EN\)|英語 \(EN\)|^EN$/i });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
 

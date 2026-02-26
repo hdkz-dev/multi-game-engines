@@ -10,8 +10,12 @@ describe("domain-mahjong", () => {
     });
 
     it("should throw on invalid moves", () => {
-      expect(() => createMahjongMove("invalid")).toThrow();
-      expect(() => createMahjongMove("10m")).toThrow();
+      expect(() => createMahjongMove("invalid")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.invalidMahjongMove" }),
+      );
+      expect(() => createMahjongMove("10m")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.invalidMahjongMove" }),
+      );
     });
   });
 
@@ -21,7 +25,9 @@ describe("domain-mahjong", () => {
     });
 
     it("should throw on injection", () => {
-      expect(() => validateMahjongBoard({ hand: ["1m\nquit"] })).toThrow();
+      expect(() => validateMahjongBoard({ hand: ["1m\nquit"] })).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
   });
 });

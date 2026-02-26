@@ -3,35 +3,42 @@
 import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { getBridge } from "@/lib/engines";
-import { createFEN } from "@multi-game-engines/domain-chess";
-import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { IEngine, EngineBridge } from "@multi-game-engines/core";
 import {
+  createFEN,
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-} from "@multi-game-engines/adapter-uci";
+  FEN,
+} from "@multi-game-engines/domain-chess";
 import {
+  createSFEN,
   IShogiSearchOptions,
   IShogiSearchInfo,
   IShogiSearchResult,
-} from "@multi-game-engines/adapter-usi";
-import { locales } from "@multi-game-engines/i18n";
+  SFEN,
+} from "@multi-game-engines/domain-shogi";
+import { IEngine, EngineBridge, Move } from "@multi-game-engines/core";
+import { commonLocales } from "@multi-game-engines/i18n-common";
+import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
 import { formatNumber } from "@multi-game-engines/ui-core";
 
 const EngineMonitorPanel = dynamic(
   () =>
-    import("@multi-game-engines/ui-react").then(
+    import("@multi-game-engines/ui-react-monitor").then(
       (mod) => mod.EngineMonitorPanel,
     ),
   { ssr: false },
 );
+
 const ChessBoard = dynamic(
-  () => import("@multi-game-engines/ui-react").then((mod) => mod.ChessBoard),
+  () =>
+    import("@multi-game-engines/ui-chess-react").then((mod) => mod.ChessBoard),
   { ssr: false },
 );
+
 const ShogiBoard = dynamic(
-  () => import("@multi-game-engines/ui-react").then((mod) => mod.ShogiBoard),
+  () =>
+    import("@multi-game-engines/ui-shogi-react").then((mod) => mod.ShogiBoard),
   { ssr: false },
 );
 
@@ -49,16 +56,33 @@ import {
   useEngineMonitor,
   StatCard,
 } from "@multi-game-engines/ui-react";
-import { useLocale } from "./layout";
 
-type EngineType = "chess" | "shogi";
+enum EngineType {
+  CHESS = "chess",
+  SHOGI = "shogi",
+}
 
 const CHESS_MULTI_PV = 3;
-const SHOGI_MULTI_PV = 2;
+const SHOGI_MULTI_PV = 3;
+
+/**
+ * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
+ */
+type DeepRecord = { [key: string]: string | number | boolean | DeepRecord | undefined };
+
+/**
+ * 2026 Zenith Tier: i18n キーへの動的アクセスを許可するための型定義。
+ */
+interface DashboardLocale {
+  dashboard: DeepRecord;
+  engine: DeepRecord;
+}
 
 export default function Dashboard() {
-  const [activeEngine, setActiveEngine] = useState<EngineType>("chess");
-  const { locale, setLocale } = useLocale();
+  const [activeEngine, setActiveEngine] = useState<EngineType>(
+    EngineType.CHESS,
+  );
+  const [locale, setLocale] = useState("ja");
   const [bridge, setBridge] = useState<EngineBridge | null>(null);
   const [chessEngine, setChessEngine] = useState<IEngine<
     IChessSearchOptions,
@@ -75,7 +99,7 @@ export default function Dashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    async function initEngines() {
+    const initEngines = async () => {
       const bridgeInstance = await getBridge();
       if (!bridgeInstance) return;
 
@@ -93,7 +117,6 @@ export default function Dashboard() {
             id: "stockfish",
             adapter: "stockfish",
             sources: {
-              // 2026: E2E tests use a mock engine for deterministic results and faster execution.
               main: {
                 url: "/mock-stockfish.js",
                 sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
@@ -101,7 +124,7 @@ export default function Dashboard() {
               },
               wasm: {
                 url: "/mock-stockfish.wasm",
-                sri: "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb",
+                sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
                 type: "wasm",
               },
             },
@@ -118,20 +141,17 @@ export default function Dashboard() {
           setShogiEngine(shogi);
         }
       } catch (error) {
-        console.error("Engine initialization failed:", error);
+        console.error("Failed to initialize engines:", error);
         if (isMounted) {
           setInitError(
-            error instanceof Error
-              ? error.message
-              : "__INITIALIZATION_FAILED__",
+            error instanceof Error ? error.message : "Initialization Failed",
           );
         }
       }
-    }
+    };
 
-    void initEngines();
+    initEngines();
 
-    // Set document title for E2E tests
     document.title = "Zenith Hybrid Analysis Dashboard";
 
     return () => {
@@ -139,294 +159,308 @@ export default function Dashboard() {
     };
   }, []);
 
-  const localeData = useMemo(
-    () => (locale === "ja" ? locales.ja : locales.en),
-    [locale],
-  );
+  const localeData = useMemo(() => {
+    const base = (
+      locale === "ja" ? commonLocales.ja : commonLocales.en
+    ) as Record<string, Record<string, unknown>>;
+    const extra = (
+      locale === "ja" ? dashboardLocales.ja : dashboardLocales.en
+    ) as Record<string, Record<string, unknown>>;
+    return {
+      dashboard: {
+        ...(base["dashboard"] as Record<string, unknown> || {}),
+        ...(extra["dashboard"] as Record<string, unknown> || {}),
+      },
+      engine: {
+        ...(base["engine"] as Record<string, unknown> || {}),
+        ...(extra["engine"] as Record<string, unknown> || {}),
+      },
+    } as unknown as DashboardLocale;
+  }, [locale]);
 
   // チェス用の設定
   const chessOptions = useMemo(
     () => ({
-      fen: createFEN(
+      initialPosition: createFEN(
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
       ),
       multipv: CHESS_MULTI_PV,
-      depth: 99,
+      depth: 20,
     }),
     [],
   );
-  const { state: chessState } = useEngineMonitor(chessEngine);
+
+  const { state: chessState } = useEngineMonitor(chessEngine, chessOptions);
 
   // 将棋用の設定
   const shogiOptions = useMemo(
     () => ({
-      sfen: createSFEN(
+      initialPosition: createSFEN(
         "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
       ),
       multipv: SHOGI_MULTI_PV,
     }),
     [],
   );
-  const { state: shogiState } = useEngineMonitor(shogiEngine);
+
+  const { state: shogiState } = useEngineMonitor(shogiEngine, shogiOptions);
 
   const chessBestMove = useMemo(
-    () => chessState.pvs[0]?.moves[0],
+    () => (chessState.pvs[0] ? chessState.pvs[0].moves[0] : null),
     [chessState.pvs],
   );
+
   const shogiBestMove = useMemo(
-    () => shogiState.pvs[0]?.moves[0],
+    () => (shogiState.pvs[0] ? shogiState.pvs[0].moves[0] : null),
     [shogiState.pvs],
   );
 
-  const nps = useMemo(() => {
-    const stats =
-      activeEngine === "chess" ? chessState.stats : shogiState.stats;
-    return formatNumber(stats.nps);
-  }, [activeEngine, chessState.stats, shogiState.stats]);
+  const stats =
+    activeEngine === EngineType.CHESS ? chessState.stats : shogiState.stats;
+  const npsValue = (stats as unknown as Record<string, unknown>).nps as number;
+  const npsLabel = useMemo(() => formatNumber(npsValue), [npsValue]);
 
   if (initError || !bridge || !chessEngine || !shogiEngine) {
+    const dashboardStrings = localeData.dashboard;
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4 text-center px-4">
-          {initError ? (
-            <div className="p-6 bg-red-50 text-red-700 rounded-3xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm">
-              <Zap className="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
-              <p className="font-black tracking-tighter text-lg mb-1">
-                {localeData.dashboard.initializationFailed}
-              </p>
-              <p className="text-xs font-bold opacity-70 leading-relaxed">
-                {initError === "__INITIALIZATION_FAILED__"
-                  ? localeData.dashboard.initializationFailed
-                  : initError}
-              </p>
+      <EngineUIProvider>
+        <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-6">
+          <div className="max-w-md w-full">
+            <div className="bg-[#111] border border-white/5 rounded-3xl p-8 text-center shadow-2xl">
+              {initError ? (
+                <>
+                  <Zap className="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
+                  <p className="font-black tracking-tighter text-lg mb-1">
+                    {dashboardStrings.initializationFailed as string}
+                  </p>
+                  <p className="text-xs font-bold opacity-70 leading-relaxed">
+                    {initError === "__INITIALIZATION_FAILED__"
+                      ? (dashboardStrings["errors"] as DeepRecord)?.bridgeNotAvailable as string
+                      : initError}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Globe className="w-8 h-8 mx-auto mb-3 text-blue-500 animate-spin-slow" />
+                  <p className="font-black tracking-tighter text-lg animate-pulse">
+                    {dashboardStrings.initializingEngines as string}
+                  </p>
+                </>
+              )}
             </div>
-          ) : (
-            <>
-              <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-500 font-bold tracking-widest text-sm uppercase">
-                {localeData.dashboard.initializingEngines}
-              </p>
-            </>
-          )}
+          </div>
         </div>
-      </div>
+      </EngineUIProvider>
     );
   }
 
+  const d = localeData.dashboard;
+  const e = localeData.engine;
+
   return (
-    <EngineUIProvider localeData={localeData}>
-      <main className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30">
-        {/* Header Area */}
-        <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
-                <LayoutGrid className="w-8 h-8 text-white" aria-hidden="true" />
-              </div>
-              {localeData.dashboard.title}
-            </h1>
-            <p className="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] ml-1">
-              {localeData.dashboard.subtitle}
-            </p>
+    <EngineUIProvider>
+      <main className="min-h-screen bg-[#0a0a0a] text-[#e0e0e0] font-sans selection:bg-blue-500/30">
+        {/* Header */}
+        <header className="px-8 py-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-6 backdrop-blur-md sticky top-0 z-50 bg-[#0a0a0a]/80">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+              <LayoutGrid className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black tracking-tighter text-white">
+                {d.title as string}
+              </h1>
+              <p className="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">
+                {d.subtitle as string}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Language Switcher */}
-            <div
-              role="group"
-              aria-label={localeData.dashboard.languageSelector}
-              className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center"
+          <div className="flex items-center gap-3 bg-[#111] p-1.5 rounded-2xl border border-white/5">
+            <button
+              onClick={() => setLocale(locale === "ja" ? "en" : "ja")}
+              className="px-4 py-2 rounded-xl text-xs font-black transition-all hover:bg-white/5 flex items-center gap-2"
+              aria-label={d.languageSelector as string}
             >
-              <Globe
-                className="w-4 h-4 ml-2 text-gray-400"
-                aria-hidden="true"
-              />
-              <button
-                onClick={() => setLocale("en")}
-                aria-pressed={locale === "en"}
-                className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all ${
-                  locale === "en"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                {localeData.dashboard.language.en}
-              </button>
-              <button
-                onClick={() => setLocale("ja")}
-                aria-pressed={locale === "ja"}
-                className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all ${
-                  locale === "ja"
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                {localeData.dashboard.language.ja}
-              </button>
-            </div>
+              <Globe className="w-3.5 h-3.5 text-blue-400" />
+              {locale === "ja"
+                ? (d.language as DeepRecord)?.en as string
+                : (d.language as DeepRecord)?.ja as string}
+            </button>
 
-            {/* Engine Switcher */}
-            <nav
-              className="flex bg-white shadow-sm border border-gray-200 p-1 rounded-xl"
-              aria-label={localeData.dashboard.engineSelector}
+            <div className="w-px h-4 bg-white/10 mx-1" />
+
+            <button
+              onClick={() =>
+                setActiveEngine(
+                  activeEngine === EngineType.CHESS
+                    ? EngineType.SHOGI
+                    : EngineType.CHESS,
+                )
+              }
+              className="px-4 py-2 rounded-xl text-xs font-black transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20 flex items-center gap-2"
+              aria-label={d.engineSelector as string}
             >
-              <button
-                onClick={() => setActiveEngine("chess")}
-                aria-pressed={activeEngine === "chess"}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all ${
-                  activeEngine === "chess"
-                    ? "bg-blue-600 shadow-md shadow-blue-200 text-white"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                <Trophy
-                  className={`w-4 h-4 ${activeEngine === "chess" ? "animate-bounce" : ""}`}
-                  aria-hidden="true"
-                />
-                {localeData.dashboard.chessLabel}
-              </button>
-              <button
-                onClick={() => setActiveEngine("shogi")}
-                aria-pressed={activeEngine === "shogi"}
-                className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all ${
-                  activeEngine === "shogi"
-                    ? "bg-blue-600 shadow-md shadow-blue-200 text-white"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                <Sword
-                  className={`w-4 h-4 ${activeEngine === "shogi" ? "animate-bounce" : ""}`}
-                  aria-hidden="true"
-                />
-                {localeData.dashboard.shogiLabel}
-              </button>
-            </nav>
+              <Sword className="w-3.5 h-3.5" />
+              {activeEngine === EngineType.CHESS
+                ? d.shogiLabel as string
+                : d.chessLabel as string}
+            </button>
           </div>
         </header>
 
-        {/* Hero Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <StatCard
-            icon={<Zap className="w-5 h-5" />}
-            iconClass="text-yellow-500"
-            label={localeData.dashboard.stats.engineRuntime.label}
-            value={nps}
-            sub={localeData.engine.npsUnit}
-          />
-          <StatCard
-            icon={<Cpu className="w-5 h-5" />}
-            iconClass="text-blue-500"
-            label={localeData.dashboard.stats.hardware.label}
-            value={localeData.dashboard.stats.hardware.value}
-            sub={localeData.dashboard.stats.hardware.sub}
-          />
-          <StatCard
-            icon={<Gauge className="w-5 h-5" />}
-            iconClass="text-green-500"
-            label={localeData.dashboard.stats.performance.label}
-            value={localeData.dashboard.stats.performance.value}
-            sub={localeData.dashboard.stats.performance.sub}
-          />
-          <StatCard
-            icon={<Trophy className="w-5 h-5" />}
-            iconClass="text-purple-500"
-            label={localeData.dashboard.stats.accessibility.label}
-            value={localeData.dashboard.stats.accessibility.value}
-            sub={localeData.dashboard.stats.accessibility.sub}
-          />
-        </div>
-
-        {/* Main Analysis Area */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-4 xl:col-span-3 h-full min-h-[600px]">
-            {activeEngine === "chess" && (
-              <EngineMonitorPanel
-                key="chess-panel"
-                engine={chessEngine}
-                searchOptions={chessOptions}
-                title={localeData.engine.stockfishTitle}
-                className="h-full"
-              />
-            )}
-            {activeEngine === "shogi" && (
-              <EngineMonitorPanel
-                key="shogi-panel"
-                engine={shogiEngine}
-                searchOptions={shogiOptions}
-                title={localeData.engine.yaneuraouTitle}
-                className="h-full"
-              />
-            )}
+        <div className="p-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              icon={<Zap className="w-5 h-5 text-yellow-400" />}
+              label={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.label as string}
+              value={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.value as string}
+              sub={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.sub as string}
+            />
+            <StatCard
+              icon={<Cpu className="w-5 h-5 text-purple-400" />}
+              label={((d.stats as DeepRecord)?.hardware as DeepRecord)?.label as string}
+              value={((d.stats as DeepRecord)?.hardware as DeepRecord)?.value as string}
+              sub={((d.stats as DeepRecord)?.hardware as DeepRecord)?.sub as string}
+            />
+            <StatCard
+              icon={<Gauge className="w-5 h-5 text-blue-400" />}
+              label={((d.stats as DeepRecord)?.performance as DeepRecord)?.label as string}
+              value={npsLabel}
+              sub={((d.stats as DeepRecord)?.performance as DeepRecord)?.sub as string}
+            />
+            <StatCard
+              icon={<Trophy className="w-5 h-5 text-pink-400" />}
+              label={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.label as string}
+              value={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.value as string}
+              sub={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.sub as string}
+            />
           </div>
 
-          <div className="lg:col-span-8 xl:col-span-9 space-y-6">
-            {/* Game Board Area */}
-            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50 aspect-video flex flex-col items-center justify-center relative overflow-hidden group">
-              <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-
-              <div className="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4">
-                {activeEngine === "chess" ? (
-                  <ChessBoard
-                    fen={chessOptions.fen}
-                    lastMove={chessBestMove}
-                    className="w-full h-full"
-                    boardLabel={localeData.dashboard.gameBoard.title}
-                    errorMessage={
-                      localeData.dashboard.gameBoard.invalidPosition
-                    }
-                    pieceNames={localeData.dashboard.gameBoard.chessPieces}
-                  />
-                ) : (
-                  <ShogiBoard
-                    sfen={shogiOptions.sfen}
-                    lastMove={shogiBestMove}
-                    className="w-full h-full"
-                    boardLabel={localeData.dashboard.gameBoard.title}
-                    errorMessage={
-                      localeData.dashboard.gameBoard.invalidPosition
-                    }
-                    handSenteLabel={localeData.dashboard.gameBoard.handSente}
-                    handGoteLabel={localeData.dashboard.gameBoard.handGote}
-                    pieceNames={localeData.dashboard.gameBoard.shogiPieces}
-                  />
-                )}
-              </div>
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            {/* Monitor Panel */}
+            <div className="xl:col-span-4">
+              <EngineMonitorPanel
+                engine={
+                  activeEngine === EngineType.CHESS ? chessEngine : shogiEngine
+                }
+                searchOptions={
+                  activeEngine === EngineType.CHESS
+                    ? chessOptions
+                    : shogiOptions
+                }
+                title={
+                  activeEngine === EngineType.CHESS
+                    ? e.stockfishTitle as string
+                    : e.yaneuraouTitle as string
+                }
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                  {localeData.dashboard.technicalInsight.title}
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                  {localeData.dashboard.technicalInsight.description}
-                </p>
+            {/* Board Area */}
+            <div className="xl:col-span-8 space-y-8">
+              <div className="bg-[#111] rounded-[2rem] p-10 border border-white/5 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+
+                <div className="flex items-center justify-between mb-10">
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tighter text-white mb-1">
+                      {(d.gameBoard as DeepRecord)?.title as string}
+                    </h2>
+                    <p className="text-xs font-bold text-white/30 uppercase tracking-widest">
+                      {(d.gameBoard as DeepRecord)?.subtitle as string}
+                    </p>
+                  </div>
+                  <div className="px-6 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-4">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-black text-white/20 uppercase tracking-tighter">
+                        {e.topCandidate as string}
+                      </span>
+                      <span className="text-xl font-mono font-black text-blue-400">
+                        {activeEngine === EngineType.CHESS
+                          ? chessBestMove?.toString() || "---"
+                          : shogiBestMove?.toString() || "---"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center">
+                  <div className="w-full max-w-[600px] aspect-square relative">
+                    {activeEngine === EngineType.CHESS ? (
+                      <ChessBoard
+                        fen={chessState.position as FEN}
+                        lastMove={chessBestMove as Move}
+                        locale={locale}
+                        className="w-full h-full rounded-xl shadow-2xl"
+                        boardLabel={(d.gameBoard as DeepRecord)?.title as string}
+                        errorMessage={(d.gameBoard as DeepRecord)?.invalidPosition as string}
+                        pieceNames={(d.gameBoard as DeepRecord)?.chessPieces as Record<string, string>}
+                      />
+                    ) : (
+                      <ShogiBoard
+                        sfen={shogiState.position as SFEN}
+                        lastMove={shogiBestMove as Move}
+                        locale={locale}
+                        className="w-full h-full rounded-xl shadow-2xl"
+                        boardLabel={(d.gameBoard as DeepRecord)?.title as string}
+                        errorMessage={(d.gameBoard as DeepRecord)?.invalidPosition as string}
+                        pieceNames={(d.gameBoard as DeepRecord)?.shogiPieces as Record<string, string>}
+                        handSenteLabel={(d.gameBoard as DeepRecord)?.handSente as string}
+                        handGoteLabel={(d.gameBoard as DeepRecord)?.handGote as string}
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
-              <div className="bg-gray-900 p-8 rounded-3xl border border-gray-800 shadow-2xl">
-                <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
-                  {localeData.dashboard.zenithFeatures.title}
-                </h3>
-                <ul className="text-sm space-y-3">
-                  <li className="flex items-center gap-3 text-white/80 font-bold">
-                    <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-green-500" />
-                    </div>
-                    {localeData.dashboard.zenithFeatures.multiPv}
-                  </li>
-                  <li className="flex items-center gap-3 text-white/80 font-bold">
-                    <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-green-500" />
-                    </div>
-                    {localeData.dashboard.zenithFeatures.reactiveState}
-                  </li>
-                  <li className="flex items-center gap-3 text-white/80 font-bold">
-                    <div className="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-green-500" />
-                    </div>
-                    {localeData.dashboard.zenithFeatures.contractUi}
-                  </li>
-                </ul>
+
+              {/* Bottom Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-[#111] rounded-[2rem] p-8 border border-white/5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                    <h3 className="text-sm font-black text-white uppercase tracking-tighter">
+                      {(d.technicalInsight as DeepRecord)?.title as string}
+                    </h3>
+                  </div>
+                  <p className="text-xs font-bold text-white/50 leading-relaxed">
+                    {(d.technicalInsight as DeepRecord)?.description as string}
+                  </p>
+                </div>
+
+                <div className="bg-blue-600 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-600/10 relative overflow-hidden group">
+                  <Zap className="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 transition-transform group-hover:scale-110 duration-700" />
+                  <h3 className="text-sm font-black uppercase tracking-tighter mb-6 relative z-10">
+                    {(d.zenithFeatures as DeepRecord)?.title as string}
+                  </h3>
+                  <ul className="space-y-4 relative z-10">
+                    {[
+                      {
+                        icon: <Zap className="w-4 h-4" />,
+                        label: (d.zenithFeatures as DeepRecord)?.multiPv as string,
+                      },
+                      {
+                        icon: <Gauge className="w-4 h-4" />,
+                        label: (d.zenithFeatures as DeepRecord)?.reactiveState as string,
+                      },
+                      {
+                        icon: <Cpu className="w-4 h-4" />,
+                        label: (d.zenithFeatures as DeepRecord)?.contractUi as string,
+                      },
+                    ].map((feature, i) => (
+                      <li
+                        key={i}
+                        className="flex items-center gap-3 text-xs font-black"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center">
+                          {feature.icon}
+                        </div>
+                        {feature.label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

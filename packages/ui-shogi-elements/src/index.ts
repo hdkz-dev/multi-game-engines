@@ -1,53 +1,72 @@
-import { LitElement, html, css } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
+import { LitElement, html, css, PropertyValues } from "lit";
+import { property, state } from "lit/decorators.js";
 import {
   parseSFEN,
+  SFEN,
   ShogiPiece,
   ShogiHand,
-  SFEN,
-  createSFEN,
 } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
-import { locales } from "@multi-game-engines/i18n";
+import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 
 /**
- * Returns true if the piece belongs to Gote (White).
- * Shogi SFEN uses lowercase for Gote pieces.
+ * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
  */
-function isGotePiece(piece: ShogiPiece): boolean {
-  const char = piece.startsWith("+") ? piece[1] : piece;
-  return !!char && char === char.toLowerCase();
+type DeepRecord = {
+  [key: string]: string | number | boolean | DeepRecord | undefined;
+};
+
+interface ShogiBoardStrings {
+  boardLabel: string;
+  handSenteLabel: string;
+  handGoteLabel: string;
+  errorMessage: string;
+  pieceNames: Record<string, string>;
+  handPieceCount: string;
+  squareLabel: (f: number, r: number) => string;
+  squarePieceLabel: (f: number, r: number, p: string) => string;
 }
 
 /**
- * A framework-agnostic Shogi board component with high accessibility.
- * Supports Roving Tabindex for keyboard navigation.
- * @element shogi-board
+ * 将棋の駒が後手（Gote）かどうかを判定します。
  */
-@customElement("shogi-board")
+function isGotePiece(piece: string): boolean {
+  const p = piece.startsWith("+") ? piece[1] : piece[0];
+  return !!p && p === p.toLowerCase();
+}
+
+/**
+ * 将棋盤を表示するカスタム要素。
+ */
 export class ShogiBoard extends LitElement {
   static override styles = css`
     :host {
       display: block;
       width: 100%;
       max-width: 600px;
-      user-select: none;
-      font-family: serif;
+      margin: 0 auto;
+      font-family:
+        "Hiragino Mincho ProN",
+        "MS Mincho",
+        serif;
+      container-type: size;
     }
     .container {
       display: flex;
       flex-direction: column;
       gap: 10px;
       width: 100%;
+      height: 100%;
     }
     .hand {
       display: flex;
+      flex-wrap: wrap;
       gap: 5px;
+      min-height: 1.5em;
       padding: 5px;
-      background: var(--board-hand-bg, #f0d9b5);
-      border-radius: 4px;
-      font-size: 0.8rem;
-      min-height: 1.5rem;
+      background-color: var(--hand-bg, #f0e6d2);
+      border: 1px solid #333;
+      font-size: clamp(0.7rem, 4cqi, 1.2rem);
       align-items: center;
     }
     .hand.gote span {
@@ -93,13 +112,10 @@ export class ShogiBoard extends LitElement {
     }
   `;
 
-  private _sfen: SFEN = createSFEN(
-    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+  private _sfen: SFEN = (
+    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as unknown as SFEN
   );
 
-  /**
-   * Current position in SFEN format.
-   */
   @property({ type: String, reflect: true })
   get sfen(): SFEN {
     return this._sfen;
@@ -108,7 +124,7 @@ export class ShogiBoard extends LitElement {
   set sfen(value: string) {
     const old = this._sfen;
     try {
-      this._sfen = createSFEN(value);
+      this._sfen = value as unknown as SFEN;
     } catch (e) {
       console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
     }
@@ -117,9 +133,6 @@ export class ShogiBoard extends LitElement {
 
   private _lastMove: Move | "" = "";
 
-  /**
-   * Last move to highlight (e.g., "7g7f" or "P*5e").
-   */
   @property({ type: String, attribute: "last-move", reflect: true })
   get lastMove(): Move | "" {
     return this._lastMove;
@@ -149,37 +162,44 @@ export class ShogiBoard extends LitElement {
   @property({ type: String, attribute: "error-message", reflect: true })
   errorMessage = "";
 
+  @property({ type: String, attribute: "hand-piece-count" })
+  handPieceCount = "";
+
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
 
-  /**
-   * 2026 Zenith Tier: Roving Tabindex state.
-   */
   @state()
   private _focusedIndex = 0;
 
-  private _getLocalizedStrings() {
-    const data = this.locale === "ja" ? locales.ja : locales.en;
+  private _getLocalizedStrings(): ShogiBoardStrings {
+    const data = (this.locale === "ja" ? shogiLocales.ja : shogiLocales.en) as unknown as DeepRecord;
+    const dashboard = (data["dashboard"] || {}) as DeepRecord;
+    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
+    const engine = (data["engine"] || {}) as DeepRecord;
+    const errors = (engine["errors"] || {}) as DeepRecord;
+    const pieces = (gameBoard["shogiPieces"] || {}) as Record<string, string>;
+
     return {
-      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
-      handSenteLabel: this.handSenteLabel || data.dashboard.gameBoard.handSente,
-      handGoteLabel: this.handGoteLabel || data.dashboard.gameBoard.handGote,
-      errorMessage:
-        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
-      pieceNames: data.dashboard.gameBoard.shogiPieces as Record<
-        ShogiPiece,
-        string
-      >,
-      handPieceCount: data.dashboard.gameBoard.handPieceCount,
-      squareLabel: (f: number, r: number) =>
-        data.dashboard.gameBoard.squareLabel
-          .replace("{file}", String(f))
-          .replace("{rank}", String(r)),
-      squarePieceLabel: (f: number, r: number, p: string) =>
-        data.dashboard.gameBoard.squarePieceLabel
-          .replace("{file}", String(f))
-          .replace("{rank}", String(r))
-          .replace("{piece}", p),
+      boardLabel: String(this.boardLabel || gameBoard["title"] || "Shogi Board"),
+      handSenteLabel: String(
+        this.handSenteLabel ||
+          gameBoard["handSente"] ||
+          (this.locale === "ja" ? "先手 持ち駒" : "Sente Hand"),
+      ),
+      handGoteLabel: String(
+        this.handGoteLabel ||
+          gameBoard["handGote"] ||
+          (this.locale === "ja" ? "後手 持ち駒" : "Gote Hand"),
+      ),
+      errorMessage: String(this.errorMessage || errors["invalidSFEN"] || ""),
+      pieceNames: { ...pieces, ...this.pieceNames },
+      handPieceCount: String(
+        this.handPieceCount ||
+          gameBoard["handPieceCount"] ||
+          (this.locale === "ja" ? "{piece}{count}枚" : "{count} {piece}s"),
+      ),
+      squareLabel: (f: number, r: number) => `${f}${r}`,
+      squarePieceLabel: (f: number, r: number, p: string) => `${p} at ${f}${r}`,
     };
   }
 
@@ -233,13 +253,22 @@ export class ShogiBoard extends LitElement {
     });
   }
 
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("locale")) {
+      this.requestUpdate();
+    }
+  }
+
   override render() {
     const strings = this._getLocalizedStrings();
     let board: (ShogiPiece | null)[][];
     let hand: ShogiHand;
 
     try {
-      ({ board, hand } = parseSFEN(this.sfen));
+      const parsed = parseSFEN(this.sfen);
+      board = parsed.board;
+      hand = parsed.hand;
     } catch {
       return html`
         <div class="container" role="alert">
@@ -267,7 +296,8 @@ export class ShogiBoard extends LitElement {
         const displayFile = usiFile;
         const displayRank = r + 1;
         const pieceLabel = piece
-          ? this.pieceNames[piece] || strings.pieceNames[piece]
+          ? (this.pieceNames[piece] as string) ||
+            (strings.pieceNames[piece] as string)
           : "";
         const ariaLabel = piece
           ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
@@ -319,20 +349,22 @@ export class ShogiBoard extends LitElement {
   private _renderHand(
     hand: ShogiHand,
     side: "sente" | "gote",
-    strings: ReturnType<typeof this._getLocalizedStrings>,
+    strings: ShogiBoardStrings,
   ) {
     const pieces =
       side === "sente"
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
+    const { pieceNames, handPieceCount } = strings;
+
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = this.pieceNames[p as ShogiPiece] || strings.pieceNames[p];
+      const label = (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p];
       const ariaLabel =
         count > 1
-          ? strings.handPieceCount
-              .replace("{piece}", label)
+          ? handPieceCount
+              .replace("{piece}", label || "")
               .replace("{count}", String(count))
           : label;
       return html`<span title="${label}" aria-label="${ariaLabel}"
@@ -342,8 +374,4 @@ export class ShogiBoard extends LitElement {
   }
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    "shogi-board": ShogiBoard;
-  }
-}
+customElements.define("shogi-board", ShogiBoard);

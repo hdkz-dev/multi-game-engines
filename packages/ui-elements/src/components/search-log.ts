@@ -6,7 +6,7 @@ import {
   formatNumber,
   formatTime,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 import "./score-badge.js";
 
 @customElement("search-log")
@@ -179,7 +179,7 @@ export class SearchLogElement extends LitElement {
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has("locale") || !this.hasAttribute("aria-label")) {
       const strings = createUIStrings(
-        this.locale === "ja" ? locales.ja : locales.en,
+        this.locale === "ja" ? commonLocales.ja : commonLocales.en,
       );
       this.setAttribute("aria-label", strings.searchLog || "Search Log");
     }
@@ -197,7 +197,7 @@ export class SearchLogElement extends LitElement {
 
   render() {
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
 
     return html`

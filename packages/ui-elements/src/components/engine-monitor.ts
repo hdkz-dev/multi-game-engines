@@ -15,7 +15,7 @@ import {
   UINormalizerMiddleware,
   createUIStrings,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 import "./score-badge.js";
 import "./evaluation-graph.js";
@@ -318,7 +318,7 @@ export class EngineMonitorElement extends LitElement {
 
   render() {
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
 
     if (!this.engine || !this._searchState) {

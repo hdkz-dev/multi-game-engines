@@ -1,0 +1,49 @@
+{
+  "pieces": {
+    "P": "歩",
+    "L": "香",
+    "N": "桂",
+    "S": "銀",
+    "G": "金",
+    "B": "角",
+    "R": "飛",
+    "K": "玉",
+    "p": "後手 歩",
+    "l": "後手 香",
+    "n": "後手 桂",
+    "s": "後手 銀",
+    "g": "後手 金",
+    "b": "後手 角",
+    "r": "後手 飛",
+    "k": "後手 王",
+    "+P": "と金",
+    "+L": "成香",
+    "+N": "成桂",
+    "+S": "成銀",
+    "+B": "龍馬",
+    "+R": "龍王",
+    "+p": "後手 と金",
+    "+l": "後手 成香",
+    "+n": "後手 成桂",
+    "+s": "後手 成銀",
+    "+b": "後手 龍馬",
+    "+r": "後手 龍王"
+  },
+  "errors": {
+    "invalidSFEN": "無効な SFEN です: 入力は空であってはなりません。",
+    "invalidSFENStructure": "無効な SFEN 構造です: 4 つのフィールドが必要です。",
+    "invalidSFENTurn": "無効な SFEN 手番です: \"b\" または \"w\" が必要です。",
+    "invalidSFENHand": "無効な SFEN 持ち駒です: \"{hand}\"",
+    "invalidSFENMoveCounter": "無効な SFEN 手数カウンタです: \"{counter}\"",
+    "invalidSfenRanks": "無効な SFEN です: 9 段必要です。",
+    "invalidSfenPiece": "無効な SFEN 駒文字です: \"{piece}\"",
+    "invalidSfenChar": "無効な SFEN 文字です: \"{char}\"",
+    "invalidSfenRankWidth": "無効な SFEN です (第 {rank} 段): 9 マス必要ですが、{actual} マスしかありません。",
+    "missingFEN": "USI プロトコルには SFEN 形式の局面文字列が必要です。"
+  },
+  "parser": {
+    "invalidCurrMove": "[USIParser.parseInfo] 無効な \"currmove\" トークンをスキップしました: \"{token}\" (応答: \"{line}\")",
+    "invalidPvMove": "[USIParser.parseInfo] 無効な \"pv\" 着手トークンをスキップしました: \"{token}\" (応答: \"{line}\")",
+    "invalidPonder": "[USIParser.parseResult] 無効な \"ponder\" トークンをスキップしました: \"{token}\" (応答: \"{line}\")"
+  }
+}

@@ -4,7 +4,10 @@ import {
   EngineErrorCode,
   I18nKey,
 } from "@multi-game-engines/core";
-import { t as translate } from "@multi-game-engines/i18n";
+import {
+  tEngines as translate,
+  EnginesKey,
+} from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
 
 /**
@@ -21,8 +24,9 @@ export class WeightedStrategy<
     this.weights = weights;
     // 2026 Best Practice: 重みが設定されていることをデバッグログで通知
     if (Object.keys(weights).length > 0) {
+      const i18nKey: EnginesKey = "ensemble.weighted.initialized";
       console.debug(
-        translate("adapters.ensemble.weighted.initialized" as I18nKey, {
+        translate(i18nKey, {
           engines: Object.keys(weights).join(", "),
         }),
       );
@@ -31,11 +35,11 @@ export class WeightedStrategy<
 
   aggregateResults(resultsMap: Map<string, T_RESULT>): T_RESULT {
     if (resultsMap.size === 0) {
-      const i18nKey = "adapters.ensemble.errors.noResults" as I18nKey;
+      const i18nKey: EnginesKey = "ensemble.errors.noResults";
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: translate(i18nKey),
-        i18nKey,
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 
@@ -51,8 +55,9 @@ export class WeightedStrategy<
       // 2026 Best Practice: エンジン固有の重みを適用
       const weight = this.weights[engineId];
       if (weight === undefined && Object.keys(this.weights).length > 0) {
+        const warnKey: EnginesKey = "ensemble.weighted.noWeight";
         console.warn(
-          translate("adapters.ensemble.weighted.noWeight" as I18nKey, {
+          translate(warnKey, {
             id: engineId,
           }),
         );

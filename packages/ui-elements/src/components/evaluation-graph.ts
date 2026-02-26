@@ -5,7 +5,7 @@ import {
   IEvaluationHistoryEntry,
   createUIStrings,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("evaluation-graph")
 export class EvaluationGraphElement extends LitElement {
@@ -46,7 +46,7 @@ export class EvaluationGraphElement extends LitElement {
 
   render() {
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
     const points = EvaluationPresenter.getGraphPoints(
       this.entries,

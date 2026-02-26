@@ -3,19 +3,25 @@
   "version": "0.1.0",
   "description": "Centralized engine metadata registry for multi-game-engines",
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "files": [
     "dist",
     "data"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --external @multi-game-engines/* --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --external @multi-game-engines/* --format cjs,esm --dts --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "license": "MIT",
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
     "stockfish": "16.0.0",
@@ -27,7 +33,7 @@
     "@multi-game-engines/core": "workspace:*"
   },
   "dependencies": {
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-engines": "workspace:*",
     "zod": "^4.3.6"
   }
 }

@@ -10,7 +10,6 @@
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-mortal"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -32,7 +31,7 @@
     "multi-game-engines"
   ],
   "dependencies": {
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/registry": "workspace:*"
   },
   "peerDependencies": {

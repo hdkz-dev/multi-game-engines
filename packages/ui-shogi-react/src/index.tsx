@@ -19,6 +19,7 @@ declare module "react" {
         "error-message"?: string | undefined;
         "hand-sente-label"?: string | undefined;
         "hand-gote-label"?: string | undefined;
+        "hand-piece-count"?: string | undefined;
         pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
         pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
         locale?: string | undefined;
@@ -36,6 +37,7 @@ export interface ShogiBoardProps {
   errorMessage?: string;
   handSenteLabel?: string;
   handGoteLabel?: string;
+  handPieceCount?: string;
   pieceNames?: Partial<Record<ShogiPiece, string>>;
   pieceSymbols?: Partial<Record<ShogiPiece, string>>;
   locale?: string;
@@ -49,6 +51,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   errorMessage,
   handSenteLabel,
   handGoteLabel,
+  handPieceCount,
   pieceNames,
   pieceSymbols,
   locale,
@@ -70,6 +73,7 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
       error-message={errorMessage}
       hand-sente-label={handSenteLabel}
       hand-gote-label={handGoteLabel}
+      hand-piece-count={handPieceCount}
       locale={locale}
     />
   );

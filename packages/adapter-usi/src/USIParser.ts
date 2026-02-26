@@ -2,11 +2,12 @@ import {
   IProtocolParser,
   EngineError,
   EngineErrorCode,
-  I18nKey,
   ProtocolValidator,
   truncateLog,
+  I18nKey,
 } from "@multi-game-engines/core";
-import { t as translate } from "@multi-game-engines/i18n";
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
+import { tCommon, CommonKey } from "@multi-game-engines/i18n-common";
 import {
   createShogiMove,
   IShogiSearchOptions,
@@ -16,13 +17,12 @@ import {
 
 /**
  * 2026 Zenith Tier: 汎用 USI (Universal Shogi Interface) パーサー。
- * 境界チェックと詳細なエラーメッセージを備え、堅牢な解析を提供します。
+ * 境界チェック and 詳細なエラーメッセージを備え、堅牢な解析を提供します。
  */
-export class USIParser implements IProtocolParser<
-  IShogiSearchOptions,
-  IShogiSearchInfo,
-  IShogiSearchResult
-> {
+export class USIParser
+  implements
+    IProtocolParser<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult>
+{
   parseInfo(data: string | Record<string, unknown>): IShogiSearchInfo | null {
     if (typeof data !== "string") return null;
 
@@ -76,7 +76,7 @@ export class USIParser implements IProtocolParser<
               info.currMove = createShogiMove(token);
             } catch {
               console.warn(
-                translate("parsers.usi.invalidCurrMove" as I18nKey, {
+                translate("parser.invalidCurrMove", {
                   token: truncateLog(token),
                   line: truncateLog(data),
                 }),
@@ -103,7 +103,7 @@ export class USIParser implements IProtocolParser<
               info.pv.push(move);
             } catch {
               console.warn(
-                translate("parsers.usi.invalidPvMove" as I18nKey, {
+                translate("parser.invalidPvMove", {
                   token: truncateLog(m),
                   line: truncateLog(data),
                 }),
@@ -127,12 +127,12 @@ export class USIParser implements IProtocolParser<
 
     const parts = data.trim().split(" ");
     if (parts.length < 2 || (parts[0] === "bestmove" && parts.length === 1)) {
-      const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+      const i18nKey: CommonKey = "engine.errors.invalidMoveFormat";
       const i18nParams = { move: truncateLog(data) };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: translate(i18nKey, i18nParams),
-        i18nKey,
+        message: tCommon(i18nKey, i18nParams),
+        i18nKey: i18nKey as unknown as I18nKey,
         i18nParams,
       });
     }
@@ -163,7 +163,7 @@ export class USIParser implements IProtocolParser<
           result.ponder = createShogiMove(ponderToken);
         } catch {
           console.warn(
-            translate("parsers.usi.invalidPonder", {
+            translate("parser.invalidPonder", {
               token: truncateLog(ponderToken),
               line: truncateLog(data),
             }),

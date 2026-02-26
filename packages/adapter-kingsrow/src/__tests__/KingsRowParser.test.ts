@@ -60,7 +60,7 @@ describe("KingsRowParser", () => {
         // Testing injection via custom field due to index signature
         "malicious\nkey": "data",
       }),
-    ).toThrow(/Potential command injection/);
+    ).toThrow(expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }));
   });
 
   it("should reject injection in nested option values", () => {

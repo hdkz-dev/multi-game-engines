@@ -93,7 +93,9 @@ describe("GTPParser", () => {
         board: "A1\nquit" as unknown as GOBoard,
         color: "black",
       }),
-    ).toThrow(/command injection/);
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 
   it("should create valid option command", () => {
@@ -105,9 +107,13 @@ describe("GTPParser", () => {
   it("should throw error for injection in option name or value", () => {
     expect(() =>
       parser.createOptionCommand("analysis_threads\nquit", 4),
-    ).toThrow(/command injection/);
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
     expect(() =>
       parser.createOptionCommand("analysis_threads", "4\nquit"),
-    ).toThrow(/command injection/);
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });

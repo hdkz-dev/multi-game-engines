@@ -1,13 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import EngineUIProvider from "../EngineUIProvider.vue";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 describe("EngineUIProvider.vue", () => {
   it("should render default slot", () => {
     const wrapper = mount(EngineUIProvider, {
       props: {
-        localeData: locales.ja,
+        localeData: commonLocales.ja!,
       },
       slots: {
         default: '<div id="child">Child</div>',

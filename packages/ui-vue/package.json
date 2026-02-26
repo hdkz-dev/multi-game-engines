@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Vue 3 components for multi-game engines (Hub Package)",
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
@@ -39,7 +38,7 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-chess-vue": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-elements": "workspace:*",

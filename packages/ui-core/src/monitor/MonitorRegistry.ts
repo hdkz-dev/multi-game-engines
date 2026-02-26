@@ -4,6 +4,9 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   createPositionString,
+  EngineErrorCode,
+  I18nKey,
+  EngineError,
 } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
 import { createInitialState, EngineSearchState } from "../types.js";
@@ -58,7 +61,6 @@ export class MonitorRegistry {
 
   /**
    * より具体的なキャストを行うためのバリデータ関数。
-   * 実行時に必要なシェイプを持っているか検証し、安全な型ダウンキャストを提供する。
    */
   private assertMonitorType<
     T_STATE extends EngineSearchState,
@@ -90,9 +92,12 @@ export class MonitorRegistry {
       !("getStatus" in monitor) ||
       typeof (monitor as { getStatus: unknown }).getStatus !== "function"
     ) {
-      throw new Error(
-        "[MonitorRegistry] Invalid monitor instance. Ensure it implements the required SearchMonitor interface.",
-      );
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "[MonitorRegistry] Invalid monitor instance.",
+        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nParams: { message: "Invalid monitor instance" },
+      });
     }
   }
 
@@ -112,7 +117,14 @@ export class MonitorRegistry {
     IBaseSearchInfo,
     IBaseSearchResult
   > {
-    if (!monitor) throw new Error("[MonitorRegistry] Monitor must be defined");
+    if (!monitor) {
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "[MonitorRegistry] Monitor must be defined",
+        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nParams: { message: "Monitor undefined" },
+      });
+    }
     return monitor as unknown as SearchMonitor<
       EngineSearchState,
       IBaseSearchOptions,
@@ -135,12 +147,12 @@ export class MonitorRegistry {
     transformer: (state: T_STATE, info: T_INFO) => T_STATE,
   ): SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT> {
     if (!engine) {
-      throw new Error(
-        "[MonitorRegistry] Engine instance is required to create a monitor.",
-      );
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: "[MonitorRegistry] Engine instance is required.",
+        i18nKey: "engine.errors.notReady" as I18nKey,
+      });
     }
-    // 2026 Best Practice: 抽象インターフェースへのキャスト。
-    // IEngine は共変的に扱えるプロパティのみを持つため、IBase へのキャストは安全。
     const abstractEngine = engine as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
@@ -149,10 +161,6 @@ export class MonitorRegistry {
     const entry = this.monitors.get(abstractEngine);
 
     if (entry) {
-      // 内部ストレージからは EngineSearchState (ベース型) で返るため、
-      // 呼び出し側の要求する具体的なサブタイプにキャストして返却する。
-      // SearchMonitor は T_STATE に対して不変 (invariant) であるが、
-      // レジストリが作成時の transformer との一貫性を保証するため、バリデータ経由で安全にキャストする。
       const cachedMonitor = entry.monitor;
       this.assertMonitorType<T_STATE, T_OPTIONS, T_INFO, T_RESULT>(
         cachedMonitor,
@@ -175,7 +183,6 @@ export class MonitorRegistry {
       IBaseSearchInfo,
       IBaseSearchResult
     > = {
-      // 永続化のためにバリデータ関数を経由してベース型として保存。
       monitor: this.asAbstractMonitor(newMonitor),
       typeTag: Symbol("MonitorTypeTag"),
     };

@@ -29,6 +29,14 @@ This document defines the peak design, implementation, and operational standards
   - **Adapters**: Adhere to `{Name}Adapter.ts` naming.
   - **Tests**: `__tests__` folders must be adjacent to the code they test.
 
+### 1.5. Federated i18n Quality (Zero-Any i18n)
+
+- **Standard**: Localization resources must be physically isolated by domain, ensuring 100% type safety even for dynamic access.
+- **Implementation**:
+  - **Physical Isolation**: Contain translation data within dedicated packages like `i18n-chess`.
+  - **DeepRecord**: Use recursive Record types to structurally eliminate `any` casts or `unknown` rendering issues during i18n access.
+  - **Branded Keys**: Leverage the `I18nKey` brand type to decouple the adapter layer from concrete language implementations.
+
 ---
 
 ## ⚡ 2. Performance & Security Standards

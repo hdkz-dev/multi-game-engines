@@ -8,7 +8,7 @@ import {
   createSFEN,
 } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
-import { locales } from "@multi-game-engines/i18n";
+import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 
 /**
  * Returns true if the piece belongs to Gote (White).
@@ -136,7 +136,7 @@ export class ShogiBoard extends LitElement {
     this.requestUpdate("lastMove", old);
   }
 
-  @property({ type: String })
+  @property({ type: String, reflect: true })
   locale = "en";
 
   @property({ type: String, attribute: "board-label", reflect: true })
@@ -159,27 +159,27 @@ export class ShogiBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings() {
-    const data = this.locale === "ja" ? locales.ja : locales.en;
+    const data = (
+      this.locale === "ja" ? shogiLocales.ja : shogiLocales.en
+    ) as Record<string, unknown>;
+    const boardTitle = this.locale === "ja" ? "ゲームボード" : "Shogi Board";
+    const errors = (data.errors || {}) as Record<string, string>;
+    const pieces = (data.pieces || {}) as Record<string, unknown>;
+
     return {
-      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
-      handSenteLabel: this.handSenteLabel || data.dashboard.gameBoard.handSente,
-      handGoteLabel: this.handGoteLabel || data.dashboard.gameBoard.handGote,
-      errorMessage:
-        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
-      pieceNames: data.dashboard.gameBoard.shogiPieces as Record<
-        ShogiPiece,
-        string
-      >,
-      handPieceCount: data.dashboard.gameBoard.handPieceCount,
-      squareLabel: (f: number, r: number) =>
-        data.dashboard.gameBoard.squareLabel
-          .replace("{file}", String(f))
-          .replace("{rank}", String(r)),
-      squarePieceLabel: (f: number, r: number, p: string) =>
-        data.dashboard.gameBoard.squarePieceLabel
-          .replace("{file}", String(f))
-          .replace("{rank}", String(r))
-          .replace("{piece}", p),
+      boardLabel: this.boardLabel || boardTitle,
+      handSenteLabel:
+        this.handSenteLabel ||
+        (this.locale === "ja" ? "先手 持ち駒" : "Sente Hand"),
+      handGoteLabel:
+        this.handGoteLabel ||
+        (this.locale === "ja" ? "後手 持ち駒" : "Gote Hand"),
+      errorMessage: this.errorMessage || errors.invalidSFEN || "",
+      pieceNames: pieces as Record<ShogiPiece, string>,
+      handPieceCount:
+        this.locale === "ja" ? "{piece}{count}枚" : "{count} {piece}s",
+      squareLabel: (f: number, r: number) => `${f}${r}`,
+      squarePieceLabel: (f: number, r: number, p: string) => `${p} at ${f}${r}`,
     };
   }
 
@@ -319,20 +319,23 @@ export class ShogiBoard extends LitElement {
   private _renderHand(
     hand: ShogiHand,
     side: "sente" | "gote",
-    strings: ReturnType<typeof this._getLocalizedStrings>,
+    strings: Record<string, unknown>,
   ) {
     const pieces =
       side === "sente"
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
+    const pieceNames = (strings["pieceNames"] || {}) as Record<string, string>;
+    const handPieceCount = (strings["handPieceCount"] || "{piece}{count}") as string;
+
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = this.pieceNames[p as ShogiPiece] || strings.pieceNames[p];
+      const label = this.pieceNames[p as ShogiPiece] || pieceNames[p];
       const ariaLabel =
         count > 1
-          ? strings.handPieceCount
-              .replace("{piece}", label)
+          ? handPieceCount
+              .replace("{piece}", label || "")
               .replace("{count}", String(count))
           : label;
       return html`<span title="${label}" aria-label="${ariaLabel}"

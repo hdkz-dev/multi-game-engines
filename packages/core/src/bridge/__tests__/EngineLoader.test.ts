@@ -160,7 +160,7 @@ describe("EngineLoader", () => {
       };
 
       await expect(prodLoader.loadResource("test", config)).rejects.toThrow(
-        "SRI bypass (__unsafeNoSRI) is not allowed in production",
+        expect.objectContaining({ i18nKey: "engine.errors.sriBypassNotAllowed" }),
       );
     } finally {
       process.env.NODE_ENV = originalEnv;
@@ -175,7 +175,7 @@ describe("EngineLoader", () => {
     };
 
     await expect(loader.loadResource("test", config)).rejects.toThrow(
-      "Insecure connection (HTTP) is not allowed",
+      expect.objectContaining({ i18nKey: "engine.errors.insecureConnection" }),
     );
   });
 
@@ -189,7 +189,7 @@ describe("EngineLoader", () => {
     };
 
     await expect(loader.loadResource(engineId, config)).rejects.toThrow(
-      "Invalid engine ID",
+      expect.objectContaining({ i18nKey: "engine.errors.invalidEngineId" }),
     );
   });
 

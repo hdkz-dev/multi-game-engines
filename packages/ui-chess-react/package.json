@@ -4,7 +4,6 @@
   "description": "Domain-specific Chess UI components for React",
   "type": "module",
   "license": "MIT",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -25,6 +24,7 @@
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/i18n-chess": "workspace:*",
     "@multi-game-engines/ui-chess-elements": "workspace:*"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 # アーキテクチャと設計原則
 
-> 最終更新: 2026-02-06
+> 最終更新: 2026-02-26 (Federated i18n Architecture 完遂)
 
 ## 1. プロジェクト概要
 
@@ -9,6 +9,7 @@
 ### ミッション
 
 - ユーザーにライセンスの懸念を感じさせない究極の隔離環境を実現
+- **物理的ドメイン隔離**: ロジックだけでなく、言語リソース（i18n）も独立したパッケージ (`i18n-chess`, `i18n-shogi` 等) に物理分離。
 - フレームワーク非依存で、どのような環境でも動作
 
 ---
@@ -43,22 +44,23 @@ console.log(`Best move: ${result.bestMove}`);
 
 ### 2.2 Branded Types による型安全性
 
-`string` 型の混用を防ぐため、`FEN` や `Move` に公称型を適用します。
+`string` 型の混用を防ぐため、`FEN`, `SFEN`, `Move`, `I18nKey` に公称型を適用します。
 
 ```typescript
 type Brand<T, K> = T & { __brand: K };
 type FEN = Brand<string, "FEN">;
-type Move = Brand<string, "Move">;
+type SFEN = Brand<string, "SFEN">;
+type Move<T extends string = string> = Brand<string, T>; // 階層化ブランド
+type I18nKey = Brand<string, "I18nKey">;
 
 // コンパイル時にエラーを検出
 function search(fen: FEN): void {
   /* ... */
 }
 search("invalid"); // ❌ エラー: string は FEN に代入不可
-search("..." as FEN); // ✅ 明示的なキャストで許可
 ```
 
-**効果**: チェスの指し手と将棋の指し手を混同することがコンパイル時に不可能。
+**効果**: チェスの指し手と将棋の指し手を混同することがコンパイル時に不可能。また、アダプター層は UI 層の具体的な言語実装を知ることなく、抽象的な `I18nKey` を通じて型安全にエラーを伝播可能。
 
 ### 2.3 ジェネリクスの統一順序
 

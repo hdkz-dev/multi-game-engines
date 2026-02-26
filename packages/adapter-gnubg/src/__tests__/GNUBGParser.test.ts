@@ -81,6 +81,6 @@ describe("GNUBGParser", () => {
         dice: [6, 5],
         "malicious\nkey": "value",
       }),
-    ).toThrow(/Potential command injection/);
+    ).toThrow(expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }));
   });
 });

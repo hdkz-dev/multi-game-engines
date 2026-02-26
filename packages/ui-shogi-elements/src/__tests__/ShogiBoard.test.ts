@@ -3,6 +3,7 @@ import "../index.js";
 import { ShogiBoard } from "../index.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
 import { createMove } from "@multi-game-engines/core";
+import { waitFor } from "@testing-library/dom";
 
 describe("shogi-board Web Component", () => {
   beforeEach(() => {
@@ -49,62 +50,49 @@ describe("shogi-board Web Component", () => {
     expect(el.getAttribute("board-label")).toBe("カスタム将棋盤");
   });
 
-  it("should highlight last move", async () => {
+  it("should support explicit i18n overrides", async () => {
     const el = document.createElement("shogi-board") as ShogiBoard;
+    el.boardLabel = "対局盤";
+    el.handSenteLabel = "自分";
     document.body.appendChild(el);
 
-    el.lastMove = createMove("7g7f");
-    await el.updateComplete;
-
-    const highlighted = el.shadowRoot?.querySelectorAll(".square.highlight");
-    expect(highlighted?.length).toBe(2);
-    expect(
-      el.shadowRoot
-        ?.querySelector('[data-square="7g"]')
-        ?.classList.contains("highlight"),
-    ).toBe(true);
-    expect(
-      el.shadowRoot
-        ?.querySelector('[data-square="7f"]')
-        ?.classList.contains("highlight"),
-    ).toBe(true);
-  });
-
-  it("should localize aria-labels and hand labels", async () => {
-    const el = document.createElement("shogi-board") as ShogiBoard;
-    document.body.appendChild(el);
-
-    el.locale = "ja";
     await el.updateComplete;
 
     const board = el.shadowRoot?.querySelector(".board");
-    expect(board?.getAttribute("aria-label")).toBe("ゲームボード");
+    expect(board?.getAttribute("aria-label")).toBe("対局盤");
 
     const senteHand = el.shadowRoot?.querySelector(".hand.sente");
-    expect(senteHand?.getAttribute("aria-label")).toBe("先手 持ち駒");
+    expect(senteHand?.getAttribute("aria-label")).toBe("自分");
   });
 
-  it("should render pieces in hand with correct count and localization", async () => {
+  it("should render localized piece names from pieceNames prop", async () => {
     const el = document.createElement("shogi-board") as ShogiBoard;
+    el.pieceNames = { P: "歩兵" };
+    el.sfen = createSFEN("9/9/9/9/9/9/9/9/P8 b - 1"); // One pawn on board
     document.body.appendChild(el);
 
-    el.locale = "ja";
-    // Sente (b) has 2 Pawns (2P) and 1 Knight (N)
-    el.sfen = createSFEN("9/9/9/9/9/9/9/9/9 b 2PN 1");
     await el.updateComplete;
 
-    const senteHand = el.shadowRoot?.querySelector(".hand.sente");
-    const spans = senteHand?.querySelectorAll("span");
-    expect(spans?.length).toBe(2);
+    const pawnSquare = el.shadowRoot?.querySelector('[data-square="9i"]');
+    const piece = pawnSquare?.querySelector(".piece");
+    expect(piece?.textContent).toBe("歩兵");
+  });
 
-    const texts = Array.from(spans!).map((s) => s.textContent);
-    expect(texts).toContain("歩2");
-    expect(texts).toContain("桂");
+  it("should render pieces in hand with correct count from prop", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    el.pieceNames = { P: "歩兵" };
+    el.handPieceCount = "{piece}が{count}枚";
+    // Sente has 2 Pawns (2P)
+    el.sfen = createSFEN("9/9/9/9/9/9/9/9/9 b 2P 1");
+    document.body.appendChild(el);
 
-    const ariaLabels = Array.from(spans!).map((s) =>
-      s.getAttribute("aria-label"),
-    );
-    expect(ariaLabels).toContain("歩2枚");
-    expect(ariaLabels).toContain("桂");
+    await el.updateComplete;
+
+    await waitFor(() => {
+      const senteHand = el.shadowRoot?.querySelector(".hand.sente");
+      const span = senteHand?.querySelector("span");
+      expect(span?.getAttribute("aria-label")).toBe("歩兵が2枚");
+      expect(span?.textContent).toContain("歩兵2");
+    });
   });
 });

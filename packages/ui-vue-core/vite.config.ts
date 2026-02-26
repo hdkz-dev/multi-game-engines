@@ -35,7 +35,7 @@ export default defineConfig({
         "@multi-game-engines/ui-chess-elements",
         "@multi-game-engines/ui-shogi-elements",
         "@multi-game-engines/ui-core",
-        "@multi-game-engines/i18n",
+        "@multi-game-engines/i18n-common",
         "lucide-vue-next",
       ],
       output: {
@@ -44,7 +44,7 @@ export default defineConfig({
           lit: "Lit",
           "@multi-game-engines/core": "MGE_Core",
           "@multi-game-engines/ui-core": "MGE_UICore",
-          "@multi-game-engines/i18n": "MGE_I18n",
+          "@multi-game-engines/i18n-common": "MGE_I18n",
           "lucide-vue-next": "LucideVue",
         },
       },

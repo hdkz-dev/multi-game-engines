@@ -2,7 +2,7 @@
 
 exports[`EvaluationGraph > should render correctly with a mate score 1`] = `
 <div
-  aria-label="評価値推移グラフ"
+  aria-label="Evaluation trend graph"
   class="relative overflow-hidden rounded bg-gray-50/50 p-1 "
   role="img"
   style="width: 100%; height: 60px;"
@@ -42,7 +42,7 @@ exports[`EvaluationGraph > should render correctly with a mate score 1`] = `
 
 exports[`EvaluationGraph > should render correctly with entries 1`] = `
 <div
-  aria-label="評価値推移グラフ"
+  aria-label="Evaluation trend graph"
   class="relative overflow-hidden rounded bg-gray-50/50 p-1 "
   role="img"
   style="width: 100%; height: 60px;"
@@ -82,7 +82,7 @@ exports[`EvaluationGraph > should render correctly with entries 1`] = `
 
 exports[`EvaluationGraph > should render correctly with no entries 1`] = `
 <div
-  aria-label="評価値推移グラフ"
+  aria-label="Evaluation trend graph"
   class="relative overflow-hidden rounded bg-gray-50/50 p-1 "
   role="img"
   style="width: 100%; height: 60px;"

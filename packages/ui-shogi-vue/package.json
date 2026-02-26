@@ -4,7 +4,6 @@
   "description": "Domain-specific Shogi UI components for Vue",
   "type": "module",
   "license": "MIT",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {

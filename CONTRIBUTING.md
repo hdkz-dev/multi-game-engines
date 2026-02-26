@@ -41,6 +41,18 @@
 - **Adapters**: Follow the naming convention `{Name}Adapter.ts` and `{Name}Parser.ts`.
 - **Tests**: Test files must be placed in a `__tests__/` folder adjacent to the code they test.
 
+## 多言語化規約 / i18n Conventions (Zenith Tier)
+
+[JP] 多言語リソースは物理的に隔離されたパッケージで管理します：
+- 共有エラーやステータスは `@multi-game-engines/i18n-common` を使用してください。
+- 各ゲーム固有の文言は `@multi-game-engines/i18n-{domain}` に追加してください。
+- 翻訳データへの動的アクセスには、必ず `DeepRecord` 型を使用し、`any` を排除してください。
+
+[EN] Localization resources are managed in physically isolated packages:
+- Use `@multi-game-engines/i18n-common` for shared errors and status messages.
+- Add game-specific vocabulary to `@multi-game-engines/i18n-{domain}`.
+- Always use the `DeepRecord` type for dynamic translation access to eliminate `any`.
+
 [EN] Automated checks are executed upon commit using **Husky** and **lint-staged**. Commits will be aborted unless the following checks pass:
 
 - Security scan (Checking for secrets)

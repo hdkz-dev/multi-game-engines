@@ -44,7 +44,7 @@ export default defineConfig({
         "lit",
         "@multi-game-engines/core",
         "@multi-game-engines/ui-core",
-        "@multi-game-engines/i18n",
+        "@multi-game-engines/i18n-common",
       ],
     },
   },

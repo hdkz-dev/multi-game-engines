@@ -1,0 +1,49 @@
+{
+  "pieces": {
+    "P": "Pawn",
+    "L": "Lance",
+    "N": "Knight",
+    "S": "Silver",
+    "G": "Gold",
+    "B": "Bishop",
+    "R": "Rook",
+    "K": "King",
+    "p": "Gote Pawn",
+    "l": "Gote Lance",
+    "n": "Gote Knight",
+    "s": "Gote Silver",
+    "g": "Gote Gold",
+    "b": "Gote Bishop",
+    "r": "Gote Rook",
+    "k": "Gote King",
+    "+P": "Promoted Pawn",
+    "+L": "Promoted Lance",
+    "+N": "Promoted Knight",
+    "+S": "Promoted Silver",
+    "+B": "Dragon Horse",
+    "+R": "Dragon King",
+    "+p": "Gote Promoted Pawn",
+    "+l": "Gote Promoted Lance",
+    "+n": "Gote Promoted Knight",
+    "+s": "Gote Promoted Silver",
+    "+b": "Gote Dragon Horse",
+    "+r": "Gote Dragon King"
+  },
+  "errors": {
+    "invalidSFEN": "Invalid SFEN: Input must not be empty.",
+    "invalidSFENStructure": "Invalid SFEN structure: 4 fields required.",
+    "invalidSFENTurn": "Invalid SFEN turn: Expected \"b\" or \"w\".",
+    "invalidSFENHand": "Invalid SFEN hand pieces: \"{hand}\"",
+    "invalidSFENMoveCounter": "Invalid SFEN move counter: \"{counter}\"",
+    "invalidSfenRanks": "Invalid SFEN: Expected 9 ranks.",
+    "invalidSfenPiece": "Invalid SFEN piece: \"{piece}\"",
+    "invalidSfenChar": "Invalid SFEN character: \"{char}\"",
+    "invalidSfenRankWidth": "Invalid SFEN rank width at rank {rank}: expected 9, got {actual}",
+    "missingFEN": "USI protocol requires a SFEN position string."
+  },
+  "parser": {
+    "invalidCurrMove": "[USIParser.parseInfo] Skipping invalid \"currmove\" token: \"{token}\" in response: \"{line}\"",
+    "invalidPvMove": "[USIParser.parseInfo] Skipping invalid \"pv\" move token: \"{token}\" in response: \"{line}\"",
+    "invalidPonder": "[USIParser.parseResult] Skipping invalid \"ponder\" token: \"{token}\" in response: \"{line}\""
+  }
+}

@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Framework-agnostic UI logic for game engines",
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -26,7 +25,7 @@
   ],
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -157,7 +157,9 @@ describe("StockfishAdapter", () => {
         // Testing injection via custom field due to index signature
         "evil\nkey": "data",
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
 
     // Value injection
     await expect(
@@ -166,7 +168,9 @@ describe("StockfishAdapter", () => {
         depth: 10,
         extra: "evil\rvalue",
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
 
     // Nested object injection
     await expect(
@@ -174,6 +178,8 @@ describe("StockfishAdapter", () => {
         fen: createFEN("startpos"),
         options: { "nested\nkey": "value" },
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });

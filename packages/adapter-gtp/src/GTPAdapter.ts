@@ -9,7 +9,7 @@ import {
   IEngineSourceConfig,
   I18nKey,
 } from "@multi-game-engines/core";
-import { t as translate } from "@multi-game-engines/i18n";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 import {
   IGoSearchOptions,
   IGoSearchInfo,

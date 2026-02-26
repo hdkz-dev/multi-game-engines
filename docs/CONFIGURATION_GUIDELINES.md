@@ -14,7 +14,10 @@
 - ルート共通設定: `eslint.config.mjs`, `tsconfig.base.json`, `prettier.config.cjs` を設置し、各パッケージはこれを継承する。
 - CI: GitHub Actions を採用。ジョブは `install` → `lint` → `test` → `build` → `publish`（バイナリ/WASMがある場合） の順序で実行。Node のマトリクス（Linux/macOS，Node 24）を用意する。
 - プリコミットQA: `./scripts/pre_commit_qa.sh` を必須化し、CI が PR 単位で実行する。
-- i18n: ハードコード文字列禁止。新規 UI の追加時は `locales/en` と `locales/ja` にキーを追加する方針。
+- i18n: ハードコード文字列禁止。新規 UI やエラーメッセージの追加時は、対応する i18n パッケージ（`packages/i18n-{domain}/locales/`）にキーを追加する方針。
+  - 共通語彙（Status, OK等）は `i18n-common` へ。
+  - ドメイン固有（駒名, FENエラー等）はそれぞれのドメインパッケージへ。
+  - 動的アクセスが必要な場合は、`DeepRecord` 型を使用して型安全性を維持すること。
 
 ## エンジン統合ポリシー
 

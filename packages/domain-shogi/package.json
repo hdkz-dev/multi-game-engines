@@ -18,14 +18,13 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*"
+    "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "hdkz-dev",
   "repository": {

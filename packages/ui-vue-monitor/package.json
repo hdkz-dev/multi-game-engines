@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Engine monitoring and management components for Vue 3",
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -29,7 +28,7 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-vue-core": "workspace:*",
     "clsx": "^2.1.1",

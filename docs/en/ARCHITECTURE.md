@@ -6,7 +6,8 @@ This document explains the design principles and technical architecture of `mult
 
 1.  **Pure Core (Pay-as-you-go)**:
     - The core library has zero knowledge of specific game engines or protocols.
-    - Users only import the adapters they need, ensuring that unused code and types are never bundled.
+    - **Domain Isolation**: Logic and localization resources (i18n) for specific games (Chess, Shogi, etc.) are physically isolated into dedicated packages (`domain-chess`, `i18n-chess`, etc.).
+    - Users only import the modules they need, ensuring that unused code, types, and language data are never bundled.
 2.  **Decentralized Type Inference (Declaration Merging)**:
     - Leverages TypeScript's declaration merging so that importing an adapter automatically enables type inference for `bridge.getEngine('id')`.
 3.  **Framework Agnostic**:
@@ -95,7 +96,11 @@ To avoid framework lock-in and support 2026 standards, the UI layer is separated
     - **Directory Structure**: Organized into functional subdirectories: `src/state/` (Store/Transformer), `src/monitor/` (SearchCore/Registry), `src/dispatch/` (Command/Middleware), `src/validation/` (Zod schemas), and `src/styles/` (shared theme.css).
     - **Generic State Support**:
       `SearchMonitor` and `createInitialState` now support custom state types via generics, allowing applications to extend the base engine state while maintaining 100% type safety and eliminating unsafe casts.
-2.  **Localization Layer (`i18n`)**: Pure language resources and type-safe interfaces.
+2.  **Localization Layer (Federated i18n)**:
+    - **Role**: Domain-optimized language resources.
+    - **Architecture**: Replaced the monolithic i18n package with physically separated sub-packages (`i18n-core`, `i18n-common`, `i18n-chess`, etc.) using a "federated" approach.
+    - **Zero-Any Policy**: 100% type safety for dynamic translation access via recursive `DeepRecord` types and Branded `I18nKey`.
+    - **Pay-as-you-go**: Consumers only depend on the specific i18n modules they require, minimizing the bundle size delivered to the browser.
 3.  **Framework Adapters (Modular Split)**:
     - **`ui-*-core`**: Foundation for each framework (i18n Provider, basic UI context).
     - **`ui-*-monitor`**: Engine monitoring and management tools (`EngineMonitorPanel` and its sub-components).

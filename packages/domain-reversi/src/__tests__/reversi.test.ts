@@ -10,8 +10,12 @@ describe("domain-reversi", () => {
     });
 
     it("should throw on invalid moves", () => {
-      expect(() => createReversiMove("z9")).toThrow();
-      expect(() => createReversiMove("e4\n")).toThrow();
+      expect(() => createReversiMove("z9")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.invalidReversiMove" }),
+      );
+      expect(() => createReversiMove("e4\n")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
   });
 
@@ -21,7 +25,9 @@ describe("domain-reversi", () => {
     });
 
     it("should throw on injection", () => {
-      expect(() => createReversiBoard("board\nquit")).toThrow();
+      expect(() => createReversiBoard("board\nquit")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
   });
 });
