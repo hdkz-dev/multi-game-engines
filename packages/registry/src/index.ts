@@ -50,6 +50,12 @@ const EngineManifestSchema = z.object({
 type EngineManifest = z.infer<typeof EngineManifestSchema>;
 
 /**
+ * 2026 Best Practice: オブジェクト型かどうかを判定する型ガード。
+ */
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/**
  * プロジェクト同梱の JSON ファイルを使用する静的エンジンレジストリ。
  */
 export class StaticRegistry implements IEngineRegistry {
@@ -83,7 +89,19 @@ export class StaticRegistry implements IEngineRegistry {
     const versionEntry = engineEntry.versions[targetVersion];
     if (!versionEntry) return null;
 
-    return versionEntry.assets as Record<string, IEngineSourceConfig>;
+    // 2026 Zenith Tier: 直接キャストを避け、不透明な Record から安全に変換
+    if (!isRecord(versionEntry.assets)) {
+      const i18nKey: EnginesKey = "registry.invalidFormat";
+      console.error(
+        translate(i18nKey, { url: id, error: "assets is not a record" }),
+      );
+      return null;
+    }
+
+    return versionEntry.assets as unknown as Record<
+      string,
+      IEngineSourceConfig
+    >;
   }
 
   getSupportedEngines(): string[] {
@@ -200,9 +218,11 @@ export class RemoteRegistry extends StaticRegistry {
   ): Promise<void> {
     const parts = expectedSri.split("-");
     if (parts.length !== 2) {
+      const i18nKey: EnginesKey = "registry.invalidSriFormat";
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `[RemoteRegistry] Invalid SRI format: ${expectedSri}`,
+        message: translate(i18nKey, { sri: expectedSri }),
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 
@@ -213,9 +233,11 @@ export class RemoteRegistry extends StaticRegistry {
     else if (algo === "sha384") cryptoAlgo = "SHA-384";
     else if (algo === "sha512") cryptoAlgo = "SHA-512";
     else {
+      const i18nKey: EnginesKey = "registry.unsupportedAlgorithm";
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `[RemoteRegistry] Unsupported SRI algorithm: ${algo}`,
+        message: translate(i18nKey, { algo: algo ?? "unknown" }),
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 

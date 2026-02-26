@@ -54,15 +54,26 @@ export class BestScoreStrategy<
       if (!score) continue;
 
       // 2026 Best Practice: 詰み(mate) > センチポーン(cp) > 勝率(winrate) の順で優先評価
+      // mate score: 正の値は自分が勝ち（少ないほど良い）、負の値は自分が負け（大きいほど良い）
       let currentScore = -Infinity;
       if (score.mate !== undefined) {
-        // 詰みスコアを極めて高い値に変換（手数が短いほど高評価）
-        currentScore =
-          score.mate > 0 ? 1000000 - score.mate : -1000000 - score.mate;
+        if (score.mate > 0) {
+          // 自分が勝ち: 2,000,000 - 手数 (mate in 1 = 1,999,999)
+          currentScore = 2000000 - score.mate;
+        } else if (score.mate < 0) {
+          // 自分が負け: -2,000,000 - 手数 (mate in -1 = -2,000,001)
+          // 負けの場合は手数が長いほど「マシ」なので、絶対値が大きい方がスコアが高くなるようにする
+          currentScore = -2000000 - score.mate;
+        } else {
+          // mate 0 は理論上ありえないがガード
+          currentScore = 0;
+        }
       } else if (score.cp !== undefined) {
         currentScore = score.cp;
-      } else {
-        currentScore = score.winrate ?? -Infinity;
+      } else if (score.winrate !== undefined) {
+        // 勝率は 0.0〜1.0 なので cp スケールに合わせるかそのまま比較
+        // ここでは cp が無い場合の最終手段として使用
+        currentScore = score.winrate - 1000000; // cp よりは必ず低くなるように
       }
 
       if (currentScore > maxScore) {

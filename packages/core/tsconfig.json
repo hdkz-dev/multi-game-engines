@@ -6,6 +6,6 @@
     "paths": {}
   },
   "references": [],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

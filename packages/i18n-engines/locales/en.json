@@ -14,6 +14,8 @@
     "invalidFormat": "Invalid manifest format from {url}: {error}",
     "timeout": "Timeout fetching manifest from {url} after {timeout}ms",
     "sriMismatch": "Security violation: Manifest integrity (SRI) mismatch detected for {url}.",
+    "invalidSriFormat": "[RemoteRegistry] Invalid SRI format: {sri}",
+    "unsupportedAlgorithm": "[RemoteRegistry] Unsupported SRI algorithm: {algo}",
     "notLoaded": "[RemoteRegistry] resolve() called before load() for engine \"{id}\". Returning null."
   }
 }

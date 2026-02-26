@@ -10,6 +10,6 @@
     { "path": "../registry" },
     { "path": "../domain-checkers" }
   ],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

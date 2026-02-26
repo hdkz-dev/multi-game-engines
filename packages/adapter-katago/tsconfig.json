@@ -11,6 +11,6 @@
     { "path": "../domain-go" },
     { "path": "../adapter-gtp" }
   ],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

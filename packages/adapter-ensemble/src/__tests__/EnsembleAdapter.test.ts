@@ -60,7 +60,7 @@ describe("EnsembleAdapter", () => {
     expect(() => strategy.aggregateResults(new Map())).toThrow(
       expect.objectContaining({
         code: "VALIDATION_ERROR",
-        i18nKey: "adapters.ensemble.errors.noResults",
+        i18nKey: "ensemble.errors.noResults",
       }),
     );
   });

@@ -12,6 +12,8 @@ export type EnginesKey =
   | "registry.invalidFormat"
   | "registry.timeout"
   | "registry.sriMismatch"
+  | "registry.invalidSriFormat"
+  | "registry.unsupportedAlgorithm"
   | "registry.notLoaded";
 
 /**

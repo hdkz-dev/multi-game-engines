@@ -9,5 +9,5 @@
     }
   },
   "references": [{ "path": "../core" }, { "path": "../i18n-common" }],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"]
+  "include": ["src/**/*", ".storybook/**/*"]
 }

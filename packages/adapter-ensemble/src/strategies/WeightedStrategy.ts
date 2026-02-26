@@ -49,11 +49,14 @@ export class WeightedStrategy<
 
     for (const [engineId, result] of resultsMap.entries()) {
       // 2026 Best Practice: bestMove が存在しない場合は投票から除外
-      if (result.bestMove === null || result.bestMove === undefined) continue;
+      // null や undefined だけでなく、空文字も除外対象とする
+      if (!result.bestMove) continue;
 
       const move = String(result.bestMove);
       // 2026 Best Practice: エンジン固有の重みを適用
+      // resultsMap のキーが this.weights のキーと一致することを期待
       const weight = this.weights[engineId];
+
       if (weight === undefined && Object.keys(this.weights).length > 0) {
         const warnKey: EnginesKey = "ensemble.weighted.noWeight";
         console.warn(
@@ -62,7 +65,8 @@ export class WeightedStrategy<
           }),
         );
       }
-      const finalWeight = weight ?? 1.0;
+
+      const finalWeight = typeof weight === "number" ? weight : 1.0;
 
       const currentWeight = (voteCounts.get(move) || 0) + finalWeight;
       voteCounts.set(move, currentWeight);

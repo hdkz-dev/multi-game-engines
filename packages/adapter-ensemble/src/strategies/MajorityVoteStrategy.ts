@@ -4,7 +4,10 @@ import {
   EngineErrorCode,
   I18nKey,
 } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import {
+  tEngines as translate,
+  EnginesKey,
+} from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
 
 /**
@@ -20,11 +23,11 @@ export class MajorityVoteStrategy<
   aggregateResults(resultsMap: Map<string, T_RESULT>): T_RESULT {
     const results = Array.from(resultsMap.values());
     if (results.length === 0) {
-      const i18nKey = "adapters.ensemble.errors.noResults" as I18nKey;
+      const i18nKey: EnginesKey = "ensemble.errors.noResults";
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: translate(i18nKey),
-        i18nKey,
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 

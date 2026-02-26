@@ -9,6 +9,6 @@
     { "path": "../i18n-common" },
     { "path": "../domain-go" }
   ],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

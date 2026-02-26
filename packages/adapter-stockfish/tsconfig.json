@@ -11,6 +11,6 @@
     { "path": "../domain-chess" },
     { "path": "../adapter-uci" }
   ],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

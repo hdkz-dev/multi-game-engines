@@ -11,6 +11,6 @@
     { "path": "../domain-shogi" },
     { "path": "../adapter-usi" }
   ],
-  "include": ["src/**/*", ".storybook/**/*", "src/**/*.vue"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

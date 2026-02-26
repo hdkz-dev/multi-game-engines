@@ -38,7 +38,7 @@
   "devDependencies": {
     "@storybook/vue3": "10.2.10",
     "@storybook/vue3-vite": "10.2.10",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.7.0",
