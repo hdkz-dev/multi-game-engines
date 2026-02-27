@@ -104,3 +104,12 @@
     - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
     - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
     - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。
+
+### 2026-02-27 更新 (実装担当: Testing and Validation Expansion)
+
+- [x] **Testing and Validation Expansion** (ADR-051)
+  - [x] **A11y**: 全盤面コンポーネントへのキーボードナビゲーション実装とテスト。
+  - [x] **Validation**: `engines.json` のスキーマバリデーション・テストの完備。
+  - [x] **Error Handling**: エンジンファクトリ関数の `EngineError` 移行と i18n 対応。
+  - [x] **Reliability**: SRI ミスマッチおよびタイムアウト時のエラーリカバリ検証テストの追加。
+  - [x] **Quality**: 全パッケージを通じた Zero-Any ポリシーの再検証と `as any` のテスト隔離。

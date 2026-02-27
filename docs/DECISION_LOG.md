@@ -47,6 +47,7 @@
 - [ADR-017: ネイティブブリッジの統合方針](./adr/017-native-integration.md) (Accepted - 2026-02-12)
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
 - [ADR-050: Advanced Development Skills Integration](./adr/050-advanced-dev-skills-integration.md) (Proposed - 2026-02-27)
+- [ADR-051: Comprehensive Validation, A11y, and Robust Error Handling Expansion](./adr/051-validation-a11y-error-hardening.md) (Accepted - 2026-02-27)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 

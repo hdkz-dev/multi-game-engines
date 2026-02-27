@@ -1,9 +1,14 @@
 import { EdaxAdapter } from "./EdaxAdapter.js";
-import { EngineFacade } from "@multi-game-engines/core";
+import {
+  EngineFacade,
+  EngineError,
+  EngineErrorCode,
+} from "@multi-game-engines/core";
 import type {
   IEngine,
   IEngineConfig,
   IEngineSourceConfig,
+  I18nKey,
 } from "@multi-game-engines/core";
 import { OfficialRegistry } from "@multi-game-engines/registry";
 import type {
@@ -29,9 +34,13 @@ export function createEdaxEngine(
   };
 
   if (!sources.main) {
-    throw new Error(
-      '[createEdaxEngine] Engine "edax" requires a "main" source, but it was not found in the registry or config.',
-    );
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `[createEdaxEngine] Engine "edax" requires a "main" source, but it was not found in the registry or config.`,
+      engineId: "edax",
+      i18nKey: "factory.requiresMainSource" as I18nKey,
+      i18nParams: { id: "edax" },
+    });
   }
 
   const mergedConfig: IEngineConfig = {

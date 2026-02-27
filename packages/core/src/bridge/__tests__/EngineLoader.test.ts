@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineLoader } from "../EngineLoader.js";
-import { IFileStorage, IEngineSourceConfig } from "../../types.js";
+import {
+  IFileStorage,
+  IEngineSourceConfig,
+  EngineErrorCode,
+} from "../../types.js";
 import { SecurityAdvisor } from "../../capabilities/SecurityAdvisor.js";
 
 describe("EngineLoader", () => {
@@ -160,7 +164,9 @@ describe("EngineLoader", () => {
       };
 
       await expect(prodLoader.loadResource("test", config)).rejects.toThrow(
-        expect.objectContaining({ i18nKey: "engine.errors.sriBypassNotAllowed" }),
+        expect.objectContaining({
+          i18nKey: "engine.errors.sriBypassNotAllowed",
+        }),
       );
     } finally {
       process.env.NODE_ENV = originalEnv;
@@ -289,5 +295,40 @@ describe("EngineLoader", () => {
     // - "newOne" は新しく作られたので revoke されるはず
     expect(revokeSpy).toHaveBeenCalledWith("blob:new");
     expect(revokeSpy).not.toHaveBeenCalledWith("blob:existing");
+  });
+
+  it("should handle fetch timeout (AbortError)", async () => {
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/timeout.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    vi.mocked(fetch).mockRejectedValueOnce(
+      new DOMException("The operation was aborted.", "AbortError"),
+    );
+
+    await expect(loader.loadResource("test", config)).rejects.toThrow(
+      expect.objectContaining({ code: EngineErrorCode.NETWORK_ERROR }),
+    );
+  });
+
+  it("should delete cache and throw SRI_MISMATCH on hash mismatch", async () => {
+    const data = new TextEncoder().encode("tampered").buffer;
+    vi.mocked(storage.get).mockResolvedValue(data);
+    // 2026: SRI 検証失敗をシミュレート
+    vi.spyOn(SecurityAdvisor, "verifySRI").mockResolvedValue(false);
+
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    // sha256("test") != sha256("tampered")
+    await expect(loader.loadResource("test", config)).rejects.toThrow(
+      expect.objectContaining({ code: EngineErrorCode.SRI_MISMATCH }),
+    );
+    expect(storage.delete).toHaveBeenCalled();
   });
 });
