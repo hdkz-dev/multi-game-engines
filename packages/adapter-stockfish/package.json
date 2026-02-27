@@ -41,7 +41,7 @@
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
