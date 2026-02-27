@@ -38,7 +38,23 @@
 - 機械的なマージではなく、設計思想（ARCHITECTURE.md）に最も合致する解決策を選択してください。
 - 解決後は必ず Quality Gate をパスすることを確認してください。
 
-## 4. リポジトリ構造
+## 4. 開発環境と名前付きURL (Portless)
+
+本プロジェクトでは **Portless** を導入し、開発環境のポート番号から AI を解放しています。ブラウザ操作や API 通信を行う際は、以下の名前付き URL を使用してください。
+
+| プロジェクト    | 名前付き URL (標準)              | 起動コマンド                 |
+| --------------- | -------------------------------- | ---------------------------- |
+| React Dashboard | `http://dashboard.localhost`     | `npx portless dashboard`     |
+| Vue Dashboard   | `http://vue-dashboard.localhost` | `npx portless vue-dashboard` |
+| Engine Registry | `http://registry.localhost`      | `npx portless registry`      |
+
+**AI エージェントへの指示:**
+
+- E2E テストやブラウザでの検証を行う際は、常に上記 URL を起点としてください。
+- ポート番号の推測や探索を行う必要はありません。
+- 開発サーバーの起動が必要な場合は、`npx portless [name]` を使用してください。
+
+## 5. リポジトリ構造
 
 - `packages/core`: 通信、ストレージ、セキュリティの基盤ロジック。
 - `packages/adapter-*`: 各ゲームエンジン固有の実装。

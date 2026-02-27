@@ -5,7 +5,13 @@ import {
   Move,
   createMove,
   truncateLog,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  IScoreInfo,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
@@ -18,24 +24,66 @@ export type SFEN = PositionString<"SFEN">;
 export type ShogiMove = Move<"ShogiMove">;
 
 /**
+ * 将棋の探索オプション。
+ */
+export interface IShogiSearchOptions extends IBaseSearchOptions {
+  sfen?: SFEN | undefined;
+  ponder?: boolean | undefined;
+  depth?: number | undefined;
+  nodes?: number | undefined;
+  time?: number | undefined;
+  movetime?: number | undefined;
+  [key: string]: unknown;
+}
+
+/**
+ * 将棋の探索状況。
+ */
+export interface IShogiSearchInfo extends IBaseSearchInfo {
+  depth?: number | undefined;
+  seldepth?: number | undefined;
+  time?: number | undefined;
+  nodes?: number | undefined;
+  nps?: number | undefined;
+  hashfull?: number | undefined;
+  score?: IScoreInfo | undefined;
+  pv?: ShogiMove[] | undefined;
+  currMove?: ShogiMove | undefined;
+  multipv?: number | undefined;
+  [key: string]: unknown;
+}
+
+/**
+ * 将棋の探索結果。
+ */
+export interface IShogiSearchResult extends IBaseSearchResult {
+  bestMove: ShogiMove | null;
+  ponder?: ShogiMove | null | undefined;
+  [key: string]: unknown;
+}
+
+/**
  * 将棋の指し手バリデータファクトリ。
  */
 export function createShogiMove(move: string): ShogiMove {
   if (typeof move !== "string" || move.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidShogiMove" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid ShogiMove: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidShogiMove",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
+    const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+    const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: `Control characters detected in move string: "${truncateLog(move)}"`,
-      i18nKey: "engine.errors.injectionDetected",
-      i18nParams: { context: "Move", input: truncateLog(move) },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
@@ -48,11 +96,13 @@ export function createShogiMove(move: string): ShogiMove {
       move,
     )
   ) {
+    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid ShogiMove format: "${truncateLog(move)}"`,
-      i18nKey: "engine.errors.invalidMoveFormat",
-      i18nParams: { move: truncateLog(move) },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
   return createMove<"ShogiMove">(move);
@@ -130,60 +180,69 @@ export interface ParsedSFEN {
  */
 export function createSFEN(pos: string): SFEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidSFEN" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid SFEN: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidSFEN",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   const trimmedPos = pos.trim();
   if (!/^[0-9a-zA-Z/+ -]+$/.test(trimmedPos)) {
+    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: "Invalid SFEN: Illegal characters detected.",
-      i18nKey: "engine.errors.illegalCharacters",
+      message: translate(i18nKey),
+      i18nKey,
       remediation:
         "SFEN should only contain board pieces [PLNSGBRK...], counts [1-9], '+', '/', '-', and spaces.",
     });
   }
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 4) {
+    const i18nKey = "engine.errors.invalidSFENStructure" as I18nKey;
+    const i18nParams = { count: fields.length };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN structure: Expected 4 fields, found ${fields.length}`,
-      i18nKey: "engine.errors.invalidSFENStructure",
-      i18nParams: { count: fields.length },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
       remediation: "SFEN must contain: [board] [turn] [hand] [moveCount]",
     });
   }
 
   // 2nd field: Turn (b or w)
   if (!/^[bw]$/.test(fields[1]!)) {
+    const i18nKey = "engine.errors.invalidSFENTurn" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN turn: Expected "b" or "w", found "${fields[1]}"`,
-      i18nKey: "engine.errors.invalidSFENTurn",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
   // 3rd field: Hand pieces (e.g., 2P3p or -)
   if (!/^(?:(?:[1-9][0-9]*)?[PLNSGBRplnsgbr])+$|^-$/.test(fields[2]!)) {
+    const i18nKey = "engine.errors.invalidSFENHand" as I18nKey;
+    const i18nParams = { hand: fields[2]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN hand: "${fields[2]}"`,
-      i18nKey: "engine.errors.invalidSFENHand",
-      i18nParams: { hand: fields[2]! },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
   // 4th field: Move counter (>= 1)
   const moveCountNum = Number(fields[3]!);
   if (!Number.isInteger(moveCountNum) || moveCountNum < 1) {
+    const i18nKey = "engine.errors.invalidSFENMoveCounter" as I18nKey;
+    const i18nParams = { counter: fields[3]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid SFEN move counter: "${fields[3]}"`,
-      i18nKey: "engine.errors.invalidSFENMoveCounter",
-      i18nParams: { counter: fields[3]! },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
@@ -209,10 +268,11 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
 
   const rows = position.split("/");
   if (rows.length !== 9) {
+    const i18nKey = "engine.errors.invalidSfenRanks" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid SFEN: Expected 9 ranks",
-      i18nKey: "engine.errors.invalidSfenRanks",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
 
@@ -233,31 +293,37 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
           boardRow.push(piece);
           i += 2;
         } else {
+          const i18nKey = "engine.errors.invalidSfenPiece" as I18nKey;
+          const i18nParams = { piece };
           throw new EngineError({
             code: EngineErrorCode.VALIDATION_ERROR,
-            message: `Invalid SFEN piece: ${piece}`,
-            i18nKey: "engine.errors.invalidSfenPiece",
-            i18nParams: { piece },
+            message: translate(i18nKey, i18nParams),
+            i18nKey,
+            i18nParams,
           });
         }
       } else if (isValidShogiPiece(char)) {
         boardRow.push(char);
         i++;
       } else {
+        const i18nKey = "engine.errors.invalidSfenChar" as I18nKey;
+        const i18nParams = { char };
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: `Invalid SFEN character: ${char}`,
-          i18nKey: "engine.errors.invalidSfenChar",
-          i18nParams: { char },
+          message: translate(i18nKey, i18nParams),
+          i18nKey,
+          i18nParams,
         });
       }
     }
     if (boardRow.length !== 9) {
+      const i18nKey = "engine.errors.invalidSfenRankWidth" as I18nKey;
+      const i18nParams = { rank: r + 1, expected: 9, actual: boardRow.length };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid SFEN rank width at rank ${r + 1}: expected 9, got ${boardRow.length}`,
-        i18nKey: "engine.errors.invalidSfenRankWidth",
-        i18nParams: { rank: r + 1, expected: 9, actual: boardRow.length },
+        message: translate(i18nKey, i18nParams),
+        i18nKey,
+        i18nParams,
       });
     }
     board.push(boardRow);

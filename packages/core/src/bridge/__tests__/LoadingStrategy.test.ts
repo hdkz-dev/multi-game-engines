@@ -5,7 +5,10 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  EngineErrorCode,
+  I18nKey,
 } from "../../types.js";
+import { EngineError } from "../../errors/EngineError.js";
 
 describe("Loading Strategies", () => {
   beforeAll(() => {
@@ -28,8 +31,14 @@ describe("Loading Strategies", () => {
       searchRaw: vi.fn().mockImplementation(function (this: {
         status: string;
       }) {
-        if (this.status !== "ready")
-          throw new Error("Engine is not initialized");
+        if (this.status !== "ready") {
+          throw new EngineError({
+            code: EngineErrorCode.INTERNAL_ERROR,
+            message: "Engine is not initialized",
+            engineId: "test",
+            i18nKey: "engine.errors.notLoaded" as I18nKey,
+          });
+        }
         return {
           info: (async function* () {
             yield { raw: "info" } as IBaseSearchInfo;
@@ -67,7 +76,7 @@ describe("Loading Strategies", () => {
     facade.loadingStrategy = "manual";
 
     await expect(facade.search({})).rejects.toThrow(
-      /Engine is not initialized/,
+      expect.objectContaining({ i18nKey: "engine.errors.notLoaded" }),
     );
   });
 });

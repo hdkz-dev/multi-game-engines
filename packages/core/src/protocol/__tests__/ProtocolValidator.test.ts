@@ -20,13 +20,19 @@ describe("ProtocolValidator", () => {
     it("should throw for strings with control characters", () => {
       expect(() =>
         ProtocolValidator.assertNoInjection("injected\nstring", "context"),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
       expect(() =>
         ProtocolValidator.assertNoInjection("injected\rstring", "context"),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
       expect(() =>
         ProtocolValidator.assertNoInjection("injected\0string", "context"),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should allow semicolon when allowSemicolon is true", () => {
@@ -48,7 +54,9 @@ describe("ProtocolValidator", () => {
           false,
           false,
         ),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should recursively check objects", () => {
@@ -60,12 +68,16 @@ describe("ProtocolValidator", () => {
       const unsafeValueObj = { a: "safe", b: { c: "unsafe\n" } };
       expect(() =>
         ProtocolValidator.assertNoInjection(unsafeValueObj, "context", true),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
 
       const unsafeKeyObj = { "unsafe\nkey": "safe value" };
       expect(() =>
         ProtocolValidator.assertNoInjection(unsafeKeyObj, "context", true),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should recursively check arrays", () => {
@@ -77,7 +89,9 @@ describe("ProtocolValidator", () => {
       const unsafeArr = ["safe", ["unsafe\0"]];
       expect(() =>
         ProtocolValidator.assertNoInjection(unsafeArr, "context", true),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
   });
 });

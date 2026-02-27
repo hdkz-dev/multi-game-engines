@@ -6,7 +6,7 @@ import {
   formatNumber,
   formatTime,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("engine-stats")
 export class EngineStatsElement extends LitElement {
@@ -48,7 +48,7 @@ export class EngineStatsElement extends LitElement {
   render() {
     if (!this.stats) return html``;
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
 
     return html`

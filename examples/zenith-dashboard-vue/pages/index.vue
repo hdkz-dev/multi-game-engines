@@ -1,16 +1,38 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
-import { createFEN } from "@multi-game-engines/domain-chess";
-import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { formatNumber } from "@multi-game-engines/ui-core";
-import type { IEngine } from "@multi-game-engines/core";
-import type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/adapter-uci";
-import type { IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult } from "@multi-game-engines/adapter-usi";
-import { EngineMonitorPanel, EngineUIProvider, ChessBoard, ShogiBoard } from "@multi-game-engines/ui-vue";
+import { ref, computed, onMounted, markRaw } from "vue";
+import {
+  EngineMonitorPanel,
+  EngineUIProvider,
+  ChessBoard,
+  ShogiBoard,
+} from "@multi-game-engines/ui-vue";
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
-import { locales } from "@multi-game-engines/i18n";
-import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "lucide-vue-next";
-import { getBridge } from "../composables/useEngines";
+import { commonLocales } from "@multi-game-engines/i18n-common";
+import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
+import {
+  LayoutGrid,
+  Sword,
+  Trophy,
+  Zap,
+  Globe,
+  Cpu,
+  Gauge,
+} from "lucide-vue-next";
+import {
+  createFEN,
+  type IChessSearchOptions,
+  type IChessSearchInfo,
+  type IChessSearchResult,
+} from "@multi-game-engines/domain-chess";
+import {
+  createSFEN,
+  type IShogiSearchOptions,
+  type IShogiSearchInfo,
+  type IShogiSearchResult,
+} from "@multi-game-engines/domain-shogi";
+import type { IEngine } from "@multi-game-engines/core";
+import { useEngines } from "../composables/useEngines";
+import StatCard from "../components/StatCard.vue";
 
 useHead({
   title: "Zenith Hybrid Analysis Dashboard (Vue)",
@@ -18,7 +40,7 @@ useHead({
     {
       name: "description",
       content:
-        "Advanced game engine analysis powered by multi-game-engines (Vue 3 + Nuxt 3)",
+        "High-performance game engine analysis powered by multi-game-engines (Vue 3 + Nuxt 3)",
     },
   ],
 });
@@ -26,340 +48,408 @@ useHead({
 type EngineType = "chess" | "shogi";
 const activeEngine = ref<EngineType>("chess");
 const locale = ref("ja");
-const localeData = computed(() => (locale.value === "ja" ? locales.ja : locales.en));
+
+const localeData = computed(() => {
+  const base = (
+    locale.value === "ja" ? commonLocales.ja : commonLocales.en
+  ) as Record<string, Record<string, unknown>>;
+  const extra = (
+    locale.value === "ja" ? dashboardLocales.ja : dashboardLocales.en
+  ) as Record<string, Record<string, unknown>>;
+  return {
+    dashboard: {
+      ...((base["dashboard"] as Record<string, unknown>) || {}),
+      ...((extra["dashboard"] as Record<string, unknown>) || {}),
+    },
+    engine: {
+      ...((base["engine"] as Record<string, unknown>) || {}),
+      ...((extra["engine"] as Record<string, unknown>) || {}),
+    },
+  };
+});
 
 const { bridge } = useEngines();
 
 // エンジンインスタンスの保持 (2026: getBridge が非同期のため)
-const chessEngine = ref<IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> | null>(null);
-const shogiEngine = ref<IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> | null>(null);
+const chessEngine = ref<IEngine<
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult
+> | null>(null);
+const shogiEngine = ref<IEngine<
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult
+> | null>(null);
 const initError = ref<string | null>(null);
 
 const initEngines = async () => {
-  initError.value = null;
-  const bridgeInstance = await getBridge();
-  if (bridgeInstance) {
-    try {
-      const [chess, shogi] = await Promise.all([
-        bridgeInstance.getEngine<
-          IChessSearchOptions,
-          IChessSearchInfo,
-          IChessSearchResult
-        >({
-          id: "stockfish",
-          adapter: "stockfish",
-          sources: {
-            // 2026: E2E environments leverage lightweight mocks for stable test state.
-            main: {
-              url: "/mock-stockfish.js",
-              sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
-              type: "worker-js",
-            },
-            wasm: {
-              url: "/mock-stockfish.wasm",
-              sri: "sha384-OLBgp1GsljhM2TJ+sbHjaiH9txEUvgdDTAzHv2P24donTt6/529l+9Ua0vFImLlb",
-              type: "wasm",
-            },
+  const bridgeInstance = bridge.value;
+  if (!bridgeInstance) return;
+
+  try {
+    const [chess, shogi] = await Promise.all([
+      bridgeInstance.getEngine<
+        IChessSearchOptions,
+        IChessSearchInfo,
+        IChessSearchResult
+      >({
+        id: "stockfish",
+        adapter: "stockfish",
+        sources: {
+          main: {
+            url: "/mock-stockfish.js",
+            sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
+            type: "worker-js",
           },
-        }),
-        bridgeInstance.getEngine<
-          IShogiSearchOptions,
-          IShogiSearchInfo,
-          IShogiSearchResult
-        >({ id: "yaneuraou", adapter: "yaneuraou" }),
-      ]);
-      chessEngine.value = chess;
-      shogiEngine.value = shogi;
-    } catch (error) {
-      console.error("Engine initialization failed:", error);
-      initError.value =
-        error instanceof Error
-          ? error.message
-          : localeData.value.dashboard.initializationFailed;
-    }
-  } else {
-    initError.value = localeData.value.dashboard.errors.bridgeNotAvailable;
+          wasm: {
+            url: "/mock-stockfish.wasm",
+            sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
+            type: "wasm",
+          },
+        },
+      }),
+      bridgeInstance.getEngine<
+        IShogiSearchOptions,
+        IShogiSearchInfo,
+        IShogiSearchResult
+      >({ id: "yaneuraou", adapter: "yaneuraou" }),
+    ]);
+
+    chessEngine.value = chess;
+    shogiEngine.value = shogi;
+  } catch (error) {
+    console.error("Failed to initialize engines:", error);
+    initError.value =
+      error instanceof Error ? error.message : "Initialization Failed";
   }
 };
 
-onMounted(initEngines);
+onMounted(() => {
+  initEngines();
+});
+
+const CHESS_MULTI_PV = 3;
+const SHOGI_MULTI_PV = 3;
 
 // チェス用の設定
 const chessOptions = {
-  fen: createFEN(
+  initialPosition: createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   ),
-  multipv: 3,
-  depth: 99,
+  multipv: CHESS_MULTI_PV,
+  depth: 20,
 };
-const { state: chessState } = useEngineMonitor(chessEngine);
+
+const { state: chessState } = useEngineMonitor(chessEngine, chessOptions);
 
 // 将棋用の設定
 const shogiOptions = {
-  sfen: createSFEN(
+  initialPosition: createSFEN(
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   ),
-  multipv: 2,
+  multipv: SHOGI_MULTI_PV,
 };
-const { state: shogiState } = useEngineMonitor(shogiEngine);
 
-const chessBestMove = computed(() => chessState.value?.pvs[0]?.moves[0]);
-const shogiBestMove = computed(() => shogiState.value?.pvs[0]?.moves[0]);
+const { state: shogiState } = useEngineMonitor(shogiEngine, shogiOptions);
 
-const nps = computed(() => {
-  const stats =
-    activeEngine.value === "chess"
-      ? chessState.value?.stats
-      : shogiState.value?.stats;
-  if (!stats) return formatNumber(0);
-  return formatNumber(stats.nps);
-});
+const chessBestMove = computed(() =>
+  chessState.value.pvs[0] ? chessState.value.pvs[0].moves[0] : null,
+);
+
+const shogiBestMove = computed(() =>
+  shogiState.value.pvs[0] ? shogiState.value.pvs[0].moves[0] : null,
+);
+
+const toggleEngine = () => {
+  activeEngine.value = activeEngine.value === "chess" ? "shogi" : "chess";
+};
+
+const toggleLocale = () => {
+  locale.value = locale.value === "ja" ? "en" : "ja";
+};
+
+// アイコンのリアクティブな生成（Vue 3 Best Practice）
+const icons = {
+  zap: markRaw(Zap),
+  cpu: markRaw(Cpu),
+  gauge: markRaw(Gauge),
+  trophy: markRaw(Trophy),
+};
 </script>
 
 <template>
-  <div
-    v-if="initError || !bridge || !chessEngine || !shogiEngine"
-    class="min-h-screen flex items-center justify-center bg-gray-50"
-  >
-    <div class="flex flex-col items-center gap-4 text-center px-4">
-      <template v-if="initError">
+  <EngineUIProvider>
+    <div
+      v-if="initError || !bridge || !chessEngine || !shogiEngine"
+      class="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-6"
+    >
+      <div class="max-w-md w-full">
         <div
-          class="p-6 bg-red-50 text-red-700 rounded-2xl border border-red-100 shadow-xl shadow-red-100/50 max-w-sm"
+          class="bg-[#111] border border-white/5 rounded-3xl p-8 text-center shadow-2xl"
         >
-          <p class="font-black mb-2 uppercase tracking-widest text-xs">
-            {{ localeData.dashboard.initializationFailed }}
-          </p>
-          <p class="text-sm font-medium mb-6 leading-relaxed">
-            {{ initError }}
-          </p>
-          <button
-            class="w-full py-3 px-6 bg-red-600 text-white rounded-xl font-black text-xs tracking-widest hover:bg-red-700 active:scale-[0.98] transition-all shadow-lg shadow-red-200"
-            @click="initEngines"
-          >
-            {{ localeData.engine.retry }}
-          </button>
-        </div>
-      </template>
-      <template v-else>
-        <div
-          class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
-        ></div>
-        <p class="text-gray-500 font-bold tracking-widest text-sm">
-          {{ localeData.dashboard.initializingEngines }}
-        </p>
-      </template>
-    </div>
-  </div>
-
-  <EngineUIProvider v-else :locale-data="localeData">
-    <main class="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-8 bg-gray-50/30">
-      <!-- Header Area -->
-      <header class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div class="space-y-1">
-          <h1 class="text-4xl font-black tracking-tighter text-gray-900 flex items-center gap-3">
-            <div class="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-200">
-              <LayoutGrid class="w-8 h-8 text-white" aria-hidden="true" />
-            </div>
-            {{ localeData.dashboard.title }}
-          </h1>
-          <p class="text-sm text-gray-400 font-bold uppercase tracking-[0.2em] ml-1">
-            {{ localeData.dashboard.subtitle }}
-          </p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-4">
-          <!-- Language Switcher -->
-          <div
-            role="group"
-            :aria-label="localeData.dashboard.languageSelector"
-            class="flex bg-white shadow-sm border border-gray-200 p-1 rounded-full items-center"
-          >
-            <Globe class="w-4 h-4 ml-2 text-gray-400" aria-hidden="true" />
-            <button
-              :aria-pressed="locale === 'en'"
-              :class="[
-                'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
-                locale === 'en' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
-              ]"
-              @click="locale = 'en'"
-            >
-              {{ localeData.dashboard.language.en }}
-            </button>
-            <button
-              :aria-pressed="locale === 'ja'"
-              :class="[
-                'px-3 py-1 rounded-full text-[10px] font-black tracking-widest transition-all',
-                locale === 'ja' ? 'bg-gray-900 text-white' : 'text-gray-400 hover:text-gray-600'
-              ]"
-              @click="locale = 'ja'"
-            >
-              {{ localeData.dashboard.language.ja }}
-            </button>
+          <div v-if="initError">
+            <Zap class="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
+            <p class="font-black tracking-tighter text-lg mb-1">
+              {{ (localeData.dashboard as any)?.initializationFailed }}
+            </p>
+            <p class="text-xs font-bold opacity-70 leading-relaxed">
+              {{
+                initError === "__INITIALIZATION_FAILED__"
+                  ? (localeData.dashboard as any)?.errors?.bridgeNotAvailable
+                  : initError
+              }}
+            </p>
           </div>
+          <div v-else>
+            <Globe class="w-8 h-8 mx-auto mb-3 text-blue-500 animate-spin-slow" />
+            <p class="font-black tracking-tighter text-lg animate-pulse">
+              {{ (localeData.dashboard as any)?.initializingEngines }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          <!-- Engine Switcher -->
-          <nav
-            class="flex bg-white shadow-sm border border-gray-200 p-1 rounded-xl"
-            :aria-label="localeData.dashboard.engineSelector"
+    <main
+      v-else
+      class="min-h-screen bg-[#0a0a0a] text-[#e0e0e0] font-sans selection:bg-blue-500/30"
+    >
+      <!-- Header -->
+      <header
+        class="px-8 py-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-6 backdrop-blur-md sticky top-0 z-50 bg-[#0a0a0a]/80"
+      >
+        <div class="flex items-center gap-4">
+          <div
+            class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20"
           >
-            <button
-              :aria-pressed="activeEngine === 'chess'"
-              :class="[
-                'flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all',
-                activeEngine === 'chess'
-                  ? 'bg-blue-600 shadow-md shadow-blue-200 text-white'
-                  : 'text-gray-400 hover:text-gray-600'
-              ]"
-              @click="activeEngine = 'chess'"
+            <LayoutGrid class="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 class="text-2xl font-black tracking-tighter text-white">
+              {{ (localeData.dashboard as any)?.title }}
+            </h1>
+            <p
+              class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase"
             >
-              <Trophy
-                :class="['w-4 h-4', { 'animate-bounce': activeEngine === 'chess' }]"
-                aria-hidden="true"
-              />
-              {{ localeData.dashboard.chessLabel }}
-            </button>
-            <button
-              :aria-pressed="activeEngine === 'shogi'"
-              :class="[
-                'flex items-center gap-2 px-6 py-2.5 rounded-lg text-xs font-black transition-all',
-                activeEngine === 'shogi'
-                  ? 'bg-blue-600 shadow-md shadow-blue-200 text-white'
-                  : 'text-gray-400 hover:text-gray-600'
-              ]"
-              @click="activeEngine = 'shogi'"
-            >
-              <Sword
-                :class="['w-4 h-4', { 'animate-bounce': activeEngine === 'shogi' }]"
-                aria-hidden="true"
-              />
-              {{ localeData.dashboard.shogiLabel }}
-            </button>
-          </nav>
+              {{ (localeData.dashboard as any)?.subtitle }}
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="flex items-center gap-3 bg-[#111] p-1.5 rounded-2xl border border-white/5"
+        >
+          <button
+            class="px-4 py-2 rounded-xl text-xs font-black transition-all hover:bg-white/5 flex items-center gap-2"
+            :aria-label="(localeData.dashboard as any)?.languageSelector"
+            @click="toggleLocale"
+          >
+            <Globe class="w-3.5 h-3.5 text-blue-400" />
+            {{
+              locale === "ja"
+                ? (localeData.dashboard as any)?.language?.en
+                : (localeData.dashboard as any)?.language?.ja
+            }}
+          </button>
+
+          <div class="w-px h-4 bg-white/10 mx-1" />
+
+          <button
+            class="px-4 py-2 rounded-xl text-xs font-black transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20 flex items-center gap-2"
+            :aria-label="(localeData.dashboard as any)?.engineSelector"
+            @click="toggleEngine"
+          >
+            <Sword class="w-3.5 h-3.5" />
+            {{
+              activeEngine === "chess"
+                ? (localeData.dashboard as any)?.shogiLabel
+                : (localeData.dashboard as any)?.chessLabel
+            }}
+          </button>
         </div>
       </header>
 
-      <!-- Hero Stats -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard
-          icon-class="text-yellow-500"
-          :label="localeData.dashboard.stats.engineRuntime.label"
-          :value="nps"
-          :sub="localeData.engine.npsUnit"
-        >
-          <template #icon><Zap class="w-5 h-5" /></template>
-        </StatCard>
-        <StatCard
-          icon-class="text-blue-500"
-          :label="localeData.dashboard.stats.hardware.label"
-          :value="localeData.dashboard.stats.hardware.value"
-          :sub="localeData.dashboard.stats.hardware.sub"
-        >
-          <template #icon><Cpu class="w-5 h-5" /></template>
-        </StatCard>
-        <StatCard
-          icon-class="text-green-500"
-          :label="localeData.dashboard.stats.performance.label"
-          :value="localeData.dashboard.stats.performance.value"
-          :sub="localeData.dashboard.stats.performance.sub"
-        >
-          <template #icon><Gauge class="w-5 h-5" /></template>
-        </StatCard>
-        <StatCard
-          icon-class="text-purple-500"
-          :label="localeData.dashboard.stats.accessibility.label"
-          :value="localeData.dashboard.stats.accessibility.value"
-          :sub="localeData.dashboard.stats.accessibility.sub"
-        >
-          <template #icon><Trophy class="w-5 h-5" /></template>
-        </StatCard>
-      </div>
-
-      <!-- Main Analysis Area -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <div class="lg:col-span-4 xl:col-span-3 h-full min-h-[600px]">
-          <EngineMonitorPanel
-            v-if="activeEngine === 'chess' && chessEngine"
-            key="chess-panel"
-            :engine="chessEngine"
-            :search-options="chessOptions"
-            :title="localeData.engine.stockfishTitle"
-            class="h-full"
-          />
-          <EngineMonitorPanel
-            v-if="activeEngine === 'shogi' && shogiEngine"
-            key="shogi-panel"
-            :engine="shogiEngine"
-            :search-options="shogiOptions"
-            :title="localeData.engine.yaneuraouTitle"
-            class="h-full"
-          />
+      <div class="p-8">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            :label="(localeData.dashboard as any)?.stats?.engineRuntime?.label"
+            :value="(localeData.dashboard as any)?.stats?.engineRuntime?.value"
+            :sub="(localeData.dashboard as any)?.stats?.engineRuntime?.sub"
+          >
+            <template #icon>
+              <component :is="icons.zap" class="w-5 h-5 text-yellow-400" />
+            </template>
+          </StatCard>
+          <StatCard
+            :label="(localeData.dashboard as any)?.stats?.hardware?.label"
+            :value="(localeData.dashboard as any)?.stats?.hardware?.value"
+            :sub="(localeData.dashboard as any)?.stats?.hardware?.sub"
+          >
+            <template #icon>
+              <component :is="icons.cpu" class="w-5 h-5 text-purple-400" />
+            </template>
+          </StatCard>
+          <StatCard
+            :label="(localeData.dashboard as any)?.stats?.performance?.label"
+            :value="(localeData.dashboard as any)?.stats?.performance?.value"
+            :sub="(localeData.dashboard as any)?.stats?.performance?.sub"
+          >
+            <template #icon>
+              <component :is="icons.gauge" class="w-5 h-5 text-blue-400" />
+            </template>
+          </StatCard>
+          <StatCard
+            :label="(localeData.dashboard as any)?.stats?.accessibility?.label"
+            :value="(localeData.dashboard as any)?.stats?.accessibility?.value"
+            :sub="(localeData.dashboard as any)?.stats?.accessibility?.sub"
+          >
+            <template #icon>
+              <component :is="icons.trophy" class="w-5 h-5 text-pink-400" />
+            </template>
+          </StatCard>
         </div>
 
-        <div class="lg:col-span-8 xl:col-span-9 space-y-6">
-          <!-- Game Board Area -->
-          <div class="bg-white rounded-3xl p-8 border border-gray-200 shadow-xl shadow-gray-200/50 aspect-video flex flex-col items-center justify-center relative overflow-hidden group">
-            <div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-
-            <div class="w-full max-w-md aspect-square bg-white rounded-xl shadow-inner flex items-center justify-center relative p-4">
-              <ChessBoard
-                v-if="activeEngine === 'chess'"
-                :fen="chessOptions.fen"
-                :last-move="chessBestMove"
-                :board-label="localeData.dashboard.gameBoard.title"
-                :error-message="localeData.dashboard.gameBoard.invalidPosition"
-                :piece-names="localeData.dashboard.gameBoard.chessPieces"
-                :locale="locale"
-                class="w-full h-full"
-              />
-              <ShogiBoard
-                v-else
-                :sfen="shogiOptions.sfen"
-                :last-move="shogiBestMove"
-                :board-label="localeData.dashboard.gameBoard.title"
-                :error-message="localeData.dashboard.gameBoard.invalidPosition"
-                :hand-sente-label="localeData.dashboard.gameBoard.handSente"
-                :hand-gote-label="localeData.dashboard.gameBoard.handGote"
-                :piece-names="localeData.dashboard.gameBoard.shogiPieces"
-                :locale="locale"
-                class="w-full h-full"
-              />
-            </div>
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+          <!-- Monitor Panel -->
+          <div class="xl:col-span-4">
+            <EngineMonitorPanel
+              :engine="activeEngine === 'chess' ? chessEngine : shogiEngine"
+              :search-options="activeEngine === 'chess' ? chessOptions : shogiOptions"
+              :title="
+                activeEngine === 'chess'
+                  ? (localeData.engine as any)?.stockfishTitle
+                  : (localeData.engine as any)?.yaneuraouTitle
+              "
+            />
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                <span class="w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-                {{ localeData.dashboard.technicalInsight.title }}
-              </h3>
-              <p class="text-sm text-gray-600 leading-relaxed font-medium">
-                {{ localeData.dashboard.technicalInsight.description }}
-              </p>
+          <!-- Board Area -->
+          <div class="xl:col-span-8 space-y-8">
+            <div
+              class="bg-[#111] rounded-[2rem] p-10 border border-white/5 shadow-2xl relative overflow-hidden group"
+            >
+              <div
+                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"
+              />
+
+              <div class="flex items-center justify-between mb-10">
+                <div>
+                  <h2 class="text-3xl font-black tracking-tighter text-white mb-1">
+                    {{ (localeData.dashboard as any)?.gameBoard?.title }}
+                  </h2>
+                  <p
+                    class="text-xs font-bold text-white/30 uppercase tracking-widest"
+                  >
+                    {{ (localeData.dashboard as any)?.gameBoard?.subtitle }}
+                  </p>
+                </div>
+                <div
+                  class="px-6 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-4"
+                >
+                  <div class="flex flex-col items-end">
+                    <span
+                      class="text-[10px] font-black text-white/20 uppercase tracking-tighter"
+                    >
+                      {{ (localeData.engine as any)?.topCandidate }}
+                    </span>
+                    <span class="text-xl font-mono font-black text-blue-400">
+                      {{
+                        activeEngine === "chess"
+                          ? chessBestMove || "---"
+                          : shogiBestMove || "---"
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-center">
+                <div class="w-full max-w-[600px] aspect-square relative">
+                  <ChessBoard
+                    v-if="activeEngine === 'chess'"
+                    class="w-full h-full rounded-xl shadow-2xl"
+                    :fen="(chessState.position as any)"
+                    :last-move="(chessBestMove as any)"
+                    :locale="locale"
+                    :board-label="(localeData.dashboard as any)?.gameBoard?.title"
+                    :error-message="(localeData.dashboard as any)?.gameBoard?.invalidPosition"
+                    :piece-names="(localeData.dashboard as any)?.gameBoard?.chessPieces"
+                  />
+                  <ShogiBoard
+                    v-else
+                    class="w-full h-full rounded-xl shadow-2xl"
+                    :sfen="(shogiState.position as any)"
+                    :last-move="(shogiBestMove as any)"
+                    :locale="locale"
+                    :board-label="(localeData.dashboard as any)?.gameBoard?.title"
+                    :error-message="(localeData.dashboard as any)?.gameBoard?.invalidPosition"
+                    :piece-names="(localeData.dashboard as any)?.gameBoard?.shogiPieces"
+                    :hand-sente-label="(localeData.dashboard as any)?.gameBoard?.handSente"
+                    :hand-gote-label="(localeData.dashboard as any)?.gameBoard?.handGote"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="bg-gray-900 p-8 rounded-3xl border border-gray-800 shadow-2xl">
-              <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">
-                {{ localeData.dashboard.zenithFeatures.title }}
-              </h3>
-              <ul class="text-sm space-y-3">
-                <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <Zap class="w-3 h-3 text-green-500" />
-                  </div>
-                  {{ localeData.dashboard.zenithFeatures.multiPv }}
-                </li>
-                <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <Zap class="w-3 h-3 text-green-500" />
-                  </div>
-                  {{ localeData.dashboard.zenithFeatures.reactiveState }}
-                </li>
-                <li class="flex items-center gap-3 text-white/80 font-bold">
-                  <div class="w-5 h-5 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <Zap class="w-3 h-3 text-green-500" />
-                  </div>
-                  {{ localeData.dashboard.zenithFeatures.contractUi }}
-                </li>
-              </ul>
+
+            <!-- Bottom Info -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="bg-[#111] rounded-[2rem] p-8 border border-white/5">
+                <div class="flex items-center gap-3 mb-4">
+                  <div
+                    class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                  />
+                  <h3
+                    class="text-sm font-black text-white uppercase tracking-tighter"
+                  >
+                    {{ (localeData.dashboard as any)?.technicalInsight?.title }}
+                  </h3>
+                </div>
+                <p class="text-xs font-bold text-white/50 leading-relaxed">
+                  {{ (localeData.dashboard as any)?.technicalInsight?.description }}
+                </p>
+              </div>
+
+              <div
+                class="bg-blue-600 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-600/10 relative overflow-hidden group"
+              >
+                <Zap
+                  class="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 transition-transform group-hover:scale-110 duration-700"
+                />
+                <h3
+                  class="text-sm font-black uppercase tracking-tighter mb-6 relative z-10"
+                >
+                  {{ (localeData.dashboard as any)?.zenithFeatures?.title }}
+                </h3>
+                <ul class="space-y-4 relative z-10">
+                  <li
+                    v-for="(feature, i) in [
+                      {
+                        icon: icons.zap,
+                        label: (localeData.dashboard as any)?.zenithFeatures?.multiPv,
+                      },
+                      {
+                        icon: icons.gauge,
+                        label: (localeData.dashboard as any)?.zenithFeatures?.reactiveState,
+                      },
+                      {
+                        icon: icons.cpu,
+                        label: (localeData.dashboard.zenithFeatures as any)?.contractUi,
+                      },
+                    ]"
+                    :key="i"
+                    class="flex items-center gap-3 text-xs font-black"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center"
+                    >
+                      <component :is="feature.icon" class="w-4 h-4" />
+                    </div>
+                    {{ feature.label }}
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -369,8 +459,15 @@ const nps = computed(() => {
 </template>
 
 <style scoped>
-/* Grid background effect */
-.bg-grid-slate-100 {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(241 245 249 / 1)'%3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

@@ -1,11 +1,10 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
-import { OfficialRegistry } from "@multi-game-engines/registry";
+import { UCIAdapter } from "@multi-game-engines/adapter-uci";
 import {
-  UCIAdapter,
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-} from "@multi-game-engines/adapter-uci";
+} from "@multi-game-engines/domain-chess";
 
 /**
  * 2026 Zenith Tier: Stockfish 専用アダプター。
@@ -13,15 +12,11 @@ import {
  */
 export class StockfishAdapter extends UCIAdapter {
   constructor(config?: Partial<IEngineConfig>) {
-    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
-    const registrySources = OfficialRegistry.resolve("stockfish") || {};
-
     const defaultConfig: IEngineConfig = {
       id: "stockfish",
       adapter: "uci",
       name: "Stockfish",
       version: "16.1",
-      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

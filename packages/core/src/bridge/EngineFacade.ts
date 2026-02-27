@@ -11,6 +11,7 @@ import {
   EngineLoadingStrategy,
   IEngineLoader,
   ICapabilities,
+  I18nKey,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
@@ -169,10 +170,12 @@ export class EngineFacade<
     ) {
       await this.load();
       if ((this.status as EngineStatus) !== "ready") {
+        const i18nKey = "engine.errors.initializationFailed" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.NOT_READY,
-          message: `Engine failed to initialize on-demand (Status: ${this.status})`,
+          message: "Engine failed to initialize on-demand",
           engineId: this.id,
+          i18nKey,
         });
       }
     }
@@ -307,10 +310,12 @@ export class EngineFacade<
     }
 
     if (missing.length > 0) {
+      const i18nKey = "engine.errors.securityViolation" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Environment does not support required capabilities: ${missing.join(", ")}`,
         engineId: this.id,
+        i18nKey,
         remediation:
           "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
       });

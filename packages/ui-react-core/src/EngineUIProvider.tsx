@@ -2,9 +2,9 @@
 
 import React, { createContext, useContext, useMemo } from "react";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
-import { locales, LocaleData } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
-const defaultStrings = createUIStrings(locales.ja);
+const defaultStrings = createUIStrings(commonLocales.ja);
 
 interface EngineUIContextValue {
   strings: EngineUIStrings;
@@ -16,10 +16,10 @@ const EngineUIContext = createContext<EngineUIContextValue | undefined>(
 
 export interface EngineUIProviderProps {
   /**
-   * Raw locale data object (e.g. from @multi-game-engines/i18n).
+   * Raw locale data object (e.g. from @multi-game-engines/i18n-common).
    * Must be serializable (no functions) to pass from Server Components.
    */
-  localeData?: LocaleData;
+  localeData?: unknown;
   children: React.ReactNode;
 }
 
@@ -33,7 +33,7 @@ export const EngineUIProvider: React.FC<EngineUIProviderProps> = ({
   children,
 }) => {
   const strings = useMemo(
-    () => createUIStrings(localeData ?? locales.ja),
+    () => createUIStrings(localeData ?? commonLocales.ja),
     [localeData],
   );
 

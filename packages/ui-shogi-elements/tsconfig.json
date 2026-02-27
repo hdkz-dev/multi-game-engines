@@ -1,18 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
     "outDir": "./dist",
-    "types": ["vitest/globals"]
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../domain-shogi" },
-    { "path": "../i18n" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

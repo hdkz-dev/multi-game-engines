@@ -2,7 +2,12 @@ import {
   IBaseSearchResult,
   EngineError,
   EngineErrorCode,
+  I18nKey,
 } from "@multi-game-engines/core";
+import {
+  tEngines as translate,
+  EnginesKey,
+} from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
 
 /**
@@ -15,19 +20,22 @@ export class MajorityVoteStrategy<
 > implements IEnsembleStrategy<T_INFO, T_RESULT> {
   public readonly id = "majority-vote";
 
-  aggregateResults(results: T_RESULT[]): T_RESULT {
+  aggregateResults(resultsMap: Map<string, T_RESULT>): T_RESULT {
+    const results = Array.from(resultsMap.values());
     if (results.length === 0) {
+      const i18nKey: EnginesKey = "ensemble.errors.noResults";
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: "No results to aggregate",
-        i18nKey: "adapters.ensemble.errors.noResults",
-        engineId: this.id,
+        message: translate(i18nKey),
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 
     const voteMap = new Map<string, { count: number; result: T_RESULT }>();
 
     for (const res of results) {
+      if (res.bestMove === null || res.bestMove === undefined) continue;
+
       const move = String(res.bestMove);
       const entry = voteMap.get(move) || { count: 0, result: res };
       entry.count++;

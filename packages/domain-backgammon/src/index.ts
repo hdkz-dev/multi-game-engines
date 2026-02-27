@@ -12,7 +12,9 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   truncateLog,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * バックギャモンの盤面表現。
@@ -25,18 +27,19 @@ export type BackgammonBoard = Brand<number[], "BackgammonBoard">;
  */
 export function createBackgammonBoard(board: unknown): BackgammonBoard {
   if (!Array.isArray(board) || board.length !== 26) {
+    const i18nKey = "engine.errors.invalidBackgammonBoard" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message:
-        "Invalid BackgammonBoard: Must be an array of exactly 26 numbers.",
-      i18nKey: "engine.errors.invalidBackgammonBoard",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   if (!board.every((v) => typeof v === "number" && Number.isFinite(v))) {
+    const i18nKey = "engine.errors.invalidBackgammonBoard" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid BackgammonBoard: All elements must be finite numbers.",
-      i18nKey: "engine.errors.invalidBackgammonBoard",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   return board as BackgammonBoard;
@@ -52,19 +55,22 @@ export type BackgammonMove = Move<"BackgammonMove">;
  */
 export function createBackgammonMove(move: string): BackgammonMove {
   if (typeof move !== "string" || move.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidBackgammonMove" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid BackgammonMove: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidBackgammonMove",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
+    const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+    const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
-      message: "Control characters detected in move string.",
-      i18nKey: "engine.errors.injectionDetected",
-      i18nParams: { context: "Move", input: truncateLog(move) },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
 
@@ -72,11 +78,13 @@ export function createBackgammonMove(move: string): BackgammonMove {
   // bar/24, 6/off, 24/18 などをサポート。厳密なスペース分離。
   const bgRegex = /^((?:bar|\d+)\/(?:off|\d+))( (?:bar|\d+)\/(?:off|\d+))*$/i;
   if (!bgRegex.test(move)) {
+    const i18nKey = "engine.errors.invalidBackgammonMove" as I18nKey;
+    const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid backgammon move format: "${truncateLog(move)}"`,
-      i18nKey: "engine.errors.invalidBackgammonMove",
-      i18nParams: { move: truncateLog(move) },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
   return createMove<"BackgammonMove">(move);
@@ -88,8 +96,8 @@ export function createBackgammonMove(move: string): BackgammonMove {
 export interface IBackgammonSearchOptions extends IBaseSearchOptions {
   board: BackgammonBoard;
   dice: [number, number];
-  cube?: number;
-  matchLength?: number;
+  cube?: number | undefined;
+  matchLength?: number | undefined;
   [key: string]: unknown;
 }
 
@@ -101,11 +109,11 @@ export interface IBackgammonSearchInfo extends IBaseSearchInfo {
   winProbability: number;
   winGammonProbability: number;
   winBackgammonProbability: number;
-  depth?: number;
-  nodes?: number;
-  nps?: number;
-  hashfull?: number;
-  raw?: string | Record<string, unknown>;
+  depth?: number | undefined;
+  nodes?: number | undefined;
+  nps?: number | undefined;
+  hashfull?: number | undefined;
+  raw?: string | Record<string, unknown> | undefined;
   [key: string]: unknown;
 }
 
@@ -115,6 +123,6 @@ export interface IBackgammonSearchInfo extends IBaseSearchInfo {
 export interface IBackgammonSearchResult extends IBaseSearchResult {
   bestMove: BackgammonMove | null;
   equity: number;
-  raw?: string | Record<string, unknown>;
+  raw?: string | Record<string, unknown> | undefined;
   [key: string]: unknown;
 }

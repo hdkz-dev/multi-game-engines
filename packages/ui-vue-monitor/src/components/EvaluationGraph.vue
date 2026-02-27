@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { EvaluationPresenter, IEvaluationHistoryEntry } from '@multi-game-engines/ui-core';
-import { useEngineUI } from '@multi-game-engines/ui-vue-core';
+import { computed } from "vue";
+import {
+  EvaluationPresenter,
+  IEvaluationHistoryEntry,
+} from "@multi-game-engines/ui-core";
+import { useEngineUI } from "@multi-game-engines/ui-vue-core";
 
 interface Props {
   entries: IEvaluationHistoryEntry[];
@@ -10,8 +13,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  width: '100%',
-  height: 60
+  width: "100%",
+  height: 60,
 });
 
 const { strings } = useEngineUI();
@@ -21,8 +24,8 @@ const points = computed(() => {
 });
 
 const pathData = computed(() => {
-  if (points.value.length < 2) return '';
-  return `M ${points.value.map((p) => `${p.x},${p.y}`).join(' L ')}`;
+  if (points.value.length < 2) return "";
+  return `M ${points.value.map((p) => `${p.x},${p.y}`).join(" L ")}`;
 });
 
 const lastPoint = computed(() => {
@@ -33,7 +36,10 @@ const lastPoint = computed(() => {
 <template>
   <div
     class="relative overflow-hidden rounded bg-gray-50/50 p-1"
-    :style="{ width: typeof width === 'number' ? `${width}px` : width, height: `${height}px` }"
+    :style="{
+      width: typeof width === 'number' ? `${width}px` : width,
+      height: `${height}px`,
+    }"
     :aria-label="strings.evaluationGraph"
     role="img"
   >

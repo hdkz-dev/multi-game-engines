@@ -13,7 +13,9 @@ import {
   IBaseSearchResult,
   EngineError,
   EngineErrorCode,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * チェッカーの盤面表現。
@@ -26,10 +28,11 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidCheckersBoard" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid CheckersBoard: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidCheckersBoard",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   ProtocolValidator.assertNoInjection(pos, "CheckersBoard", true);
@@ -46,19 +49,22 @@ export type CheckersMove = Move<"CheckersMove">;
  */
 export function createCheckersMove(move: string): CheckersMove {
   if (typeof move !== "string" || move.trim().length === 0) {
+    const i18nKey = "engine.errors.invalidCheckersMove" as I18nKey;
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Invalid CheckersMove: Input must be a non-empty string.",
-      i18nKey: "engine.errors.invalidCheckersMove",
+      message: translate(i18nKey),
+      i18nKey,
     });
   }
   ProtocolValidator.assertNoInjection(move, "CheckersMove");
   if (!/^\d+-\d+$/.test(move) && move !== "(none)") {
+    const i18nKey = "engine.errors.invalidCheckersMove" as I18nKey;
+    const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid CheckersMove format: "${move}"`,
-      i18nKey: "engine.errors.invalidCheckersMove",
-      i18nParams: { move },
+      message: translate(i18nKey, i18nParams),
+      i18nKey,
+      i18nParams,
     });
   }
   return createMove<"CheckersMove">(move);
@@ -69,7 +75,7 @@ export function createCheckersMove(move: string): CheckersMove {
  */
 export interface ICheckersSearchOptions extends IBaseSearchOptions {
   board: CheckersBoard;
-  variant?: "english" | "brazilian" | "pool";
+  variant?: "english" | "brazilian" | "pool" | undefined;
   [key: string]: unknown;
 }
 
@@ -77,13 +83,13 @@ export interface ICheckersSearchOptions extends IBaseSearchOptions {
  * 探索状況。
  */
 export interface ICheckersSearchInfo extends IBaseSearchInfo {
-  eval?: number;
-  depth?: number;
-  pv?: CheckersMove[];
-  nodes?: number;
-  nps?: number;
-  hashfull?: number;
-  raw?: string | Record<string, unknown>;
+  eval?: number | undefined;
+  depth?: number | undefined;
+  pv?: CheckersMove[] | undefined;
+  nodes?: number | undefined;
+  nps?: number | undefined;
+  hashfull?: number | undefined;
+  raw?: string | Record<string, unknown> | undefined;
   [key: string]: unknown;
 }
 
@@ -92,7 +98,7 @@ export interface ICheckersSearchInfo extends IBaseSearchInfo {
  */
 export interface ICheckersSearchResult extends IBaseSearchResult {
   bestMove: CheckersMove | null;
-  eval?: number;
-  raw?: string | Record<string, unknown>;
+  eval?: number | undefined;
+  raw?: string | Record<string, unknown> | undefined;
   [key: string]: unknown;
 }

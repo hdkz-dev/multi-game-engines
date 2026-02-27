@@ -5,7 +5,7 @@ import { Move } from "@multi-game-engines/core";
 import { SFEN } from "@multi-game-engines/domain-shogi";
 import { ShogiPiece } from "@multi-game-engines/domain-shogi";
 
-declare module "react/jsx-runtime" {
+declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
     interface IntrinsicElements {

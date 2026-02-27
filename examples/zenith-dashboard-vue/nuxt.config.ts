@@ -21,7 +21,7 @@ export default defineNuxtConfig({
       "@multi-game-engines/core",
       "@multi-game-engines/ui-core",
       "@multi-game-engines/ui-vue",
-      "@multi-game-engines/i18n",
+      "@multi-game-engines/i18n-common", "@multi-game-engines/i18n-dashboard",
     ],
   },
 

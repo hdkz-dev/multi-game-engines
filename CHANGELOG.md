@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **Federated i18n Architecture (ADR-049)**: Decoupled the monolithic i18n package into domain-isolated physical packages (`i18n-core`, `common`, `chess`, `shogi`, `engines`, `dashboard`). This ensures "Pay-as-you-go" bundle sizes and physically prevents cross-domain knowledge leakage.
+- **Zero-Any i18n Safety**: Achieved 100% type safety for dynamic translation access via recursive `DeepRecord` types and Branded `I18nKey`, structurally eliminating unsafe casts project-wide.
 - **Standardized Directory Structure (ADR-046)**: Reorganized all 39 packages into a predictable, best-practice layout. Consolidated components into `src/components/`, styles into `src/styles/`, and modularized `ui-core`.
 - **Adapter Naming Symmetry**: Renamed all engine adapters to `{Name}Adapter.ts` (e.g., `StockfishAdapter`, `KataGoAdapter`) for project-wide consistency.
 - **Privacy-First Logging (ADR-038)**: Implemented automated log truncation for sensitive position data (FEN/SFEN) to prevent PII/SPI leaks in diagnostics.

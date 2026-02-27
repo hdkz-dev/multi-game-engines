@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import ScoreBadge from "../components/ScoreBadge.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 const meta: Meta<typeof ScoreBadge> = {
   title: "Components/ScoreBadge",
@@ -12,7 +12,7 @@ const meta: Meta<typeof ScoreBadge> = {
       components: { EngineUIProvider },
       template:
         '<EngineUIProvider :localeData="localeData"><slot /></EngineUIProvider>',
-      data: () => ({ localeData: locales.ja }),
+      data: () => ({ localeData: commonLocales.ja }),
     }),
   ],
 };

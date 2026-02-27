@@ -1,6 +1,6 @@
 # コンポーネント設計詳細
 
-> 最終更新: 2026-02-06
+> 最終更新: 2026-02-26 (Federated i18n Architecture 完遂)
 
 ## 1. Core パッケージ構成
 
@@ -106,11 +106,8 @@ type EngineStatus =
 interface ILoadProgress {
   phase: "not-started" | "downloading" | "initializing" | "ready" | "error";
   percentage: number;
-  i18n: {
-    key: string;
-    params?: Record<string, string | number>;
-    defaultMessage: string;
-  };
+  i18nKey: I18nKey;
+  i18nParams?: Record<string, string | number>;
   error?: Error;
 }
 ```
@@ -138,7 +135,7 @@ abstract class BaseAdapter<
   protected _progress: ILoadProgress = {
     phase: "not-started",
     percentage: 0,
-    i18n: { key: "progress.idle", defaultMessage: "Initializing..." },
+    i18nKey: "progress.idle" as I18nKey,
   };
 
   // ライフサイクル (サブクラスがオーバーライド)

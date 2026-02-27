@@ -12,6 +12,7 @@ import {
   EngineErrorCode,
   ResourceMap,
   IEngineConfig,
+  I18nKey,
 } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -73,10 +74,11 @@ export abstract class BaseAdapter<
     for (const [key, source] of Object.entries(sources)) {
       const sri = source?.sri;
       if (sri && (!sriPattern.test(sri) || /placeholder/i.test(sri))) {
+        const i18nKey = "engine.errors.sriMismatch" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: `Engine Adapter "${this.id}": Source "${key}" has an invalid or placeholder SRI hash: "${sri}"`,
-          i18nKey: "engine.errors.sriMismatch",
+          i18nKey,
           remediation:
             "Provide a valid Base64-encoded SRI hash for all engine resources in the constructor config.",
           engineId: this.id,
@@ -109,18 +111,22 @@ export abstract class BaseAdapter<
     command: string | string[] | Uint8Array | Record<string, unknown>,
   ): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready") {
+      const i18nKey = "engine.errors.notReady" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not ready",
         engineId: this.id,
+        i18nKey,
       });
     }
 
     if (!this.communicator) {
+      const i18nKey = "engine.errors.initializationFailed" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Communicator not initialized",
         engineId: this.id,
+        i18nKey,
       });
     }
 
@@ -286,10 +292,12 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (this._status !== "ready" && this._status !== "busy") {
+      const i18nKey = "engine.errors.notReady" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: `Cannot set option: Engine is not ready (current status: ${this._status})`,
         engineId: this.id,
+        i18nKey,
       });
     }
     await this.sendOptionToWorker(name, value);
@@ -300,10 +308,12 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (!this.communicator) {
+      const i18nKey = "engine.errors.notReady" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not loaded",
         engineId: this.id,
+        i18nKey,
       });
     }
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));
@@ -331,6 +341,7 @@ export abstract class BaseAdapter<
     skipReadyTransition = false,
   ): void {
     if (this.pendingReject) {
+      const i18nKey = "engine.errors.searchAborted" as I18nKey;
       this.pendingReject(
         new EngineError({
           code: EngineErrorCode.SEARCH_ABORTED,
@@ -338,6 +349,7 @@ export abstract class BaseAdapter<
             reason ??
             "Search aborted: Replaced by new command or engine reset.",
           engineId: this.id,
+          i18nKey: reason ? undefined : i18nKey,
           remediation:
             "This is a normal operational event. No action required unless search is unexpectedly stopping.",
         }),

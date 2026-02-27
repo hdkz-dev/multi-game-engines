@@ -1,0 +1,19 @@
+{
+  "general": {
+    "enablePromptCompletion": true
+  },
+  "ui": {
+    "inlineThinkingMode": "full"
+  },
+  "tools": {
+    "useRipgrep": true
+  },
+  "experimental": {
+    "enableAgents": true,
+    "toolOutputMasking": {
+      "enabled": true
+    },
+    "jitContext": true,
+    "plan": true
+  }
+}

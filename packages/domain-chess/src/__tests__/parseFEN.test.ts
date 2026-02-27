@@ -26,14 +26,14 @@ describe("parseFEN", () => {
   it("should throw error for invalid row count", () => {
     const fen =
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP w - - 0 1" as unknown as FEN; // 7 rows
-    expect(() => parseFEN(fen)).toThrow("Invalid FEN: Expected 8 ranks");
+    expect(() => parseFEN(fen)).toThrow(/engine.errors.invalidFenRanks/);
   });
 
   it("should throw error for invalid character", () => {
     // Note: createFEN already validates characters, so to test parseFEN we bypass it
     const fen =
       "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNZ w - - 0 1" as unknown as FEN;
-    expect(() => parseFEN(fen)).toThrow("Invalid FEN character");
+    expect(() => parseFEN(fen)).toThrow(/engine.errors.invalidFenChar/);
   });
 
   it("should throw on empty string", () => {

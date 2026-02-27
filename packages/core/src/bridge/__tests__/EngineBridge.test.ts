@@ -10,6 +10,7 @@ import {
   EngineStatus,
   MiddlewarePriority,
   Move,
+  IEngineConfig,
 } from "../../types.js";
 import { createMove } from "../../protocol/ProtocolValidator.js";
 
@@ -131,6 +132,65 @@ describe("EngineBridge", () => {
     // キャッシュがクリアされ、新しいインスタンスが返されるはず
     const instance3 = await bridge.getEngine("engine1");
     expect(instance3).not.toBe(instance1);
+  });
+
+  describe("Registry Chain (LIFO)", () => {
+    it("should resolve metadata from the most recently added registry", async () => {
+      const bridge = new EngineBridge();
+
+      const registry1 = {
+        resolve: vi
+          .fn()
+          .mockReturnValue({ main: { url: "v1.js", type: "worker-js" } }),
+        getSupportedEngines: () => ["engine1"],
+      };
+      const registry2 = {
+        resolve: vi
+          .fn()
+          .mockReturnValue({ main: { url: "v2.js", type: "worker-js" } }),
+        getSupportedEngines: () => ["engine1"],
+      };
+
+      bridge.addRegistry(registry1);
+      bridge.addRegistry(registry2);
+
+      // Access private method for testing using type-safe double casting
+      const config = (
+        bridge as unknown as {
+          resolveEngineConfig: (id: string | IEngineConfig) => IEngineConfig;
+        }
+      ).resolveEngineConfig("engine1");
+      expect(config.sources?.main.url).toBe("v2.js");
+      expect(registry2.resolve).toHaveBeenCalled();
+      expect(registry1.resolve).not.toHaveBeenCalled(); // LIFO: found in registry2
+    });
+
+    it("should fallback to earlier registries if not found in recent ones", async () => {
+      const bridge = new EngineBridge();
+
+      const registry1 = {
+        resolve: vi
+          .fn()
+          .mockReturnValue({ main: { url: "v1.js", type: "worker-js" } }),
+        getSupportedEngines: () => ["engine1"],
+      };
+      const registry2 = {
+        resolve: vi.fn().mockReturnValue(null),
+        getSupportedEngines: () => [],
+      };
+
+      bridge.addRegistry(registry1);
+      bridge.addRegistry(registry2);
+
+      const config = (
+        bridge as unknown as {
+          resolveEngineConfig: (id: string | IEngineConfig) => IEngineConfig;
+        }
+      ).resolveEngineConfig("engine1");
+      expect(config.sources?.main.url).toBe("v1.js");
+      expect(registry2.resolve).toHaveBeenCalled();
+      expect(registry1.resolve).toHaveBeenCalled();
+    });
   });
 
   it("should filter middlewares based on supportedEngines", async () => {

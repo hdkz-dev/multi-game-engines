@@ -12,8 +12,9 @@
 - **Modern Security**: SRI 必須化と「Refuse by Exception」ポリシーによる、プロトコルレベルの堅牢なインジェクション対策。
 - **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤。
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
-- **Universal UI Architecture**:
-  - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、i18n。
+- **Universal & Federated UI Architecture**:
+  - **ui-core**: フレームワーク非依存のビジネスロジック、状態管理、および正規化レイヤー。
+  - **i18n Swarm**: 物理的に分離された多言語リソースパッケージ (`i18n-chess`, `i18n-shogi` 等) による極小バンドルサイズ。
   - **ui-react / ui-vue**: 基盤、監視ツール、ゲームUIをモジュール化したフレームワーク専用スイート。
   - **ui-elements**: Lit ベースの Web Components (Ready)。
 

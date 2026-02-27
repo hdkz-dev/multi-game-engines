@@ -93,7 +93,7 @@ describe("UCIParser", () => {
       const maliciousFen =
         "startpos\nquit" as unknown as import("@multi-game-engines/domain-chess").FEN;
       expect(() => parser.createSearchCommand({ fen: maliciousFen })).toThrow(
-        /Potential command injection/,
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
       );
     });
 
@@ -107,7 +107,9 @@ describe("UCIParser", () => {
           parser.createSearchCommand({
             fen: maliciousFen,
           }),
-        ).toThrow(/Potential command injection/);
+        ).toThrow(
+          expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+        );
       },
     );
 
@@ -120,7 +122,9 @@ describe("UCIParser", () => {
           // Using index signature to pass malicious data safely in TS
           "malicious\nkey": "value",
         }),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
 
     it("should throw error for nested injection", () => {
@@ -133,7 +137,9 @@ describe("UCIParser", () => {
             "evil\r\nkey": "data",
           },
         }),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     });
   });
 });

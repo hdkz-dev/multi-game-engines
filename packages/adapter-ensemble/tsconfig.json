@@ -1,20 +1,14 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "declarationDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "src",
+    "composite": false,
+    "paths": {
+      "@multi-game-engines/core": ["../core/src/index.ts"],
+      "@multi-game-engines/i18n-engines": ["../i18n-engines/src/index.ts"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

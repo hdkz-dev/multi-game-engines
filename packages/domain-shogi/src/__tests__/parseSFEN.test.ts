@@ -31,12 +31,12 @@ describe("parseSFEN", () => {
   it("should throw error for invalid row length", () => {
     const sfen =
       "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSN b - 1" as unknown as SFEN; // last row missing piece
-    expect(() => parseSFEN(sfen)).toThrow("Invalid SFEN rank width");
+    expect(() => parseSFEN(sfen)).toThrow(/engine.errors.invalidSfenRankWidth/);
   });
 
   it("should throw error for invalid piece character", () => {
     const sfen = "9/9/9/9/9/9/9/9/8Z b - 1" as unknown as SFEN; // 'Z' is invalid
-    expect(() => parseSFEN(sfen)).toThrow("Invalid SFEN character");
+    expect(() => parseSFEN(sfen)).toThrow(/engine.errors.invalidSfenChar/);
   });
 
   it("should throw on empty string", () => {

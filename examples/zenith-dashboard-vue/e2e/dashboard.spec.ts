@@ -2,8 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
-  // Switch to English to match assertions (using regex to match "英語 (EN)" in JA locale or exact "EN")
-  const enButton = page.getByRole("button", { name: /^EN$|英語 \(EN\)/ });
+  // Switch to English to match assertions (match "English (EN)", "英語 (EN)", or just "EN")
+  const enButton = page.getByRole("button", {
+    name: /English \(EN\)|英語 \(EN\)|^EN$/i,
+  });
   await enButton.waitFor({ state: "visible", timeout: 15000 });
   await enButton.click();
 
@@ -69,4 +71,72 @@ test("vue dashboard engine switching", async ({ page }) => {
   // 3. Verify Shogi board elements
   const senteHand = page.getByLabel(/Sente Hand/i);
   await expect(senteHand).toBeVisible({ timeout: 10000 });
+});
+
+test("vue dashboard multi-engine parallel search", async ({
+  page,
+  browserName,
+}) => {
+  // 1. Start Chess
+  const chessPanel = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
+  await chessPanel.getByRole("button", { name: /START/i }).click();
+
+  // 2. Switch to Shogi and Start
+  await page.getByRole("button", { name: /SHOGI/i }).click();
+  const shogiPanel = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Yaneuraou/i }) });
+  await shogiPanel.getByRole("button", { name: /START/i }).click();
+
+  // 3. Verify both are running (STOP buttons visible in their respective views)
+  await expect(shogiPanel.getByRole("button", { name: /STOP/i })).toBeVisible();
+
+  // 4. Switch back to Chess and verify it's still running
+  await page.getByRole("button", { name: /CHESS/i }).click();
+  await expect(chessPanel.getByRole("button", { name: /STOP/i })).toBeVisible();
+
+  // 5. Verify search output is updating for both (non-zero nodes/depth)
+  await expect(chessPanel.getByText(/depth:/i)).toBeVisible({
+    timeout: 15000,
+  });
+
+  // 6. Stop both
+  await chessPanel.getByRole("button", { name: /STOP/i }).click();
+  await page.getByRole("button", { name: /SHOGI/i }).click();
+  await shogiPanel.getByRole("button", { name: /STOP/i }).click();
+});
+
+test("vue dashboard language switching logic", async ({ page }) => {
+  // 1. Switch to Japanese
+  const jaButton = page.getByRole("button", {
+    name: /Japanese \(JA\)|日本語 \(JA\)|^JA$/i,
+  });
+  await jaButton.click();
+
+  // 2. Verify heading changed to Japanese
+  await expect(
+    page.getByRole("heading", { name: /ZENITH ダッシュボード/i }),
+  ).toBeVisible({
+    timeout: 10000,
+  });
+
+  // 3. Verify labels in panels are translated
+  const chessPanel = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: /Stockfish/i }) });
+  await expect(chessPanel.getByText(/準備完了/i)).toBeVisible({
+    timeout: 10000,
+  });
+
+  // 4. Switch back to English
+  const enButton = page.getByRole("button", {
+    name: /English \(EN\)|英語 \(EN\)|^EN$/i,
+  });
+  await enButton.click();
+
+  await expect(
+    page.getByRole("heading", { name: /ZENITH DASHBOARD/i }),
+  ).toBeVisible();
 });

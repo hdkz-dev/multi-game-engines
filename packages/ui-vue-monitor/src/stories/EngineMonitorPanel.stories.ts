@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/vue3-vite";
 import EngineMonitorPanel from "../components/EngineMonitorPanel.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { MockEngine } from "../mocks/MockEngine.js";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -21,7 +21,7 @@ const meta: Meta<typeof EngineMonitorPanel> = {
       components: { EngineUIProvider },
       template:
         '<div style="max-width: 400px; height: 600px;"><EngineUIProvider :localeData="localeData"><slot /></EngineUIProvider></div>',
-      data: () => ({ localeData: locales.ja }),
+      data: () => ({ localeData: commonLocales.ja }),
     }),
   ],
 };

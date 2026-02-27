@@ -10,7 +10,6 @@
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-ensemble"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -44,8 +43,8 @@
     "vitest": "^4.0.18"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts",
+    "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint ."
@@ -56,5 +55,9 @@
   "bugs": {
     "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
   },
-  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme",
+  "dependencies": {
+    "@multi-game-engines/i18n-common": "workspace:*",
+    "@multi-game-engines/i18n-engines": "workspace:*"
+  }
 }

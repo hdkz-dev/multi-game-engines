@@ -25,6 +25,9 @@
 - [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed - 2026-02-21)
 - [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed - 2026-02-21)
 - [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Pending Merge - 2026-02-23)
+- [ADR-047: Pluggable Engine Metadata Registry](./adr/047-pluggable-engine-registry.md) (Completed - 2026-02-24)
+- [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
+- [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 
@@ -43,6 +46,7 @@
 - [ADR-016: 段階的なリリース戦略](./adr/016-two-stage-release.md) (Accepted - 2026-02-11)
 - [ADR-017: ネイティブブリッジの統合方針](./adr/017-native-integration.md) (Accepted - 2026-02-12)
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
+- [ADR-050: Advanced Development Skills Integration](./adr/050-advanced-dev-skills-integration.md) (Proposed - 2026-02-27)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 

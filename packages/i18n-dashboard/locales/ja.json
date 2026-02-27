@@ -1,0 +1,78 @@
+{
+  "dashboard": {
+    "title": "ZENITH DASHBOARD",
+    "subtitle": "次世代ゲームインテリジェンス・ブリッジ",
+    "initializingEngines": "エンジンを初期化中...",
+    "initializationFailed": "初期化失敗",
+    "chessLabel": "チェス / UCI",
+    "shogiLabel": "将棋 / USI",
+    "engineSelector": "エンジン選択",
+    "languageSelector": "言語選択",
+    "language": {
+      "en": "英語 (EN)",
+      "ja": "日本語 (JA)"
+    },
+    "errors": {
+      "bridgeNotAvailable": "エンジンブリッジが利用できません。"
+    },
+    "stats": {
+      "engineRuntime": {
+        "label": "エンジン実行環境",
+        "value": "WASM スレッド",
+        "sub": "SIMD 加速"
+      },
+      "hardware": {
+        "label": "ハードウェア",
+        "value": "ネイティブ V8",
+        "sub": "最大最適化"
+      },
+      "performance": {
+        "label": "パフォーマンス",
+        "value": "Zenith ティア",
+        "sub": "低遅延"
+      },
+      "accessibility": {
+        "label": "アクセシビリティ",
+        "value": "WCAG 2.2 AA",
+        "sub": "インクルーシブ・デザイン"
+      }
+    },
+    "gameBoard": {
+      "title": "ゲームボード",
+      "subtitle": "指し手連携待機中",
+      "handSente": "先手 持ち駒",
+      "handGote": "後手 持ち駒",
+      "invalidPosition": "局面の解析に失敗しました",
+      "handPieceCount": "{piece}{count}枚",
+      "squareLabel": "{file}筋 {rank}段",
+      "squarePieceLabel": "{file}筋 {rank}段 {piece}"
+    },
+    "technicalInsight": {
+      "title": "技術的な洞察",
+      "description": "このダッシュボードは 2026 エンジンブリッジプロトコルを活用しています。UI をエンジン固有のロジックから分離することで、Worker のシリアライズから React のレンダリングに至るまで、全レイヤーで Zero-Any ポリシーを実現しています。"
+    },
+    "zenithFeatures": {
+      "title": "Zenith 機能一覧",
+      "multiPv": "Multi-PV 永続ログ",
+      "reactiveState": "リアクティブ状態変換",
+      "contractUi": "契約駆動 UI (Zod)"
+    }
+  },
+  "engine": {
+    "title": "エンジン解析",
+    "topCandidate": "最善手候補",
+    "principalVariations": "読み筋一覧",
+    "searchLog": "探索履歴",
+    "logCount": "{n} 件",
+    "moveAriaLabel": "着手 {move}",
+    "evaluationGraph": "評価値推移グラフ",
+    "pv": "読み筋",
+    "start": "開始",
+    "stop": "停止",
+    "searching": "解析中...",
+    "initializing": "初期化中...",
+    "ready": "待機中",
+    "stockfishTitle": "Stockfish 16.1",
+    "yaneuraouTitle": "やねうら王 7.5.0"
+  }
+}

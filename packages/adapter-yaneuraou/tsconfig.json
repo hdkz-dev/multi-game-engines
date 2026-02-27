@@ -1,20 +1,16 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "declarationDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "src"
   },
-  "include": ["src/**/*"],
+  "references": [
+    { "path": "../core" },
+    { "path": "../i18n-common" },
+    { "path": "../registry" },
+    { "path": "../domain-shogi" },
+    { "path": "../adapter-usi" }
+  ],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

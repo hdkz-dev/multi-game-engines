@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
-import dts from "vite-plugin-dts";
 
 export default defineConfig({
   plugins: [
@@ -11,18 +10,6 @@ export default defineConfig({
           isCustomElement: (tag) => tag.endsWith("-board"),
         },
       },
-    }),
-    dts({
-      insertTypesEntry: true,
-      staticImport: true,
-      include: ["src/**/*"],
-      exclude: [
-        "**/*.test.ts",
-        "**/*.spec.ts",
-        "**/*.test.tsx",
-        "**/*.spec.tsx",
-        "**/__tests__/**",
-      ],
     }),
   ],
   build: {

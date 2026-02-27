@@ -4,7 +4,6 @@
   "description": "Domain-specific Shogi UI components for Vue",
   "type": "module",
   "license": "MIT",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -13,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vue-tsc --emitDeclarationOnly --declaration --outDir dist --composite false",
     "dev": "vite build --watch",
     "lint": "eslint .",
     "test": "vitest run",

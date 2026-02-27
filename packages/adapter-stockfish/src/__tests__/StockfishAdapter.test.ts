@@ -39,6 +39,15 @@ class MockWorker {
 
 describe("StockfishAdapter", () => {
   let mockLoader: IEngineLoader;
+  const mockConfig = {
+    sources: {
+      main: {
+        url: "stockfish.js",
+        __unsafeNoSRI: true as const,
+        type: "worker-js" as const,
+      },
+    },
+  };
 
   beforeAll(() => {
     vi.useFakeTimers({ now: 0 });
@@ -65,12 +74,36 @@ describe("StockfishAdapter", () => {
   });
 
   it("should initialize with correct metadata", () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     expect(adapter.id).toBe("stockfish");
   });
 
+  it("should use provided registry config if available", async () => {
+    const customConfig = {
+      sources: {
+        main: {
+          url: "custom-stockfish.js",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
+          type: "worker-js" as const,
+        },
+      },
+    };
+    const adapter = new StockfishAdapter(customConfig);
+
+    const loadPromise = adapter.load(mockLoader);
+    await vi.runAllTimersAsync();
+    await loadPromise;
+
+    expect(mockLoader.loadResources).toHaveBeenCalledWith(
+      "stockfish",
+      expect.objectContaining({
+        main: expect.objectContaining({ url: "custom-stockfish.js" }),
+      }),
+    );
+  });
+
   it("should change status correctly on load", async () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;
@@ -97,7 +130,7 @@ describe("StockfishAdapter", () => {
     }
     vi.stubGlobal("Worker", NoneWorker);
 
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;
@@ -112,7 +145,7 @@ describe("StockfishAdapter", () => {
   });
 
   it("should reject position strings containing control characters", async () => {
-    const adapter = new StockfishAdapter();
+    const adapter = new StockfishAdapter(mockConfig);
     const loadPromise = adapter.load(mockLoader);
     await vi.runAllTimersAsync();
     await loadPromise;
@@ -124,7 +157,9 @@ describe("StockfishAdapter", () => {
         // Testing injection via custom field due to index signature
         "evil\nkey": "data",
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
 
     // Value injection
     await expect(
@@ -133,7 +168,9 @@ describe("StockfishAdapter", () => {
         depth: 10,
         extra: "evil\rvalue",
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
 
     // Nested object injection
     await expect(
@@ -141,6 +178,8 @@ describe("StockfishAdapter", () => {
         fen: createFEN("startpos"),
         options: { "nested\nkey": "value" },
       }),
-    ).rejects.toThrow(/Potential command injection/);
+    ).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });

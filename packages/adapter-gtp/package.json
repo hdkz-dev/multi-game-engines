@@ -10,7 +10,6 @@
     "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
     "directory": "packages/adapter-gtp"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -34,7 +33,9 @@
     "multi-game-engines"
   ],
   "dependencies": {
-    "@multi-game-engines/domain-go": "workspace:*"
+    "@multi-game-engines/domain-go": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "^0.1.0"
@@ -47,8 +48,8 @@
     "vitest": "^4.0.18"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint ."

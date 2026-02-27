@@ -1,10 +1,16 @@
 import { StockfishAdapter } from "./StockfishAdapter.js";
-import { IEngine, IEngineConfig, EngineFacade } from "@multi-game-engines/core";
-import {
+import { EngineFacade } from "@multi-game-engines/core";
+import type {
+  IEngine,
+  IEngineConfig,
+  IEngineSourceConfig,
+} from "@multi-game-engines/core";
+import { OfficialRegistry } from "@multi-game-engines/registry";
+import type {
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-} from "@multi-game-engines/adapter-uci";
+} from "@multi-game-engines/domain-chess";
 
 export { StockfishAdapter };
 
@@ -14,8 +20,18 @@ export { StockfishAdapter };
 export function createStockfishEngine(
   config: IEngineConfig = {},
 ): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
-  const adapter = new StockfishAdapter(config);
+  // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
+  // これにより、アダプター自身を特定のレジストリから疎結合に保つ
+  const registrySources =
+    OfficialRegistry.resolve("stockfish", config.version) || {};
+  const mergedConfig: IEngineConfig = {
+    ...config,
+    sources: {
+      ...(registrySources as Record<string, IEngineSourceConfig>),
+      ...(config.sources || {}),
+    } as Required<IEngineConfig>["sources"],
+  };
+
+  const adapter = new StockfishAdapter(mergedConfig);
   return new EngineFacade(adapter);
 }
-
-export * from "@multi-game-engines/adapter-uci";

@@ -176,7 +176,7 @@ const errorMessage = computed(() => {
           class="text-[10px] text-gray-400 uppercase font-bold tracking-tight"
           role="status"
         >
-          {{ status === 'busy' ? strings.searching : strings.ready }}
+          {{ status === "busy" ? strings.searching : strings.ready }}
         </span>
       </div>
 
@@ -283,10 +283,16 @@ const errorMessage = computed(() => {
                 :id="`${panelId}-pv-tab`"
                 :tabindex="activeTab === 'pv' ? 0 : -1"
                 class="flex items-center gap-1.5 transition-colors outline-none"
-                :class="activeTab === 'pv' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+                :class="
+                  activeTab === 'pv'
+                    ? 'text-blue-600'
+                    : 'text-gray-400 hover:text-gray-600'
+                "
               >
                 <ScrollText class="w-3.5 h-3.5" />
-                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.principalVariations }}</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{
+                  strings.principalVariations
+                }}</span>
               </button>
               <button
                 ref="logTabRef"
@@ -297,14 +303,24 @@ const errorMessage = computed(() => {
                 :id="`${panelId}-log-tab`"
                 :tabindex="activeTab === 'log' ? 0 : -1"
                 class="flex items-center gap-1.5 transition-colors outline-none"
-                :class="activeTab === 'log' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'"
+                :class="
+                  activeTab === 'log'
+                    ? 'text-blue-600'
+                    : 'text-gray-400 hover:text-gray-600'
+                "
               >
                 <History class="w-3.5 h-3.5" />
-                <span class="text-[10px] font-bold uppercase tracking-wider">{{ strings.searchLog }}</span>
+                <span class="text-[10px] font-bold uppercase tracking-wider">{{
+                  strings.searchLog
+                }}</span>
               </button>
             </div>
             <span class="text-[10px] font-mono text-gray-300">
-              {{ activeTab === 'pv' ? strings.pvCount(state.pvs.length) : strings.logCount(state.searchLog.length) }}
+              {{
+                activeTab === "pv"
+                  ? strings.pvCount(state.pvs.length)
+                  : strings.logCount(state.searchLog.length)
+              }}
             </span>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">

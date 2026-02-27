@@ -11,20 +11,20 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --clean",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --minify --clean",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@multi-game-engines/core": "workspace:*"
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },
-  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "author": "hdkz-dev",
   "repository": {

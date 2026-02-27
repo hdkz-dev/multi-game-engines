@@ -56,6 +56,7 @@
   - **Hybrid Bridge**: 環境（Browser/Node/Desktop）応じた WASM/Native バイナリの透過的切替。
   - **Mobile Native Bridge**: Capacitor/Cordova プラグインによる、モバイル OS ネイティブ環境での最高性能エンジン実行。
 - [x] **Modular Split**: UI パッケージの物理分離（core/monitor/game）による「Pay-as-you-go」アーキテクチャの完成。
+- [x] **Federated i18n Architecture**: 多言語リソースの物理パッケージ分離と、Zero-Any 型安全性の完遂。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。

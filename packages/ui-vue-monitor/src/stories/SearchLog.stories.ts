@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/vue3";
 import SearchLog from "../components/SearchLog.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 import { createMove } from "@multi-game-engines/core";
 
 const meta: Meta<typeof SearchLog> = {
@@ -11,14 +11,14 @@ const meta: Meta<typeof SearchLog> = {
     () => ({
       components: { EngineUIProvider },
       template: `
-        <EngineUIProvider :localeData="locales.en">
+        <EngineUIProvider :localeData="commonLocales.en">
           <div class="p-4 bg-gray-100 min-h-[500px]">
             <story />
           </div>
         </EngineUIProvider>
       `,
       setup() {
-        return { locales };
+        return { commonLocales };
       },
     }),
   ],

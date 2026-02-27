@@ -1,0 +1,72 @@
+{
+  "engine": {
+    "status": "状態",
+    "depth": "深さ",
+    "nodes": "局面数",
+    "nps": "探索速度",
+    "npsUnit": "局面 / 秒",
+    "time": "時間",
+    "score": "評価値",
+    "visits": "試行数",
+    "visitsUnit": "回",
+    "mateIn": "詰みまで {n} 手",
+    "advantage": "{side}有利 {v} 点",
+    "retry": "再試行",
+    "reloadResources": "リソースを再読み込み",
+    "errorTitle": "エンジンエラー",
+    "errorDefaultRemediation": "接続を確認して、もう一度お試しください。",
+    "timeUnitSeconds": "秒",
+    "noMove": "---",
+    "standard": "2026 Engine Bridge Standard",
+    "errors": {
+      "initializationFailed": "エンジンの初期化に失敗しました。",
+      "protocolError": "プロトコルエラーが発生しました: {message}",
+      "workerError": "Worker エラーが発生しました: {message}",
+      "timeout": "操作がタイムアウトしました。",
+      "disposed": "エンジンインスタンスは破棄されています。",
+      "nestedTooDeep": "データ構造が深すぎます: {path}",
+      "illegalCharacters": "不正な文字が検出されました。",
+      "networkError": "エンジンリソースの取得に失敗しました。",
+      "securityViolation": "セキュリティ違反: 不安全なリソースロードが遮断されました。",
+      "sriMismatch": "セキュリティ違反: リソースの整合性 (SRI) 検証に失敗しました。",
+      "bridgeDisposed": "エンジンブリッジは既に破棄されています。",
+      "notReady": "エンジンが要求された操作を実行できる状態ではありません。",
+      "loaderRequired": "安全なリソースロードのために IEngineLoader が必要です。",
+      "missingSources": "エンジン構成に 'sources' フィールドがありません。",
+      "invalidMoveFormat": "指し手の形式が無効です: \"{move}\"",
+      "injectionDetected": "{context} で潜在的なコマンドインジェクションが検出されました: \"{input}\"",
+      "invalidPositionString": "局面文字列が無効です: 入力は空であってはなりません。",
+      "invalidEngineId": "エンジン ID が無効です: \"{id}\"。英数字、ハイフン、アンダースコアのみが許可されています。",
+      "insecureConnection": "不安全な接続 (HTTP) は、機密性の高いエンジンファイルには許可されていません。",
+      "sriRequired": "セキュリティ検証のために SRI が必要です。",
+      "adapterFactoryInvalidReturn": "\"{adapter}\" のファクトリが無効なオブジェクトを返しました。",
+      "adapterNotFound": "\"{id}\" のエンジンアダプターが見つからないか、ファクトリが登録されていません。",
+      "internalError": "システム内部エラーが発生しました: {message}",
+      "resourceLoadUnknown": "エンジン \"{engineId}\" のリソースロード中に不明なエラーが発生しました。",
+      "missingMainEntryPoint": "エンジンリソースに 'main' エントリポイント URL が含まれていません。",
+      "invalidShogiMove": "無効な将棋の指し手です: \"{move}\"",
+      "invalidMahjongMove": "無効な麻雀の打牌です: \"{move}\"",
+      "invalidGOBoard": "無効な囲碁の盤面状態です。",
+      "invalidGOMove": "無効な囲碁の着手です: \"{move}\"",
+      "invalidReversiBoard": "無効なリバーシの盤面状態です。",
+      "invalidReversiMove": "無効なリバーシの着手です: \"{move}\"",
+      "invalidBackgammonBoard": "無効なバックギャモンの盤面状態です。",
+      "invalidBackgammonMove": "無効なバックギャモンの着手です: \"{move}\"",
+      "invalidCheckersBoard": "無効なチェッカーの盤面状態です。",
+      "invalidCheckersMove": "無効なチェッカーの着手です: \"{move}\""
+    }
+  },
+  "adapters": {
+    "gtp": {
+      "errors": {
+        "invalidResponse": "無効な GTP 応答です: \"{response}\""
+      }
+    }
+  },
+  "parsers": {
+    "generic": {
+      "invalidOptionValue": "オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります。",
+      "parseError": "[{parser}] {type} の解析に失敗しました: {error}"
+    }
+  }
+}

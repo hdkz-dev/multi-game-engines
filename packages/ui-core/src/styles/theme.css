@@ -46,11 +46,10 @@
 
   /* Shadow & Glow (Zenith Tier Aesthetic) */
   --mge-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --mge-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --mge-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --mge-shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --mge-shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --mge-glow-plus: 0 0 15px rgba(37, 99, 235, 0.2);
   --mge-glow-minus: 0 0 15px rgba(220, 38, 38, 0.2);
 }
-

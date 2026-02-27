@@ -14,6 +14,8 @@ export default [
       "**/*.config.js",
       "**/next-env.d.ts",
       "fixtures/shared-mocks/**",
+      "**/.storybook/**",
+      "**/scripts/**",
     ],
   },
   eslint.configs.recommended,
@@ -31,7 +33,7 @@ export default [
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { "argsIgnorePattern": "^_" },
+        { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-floating-promises": "error",
     },
@@ -41,7 +43,6 @@ export default [
       },
     },
   },
-  // Storybook 用の設定を個別に定義（互換性エラーを避けるため、configs を直接展開）
   {
     files: ["**/*.stories.@(ts|tsx|js|jsx|mjs|cjs)"],
     plugins: {

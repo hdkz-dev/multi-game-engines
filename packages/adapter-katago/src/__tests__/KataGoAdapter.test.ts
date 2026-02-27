@@ -79,7 +79,7 @@ describe("KataGoAdapter", () => {
       },
     });
     await expect(adapter.load(mockLoader as IEngineLoader)).rejects.toThrow(
-      /has an invalid or placeholder SRI hash/,
+      expect.objectContaining({ i18nKey: "engine.errors.sriMismatch" }),
     );
     expect(adapter.status).not.toBe("ready");
   });
@@ -95,7 +95,9 @@ describe("KataGoAdapter", () => {
             ? { board: input }
             : (input as unknown as IGoSearchOptions),
         ),
-      ).toThrow(/Potential command injection/);
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
     }
   });
 });

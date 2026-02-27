@@ -5,7 +5,7 @@ import {
   EvaluationPresenter,
   createUIStrings,
 } from "@multi-game-engines/ui-core";
-import { locales } from "@multi-game-engines/i18n";
+import { commonLocales } from "@multi-game-engines/i18n-common";
 
 /**
  * 評価値を表示するカスタム要素 <score-badge>
@@ -59,7 +59,7 @@ export class ScoreBadgeElement extends LitElement {
     if (!this.score) return html``;
 
     const strings = createUIStrings(
-      this.locale === "ja" ? locales.ja : locales.en,
+      this.locale === "ja" ? commonLocales.ja : commonLocales.en,
     );
     const colorClass = EvaluationPresenter.getColorClass(
       this.score,

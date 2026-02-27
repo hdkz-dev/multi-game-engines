@@ -7,13 +7,15 @@ import {
   ResourceMap,
   IEngineConfig,
   IEngineSourceConfig,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 import {
   IShogiSearchOptions,
   IShogiSearchInfo,
   IShogiSearchResult,
-  USIParser,
-} from "./USIParser.js";
+} from "@multi-game-engines/domain-shogi";
+import { USIParser } from "./USIParser.js";
 
 export class USIAdapter extends BaseAdapter<
   IShogiSearchOptions,
@@ -38,21 +40,23 @@ export class USIAdapter extends BaseAdapter<
       this.validateSources();
 
       if (!loader) {
+        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "IEngineLoader is required for secure resource loading.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.loaderRequired",
+          i18nKey,
         });
       }
 
       const sources = this.config.sources;
       if (!sources) {
+        const i18nKey = "engine.errors.missingSources" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Engine configuration is missing 'sources' field.",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingSources",
+          i18nKey,
         });
       }
 
@@ -66,11 +70,12 @@ export class USIAdapter extends BaseAdapter<
       const resources = await loader.loadResources(this.id, validSources);
 
       if (!resources["main"]) {
+        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: "Missing main entry after resolution",
+          message: translate(i18nKey),
           engineId: this.id,
-          i18nKey: "engine.errors.missingMainEntryPoint",
+          i18nKey,
         });
       }
 

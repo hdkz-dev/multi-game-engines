@@ -1,68 +1,74 @@
-import { LitElement, html, css } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { LitElement, html, css, PropertyValues } from "lit";
+import { property, state } from "lit/decorators.js";
 import {
   parseFEN,
-  ChessPiece,
   FEN,
+  ChessPiece,
   createFEN,
 } from "@multi-game-engines/domain-chess";
-import { Move, createMove, truncateLog } from "@multi-game-engines/core";
-import { locales } from "@multi-game-engines/i18n";
+import { Move, createMove } from "@multi-game-engines/core";
+import { chessLocales } from "@multi-game-engines/i18n-chess";
 
-const PIECE_SVG: Record<ChessPiece, string> = {
-  P: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22.5 9c-2.21 0-4 1.79-4 4 0 .89.36 1.7.94 2.28C19.15 15.59 19 15.79 19 16c0 .55.45 1 1 1h7c.55 0 1-.45 1-1 0-.21-.15-.41-.44-.72.58-.58.94-1.39.94-2.28 0-2.21-1.79-4-4-4h-2.5zM23 29.5c-4.42 0-8 1.57-8 3.5h16c0-1.93-3.58-3.5-8-3.5z' fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
-  N: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21' fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
-  B: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z'/%3E%3Cpath d='M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z'/%3E%3Cpath d='M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3C/svg%3E",
-  R: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke='%23000' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E",
-  Q: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM11 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM38 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0z'/%3E%3Cpath d='M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25L7 14l2 12z'/%3E%3Cpath d='M9 26c0 2 1.5 2 2.5 4 1 1 1 1 1 1h20s0 0 1-1c1-2 2.5-2 2.5-4 0 0-4.5-1.5-13.5-1.5S9 26 9 26z'/%3E%3Cpath d='M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
-  K: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23fff' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
-  p: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22.5 9c-2.21 0-4 1.79-4 4 0 .89.36 1.7.94 2.28C19.15 15.59 19 15.79 19 16c0 .55.45 1 1 1h7c.55 0 1-.45 1-1 0-.21-.15-.41-.44-.72.58-.58.94-1.39.94-2.28 0-2.21-1.79-4-4-4h-2.5zM23 29.5c-4.42 0-8 1.57-8 3.5h16c0-1.93-3.58-3.5-8-3.5z' fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
-  n: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cpath d='M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21' fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E",
-  b: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M9 36c3.39-.97 10.11.43 13.5-2 3.39 2.43 10.11 1.03 13.5 2 0 0 1.65.54 3 2-.68.97-1.65.99-3 .5-3.39-.97-10.11.46-13.5-1-3.39 1.46-10.11.03-13.5 1-1.35.49-2.32.47-3-.5 1.35-1.46 3-2 3-2z'/%3E%3Cpath d='M15 32c2.5 2.5 12.5 2.5 15 0 .5-1.5 0-2 0-2 0-2.5-2.5-4-2.5-4 5.5-1.5 6-11.5-5-15.5-11 4-10.5 14-5 15.5 0 0-2.5 1.5-2.5 4 0 0-.5.5 0 2z'/%3E%3Cpath d='M25 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z'/%3E%3C/g%3E%3C/svg%3E",
-  r: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M9 39h27v-3H9v3zM12 36v-4h21v4H12zM11 14V9h4v2h5V9h5v2h5V9h4v5'/%3E%3Cpath d='M34 14l-3 3H14l-3-3'/%3E%3Cpath d='M31 17v12.5H14V17'/%3E%3Cpath d='M31 29.5l1.5 2.5h-20l1.5-2.5'/%3E%3Cpath d='M11 14h23' fill='none' stroke='%23fff' stroke-linejoin='miter'/%3E%3C/g%3E%3C/svg%3E",
-  q: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M8 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM24.5 7.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM41 12a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM11 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM38 20a2 2 0 1 1-4 0 2 2 0 1 1 4 0z'/%3E%3Cpath d='M9 26c8.5-1.5 21-1.5 27 0l2-12-7 11V11l-5.5 13.5-3-15-3 15-5.5-13.5V25L7 14l2 12z'/%3E%3Cpath d='M9 26c0 2 1.5 2 2.5 4 1 1 1 1 1 1h20s0 0 1-1c1-2 2.5-2 2.5-4 0 0-4.5-1.5-13.5-1.5S9 26 9 26z'/%3E%3Cpath d='M11.5 30c3.5-1 18.5-1 22 0M12 33.5c6-1 15-1 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
-  k: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='45'%3E%3Cg fill='%23000' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5'%3E%3Cpath d='M22.5 11.63V6M20 8h5' fill='none' stroke-linejoin='miter'/%3E%3Cpath d='M22.5 25s4.5-7.5 3-10c-1.5-2.5-6-2.5-6 0-1.5 2.5 3 10 3 10z'/%3E%3Cpath d='M11.5 37c5.5 3.5 15.5 3.5 21 0v-7s9-4.5 6-10.5c-4-1-1-1-4-1-3 0-3 2-3 2s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s-1.5-3.5-4.5-3.5c-3 0-4.5 3.5-4.5 3.5s0-2-3-2c-3 0-0 0-4 1-3 6 6 10.5 6 10.5v7z'/%3E%3Cpath d='M11.5 30c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0m-21 3.5c5.5-3 15.5-3 21 0' fill='none'/%3E%3C/g%3E%3C/svg%3E",
+/**
+ * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
+ */
+type DeepRecord = {
+  [key: string]: string | number | boolean | DeepRecord | undefined;
 };
 
-@customElement("chess-board")
+interface ChessBoardStrings {
+  boardLabel: string;
+  errorMessage: string;
+  pieceNames: Record<string, string>;
+  squareLabel: (f: string, r: number) => string;
+  squarePieceLabel: (f: string, r: number, p: string) => string;
+}
+
+/**
+ * チェス盤を表示するカスタム要素。
+ */
 export class ChessBoard extends LitElement {
   static override styles = css`
     :host {
       display: block;
-      aspect-ratio: 1 / 1;
       width: 100%;
       max-width: 600px;
-      user-select: none;
+      margin: 0 auto;
+      container-type: size;
     }
     .board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
       grid-template-rows: repeat(8, 1fr);
+      aspect-ratio: 1 / 1;
       width: 100%;
-      height: 100%;
-      border: 2px solid var(--board-border-color, #333);
+      border: 1px solid var(--board-border-color, #333);
+      background-color: var(--board-bg, #f0d9b5);
     }
     .square {
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: clamp(1rem, 8cqi, 3rem);
       position: relative;
+      outline-offset: -2px;
     }
-    .square.light {
-      background-color: var(--board-light-square, #ebecd0);
+    .square:focus-visible {
+      outline: 2px solid var(--board-focus-color, #2563eb);
+      z-index: 1;
     }
-    .square.dark {
-      background-color: var(--board-dark-square, #779556);
+    .square.white {
+      background-color: var(--square-white, #f0d9b5);
+    }
+    .square.black {
+      background-color: var(--square-black, #b58863);
     }
     .square.highlight {
-      background-color: var(--board-highlight-color, rgba(255, 255, 0, 0.5));
+      background-color: var(--board-highlight-color, rgba(255, 255, 0, 0.4));
     }
     .piece {
       cursor: default;
-      z-index: 1;
-      width: 80%;
-      height: 80%;
-      object-fit: contain;
+      user-select: none;
     }
     .error-overlay {
       color: #ef4444;
@@ -75,7 +81,6 @@ export class ChessBoard extends LitElement {
   private _fen: FEN = createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   );
-
   @property({ type: String, reflect: true })
   get fen(): FEN {
     return this._fen;
@@ -83,66 +88,55 @@ export class ChessBoard extends LitElement {
   set fen(value: string) {
     const old = this._fen;
     try {
-      this._fen = createFEN(value);
-      this.errorMessage = "";
-    } catch (e) {
-      console.warn(
-        `[ChessBoard] Invalid FEN attribute: ${truncateLog(value)}`,
-        e,
-      );
-      this.errorMessage =
-        e instanceof Error ? e.message : "Invalid FEN position";
+      this._fen = value as unknown as FEN;
+    } catch {
+      console.warn(`[ChessBoard] Invalid FEN attribute: ${value}`);
     }
     this.requestUpdate("fen", old);
   }
 
   private _lastMove: Move | "" = "";
   @property({ type: String, attribute: "last-move", reflect: true })
-  get lastMove(): Move | "" | undefined {
+  get lastMove(): Move | "" {
     return this._lastMove;
   }
-  set lastMove(value: string | undefined) {
+  set lastMove(value: string) {
     const old = this._lastMove;
     try {
-      this._lastMove = !value || value === "" ? "" : createMove(value);
+      this._lastMove = value === "" ? "" : createMove(value);
     } catch {
       this._lastMove = "";
     }
     this.requestUpdate("lastMove", old);
   }
 
-  @property({ type: String, reflect: true }) locale: string | undefined = "en";
-  @property({ type: String, reflect: true }) orientation:
-    | "white"
-    | "black"
-    | undefined = "white";
+  @property({ type: String, reflect: true }) locale = "en";
+  @property({ type: String, reflect: true }) orientation: "white" | "black" =
+    "white";
   @property({ type: String, attribute: "board-label", reflect: true })
-  boardLabel: string | undefined = "";
+  boardLabel = "";
   @property({ type: String, attribute: "error-message", reflect: true })
-  errorMessage: string | undefined = "";
-  @property({ type: Object }) pieceNames:
-    | Partial<Record<ChessPiece, string>>
-    | undefined = {};
+  errorMessage = "";
+  @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
+    {};
 
-  private _getLocalizedStrings() {
-    const data = this.locale === "ja" ? locales.ja : locales.en;
+  @state()
+  private _focusedIndex = 0;
+
+  private _getLocalizedStrings(): ChessBoardStrings {
+    const data = (this.locale === "ja" ? chessLocales.ja : chessLocales.en) as unknown as DeepRecord;
+    const dashboard = (data["dashboard"] || {}) as DeepRecord;
+    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
+    const engine = (data["engine"] || {}) as DeepRecord;
+    const errors = (engine["errors"] || {}) as DeepRecord;
+    const pieces = (gameBoard["chessPieces"] || {}) as Record<string, string>;
+
     return {
-      boardLabel: this.boardLabel || data.dashboard.gameBoard.title,
-      errorMessage:
-        this.errorMessage || data.dashboard.gameBoard.invalidPosition,
-      pieceNames: data.dashboard.gameBoard.chessPieces as Record<
-        ChessPiece,
-        string
-      >,
-      squareLabel: (f: string, r: number) =>
-        data.dashboard.gameBoard.squareLabel
-          .replace("{file}", f)
-          .replace("{rank}", String(r)),
-      squarePieceLabel: (f: string, r: number, p: string) =>
-        data.dashboard.gameBoard.squarePieceLabel
-          .replace("{file}", f)
-          .replace("{rank}", String(r))
-          .replace("{piece}", p),
+      boardLabel: String(this.boardLabel || gameBoard["title"] || "Chess Board"),
+      errorMessage: String(this.errorMessage || errors["invalidFEN"] || ""),
+      pieceNames: { ...pieces, ...this.pieceNames },
+      squareLabel: (f: string, r: number) => `${f}${r}`,
+      squarePieceLabel: (f: string, r: number, p: string) => `${p} at ${f}${r}`,
     };
   }
 
@@ -154,18 +148,66 @@ export class ChessBoard extends LitElement {
     return rank * 8 + file;
   }
 
+  private _handleKeyDown(e: KeyboardEvent) {
+    let newIndex = this._focusedIndex;
+    const row = Math.floor(this._focusedIndex / 8);
+    const col = this._focusedIndex % 8;
+
+    switch (e.key) {
+      case "ArrowUp":
+        newIndex = Math.max(0, this._focusedIndex - 8);
+        break;
+      case "ArrowDown":
+        newIndex = Math.min(63, this._focusedIndex + 8);
+        break;
+      case "ArrowLeft":
+        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        break;
+      case "ArrowRight":
+        newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
+        break;
+      case "Home":
+        newIndex = row * 8;
+        break;
+      case "End":
+        newIndex = row * 8 + 7;
+        break;
+      default:
+        return;
+    }
+
+    e.preventDefault();
+    this._focusedIndex = newIndex;
+    void this.updateComplete.then(() => {
+      const el = this.shadowRoot?.querySelector(
+        `[data-index="${newIndex}"]`,
+      ) as HTMLElement;
+      el?.focus();
+    });
+  }
+
+  protected override willUpdate(changedProperties: PropertyValues) {
+    super.willUpdate(changedProperties);
+    if (changedProperties.has("locale")) {
+      // Force strings update if locale changes
+      this.requestUpdate();
+    }
+  }
+
   override render() {
     const strings = this._getLocalizedStrings();
     let board: (ChessPiece | null)[][];
     try {
-      ({ board } = parseFEN(this.fen));
+      const parsed = parseFEN(this.fen);
+      board = parsed.board;
     } catch {
-      return html`<div class="board" role="alert">
-        <div class="error-overlay">
-          ${this.errorMessage || strings.errorMessage}
+      return html`
+        <div class="board" role="alert">
+          <div class="error-overlay">${strings.errorMessage}</div>
         </div>
-      </div>`;
+      `;
     }
+
     const highlightedSquares = new Set<number>();
     if (this.lastMove && this.lastMove.length >= 4) {
       const from = this._getSquareIndex(this.lastMove.slice(0, 2));
@@ -173,56 +215,64 @@ export class ChessBoard extends LitElement {
       if (from >= 0) highlightedSquares.add(from);
       if (to >= 0) highlightedSquares.add(to);
     }
+
     const squares = [];
+    const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
     for (let r = 0; r < 8; r++) {
       for (let f = 0; f < 8; f++) {
-        const rankIndex = this.orientation === "white" ? r : 7 - r;
-        const fileIndex = this.orientation === "white" ? f : 7 - f;
-        const squareIdx = rankIndex * 8 + fileIndex;
-        const piece = board[rankIndex]?.[fileIndex];
-        const algebraicRank = 8 - rankIndex;
-        const algebraicFile = String.fromCharCode(97 + fileIndex);
-        const isDark = (rankIndex + fileIndex) % 2 !== 0;
+        // orientation が black の場合、行と列を反転させる
+        const row = this.orientation === "white" ? r : 7 - r;
+        const col = this.orientation === "white" ? f : 7 - f;
+        
+        const squareIdx = row * 8 + col;
+        const piece = board[row]?.[col];
+        const isWhiteSquare = (row + col) % 2 === 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
-        const pieceName = piece
-          ? this.pieceNames?.[piece] || strings.pieceNames[piece]
+        
+        const displayFile = files[col]!;
+        const displayRank = 8 - row;
+        const pieceLabel = piece
+          ? (this.pieceNames[piece] as string) ||
+            (strings.pieceNames[piece] as string)
           : "";
         const ariaLabel = piece
-          ? strings.squarePieceLabel(algebraicFile, algebraicRank, pieceName)
-          : strings.squareLabel(algebraicFile, algebraicRank);
+          ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
+          : strings.squareLabel(displayFile, displayRank);
+
         squares.push(html`
           <div
-            class="square ${isDark ? "dark" : "light"} ${isHighlighted
+            class="square ${isWhiteSquare ? "white" : "black"} ${isHighlighted
               ? "highlight"
               : ""}"
-            data-square="${algebraicFile}${algebraicRank}"
+            data-square="${displayFile}${displayRank}"
+            data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
+            tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
+            @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<img
-                  class="piece"
-                  src="${PIECE_SVG[piece]}"
-                  alt="${pieceName}"
-                  aria-hidden="true"
-                />`
+              ? html`<span class="piece" role="img" aria-hidden="true"
+                  >${pieceLabel}</span
+                >`
               : ""}
           </div>
         `);
       }
     }
-    return html`<div
-      class="board"
-      role="grid"
-      aria-label="${strings.boardLabel}"
-    >
-      ${squares}
-    </div>`;
+
+    return html`
+      <div
+        class="board"
+        role="grid"
+        aria-label="${strings.boardLabel}"
+        @keydown="${this._handleKeyDown}"
+      >
+        ${squares}
+      </div>
+    `;
   }
 }
 
-declare global {
-  interface HTMLElementTagNameMap {
-    "chess-board": ChessBoard;
-  }
-}
+customElements.define("chess-board", ChessBoard);

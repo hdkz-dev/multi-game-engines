@@ -4,7 +4,6 @@
   "description": "Domain-specific Chess UI components for React",
   "type": "module",
   "license": "MIT",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -13,8 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.tsx --format esm --dts --clean",
-    "dev": "tsup src/index.tsx --format esm --watch --dts",
+    "build": "tsup src/index.tsx --external @multi-game-engines/* --format esm --dts --clean",
+    "dev": "tsup src/index.tsx --external @multi-game-engines/* --format esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
@@ -25,6 +24,7 @@
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",
+    "@multi-game-engines/i18n-chess": "workspace:*",
     "@multi-game-engines/ui-chess-elements": "workspace:*"
   },
   "devDependencies": {

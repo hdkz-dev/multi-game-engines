@@ -1,0 +1,50 @@
+name: Refresh Engine SRI Hashes
+
+on:
+  push:
+    paths:
+      - "packages/registry/data/engines.json"
+      - "scripts/refresh-engine-sris.mjs"
+  schedule:
+    - cron: "0 0 * * 0" # 毎週日曜日に定期チェック
+  workflow_dispatch: # 手動実行も許可
+
+jobs:
+  refresh-sri:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run SRI Refresh Script
+        run: node scripts/refresh-engine-sris.mjs
+
+      - name: Create Pull Request if updated
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(registry): refresh engine SRI hashes"
+          branch: chore/refresh-sri
+          title: "chore(registry): refresh engine SRI hashes"
+          body: |
+            This is an automated PR to update SRI hashes in `engines.json`.
+            The hashes were recalculated based on current remote assets.
+          labels: |
+            registry
+            security
+            automated-pr

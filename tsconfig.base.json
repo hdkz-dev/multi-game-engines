@@ -14,9 +14,11 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
+    "resolveJsonModule": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "composite": true
+    "composite": true,
+    "baseUrl": "."
   }
 }

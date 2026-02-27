@@ -39,7 +39,9 @@ describe("EdaxParser", () => {
         board: "start\nquit" as unknown as ReversiBoard,
         depth: 10,
       }),
-    ).toThrow(/command injection/);
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 
   it("should create valid option command", () => {
@@ -48,10 +50,10 @@ describe("EdaxParser", () => {
 
   it("should throw error for injection in option name or value", () => {
     expect(() => parser.createOptionCommand("level\nquit", 10)).toThrow(
-      /command injection/,
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
     );
     expect(() => parser.createOptionCommand("level", "10\nquit")).toThrow(
-      /command injection/,
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
     );
   });
 });

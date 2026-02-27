@@ -1,16 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "jsx": "react-jsx",
-    "outDir": "./dist"
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "references": [
-    { "path": "../core" },
-    { "path": "../ui-core" },
-    { "path": "../ui-react-core" }
-  ],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]
 }

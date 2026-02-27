@@ -1,5 +1,4 @@
 import { IEngineConfig, deepMerge } from "@multi-game-engines/core";
-import { OfficialRegistry } from "@multi-game-engines/registry";
 import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
 
 /**
@@ -8,15 +7,11 @@ import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
  */
 export class KataGoAdapter extends GTPAdapter {
   constructor(config?: Partial<IEngineConfig>) {
-    // 2026 Best Practice: セントラルレジストリからデフォルトの URL/SRI を解決
-    const registrySources = OfficialRegistry.resolve("katago") || {};
-
     const defaultConfig: IEngineConfig = {
       id: "katago",
       adapter: "gtp",
       name: "KataGo",
       version: "1.15.0",
-      sources: registrySources as IEngineConfig["sources"],
     };
     const finalConfig = deepMerge(defaultConfig, config);
     super(finalConfig);

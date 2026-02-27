@@ -51,7 +51,9 @@ describe("WorkerCommunicator", () => {
       { timeoutMs: 100 },
     );
 
-    await expect(responsePromise).rejects.toThrow(/timed out/);
+    await expect(responsePromise).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.timeout" }),
+    );
   });
 
   it("AbortSignal を受け取り、中断された場合に reject されること", async () => {
@@ -122,7 +124,9 @@ describe("WorkerCommunicator", () => {
 
     communicator.terminate();
 
-    await expect(responsePromise).rejects.toThrow(/terminated/);
+    await expect(responsePromise).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.disposed" }),
+    );
     expect(currentMockWorker?.terminate).toHaveBeenCalled();
   });
 

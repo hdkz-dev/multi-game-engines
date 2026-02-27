@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Framework-agnostic Web Components for multi-game engines",
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -12,8 +11,8 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --clean",
-    "dev": "tsup src/index.ts --format esm --watch --dts",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
@@ -32,7 +31,7 @@
   ],
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-chess-elements": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-shogi-elements": "workspace:*",

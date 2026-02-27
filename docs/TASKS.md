@@ -34,6 +34,10 @@
 
 ## 🔥 フェーズ 3: 第2段階・究極の最適化 (進行中)
 
+- [x] **Modular i18n (Pay-as-you-go)**: 言語データのモジュール分割によるバンドルサイズの極小化。(High)
+  - [x] **物理的パッケージ分離**: `i18n-core`, `common`, `chess`, `shogi`, `engines`, `dashboard` への分離。
+  - [x] **Zero-Any Policy**: `DeepRecord` と `I18nKey` による型安全性の完遂。
+  - [x] **旧パッケージ廃止**: monolithic な `packages/i18n` の完全削除。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 - [ ] **WASM Integration**: 各エンジンの実 WASM バイナリ統合と SRI ハッシュの確定。
   - [ ] Stockfish (Chess)
@@ -45,7 +49,12 @@
 - [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
 - [ ] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
   - [x] プロトタイプと MajorityVote 実装。
-  - [ ] `BestScore`, `Weighted` 戦略の追加。
+  - [x] `BestScore`, `Weighted` 戦略の追加。
+- [ ] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-038以降)。
+  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+  - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
+  - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
+  - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
 - [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
 - [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
@@ -55,6 +64,13 @@
 ---
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
+
+### 2026-02-26 更新 (実装担当: Federated i18n Architecture)
+
+- [x] Federated i18n Architecture の実装
+  - [x] 言語リソースの物理的パッケージ分離とドメイン隔離
+  - [x] 全 40+ パッケージの新構成への完全移行
+  - [x] i18n ロジックにおける Zero-Any 型安全性の達成
 
 ### 2026-02-23 更新 (実装担当: エンジンレジストリ導入)
 
@@ -74,7 +90,7 @@
   - [x] **Reliability**: `EngineLoader` の ID 衝突防止 (セパレータ復帰) と `IndexedDB` ハング防止。
   - [x] **Leak Prevention**: `revokeAll()` 実装による Blob URL メモリリークの完全排除。
   - [x] **Type Safety**: `isIEngineAdapter` 検証の完備と `ValidI18nKey` によるエラーキーの型保証。
-  - [x] **i18n**: `en.json` / `ja.json` への全エラーキーの完全同期。
+  - [x] **i18n**: `en.json` / `ja.json`への全エラーキーの完全同期。
   - [x] **Security**: USI パーサーへの PV/BestMove インジェクション対策適用。
   - [x] **Stability**: E2E テストの `networkidle` 排除と Locator 絞り込み。
   - [x] **Release**: `.changeset` によるリリースノート自動化準備。

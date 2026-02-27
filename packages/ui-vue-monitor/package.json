@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Engine monitoring and management components for Vue 3",
   "type": "module",
-  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -13,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vue-tsc --emitDeclarationOnly --declaration --outDir dist --composite false",
     "dev": "vite build --watch",
     "lint": "eslint .",
     "test": "vitest run",
@@ -29,7 +28,7 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-vue-core": "workspace:*",
     "clsx": "^2.1.1",
@@ -39,7 +38,7 @@
   "devDependencies": {
     "@storybook/vue3": "10.2.10",
     "@storybook/vue3-vite": "10.2.10",
-    "@types/node": "^25.3.0",
+    "@types/node": "^24.0.0",
     "@vitejs/plugin-vue": "^6.0.4",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^20.7.0",

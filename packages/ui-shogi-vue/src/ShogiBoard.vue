@@ -10,6 +10,7 @@ defineProps<{
   errorMessage?: string | undefined;
   handSenteLabel?: string | undefined;
   handGoteLabel?: string | undefined;
+  handPieceCount?: string | undefined;
   pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
   pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
   locale?: string | undefined;
@@ -24,6 +25,7 @@ defineProps<{
     :error-message="errorMessage"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
+    :hand-piece-count="handPieceCount"
     :locale="locale"
     .pieceNames="pieceNames"
     .pieceSymbols="pieceSymbols"

@@ -128,6 +128,20 @@ High-frequency state management foundation.
 - **Lit Implementation**: Standard-compliant lightweight Web Components.
 - **Board Components**: Efficient CSS Grid rendering with move highlighting and accessible localized piece names.
 
+### 6-5. Federated i18n Architecture (Zenith Tier)
+
+Localization resources are physically isolated by domain to ensure maximum type safety and performance.
+
+- **Physical Package Separation**:
+  - `i18n-core`: Core translation engine logic.
+  - `i18n-common`: Shared error codes, common status definitions.
+  - `i18n-{domain}`: Game-specific (Chess, Shogi, etc.) vocabulary and messages.
+- **Zero-Any Type Safety**:
+  - `DeepRecord`: A recursive Record type for dynamic, type-safe access to nested translation data, eliminating `unknown` rendering issues.
+  - `I18nKey`: A Branded string defined in the `core` package, allowing adapters to propagate errors without knowledge of specific language implementations.
+- **Pay-as-you-go Optimization**:
+  - Consumers only import the specific i18n modules they need, reducing the bundle size to nearly zero for unused domains.
+
 ## 7. Quality Assurance (Testing Philosophy)
 
 - **140+ Unit Tests**: Comprehensive coverage across Core, Adapters, and UI.

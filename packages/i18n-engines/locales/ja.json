@@ -1,0 +1,21 @@
+{
+  "ensemble": {
+    "errors": {
+      "noResults": "合議するための engine 実行結果が存在しません。"
+    },
+    "weighted": {
+      "initialized": "[WeightedStrategy] 重み設定を読み込みました: {engines}",
+      "noWeight": "[WeightedStrategy] engine \"{id}\" の重みが定義されていません。デフォルト値 1.0 を使用します。"
+    }
+  },
+  "registry": {
+    "invalidManifest": "無効なマニフェストデータです。バンドルされたデフォルトにフォールバックします。詳細: {error}",
+    "fetchFailed": "{url} からのマニフェスト取得に失敗しました: {status}",
+    "invalidFormat": "{url} からのマニフェスト形式が無効です: {error}",
+    "timeout": "{url} からのマニフェスト取得が {timeout}ms でタイムアウトしました",
+    "sriMismatch": "セキュリティ違反: {url} のマニフェスト整合性 (SRI) 検証に失敗しました。",
+    "invalidSriFormat": "[RemoteRegistry] 無効な SRI 形式です: {sri}",
+    "unsupportedAlgorithm": "[RemoteRegistry] サポートされていない SRI アルゴリズムです: {algo}",
+    "notLoaded": "[RemoteRegistry] マニフェストロード前に engine \"{id}\" が解決されました。null を返します。"
+  }
+}

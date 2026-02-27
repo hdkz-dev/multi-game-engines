@@ -8,7 +8,9 @@ import {
   EngineErrorCode,
   EngineError,
   IMiddleware,
+  I18nKey,
 } from "@multi-game-engines/core";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * アンサンブル合議戦略のインターフェース。
@@ -21,12 +23,13 @@ export interface IEnsembleStrategy<
   readonly id: string;
   /**
    * 複数のエンジンからの結果を統合して一つにします。
+   * @param results - エンジン ID をキー、検索結果を値とする Map。
    */
-  aggregateResults(results: T_RESULT[]): T_RESULT;
+  aggregateResults(results: Map<string, T_RESULT>): T_RESULT;
   /**
    * 複数のエンジンからの途中経過を統合します（オプション）。
    */
-  aggregateInfo?(infos: T_INFO[]): T_INFO | undefined;
+  aggregateInfo?(infos: Map<string, T_INFO[]>): T_INFO | undefined;
 }
 
 /**
@@ -70,10 +73,11 @@ export class EnsembleAdapter<
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.status !== "ready") {
+      const i18nKey = "engine.errors.notReady" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
-        message: `Ensemble engine ${this.id} is not ready (status: ${this.status})`,
-        i18nKey: "engine.errors.notReady",
+        message: translate(i18nKey),
+        i18nKey,
         engineId: this.id,
       });
     }
@@ -81,10 +85,14 @@ export class EnsembleAdapter<
     this.status = "busy";
     try {
       // 全てのサブエンジンで並列探索
-      const results = await Promise.all(
-        this.engines.map((e) => e.search(options)),
+      const resultMap = new Map<string, T_RESULT>();
+      await Promise.all(
+        this.engines.map(async (e) => {
+          const res = await e.search(options);
+          resultMap.set(e.id, res);
+        }),
       );
-      const aggregated = this.strategy.aggregateResults(results);
+      const aggregated = this.strategy.aggregateResults(resultMap);
       this.status = "ready";
       return aggregated;
     } catch (error) {

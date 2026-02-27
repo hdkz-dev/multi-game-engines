@@ -1,53 +1,28 @@
 import {
   IProtocolParser,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  IScoreInfo,
   Move,
   ProtocolValidator,
   EngineError,
   EngineErrorCode,
   createMove,
   truncateLog,
+  I18nKey,
 } from "@multi-game-engines/core";
-import { FEN, createFEN } from "@multi-game-engines/domain-chess";
-
-/** チェス用の探索オプション (UCI標準規格) */
-export interface IChessSearchOptions extends IBaseSearchOptions {
-  fen?: FEN;
-  depth?: number;
-  time?: number;
-  nodes?: number;
-}
-
-/** チェス用の思考情報 */
-export interface IChessSearchInfo extends IBaseSearchInfo {
-  depth?: number;
-  seldepth?: number;
-  score?: IScoreInfo;
-  nodes?: number;
-  nps?: number;
-  time?: number;
-  pv?: Move[];
-  hashfull?: number;
-  multipv?: number;
-}
-
-/** チェス用の探索結果 */
-export interface IChessSearchResult extends IBaseSearchResult {
-  bestMove: Move | null;
-  ponder?: Move | null;
-}
+import { tChess as translate, ChessKey } from "@multi-game-engines/i18n-chess";
+import {
+  createFEN,
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "@multi-game-engines/domain-chess";
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser implements IProtocolParser<
-  IChessSearchOptions,
-  IChessSearchInfo,
-  IChessSearchResult
-> {
+export class UCIParser
+  implements
+    IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult>
+{
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
   // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
   private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
@@ -153,7 +128,10 @@ export class UCIParser implements IProtocolParser<
               moves.push(m);
             } else {
               console.warn(
-                `[UCIParser.parseInfo] Skipping invalid "pv" move token: "${truncateLog(token)}" in response: "${truncateLog(line)}"`,
+                translate("parser.invalidPvMove", {
+                  token: truncateLog(token),
+                  line: truncateLog(line),
+                }),
               );
             }
           }
@@ -226,7 +204,10 @@ export class UCIParser implements IProtocolParser<
             result.ponder = ponder;
           } else {
             console.warn(
-              `[UCIParser.parseResult] Skipping invalid "ponder" token: "${truncateLog(ponderStr)}" in response: "${truncateLog(line)}"`,
+              translate("parser.invalidPonder", {
+                token: truncateLog(ponderStr),
+                line: truncateLog(line),
+              }),
             );
             result.ponder = null;
           }
@@ -252,11 +233,12 @@ export class UCIParser implements IProtocolParser<
     ProtocolValidator.assertNoInjection(options, "search options", true);
 
     if (!options.fen) {
+      const i18nKey: ChessKey = "errors.missingFEN";
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
-        message: "UCI requires a FEN position.",
+        message: translate(i18nKey),
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey: "adapters.uci.errors.missingFEN",
+        i18nKey: i18nKey as unknown as I18nKey,
       });
     }
 
