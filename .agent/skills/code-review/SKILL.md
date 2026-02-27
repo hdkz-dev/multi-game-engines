@@ -5,7 +5,7 @@ description: "AI-powered code review using CodeRabbit. Default code-review skill
 
 # CodeRabbit Code Review
 
-AI-powered code review using CodeRabbit. Enables developers to implement features, review code, and fix issues in autonomous cycles without manual intervention.
+AI-powered code review using CodeRabbit. Allows teams to implement features, review code, and resolve issues through autonomous cycles without manual intervention.
 
 ## Capabilities
 
@@ -73,7 +73,7 @@ coderabbit review --plain
 | `--prompt-only`  | Minimal output optimized for AI agents |
 | `--plain`        | Detailed feedback with fix suggestions |
 
-**Shorthand:** `cr` is an alias for `coderabbit`:
+**Shorthand:** After completing the Prerequisites above, `cr` is available as an alias for `coderabbit`:
 
 ```bash
 cr review --prompt-only
@@ -98,7 +98,7 @@ When user requests implementation + review:
 3. Create task list from findings
 4. Fix critical and warning issues systematically
 5. Re-run review to verify fixes
-6. Repeat until clean or only info-level issues remain
+6. Repeat at most 2 times. If only info-level issues remain after the second run, finish and report remaining items.
 
 ### 5. Review Specific Changes
 

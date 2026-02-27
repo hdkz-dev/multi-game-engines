@@ -15,16 +15,34 @@ import { z } from "zod";
 /**
  * エンジンソース設定の Zod スキーマ。
  */
-const EngineSourceSchema = z.object({
-  url: z.string().url(),
-  sri: z
-    .string()
-    .regex(/^sha(256|384|512)-[A-Za-z0-9+/]{43,88}={0,2}$/)
-    .optional(),
-  __unsafeNoSRI: z.boolean().optional(),
-  type: z.enum(["worker-js", "wasm", "data"]),
-  mountPath: z.string().optional(),
-});
+const EngineSourceSchema = z
+  .object({
+    url: z.string().url(),
+    type: z.enum([
+      "worker-js",
+      "wasm",
+      "eval-data",
+      "native",
+      "webgpu-compute",
+      "json",
+      "text",
+      "asset",
+    ]),
+    size: z.number().optional(),
+    mountPath: z.string().optional(),
+  })
+  .and(
+    z.union([
+      z.object({
+        sri: z.string().regex(/^sha(256|384|512)-[A-Za-z0-9+/]{43,88}={0,2}$/),
+        __unsafeNoSRI: z.undefined().optional(),
+      }),
+      z.object({
+        sri: z.undefined().optional(),
+        __unsafeNoSRI: z.literal(true),
+      }),
+    ]),
+  );
 
 /**
  * エンジンマニフェスト（engines.json）の Zod スキーマ。
@@ -188,7 +206,7 @@ export class RemoteRegistry extends StaticRegistry {
         this.data = result.data;
         this.loaded = true;
       } catch (error) {
-        if ((error as Error).name === "AbortError") {
+        if (error instanceof Error && error.name === "AbortError") {
           const i18nKey: EnginesKey = "registry.timeout";
           throw new EngineError({
             code: EngineErrorCode.NETWORK_ERROR,

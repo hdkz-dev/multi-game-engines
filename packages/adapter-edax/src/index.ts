@@ -23,12 +23,20 @@ export function createEdaxEngine(
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
     OfficialRegistry.resolve("edax", config.version) || {};
+  const sources = {
+    ...(registrySources as Record<string, IEngineSourceConfig>),
+    ...(config.sources || {}),
+  };
+
+  if (!sources.main) {
+    throw new Error(
+      '[createEdaxEngine] Engine "edax" requires a "main" source, but it was not found in the registry or config.',
+    );
+  }
+
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: {
-      ...(registrySources as Record<string, IEngineSourceConfig>),
-      ...(config.sources || {}),
-    } as Required<IEngineConfig>["sources"],
+    sources: sources as Required<IEngineConfig>["sources"],
   };
 
   const adapter = new EdaxAdapter(mergedConfig);
