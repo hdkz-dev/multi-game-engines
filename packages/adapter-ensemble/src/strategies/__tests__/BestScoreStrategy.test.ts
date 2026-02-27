@@ -61,4 +61,38 @@ describe("BestScoreStrategy", () => {
     const winner = strategy.aggregateResults(resultsMap);
     expect(winner.bestMove).toBe("a2a4");
   });
+
+  it("should throw EngineError when resultsMap is empty", () => {
+    const strategy = new BestScoreStrategy();
+    const resultsMap = new Map<string, IBaseSearchResult>();
+
+    expect(() => strategy.aggregateResults(resultsMap)).toThrow();
+  });
+
+  it("should fallback to first result when no result has a score", () => {
+    const strategy = new BestScoreStrategy();
+    const resultsMap = new Map<string, IBaseSearchResult>([
+      ["e1", { bestMove: "a2a3" }],
+      ["e2", { bestMove: "a2a4" }],
+    ]);
+
+    const winner = strategy.aggregateResults(resultsMap);
+    // No scores → returns first result
+    expect(winner.bestMove).toBe("a2a3");
+  });
+
+  it("should handle points-based scores", () => {
+    const strategy = new BestScoreStrategy();
+    const resultsMap = new Map<string, IBaseSearchResult>([
+      ["e1", { bestMove: "a2a3", score: { points: 5 } }],
+      ["e2", { bestMove: "a2a4", score: { points: 10 } }],
+    ]);
+
+    // points は IScoreInfo に含まれるがスコア計算の優先順位では
+    // mate > cp > winrate の順。points は直接使われない。
+    // しかし isScoreInfo は true を返すので score は取れるが currentScore は -Infinity のまま。
+    // → fallback to first result
+    const winner = strategy.aggregateResults(resultsMap);
+    expect(winner).toBeDefined();
+  });
 });

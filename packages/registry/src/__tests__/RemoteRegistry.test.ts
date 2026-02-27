@@ -94,4 +94,72 @@ describe("RemoteRegistry", () => {
       expect.objectContaining({ i18nKey: "registry.fetchFailed" }),
     );
   });
+
+  it("should throw timeout error on AbortError", async () => {
+    const abortError = new DOMException(
+      "The operation was aborted",
+      "AbortError",
+    );
+    vi.mocked(fetch).mockRejectedValue(abortError);
+
+    const registry = new RemoteRegistry(mockUrl);
+    await expect(registry.load()).rejects.toThrow(
+      expect.objectContaining({ code: "NETWORK_ERROR" }),
+    );
+  });
+
+  it("should re-throw non-AbortError errors directly", async () => {
+    const networkError = new TypeError("Failed to fetch");
+    vi.mocked(fetch).mockRejectedValue(networkError);
+
+    const registry = new RemoteRegistry(mockUrl);
+    await expect(registry.load()).rejects.toThrow("Failed to fetch");
+  });
+
+  it("should reject remote manifest with invalid schema", async () => {
+    const invalidData = { version: "1.0.0", engines: { bad: { name: 123 } } };
+    const encodedData = new TextEncoder().encode(JSON.stringify(invalidData));
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl);
+    await expect(registry.load()).rejects.toThrow(
+      expect.objectContaining({ code: "VALIDATION_ERROR" }),
+    );
+  });
+
+  it("should share loading promise for concurrent load calls", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl);
+    const p1 = registry.load();
+    const p2 = registry.load();
+
+    await Promise.all([p1, p2]);
+    // fetch should only be called once
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(registry.isLoaded).toBe(true);
+  });
+
+  it("should skip load if already loaded", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl);
+    await registry.load();
+    expect(registry.isLoaded).toBe(true);
+
+    // Second load should be a no-op
+    await registry.load();
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 });
