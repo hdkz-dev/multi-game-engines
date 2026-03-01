@@ -135,6 +135,46 @@ describe("EngineBridge", () => {
     expect(instance3).not.toBe(instance1);
   });
 
+  it("ID の代わりに EngineConfig オブジェクトを直接渡してエンジンを取得できること", async () => {
+    const bridge = new EngineBridge();
+    const config: IEngineConfig = {
+      id: "dynamic-engine",
+      adapter: "test",
+      sources: { main: { url: "test.js", type: "script", sri: "sha256-..." } },
+    };
+
+    // アダプターファクトリが必要
+    bridge.registerAdapterFactory("test", (cfg) => {
+      const adapter = createMockAdapter(cfg.id!);
+      return Promise.resolve(adapter);
+    });
+
+    const engine = await bridge.getEngine(config);
+    expect(engine.id).toBe("dynamic-engine");
+  });
+
+  it("存在しないアダプタータイプを指定した場合にエラーを投げること", async () => {
+    const bridge = new EngineBridge();
+    const config: IEngineConfig = {
+      id: "unknown-adapter-engine",
+      adapter: "non-existent",
+    };
+
+    await expect(bridge.getEngine(config)).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.adapterNotFound" }),
+    );
+  });
+
+  it("同一 ID で複数回 getEngine しても、内部アダプターが同じであればインスタンスが再利用されること", async () => {
+    const bridge = new EngineBridge();
+    const adapter = createMockAdapter("engine1");
+    await bridge.registerAdapter(adapter);
+
+    const e1 = await bridge.getEngine("engine1");
+    const e2 = await bridge.getEngine("engine1");
+    expect(e1).toBe(e2);
+  });
+
   describe("Registry Chain (LIFO)", () => {
     it("should resolve metadata from the most recently added registry", async () => {
       const bridge = new EngineBridge();

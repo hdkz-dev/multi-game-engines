@@ -22,6 +22,17 @@ describe("ResourceInjector", () => {
     expect(ResourceInjector.resolve("unknown/path")).toBe("unknown/path");
   });
 
+  it("should throw on paths with leading dot (Security Constraint)", () => {
+    expect(() => ResourceInjector.resolve("./test.js")).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.securityViolation" }),
+    );
+  });
+
+  it("should throw on path traversal attempts", () => {
+    expect(() => ResourceInjector.resolve("../secret.js")).toThrow();
+    expect(() => ResourceInjector.resolve("/absolute/path")).toThrow();
+  });
+
   describe("adaptEmscriptenModule", () => {
     it("should override locateFile to use resolved Blob URLs", () => {
       // @ts-expect-error accessing private static for testing
@@ -103,6 +114,50 @@ describe("ResourceInjector", () => {
         "/data/config.json",
         expect.any(Uint8Array),
       );
+    });
+
+    it("should handle EEXIST error during directory creation", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = { "dir/file.bin": "blob:url" };
+      const mockFS = {
+        mkdir: vi.fn().mockImplementation(() => {
+          const err = new Error("EEXIST");
+          (err as unknown as { code: string }).code = "EEXIST";
+          throw err;
+        }),
+        writeFile: vi.fn(),
+      };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),
+      });
+
+      // Should NOT throw
+      await expect(
+        ResourceInjector.mountToVFS(
+          { FS: mockFS },
+          "/dir/file.bin",
+          "dir/file.bin",
+        ),
+      ).resolves.toBeUndefined();
+    });
+
+    it("should throw error if fetch fails", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = {
+        "error.file": "blob:error-url",
+      };
+
+      const mockModule = { FS: { mkdir: vi.fn(), writeFile: vi.fn() } };
+
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        statusText: "Not Found",
+      });
+
+      await expect(
+        ResourceInjector.mountToVFS(mockModule, "/error.file", "error.file"),
+      ).rejects.toThrow("Failed to fetch resource: Not Found");
     });
   });
 });

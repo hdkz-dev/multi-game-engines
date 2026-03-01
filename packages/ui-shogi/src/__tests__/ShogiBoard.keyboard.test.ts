@@ -140,6 +140,48 @@ describe("shogi-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("17"); // row 1, col 8
   });
 
+  it("PageUp should move focus to the same column in the first row", async () => {
+    await focusSquare(40); // row 4, col 4
+    pressKey("PageUp");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("4"); // row 0, col 4
+  });
+
+  it("PageDown should move focus to the same column in the last row", async () => {
+    await focusSquare(40); // row 4, col 4
+    pressKey("PageDown");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("76"); // row 8, col 4
+  });
+
+  it("Home (ctrl) should move focus to index 0", async () => {
+    await focusSquare(40);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Home",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("0");
+  });
+
+  it("End (ctrl) should move focus to index 80", async () => {
+    await focusSquare(40);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "End",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("80");
+  });
+
   // --- 複合テスト ---
   it("should navigate correctly with multiple key presses", async () => {
     await focusSquare(0);

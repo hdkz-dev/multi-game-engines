@@ -134,12 +134,6 @@ export class ChessBoard extends LitElement {
   @state()
   private _focusedIndex = 0;
 
-  /**
-   * 2026 Zenith Tier: Roving Tabindex state.
-   */
-  @state()
-  private _focusedIndex = 0;
-
   private _getLocalizedStrings() {
     const data = (
       this.locale === "ja" ? chessLocales.ja : chessLocales.en
@@ -184,10 +178,16 @@ export class ChessBoard extends LitElement {
         newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 8;
+        newIndex = e.ctrlKey ? 0 : row * 8;
         break;
       case "End":
-        newIndex = row * 8 + 7;
+        newIndex = e.ctrlKey ? 63 : row * 8 + 7;
+        break;
+      case "PageUp":
+        newIndex = col; // same column, first row
+        break;
+      case "PageDown":
+        newIndex = 56 + col; // same column, last row
         break;
       default:
         return;

@@ -217,10 +217,16 @@ export class ShogiBoard extends LitElement {
         newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 9;
+        newIndex = e.ctrlKey ? 0 : row * 9;
         break;
       case "End":
-        newIndex = row * 9 + 8;
+        newIndex = e.ctrlKey ? 80 : row * 9 + 8;
+        break;
+      case "PageUp":
+        newIndex = col; // same column, first row
+        break;
+      case "PageDown":
+        newIndex = 72 + col; // same column, last row
         break;
       default:
         return;

@@ -114,7 +114,10 @@ describe("EngineLoader", () => {
       headers: { get: () => null } as unknown as Headers,
       statusText: "Internal Server Error",
     } as Response;
-    vi.mocked(fetch).mockResolvedValueOnce(errRes).mockResolvedValueOnce(errRes).mockResolvedValueOnce(errRes);
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(errRes)
+      .mockResolvedValueOnce(errRes)
+      .mockResolvedValueOnce(errRes);
 
     await expect(loader.loadResource("test", config)).rejects.toThrow();
 
@@ -164,7 +167,9 @@ describe("EngineLoader", () => {
       };
 
       await expect(prodLoader.loadResource("test", config)).rejects.toThrow(
-        expect.objectContaining({ i18nKey: "engine.errors.sriBypassNotAllowed" }),
+        expect.objectContaining({
+          i18nKey: "engine.errors.sriBypassNotAllowed",
+        }),
       );
     } finally {
       process.env.NODE_ENV = originalEnv;
@@ -278,7 +283,11 @@ describe("EngineLoader", () => {
     // 2. バッチロードを実行。3つ目のリソースを失敗させる
     vi.mocked(fetch).mockImplementation(async (url) => {
       if (url.toString().includes("fail.js")) {
-        return { ok: false, status: 500, headers: { get: () => null } as unknown as Headers } as Response;
+        return {
+          ok: false,
+          status: 500,
+          headers: { get: () => null } as unknown as Headers,
+        } as Response;
       }
       return {
         ok: true,
@@ -294,5 +303,27 @@ describe("EngineLoader", () => {
     // - "newOne" は新しく作られたので revoke されるはず
     expect(revokeSpy).toHaveBeenCalledWith("blob:new");
     expect(revokeSpy).not.toHaveBeenCalledWith("blob:existing");
+  });
+
+  it("物理的な URL 解放の検証: dispose 時に全ての Blob URL が確実に破棄されること", async () => {
+    const revokeSpy = vi.mocked(globalThis.URL.revokeObjectURL);
+
+    await loader.loadResource("engine-a", {
+      url: "https://test.com/a.js",
+      type: "script",
+      sri: dummySRI,
+    });
+    await loader.loadResource("engine-b", {
+      url: "https://test.com/b.js",
+      type: "script",
+      sri: dummySRI,
+    });
+
+    expect(revokeSpy).not.toHaveBeenCalled();
+
+    loader.revokeAll();
+
+    // 全てのエンジンに関連するリソースが解放されていること
+    expect(revokeSpy).toHaveBeenCalledTimes(2);
   });
 });

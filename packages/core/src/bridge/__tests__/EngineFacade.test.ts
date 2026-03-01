@@ -1,19 +1,23 @@
-import { describe,
+import {
+  describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll, } from "vitest";
+  afterAll,
+} from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
-import { IMiddleware,
+import {
+  IMiddleware,
   IEngineLoader,
   EngineStatus,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   IEngineAdapter,
-  IProtocolParser, } from "../../types.js";
+  IProtocolParser,
+} from "../../types.js";
 import { createPositionString } from "../../protocol/ProtocolValidator.js";
 
 describe("EngineFacade", () => {
@@ -172,14 +176,18 @@ describe("EngineFacade", () => {
 
   it("各イベントの購読がアダプターに委譲されること", () => {
     const facade = new EngineFacade(adapter);
-    facade.onStatusChange(() => {});
-    // facade.onProgress は IEngine には無い (IEngineAdapter にはある) が、
-    // ここでは adapter への委譲を確認したい。IEngine に onProgress がないなら
-    // テスト対象外とするか、実装を確認する。
-    // 現状 IEngine に onProgress はないので削除し、onTelemetry を確認
-    facade.onTelemetry(() => {});
+
+    const unsub1 = facade.onStatusChange(vi.fn());
+    const unsub2 = facade.onTelemetry(vi.fn());
+    const unsub3 = facade.onInfo(vi.fn());
+
     expect(adapter.onStatusChange).toHaveBeenCalled();
     expect(adapter.onTelemetry).toHaveBeenCalled();
+    expect(adapter.onInfo).toHaveBeenCalled();
+
+    unsub1();
+    unsub2();
+    unsub3();
   });
 
   it("should atomic load: concurrent load() calls should be shared", async () => {
@@ -217,6 +225,38 @@ describe("EngineFacade", () => {
     expect(loaderProvider).toHaveBeenCalledTimes(1);
     expect(mockLoader.revokeByEngineId).toHaveBeenCalledTimes(1);
     expect(mockLoader.revokeByEngineId).toHaveBeenCalledWith(adapter.id);
+  });
+
+  it("ミドルウェアが例外を投げた際でも、エンジンのコア機能（探索）が停止しないこと (Zenith 6.2)", async () => {
+    const errorMw: IMiddleware<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    > = {
+      onCommand: vi.fn().mockImplementation(() => {
+        throw new Error("MW Command Crash");
+      }),
+      onInfo: vi.fn().mockImplementation(() => {
+        throw new Error("MW Info Crash");
+      }),
+      onResult: vi.fn().mockImplementation(() => {
+        throw new Error("MW Result Crash");
+      }),
+    };
+
+    const facade = new EngineFacade(adapter, [errorMw]);
+    const infoSpy = vi.fn();
+    facade.onInfo(infoSpy);
+
+    // ミドルウェアが例外を投げても、探索結果自体は正常に返ってくること
+    const result = await facade.search({ board: "..." } as IBaseSearchOptions);
+
+    expect(result).toEqual({ raw: "result", bestMove: "e2e4" });
+    // onInfo への通知も（ミドルウェア経由ではなく本体リスナー経由で）到達していること
+    expect(infoSpy).toHaveBeenCalled();
+    // ミドルウェアが呼ばれた形跡を確認
+    expect(errorMw.onCommand).toHaveBeenCalled();
+    expect(errorMw.onResult).toHaveBeenCalled();
   });
 
   it("dispose() が loaderProvider() の例外を握りつぶすこと", async () => {
