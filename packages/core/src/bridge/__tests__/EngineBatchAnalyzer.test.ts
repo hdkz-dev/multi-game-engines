@@ -1,12 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineBatchAnalyzer } from "../EngineBatchAnalyzer.js";
-import {
-  IEngine,
+import { IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   IBaseSearchInfo,
-  EngineErrorCode,
-} from "../../types.js";
+  EngineErrorCode, } from "../../types.js";
 import { EngineError } from "../../errors/EngineError.js";
 
 describe("EngineBatchAnalyzer", () => {
@@ -30,7 +28,7 @@ describe("EngineBatchAnalyzer", () => {
       stop: vi.fn(),
     };
     analyzer = new EngineBatchAnalyzer(
-      mockEngine as any as IEngine<
+      mockEngine as unknown as IEngine<
         IBaseSearchOptions,
         IBaseSearchInfo,
         IBaseSearchResult
@@ -104,8 +102,8 @@ describe("EngineBatchAnalyzer", () => {
   });
 
   it("should stop processing on abort during search", async () => {
-    analyzer.add({ fen: "p1" } as any);
-    analyzer.add({ fen: "p2" } as any);
+    analyzer.add({ fen: "p1" } as IBaseSearchOptions);
+    analyzer.add({ fen: "p2" } as IBaseSearchOptions);
 
     mockEngine.search.mockImplementationOnce(async () => {
       analyzer.abort();
@@ -121,8 +119,8 @@ describe("EngineBatchAnalyzer", () => {
   });
 
   it("should report progress", () => {
-    analyzer.add({} as any);
-    analyzer.add({} as any);
+    analyzer.add({} as IBaseSearchOptions);
+    analyzer.add({} as IBaseSearchOptions);
     expect(analyzer.progress).toEqual({ current: 0, total: 2 });
   });
 

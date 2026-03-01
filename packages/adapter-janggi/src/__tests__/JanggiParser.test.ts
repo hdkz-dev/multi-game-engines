@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { JanggiParser } from "../JanggiParser.js";
 import { PositionId } from "@multi-game-engines/core";
 

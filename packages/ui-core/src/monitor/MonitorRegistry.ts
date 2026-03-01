@@ -1,12 +1,4 @@
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  createPositionString,
-  EngineErrorCode,
-  I18nKey,
-  EngineError, createI18nKey } from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, createPositionString, EngineErrorCode, EngineError, createI18nKey } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
 import { createInitialState, EngineSearchState } from "../types.js";
 

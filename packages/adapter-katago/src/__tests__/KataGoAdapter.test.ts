@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeAll,
   afterAll,
-  beforeEach,
-} from "vitest";
+  beforeEach, } from "vitest";
 import { KataGoAdapter } from "../index.js";
 import { IEngineLoader } from "@multi-game-engines/core";
 import { IGoSearchOptions } from "@multi-game-engines/adapter-gtp";

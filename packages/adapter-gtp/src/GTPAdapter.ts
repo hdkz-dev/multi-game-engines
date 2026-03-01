@@ -1,20 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  IEngineConfig,
-  IEngineAdapter,
-  IEngineSourceConfig,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IGoSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineAdapter, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+
+import { IGoSearchOptions,
   IGoSearchInfo,
-  IGoSearchResult,
-} from "@multi-game-engines/domain-go";
+  IGoSearchResult, } from "@multi-game-engines/domain-go";
 import { GTPParser } from "./GTPParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 export class GTPAdapter extends BaseAdapter<
   IGoSearchOptions,

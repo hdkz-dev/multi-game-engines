@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createFileStorage } from "../index.js";
 import { OPFSStorage } from "../OPFSStorage.js";
 import { IndexedDBStorage } from "../IndexedDBStorage.js";

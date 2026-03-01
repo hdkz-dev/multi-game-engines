@@ -1,12 +1,10 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {
-  parseSFEN,
+import { parseSFEN,
   ShogiPiece,
   ShogiHand,
   SFEN,
-  createSFEN,
-} from "@multi-game-engines/domain-shogi";
+  createSFEN, } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
 import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 

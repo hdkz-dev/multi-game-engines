@@ -1,5 +1,5 @@
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   EngineError,
   EngineErrorCode,
   Move,
@@ -10,8 +10,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * Xiangqi Move (UCCI format: e2e4, h0g2, etc.).

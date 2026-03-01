@@ -1,11 +1,9 @@
 import { EngineError } from "../errors/EngineError.js";
-import {
-  EngineErrorCode,
+import { EngineErrorCode,
   Move,
   PositionString,
   I18nKey,
-  PositionId,
-} from "../types.js";
+  PositionId, } from "../types.js";
 import { truncateLog } from "../utils/Sanitizer.js";
 
 /**

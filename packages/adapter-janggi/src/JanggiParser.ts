@@ -1,16 +1,8 @@
-import {
-  IProtocolParser,
-  ScoreNormalizer,
-  PositionId,
-  MiddlewareCommand,
-  ProtocolValidator,
-} from "@multi-game-engines/core";
-import {
-  IJanggiSearchOptions,
+import { IProtocolParser, ScoreNormalizer, PositionId, MiddlewareCommand, ProtocolValidator } from "@multi-game-engines/core";
+import { IJanggiSearchOptions,
   IJanggiSearchInfo,
   IJanggiSearchResult,
-  createJanggiMove,
-} from "@multi-game-engines/domain-janggi";
+  createJanggiMove, } from "@multi-game-engines/domain-janggi";
 
 export class JanggiParser implements IProtocolParser<
   IJanggiSearchOptions,

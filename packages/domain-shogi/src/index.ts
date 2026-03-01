@@ -1,5 +1,5 @@
-import {
-  EngineErrorCode,
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
+import { EngineErrorCode,
   EngineError,
   PositionString,
   Move,
@@ -9,8 +9,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.

@@ -1,5 +1,5 @@
-import {
-  IEngine,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   EngineStatus,
@@ -8,10 +8,9 @@ import {
   EngineErrorCode,
   EngineError,
   IMiddleware,
-  I18nKey,
   IBookAsset,
-  ProgressCallback, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  ProgressCallback,
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * アンサンブル合議戦略のインターフェース。

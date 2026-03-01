@@ -1,20 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  ResourceMap,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IChessSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+
+import { IChessSearchOptions,
   IChessSearchInfo,
-  IChessSearchResult,
-} from "@multi-game-engines/domain-chess";
+  IChessSearchResult, } from "@multi-game-engines/domain-chess";
 import { UCIParser } from "./UCIParser.js";
+import { tChess as translate } from "@multi-game-engines/i18n-chess";
 
 /**
  * 2026 Zenith Tier: 汎用 UCI (Universal Chess Interface) アダプター。

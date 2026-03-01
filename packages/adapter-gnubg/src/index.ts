@@ -1,22 +1,15 @@
 import { GNUBGAdapter } from "./GNUBGAdapter.js";
-import {
-  EngineFacade,
-  EngineError,
-  EngineErrorCode,
-  normalizeAndValidateSources
-} from "@multi-game-engines/core";
+import { EngineFacade, normalizeAndValidateSources } from "@multi-game-engines/core";
 import type {
   IEngine,
   IEngineConfig,
   IEngineSourceConfig,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, } from "@multi-game-engines/core";
 import { OfficialRegistry } from "@multi-game-engines/registry";
 import type {
   IBackgammonSearchOptions,
   IBackgammonSearchInfo,
-  IBackgammonSearchResult,
-} from "@multi-game-engines/domain-backgammon";
+  IBackgammonSearchResult, } from "@multi-game-engines/domain-backgammon";
 
 export { GNUBGAdapter };
 

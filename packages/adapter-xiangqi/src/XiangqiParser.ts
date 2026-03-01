@@ -1,16 +1,8 @@
-import {
-  IProtocolParser,
-  ScoreNormalizer,
-  PositionId,
-  MiddlewareCommand,
-  ProtocolValidator,
-} from "@multi-game-engines/core";
-import {
-  IXiangqiSearchOptions,
+import { IProtocolParser, ScoreNormalizer, PositionId, MiddlewareCommand, ProtocolValidator } from "@multi-game-engines/core";
+import { IXiangqiSearchOptions,
   IXiangqiSearchInfo,
   IXiangqiSearchResult,
-  createXiangqiMove,
-} from "@multi-game-engines/domain-xiangqi";
+  createXiangqiMove, } from "@multi-game-engines/domain-xiangqi";
 
 export class XiangqiParser implements IProtocolParser<
   IXiangqiSearchOptions,

@@ -1,20 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey,
-  ResourceMap, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IXiangqiSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+
+import { IXiangqiSearchOptions,
   IXiangqiSearchInfo,
-  IXiangqiSearchResult,
-} from "@multi-game-engines/domain-xiangqi";
+  IXiangqiSearchResult, } from "@multi-game-engines/domain-xiangqi";
 import { XiangqiParser } from "./XiangqiParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: Xiangqi (UCCI) Adapter.

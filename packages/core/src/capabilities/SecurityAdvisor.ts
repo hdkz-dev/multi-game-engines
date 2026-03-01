@@ -1,5 +1,5 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import { ISecurityStatus, EngineErrorCode, I18nKey } from "../types.js";
+import { ISecurityStatus, EngineErrorCode } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 /**

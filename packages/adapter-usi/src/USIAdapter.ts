@@ -1,20 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  ResourceMap,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IShogiSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+
+import { IShogiSearchOptions,
   IShogiSearchInfo,
-  IShogiSearchResult,
-} from "@multi-game-engines/domain-shogi";
+  IShogiSearchResult, } from "@multi-game-engines/domain-shogi";
 import { USIParser } from "./USIParser.js";
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 
 export class USIAdapter extends BaseAdapter<
   IShogiSearchOptions,

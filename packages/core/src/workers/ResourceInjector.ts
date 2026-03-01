@@ -1,5 +1,5 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import { ResourceMap, EngineErrorCode, I18nKey } from "../types.js";
+import { ResourceMap, EngineErrorCode } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 interface MessagePayload {

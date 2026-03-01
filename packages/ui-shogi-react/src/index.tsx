@@ -1,6 +1,6 @@
 import React from "react";
-import "@multi-game-engines/ui-shogi-elements";
 import { ShogiBoard as ShogiBoardElement } from "@multi-game-engines/ui-shogi-elements";
+
 import { Move } from "@multi-game-engines/core";
 import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 

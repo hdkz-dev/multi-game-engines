@@ -1,13 +1,12 @@
-import {
-  EngineError,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { EngineError,
   EngineErrorCode,
   ProtocolValidator,
   Move,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** 麻雀の指し手（打牌、副露等） */
 export type MahjongMove = Move<"MahjongMove">;

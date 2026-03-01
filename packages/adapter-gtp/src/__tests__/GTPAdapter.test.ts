@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { GTPAdapter } from "../GTPAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 

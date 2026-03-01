@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { XiangqiAdapter } from "../XiangqiAdapter.js";
-import { IEngineLoader } from "@multi-game-engines/core";
 
 describe("XiangqiAdapter", () => {
   it("should have correct id and name", () => {

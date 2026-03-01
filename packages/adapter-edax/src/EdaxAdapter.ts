@@ -1,19 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  IEngineConfig,
-  IEngineSourceConfig,
-  EngineErrorCode,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IReversiSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, IEngineConfig, IEngineSourceConfig, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+
+import { IReversiSearchOptions,
   IReversiSearchInfo,
-  IReversiSearchResult,
-} from "@multi-game-engines/domain-reversi";
+  IReversiSearchResult, } from "@multi-game-engines/domain-reversi";
 import { EdaxParser } from "./EdaxParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: Edax リバーシエンジンアダプター。

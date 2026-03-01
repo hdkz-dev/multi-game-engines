@@ -1,6 +1,6 @@
 import React from "react";
-import "@multi-game-engines/ui-chess-elements";
 import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
+
 import { Move } from "@multi-game-engines/core";
 import { FEN, ChessPiece } from "@multi-game-engines/domain-chess";
 

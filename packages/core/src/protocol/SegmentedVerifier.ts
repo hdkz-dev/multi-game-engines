@@ -1,5 +1,5 @@
 import { createI18nKey } from "./ProtocolValidator.js";
-import { ISegmentedSRI, EngineErrorCode, I18nKey } from "../types.js";
+import { ISegmentedSRI, EngineErrorCode } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 /**

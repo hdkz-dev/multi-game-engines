@@ -1,16 +1,11 @@
-import {
-  IProtocolParser,
-  ProtocolValidator,
-  truncateLog,
-} from "@multi-game-engines/core";
+import { IProtocolParser, ProtocolValidator, truncateLog } from "@multi-game-engines/core";
+
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  validateMahjongBoard,
+import { validateMahjongBoard,
   createMahjongMove,
   IMahjongSearchOptions,
   IMahjongSearchInfo,
-  IMahjongSearchResult,
-} from "@multi-game-engines/domain-mahjong";
+  IMahjongSearchResult, } from "@multi-game-engines/domain-mahjong";
 
 export class MahjongJSONParser implements IProtocolParser<
   IMahjongSearchOptions,

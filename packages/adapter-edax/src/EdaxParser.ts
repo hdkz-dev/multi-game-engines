@@ -1,15 +1,8 @@
-import {
-  IProtocolParser,
-  ProtocolValidator,
-  ScoreNormalizer,
-  PositionId,
-} from "@multi-game-engines/core";
-import {
-  createReversiMove,
+import { IProtocolParser, ProtocolValidator, ScoreNormalizer, PositionId } from "@multi-game-engines/core";
+import { createReversiMove,
   IReversiSearchOptions,
   IReversiSearchInfo,
-  IReversiSearchResult,
-} from "@multi-game-engines/domain-reversi";
+  IReversiSearchResult, } from "@multi-game-engines/domain-reversi";
 
 export class EdaxParser implements IProtocolParser<
   IReversiSearchOptions,

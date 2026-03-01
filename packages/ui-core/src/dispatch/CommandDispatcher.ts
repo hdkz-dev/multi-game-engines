@@ -1,9 +1,4 @@
-import {
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  EngineStatus,
-  IBaseSearchInfo,
-} from "@multi-game-engines/core";
+import { IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
 import { SearchMonitor } from "../monitor/monitor.js";
 
 /**

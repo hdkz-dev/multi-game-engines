@@ -1,16 +1,10 @@
-import {
-  IProtocolParser,
-  ProtocolValidator,
-  ScoreNormalizer,
-  PositionId,
-} from "@multi-game-engines/core";
+import { IProtocolParser, ProtocolValidator, ScoreNormalizer, PositionId } from "@multi-game-engines/core";
+
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  createGOMove,
+import { createGOMove,
   IGoSearchOptions,
   IGoSearchInfo,
-  IGoSearchResult,
-} from "@multi-game-engines/domain-go";
+  IGoSearchResult, } from "@multi-game-engines/domain-go";
 
 /**
  * 2026 Zenith Tier: 汎用 GTP (Go Text Protocol) パーサー。

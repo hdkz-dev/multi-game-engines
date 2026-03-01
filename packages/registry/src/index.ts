@@ -1,15 +1,8 @@
-import {
-  IEngineRegistry,
-  IEngineSourceConfig,
-  EngineError,
-  EngineErrorCode,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
+import { IEngineRegistry, IEngineSourceConfig, EngineError, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
-import {
-  tEngines as translate,
-  EnginesKey,
-} from "@multi-game-engines/i18n-engines";
+import { EnginesKey } from "@multi-game-engines/i18n-engines";
 import { z } from "zod";
+import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * エンジンソース設定の Zod スキーマ。

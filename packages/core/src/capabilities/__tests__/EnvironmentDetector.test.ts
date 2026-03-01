@@ -69,7 +69,7 @@ describe("EnvironmentDetector", () => {
     // @ts-expect-error Testing private property access or invalid input
     delete globalThis.SharedArrayBuffer;
 
-    expect((EnvironmentDetector as any).checkWasmThreads()).toBe(false);
+    expect((EnvironmentDetector as unknown).checkWasmThreads()).toBe(false);
 
     globalThis.SharedArrayBuffer = originalSAB;
   });
@@ -79,7 +79,7 @@ describe("EnvironmentDetector", () => {
     // @ts-expect-error Testing private property access or invalid input
     delete globalThis.WebAssembly;
 
-    expect((EnvironmentDetector as any).checkWasmSimd()).toBe(false);
+    expect((EnvironmentDetector as unknown).checkWasmSimd()).toBe(false);
 
     globalThis.WebAssembly = originalWA;
   });
@@ -90,12 +90,12 @@ describe("EnvironmentDetector", () => {
         throw new Error("Validation failed");
       },
     });
-    expect((EnvironmentDetector as any).checkWasmSimd()).toBe(false);
+    expect((EnvironmentDetector as unknown).checkWasmSimd()).toBe(false);
   });
 
   it("should detect various runtimes", () => {
     const originalProcess = globalThis.process;
-    const originalWindow = (globalThis as any).window;
+    const originalWindow = (globalThis as unknown).window;
 
     // 1. Browser
     // @ts-expect-error Testing private property access or invalid input
@@ -115,7 +115,7 @@ describe("EnvironmentDetector", () => {
     expect(EnvironmentDetector.getRuntime()).toBe("bun");
 
     globalThis.process = originalProcess;
-    (globalThis as any).window = originalWindow;
+    (globalThis as unknown).window = originalWindow;
   });
 
   it("should handle error in checkWasmThreads gracefully", () => {
@@ -125,6 +125,6 @@ describe("EnvironmentDetector", () => {
       }),
     });
     vi.stubGlobal("SharedArrayBuffer", vi.fn());
-    expect((EnvironmentDetector as any).checkWasmThreads()).toBe(false);
+    expect((EnvironmentDetector as unknown).checkWasmThreads()).toBe(false);
   });
 });

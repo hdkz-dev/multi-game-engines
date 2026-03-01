@@ -1,20 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey,
-  ResourceMap, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IJanggiSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+
+import { IJanggiSearchOptions,
   IJanggiSearchInfo,
-  IJanggiSearchResult,
-} from "@multi-game-engines/domain-janggi";
+  IJanggiSearchResult, } from "@multi-game-engines/domain-janggi";
 import { JanggiParser } from "./JanggiParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: Janggi (UJCI) Adapter.

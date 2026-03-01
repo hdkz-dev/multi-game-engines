@@ -1,11 +1,9 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
-import {
-  SearchLogEntry,
+import { SearchLogEntry,
   createUIStrings,
   formatNumber,
-  formatTime,
-} from "@multi-game-engines/ui-core";
+  formatTime, } from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import "./score-badge.js";
 

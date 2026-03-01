@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import ChessBoardComponent from "../ChessBoard.vue";
+
 import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
 import { createFEN } from "@multi-game-engines/domain-chess";
 

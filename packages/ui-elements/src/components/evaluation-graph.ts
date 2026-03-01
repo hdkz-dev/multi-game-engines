@@ -1,10 +1,8 @@
 import { LitElement, html, css, svg } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import {
-  EvaluationPresenter,
+import { EvaluationPresenter,
   IEvaluationHistoryEntry,
-  createUIStrings,
-} from "@multi-game-engines/ui-core";
+  createUIStrings, } from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("evaluation-graph")

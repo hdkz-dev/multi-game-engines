@@ -1,11 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { MonitorRegistry } from "../MonitorRegistry.js";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 
 type TestEngine = IEngine<
   IBaseSearchOptions,

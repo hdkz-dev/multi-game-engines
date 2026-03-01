@@ -1,5 +1,5 @@
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   EngineError,
   EngineErrorCode,
   ProtocolValidator,
@@ -7,8 +7,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** リバーシの盤面データ */
 export type ReversiBoard = Brand<string, "ReversiBoard">;

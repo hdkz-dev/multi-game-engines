@@ -1,6 +1,5 @@
 import { BaseAdapter } from "../adapters/BaseAdapter.js";
-import {
-  IEngineLoader,
+import { IEngineLoader,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -8,8 +7,7 @@ import {
   IProtocolParser,
   IEngineConfig,
   MiddlewareCommand,
-  NormalizedScore,
-} from "../types.js";
+  NormalizedScore, } from "../types.js";
 import { createMove } from "../protocol/ProtocolValidator.js";
 
 /**

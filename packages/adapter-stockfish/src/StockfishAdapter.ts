@@ -1,10 +1,8 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
 import { UCIAdapter } from "@multi-game-engines/adapter-uci";
-import {
-  IChessSearchOptions,
+import { IChessSearchOptions,
   IChessSearchInfo,
-  IChessSearchResult,
-} from "@multi-game-engines/domain-chess";
+  IChessSearchResult, } from "@multi-game-engines/domain-chess";
 
 /**
  * 2026 Zenith Tier: Stockfish 専用アダプター。

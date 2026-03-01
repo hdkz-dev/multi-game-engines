@@ -1,20 +1,7 @@
-import {
-  IProtocolParser,
-  EngineError,
-  EngineErrorCode,
-  ProtocolValidator,
-  truncateLog,
-  I18nKey,
-  ScoreNormalizer,
-  PositionId, createI18nKey } from "@multi-game-engines/core";
-import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
+import { IProtocolParser, EngineError, EngineErrorCode, ProtocolValidator, truncateLog, ScoreNormalizer, PositionId, I18nKey, createI18nKey } from "@multi-game-engines/core";
 import { tCommon, CommonKey } from "@multi-game-engines/i18n-common";
-import {
-  createShogiMove,
-  IShogiSearchOptions,
-  IShogiSearchInfo,
-  IShogiSearchResult,
-} from "@multi-game-engines/domain-shogi";
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
+import { createShogiMove, IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult } from "@multi-game-engines/domain-shogi";
 
 /**
  * 2026 Zenith Tier: 汎用 USI (Universal Shogi Interface) パーサー。

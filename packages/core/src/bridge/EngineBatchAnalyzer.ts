@@ -1,10 +1,8 @@
-import {
-  IBaseSearchOptions,
+import { IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   IEngine,
-  EngineErrorCode,
-} from "../types.js";
+  EngineErrorCode, } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 /**

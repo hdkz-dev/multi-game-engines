@@ -2,12 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { MonitorRegistry } from "@multi-game-engines/ui-core";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 
 describe("useEngineMonitor", () => {
   // 2026 Zenith Practice: 型安全なモック定義

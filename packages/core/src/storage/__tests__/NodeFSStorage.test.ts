@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { NodeFSStorage } from "../NodeFSStorage.js";
 import * as os from "node:os";
 import * as path from "node:path";

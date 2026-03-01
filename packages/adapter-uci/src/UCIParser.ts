@@ -1,21 +1,6 @@
-import {
-  IProtocolParser,
-  Move,
-  ProtocolValidator,
-  EngineError,
-  EngineErrorCode,
-  createMove,
-  truncateLog,
-  I18nKey,
-  ScoreNormalizer,
-  PositionId, createI18nKey } from "@multi-game-engines/core";
-import { tChess as translate, ChessKey } from "@multi-game-engines/i18n-chess";
-import {
-  createFEN,
-  IChessSearchOptions,
-  IChessSearchInfo,
-  IChessSearchResult,
-} from "@multi-game-engines/domain-chess";
+import { IProtocolParser, Move, ProtocolValidator, EngineError, EngineErrorCode, createMove, truncateLog, ScoreNormalizer, PositionId, I18nKey, createI18nKey } from "@multi-game-engines/core";
+import { ChessKey, tChess as translate } from "@multi-game-engines/i18n-chess";
+import { createFEN, IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/domain-chess";
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。

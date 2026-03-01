@@ -3,18 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 // Import components
 import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  createPositionString,
-} from "@multi-game-engines/core";
-import {
-  EngineSearchState,
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, createPositionString } from "@multi-game-engines/core";
+import { EngineSearchState,
   SearchMonitor,
-  createInitialState,
-} from "@multi-game-engines/ui-core";
+  createInitialState, } from "@multi-game-engines/ui-core";
 
 // Mock the hooks
 vi.mock("../useEngineMonitor.js", () => ({

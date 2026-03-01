@@ -1,26 +1,5 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import {
-  IEngineBridge,
-  IEngineAdapter,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
-  EngineLoadingStrategy,
-  IMiddleware,
-  ICapabilities,
-  IEngineLoader,
-  IEngine,
-  IEngineConfig,
-  IEngineRegistry,
-  EngineRegistry,
-  EngineErrorCode,
-  I18nKey,
-  IEngineBridgeOptions,
-  IBookProvider,
-} from "../types.js";
+import { IEngineBridge, IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineStatus, ILoadProgress, ITelemetryEvent, EngineLoadingStrategy, IMiddleware, ICapabilities, IEngineLoader, IEngine, IEngineConfig, IEngineRegistry, EngineRegistry, EngineErrorCode, IEngineBridgeOptions, IBookProvider } from "../types.js";
 import { EngineFacade, INTERNAL_ADAPTER } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
 import { EngineConcurrencyController } from "./EngineConcurrencyController.js";
@@ -597,7 +576,7 @@ export class EngineBridge implements IEngineBridge {
     this.pendingEngines.clear();
   }
 
-  unuse(middleware: IMiddleware<any, any, any> | string): void {
+  unuse(middleware: IMiddleware<unknown, unknown, unknown> | string): void {
     if (typeof middleware === "string") {
       this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
     } else {
@@ -791,13 +770,13 @@ export class EngineBridge implements IEngineBridge {
     this.capsPromise = null;
   }
 
-  private isIEngineAdapter(obj: any): obj is IEngineAdapter {
+  private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
-    const r = obj as Record<string, any>;
+    const r = obj as Record<string, unknown>;
     const parser = r["parser"];
     if (typeof parser !== "object" || parser === null) return false;
 
-    const p = parser as Record<string, any>;
+    const p = parser as Record<string, unknown>;
     return (
       typeof r["id"] === "string" &&
       typeof r["name"] === "string" &&

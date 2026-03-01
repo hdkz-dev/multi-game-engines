@@ -1,10 +1,8 @@
-import {
-  IBookProvider,
+import { IBookProvider,
   IBookAsset,
   IEngineLoader,
   ProgressCallback,
-  IEngineSourceConfig,
-} from "../types.js";
+  IEngineSourceConfig, } from "../types.js";
 
 /**
  * 2026 Zenith Tier: 定跡書プロバイダーの標準実装。

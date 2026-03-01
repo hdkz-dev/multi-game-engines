@@ -2,8 +2,8 @@
  * 2026 Zenith Tier: Backgammon Domain Implementation.
  */
 
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   Move,
   createMove,
   EngineError,
@@ -12,8 +12,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   truncateLog,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * バックギャモンの盤面表現。

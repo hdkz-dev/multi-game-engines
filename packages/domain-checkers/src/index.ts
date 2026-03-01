@@ -2,8 +2,8 @@
  * 2026 Zenith Tier: Checkers Domain Implementation.
  */
 
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   Move,
   createMove,
   createPositionString,
@@ -13,8 +13,7 @@ import {
   IBaseSearchResult,
   EngineError,
   EngineErrorCode,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * チェッカーの盤面表現。

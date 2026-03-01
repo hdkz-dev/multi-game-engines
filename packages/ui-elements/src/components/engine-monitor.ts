@@ -1,20 +1,12 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  EngineStatus,
-  IBaseSearchInfo,
-} from "@multi-game-engines/core";
-import {
-  MonitorRegistry,
+import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
+import { MonitorRegistry,
   EngineSearchState,
   SearchStateTransformer,
   CommandDispatcher,
   UINormalizerMiddleware,
-  createUIStrings,
-} from "@multi-game-engines/ui-core";
+  createUIStrings, } from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 
 import "./score-badge.js";

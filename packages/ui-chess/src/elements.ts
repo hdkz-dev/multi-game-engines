@@ -1,11 +1,9 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {
-  parseFEN,
+import { parseFEN,
   ChessPiece,
   FEN,
-  createFEN,
-} from "@multi-game-engines/domain-chess";
+  createFEN, } from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
 import { chessLocales } from "@multi-game-engines/i18n-chess";
 

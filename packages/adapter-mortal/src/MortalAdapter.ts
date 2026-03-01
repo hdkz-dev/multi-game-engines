@@ -1,19 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  IEngineConfig,
-  IEngineSourceConfig,
-  EngineErrorCode,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IMahjongSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, IEngineConfig, IEngineSourceConfig, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+
+import { IMahjongSearchOptions,
   IMahjongSearchInfo,
-  IMahjongSearchResult,
-} from "@multi-game-engines/domain-mahjong";
+  IMahjongSearchResult, } from "@multi-game-engines/domain-mahjong";
 import { MahjongJSONParser } from "./MahjongJSONParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: Mortal 麻雀エンジンアダプター。

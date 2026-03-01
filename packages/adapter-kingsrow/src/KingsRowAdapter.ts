@@ -1,21 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  IEngineConfig,
-  IEngineSourceConfig,
-  ResourceMap,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  ICheckersSearchOptions,
+import { BaseAdapter, IEngineAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+
+import { ICheckersSearchOptions,
   ICheckersSearchInfo,
-  ICheckersSearchResult,
-} from "@multi-game-engines/domain-checkers";
+  ICheckersSearchResult, } from "@multi-game-engines/domain-checkers";
 import { KingsRowParser } from "./KingsRowParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: KingsRow チェッカーアダプター。

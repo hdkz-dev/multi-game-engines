@@ -1,14 +1,7 @@
-import {
-  IBaseSearchResult,
-  IScoreInfo,
-  EngineError,
-  EngineErrorCode,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import {
-  tEngines as translate,
-  EnginesKey,
-} from "@multi-game-engines/i18n-engines";
+import { IBaseSearchResult, IScoreInfo, EngineError, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+import { EnginesKey } from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
+import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * 2026 Best Practice: IScoreInfo の型ガード。

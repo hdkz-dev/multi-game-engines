@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { XiangqiParser } from "../XiangqiParser.js";
-import { createXFEN } from "@multi-game-engines/domain-xiangqi";
+
 import { PositionId } from "@multi-game-engines/core";
 
 describe("XiangqiParser", () => {

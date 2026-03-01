@@ -1,5 +1,5 @@
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   EngineError,
   EngineErrorCode,
   Move,
@@ -9,8 +9,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
 export type GOBoard = Brand<string, "GOBoard">;

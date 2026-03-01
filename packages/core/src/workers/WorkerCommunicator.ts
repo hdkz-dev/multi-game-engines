@@ -1,6 +1,6 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode, I18nKey } from "../types.js";
+import { EngineErrorCode } from "../types.js";
 
 /**
  * Web Worker との通信をカプセル化し、バッファリングと期待メッセージの待機機能を提供します。

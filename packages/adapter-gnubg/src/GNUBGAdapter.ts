@@ -1,21 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  IEngineConfig,
-  IEngineSourceConfig,
-  ResourceMap,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IBackgammonSearchOptions,
+import { BaseAdapter, IEngineAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+
+import { IBackgammonSearchOptions,
   IBackgammonSearchInfo,
-  IBackgammonSearchResult,
-} from "@multi-game-engines/domain-backgammon";
+  IBackgammonSearchResult, } from "@multi-game-engines/domain-backgammon";
 import { GNUBGParser } from "./GNUBGParser.js";
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * 2026 Zenith Tier: GNU Backgammon アダプター。

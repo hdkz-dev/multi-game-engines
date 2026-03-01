@@ -1,9 +1,7 @@
-import {
-  IMiddleware,
+import { IMiddleware,
   IMiddlewareContext,
   ITelemetryEvent,
-  MiddlewarePriority,
-} from "../types.js";
+  MiddlewarePriority, } from "../types.js";
 
 interface PerformanceWithMemory extends Performance {
   memory?: {

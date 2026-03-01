@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { StockfishAdapter } from "../StockfishAdapter.js";
 import { IEngineLoader } from "@multi-game-engines/core";
 import { createFEN } from "@multi-game-engines/domain-chess";

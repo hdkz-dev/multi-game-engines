@@ -1,7 +1,7 @@
 import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect } from "vitest";
 import { EngineError } from "../EngineError.js";
-import { EngineErrorCode, I18nKey } from "../../types.js";
+import { EngineErrorCode } from "../../types.js";
 
 describe("EngineError", () => {
   it("should create an error with correct properties and name", () => {

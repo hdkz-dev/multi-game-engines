@@ -4,8 +4,8 @@ import { NativeCommunicator } from "../NativeCommunicator.js";
 const { mockChild } = vi.hoisted(() => {
   // Use a simple mock object that implements the necessary EventEmitter interface
   // to avoid issues with hoisted imports of node:events
-  const listeners = new Map<string, Set<(...args: any[]) => any>>();
-  const m: any = {
+  const listeners = new Map<string, Set<(...args: unknown[]) => unknown>>();
+  const m: unknown = {
     on: vi.fn((event, cb) => {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add(cb);
@@ -28,7 +28,7 @@ const { mockChild } = vi.hoisted(() => {
         return m.stdout;
       }),
       emit: vi.fn((event, ...args) => {
-        m._stdoutListeners?.get(event)?.forEach((cb: any) => cb(...args));
+        m._stdoutListeners?.get(event)?.forEach((cb: unknown) => cb(...args));
         return true;
       }),
       removeAllListeners: vi.fn(() => {

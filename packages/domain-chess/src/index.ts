@@ -1,5 +1,5 @@
-import {
-  EngineErrorCode,
+import { tChess as translate } from "@multi-game-engines/i18n-chess";
+import { EngineErrorCode,
   EngineError,
   PositionString,
   IBaseSearchOptions,
@@ -7,8 +7,7 @@ import {
   IBaseSearchResult,
   IScoreInfo,
   Move,
-  I18nKey, createI18nKey } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * Branded Type for FEN (Forsyth-Edwards Notation) strings.

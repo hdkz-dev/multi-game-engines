@@ -1,18 +1,8 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  type Mock,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { DefaultTelemetryMiddleware } from "../DefaultTelemetryMiddleware.js";
-import {
-  IMiddlewareContext,
+import { IMiddlewareContext,
   ITelemetryEvent,
-  MiddlewarePriority,
-} from "../../types.js";
+  MiddlewarePriority, } from "../../types.js";
 
 describe("DefaultTelemetryMiddleware", () => {
   let middleware: DefaultTelemetryMiddleware;

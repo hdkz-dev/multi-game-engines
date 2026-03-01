@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineBridge } from "../EngineBridge.js";
-import {
-  IEngineAdapter,
+import { IEngineAdapter,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -10,8 +9,7 @@ import {
   EngineStatus,
   MiddlewarePriority,
   Move,
-  IEngineConfig,
-} from "../../types.js";
+  IEngineConfig, } from "../../types.js";
 import { createMove } from "../../protocol/ProtocolValidator.js";
 
 describe("EngineBridge", () => {
