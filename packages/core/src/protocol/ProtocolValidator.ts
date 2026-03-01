@@ -2,8 +2,9 @@ import { EngineError } from "../errors/EngineError.js";
 import { EngineErrorCode,
   Move,
   PositionString,
+  PositionId,
   I18nKey,
-  PositionId, } from "../types.js";
+  } from "../types.js";
 import { truncateLog } from "../utils/Sanitizer.js";
 
 /**

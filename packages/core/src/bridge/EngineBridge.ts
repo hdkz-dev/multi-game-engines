@@ -1,4 +1,4 @@
-import { createI18nKey } from "../protocol/ProtocolValidator.js";
+import { createI18nKey, ProtocolValidator } from "../protocol/ProtocolValidator.js";
 import { IEngineBridge, IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineStatus, ILoadProgress, ITelemetryEvent, EngineLoadingStrategy, IMiddleware, ICapabilities, IEngineLoader, IEngine, IEngineConfig, IEngineRegistry, EngineRegistry, EngineErrorCode, IEngineBridgeOptions, IBookProvider } from "../types.js";
 import { EngineFacade, INTERNAL_ADAPTER } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -487,6 +487,12 @@ export class EngineBridge implements IEngineBridge {
 
     const id = config.id!;
     const version = config.version;
+
+    // 2026 Zenith Tier: Input Hardening
+    ProtocolValidator.assertNoInjection(id, "Engine ID");
+    if (version) {
+      ProtocolValidator.assertNoInjection(version, "Engine Version");
+    }
 
     // 既に sources が完全に揃っている場合は何もしない
     if (config.sources?.main) {

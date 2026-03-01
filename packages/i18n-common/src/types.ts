@@ -5,6 +5,7 @@ import { I18nKey } from "@multi-game-engines/core";
  */
 export type CommonKey =
   | "engine.status"
+  | "engine.security.remediationAdvice"
   | "engine.depth"
   | "engine.nodes"
   | "engine.nps"
@@ -38,6 +39,8 @@ export type CommonKey =
   | "engine.errors.missingSources"
   | "engine.errors.missingMainEntryPoint"
   | "engine.errors.searchAborted"
+  | "engine.errors.duplicateFactory"
+  | "engine.errors.stalePositionId"
   | "engine.errors.invalidPositionId"
   | "engine.errors.invalidMoveFormat"
   | "engine.errors.injectionDetected"
