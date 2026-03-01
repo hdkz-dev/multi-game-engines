@@ -72,8 +72,10 @@
 - [x] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
   - [x] プロトタイプと MajorityVote 実装。
   - [x] `BestScore`, `Weighted` 戦略の追加。
-- [ ] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-038以降)。
-  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+- [x] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-056)。
+  - `skills/` ディレクトリの標準化と `SKILL.md` 形式への統一。
+  - `zenith-audit`, `doc-sync` スキルの新規実装。
+  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
   - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
   - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。

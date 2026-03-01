@@ -128,3 +128,20 @@ All UI components must strictly adhere to the following accessibility standards:
 - **Empirical 98% Coverage**: Targets 98.41%+ line coverage in `core`, physically demonstrating resilience against network failures, storage locks, and timeout conditions using mocks.
 - **Deterministic Telemetry**: Mocks `performance.now()` for environment-independent verification.
 - **Zero-Any Policy**: 100% elimination of `any` in production and test code.
+
+## 7. AI Agent Skills (Modular Capabilities)
+
+Standardized framework for extending AI agent capabilities across the monorepo.
+
+### 7-1. Skill Structure (SKILL.md)
+
+Each skill is a self-contained directory in `skills/` containing:
+- **`SKILL.md`**: Frontmatter metadata (name, description) and instructions.
+- **`README.md`** (Optional): User-facing documentation.
+- **`tools/`** (Optional): Scripts or local MCP tools associated with the skill.
+
+### 7-2. Core Skills
+
+- **`zenith-audit`**: Automated Grep-based auditing for Zero-Any and Branded Type compliance.
+- **`doc-sync`**: Maintenance of Japanese/English documentation parity.
+- **`code-review`**: Integration with external auditing tools like CodeRabbit.

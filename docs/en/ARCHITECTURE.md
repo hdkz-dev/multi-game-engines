@@ -120,3 +120,11 @@ In alignment with 2026 Zenith Tier standards, all UI components adhere to **WCAG
 ## AI Ensemble Development
 
 Code quality and architectural integrity are maintained through mutual AI supervision (Gemini, CodeRabbit, DeepSource, Snyk).
+
+### AI Agent Skills
+
+To scale complex engineering tasks, we utilize a standardized **Agent Skills** framework.
+
+- **Standardization**: Skills are modular instruction sets located in `skills/` (e.g., `skills/zenith-audit/SKILL.md`).
+- **Dynamic Activation**: Agents activate specific skills to augment their capabilities for auditing, document synchronization, and advanced refactoring.
+- **Consistency**: Centralized skills ensure that all AI tools operating on the codebase adhere to the same 2026 Zenith Tier quality gates.
