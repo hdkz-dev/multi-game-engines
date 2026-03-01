@@ -124,6 +124,9 @@ export class ChessBoard extends LitElement {
   errorMessage = "";
   @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
     {};
+  @property({ type: Object }) pieceSymbols: Partial<
+    Record<ChessPiece, string>
+  > = {};
 
   /**
    * 2026 Zenith Tier: Roving Tabindex state.

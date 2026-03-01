@@ -1,5 +1,8 @@
 {
   "engine": {
+    "security": {
+      "remediationAdvice": "マルチスレッド (SharedArrayBuffer) を有効にするには、以下の HTTP ヘッダーを設定してください:\n- Cross-Origin-Opener-Policy: same-origin\n- Cross-Origin-Embedder-Policy: require-corp\n\nプラットフォームごとの設定例:\n[Vercel (vercel.json)]\n{ \"headers\": [{ \"source\": \"/(.*)\", \"headers\": [\n  { \"key\": \"Cross-Origin-Opener-Policy\", \"value\": \"same-origin\" },\n  { \"key\": \"Cross-Origin-Embedder-Policy\", \"value\": \"require-corp\" }\n]}]}\n\n[Cloudflare Pages (_headers)]\n/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n\n[Netlify (_headers)]\n/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp"
+    },
     "status": "状態",
     "depth": "深さ",
     "nodes": "局面数",
@@ -39,11 +42,16 @@
       "invalidEngineId": "エンジン ID が無効です: \"{id}\"。英数字、ハイフン、アンダースコアのみが許可されています。",
       "insecureConnection": "不安全な接続 (HTTP) は、機密性の高いエンジンファイルには許可されていません。",
       "sriRequired": "セキュリティ検証のために SRI が必要です。",
+      "sriBypassNotAllowed": "本番環境では SRI バイパス (__unsafeNoSRI) は許可されていません。",
       "adapterFactoryInvalidReturn": "\"{adapter}\" のファクトリが無効なオブジェクトを返しました。",
       "adapterNotFound": "\"{id}\" のエンジンアダプターが見つからないか、ファクトリが登録されていません。",
       "internalError": "システム内部エラーが発生しました: {message}",
       "resourceLoadUnknown": "エンジン \"{engineId}\" のリソースロード中に不明なエラーが発生しました。",
       "missingMainEntryPoint": "エンジンリソースに 'main' エントリポイント URL が含まれていません。",
+      "searchAborted": "探索タスクが中止されました。",
+      "duplicateFactory": "アダプターファクトリ \"{type}\" は既に登録されています。",
+      "stalePositionId": "古い局面に対する解析結果であるため、破棄されました。",
+      "invalidPositionId": "不正な局面ID形式です: \"{id}\"。",
       "invalidShogiMove": "無効な将棋の指し手です: \"{move}\"",
       "invalidMahjongMove": "無効な麻雀の打牌です: \"{move}\"",
       "invalidGOBoard": "無効な囲碁の盤面状態です。",

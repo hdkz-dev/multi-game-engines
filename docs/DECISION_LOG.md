@@ -47,6 +47,10 @@
 - [ADR-017: ネイティブブリッジの統合方針](./adr/017-native-integration.md) (Accepted - 2026-02-12)
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
 - [ADR-050: Advanced Development Skills Integration](./adr/050-advanced-dev-skills-integration.md) (Proposed - 2026-02-27)
+- [ADR-051: Comprehensive Validation, A11y, and Robust Error Handling Expansion](./adr/051-validation-a11y-error-hardening.md) (Accepted - 2026-02-27)
+- [ADR-052: Zenith Hardening & Standardized Score Normalization](./adr/052-zenith-hardening-score-normalization.md) (Proposed - 2026-02-27)
+- [ADR-053: Pluggable Storage Architecture](./adr/053-pluggable-storage-architecture.md) (Proposed - 2026-02-27)
+- [ADR-054: Extreme Robustness and High Coverage Testing Strategy](./adr/054-extreme-robustness-strategy.md) (Proposed - 2026-02-28)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 
@@ -59,3 +63,4 @@
 - [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](./adr/036-zenith-audit-and-strict-types.md) (Accepted - 2026-02-20)
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](./adr/037-core-domain-isolation-and-lifecycle-hardening.md) (Accepted - 2026-02-20)
 - [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed - 2026-02-21)
+- [ADR-055: Standardization of Piece Visualization through pieceSymbols property](./adr/055-piece-symbols-standardization.md) (Accepted - 2026-03-01)

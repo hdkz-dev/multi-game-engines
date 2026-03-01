@@ -17,5 +17,8 @@
     "invalidSriFormat": "[RemoteRegistry] 無効な SRI 形式です: {sri}",
     "unsupportedAlgorithm": "[RemoteRegistry] サポートされていない SRI アルゴリズムです: {algo}",
     "notLoaded": "[RemoteRegistry] マニフェストロード前に engine \"{id}\" が解決されました。null を返します。"
+  },
+  "factory": {
+    "requiresMainSource": "エンジン \"{id}\" の初期化には \"main\" ソースの設定（Worker スクリプトや WASM バイナリ等）が必須です。"
   }
 }

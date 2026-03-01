@@ -1,149 +1,147 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
-## 1. Core Types
+## 1. Core Type Definitions
 
-The Core package provides only abstract definitions independent of specific games or protocols.
+The `core` package provides abstract definitions independent of specific games.
 
-### 1-1. Abstract Foundation
+### 1-1. Base Definitions
 
-- **Brand<K, T>**: Common helper for creating Branded Types.
+- **Brand<K, T>**: Common helper for generating Branded Types.
+- **NormalizedScore**: Branded number mapped from -1.0 to 1.0.
 - **EngineStatus**: Lifecycle states (`loading`, `ready`, `busy`, etc.).
 - **EngineErrorCode**: Standardized error codes.
 
-### 1-2. Domain-Specific Branded Types
+### 1-2. Search Info (IBaseSearchInfo)
 
-Game-specific types are centralized in `@multi-game-engines/core`'s `types.ts` to avoid circular dependencies and ensure cross-package consistency.
+Highly standardized structure for engine candidate data.
 
-- **FEN**: Chess position notation (Branded string). Validated via `createFEN`.
-- **SFEN**: Shogi position notation (Branded string). Validated via `createSFEN`.
-- **Move**: Move notation (Branded string). Supports UCI/USI formats, validated via `createMove`.
-- **PositionString**: Generic game-agnostic position string.
+- **`positionId`**: Unique identifier for the board position, used for stale message filtering.
+- **`score` (Standardized Score)**:
+  - `raw`: Raw numeric value from engine.
+  - `unit`: Evaluation unit (`cp`, `mate`, `points`, `winrate`, `diff`).
+  - `normalized`: `NormalizedScore` (-1.0 to 1.0).
+- **`pv` (Structured PV)**: Array of `Move[]` (Branded Types) instead of raw strings.
+- **`depth`, `seldepth`, `nodes`, `nps`, `time`, `hashfull`**: Standard metrics.
 
-### 1-3. Loading Strategy
+### 1-3. Universal I/O & Flow Control
 
-- `manual`: Requires explicit `load()`.
-- `on-demand`: Auto-loads if not ready when `search()` is called.
-- `eager`: Starts loading immediately upon engine creation.
+- **`AbortSignal`**: Required parameter for `loadResource`, `search`, and `analyze`.
+- **`ILoadProgress`**: Standard object for progress notifications.
+  - `status`: 'connecting', 'downloading', 'verifying', 'completed', 'aborted'.
+  - `loadedBytes`: Current transferred bytes.
+  - `totalBytes`: Expected total size.
+- **`ProgressCallback`**: `(progress: ILoadProgress) => void`.
+
+### 1-4. Environment-Agnostic Storage (IFileStorage)
+
+- **`OPFSStorage`**: High-performance browser Origin Private File System (Primary).
+- **`IndexedDBStorage`**: Browser-based fallback.
+- **`NodeFSStorage`**: Node.js/Bun local file system.
+- **`MemoryStorage`**: Ephemeral in-memory storage.
+- **Custom Injection**: Users can inject custom `IFileStorage` via `IEngineBridgeOptions`.
 
 ## 2. Engine Facade (IEngine)
 
-The main consumer API.
+Primary API for application developers.
 
-- **EngineRegistry-based Inference**: Automatic type inference for `bridge.getEngine('id')`.
-- `load()`: Initialization with SRI validation and cache loading.
-- `search(options)`: Asynchronous search with middleware support. Sequential task management stops previous tasks.
-- `onInfo(callback)`: Real-time thinking stream subscription.
-- `stop()`: Safely aborts current search.
-- `dispose()`: Releases individual engine resources and clears managed subscriptions.
+- **Auto-Type Inference**: `bridge.getEngine('stockfish')` automatically infers the correct generic types via the `EngineRegistry`.
+- `load()`: Initialization with SRI validation and persistent cache loading.
+- `search(options)`: Asynchronous search with automatic loading. **Middleware Isolation** protects the main process from crashes in individual middleware hooks using per-hook `try-catch`.
+- `onInfo(callback)`: Real-time subscription to thinking info via normalization middleware.
+- `consent()`: Resumes loading after explicit license agreement.
+- `stop()`: Graceful search interruption (Async).
+- `dispose()`: Releases engine resources and clears managed subscriptions.
 
-## 3. Security & Infrastructure
+## 3. Advanced Analysis
 
-### 3-1. EngineLoader (Modern Security)
+### 3-1. Batch Analysis (EngineBatchAnalyzer)
 
-- **Mandatory SRI**: Force hash validation for all resources. Supports W3C standard multi-hash formats.
-- **Atomic Multi-load**: Loads multiple related resources (e.g., WASM + NNUE weights) atomically via `loadResources()`.
-- **Auto-Revocation**: Prevents memory leaks by revoking old Blob URLs on reload.
-- **30s Timeout**: Prevents fetch hangs with detailed `Error Cause API` tracking.
+Efficiently analyzes entire game records (move lists).
 
-### 3-2. File Storage (2026 Best Practice)
+- **Prioritized Interruption**: `analyzePriority` allows real-time analysis to preempt background batch processing.
+- **Flow Control**: Supports `pause()`, `resume()`, and `abort()`.
 
-- **Environment Adaptation**: Auto-switches between `OPFSStorage` (Fast) and `IndexedDBStorage`.
-- **Robust Connections**: Auto-recovery from browser disconnects in `IndexedDBStorage`.
+### 3-2. Opening Book Provider (IBookProvider)
 
-### 3-3. WorkerCommunicator (Race-condition Free)
+Manages huge book assets independently.
 
-- **Message Buffering**: Handles messages arriving before `expectMessage` is called.
-- **Exception Propagation**: Forwards internal Worker errors and terminates pending tasks correctly.
+- **`loadBook(asset, options)`**: Loads book data and returns a Blob URL or physical path accessible to WASM.
 
-## 4. Protocol Parsing (2026 Best Practice)
+## 4. Security & Infrastructure
 
-- **Structural Standardization**: All adapters follow the separation of `{Name}Adapter.ts` (lifecycle) and `{Name}Parser.ts` (logic), with UI components consolidated into `src/components/` (ADR-046).
-- **UCIParser**: Chess protocol with factor 10,000 `mate` score conversion.
-- **USIParser**: Shogi protocol with time control and `startpos` keyword support.
-- **GTPParser**: Go protocol supporting `genmove`, `visits`, and `winrate`.
-- **JSONParser (Mahjong)**: Structured message parsing with recursive injection validation.
-- **Generic Text Parsers**: Flexible regex-based parsers for custom text protocols like Edax (Reversi), gnubg, etc.
-- **Injection Protection**: Illegal control characters trigger immediate `SECURITY_ERROR` rejection.
+### 4-1. EngineLoader (Zenith Tier)
 
-### 4-1. Board & Move Parsers
+- **SRI Mandatory**: Hash validation is enforced for all resources. Blank `sri` requires explicit `__unsafeNoSRI` flag.
+- **Atomic Multi-load**: Fetches and validates multiple dependencies (WASM + NNUE) as a single atomic unit.
+- **Auto-Revocation**: Automatically revokes old Blob URLs to prevent memory leaks.
+- **30s Timeout**: Prevents hang-ups during network fetch with detailed Error Cause API tracking.
 
-Lightweight parsers for UI-layer reuse.
+### 4-2. Protocol Validation (Structural Defense)
 
-- **parseFEN**: Extracts 8x8 grid and turn metadata from FEN strings.
-- **parseSFEN**: Extracts 9x9 grid, turn, and hand counts from SFEN strings.
+Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 
-## 5. Telemetry & Observability
+- **Target**: `createSearchCommand` (positions), `createOptionCommand` (names/values).
+- **Checks**: Control characters like `\n`, `\0`, `;`.
+- **Circular Protection**: Uses `WeakSet` to detect and reject recursive objects, preventing stack overflow from malicious input.
+- **Policy**: Reject (Throw) instead of Sanitize.
 
-- **Structured Telemetry**: Automatic measurement of search performance via `DefaultTelemetryMiddleware`.
-- **Privacy-First Logging (ADR-038)**: To prevent PII leakage in logs, `truncateLog` utility automatically limits position-related strings to the first ~20 characters while maintaining context for debugging.
-- **Remediation**: All errors include `remediation` fields with specific recovery actions.
+### 4-3. Hybrid Bridge
 
-## 6. UI & Presentation Foundation
+- **Environment Detection**: Determines runtime (Browser vs Node.js).
+- **Interface Consistency**: `WebWorkerAdapter` and `NativeCommunicator` share the same `IEngineAdapter` interface.
+- **Stream Buffering**: `NativeCommunicator` implements internal buffering to reassemble messages split across OS pipe packets (e.g., extremely long PV strings).
 
-### 6-0. Resource Loading Strategy (EngineLoader)
+## 5. UI & Presentation Layer
 
-To bypass the "Blob Origin" constraint that prohibits relative URL resolution inside Workers in certain browsers:
+### 5-1. Reactive Engine Store (`ui-core`)
 
-- **Dependency Injection**: Engines do not use `importScripts` or `fetch` for their own binary files (.wasm, .nnue).
-- **Blob Injection**: The `EngineLoader` fetches and hashes all resources at the main-thread level, then injects the resulting Blob URLs directly into the Worker environment during initialization (ADR-043).
-- **Auto-Revocation**: Loader automatically tracks Blob URL lifecycles to prevent memory leaks.
+- **Throttling**: Synchronizes with `requestAnimationFrame` (60/120fps) to prevent UI thread saturation from high-frequency engine data.
+- **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering "tearing".
+- **Zod Validation**: Validates all incoming engine messages at the UI boundary.
 
-### 6-1. Reactive Engine Store (`ui-core`)
+### 5-2. Federated i18n Architecture
 
-High-frequency state management foundation.
+- **Physical Isolation**: `i18n-chess`, `i18n-shogi`, etc., are separate packages.
+- **Zero-Any Safety**: Recursive `DeepRecord` types ensure 100% type safety when accessing nested translation keys.
+- **Pay-as-you-go**: Minimum bundle size by only including required language modules.
 
-- **Modular Structure**:
-  - `src/state/`: `EngineStore`, `SearchStateTransformer`, `SubscriptionManager`.
-  - `src/monitor/`: `SearchMonitor`, `MonitorRegistry`, `EvaluationPresenter`.
-  - `src/dispatch/`: `CommandDispatcher`, `Middleware`.
-  - `src/validation/`: Zod contract definitions.
-  - `src/styles/`: Shared theme foundation (`theme.css`).
-- **Adaptive Throttling**:
-  Synchronizes with `requestAnimationFrame` by default.
-- **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering tears.
-- **Zod Contract Validation**: Validates all engine messages via `SearchInfoSchema` at runtime.
-- **EvaluationPresenter**: Separates display logic (colors, labels) from UI frameworks.
+### 5-3. Web Accessibility (A11y) Standards
 
-### 6-2. React Adapters
+All UI components must strictly adhere to the following accessibility standards:
 
-- **`ui-react-core`**: Core React context and Provider.
-- **`ui-react-monitor`**: Monitoring components and `useEngineMonitor` hook.
-- **`ui-chess-react`, `ui-shogi-react`**: Domain-specific components.
-- **`ui-react` (Hub)**: All-in-one package for convenience.
-- **Storybook 10**: Fully compatible with Vite 6 and Tailwind CSS v4.
-- **Deterministic Lifecycle**: Ref-based monitor persistence and Strict Mode safety.
-- **A11y (WCAG 2.2 AA)**: Landmark roles and intelligent live regions.
+- **Compliance**: WCAG 2.2 Level AA.
+- **ARIA Roles & Landmarks**:
+  - Game boards must use `role="grid"` with squares as `role="gridcell"`.
+  - Dynamic content updates (engine info) must use `aria-live="polite"`.
+  - Error notifications must use `role="alert"`.
+- **Keyboard Navigation**:
+  - Proper `tabindex` management and visible focus indicators using `:focus-visible`.
+  - Arrow key support for board navigation; Enter/Space for details.
+  - Proper focus trapping for modal/overlay elements.
+- **Visual & Layout**:
+  - Minimum contrast ratio of 4.5:1 for text and 3:1 for UI elements.
+  - Supports 400% zoom without horizontal scrolling (Reflow).
+- **Automated Validation**: Mandatory `axe-core` scanning in CI/CD via Playwright.
 
-### 6-3. Vue Adapters
+## 6. Testing Philosophy
 
-- **`ui-vue-core`**: Core Vue context and Provider.
-- **`ui-vue-monitor`**: Monitoring components and `useEngineMonitor` composable.
-- **`ui-chess-vue`, `ui-shogi-vue`**: Domain-specific components.
-- **`ui-vue` (Hub)**: All-in-one package for convenience.
-- **Vue 3 Composition API**: `useEngineMonitor` composable for reactive state.
-- **Storybook 10**: Storybook integration in Vue 3 + Vite.
+- **Empirical 98% Coverage**: Targets 98.41%+ line coverage in `core`, physically demonstrating resilience against network failures, storage locks, and timeout conditions using mocks.
+- **Deterministic Telemetry**: Mocks `performance.now()` for environment-independent verification.
+- **Zero-Any Policy**: 100% elimination of `any` in production and test code.
 
-### 6-4. Web Components Adapter (`ui-elements`)
+## 7. AI Agent Skills (Modular Capabilities)
 
-- **Lit Implementation**: Standard-compliant lightweight Web Components.
-- **Board Components**: Efficient CSS Grid rendering with move highlighting and accessible localized piece names.
+Standardized framework for extending AI agent capabilities across the monorepo.
 
-### 6-5. Federated i18n Architecture (Zenith Tier)
+### 7-1. Skill Structure (SKILL.md)
 
-Localization resources are physically isolated by domain to ensure maximum type safety and performance.
+Each skill is a self-contained directory in `skills/` containing:
+- **`SKILL.md`**: Frontmatter metadata (name, description) and instructions.
+- **`README.md`** (Optional): User-facing documentation.
+- **`tools/`** (Optional): Scripts or local MCP tools associated with the skill.
 
-- **Physical Package Separation**:
-  - `i18n-core`: Core translation engine logic.
-  - `i18n-common`: Shared error codes, common status definitions.
-  - `i18n-{domain}`: Game-specific (Chess, Shogi, etc.) vocabulary and messages.
-- **Zero-Any Type Safety**:
-  - `DeepRecord`: A recursive Record type for dynamic, type-safe access to nested translation data, eliminating `unknown` rendering issues.
-  - `I18nKey`: A Branded string defined in the `core` package, allowing adapters to propagate errors without knowledge of specific language implementations.
-- **Pay-as-you-go Optimization**:
-  - Consumers only import the specific i18n modules they need, reducing the bundle size to nearly zero for unused domains.
+### 7-2. Core Skills
 
-## 7. Quality Assurance (Testing Philosophy)
-
-- **140+ Unit Tests**: Comprehensive coverage across Core, Adapters, and UI.
-- **Deterministic Time**: Mocks `performance.now()` for environment-independent telemetry validation.
-- **Zero-Any Policy**: Strict elimination of `any` using `satisfies` and explicit interfaces.
+- **`zenith-audit`**: Automated Grep-based auditing for Zero-Any and Branded Type compliance.
+- **`doc-sync`**: Maintenance of Japanese/English documentation parity.
+- **`code-review`**: Integration with external auditing tools like CodeRabbit.

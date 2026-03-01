@@ -1,26 +1,16 @@
-import {
-  useCallback,
+import { useCallback,
   useSyncExternalStore,
   useEffect,
   useMemo,
-  useState,
-} from "react";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  EngineStatus,
-  createPositionString,
-} from "@multi-game-engines/core";
-import {
-  createInitialState,
+  useState, } from "react";
+import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, createPositionString } from "@multi-game-engines/core";
+import { createInitialState,
   MonitorRegistry,
   SearchStateTransformer,
   EngineSearchState,
   ExtendedSearchInfo,
   UINormalizerMiddleware,
-  CommandDispatcher,
-} from "@multi-game-engines/ui-core";
+  CommandDispatcher, } from "@multi-game-engines/ui-core";
 
 /**
  * 2026 Zenith Constants

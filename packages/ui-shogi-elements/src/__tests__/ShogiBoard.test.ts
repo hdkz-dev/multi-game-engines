@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "../index.js";
 import { ShogiBoard } from "../index.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { createMove } from "@multi-game-engines/core";
+
 import { waitFor } from "@testing-library/dom";
 
 describe("shogi-board Web Component", () => {

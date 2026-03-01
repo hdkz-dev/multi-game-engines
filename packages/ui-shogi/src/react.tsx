@@ -1,6 +1,6 @@
 import React from "react";
-import "./elements.js";
 import { ShogiBoard as ShogiBoardElement } from "./elements.js";
+
 import { Move } from "@multi-game-engines/core";
 import { SFEN } from "@multi-game-engines/domain-shogi";
 import { ShogiPiece } from "@multi-game-engines/domain-shogi";
@@ -21,6 +21,7 @@ declare module "react" {
         "hand-sente-label"?: string | undefined;
         "hand-gote-label"?: string | undefined;
         pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+        pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
         ref?: React.Ref<ShogiBoardElement> | undefined;
       };
     }
@@ -36,6 +37,7 @@ export interface ShogiBoardProps {
   handSenteLabel?: string;
   handGoteLabel?: string;
   pieceNames?: Partial<Record<ShogiPiece, string>>;
+  pieceSymbols?: Partial<Record<ShogiPiece, string>>;
 }
 
 export const ShogiBoard: React.FC<ShogiBoardProps> = ({
@@ -47,13 +49,16 @@ export const ShogiBoard: React.FC<ShogiBoardProps> = ({
   handSenteLabel,
   handGoteLabel,
   pieceNames,
+  pieceSymbols,
 }: ShogiBoardProps) => {
   const ref = React.useRef<ShogiBoardElement>(null);
-  React.useEffect(() => {
+
+  React.useLayoutEffect(() => {
     if (ref.current) {
       ref.current.pieceNames = pieceNames ?? {};
+      ref.current.pieceSymbols = pieceSymbols ?? {};
     }
-  }, [pieceNames]);
+  }, [pieceNames, pieceSymbols]);
 
   return (
     <shogi-board

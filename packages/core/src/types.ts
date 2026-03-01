@@ -17,6 +17,18 @@ export type Move<T extends string = string> = Brand<string, T>;
  */
 export type PositionString<T extends string = string> = Brand<string, T>;
 
+/**
+ * 正規化された評価値を表すブランド型。
+ * -1.0 (負け確) 〜 1.0 (勝ち確) の範囲。
+ */
+export type NormalizedScore = Brand<number, "NormalizedScore">;
+
+/**
+ * 局面を一意に識別するためのブランド型。
+ * レースコンディション（古い解析結果の表示）を防ぐために使用される。
+ */
+export type PositionId = Brand<string, "PositionId">;
+
 // 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
 /**
@@ -24,6 +36,7 @@ export type PositionString<T extends string = string> = Brand<string, T>;
  */
 export type EngineStatus =
   | "uninitialized"
+  | "awaiting-consent"
   | "loading"
   | "ready"
   | "busy"
@@ -35,6 +48,8 @@ export type EngineStatus =
  * 探索オプション。
  */
 export interface IBaseSearchOptions {
+  /** 局面の ID (レースコンディション防止用) */
+  positionId?: PositionId | undefined;
   fen?: PositionString | undefined;
   signal?: AbortSignal | undefined;
   [key: string]: unknown;
@@ -53,12 +68,24 @@ export interface IScoreInfo {
   points?: number | undefined;
   /** 勝率 (0.0 - 1.0)。確率論的な評価を行うエンジンで使用。 */
   winrate?: number | undefined;
+  /**
+   * 2026 Zenith Standard: 正規化された評価値 (-1.0 to 1.0)。
+   * UI での一貫した表示（評価バー等）に使用される。
+   */
+  normalized?: NormalizedScore | undefined;
+  /** 元の評価値の単位 */
+  unit?: "cp" | "mate" | "points" | "winrate" | string | undefined;
 }
 
 /**
  * 探索状況情報。
  */
 export interface IBaseSearchInfo {
+  /**
+   * この情報の対象となる局面の ID。
+   * 古い局面に対する解析結果を無視するために使用。
+   */
+  positionId?: PositionId | undefined;
   /** 探索深度 (プライまたは手数) */
   depth?: number | undefined;
   /** 選択的探索深度 (Selective Depth) */
@@ -69,7 +96,7 @@ export interface IBaseSearchInfo {
   nps?: number | undefined;
   /** 探索時間 (ミリ秒) */
   time?: number | undefined;
-  /** 読み筋 (Principal Variation) */
+  /** 読み筋 (Principal Variation)。Branded Move の配列。 */
   pv?: Move[] | undefined;
   /** MultiPV の順位 (1, 2, ...) */
   multipv?: number | undefined;
@@ -90,20 +117,44 @@ export interface IBaseSearchInfo {
  * 探索結果。
  */
 export interface IBaseSearchResult {
-  bestMove?: unknown;
-  ponder?: unknown;
+  bestMove: Move | null;
+  ponder?: Move | null | undefined;
   [key: string]: unknown;
 }
 
 /**
- * ロード進捗。
+ * ロード進捗状況。
+ * UI および CLI での進捗表示、中断制御に使用される。
  */
 export interface ILoadProgress {
-  phase: string;
-  loaded: number;
-  total: number;
-  percentage: number;
+  /**
+   * 現在のフェーズ。
+   * 'connecting' (接続中), 'downloading' (ダウンロード中),
+   * 'verifying' (SRI検証中), 'completed' (完了), 'aborted' (中断)
+   */
+  status:
+    | "connecting"
+    | "downloading"
+    | "verifying"
+    | "completed"
+    | "aborted"
+    | string;
+  /** フェーズの説明 (i18n キー) */
+  i18nKey?: I18nKey | undefined;
+  /** 既にロードされたバイト数 */
+  loadedBytes: number;
+  /** 合計バイト数 (不明な場合は undefined) */
+  totalBytes?: number | undefined;
+  /** 進捗パーセンテージ (0 - 100) */
+  percentage?: number | undefined;
+  /** リソースの識別子 (URL 等) */
+  resource?: string | undefined;
 }
+
+/**
+ * 進捗状況の通知を受け取るためのコールバック。
+ */
+export type ProgressCallback = (progress: ILoadProgress) => void;
 
 /**
  * 能力検出。
@@ -111,12 +162,14 @@ export interface ILoadProgress {
 export interface ICapabilities {
   wasmThreads: boolean;
   wasmSimd: boolean;
-  webNN?: boolean;
-  webGPU?: boolean;
-  webTransport?: boolean;
-  threads?: boolean;
-  simd?: boolean;
-  opfs?: boolean;
+  webNN?: boolean | undefined;
+  webGPU?: boolean | undefined;
+  webTransport?: boolean | undefined;
+  threads?: boolean | undefined;
+  simd?: boolean | undefined;
+  opfs?: boolean | undefined;
+  /** ハードウェアアクセラレーションの使用状況 */
+  acceleration?: "none" | "simd" | "webgpu" | "webnn" | undefined;
 }
 
 /**
@@ -247,6 +300,20 @@ export interface IMiddleware<
     result: T_RESULT,
     context: MiddlewareContext<T_OPTIONS>,
   ): Promise<T_RESULT | undefined | void> | T_RESULT | undefined | void;
+  /**
+   * エンジンのステータス変更時に呼び出されます。
+   */
+  onStatusChange?(
+    status: EngineStatus,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): Promise<void> | void;
+  /**
+   * テレメトリイベントの発生時に呼び出されます。
+   */
+  onTelemetry?(
+    telemetry: EngineTelemetry,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): void;
 }
 
 /**
@@ -273,8 +340,21 @@ export interface IProtocolParser<
   createSearchCommand(options: T_OPTIONS): MiddlewareCommand;
   createStopCommand(): MiddlewareCommand;
   createOptionCommand(name: string, value: unknown): MiddlewareCommand;
-  parseInfo(line: string | Record<string, unknown>): T_INFO | null;
+  /**
+   * info 行を解析します。
+   * @param line エンジンからの出力
+   * @param positionId 現在の局面 ID (オプション)
+   */
+  parseInfo(
+    line: string | Record<string, unknown>,
+    positionId?: PositionId,
+  ): T_INFO | null;
   parseResult(line: string | Record<string, unknown>): T_RESULT | null;
+  /**
+   * エンジンが出力する独自のエラーメッセージを i18n キーに変換します。
+   * @param message エンジンからのエラー文字列
+   */
+  translateError?(message: string): I18nKey | null;
 }
 
 /**
@@ -293,10 +373,17 @@ export interface IEngineAdapter<
   readonly requiredCapabilities?: Partial<ICapabilities>;
 
   load(loader?: IEngineLoader): Promise<void>;
+  updateStatus(status: EngineStatus): void;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
   stop(): void | Promise<void>;
   dispose(): Promise<void>;
+  /** 定跡書を設定します。 */
+  setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void>;
+  /** エンジンオプションを設定します。 */
   setOption(name: string, value: string | number | boolean): Promise<void>;
   onInfo?(callback: (info: T_INFO) => void): () => void;
   onSearchResult(callback: (result: T_RESULT) => void): () => void;
@@ -319,11 +406,19 @@ export interface IEngine<
   readonly version: string;
   readonly status: EngineStatus;
   readonly lastError: IEngineError | null;
+  readonly config?: IEngineConfig | undefined;
   loadingStrategy?: EngineLoadingStrategy;
 
   use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this;
   unuse(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT> | string): this;
   load(): Promise<void>;
+  /** ユーザーのライセンス同意を通知し、ロードを続行します。 */
+  consent(): void;
+  /** 定跡書を設定します。 */
+  setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void>;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   stop(): void;
   dispose(): Promise<void>;
@@ -341,13 +436,29 @@ export type EngineLoadingStrategy = "manual" | "on-demand" | "eager";
 
 /**
  * ストレージ関連。
+ * Web (OPFS/IDB) および Node.js (fs) の抽象化。
  */
 export interface IFileStorage {
+  /** データの取得 */
   get(key: string): Promise<ArrayBuffer | null>;
+  /** データの保存 */
   set(key: string, data: ArrayBuffer): Promise<void>;
+  /** データの削除 */
   delete(key: string): Promise<void>;
+  /** キーの存在確認 */
   has?(key: string): Promise<boolean>;
+  /** 全データの消去 */
   clear(): Promise<void>;
+  /**
+   * 現在の使用量と空き容量 (bytes) を取得します。
+   * ブラウザの StorageManager API や Node.js の statvfs を使用。
+   */
+  getQuota?(): Promise<{ usage: number; quota: number }>;
+  /**
+   * 物理ファイルとしての絶対パスを取得します。
+   * 主に CLI/Native 環境で使用されます（WASM への注入等）。
+   */
+  getPhysicalPath?(key: string): Promise<string | null>;
 }
 
 /**
@@ -364,6 +475,17 @@ export type IEngineSourceType =
   | "asset";
 
 /**
+ * 分割された SRI ハッシュ。
+ * 巨大なファイルのインクリメンタル検証に使用される。
+ */
+export interface ISegmentedSRI {
+  /** 各セグメント（チャンク）のサイズ (bytes) */
+  segmentSize: number;
+  /** 各セグメントの SRI ハッシュ配列 */
+  hashes: string[];
+}
+
+/**
  * エンジン・ソース設定。
  */
 export type IEngineSourceConfig = {
@@ -375,6 +497,8 @@ export type IEngineSourceConfig = {
    * Blob URL 環境下での相対パス解決に使用される。
    */
   mountPath?: string;
+  /** 分割された SRI ハッシュ (100MB 超の巨大ファイル用) */
+  segmentedSri?: ISegmentedSRI | undefined;
 } & (
   | { sri: string; __unsafeNoSRI?: never }
   | { sri?: never; __unsafeNoSRI: true }
@@ -402,10 +526,21 @@ export interface IEngineConfig {
         wasm?: IEngineSourceConfig | undefined;
         /** ニューラルネットワークの重みファイル等（オプション） */
         eval?: IEngineSourceConfig | undefined;
+        /** 特定の環境向けバリアント定義 (simd, threads 等) */
+        variants?:
+          | Record<string, Partial<IEngineConfig["sources"]>>
+          | undefined;
         /** 追加の任意リソース */
-        [key: string]: IEngineSourceConfig | undefined;
+        [key: string]:
+          | IEngineSourceConfig
+          | Record<string, unknown>
+          | undefined;
       }
     | undefined;
+  /** ライセンス情報 URL */
+  licenseUrl?: string | undefined;
+  /** ユーザーへの免責事項・同意テキスト */
+  disclaimer?: string | undefined;
   /** エンジン起動時のデフォルトオプション */
   options?: Record<string, unknown> | undefined;
   /** 必須とされる環境能力 */
@@ -422,10 +557,20 @@ export type ResourceMap = Record<string, string>;
  * エンジンローダー。
  */
 export interface IEngineLoader {
-  loadResource(engineId: string, config: IEngineSourceConfig): Promise<string>;
+  /**
+   * 単一のリソースをロードします。
+   * AbortSignal による中断と ProgressCallback による進捗監視をサポート。
+   */
+  loadResource(
+    engineId: string,
+    config: IEngineSourceConfig,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<string>;
+  /** 複数リソースを一括ロードします（アトミック性保証）。 */
   loadResources(
     engineId: string,
     configs: Record<string, IEngineSourceConfig>,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<Record<string, string>>;
   revoke(url: string): void;
   revokeAll(): void;
@@ -440,15 +585,60 @@ export interface IEngineRegistry {
    * 指定されたエンジンIDとバージョンのリソース設定を解決します。
    * 見つからない場合は null を返します。
    */
-  resolve(
-    id: string,
-    version?: string,
-  ): Record<string, IEngineSourceConfig> | null;
+  resolve(id: string, version?: string): IEngineConfig["sources"] | null;
 
   /**
    * このレジストリがサポートしているエンジン ID の一覧を取得します。
    */
   getSupportedEngines(): string[];
+}
+
+/**
+ * 定跡書・データベースアセットの情報。
+ */
+export type IBookAsset = {
+  id: string;
+  url: string;
+  size?: number | undefined;
+  type: "bin" | "db" | "json";
+} & (
+  | { sri: string; __unsafeNoSRI?: never }
+  | { sri?: never; __unsafeNoSRI: true }
+);
+
+/**
+ * 定跡書プロバイダー。
+ * 巨大な定跡ファイルを管理・共有するためのインターフェース。
+ */
+export interface IBookProvider {
+  /** 指定された定跡をロードし、物理パスまたは Blob URL を返します。 */
+  loadBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<string>;
+  /** キャッシュされた定跡の一覧を取得します。 */
+  listCachedBooks(): Promise<string[]>;
+  /** キャッシュを削除します。 */
+  deleteBook(id: string): Promise<void>;
+}
+
+/**
+ * エンジン・ブリッジの設定オプション。
+ */
+export interface IEngineBridgeOptions {
+  /**
+   * カスタムストレージ。
+   * 指定された場合、環境自動検知をスキップしてこのインスタンスを使用します。
+   */
+  storage?: IFileStorage | undefined;
+  /**
+   * カスタム定跡プロバイダー。
+   */
+  bookProvider?: IBookProvider | undefined;
+  /**
+   * 強制的に設定する能力（デバッグまたは特殊環境用）。
+   */
+  capabilities?: Partial<ICapabilities> | undefined;
 }
 
 /**
@@ -490,12 +680,15 @@ export interface IEngineBridge {
     >,
   ): Promise<void>;
 
-  /**
-   * 汎用アダプター用のファクトリ（クラス）を登録します。
-   */
   registerAdapterFactory(
     type: string,
-    factory: (config: IEngineConfig) => unknown,
+    factory: (
+      config: IEngineConfig,
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | Promise<
+          IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+        >,
   ): void;
 
   /**

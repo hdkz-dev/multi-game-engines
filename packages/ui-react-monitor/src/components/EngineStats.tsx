@@ -1,10 +1,8 @@
 import React from "react";
-import {
-  SearchStatistics,
+import { SearchStatistics,
   EngineUIStrings,
   formatNumber,
-  formatTime,
-} from "@multi-game-engines/ui-core";
+  formatTime, } from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-react";
 import { cn } from "../utils/cn.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";

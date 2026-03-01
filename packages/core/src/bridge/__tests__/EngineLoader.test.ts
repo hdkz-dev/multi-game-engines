@@ -29,6 +29,7 @@ describe("EngineLoader", () => {
     // globalThis fetch mock
     globalThis.fetch = vi.fn<() => Promise<Response>>().mockResolvedValue({
       ok: true,
+      headers: { get: () => null } as unknown as Headers,
       arrayBuffer: async () => new TextEncoder().encode("test").buffer,
     } as Response);
 
@@ -107,17 +108,20 @@ describe("EngineLoader", () => {
     };
 
     // 1回目: 失敗させる
-    vi.mocked(fetch).mockResolvedValueOnce({
+    const errRes = {
       ok: false,
       status: 500,
+      headers: { get: () => null } as unknown as Headers,
       statusText: "Internal Server Error",
-    } as Response);
+    } as Response;
+    vi.mocked(fetch).mockResolvedValueOnce(errRes).mockResolvedValueOnce(errRes).mockResolvedValueOnce(errRes);
 
     await expect(loader.loadResource("test", config)).rejects.toThrow();
 
     // 2回目: 成功させる
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
+      headers: { get: () => null } as unknown as Headers,
       arrayBuffer: async () => new TextEncoder().encode("test").buffer,
     } as Response);
 
@@ -274,10 +278,11 @@ describe("EngineLoader", () => {
     // 2. バッチロードを実行。3つ目のリソースを失敗させる
     vi.mocked(fetch).mockImplementation(async (url) => {
       if (url.toString().includes("fail.js")) {
-        return { ok: false, status: 500 } as Response;
+        return { ok: false, status: 500, headers: { get: () => null } as unknown as Headers } as Response;
       }
       return {
         ok: true,
+        headers: { get: () => null } as unknown as Headers,
         arrayBuffer: async () => new TextEncoder().encode("test").buffer,
       } as Response;
     });

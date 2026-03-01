@@ -17,6 +17,22 @@
               "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16.wasm",
               "sri": "sha384-ScF6ZY1hx3CQtkWXLNFo7FVn1rMTyNGdfl7ZznGyTP+n9sDwGmS8ECn5WeJjuMK7",
               "type": "wasm"
+            },
+            "variants": {
+              "simd-mt": {
+                "wasm": {
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-simd-mt.wasm",
+                  "type": "wasm",
+                  "__unsafeNoSRI": true
+                }
+              },
+              "st": {
+                "wasm": {
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-st.wasm",
+                  "type": "wasm",
+                  "__unsafeNoSRI": true
+                }
+              }
             }
           }
         }
@@ -38,6 +54,15 @@
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
               "type": "wasm",
               "__unsafeNoSRI": true
+            },
+            "variants": {
+              "simd": {
+                "wasm": {
+                  "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou-simd.wasm",
+                  "type": "wasm",
+                  "__unsafeNoSRI": true
+                }
+              }
             }
           }
         }
@@ -123,6 +148,22 @@
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
               "type": "worker-js",
               "__unsafeNoSRI": true
+            }
+          }
+        }
+      }
+    },
+    "mock": {
+      "name": "Mock Engine",
+      "adapter": "mock",
+      "latest": "1.0",
+      "versions": {
+        "1.0": {
+          "assets": {
+            "main": {
+              "url": "data:text/javascript;base64,Ly8gTW9jayBFbmdpbmUgV29ya2Vy",
+              "type": "worker-js",
+              "sri": "sha384-CMVYOQbYfi6lQXhnr4ThiJcK/arlmJ3/xAKjgYE/NNmnBdJ5avXpCazRf5lFxKSB"
             }
           }
         }

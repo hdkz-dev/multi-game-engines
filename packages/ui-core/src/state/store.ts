@@ -1,10 +1,4 @@
-import {
-  EngineStatus,
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { EngineStatus, IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 
 /**
  * 購読解除用の関数

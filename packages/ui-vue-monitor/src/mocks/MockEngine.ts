@@ -1,15 +1,4 @@
-import {
-  IEngine,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  IMiddleware,
-  EngineErrorCode,
-  EngineError,
-  createMove,
-} from "@multi-game-engines/core";
+import { IEngine, EngineStatus, ILoadProgress, ITelemetryEvent, IBaseSearchOptions, IBaseSearchResult, IMiddleware, EngineErrorCode, EngineError, createMove, IBookAsset } from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 
 export interface MockEngineOptions {
@@ -44,6 +33,14 @@ export class MockEngine implements IEngine<
     this.updateStatus("loading");
     await new Promise((r) => setTimeout(r, 500));
     this.updateStatus("ready");
+  }
+
+  consent(): void {
+    // NOP
+  }
+
+  async setBook(_asset: IBookAsset): Promise<void> {
+    // NOP
   }
 
   async search(_options: IBaseSearchOptions): Promise<IBaseSearchResult> {

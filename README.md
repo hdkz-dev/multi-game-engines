@@ -7,9 +7,11 @@
 ## 🌟 特徴 / Features
 
 - **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
-- **Zero-Any Type Safety**: Branded Types とジェネリクスにより、コンパイル時に多くのミスを未然に防止。
+- **Unified Score Normalization**: 異種ゲームの評価値を `-1.0 〜 1.0` に統合。UI での汎用表示を実現。
+- **Zenith Robustness & High Coverage**: `core` パッケージで **98.41%** のラインカバレッジを達成。ミドルウェア絶縁、循環参照保護、パケット分割耐性を完備。
+- **Universal Storage & Flow Control**: Web (OPFS) / Node.js (Local FS) の自動切替と AbortSignal 制御。
 - **AI Ensemble 開発**: Gemini, CodeRabbit, DeepSource, Snyk 等の AI ツールが相互に監査を行う自律的品質保証。
-- **Modern Security**: SRI 必須化と「Refuse by Exception」ポリシーによる、プロトコルレベルの堅牢なインジェクション対策。
+- **Modern Security**: SRI 必須化、分割検証 (Segmented SRI)、および「Refuse by Exception」ポリシー。
 - **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤。
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
 - **Universal & Federated UI Architecture**:
@@ -33,7 +35,10 @@
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
 - **Go**: KataGo (GTP) - **Ready**
+- **Xiangqi**: Universal Chinese Chess Interface (UCCI) - **Ready**
+- **Janggi**: Universal Janggi Chess Interface (UJCI) - **Ready**
 - **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
+- **Gomoku**: Renju Solvers (Custom Protocol) - **Ready**
 - **Mahjong**: Mortal (JSON Protocol) - **Ready**
 
 ## 🚀 クイックスタート / Quick Start

@@ -1,6 +1,7 @@
+import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect } from "vitest";
 import { EngineError } from "../EngineError.js";
-import { EngineErrorCode, I18nKey } from "../../types.js";
+import { EngineErrorCode } from "../../types.js";
 
 describe("EngineError", () => {
   it("should create an error with correct properties and name", () => {
@@ -63,7 +64,7 @@ describe("EngineError", () => {
     const error = new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Validation failed",
-      i18nKey: "engine.errors.invalidMoveFormat" as I18nKey,
+      i18nKey: createI18nKey("engine.errors.invalidMoveFormat"),
       i18nParams: { move: "7g7f" },
     });
 
@@ -75,10 +76,18 @@ describe("EngineError", () => {
     const source = new EngineError({
       code: EngineErrorCode.NETWORK_ERROR,
       message: "failed",
-      i18nKey: "errors.network" as I18nKey,
+      i18nKey: createI18nKey("errors.network"),
     });
     const wrapped = EngineError.from(source, "new-id");
     expect(wrapped.i18nKey).toBe("errors.network");
     expect(wrapped.engineId).toBe("new-id");
+  });
+
+  it("should provide remediation for TypeError and RangeError", () => {
+    const tErr = EngineError.from(new TypeError("Bad type"), "test");
+    expect(tErr.remediation).toContain("invalid values");
+
+    const rErr = EngineError.from(new RangeError("Out of range"), "test");
+    expect(rErr.remediation).toContain("allowed limits");
   });
 });

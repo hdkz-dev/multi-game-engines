@@ -2,8 +2,8 @@
  * 2026 Zenith Tier: Backgammon Domain Implementation.
  */
 
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   Move,
   createMove,
   EngineError,
@@ -12,9 +12,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   truncateLog,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * バックギャモンの盤面表現。
@@ -27,7 +25,7 @@ export type BackgammonBoard = Brand<number[], "BackgammonBoard">;
  */
 export function createBackgammonBoard(board: unknown): BackgammonBoard {
   if (!Array.isArray(board) || board.length !== 26) {
-    const i18nKey = "engine.errors.invalidBackgammonBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidBackgammonBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -35,7 +33,7 @@ export function createBackgammonBoard(board: unknown): BackgammonBoard {
     });
   }
   if (!board.every((v) => typeof v === "number" && Number.isFinite(v))) {
-    const i18nKey = "engine.errors.invalidBackgammonBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidBackgammonBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -55,7 +53,7 @@ export type BackgammonMove = Move<"BackgammonMove">;
  */
 export function createBackgammonMove(move: string): BackgammonMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidBackgammonMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidBackgammonMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -64,7 +62,7 @@ export function createBackgammonMove(move: string): BackgammonMove {
   }
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
-    const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.injectionDetected");
     const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
@@ -78,7 +76,7 @@ export function createBackgammonMove(move: string): BackgammonMove {
   // bar/24, 6/off, 24/18 などをサポート。厳密なスペース分離。
   const bgRegex = /^((?:bar|\d+)\/(?:off|\d+))( (?:bar|\d+)\/(?:off|\d+))*$/i;
   if (!bgRegex.test(move)) {
-    const i18nKey = "engine.errors.invalidBackgammonMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidBackgammonMove");
     const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,

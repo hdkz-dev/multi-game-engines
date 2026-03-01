@@ -10,6 +10,7 @@ defineProps<{
   boardLabel?: string | undefined;
   errorMessage?: string | undefined;
   pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+  pieceSymbols?: Partial<Record<ChessPiece, string>> | undefined;
   locale?: string | undefined;
 }>();
 </script>
@@ -23,5 +24,6 @@ defineProps<{
     :error-message="errorMessage"
     :locale="locale"
     .pieceNames="pieceNames"
+    .pieceSymbols="pieceSymbols"
   ></chess-board>
 </template>

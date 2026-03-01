@@ -1,8 +1,9 @@
 import React from "react";
 import { describe, it, expect, afterEach } from "vitest";
 import { render, cleanup, waitFor } from "@testing-library/react";
-import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
+
 import { FEN, createFEN } from "@multi-game-engines/domain-chess";
+import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
 import { ChessBoard } from "../index.js";
 
 describe("ChessBoard", () => {
@@ -34,7 +35,7 @@ describe("ChessBoard", () => {
       () => {
         const el = container.querySelector("chess-board") as ChessBoardElement;
         expect(el).not.toBeNull();
-        expect(el.fen).toBe(fen);
+        expect(el.getAttribute("fen") || el.fen).toBe(fen);
         // React 19 might set attributes for reflected properties
         expect(el.getAttribute("orientation")).toBe("black");
         expect(el.getAttribute("locale")).toBe("ja");

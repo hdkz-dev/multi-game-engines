@@ -1,10 +1,8 @@
 import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
-import {
-  IBackgammonSearchOptions,
+import { IBackgammonSearchOptions,
   IBackgammonSearchInfo,
   IBackgammonSearchResult,
-  createBackgammonMove,
-} from "@multi-game-engines/domain-backgammon";
+  createBackgammonMove, } from "@multi-game-engines/domain-backgammon";
 
 /**
  * 2026 Zenith Tier: GNU Backgammon プロトコルパーサー。

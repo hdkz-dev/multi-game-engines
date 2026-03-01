@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { UCIAdapter } from "../UCIAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 

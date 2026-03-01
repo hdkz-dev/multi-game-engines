@@ -1,5 +1,5 @@
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   EngineError,
   EngineErrorCode,
   Move,
@@ -9,9 +9,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
 export type GOBoard = Brand<string, "GOBoard">;
@@ -57,7 +55,7 @@ export interface IGoSearchResult extends IBaseSearchResult {
  */
 export function createGOBoard(pos: string): GOBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidGOBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -66,7 +64,7 @@ export function createGOBoard(pos: string): GOBoard {
   }
   ProtocolValidator.assertNoInjection(pos, "GOBoard");
   if (!/^[a-zA-Z0-9.\- ]+$/.test(pos)) {
-    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.illegalCharacters");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: translate(i18nKey),
@@ -81,7 +79,7 @@ export function createGOBoard(pos: string): GOBoard {
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidGOMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -92,7 +90,7 @@ export function createGOMove(move: string): GOMove {
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施
   const normalized = move.toLowerCase();
   if (!/^[a-z0-9]+$/.test(normalized)) {
-    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.illegalCharacters");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: translate(i18nKey),
@@ -100,7 +98,7 @@ export function createGOMove(move: string): GOMove {
     });
   }
   if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
-    const i18nKey = "engine.errors.invalidGOMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOMove");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,

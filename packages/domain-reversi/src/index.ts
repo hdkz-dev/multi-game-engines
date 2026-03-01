@@ -1,15 +1,15 @@
-import {
-  Brand,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { Brand,
   EngineError,
   EngineErrorCode,
   ProtocolValidator,
   Move,
+  createMove,
+  createPositionString,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** リバーシの盤面データ */
 export type ReversiBoard = Brand<string, "ReversiBoard">;
@@ -51,7 +51,7 @@ export const REVERSI_MOVE_REGEX = /^([a-h][1-8]|PS)$/i;
  */
 export function createReversiMove(move: string): ReversiMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidReversiMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidReversiMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -60,7 +60,7 @@ export function createReversiMove(move: string): ReversiMove {
   }
   ProtocolValidator.assertNoInjection(move, "ReversiMove");
   if (!REVERSI_MOVE_REGEX.test(move)) {
-    const i18nKey = "engine.errors.invalidReversiMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidReversiMove");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -69,7 +69,7 @@ export function createReversiMove(move: string): ReversiMove {
       i18nParams,
     });
   }
-  return move as ReversiMove;
+  return createMove<"ReversiMove">(move);
 }
 
 /**
@@ -77,7 +77,7 @@ export function createReversiMove(move: string): ReversiMove {
  */
 export function createReversiBoard(pos: string): ReversiBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidReversiBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidReversiBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -85,5 +85,5 @@ export function createReversiBoard(pos: string): ReversiBoard {
     });
   }
   ProtocolValidator.assertNoInjection(pos, "ReversiBoard");
-  return pos as ReversiBoard;
+  return createPositionString<"ReversiBoard">(pos);
 }

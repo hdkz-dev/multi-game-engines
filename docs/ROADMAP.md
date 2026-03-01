@@ -57,6 +57,9 @@
   - **Mobile Native Bridge**: Capacitor/Cordova プラグインによる、モバイル OS ネイティブ環境での最高性能エンジン実行。
 - [x] **Modular Split**: UI パッケージの物理分離（core/monitor/game）による「Pay-as-you-go」アーキテクチャの完成。
 - [x] **Federated i18n Architecture**: 多言語リソースの物理パッケージ分離と、Zero-Any 型安全性の完遂。
+- [x] **Standardized Core (task_0001)**: 異種ゲームの評価値正規化、`positionId` による競合制御、および読み筋の構造化。
+- [x] **Universal Storage & Flow Control**: Node.js/Bun CLI 環境への対応、`AbortSignal` 標準化、およびレジューム機能付きロード。
+- [x] **Binary Variant Selection**: SIMD/Threads に応じた最適な WASM バイナリの自動ディスパッチ。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
@@ -65,7 +68,7 @@
   - [ ] **[BLOCKER]** 全アダプターの SRI プレースホルダーハッシュ (`sha384-*Placeholder`) を本番用ハッシュ値へ置換 (Binary Release Required)。
   - [x] 20パッケージへの README.md 追加。
   - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
-- [ ] **Extended Adapters**:
+- [x] **Extended Adapters**:
   - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), リバーシ (Edax)。
   - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。
   - **Incomplete Information**: ポーカー (DeepStack), ブリッジ, 花札。
@@ -88,6 +91,7 @@
 
 - [x] **Turborepo & CI Optimization**: CI 上での 100% 再現可能な高速実行環境。
 - [x] **超深層監査 (Zenith Tier Audit)**: 全 14 パッケージにわたる徹底的な A11y / ロジック監査。
+- [x] **Extreme Robustness**: 98.41% のラインカバレッジ達成。ミドルウェア絶縁、循環参照保護、パケット分割耐性を完備。
 - [ ] **Continuous Benchmarking**: `CodSpeed` 等による、PR 単位での性能劣化（NPS 低下）検知。
 - [ ] **Self-Healing Docs**: `TypeDoc` による、コード変更に 1 秒も遅れない API リファレンス生成。
 - [x] **Browser Matrix Verification**: `Playwright` による、実ブラウザ上での WASM 動作保証。

@@ -1,21 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  ResourceMap,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IChessSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+
+import { IChessSearchOptions,
   IChessSearchInfo,
-  IChessSearchResult,
-} from "@multi-game-engines/domain-chess";
+  IChessSearchResult, } from "@multi-game-engines/domain-chess";
 import { UCIParser } from "./UCIParser.js";
+import { tChess as translate } from "@multi-game-engines/i18n-chess";
 
 /**
  * 2026 Zenith Tier: 汎用 UCI (Universal Chess Interface) アダプター。
@@ -41,17 +30,16 @@ export class UCIAdapter extends BaseAdapter<
   /**
    * エンジンのリソースをロードし、Worker を初期化して 'uci' ハンドシェイクを実行します。
    *
-   * @param loader - エンジンローダー。2026 Zenith Tier では必須です。省略されると EngineError がスローされます。
-   * @returns 初期化とハンドシェイク ('uciok') 完了時に解決される Promise。
-   * @throws {EngineError} リソース不足、Worker エラー、またはハンドシェイクのタイムアウト時にスローされます。
+   * @param loader - エンジンローダー。
+   * @param signal - 中断用シグナル。
    */
-  async load(loader?: IEngineLoader): Promise<void> {
+  async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
       this.validateSources();
 
       if (!loader) {
-        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.loaderRequired");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -59,10 +47,11 @@ export class UCIAdapter extends BaseAdapter<
           i18nKey,
         });
       }
+      this.activeLoader = loader;
 
       const sources = this.config.sources;
       if (!sources) {
-        const i18nKey = "engine.errors.missingSources" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingSources");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -71,18 +60,22 @@ export class UCIAdapter extends BaseAdapter<
         });
       }
 
-      // 2026 Best Practice: マルチソースの並列ロードと検証
+      // 2026 Best Practice: マルチソースの並列ロードと検証 (進捗通知付き)
       const validSources: Record<string, IEngineSourceConfig> = {};
       for (const [key, value] of Object.entries(sources)) {
-        if (value) {
-          validSources[key] = value;
+        if (value && typeof value === "object" && "url" in value) {
+          validSources[key] = value as IEngineSourceConfig;
         }
       }
 
-      const resources = await loader.loadResources(this.id, validSources);
+      const resources = await this.loadWithProgress(
+        loader,
+        validSources,
+        signal,
+      );
 
       if (!resources["main"]) {
-        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -95,7 +88,8 @@ export class UCIAdapter extends BaseAdapter<
 
       // 依存性注入: WASM や評価関数等の Blob URL マップを Worker に送信
       const resourceMap: ResourceMap = {};
-      for (const [key, source] of Object.entries(sources)) {
+      for (const [key, sourceVal] of Object.entries(sources)) {
+        const source = sourceVal as IEngineSourceConfig | undefined;
         if (source?.mountPath && resources[key]) {
           resourceMap[source.mountPath] = resources[key]!;
         }
@@ -112,7 +106,7 @@ export class UCIAdapter extends BaseAdapter<
       // 2026 Best Practice: エンジン初期化のハンドシェイク (Atomic Ready)
       const uciOkPromise = this.communicator.expectMessage(
         (line) => line === "uciok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
 
       this.communicator.postMessage("uci");
@@ -131,5 +125,9 @@ export class UCIAdapter extends BaseAdapter<
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }
+  }
+
+  protected async onBookLoaded(url: string): Promise<void> {
+    await this.setOption("BookFile", url);
   }
 }

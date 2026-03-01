@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   beforeEach,
   vi,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import "../components/engine-monitor.js";
 import { EngineMonitorElement } from "../components/engine-monitor.js";
 

@@ -1,23 +1,31 @@
 import {
   IEngineRegistry,
   IEngineSourceConfig,
+  IEngineConfig,
   EngineError,
   EngineErrorCode,
-  I18nKey,
-} from "@multi-game-engines/core";
+  createI18nKey } from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
-import {
-  tEngines as translate,
-  EnginesKey,
-} from "@multi-game-engines/i18n-engines";
+import { EnginesKey } from "@multi-game-engines/i18n-engines";
 import { z } from "zod";
+import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * エンジンソース設定の Zod スキーマ。
  */
 const EngineSourceSchema = z
   .object({
-    url: z.string().url(),
+    url: z
+      .string()
+      .regex(/^(https?:\/\/|blob:|data:)/i, "Unsupported URL scheme")
+      .superRefine((val, ctx) => {
+        if (/[\r\n\0<>]/.test(val)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "SECURITY_ERROR: Invalid characters in URL",
+          });
+        }
+      }),
     type: z.enum([
       "worker-js",
       "wasm",
@@ -58,7 +66,7 @@ const EngineManifestSchema = z.object({
       versions: z.record(
         z.string(),
         z.object({
-          assets: z.record(z.string(), EngineSourceSchema),
+          assets: z.record(z.string(), z.union([EngineSourceSchema, z.record(z.string(), z.record(z.string(), EngineSourceSchema))])), // variants等も厳密に検証
         }),
       ),
     }),
@@ -99,7 +107,7 @@ export class StaticRegistry implements IEngineRegistry {
   resolve(
     id: string,
     version?: string,
-  ): Record<string, IEngineSourceConfig> | null {
+  ): IEngineConfig["sources"] | null {
     const engineEntry = this.data.engines[id];
     if (!engineEntry) return null;
 
@@ -116,10 +124,7 @@ export class StaticRegistry implements IEngineRegistry {
       return null;
     }
 
-    return versionEntry.assets as unknown as Record<
-      string,
-      IEngineSourceConfig
-    >;
+    return versionEntry.assets as unknown as IEngineConfig["sources"];
   }
 
   getSupportedEngines(): string[] {
@@ -176,7 +181,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               status: response.statusText,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
 
@@ -199,7 +204,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               error: result.error.message,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
 
@@ -214,7 +219,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
         throw error;
@@ -240,7 +245,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { sri: expectedSri }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 
@@ -255,7 +260,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { algo: algo ?? "unknown" }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 
@@ -270,7 +275,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { url: this.url }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
   }
@@ -278,7 +283,7 @@ export class RemoteRegistry extends StaticRegistry {
   override resolve(
     id: string,
     version?: string,
-  ): Record<string, IEngineSourceConfig> | null {
+  ): IEngineConfig["sources"] | null {
     if (!this.loaded) {
       const i18nKey: EnginesKey = "registry.notLoaded";
       console.warn(translate(i18nKey, { id }));

@@ -17,5 +17,8 @@
     "invalidSriFormat": "[RemoteRegistry] Invalid SRI format: {sri}",
     "unsupportedAlgorithm": "[RemoteRegistry] Unsupported SRI algorithm: {algo}",
     "notLoaded": "[RemoteRegistry] resolve() called before load() for engine \"{id}\". Returning null."
+  },
+  "factory": {
+    "requiresMainSource": "Engine \"{id}\" requires a \"main\" source configuration (e.g., worker script or WASM binary) to initialize."
   }
 }

@@ -1,10 +1,8 @@
 import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
-import {
-  ICheckersSearchOptions,
+import { ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult,
-  createCheckersMove,
-} from "@multi-game-engines/domain-checkers";
+  createCheckersMove, } from "@multi-game-engines/domain-checkers";
 
 /**
  * 2026 Zenith Tier: KingsRow チェッカープロトコルパーサー。

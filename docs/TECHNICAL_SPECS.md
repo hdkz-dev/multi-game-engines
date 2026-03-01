@@ -7,10 +7,45 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 ### 1-1. 抽象基盤定義
 
 - **Brand<K, T>**: 公称型 (Branded Types) を生成するための共通ヘルパー。
+- **NormalizedScore**: -1.0 〜 1.0 に正規化された評価値。
 - **EngineStatus**: エンジンのライフサイクル状態 (`loading`, `ready`, `busy` 等)。
 - **EngineErrorCode**: 標準化されたエラーコード。
 
-### 1-2. ドメイン固有の型定義 (Domain Types)
+### 1-2. 思考情報 (IBaseSearchInfo) の拡張
+
+全エンジンのアダプターが共通で返す探索情報の構造を、より高度に標準化します。
+
+- **`positionId`**: 局面を一意識別する ID。古い局面の情報破棄に使用（Stale Message Filter）。
+- **`score` (Standardized Score)**:
+  - `raw`: エンジンから返された生の数値。
+  - `unit`: 評価単位 (`cp`, `mate`, `points`, `winrate`, `diff`)。
+  - `normalized`: `NormalizedScore` (-1.0 to 1.0)。
+- **`pv` (Structured PV)**: 文字列ではなく `Move[]` 型の配列。ドメインパッケージの `Branded Move` を使用します。
+- **`depth`, `seldepth`, `nodes`, `nps`, `time`, `hashfull`**: 従来通り提供。
+
+### 1-4. 汎用 I/O とフロー制御 (Flow Control)
+
+- **`AbortSignal`**: 全ての `loadResource`, `search`, `analyze` メソッドで必須のオプション引数として提供。
+- **`ILoadProgress`**: ロード進捗を通知するための標準オブジェクト。
+  - `status`: 'connecting', 'downloading', 'verifying', 'completed', 'aborted'
+  - `loadedBytes`: 現在の転送済みバイト数。
+  - `totalBytes`: 合計サイズ（サーバー未返答時は `undefined`）。
+- **`ProgressCallback`**: `(progress: ILoadProgress) => void` の形式。
+
+### 1-5. 環境適応型ストレージ (IFileStorage)
+
+- **`OPFSStorage`**: ブラウザの Origin Private File System 用（最優先）。
+- **`IndexedDBStorage`**: ブラウザの汎用ストレージ用（フォールバック）。
+- **`NodeFSStorage`**: Node.js/Bun 環境での `fs.promises` を用いたファイルシステム用。
+- **`MemoryStorage`**: 揮発性のオンメモリストレージ。
+- **カスタムストレージ注入**: `IEngineBridgeOptions.storage` を通じて、利用者が独自の `IFileStorage` 実装を注入可能。
+
+### 1-6. ブリッジ設定 (IEngineBridgeOptions)
+
+- **`storage?: IFileStorage`**: 自動検知をオーバーライドするカスタムストレージ。
+- **`capabilities?: Partial<ICapabilities>`**: 特定の能力を強制または無効化。
+
+### 1-7. ドメイン固有の型定義 (Domain Types)
 
 各種ゲーム固有の型（`FEN`, `SFEN`, `GOMove` 等）は、モノレポ全体での循環参照を避け、かつ UI 層やアダプター層での一貫性を保つため、それぞれのドメインパッケージ（`@multi-game-engines/domain-*`）で提供されています。
 
@@ -30,13 +65,31 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 - **EngineRegistry による自動型推論**: `bridge.getEngine('stockfish')` のように呼ぶだけで、戻り値の型が自動的に最適なジェネリクスで推論されます。
 - `load()`: SRI 検証とキャッシュロードを伴う初期化。
-- `search(options)`: 非同期探索。ロード戦略に応じて自動ロードを実行。ミドルウェアをシーケンシャルに適用。新しい探索が開始されると前のタスクは自動停止します。
+- `search(options)`: 非同期探索。ロード戦略に応じて自動ロードを実行。ミドルウェアをシーケンシャルに適用。**ミドルウェア絶縁**により、あるミドルウェアが投げた例外が探索プロセス全体を中断させないよう、各フックは `try-catch` で個別に保護されます。
 - `onInfo(callback)`: リアルタイムな思考配信の購読。ミドルウェアによるデータ正規化（`undefined` スキップ等）を経由します。
 - `loadingStrategy`: ロード戦略の動的な変更。
+- `consent()`: ライセンス同意が必要な場合にロードを続行。
 - `stop()`: 現在の探索を安全に中断。非同期メソッドとして定義され、エラー発生時も適切にログ出力されます。
 - `dispose()`: 個別エンジンのリソース解放。アダプターへの全イベント購読（Managed Subscriptions）を自動解除。
 
-## 3. セキュリティとインフラ
+## 3. 高度な分析機能 (Analysis APIs)
+
+### 3-1. エンジン一括解析 (EngineBatchAnalyzer)
+
+棋譜全体を非同期かつ効率的に解析するための上位 API です。
+
+- **割り込み優先処理**: `analyzePriority` により、バッチ解析中にリアルタイムでの局面検討を優先実行可能。
+- **フロー制御**: `pause()`, `resume()`, `abort()` をサポート。
+- **進捗監視**: 解析完了ごとに `onProgress` で結果と進捗率を受け取り可能。
+
+### 3-2. 定跡書プロバイダー (IBookProvider)
+
+巨大な定跡データをエンジン外部で独立して管理します。
+
+- **`loadBook(asset, options)`**: 定跡アセットをロードし、WASM 側からアクセス可能な Blob URL または物理パスを返します。
+- **`IBookAsset`**: `id`, `url`, `sri`, `size`, `type` (bin/db/json) を含むデータ定義。
+
+## 4. セキュリティとインフラ
 
 ### 3-1. EngineLoader (Modern Security)
 
@@ -66,7 +119,8 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 ### 3-5. Hybrid Bridge (マルチ環境対応)
 
 - **Environment Detection**: `navigator` オブジェクトの欠如や `process` オブジェクトの存在により実行環境を判定。
-- **Interface Consistency**: `WebWorkerAdapter` と `NativeProcessAdapter` (Node.js 用) が同一の `IEngineAdapter` インターフェースを実装。
+- **Interface Consistency**: `WebWorkerAdapter` と `NativeCommunicator` (Node.js 用) が同一の `IEngineAdapter` インターフェースを実装。
+- **Stream Buffering**: `NativeCommunicator` は、OS パイプからの受信データを内部バッファで管理します。これにより、巨大な PV（検討順）などのメッセージが複数パケットに分割されて届いても、正しく結合して 1 行としてパースすることを保証します。
 - **Zero-Config Switch**: 設定ファイルなしで、環境に応じた最適なバイナリ（`.wasm` vs `.exe` / `.bin`）を選択。
 
 ## 4. プロトコル解析 (2026 Best Practice)
@@ -77,6 +131,8 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 - **UCIParser**: チェス用。`mate` スコアの数値変換 (係数 10,000) をサポート。
 - **USIParser**: 将棋用。時間制御オプション、`mate` スコア変換 (係数 100,000)、および `startpos` キーワードの特殊処理をサポート。
 - **GTPParser**: 囲碁用。KataGo 拡張 JSON 出力と標準 GTP 応答の両方をサポート。`visits`, `winrate`, `scoreLead`, `pv` の詳細解析に対応。
+- **XiangqiParser**: シャンチー用。UCCI (Universal Chinese Chess Interface) プロトコルのパースをサポート。
+- **JanggiParser**: チャンギ用。UJCI プロトコルのパースをサポート。
 - **KingsRowParser**: チェッカー用。`bestmove: 11-15 (eval: 0.12)` 形式のテキスト解析。
 - **GNUBGParser**: バックギャモン用。JSON プロトコルによる `equity` および勝率（Win/Gammon/Backgammon）の解析。
 - **EdaxParser**: リバーシ用。テキストベースの評価値・指し手解析。
@@ -88,6 +144,7 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
 
 - **対象**: `createSearchCommand` (局面データ), `createOptionCommand` (オプション名/値)。
 - **検証内容**: 改行 (`\n`), ヌル (`\0`), セミコロン (`;`) 等の制御文字。
+- **循環参照保護**: `WeakSet` を用いた循環オブジェクト検知を搭載。悪意ある入力による無限再帰（スタックオーバーフロー）を物理的に防止します。
 - **ポリシー**: サニタイズ（除去）ではなく拒否（例外スロー）。不正な入力によるエンジンの意図しない操作を構造的に防止します。
 
 ### 4-2. 同一ゲーム・マルチエンジン対応 (Multi-Engine Support)
@@ -194,10 +251,27 @@ Core パッケージは、特定のゲーム（チェス、将棋等）に依存
   - `DeepRecord`: 複雑な階層構造を持つ翻訳データに動的にアクセスするための再帰的な型定義。`unknown` の直接レンダリングを排除。
   - `I18nKey`: `core` パッケージで定義される Branded string。アダプター層が UI 層の具体的な言語実装を知ることなく、型安全にエラーを伝播させるための抽象キー。
 - **最適化 (Pay-as-you-go)**:
-  - 各アダプターや UI は、自身が必要な言語リソースのみをパッケージとしてインポート。不要な言語データのダウンロードを 0 に抑えます。
+- 各アダプターや UI は、自身が必要な言語リソースのみをパッケージとしてインポート。不要な言語データのダウンロードを 0 に抑えます。
+
+### 7-6. ウェブ・アクセシビリティ基準 (A11y Standards)
+
+全ての UI コンポーネントにおいて、以下のアクセシビリティ基準を技術的に強制します。
+
+- **準拠規格**: WCAG 2.2 Level AA。
+- **ARIA ロールとランドマーク**:
+- 盤面には `role="grid"` を適用し、各マス目を `role="gridcell"` として定義。
+- 思考情報の動的な更新には `aria-live="polite"` を使用。
+- エラー等の重要な通知には `role="alert"` を適用。
+- **キーボード操作の実装**:
+- `tabindex` の適切な管理と `:focus-visible` による視覚的強調。
+- 矢印キーによる盤面移動、Enter/Space による詳細表示のトリガー。
+- フォーカス・トラップ（モーダル等）の適切な管理。
+- **視覚的配慮**:
+- 色コントラスト比 4.5:1 (標準テキスト) / 3:1 (UI要素) を下回らないテーマ定義。
+- 拡大縮小（400% ズーム）時におけるレイアウトの崩壊防止（Reflow）。
+- **検証の自動化**: CI/CD における `axe-core` を用いた自動スキャンの実施。
 
 ## 8. 品質保証 (Testing Philosophy)
-
 - **ユニットテスト**: 主要ロジックおよびエッジケースを網羅するテスト（Core + Adapters + UI）。
 - **決定論的な時間計測テスト**: `performance.now()` をモックし、環境に依存しない正確なテレメトリ検証を実現。
 - **Zero-Any Policy**: 実装およびテスト全体での `any` 使用を極力排除（Middleware の内部実装など不可避な場合を除く）。`satisfies` 演算子による厳格な型推論。

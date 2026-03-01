@@ -1,3 +1,4 @@
+import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import {
@@ -6,7 +7,6 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   EngineErrorCode,
-  I18nKey,
 } from "../../types.js";
 import { EngineError } from "../../errors/EngineError.js";
 
@@ -28,6 +28,10 @@ describe("Loading Strategies", () => {
         this.status = "ready";
         return Promise.resolve();
       }),
+      setOption: vi.fn().mockResolvedValue(undefined),
+      setBook: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
+      dispose: vi.fn().mockResolvedValue(undefined),
       searchRaw: vi.fn().mockImplementation(function (this: {
         status: string;
       }) {
@@ -36,17 +40,21 @@ describe("Loading Strategies", () => {
             code: EngineErrorCode.INTERNAL_ERROR,
             message: "Engine is not initialized",
             engineId: "test",
-            i18nKey: "engine.errors.notLoaded" as I18nKey,
+            i18nKey: createI18nKey("engine.errors.notLoaded"),
           });
         }
         return {
           info: (async function* () {
             yield { raw: "info" } as IBaseSearchInfo;
           })(),
-          result: Promise.resolve({ raw: "result" } as IBaseSearchResult),
+          result: Promise.resolve({
+            bestMove: null,
+            raw: "result",
+          } as IBaseSearchResult),
           stop: vi.fn(),
         };
       }),
+      updateStatus: vi.fn(),
       onStatusChange: vi.fn().mockReturnValue(() => {}),
       onProgress: vi.fn().mockReturnValue(() => {}),
       onTelemetry: vi.fn().mockReturnValue(() => {}),

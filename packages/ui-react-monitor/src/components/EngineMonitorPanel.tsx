@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useCallback, useId, useMemo } from "react";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { EngineStats } from "./EngineStats.js";
 import { PVList } from "./PVList.js";
@@ -16,14 +11,12 @@ import { EvaluationGraph } from "./EvaluationGraph.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Separator from "@radix-ui/react-separator";
-import {
-  Play,
+import { Play,
   Square,
   Settings2,
   AlertCircle,
   List,
-  History,
-} from "lucide-react";
+  History, } from "lucide-react";
 import { cn } from "../utils/cn.js";
 
 interface EngineMonitorPanelProps<

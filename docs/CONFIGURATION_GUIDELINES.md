@@ -58,15 +58,30 @@
 - ルート `docs/` にこのファイルを置き、変更時は必ず更新する。
 - 変更提案は PR に設計ノートを添えて行う。
 
-## 次の実装タスク（推奨優先順位）
+## 物理的制約とストレージ構成 (Storage & Environment)
 
-1. ルート `pnpm-workspace.yaml` と `tsconfig.base.json` の整備。
-2. GitHub Actions のテンプレ化（Node 24 + pnpm キャッシュ + QA実行）。
-3. `./scripts/pre_commit_qa.sh` の CI 組み込み。
-4. WASM/ネイティブバイナリのビルドジョブ整備。
+`multi-game-engines` は、ブラウザ、Node.js、ハイブリッドアプリの各環境で動作します。
+
+- **ブラウザ (Web)**:
+  - デフォルトで **OPFS (Origin Private File System)** を使用し、巨大な WASM/NNUE バイナリを高速に永続化します。
+  - OPFS が利用不可、または COOP/COEP ヘッダーが未設定の場合は、自動的に **IndexedDB** へフォールバックします。
+- **Node.js / CLI**:
+  - `NodeFSStorage` を使用し、ローカルの `.cache/multi-game-engines/` 等にバイナリをキャッシュします。
+- **カスタム注入**:
+  - `EngineBridge` のコンストラクタで `IFileStorage` インターフェースを実装した独自のストレージクラスを注入可能です（例: Capacitor 用 SQLite ストレージ等）。
+
+## パッケージ作成の要件 (Package Standards)
+
+新規パッケージ（adapter, domain, ui等）を追加する際は、以下の Zenith Tier 基準を遵守してください。
+
+1. **Zero-Any Policy**: プロダクションコードにおける `any` は厳禁です。
+2. **License**: ルートの MIT LICENSE ファイルをコピーし、`package.json` の `license` フィールドを適切に設定してください。
+3. **Types**: `dist/` 配下に型定義ファイルを生成するよう `tsup` または `tsc` を設定してください。
+4. **Coverage**: `core` パッケージについては **98% 以上のラインカバレッジ**を維持してください。他のパッケージも、主要な正常系および異常系（ネットワークエラー等）の物理的実証を含めることが義務付けられます。
 
 ---
 
 更新履歴:
 
+- 2026-02-28: Zenith Tier (Storage, Coverage, Zero-Any) の基準を追記
 - 2026-02-07: 初版作成

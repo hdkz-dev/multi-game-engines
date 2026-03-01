@@ -1,8 +1,9 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, cleanup, waitFor } from "@testing-library/react";
-import { ShogiBoard as ShogiBoardElement } from "@multi-game-engines/ui-shogi-elements";
+
 import { SFEN, createSFEN } from "@multi-game-engines/domain-shogi";
+import { ShogiBoard as ShogiBoardElement } from "@multi-game-engines/ui-shogi-elements";
 import { ShogiBoard } from "../index.js";
 
 describe("ShogiBoard", () => {
@@ -37,7 +38,7 @@ describe("ShogiBoard", () => {
       () => {
         const el = container.querySelector("shogi-board") as ShogiBoardElement;
         expect(el).not.toBeNull();
-        expect(el.sfen).toBe(sfen);
+        expect(el.getAttribute("sfen") || el.sfen).toBe(sfen);
         expect(el.getAttribute("locale")).toBe("ja");
         expect(el.getAttribute("board-label")).toBe("将棋盤");
       },

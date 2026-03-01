@@ -3,12 +3,7 @@ import EngineMonitorPanel from "../components/EngineMonitorPanel.vue";
 import { EngineUIProvider } from "@multi-game-engines/ui-vue-core";
 import { MockEngine } from "../mocks/MockEngine.js";
 import { commonLocales } from "@multi-game-engines/i18n-common";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 
 const meta: Meta<typeof EngineMonitorPanel> = {
   title: "Components/EngineMonitorPanel",

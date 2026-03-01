@@ -1,14 +1,7 @@
-import {
-  IBaseSearchResult,
-  EngineError,
-  EngineErrorCode,
-  I18nKey,
-} from "@multi-game-engines/core";
-import {
-  tEngines as translate,
-  EnginesKey,
-} from "@multi-game-engines/i18n-engines";
+import { IBaseSearchResult, EngineError, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+import { EnginesKey } from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
+import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * 各エンジンに重みを設定し、重み付き多数決を行う戦略。
@@ -39,7 +32,7 @@ export class WeightedStrategy<
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: translate(i18nKey),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 

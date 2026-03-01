@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { EdaxAdapter } from "../EdaxAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 

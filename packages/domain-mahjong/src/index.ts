@@ -1,14 +1,13 @@
-import {
-  EngineError,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { EngineError,
   EngineErrorCode,
   ProtocolValidator,
   Move,
+  createMove,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /** 麻雀の指し手（打牌、副露等） */
 export type MahjongMove = Move<"MahjongMove">;
@@ -57,7 +56,7 @@ export const MAHJONG_MOVE_REGEX =
  */
 export function createMahjongMove(move: string): MahjongMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidMahjongMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMahjongMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -66,7 +65,7 @@ export function createMahjongMove(move: string): MahjongMove {
   }
   ProtocolValidator.assertNoInjection(move, "MahjongMove");
   if (!MAHJONG_MOVE_REGEX.test(move)) {
-    const i18nKey = "engine.errors.invalidMahjongMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMahjongMove");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -75,7 +74,7 @@ export function createMahjongMove(move: string): MahjongMove {
       i18nParams,
     });
   }
-  return move as MahjongMove;
+  return createMove<"MahjongMove">(move);
 }
 
 /**
@@ -89,7 +88,7 @@ export function validateMahjongBoard(board: unknown): void {
     depth: number = 0,
   ): void => {
     if (depth > MAX_DEPTH) {
-      const i18nKey = "engine.errors.nestedTooDeep" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.nestedTooDeep");
       const i18nParams = { path };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
