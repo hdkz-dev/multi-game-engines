@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { PositionId } from "@multi-game-engines/core";
+import { PositionId, createPositionId } from "@multi-game-engines/core";
 
 describe("USIParser", () => {
   beforeAll(() => {
@@ -18,7 +18,7 @@ describe("USIParser", () => {
     it("should parse score cp as standardized object", () => {
       const info = parser.parseInfo(
         "info depth 10 score cp 50 pv 7g7f",
-        "pos1" as PositionId,
+        createPositionId("pos1"),
       );
       expect(info?.score).toMatchObject({
         cp: 50,

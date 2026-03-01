@@ -25,7 +25,7 @@ export function createMortalEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "mortal"),
+    sources: normalizeAndValidateSources(registrySources, config, "mortal"),
   };
 
   const adapter = new MortalAdapter(mergedConfig);

@@ -27,7 +27,7 @@ export function createUSIEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "yaneuraou"),
+    sources: normalizeAndValidateSources(registrySources, config, "yaneuraou"),
   };
 
   const adapter = new USIAdapter(mergedConfig);

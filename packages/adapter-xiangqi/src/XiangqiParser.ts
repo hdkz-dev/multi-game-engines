@@ -36,17 +36,45 @@ export class XiangqiParser implements IProtocolParser<
     if (!data.startsWith("info ")) return null;
 
     const info: IXiangqiSearchInfo = { raw: data, positionId };
-    // Basic parsing similar to UCI
     const parts = data.split(/\s+/);
     for (let i = 0; i < parts.length; i++) {
-      if (parts[i] === "score") {
-        const type = parts[++i] as "cp" | "mate";
-        const val = parseInt(parts[++i] || "0", 10);
-        info.score = {
-          unit: type,
-          [type]: val,
-          normalized: ScoreNormalizer.normalize(val, type, "xiangqi"),
-        };
+      const token = parts[i];
+      if (!token) continue;
+
+      switch (token) {
+        case "depth":
+          info.depth = parseInt(parts[++i] || "0", 10);
+          break;
+        case "nodes":
+          info.nodes = parseInt(parts[++i] || "0", 10);
+          break;
+        case "nps":
+          info.nps = parseInt(parts[++i] || "0", 10);
+          break;
+        case "score": {
+          const type = parts[++i];
+          const val = parseInt(parts[++i] || "0", 10);
+          if (type === "cp" || type === "mate") {
+            info.score = {
+              unit: type,
+              [type]: val,
+              normalized: ScoreNormalizer.normalize(val, type, "xiangqi"),
+            };
+          }
+          break;
+        }
+        case "pv": {
+          const pvMoves = parts.slice(i + 1).map((m) => {
+            try {
+              return createXiangqiMove(m);
+            } catch {
+              return null;
+            }
+          });
+          info.pv = pvMoves.filter((m) => m !== null);
+          i = parts.length; // PV is always last in UCCI/UCI
+          break;
+        }
       }
     }
     return info;

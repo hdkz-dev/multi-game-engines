@@ -26,7 +26,7 @@ export function createStockfishEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "stockfish"),
+    sources: normalizeAndValidateSources(registrySources, config, "stockfish"),
   };
 
   const adapter = new StockfishAdapter(mergedConfig);

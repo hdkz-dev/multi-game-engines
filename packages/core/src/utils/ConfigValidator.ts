@@ -13,14 +13,14 @@ import { createI18nKey } from "../protocol/ProtocolValidator.js";
  * @returns 検証済みで必須の sources.main を含むリソース設定
  */
 export function normalizeAndValidateSources(
-  registrySources: Record<string, IEngineSourceConfig> | null | undefined,
+  registrySources: IEngineConfig["sources"] | null | undefined,
   config: IEngineConfig,
   defaultEngineId: string,
 ): NonNullable<IEngineConfig["sources"]> {
   const sources = {
     ...(registrySources || {}),
     ...(config.sources || {}),
-  };
+  } as NonNullable<IEngineConfig["sources"]>;
 
   if (!sources.main) {
     const engineId = config.id || defaultEngineId;

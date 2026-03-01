@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { PrincipalVariation, Move } from "@multi-game-engines/ui-core";
+import { createMove } from "@multi-game-engines/core";
 import { PVList } from "../components/PVList.js";
 
 // Mock hooks
@@ -22,7 +23,7 @@ describe("PVList", () => {
     {
       multipv: 1,
       score: { type: "cp", value: 10, relativeValue: 10 },
-      moves: ["e2e4", "e7e5", "g1f3"] as Move[],
+      moves: ["e2e4", "e7e5", "g1f3"].map(createMove),
     },
   ];
 

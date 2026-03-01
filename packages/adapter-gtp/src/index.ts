@@ -27,7 +27,7 @@ export function createGTPEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "katago"),
+    sources: normalizeAndValidateSources(registrySources, config, "katago"),
   };
 
   const adapter = new GTPAdapter(mergedConfig);

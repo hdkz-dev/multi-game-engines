@@ -321,11 +321,13 @@ export class EngineLoader implements IEngineLoader {
     engineId: string,
   ): void {
     const url = config.url;
+    const urlObj = new URL(url);
     // 2026: Insecure Connection Check
     if (
-      url.startsWith("http:") &&
-      !url.includes("localhost") &&
-      !url.includes("127.0.0.1")
+      urlObj.protocol === "http:" &&
+      urlObj.hostname !== "localhost" &&
+      urlObj.hostname !== "127.0.0.1" &&
+      urlObj.hostname !== "[::1]"
     ) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,

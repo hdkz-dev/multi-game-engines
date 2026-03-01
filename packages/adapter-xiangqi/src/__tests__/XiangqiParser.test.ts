@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { XiangqiParser } from "../XiangqiParser.js";
 
-import { PositionId } from "@multi-game-engines/core";
+import { PositionId, createPositionId } from "@multi-game-engines/core";
 
 describe("XiangqiParser", () => {
   const parser = new XiangqiParser();
@@ -10,7 +10,7 @@ describe("XiangqiParser", () => {
     it("should parse score cp", () => {
       const info = parser.parseInfo(
         "info depth 10 score cp 50 pv a0a1",
-        "pos1" as PositionId,
+        createPositionId("pos1"),
       );
       expect(info?.score).toMatchObject({
         cp: 50,

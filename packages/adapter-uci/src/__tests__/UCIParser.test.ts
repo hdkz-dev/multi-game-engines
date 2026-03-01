@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { UCIParser } from "../UCIParser.js";
 import { createFEN } from "@multi-game-engines/domain-chess";
-import { PositionId } from "@multi-game-engines/core";
+import { PositionId, createPositionId } from "@multi-game-engines/core";
 
 describe("UCIParser", () => {
   beforeAll(() => {
@@ -18,7 +18,7 @@ describe("UCIParser", () => {
     it("should parse positive cp score as standardized object", () => {
       const info = parser.parseInfo(
         "info depth 10 score cp 50 pv e2e4",
-        "pos1" as PositionId,
+        createPositionId("pos1"),
       );
       expect(info?.score).toMatchObject({
         cp: 50,

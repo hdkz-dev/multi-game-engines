@@ -20,6 +20,7 @@ declare module "react" {
         "board-label"?: string | undefined;
         "error-message"?: string | undefined;
         pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+        pieceSymbols?: Partial<Record<ChessPiece, string>> | undefined;
         ref?: React.Ref<ChessBoardElement> | undefined;
       };
     }
@@ -34,6 +35,7 @@ export interface ChessBoardProps {
   boardLabel?: string;
   errorMessage?: string;
   pieceNames?: Partial<Record<ChessPiece, string>>;
+  pieceSymbols?: Partial<Record<ChessPiece, string>>;
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -43,8 +45,18 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   className,
   boardLabel,
   errorMessage,
+  pieceNames,
+  pieceSymbols,
 }: ChessBoardProps) => {
   const ref = React.useRef<ChessBoardElement>(null);
+
+  React.useLayoutEffect(() => {
+    if (ref.current) {
+      ref.current.pieceNames = pieceNames ?? {};
+      ref.current.pieceSymbols = pieceSymbols ?? {};
+    }
+  }, [pieceNames, pieceSymbols]);
+
   return (
     <chess-board
       ref={ref}

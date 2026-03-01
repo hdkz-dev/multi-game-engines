@@ -25,7 +25,7 @@ export function createYaneuraouEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "yaneuraou"),
+    sources: normalizeAndValidateSources(registrySources, config, "yaneuraou"),
   };
 
   const adapter = new YaneuraouAdapter(mergedConfig);

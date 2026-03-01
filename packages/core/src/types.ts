@@ -588,7 +588,7 @@ export interface IEngineRegistry {
 export interface IBookAsset {
   id: string;
   url: string;
-  sri?: string | undefined;
+  sri: string;
   size?: number | undefined;
   type: "bin" | "db" | "json";
 }
@@ -667,12 +667,19 @@ export interface IEngineBridge {
     >,
   ): Promise<void>;
 
-  /**
-   * 汎用アダプター用のファクトリ（クラス）を登録します。
-   */
   registerAdapterFactory(
     type: string,
-    factory: (config: IEngineConfig) => unknown,
+    factory: (
+      config: IEngineConfig,
+    ) =>
+      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | Promise<
+          IEngineAdapter<
+            IBaseSearchOptions,
+            IBaseSearchInfo,
+            IBaseSearchResult
+          >
+        >,
   ): void;
 
   /**

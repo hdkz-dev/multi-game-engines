@@ -108,14 +108,12 @@ export class EngineBridge implements IEngineBridge {
       config: IEngineConfig,
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
       | Promise<
-          | IEngineAdapter<
-              IBaseSearchOptions,
-              IBaseSearchInfo,
-              IBaseSearchResult
-            >
-          | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+          IEngineAdapter<
+            IBaseSearchOptions,
+            IBaseSearchInfo,
+            IBaseSearchResult
+          >
         >,
   ): void {
     if (this.adapterFactories.has(type)) {

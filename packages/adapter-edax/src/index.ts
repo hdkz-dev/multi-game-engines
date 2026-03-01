@@ -25,7 +25,7 @@ export function createEdaxEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "edax"),
+    sources: normalizeAndValidateSources(registrySources, config, "edax"),
   };
 
   const adapter = new EdaxAdapter(mergedConfig);

@@ -25,7 +25,7 @@ export function createKingsRowEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "kingsrow"),
+    sources: normalizeAndValidateSources(registrySources, config, "kingsrow"),
   };
 
   const adapter = new KingsRowAdapter(mergedConfig);

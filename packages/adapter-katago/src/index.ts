@@ -25,7 +25,7 @@ export function createKataGoEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "katago"),
+    sources: normalizeAndValidateSources(registrySources, config, "katago"),
   };
 
   const adapter = new KataGoAdapter(mergedConfig);

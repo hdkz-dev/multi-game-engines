@@ -52,7 +52,7 @@ describe("EngineBridge", () => {
         yield { depth: 1 } as IBaseSearchInfo;
       })(),
       result: Promise.resolve({
-        bestMove: "e2e4" as Move,
+        bestMove: createMove("e2e4"),
       } as IBaseSearchResult),
       stop: vi.fn(),
     })),

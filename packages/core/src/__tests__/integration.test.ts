@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge.js";
 import { MemoryStorage } from "../storage/MemoryStorage.js";
+import { createPositionId } from "../index.js";
 import { PositionId } from "../types.js";
 
 describe("Core Integration", () => {
@@ -22,7 +23,7 @@ describe("Core Integration", () => {
     expect(engine.status).toBe("ready");
 
     const result = await engine.search({
-      positionId: "pos1" as PositionId,
+      positionId: createPositionId("pos1"),
     });
 
     expect(result.bestMove).toBeDefined();

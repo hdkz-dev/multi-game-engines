@@ -29,7 +29,7 @@ export function createGNUBGEngine(
   
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "gnubg"),
+    sources: normalizeAndValidateSources(registrySources, config, "gnubg"),
   };
 
   const adapter = new GNUBGAdapter(mergedConfig);
