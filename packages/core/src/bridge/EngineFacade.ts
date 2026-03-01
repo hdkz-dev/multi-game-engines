@@ -197,9 +197,7 @@ export class EngineFacade<
 
           // ステータス変更の通知（アダプターがサポートしている必要があるが、
           // Facade レベルでの状態管理を強化）
-          (this.adapter as unknown as { _status: EngineStatus })._status =
-            "awaiting-consent";
-          for (const cb of this.statusListeners) cb("awaiting-consent");
+          this.adapter.updateStatus("awaiting-consent");
 
           await promise;
         }
@@ -280,10 +278,12 @@ export class EngineFacade<
 
       // 古いリクエストの結果であれば破棄
       if (options.positionId && this.currentPositionId !== options.positionId) {
+        const i18nKey = createI18nKey("engine.errors.stalePositionId");
         throw new EngineError({
           code: EngineErrorCode.CANCELLED,
           message: "Search result discarded (Stale PositionId)",
           engineId: this.id,
+          i18nKey,
         });
       }
 
@@ -340,6 +340,10 @@ export class EngineFacade<
       try {
         // 2026: Graceful Shutdown (quit 送信)
         await this.adapter.stop();
+      } catch (err) {
+        console.error(`[EngineFacade] Failed to stop adapter ${id}:`, err);
+      }
+      try {
         await this.adapter.dispose();
       } catch (err) {
         console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);

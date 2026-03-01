@@ -96,7 +96,7 @@ export class XiangqiAdapter extends BaseAdapter<
 
       const ucciOkPromise = this.communicator.expectMessage(
         (line) => line === "ucciok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
 
       this.communicator.postMessage("ucci");

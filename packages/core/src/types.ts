@@ -117,8 +117,8 @@ export interface IBaseSearchInfo {
  * 探索結果。
  */
 export interface IBaseSearchResult {
-  bestMove?: unknown;
-  ponder?: unknown;
+  bestMove: Move | null;
+  ponder?: Move | null | undefined;
   [key: string]: unknown;
 }
 
@@ -359,6 +359,7 @@ export interface IEngineAdapter<
   readonly requiredCapabilities?: Partial<ICapabilities>;
 
   load(loader?: IEngineLoader): Promise<void>;
+  updateStatus(status: EngineStatus): void;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
   stop(): void | Promise<void>;
@@ -573,7 +574,7 @@ export interface IEngineRegistry {
   resolve(
     id: string,
     version?: string,
-  ): Record<string, IEngineSourceConfig> | null;
+  ): IEngineConfig["sources"] | null;
 
   /**
    * このレジストリがサポートしているエンジン ID の一覧を取得します。

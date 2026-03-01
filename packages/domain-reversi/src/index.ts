@@ -4,6 +4,8 @@ import { Brand,
   EngineErrorCode,
   ProtocolValidator,
   Move,
+  createMove,
+  createPositionString,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -67,7 +69,7 @@ export function createReversiMove(move: string): ReversiMove {
       i18nParams,
     });
   }
-  return move as ReversiMove;
+  return createMove<"ReversiMove">(move);
 }
 
 /**
@@ -83,5 +85,5 @@ export function createReversiBoard(pos: string): ReversiBoard {
     });
   }
   ProtocolValidator.assertNoInjection(pos, "ReversiBoard");
-  return pos as ReversiBoard;
+  return createPositionString<"ReversiBoard">(pos);
 }

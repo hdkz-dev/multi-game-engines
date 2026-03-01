@@ -1,4 +1,10 @@
-import { IEngineRegistry, IEngineSourceConfig, EngineError, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+import {
+  IEngineRegistry,
+  IEngineSourceConfig,
+  IEngineConfig,
+  EngineError,
+  EngineErrorCode,
+  createI18nKey } from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
 import { EnginesKey } from "@multi-game-engines/i18n-engines";
 import { z } from "zod";
@@ -9,7 +15,17 @@ import { tEngines as translate } from "@multi-game-engines/i18n-engines";
  */
 const EngineSourceSchema = z
   .object({
-    url: z.string(), // data: URL等も許容するため .url() を外すか正規表現で対応
+    url: z
+      .string()
+      .regex(/^(https?:\/\/|blob:|data:)/i, "Unsupported URL scheme")
+      .superRefine((val, ctx) => {
+        if (/[\r\n\0<>]/.test(val)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "SECURITY_ERROR: Invalid characters in URL",
+          });
+        }
+      }),
     type: z.enum([
       "worker-js",
       "wasm",
@@ -91,7 +107,7 @@ export class StaticRegistry implements IEngineRegistry {
   resolve(
     id: string,
     version?: string,
-  ): Record<string, IEngineSourceConfig> | null {
+  ): IEngineConfig["sources"] | null {
     const engineEntry = this.data.engines[id];
     if (!engineEntry) return null;
 
@@ -108,10 +124,7 @@ export class StaticRegistry implements IEngineRegistry {
       return null;
     }
 
-    return versionEntry.assets as unknown as Record<
-      string,
-      IEngineSourceConfig
-    >;
+    return versionEntry.assets as unknown as IEngineConfig["sources"];
   }
 
   getSupportedEngines(): string[] {
@@ -270,7 +283,7 @@ export class RemoteRegistry extends StaticRegistry {
   override resolve(
     id: string,
     version?: string,
-  ): Record<string, IEngineSourceConfig> | null {
+  ): IEngineConfig["sources"] | null {
     if (!this.loaded) {
       const i18nKey: EnginesKey = "registry.notLoaded";
       console.warn(translate(i18nKey, { id }));

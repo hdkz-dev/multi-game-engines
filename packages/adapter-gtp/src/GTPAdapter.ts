@@ -83,6 +83,17 @@ export class GTPAdapter extends BaseAdapter<
       this.messageUnsubscriber = this.communicator.onMessage((data) =>
         this.handleIncomingMessage(data),
       );
+
+      // 2026 Zenith Tier: リソースインジェクションとハンドシェイク
+      await this.injectResources(resources);
+
+      const versionPromise = this.communicator.expectMessage(
+        (line) => String(line).startsWith("="),
+        { timeoutMs: 5000, signal },
+      );
+      this.communicator.postMessage("version");
+      await versionPromise;
+
       this.emitStatusChange("ready");
     } catch (e) {
       if (this.messageUnsubscriber) {

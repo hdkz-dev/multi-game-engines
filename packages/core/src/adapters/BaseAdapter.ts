@@ -45,6 +45,10 @@ export abstract class BaseAdapter<
     return this._status;
   }
 
+  updateStatus(status: EngineStatus): void {
+    this.emitStatusChange(status);
+  }
+
   /**
    * 2026 Best Practice: リソースソースの SRI ハッシュを検証します。
    * プレースホルダーの検出と形式チェックを一括で行います。
@@ -114,10 +118,22 @@ export abstract class BaseAdapter<
       });
     }
 
+    if (!asset.sri) {
+      const i18nKey = createI18nKey("engine.errors.sriMismatch");
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Engine Adapter "${this.id}": Book asset "${asset.id}" requires an SRI hash for security.`,
+        i18nKey,
+        engineId: this.id,
+      });
+    }
+
     // 1. ローダー経由でロード
-    const config: IEngineSourceConfig = asset.sri
-      ? { url: asset.url, type: "asset", sri: asset.sri }
-      : { url: asset.url, type: "asset", __unsafeNoSRI: true };
+    const config: IEngineSourceConfig = {
+      url: asset.url,
+      type: "asset",
+      sri: asset.sri,
+    };
 
     if (asset.size) {
       config.size = asset.size;

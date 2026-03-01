@@ -89,7 +89,7 @@ export class WorkerCommunicator {
 
   async expectMessage<T>(
     predicate: (data: unknown) => boolean,
-    options: { timeoutMs?: number; signal?: AbortSignal } = {},
+    options: { timeoutMs?: number | undefined; signal?: AbortSignal | undefined } = {},
   ): Promise<T> {
     // まずバッファをチェック
     const bufferedIndex = this.buffer.findIndex(predicate);

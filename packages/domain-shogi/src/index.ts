@@ -2,6 +2,7 @@ import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 import { EngineErrorCode,
   EngineError,
   PositionString,
+  createPositionString,
   Move,
   createMove,
   truncateLog,
@@ -244,7 +245,7 @@ export function createSFEN(pos: string): SFEN {
     });
   }
 
-  return trimmedPos as SFEN;
+  return createPositionString<"SFEN">(trimmedPos);
 }
 
 export function isValidShogiPiece(str: string): str is ShogiPiece {

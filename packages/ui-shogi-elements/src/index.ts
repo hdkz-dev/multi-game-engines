@@ -3,7 +3,8 @@ import { property, state } from "lit/decorators.js";
 import { parseSFEN,
   SFEN,
   ShogiPiece,
-  ShogiHand, } from "@multi-game-engines/domain-shogi";
+  ShogiHand,
+  createSFEN } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
 import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 
@@ -110,8 +111,8 @@ export class ShogiBoard extends LitElement {
     }
   `;
 
-  private _sfen: SFEN = (
-    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1" as unknown as SFEN
+  private _sfen: SFEN = createSFEN(
+    "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   );
 
   @property({ type: String, reflect: true })
@@ -122,7 +123,7 @@ export class ShogiBoard extends LitElement {
   set sfen(value: string) {
     const old = this._sfen;
     try {
-      this._sfen = value as unknown as SFEN;
+      this._sfen = createSFEN(value);
     } catch (e) {
       console.warn(`[ShogiBoard] Invalid SFEN attribute: ${value}`, e);
     }
@@ -165,6 +166,9 @@ export class ShogiBoard extends LitElement {
 
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
+
+  @property({ type: Object })
+  pieceSymbols: Partial<Record<ShogiPiece, string>> = {};
 
   @state()
   private _focusedIndex = 0;
@@ -289,22 +293,25 @@ export class ShogiBoard extends LitElement {
         const squareIdx = r * 9 + f;
         const piece = board[r]?.[f];
         const isHighlighted = highlightedSquares.has(squareIdx);
-        const isGote = piece && isGotePiece(piece);
         const usiFile = 9 - f;
+        const usiRank = String.fromCharCode(97 + r); // a, b, c, ...
         const displayFile = usiFile;
-        const displayRank = r + 1;
+        const displayRank = usiRank;
         const pieceLabel = piece
           ? (this.pieceNames[piece] as string) ||
             (strings.pieceNames[piece] as string)
           : "";
+        const pieceSymbol = piece
+          ? (this.pieceSymbols[piece] as string) || pieceLabel
+          : "";
         const ariaLabel = piece
-          ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
-          : strings.squareLabel(displayFile, displayRank);
+          ? strings.squarePieceLabel(displayFile, r + 1, pieceLabel) // Maintain numeric for params if preferred, or change to usiRank
+          : strings.squareLabel(displayFile, r + 1);
 
         squares.push(html`
           <div
             class="square ${isHighlighted ? "highlight" : ""}"
-            data-square="${usiFile}${String.fromCharCode(97 + r)}"
+            data-square="${displayFile}${usiRank}"
             data-index="${squareIdx}"
             role="gridcell"
             aria-label="${ariaLabel}"
@@ -313,10 +320,10 @@ export class ShogiBoard extends LitElement {
           >
             ${piece
               ? html`<span
-                  class="piece ${isGote ? "gote" : ""}"
+                  class="piece ${isGotePiece(piece) ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
-                  >${pieceLabel}</span
+                  >${pieceSymbol}</span
                 >`
               : ""}
           </div>
@@ -358,15 +365,18 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p];
+      const pieceLabel =
+        (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p];
+      const pieceSymbol =
+        (this.pieceSymbols[p as ShogiPiece] as string) || pieceLabel;
       const ariaLabel =
         count > 1
           ? handPieceCount
-              .replace("{piece}", label || "")
+              .replace("{piece}", pieceLabel || "")
               .replace("{count}", String(count))
-          : label;
-      return html`<span title="${label}" aria-label="${ariaLabel}"
-        >${label}${count > 1 ? count : ""}</span
+          : pieceLabel;
+      return html`<span title="${pieceLabel}" aria-label="${ariaLabel}"
+        >${pieceSymbol}${count > 1 ? count : ""}</span
       >`;
     });
   }

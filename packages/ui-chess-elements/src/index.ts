@@ -86,7 +86,7 @@ export class ChessBoard extends LitElement {
   set fen(value: string) {
     const old = this._fen;
     try {
-      this._fen = value as unknown as FEN;
+      this._fen = createFEN(value);
     } catch {
       console.warn(`[ChessBoard] Invalid FEN attribute: ${value}`);
     }
@@ -116,6 +116,8 @@ export class ChessBoard extends LitElement {
   @property({ type: String, attribute: "error-message", reflect: true })
   errorMessage = "";
   @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
+    {};
+  @property({ type: Object }) pieceSymbols: Partial<Record<ChessPiece, string>> =
     {};
 
   @state()
@@ -234,6 +236,9 @@ export class ChessBoard extends LitElement {
           ? (this.pieceNames[piece] as string) ||
             (strings.pieceNames[piece] as string)
           : "";
+        const pieceSymbol = piece
+          ? (this.pieceSymbols[piece] as string) || pieceLabel
+          : "";
         const ariaLabel = piece
           ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
           : strings.squareLabel(displayFile, displayRank);
@@ -252,7 +257,7 @@ export class ChessBoard extends LitElement {
           >
             ${piece
               ? html`<span class="piece" role="img" aria-hidden="true"
-                  >${pieceLabel}</span
+                  >${pieceSymbol}</span
                 >`
               : ""}
           </div>

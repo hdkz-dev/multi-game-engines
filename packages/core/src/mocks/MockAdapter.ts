@@ -120,6 +120,6 @@ class MockParser implements IProtocolParser<
   parseResult(
     line: string | Record<string, unknown>,
   ): IBaseSearchResult | null {
-    return typeof line === "string" ? { bestMove: "e2e4", raw: line } : null;
+    return typeof line === "string" ? { bestMove: createMove("e2e4"), raw: line } : null;
   }
 }

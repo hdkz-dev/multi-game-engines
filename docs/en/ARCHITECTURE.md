@@ -108,6 +108,15 @@ High-performance, accessible UI foundation delivering engine results through a l
 
 Zod schemas within `ui-core` validate all incoming engine data, preventing UI crashes from protocol deviations.
 
+### Web Accessibility (A11y)
+
+In alignment with 2026 Zenith Tier standards, all UI components adhere to **WCAG 2.2 Level AA**, ensuring a fully accessible experience for screen reader and keyboard users.
+
+- **Semantic HTML**: Proper use of landmarks (`<nav>`, `<main>`, `<grid>`) and roles communicates document structure to assistive technologies.
+- **Full Keyboard Navigation**: Every action (board selection, move inspection, engine control) is executable via keyboard, with strict logical tab order and focus management.
+- **ARIA Live Regions**: Dynamic updates (search results, errors) are announced in real-time using `aria-live` attributes.
+- **Automated A11y Testing**: Integration of `axe-core` in Playwright tests prevents accessibility regressions throughout the development lifecycle.
+
 ## AI Ensemble Development
 
 Code quality and architectural integrity are maintained through mutual AI supervision (Gemini, CodeRabbit, DeepSource, Snyk).

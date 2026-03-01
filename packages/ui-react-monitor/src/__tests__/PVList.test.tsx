@@ -45,6 +45,6 @@ describe("PVList", () => {
 
   it("should show searching message when no pvs", () => {
     render(<PVList pvs={[]} />);
-    expect(screen.getByText("Searching...")).toBeDefined();
+    screen.getByText("Searching...");
   });
 });

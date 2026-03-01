@@ -24,9 +24,17 @@ export class HardwareAccelerator {
    * WebNN が利用可能かチェックします。
    */
   public static async checkWebNN(): Promise<boolean> {
-    const g = globalThis as unknown as { navigator: { ml?: unknown } };
-    // 2026: WebNN API は navigator.ml 下に配置される想定
-    return !!g.navigator.ml;
+    const g = globalThis as unknown as {
+      navigator: { ml?: { createContext: () => Promise<unknown> } };
+    };
+    if (!g.navigator.ml) return false;
+    try {
+      // 2026: 実際にコンテキストを作成できるか検証
+      const context = await g.navigator.ml.createContext();
+      return !!context;
+    } catch {
+      return false;
+    }
   }
 
   /**

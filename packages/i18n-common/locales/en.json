@@ -1,5 +1,8 @@
 {
   "engine": {
+    "security": {
+      "remediationAdvice": "To enable Multi-threading (SharedArrayBuffer), set the following HTTP headers:\n- Cross-Origin-Opener-Policy: same-origin\n- Cross-Origin-Embedder-Policy: require-corp\n\nPlatform examples:\n[Vercel (vercel.json)]\n{ \"headers\": [{ \"source\": \"/(.*)\", \"headers\": [\n  { \"key\": \"Cross-Origin-Opener-Policy\", \"value\": \"same-origin\" },\n  { \"key\": \"Cross-Origin-Embedder-Policy\", \"value\": \"require-corp\" }\n]}]}\n\n[Cloudflare Pages (_headers)]\n/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp\n\n[Netlify (_headers)]\n/*\n  Cross-Origin-Opener-Policy: same-origin\n  Cross-Origin-Embedder-Policy: require-corp"
+    },
     "status": "Status",
     "depth": "Depth",
     "nodes": "Nodes",
@@ -46,6 +49,8 @@
       "resourceLoadUnknown": "Unknown error during resource loading for engine \"{engineId}\".",
       "missingMainEntryPoint": "Engine resources are missing 'main' entry point URL.",
       "searchAborted": "The search task was aborted.",
+      "duplicateFactory": "Adapter factory for \"{type}\" is already registered.",
+      "stalePositionId": "The search result was discarded because it belongs to a stale position.",
       "invalidPositionId": "Invalid Position ID format: \"{id}\".",
       "invalidShogiMove": "Invalid Shogi move: \"{move}\"",
       "invalidMahjongMove": "Invalid Mahjong move: \"{move}\"",

@@ -21,6 +21,12 @@ class MockWorker {
           this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
         }
       }, 0);
+    } else if (typeof msg === "string" && msg === "version") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "= 1.0" });
+        }
+      }, 0);
     }
   });
   terminate = vi.fn();

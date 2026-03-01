@@ -106,7 +106,7 @@ export class UCIAdapter extends BaseAdapter<
       // 2026 Best Practice: エンジン初期化のハンドシェイク (Atomic Ready)
       const uciOkPromise = this.communicator.expectMessage(
         (line) => line === "uciok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
 
       this.communicator.postMessage("uci");

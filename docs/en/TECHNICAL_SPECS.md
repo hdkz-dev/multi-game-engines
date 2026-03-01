@@ -105,6 +105,24 @@ Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 - **Zero-Any Safety**: Recursive `DeepRecord` types ensure 100% type safety when accessing nested translation keys.
 - **Pay-as-you-go**: Minimum bundle size by only including required language modules.
 
+### 5-3. Web Accessibility (A11y) Standards
+
+All UI components must strictly adhere to the following accessibility standards:
+
+- **Compliance**: WCAG 2.2 Level AA.
+- **ARIA Roles & Landmarks**:
+  - Game boards must use `role="grid"` with squares as `role="gridcell"`.
+  - Dynamic content updates (engine info) must use `aria-live="polite"`.
+  - Error notifications must use `role="alert"`.
+- **Keyboard Navigation**:
+  - Proper `tabindex` management and visible focus indicators using `:focus-visible`.
+  - Arrow key support for board navigation; Enter/Space for details.
+  - Proper focus trapping for modal/overlay elements.
+- **Visual & Layout**:
+  - Minimum contrast ratio of 4.5:1 for text and 3:1 for UI elements.
+  - Supports 400% zoom without horizontal scrolling (Reflow).
+- **Automated Validation**: Mandatory `axe-core` scanning in CI/CD via Playwright.
+
 ## 6. Testing Philosophy
 
 - **Empirical 98% Coverage**: Targets 98.41%+ line coverage in `core`, physically demonstrating resilience against network failures, storage locks, and timeout conditions using mocks.

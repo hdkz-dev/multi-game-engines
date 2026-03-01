@@ -96,8 +96,8 @@
 
 ### 5.1. Immutable Trust Chain
 
-- **基準**: 全ての外部バイナリは SRI (Subresource Integrity) によるハッシュ検証を必須とする。
-- **実装**: `__unsafeNoSRI` の使用は、ローカル開発環境または AI による検証済みの一時的なプロトタイプに限定する。
+- **基準**: 全ての外部バイナリおよびアセット (.wasm, .nnue, .bin) は SRI (Subresource Integrity) によるハッシュ検証を必須とする。本番環境（Official Registry）におけるプレースホルダーの使用は厳禁とする。
+- **実装**: `__unsafeNoSRI` の使用は、ローカル開発環境または AI による検証済みの一時的なプロトタイプに限定し、CI/CD パイプラインにおいて本番レジストリへの混入を自動的にブロックする。
 
 ### 5.2. Secure Context Isolation
 

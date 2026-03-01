@@ -10,7 +10,26 @@ import { IEngineLoader } from "@multi-game-engines/core";
 import { IGoSearchOptions } from "@multi-game-engines/adapter-gtp";
 
 class MockWorker {
-  postMessage = vi.fn();
+  postMessage = vi.fn((msg: unknown) => {
+    if (
+      msg !== null &&
+      typeof msg === "object" &&
+      "type" in msg &&
+      msg.type === "MG_INJECT_RESOURCES"
+    ) {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    } else if (typeof msg === "string" && msg === "version") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "= 1.0" });
+        }
+      }, 0);
+    }
+  });
   terminate = vi.fn();
   onmessage: ((ev: { data: unknown }) => void) | null = null;
   onerror: unknown = null;

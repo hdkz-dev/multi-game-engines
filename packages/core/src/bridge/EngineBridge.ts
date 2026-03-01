@@ -119,7 +119,13 @@ export class EngineBridge implements IEngineBridge {
         >,
   ): void {
     if (this.adapterFactories.has(type)) {
-      throw new Error(`Adapter factory for "${type}" is already registered.`);
+      const i18nKey = createI18nKey("engine.errors.duplicateFactory");
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Adapter factory for "${type}" is already registered.`,
+        i18nKey,
+        i18nParams: { type },
+      });
     }
     this.adapterFactories.set(type, factory);
   }
@@ -522,7 +528,7 @@ export class EngineBridge implements IEngineBridge {
         };
 
         // 2026 Best Practice: IEngineConfig.sources の型（main を必須とする）に適合させる。
-        // registry.resolve は Record<string, IEngineSourceConfig> を返すが、
+        // registry.resolve は IEngineConfig["sources"] を返すが、
         // 少なくとも 'main' が含まれていることを前提とする（またはバリデーション）。
         if (mergedSources["main"]) {
           config.sources = mergedSources as Required<IEngineConfig>["sources"];

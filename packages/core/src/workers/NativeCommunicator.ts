@@ -33,6 +33,14 @@ export class NativeCommunicator {
     this.child.on("error", (err: Error) => {
       console.error("[NativeCommunicator] Process error:", err);
     });
+
+    this.child.on("exit", (code, signal) => {
+      if (code !== 0 && code !== null) {
+        console.error(
+          `[NativeCommunicator] Process exited with code ${code}, signal ${signal}`,
+        );
+      }
+    });
   }
 
   postMessage(message: string): void {

@@ -54,7 +54,12 @@ export class NodeFSStorage implements IFileStorage {
       const { fs } = await this.getModules();
       const filePath = await this.getFilePath(key);
       const buffer = await fs.readFile(filePath);
-      return buffer.buffer as ArrayBuffer;
+      // 2026: Node.js Buffer.buffer may return more than just the file content
+      // if it's using a shared pool. Always slice to be safe.
+      return buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength,
+      );
     } catch {
       return null;
     }

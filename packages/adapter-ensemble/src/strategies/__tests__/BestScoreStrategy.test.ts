@@ -97,6 +97,38 @@ describe("BestScoreStrategy", () => {
     expect(winner.bestMove).toBe("a2a3");
   });
 
+  it("should prioritize normalized score if present and ignore raw scores", () => {
+    const strategy = new BestScoreStrategy();
+    const resultsMap = new Map<string, IBaseSearchResult>([
+      [
+        "e1",
+        {
+          bestMove: "a2a3",
+          score: { normalized: 0.5 as NormalizedScore, cp: 100 },
+        },
+      ],
+      [
+        "e2",
+        {
+          bestMove: "a2a4",
+          score: { normalized: 0.8 as NormalizedScore, cp: 50 },
+        },
+      ],
+      [
+        "e3",
+        {
+          bestMove: "h2h3",
+          score: { cp: 1000 }, // No normalized score
+        },
+      ],
+    ]);
+
+    const winner = strategy.aggregateResults(resultsMap);
+    // e3 has the highest raw CP, but since e1 and e2 have normalized scores,
+    // only they should be compared. e2 has the highest normalized score.
+    expect(winner.bestMove).toBe("a2a4");
+  });
+
   it("should prioritize normalized score if present", () => {
     const strategy = new BestScoreStrategy();
     const resultsMap = new Map<string, IBaseSearchResult>([

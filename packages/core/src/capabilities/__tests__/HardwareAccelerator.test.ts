@@ -22,7 +22,9 @@ describe("HardwareAccelerator", () => {
   });
 
   it("should detect WebNN correctly", async () => {
-    vi.stubGlobal("navigator", { ml: {} });
+    vi.stubGlobal("navigator", {
+      ml: { createContext: vi.fn().mockResolvedValue({}) },
+    });
     expect(await HardwareAccelerator.checkWebNN()).toBe(true);
 
     vi.stubGlobal("navigator", {});
@@ -30,7 +32,9 @@ describe("HardwareAccelerator", () => {
   });
 
   it("should recommend the best acceleration", async () => {
-    vi.stubGlobal("navigator", { ml: {} });
+    vi.stubGlobal("navigator", {
+      ml: { createContext: vi.fn().mockResolvedValue({}) },
+    });
     expect(await HardwareAccelerator.getBestAcceleration()).toBe("webnn");
 
     vi.stubGlobal("navigator", {

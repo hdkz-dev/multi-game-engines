@@ -96,7 +96,7 @@ export class JanggiAdapter extends BaseAdapter<
 
       const ujciOkPromise = this.communicator.expectMessage(
         (line) => line === "ujciok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
 
       this.communicator.postMessage("ujci");

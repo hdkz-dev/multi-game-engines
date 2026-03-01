@@ -230,6 +230,13 @@ export class EngineLoader implements IEngineLoader {
         }
 
         const isPartial = response.status === 206;
+        if (loadedBytes > 0 && !isPartial) {
+          // 2026: サーバーが Range を無視して 200 OK を返した場合、
+          // 既存のチャンクを破棄して最初からやり直す。
+          loadedBytes = 0;
+          chunks.length = 0;
+        }
+
         const contentLength = parseInt(
           response.headers.get("Content-Length") || "0",
           10,

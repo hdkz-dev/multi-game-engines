@@ -26,9 +26,8 @@ This document defines the peak design, implementation, and operational standards
 - **Implementation**: Centralized validation via `ProtocolValidator.assertNoInjection`.
 
 ### 2.2. Mandatory SRI
-
-- **Requirement**: Subresource Integrity (SRI) must be verified for all external assets (.wasm, .nnue, .bin).
-- **Fallback**: Placeholders (`__unsafeNoSRI`) are only allowed during initial development and must be blocked in production registries.
+- **Requirement**: Subresource Integrity (SRI) must be verified for all external assets (.wasm, .nnue, .bin). Placeholders are strictly forbidden in production registries.
+- **Fallback**: Placeholders (`__unsafeNoSRI`) are only allowed during initial development and must be automatically blocked in production registries.
 
 ---
 

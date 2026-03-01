@@ -57,7 +57,11 @@ export class ResourceInjector {
       const payload = data as MessagePayload;
 
       if (payload.type === "MG_INJECT_RESOURCES") {
-        if (!payload.resources || typeof payload.resources !== "object") {
+        if (
+          !payload.resources ||
+          typeof payload.resources !== "object" ||
+          payload.resources === null
+        ) {
           throw new EngineError({
             code: EngineErrorCode.PROTOCOL_ERROR,
             message:

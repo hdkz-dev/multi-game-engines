@@ -72,11 +72,13 @@ export class USIParser implements IProtocolParser<
                     : -1
                   : parseInt(valToken || "0", 10);
 
-              info.score = {
-                unit: "mate",
-                mate: value,
-                normalized: ScoreNormalizer.normalize(value, "mate", "shogi"),
-              };
+              if (Number.isFinite(value)) {
+                info.score = {
+                  unit: "mate",
+                  mate: value,
+                  normalized: ScoreNormalizer.normalize(value, "mate", "shogi"),
+                };
+              }
             }
           }
           break;

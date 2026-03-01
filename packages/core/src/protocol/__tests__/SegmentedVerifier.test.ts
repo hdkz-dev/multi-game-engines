@@ -4,12 +4,11 @@ import { ISegmentedSRI, EngineErrorCode } from "../../types.js";
 
 describe("SegmentedVerifier", () => {
   const dummyData = new Uint8Array([1, 2, 3, 4, 5, 6]);
-  // sha256 of [1, 2, 3] is "LCa0a2j/xo/5m0U8HTBBNBNCLDtHMaRdg4WInVT/J28=" (approx)
-  // Let's use a real calculation for the test.
 
-  const calcHash = async (data: Uint8Array) => {
-    const digest = await crypto.subtle.digest("SHA-256", data as unknown as ArrayBuffer);
-    return "sha256-" + btoa(String.fromCharCode(...new Uint8Array(digest)));
+  const calcHash = async (data: Uint8Array, algo = "SHA-256") => {
+    const digest = await crypto.subtle.digest(algo, data as unknown as ArrayBuffer);
+    const prefix = algo.toLowerCase().replace("-", "");
+    return prefix + "-" + btoa(String.fromCharCode(...new Uint8Array(digest)));
   };
 
   it("should verify segments correctly", async () => {
@@ -42,8 +41,23 @@ describe("SegmentedVerifier", () => {
     );
   });
 
+  it("should throw SRI_MISMATCH if segment count doesn't match data size", async () => {
+    const h1 = await calcHash(new Uint8Array([1, 2, 3, 4, 5, 6]));
+
+    const segmentedSri: ISegmentedSRI = {
+      segmentSize: 3, // Expected 2 segments for 6 bytes
+      hashes: [h1],
+    };
+
+    await expect(
+      SegmentedVerifier.assertSegmented(dummyData.buffer, segmentedSri),
+    ).rejects.toThrow(
+      expect.objectContaining({ code: EngineErrorCode.SRI_MISMATCH }),
+    );
+  });
+
   it("should support sha384 and sha512", async () => {
-    // Basic structural check
+    // Basic structural check for failure
     expect(
       await SegmentedVerifier.verifySegment(new Uint8Array([1]), "sha384-xxxx"),
     ).toBe(false);
@@ -56,5 +70,15 @@ describe("SegmentedVerifier", () => {
         "unknown-xxxx",
       ),
     ).toBe(false);
+  });
+
+  it("should support sha384 success case", async () => {
+    const h = await calcHash(new Uint8Array([1, 2, 3]), "SHA-384");
+    expect(await SegmentedVerifier.verifySegment(new Uint8Array([1, 2, 3]), h)).toBe(true);
+  });
+
+  it("should support sha512 success case", async () => {
+    const h = await calcHash(new Uint8Array([1, 2, 3]), "SHA-512");
+    expect(await SegmentedVerifier.verifySegment(new Uint8Array([1, 2, 3]), h)).toBe(true);
   });
 });

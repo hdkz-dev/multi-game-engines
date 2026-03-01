@@ -2,6 +2,7 @@ import { tChess as translate } from "@multi-game-engines/i18n-chess";
 import { EngineErrorCode,
   EngineError,
   PositionString,
+  createPositionString,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -88,7 +89,7 @@ export function createFEN(pos: string): FEN {
   }
   const trimmedPos = pos.trim();
   if (trimmedPos === "startpos") {
-    return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" as FEN;
+    return createPositionString<"FEN">("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
   }
   if (!/^[0-9a-hRNBQKPpnbrqkw/ -]+$/.test(trimmedPos)) {
     const i18nKey = createI18nKey("engine.errors.illegalCharacters");
@@ -175,7 +176,7 @@ export function createFEN(pos: string): FEN {
     });
   }
 
-  return trimmedPos as FEN;
+  return createPositionString<"FEN">(trimmedPos);
 }
 
 export function isValidChessPiece(char: string): char is ChessPiece {

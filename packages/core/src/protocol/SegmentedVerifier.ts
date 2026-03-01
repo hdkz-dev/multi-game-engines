@@ -42,7 +42,26 @@ export class SegmentedVerifier {
     const { segmentSize, hashes } = segmentedSri;
     const bytes = new Uint8Array(fullData);
 
-    for (let i = 0; i < hashes.length; i++) {
+    if (!Number.isInteger(segmentSize) || segmentSize <= 0) {
+      const i18nKey = createI18nKey("engine.errors.sriMismatch");
+      throw new EngineError({
+        code: EngineErrorCode.SRI_MISMATCH,
+        message: "Segmented SRI verification failed: invalid segmentSize.",
+        i18nKey,
+      });
+    }
+
+    const expectedSegments = Math.ceil(bytes.length / segmentSize);
+    if (hashes.length !== expectedSegments) {
+      const i18nKey = createI18nKey("engine.errors.sriMismatch");
+      throw new EngineError({
+        code: EngineErrorCode.SRI_MISMATCH,
+        message: `Segmented SRI verification failed: expected ${expectedSegments} hashes, got ${hashes.length}.`,
+        i18nKey,
+      });
+    }
+
+    for (let i = 0; i < expectedSegments; i++) {
       const start = i * segmentSize;
       const end = Math.min(start + segmentSize, bytes.length);
       const segment = bytes.slice(start, end);

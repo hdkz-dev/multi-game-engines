@@ -19,6 +19,7 @@ export class EngineBatchAnalyzer<
   private isPaused = false;
   private isAborted = false;
   private currentTaskPromise: Promise<T_RESULT> | null = null;
+  private runPromise: Promise<T_RESULT[]> | null = null;
   private currentIndex = 0;
 
   constructor(private engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>) {}
@@ -36,38 +37,49 @@ export class EngineBatchAnalyzer<
   public async analyzeAll(
     onProgress?: (index: number, total: number, result: T_RESULT) => void,
   ): Promise<T_RESULT[]> {
-    this.isAborted = false;
+    if (this.runPromise) return this.runPromise;
 
-    while (this.currentIndex < this.queue.length && !this.isAborted) {
-      if (this.isPaused) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        continue;
-      }
+    this.runPromise = (async () => {
+      this.isAborted = false;
 
-      const options = this.queue[this.currentIndex]!;
-      try {
-        this.currentTaskPromise = this.engine.search(options);
-        const result = await this.currentTaskPromise;
-        this.results[this.currentIndex] = result;
-
-        onProgress?.(this.currentIndex + 1, this.queue.length, result);
-        this.currentIndex++;
-      } catch (err) {
-        if (
-          err instanceof EngineError &&
-          err.code === EngineErrorCode.CANCELLED
-        ) {
-          // Pause or Abort during search
-          if (this.isAborted) break;
+      while (this.currentIndex < this.queue.length && !this.isAborted) {
+        if (this.isPaused) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
           continue;
         }
-        throw err;
-      } finally {
-        this.currentTaskPromise = null;
-      }
-    }
 
-    return this.results;
+        const options = this.queue[this.currentIndex]!;
+        try {
+          this.currentTaskPromise = this.engine.search(options);
+          const result = await this.currentTaskPromise;
+          this.results[this.currentIndex] = result;
+
+          onProgress?.(this.currentIndex + 1, this.queue.length, result);
+          this.currentIndex++;
+        } catch (err) {
+          if (
+            err instanceof EngineError &&
+            err.code === EngineErrorCode.CANCELLED
+          ) {
+            // Pause or Abort during search
+            if (this.isAborted) break;
+            if (this.isPaused) continue;
+            throw err;
+          }
+          throw err;
+        } finally {
+          this.currentTaskPromise = null;
+        }
+      }
+
+      return [...this.results];
+    })();
+
+    try {
+      return await this.runPromise;
+    } finally {
+      this.runPromise = null;
+    }
   }
 
   /**
@@ -106,8 +118,15 @@ export class EngineBatchAnalyzer<
       if (this.currentTaskPromise) {
         try {
           await this.currentTaskPromise;
-        } catch {
-          /* Ignore cancellation */
+        } catch (err) {
+          if (
+            !(
+              err instanceof EngineError &&
+              err.code === EngineErrorCode.CANCELLED
+            )
+          ) {
+            throw err;
+          }
         }
       }
       return await this.engine.search(options);

@@ -18,7 +18,6 @@
   },
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/i18n-chess": "workspace:*"
   },
   "devDependencies": {

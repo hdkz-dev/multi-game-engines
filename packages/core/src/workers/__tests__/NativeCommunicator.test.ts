@@ -1,18 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NativeCommunicator } from "../NativeCommunicator.js";
 
 const { mockChild } = vi.hoisted(() => {
   // Use a simple mock object that implements the necessary EventEmitter interface
   // to avoid issues with hoisted imports of node:events
   const listeners = new Map<string, Set<(...args: unknown[]) => unknown>>();
-  const m: unknown = {
+  const m: any = {
     on: vi.fn((event, cb) => {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add(cb);
       return m;
     }),
     emit: vi.fn((event, ...args) => {
-      listeners.get(event)?.forEach((cb) => cb(...args));
+      listeners.get(event)?.forEach((cb) => {
+        cb(...args);
+      });
       return true;
     }),
     removeAllListeners: vi.fn(() => {
@@ -28,7 +30,9 @@ const { mockChild } = vi.hoisted(() => {
         return m.stdout;
       }),
       emit: vi.fn((event, ...args) => {
-        m._stdoutListeners?.get(event)?.forEach((cb: unknown) => cb(...args));
+        m._stdoutListeners?.get(event)?.forEach((cb: unknown) => {
+          if (typeof cb === "function") cb(...args);
+        });
         return true;
       }),
       removeAllListeners: vi.fn(() => {
@@ -49,9 +53,14 @@ vi.mock("node:child_process", () => ({
 
 describe("NativeCommunicator", () => {
   beforeEach(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
     mockChild.removeAllListeners();
     mockChild.stdout.removeAllListeners();
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should spawn and communicate with a process", async () => {
@@ -94,10 +103,12 @@ describe("NativeCommunicator", () => {
     await comm.spawn();
 
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockChild.emit("exit", 1, "SIGTERM");
+    
+    expect(() => {
+      mockChild.emit("exit", 1, "SIGTERM");
+    }).not.toThrow();
 
-    // In current implementation it just logs or might need a listener.
-    // Let's add an onExit or similar if needed, or just verify it doesn't crash.
+    expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
   });
 

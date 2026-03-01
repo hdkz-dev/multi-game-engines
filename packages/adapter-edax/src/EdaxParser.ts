@@ -21,7 +21,8 @@ export class EdaxParser implements IProtocolParser<
     if (typeof data !== "string") return null;
 
     // Edax の出力を想定
-    if (!data.includes("depth") && !data.includes("score")) return null;
+    const lowerData = data.toLowerCase();
+    if (!lowerData.includes("depth") && !lowerData.includes("score")) return null;
 
     const info: IReversiSearchInfo = { raw: data, positionId, depth: 0 };
 

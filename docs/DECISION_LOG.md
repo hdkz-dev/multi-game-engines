@@ -63,3 +63,4 @@
 - [ADR-036: Zenith Tier PR 監査とモノレポ全域の厳格な型安全性の再適用](./adr/036-zenith-audit-and-strict-types.md) (Accepted - 2026-02-20)
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](./adr/037-core-domain-isolation-and-lifecycle-hardening.md) (Accepted - 2026-02-20)
 - [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed - 2026-02-21)
+- [ADR-055: Standardization of Piece Visualization through pieceSymbols property](./adr/055-piece-symbols-standardization.md) (Accepted - 2026-03-01)

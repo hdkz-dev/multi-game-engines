@@ -1,12 +1,12 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年2月28日 (実装担当: Zenith Robustness Engineer)
+## 📅 更新日: 2026年3月1日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
 
 ### 1. Zenith Robustness & 100% Coverage Challenge (品質の極致)
 
-- [x] `core` パッケージのラインカバレッジ **98.41%** 達成 (残りは環境依存のデッドコードのみ)
+- [x] `core` パッケージのラインカバレッジ **98.41%** 達成
 - [x] 異常系・エッジケースの完全網羅テストスイートの構築
 - [x] `EngineFacade` におけるミドルウェア故障の完全絶縁 (Isolation)
 - [x] `ProtocolValidator` への循環参照検知ロジックの実装
@@ -16,10 +16,9 @@
 ### 2. Advanced Development Skills Integration (継続強化)
 
 - [x] 統合計画の策定 (`docs/implementation_plans/20260227_advanced_skills_integration.md`)
-- [x] Playwright E2E テストの拡充 (並列探索、ロケール切り替え等のケース追加)
+- [x] Playwright E2E テストの拡充
 - [x] ビルドプロセスへの SRI 自動再計算 (`sri:refresh`) の統合
-- [ ] Jules / Subagent ワークフローのドキュメント化と実運用開始
-- [ ] Changesets によるリリースオートメーションの強化
+- [x] **アクセシビリティ強化 (ADR-051)**: キーボードナビゲーションの完全実装と物理的実証テストの追加。
 
 ## 🏆 到達ハイライト (2026-03-01 Zenith Quality Finalization)
 
@@ -28,6 +27,8 @@
   - **テストの決定性向上**: `performance.now()` のモック化と `vi.useFakeTimers()` の適用により、環境に依存しない安定したテストスイートを構築。
   - **インフラ層のリファクタリング**: 各アダプターに散在していたソース検証ロジックを `core` の `normalizeAndValidateSources` へ集約。
   - **セキュリティの再強化**: `EngineLoader` において、ローカルホスト以外の `http:` 通信を無条件で遮断するロジックを実装し、CodeQL の警告を解消。
+- **アクセシビリティの極致**:
+  - `ChessBoard`, `ShogiBoard` 等の主要 UI におけるフルキーボードナビゲーションの実装と、それを検証する自動テストスイートの完備。
 - **100% 品質ゲートの突破**:
   - 全 51 パッケージにおける **Build, Typecheck, Lint, Test すべてのパス**を確認（テスト数: 356件）。
   - Zero-Any ポリシーをプロダクションコードで 100% 遵守。

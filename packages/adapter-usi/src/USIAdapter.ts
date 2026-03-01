@@ -95,7 +95,7 @@ export class USIAdapter extends BaseAdapter<
 
       const usiOk = this.communicator.expectMessage(
         (line) => line === "usiok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
       this.communicator.postMessage("usi");
       await usiOk;

@@ -3,6 +3,7 @@ import { EngineError,
   EngineErrorCode,
   ProtocolValidator,
   Move,
+  createMove,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -73,7 +74,7 @@ export function createMahjongMove(move: string): MahjongMove {
       i18nParams,
     });
   }
-  return move as MahjongMove;
+  return createMove<"MahjongMove">(move);
 }
 
 /**

@@ -132,17 +132,34 @@ describe("EngineBatchAnalyzer", () => {
   });
 
   it("should continue to next item if search is cancelled but not aborted (e.g. pause simulation)", async () => {
-    analyzer.add({ fen: "p1" } as IBaseSearchOptions);
-    analyzer.add({ fen: "p2" } as IBaseSearchOptions);
+    analyzer.add({ fen: "pos1" } as IBaseSearchOptions);
 
-    mockEngine.search
-      .mockRejectedValueOnce(
-        new EngineError({ code: EngineErrorCode.CANCELLED, message: "Paused" }),
-      )
-      .mockResolvedValueOnce({ bestMove: "e7e5" } as IBaseSearchResult);
+    let resolveSearch: (res: T_RESULT) => void;
+    let rejectSearch: (err: Error) => void;
+    const searchPromise = new Promise<T_RESULT>((res, rej) => {
+      resolveSearch = res;
+      rejectSearch = rej;
+    });
 
-    const results = await analyzer.analyzeAll();
-    // It should have retried the same item and succeeded
+    mockEngine.search.mockReturnValueOnce(searchPromise);
+
+    const runPromise = analyzer.analyzeAll();
+
+    // Now it's inside search. Let's pause and then fail the search.
+    analyzer.pause();
+    rejectSearch!(
+      new EngineError({ code: EngineErrorCode.CANCELLED, message: "Paused" }),
+    );
+
+    // Give it a moment to hit the catch block and then the pause loop
+    await new Promise((r) => setTimeout(r, 100));
+
+    mockEngine.search.mockResolvedValueOnce({
+      bestMove: "e7e5",
+    } as IBaseSearchResult);
+    analyzer.resume();
+
+    const results = await runPromise;
     expect(results[0]?.bestMove).toBe("e7e5");
   });
 });

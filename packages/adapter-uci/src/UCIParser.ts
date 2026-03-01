@@ -85,17 +85,21 @@ export class UCIParser implements IProtocolParser<
           break;
         case "score": {
           if (i + 2 < parts.length) {
-            const scoreType = parts[++i] as "cp" | "mate";
-            const scoreValue = parseInt(parts[++i] || "0", 10) || 0;
-            info.score = {
-              unit: scoreType,
-              [scoreType]: scoreValue,
-              normalized: ScoreNormalizer.normalize(
-                scoreValue,
-                scoreType,
-                "chess",
-              ),
-            };
+            const scoreType = parts[++i];
+            const valToken = parts[++i];
+            const scoreValue = parseInt(valToken || "0", 10) || 0;
+
+            if (scoreType === "cp" || scoreType === "mate") {
+              info.score = {
+                unit: scoreType,
+                [scoreType]: scoreValue,
+                normalized: ScoreNormalizer.normalize(
+                  scoreValue,
+                  scoreType,
+                  "chess",
+                ),
+              };
+            }
           }
           break;
         }
