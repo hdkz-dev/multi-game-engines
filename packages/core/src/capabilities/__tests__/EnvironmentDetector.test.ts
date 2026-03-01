@@ -69,7 +69,8 @@ describe("EnvironmentDetector", () => {
     // @ts-expect-error Testing private property access or invalid input
     delete globalThis.SharedArrayBuffer;
 
-    expect((EnvironmentDetector as unknown).checkWasmThreads()).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((EnvironmentDetector as any).checkWasmThreads()).toBe(false);
 
     globalThis.SharedArrayBuffer = originalSAB;
   });
@@ -79,7 +80,8 @@ describe("EnvironmentDetector", () => {
     // @ts-expect-error Testing private property access or invalid input
     delete globalThis.WebAssembly;
 
-    expect((EnvironmentDetector as unknown).checkWasmSimd()).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((EnvironmentDetector as any).checkWasmSimd()).toBe(false);
 
     globalThis.WebAssembly = originalWA;
   });
@@ -90,12 +92,14 @@ describe("EnvironmentDetector", () => {
         throw new Error("Validation failed");
       },
     });
-    expect((EnvironmentDetector as unknown).checkWasmSimd()).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((EnvironmentDetector as any).checkWasmSimd()).toBe(false);
   });
 
   it("should detect various runtimes", () => {
     const originalProcess = globalThis.process;
-    const originalWindow = (globalThis as unknown).window;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const originalWindow = (globalThis as any).window;
 
     // 1. Browser
     // @ts-expect-error Testing private property access or invalid input
@@ -115,7 +119,8 @@ describe("EnvironmentDetector", () => {
     expect(EnvironmentDetector.getRuntime()).toBe("bun");
 
     globalThis.process = originalProcess;
-    (globalThis as unknown).window = originalWindow;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).window = originalWindow;
   });
 
   it("should handle error in checkWasmThreads gracefully", () => {
@@ -125,6 +130,7 @@ describe("EnvironmentDetector", () => {
       }),
     });
     vi.stubGlobal("SharedArrayBuffer", vi.fn());
-    expect((EnvironmentDetector as unknown).checkWasmThreads()).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((EnvironmentDetector as any).checkWasmThreads()).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { WeightedStrategy } from "../WeightedStrategy.js";
-import { IBaseSearchResult, EngineError } from "@multi-game-engines/core";
+import { IBaseSearchResult, EngineError, Move } from "@multi-game-engines/core";
 
 describe("WeightedStrategy", () => {
   it("should select the move with highest total weight", () => {
@@ -22,9 +22,9 @@ describe("WeightedStrategy", () => {
     debugSpy.mockRestore();
 
     const resultsMap = new Map<string, IBaseSearchResult>([
-      ["engine1", { bestMove: "a2a3" }],
-      ["engine2", { bestMove: "a2a3" }],
-      ["engine3", { bestMove: "a2a4" }],
+      ["engine1", { bestMove: "a2a3" as Move }],
+      ["engine2", { bestMove: "a2a3" as Move }],
+      ["engine3", { bestMove: "a2a4" as Move }],
     ]);
 
     const winner = strategy.aggregateResults(resultsMap);
@@ -36,8 +36,9 @@ describe("WeightedStrategy", () => {
 
     const resultsMap = new Map<string, IBaseSearchResult>([
       ["e1", { bestMove: null }],
-      ["e2", { bestMove: undefined }],
-      ["e3", { bestMove: "e2e4" }],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ["e2", { bestMove: undefined as any }],
+      ["e3", { bestMove: "e2e4" as Move }],
     ]);
 
     const winner = strategy.aggregateResults(resultsMap);
@@ -48,8 +49,8 @@ describe("WeightedStrategy", () => {
     const strategy = new WeightedStrategy();
 
     const resultsMap = new Map<string, IBaseSearchResult>([
-      ["e1", { bestMove: "" }],
-      ["e2", { bestMove: "e2e4" }],
+      ["e1", { bestMove: "" as Move }],
+      ["e2", { bestMove: "e2e4" as Move }],
     ]);
 
     const winner = strategy.aggregateResults(resultsMap);
@@ -68,7 +69,8 @@ describe("WeightedStrategy", () => {
 
     const resultsMap = new Map<string, IBaseSearchResult>([
       ["e1", { bestMove: null }],
-      ["e2", { bestMove: undefined }],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ["e2", { bestMove: undefined as any }],
     ]);
 
     // winnerMove is null → returns first entry via resultsMap.values().next().value
@@ -79,7 +81,7 @@ describe("WeightedStrategy", () => {
 
   it("should warn when engine has no weight configured", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    vi.spyOn(console, "debug").mockImplementation(() => {});
 
     const strategy = new WeightedStrategy({
       engine1: 2.0,
@@ -87,14 +89,14 @@ describe("WeightedStrategy", () => {
     });
 
     const resultsMap = new Map<string, IBaseSearchResult>([
-      ["engine1", { bestMove: "a2a3" }],
-      ["engine2", { bestMove: "a2a4" }], // not in weights
+      ["engine1", { bestMove: "a2a3" as Move }],
+      ["engine2", { bestMove: "a2a4" as Move }], // not in weights
     ]);
 
     strategy.aggregateResults(resultsMap);
     // engine2 に重みが設定されていない旨の warn が出るはず
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("engine2"));
-    
+
     vi.restoreAllMocks();
   });
 
@@ -110,9 +112,9 @@ describe("WeightedStrategy", () => {
     });
 
     const resultsMap = new Map<string, IBaseSearchResult>([
-      ["engine1", { bestMove: "a2a3" }],
-      ["engine2", { bestMove: "a2a3" }], // default weight 1.0
-      ["engine3", { bestMove: "a2a4" }], // weight 2.0
+      ["engine1", { bestMove: "a2a3" as Move }],
+      ["engine2", { bestMove: "a2a3" as Move }], // default weight 1.0
+      ["engine3", { bestMove: "a2a4" as Move }], // weight 2.0
     ]);
 
     const winner = strategy.aggregateResults(resultsMap);

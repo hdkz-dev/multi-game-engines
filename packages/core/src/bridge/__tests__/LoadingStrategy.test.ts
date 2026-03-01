@@ -1,7 +1,13 @@
 import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
-import { IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineErrorCode } from "../../types.js";
+import {
+  IEngineAdapter,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  EngineErrorCode,
+} from "../../types.js";
 import { EngineError } from "../../errors/EngineError.js";
 
 describe("Loading Strategies", () => {
@@ -41,10 +47,14 @@ describe("Loading Strategies", () => {
           info: (async function* () {
             yield { raw: "info" } as IBaseSearchInfo;
           })(),
-          result: Promise.resolve({ raw: "result" } as IBaseSearchResult),
+          result: Promise.resolve({
+            bestMove: null,
+            raw: "result",
+          } as IBaseSearchResult),
           stop: vi.fn(),
         };
       }),
+      updateStatus: vi.fn(),
       onStatusChange: vi.fn().mockReturnValue(() => {}),
       onProgress: vi.fn().mockReturnValue(() => {}),
       onTelemetry: vi.fn().mockReturnValue(() => {}),

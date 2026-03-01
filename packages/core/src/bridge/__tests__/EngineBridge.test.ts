@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineBridge } from "../EngineBridge.js";
-import { IEngineAdapter,
+import {
+  IEngineAdapter,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -8,8 +9,8 @@ import { IEngineAdapter,
   IMiddleware,
   EngineStatus,
   MiddlewarePriority,
-  Move,
-  IEngineConfig, } from "../../types.js";
+  IEngineConfig,
+} from "../../types.js";
 import { createMove } from "../../protocol/ProtocolValidator.js";
 
 describe("EngineBridge", () => {
@@ -44,6 +45,7 @@ describe("EngineBridge", () => {
       IBaseSearchResult
     >,
     load: vi.fn().mockResolvedValue(undefined),
+    updateStatus: vi.fn(),
     search: vi.fn().mockResolvedValue({
       bestMove: createMove("e2e4"),
     }),

@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineBatchAnalyzer } from "../EngineBatchAnalyzer.js";
-import { IEngine,
+import {
+  IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   IBaseSearchInfo,
-  EngineErrorCode, } from "../../types.js";
+  EngineErrorCode,
+} from "../../types.js";
 import { EngineError } from "../../errors/EngineError.js";
 
 describe("EngineBatchAnalyzer", () => {
@@ -134,10 +136,8 @@ describe("EngineBatchAnalyzer", () => {
   it("should continue to next item if search is cancelled but not aborted (e.g. pause simulation)", async () => {
     analyzer.add({ fen: "pos1" } as IBaseSearchOptions);
 
-    let resolveSearch: (res: T_RESULT) => void;
     let rejectSearch: (err: Error) => void;
-    const searchPromise = new Promise<T_RESULT>((res, rej) => {
-      resolveSearch = res;
+    const searchPromise = new Promise<IBaseSearchResult>((_res, rej) => {
       rejectSearch = rej;
     });
 

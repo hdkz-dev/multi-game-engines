@@ -585,10 +585,7 @@ export interface IEngineRegistry {
    * 指定されたエンジンIDとバージョンのリソース設定を解決します。
    * 見つからない場合は null を返します。
    */
-  resolve(
-    id: string,
-    version?: string,
-  ): IEngineConfig["sources"] | null;
+  resolve(id: string, version?: string): IEngineConfig["sources"] | null;
 
   /**
    * このレジストリがサポートしているエンジン ID の一覧を取得します。
@@ -599,13 +596,15 @@ export interface IEngineRegistry {
 /**
  * 定跡書・データベースアセットの情報。
  */
-export interface IBookAsset {
+export type IBookAsset = {
   id: string;
   url: string;
-  sri: string;
   size?: number | undefined;
   type: "bin" | "db" | "json";
-}
+} & (
+  | { sri: string; __unsafeNoSRI?: never }
+  | { sri?: never; __unsafeNoSRI: true }
+);
 
 /**
  * 定跡書プロバイダー。
@@ -688,11 +687,7 @@ export interface IEngineBridge {
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
       | Promise<
-          IEngineAdapter<
-            IBaseSearchOptions,
-            IBaseSearchInfo,
-            IBaseSearchResult
-          >
+          IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
         >,
   ): void;
 

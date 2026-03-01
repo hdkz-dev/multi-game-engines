@@ -1,10 +1,12 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { parseSFEN,
+import {
+  parseSFEN,
   ShogiPiece,
   ShogiHand,
   SFEN,
-  createSFEN, } from "@multi-game-engines/domain-shogi";
+  createSFEN,
+} from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
 import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 
@@ -149,6 +151,9 @@ export class ShogiBoard extends LitElement {
 
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
+
+  @property({ type: Object })
+  pieceSymbols: Partial<Record<ShogiPiece, string>> = {};
 
   /**
    * 2026 Zenith Tier: Roving Tabindex state.
@@ -324,7 +329,8 @@ export class ShogiBoard extends LitElement {
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
     const pieceNames = (strings["pieceNames"] || {}) as Record<string, string>;
-    const handPieceCount = (strings["handPieceCount"] || "{piece}{count}") as string;
+    const handPieceCount = (strings["handPieceCount"] ||
+      "{piece}{count}") as string;
 
     return pieces.map((p) => {
       const count = hand[p];

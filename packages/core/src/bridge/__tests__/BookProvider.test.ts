@@ -40,6 +40,7 @@ describe("BookProvider", () => {
       id: "no-sri-book",
       url: "https://test.com/no-sri.bin",
       type: "bin",
+      __unsafeNoSRI: true,
     };
 
     await provider.loadBook(asset);
