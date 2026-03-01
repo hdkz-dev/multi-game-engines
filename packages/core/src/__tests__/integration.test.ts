@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge.js";
 import { MemoryStorage } from "../storage/MemoryStorage.js";
 import { createPositionId } from "../index.js";
-import { PositionId } from "../types.js";
 
 describe("Core Integration", () => {
   let bridge: EngineBridge;
