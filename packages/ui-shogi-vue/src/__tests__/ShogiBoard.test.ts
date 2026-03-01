@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 import ShogiBoardComponent from "../ShogiBoard.vue";
+
 import { ShogiBoard as ShogiBoardElement } from "@multi-game-engines/ui-shogi-elements";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
 

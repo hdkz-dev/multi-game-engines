@@ -1,10 +1,4 @@
-import {
-  EngineStatus,
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { EngineStatus, IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 import { EngineStore, Unsubscribe } from "../state/store.js";
 import { SubscriptionManager } from "../state/SubscriptionManager.js";
 

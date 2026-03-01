@@ -21,6 +21,41 @@ async function calculateSRI(url) {
   }
 }
 
+async function processAsset(assetId, asset) {
+  if (!asset || typeof asset !== "object") return 0;
+
+  // variants 等の入れ子構造を再帰的に処理
+  if (assetId === "variants") {
+    let count = 0;
+    for (const [variantId, variantData] of Object.entries(asset)) {
+      console.log(`    Variant: ${variantId}`);
+      for (const [subAssetId, subAsset] of Object.entries(variantData)) {
+        count += await processAsset(subAssetId, subAsset);
+      }
+    }
+    return count;
+  }
+
+  // 単一アセットの処理
+  if (asset.url && !asset.url.startsWith("data:")) {
+    const sri = await calculateSRI(asset.url);
+    if (sri) {
+      if (asset.sri !== sri || asset.__unsafeNoSRI) {
+        asset.sri = sri;
+        delete asset.__unsafeNoSRI;
+        console.log(`      ✅ Updated ${assetId}`);
+        return 1;
+      } else {
+        console.log(`      ℹ️ No change for ${assetId}`);
+        return 0;
+      }
+    } else {
+      throw new Error(`Failed to calculate SRI for ${assetId}`);
+    }
+  }
+  return 0;
+}
+
 async function main() {
   console.log(`Refreshing SRI hashes in ${ENGINES_JSON_PATH}...`);
 
@@ -33,17 +68,10 @@ async function main() {
     for (const [version, versionData] of Object.entries(engine.versions)) {
       console.log(`  Version: ${version}`);
       for (const [assetId, asset] of Object.entries(versionData.assets)) {
-        const sri = await calculateSRI(asset.url);
-        if (sri) {
-          if (asset.sri !== sri || asset.__unsafeNoSRI) {
-            asset.sri = sri;
-            delete asset.__unsafeNoSRI;
-            updatedCount++;
-            console.log(`    ✅ Updated ${assetId}`);
-          } else {
-            console.log(`    ℹ️ No change for ${assetId}`);
-          }
-        } else {
+        try {
+          updatedCount += await processAsset(assetId, asset);
+        } catch (err) {
+          console.error(`    ❌ Error processing ${assetId}: ${err.message}`);
           errorCount++;
         }
       }

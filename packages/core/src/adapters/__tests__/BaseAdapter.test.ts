@@ -1,12 +1,10 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { BaseAdapter } from "../BaseAdapter.js";
-import {
-  IBaseSearchOptions,
+import { IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
   IProtocolParser,
-  EngineStatus,
-} from "../../types.js";
+  EngineStatus, } from "../../types.js";
 
 // モック用の型定義
 class TestAdapter extends BaseAdapter<
@@ -31,6 +29,10 @@ class TestAdapter extends BaseAdapter<
 
   async load() {}
   async dispose() {}
+
+  protected async onBookLoaded(_url: string): Promise<void> {
+    // mock implementation
+  }
 
   // テスト用の公開ラッパー
   public testEmitStatusChange(status: EngineStatus) {

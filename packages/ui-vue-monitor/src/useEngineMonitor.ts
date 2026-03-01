@@ -1,22 +1,13 @@
-import {
-  ref,
+import { ref,
   watch,
   computed,
   toValue,
   Ref,
   ComputedRef,
   MaybeRefOrGetter,
-  onWatcherCleanup,
-} from "vue";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  EngineStatus,
-  createPositionString,
-} from "@multi-game-engines/core";
-import {
-  MonitorRegistry,
+  onWatcherCleanup, } from "vue";
+import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, createPositionString } from "@multi-game-engines/core";
+import { MonitorRegistry,
   SearchStateTransformer,
   EngineSearchState,
   ExtendedSearchInfo,
@@ -24,8 +15,7 @@ import {
   SearchMonitor,
   CommandDispatcher,
   createInitialState,
-  UI_NORMALIZER_MIDDLEWARE_ID,
-} from "@multi-game-engines/ui-core";
+  UI_NORMALIZER_MIDDLEWARE_ID, } from "@multi-game-engines/ui-core";
 
 /**
  * useEngineMonitor の戻り値型を明示的に定義。

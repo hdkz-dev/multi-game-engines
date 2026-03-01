@@ -1,21 +1,10 @@
-import {
-  BaseAdapter,
-  IEngineLoader,
-  WorkerCommunicator,
-  EngineError,
-  EngineErrorCode,
-  ResourceMap,
-  IEngineConfig,
-  IEngineSourceConfig,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import {
-  IShogiSearchOptions,
+import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+
+import { IShogiSearchOptions,
   IShogiSearchInfo,
-  IShogiSearchResult,
-} from "@multi-game-engines/domain-shogi";
+  IShogiSearchResult, } from "@multi-game-engines/domain-shogi";
 import { USIParser } from "./USIParser.js";
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 
 export class USIAdapter extends BaseAdapter<
   IShogiSearchOptions,
@@ -34,13 +23,18 @@ export class USIAdapter extends BaseAdapter<
     this.version = config.version ?? "unknown";
   }
 
-  async load(loader?: IEngineLoader): Promise<void> {
+  /**
+   * エンジンのリソースをロードします。
+   * @param loader - エンジンローダー。
+   * @param signal - 中断用シグナル。
+   */
+  async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
       this.validateSources();
 
       if (!loader) {
-        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.loaderRequired");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -48,10 +42,11 @@ export class USIAdapter extends BaseAdapter<
           i18nKey,
         });
       }
+      this.activeLoader = loader;
 
       const sources = this.config.sources;
       if (!sources) {
-        const i18nKey = "engine.errors.missingSources" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingSources");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -62,15 +57,19 @@ export class USIAdapter extends BaseAdapter<
 
       const validSources: Record<string, IEngineSourceConfig> = {};
       for (const [key, value] of Object.entries(sources)) {
-        if (value) {
-          validSources[key] = value;
+        if (value && typeof value === "object" && "url" in value) {
+          validSources[key] = value as IEngineSourceConfig;
         }
       }
 
-      const resources = await loader.loadResources(this.id, validSources);
+      const resources = await this.loadWithProgress(
+        loader,
+        validSources,
+        signal,
+      );
 
       if (!resources["main"]) {
-        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -81,7 +80,8 @@ export class USIAdapter extends BaseAdapter<
 
       this.communicator = new WorkerCommunicator(resources["main"]);
       const resourceMap: ResourceMap = {};
-      for (const [key, source] of Object.entries(sources)) {
+      for (const [key, sourceVal] of Object.entries(sources)) {
+        const source = sourceVal as IEngineSourceConfig | undefined;
         if (source?.mountPath && resources[key]) {
           resourceMap[source.mountPath] = resources[key]!;
         }
@@ -95,7 +95,7 @@ export class USIAdapter extends BaseAdapter<
 
       const usiOk = this.communicator.expectMessage(
         (line) => line === "usiok",
-        { timeoutMs: 10000 },
+        { timeoutMs: 10000, signal },
       );
       this.communicator.postMessage("usi");
       await usiOk;
@@ -112,5 +112,9 @@ export class USIAdapter extends BaseAdapter<
       this.emitStatusChange("error");
       throw EngineError.from(e, this.id);
     }
+  }
+
+  protected async onBookLoaded(url: string): Promise<void> {
+    await this.setOption("BookFile", url);
   }
 }

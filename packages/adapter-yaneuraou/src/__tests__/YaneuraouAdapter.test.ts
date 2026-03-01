@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { YaneuraouAdapter } from "../YaneuraouAdapter.js";
 import { IEngineLoader } from "@multi-game-engines/core";
 

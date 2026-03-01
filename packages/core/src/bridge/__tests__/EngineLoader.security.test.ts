@@ -43,58 +43,69 @@ describe("EngineLoader Security", () => {
     );
   });
 
-  describe("validateWorkerUrl", () => {
+  describe("validateResourceUrl", () => {
     // 2026 Best Practice: private メソッドへのアクセスのための型ヘルパー
-    const callValidate = (url: string) => {
+    const callValidate = (url: string, sri?: string, unsafe?: boolean, isProd = false) => {
+      // Mock the production state
+      (loader as unknown as { isProduction: boolean }).isProduction = isProd;
       (
-        loader as unknown as { validateWorkerUrl(u: string, id?: string): void }
-      ).validateWorkerUrl(url);
+        loader as unknown as { validateResourceUrl(c: unknown, id: string): void }
+      ).validateResourceUrl({ url, type: "worker-js", sri, __unsafeNoSRI: unsafe }, "test-id");
     };
 
-    it("should allow same-origin URLs", () => {
+    it("should allow https URLs with SRI", () => {
       const url = "https://app.example.com/worker.js";
       // Should not throw
-      callValidate(url);
+      callValidate(url, "sha384-dummy");
     });
 
-    it("should allow blob: URLs", () => {
-      const url = "blob:https://app.example.com/uuid";
-      callValidate(url);
+    it("should allow http exact localhost", () => {
+      callValidate("http://localhost/worker.js", "sha384-dummy");
+      callValidate("http://127.0.0.1/worker.js", "sha384-dummy");
     });
 
-    it("should allow exact localhost", () => {
-      callValidate("http://localhost/worker.js");
-      callValidate("http://127.0.0.1/worker.js");
-    });
-
-    it("should throw SECURITY_ERROR for cross-origin URLs", () => {
-      const url = "https://malicious.com/worker.js";
+    it("should throw SECURITY_ERROR for non-localhost http", () => {
+      const url = "http://malicious.com/worker.js";
       let thrown: unknown;
       try {
-        callValidate(url);
+        callValidate(url, "sha384-dummy");
       } catch (e) {
         thrown = e;
       }
       expect(thrown).toBeInstanceOf(EngineError);
       if (thrown instanceof EngineError) {
         expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(thrown.message).toContain(
-          "Cross-origin Worker scripts are prohibited",
-        );
+        expect(thrown.message).toContain("Insecure connection (HTTP)");
       }
     });
 
-    it("should throw SECURITY_ERROR for spoofed localhost", () => {
-      const url = "https://localhost.evil.com/worker.js";
+    it("should throw SECURITY_ERROR if SRI is missing and unsafe flag is false", () => {
+      const url = "https://app.example.com/worker.js";
       let thrown: unknown;
       try {
-        callValidate(url);
+        callValidate(url, undefined, false);
       } catch (e) {
         thrown = e;
       }
       expect(thrown).toBeInstanceOf(EngineError);
       if (thrown instanceof EngineError) {
         expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        expect(thrown.message).toContain("SRI hash is required");
+      }
+    });
+
+    it("should throw SECURITY_ERROR if unsafe flag is used in production", () => {
+      const url = "https://app.example.com/worker.js";
+      let thrown: unknown;
+      try {
+        callValidate(url, undefined, true, true);
+      } catch (e) {
+        thrown = e;
+      }
+      expect(thrown).toBeInstanceOf(EngineError);
+      if (thrown instanceof EngineError) {
+        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
+        expect(thrown.message).toContain("SRI bypass (__unsafeNoSRI) is not allowed in production.");
       }
     });
   });

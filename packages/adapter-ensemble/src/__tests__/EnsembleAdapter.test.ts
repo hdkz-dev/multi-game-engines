@@ -1,11 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { EnsembleAdapter } from "../EnsembleAdapter.js";
 import { MajorityVoteStrategy } from "../strategies/MajorityVoteStrategy.js";
-import {
-  IEngine,
-  IBaseSearchResult,
-  PositionString,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchResult, PositionString } from "@multi-game-engines/core";
 
 describe("EnsembleAdapter", () => {
   const mockEngine = (id: string, move: string): IEngine =>

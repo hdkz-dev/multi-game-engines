@@ -1,8 +1,4 @@
-import {
-  IMiddleware,
-  IMiddlewareContext,
-  IBaseSearchOptions,
-} from "@multi-game-engines/core";
+import { IMiddleware, IMiddlewareContext, IBaseSearchOptions } from "@multi-game-engines/core";
 import { SearchInfoSchema, ExtendedSearchInfo } from "../validation/schema.js";
 import { UI_NORMALIZER_MIDDLEWARE_ID } from "../types.js";
 

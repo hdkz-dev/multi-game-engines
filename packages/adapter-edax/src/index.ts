@@ -1,16 +1,15 @@
 import { EdaxAdapter } from "./EdaxAdapter.js";
-import { EngineFacade } from "@multi-game-engines/core";
+import { EngineFacade, normalizeAndValidateSources } from "@multi-game-engines/core";
 import type {
   IEngine,
   IEngineConfig,
   IEngineSourceConfig,
-} from "@multi-game-engines/core";
+  I18nKey, } from "@multi-game-engines/core";
 import { OfficialRegistry } from "@multi-game-engines/registry";
 import type {
   IReversiSearchOptions,
   IReversiSearchInfo,
-  IReversiSearchResult,
-} from "@multi-game-engines/domain-reversi";
+  IReversiSearchResult, } from "@multi-game-engines/domain-reversi";
 
 export { EdaxAdapter };
 
@@ -22,21 +21,11 @@ export function createEdaxEngine(
 ): IEngine<IReversiSearchOptions, IReversiSearchInfo, IReversiSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve("edax", config.version) || {};
-  const sources = {
-    ...(registrySources as Record<string, IEngineSourceConfig>),
-    ...(config.sources || {}),
-  };
-
-  if (!sources.main) {
-    throw new Error(
-      '[createEdaxEngine] Engine "edax" requires a "main" source, but it was not found in the registry or config.',
-    );
-  }
-
+    OfficialRegistry.resolve("edax", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: sources as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources, config, "edax"),
   };
 
   const adapter = new EdaxAdapter(mergedConfig);

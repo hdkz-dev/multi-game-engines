@@ -1,25 +1,44 @@
-# Roadmap (ROADMAP.md)
+# Project Roadmap (2026-2027)
 
-## 🏁 Phase 1: Foundation (Completed)
+Leveraging 2026 Web standards to deliver industry-leading game analysis performance in the browser.
 
-- Core Bridge Logic (`EngineBridge`, `EngineFacade`)
-- Worker Communication Layer (`WorkerCommunicator`)
-- Basic Security (`SRI`, `Injection Protection`)
-- Storage Foundation (`OPFS`, `IndexedDB`)
+---
 
-## 🚀 Phase 2: Multi-Game Ecosystem (Completed)
+## 🚀 Phase 1: Foundation & Zenith Architecture (Completed)
 
-- Support for Chess (Stockfish), Shogi (Yaneuraou), Go (KataGo), Reversi (Edax), and Mahjong (Mortal).
-- Cross-framework UI Components (React, Vue, Web Components).
-- **Zenith Tier Refinement**:
-  - **Standardization (ADR-046)**: Uniform directory structure across the monorepo.
-  - **Security (ADR-043)**: Reliable resource injection via handshake.
-  - **Observability (ADR-038)**: Privacy-first logging with `truncateLog`.
+**Goal**: Establish a future-proof architecture and type system.
 
-## 🔥 Phase 3: Ultimate Optimization (Current)
+- [x] **Monorepo Structure**: Separate `core` and `adapters` via npm workspaces.
+- [x] **Zero-Any Policy**: 100% elimination of `any`, domain protection via Branded Types.
+- [x] **Facade Pattern**: Clean separation between user-facing `IEngine` and internal `IEngineAdapter`.
+- [x] **Legal Isolation**: MIT-licensed adapters with dynamic loading of copyleft binaries.
+- [x] **Capability Detection**: Auto-diagnostics for OPFS, WebNN, and WASM SIMD/Threads.
 
-- **Modular i18n (Pay-as-you-go)**: Physical package separation and Zero-Any type safety (Federated i18n Architecture).
-- **Engine Registry**: Pluggable metadata resolution chain (ADR-047).
-- **Swarm Intelligence**: Advanced `EnsembleAdapter` strategies.
-- **Hardware Acceleration**: Universal WebNN and WebGPU bindings.
-- **Mobile Native Bridge**: Direct interop with native engine binaries.
+---
+
+## 🔥 Phase 2: Power & Resilience (Ongoing)
+
+**Goal**: Maximize performance and stability via hardware acceleration and empirical hardening.
+
+- [x] **Federated i18n Architecture**: Physically isolated language modules with recursive type safety.
+- [x] **Standardized Core (task_0001)**: Score normalization, `positionId` conflict control, and structured PV.
+- [x] **Universal Storage & Flow Control**: CLI/Node.js support (`NodeFSStorage`), `AbortSignal` standardization, and resumable loading.
+- [x] **Binary Variant Selection**: Auto-dispatching optimal binaries based on SIMD/Threads support.
+- [x] **Extreme Robustness**: 98.41% line coverage. Middleware isolation, circular reference protection, and stream buffering.
+- [ ] **Hardware Acceleration**:
+  - **WebNN**: NPU/GPU-accelerated NNUE inference (W3C 2026 CR).
+  - **WebGPU Compute**: Offloading MCTS and parallel search to the GPU.
+- [ ] **Swarm (Ensemble) Architecture**:
+  - **Meta-Adapters**: Multi-engine consensus and expertise-based weighting.
+- [ ] **Release Automation**: Full CI/CD with automatic CHANGELOG generation via Changesets.
+
+---
+
+## 💎 Phase 3: The Zenith Tier
+
+**Goal**: 100% autonomous quality maintenance and world-class reliability.
+
+- [x] **Empirical Hardening**: Verified resilience against network failures and packet splitting.
+- [x] **A11y Audit**: WCAG 2.2 Level AA compliance for all board components.
+- [ ] **Self-Healing Docs**: Code-synchronized API references generated via TypeDoc.
+- [ ] **Continuous Benchmarking**: NPS regression tracking on every PR.

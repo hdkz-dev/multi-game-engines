@@ -1,12 +1,10 @@
-import {
-  describe,
+import { describe,
   it,
   expect,
   vi,
   beforeEach,
   beforeAll,
-  afterAll,
-} from "vitest";
+  afterAll, } from "vitest";
 import { GTPAdapter } from "../GTPAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
@@ -21,6 +19,12 @@ class MockWorker {
       setTimeout(() => {
         if (typeof this.onmessage === "function") {
           this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+        }
+      }, 0);
+    } else if (typeof msg === "string" && msg === "version") {
+      setTimeout(() => {
+        if (typeof this.onmessage === "function") {
+          this.onmessage({ data: "= 1.0" });
         }
       }, 0);
     }

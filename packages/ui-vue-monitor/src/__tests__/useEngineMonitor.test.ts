@@ -2,13 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { useEngineMonitor } from "../useEngineMonitor.js";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchResult,
-  EngineStatus,
-  IBaseSearchInfo,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 
 // 2026 Best Practice: SearchMonitor が必要とするメソッドを完全に網羅したモック

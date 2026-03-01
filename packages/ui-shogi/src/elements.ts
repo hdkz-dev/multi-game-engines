@@ -152,6 +152,9 @@ export class ShogiBoard extends LitElement {
   @property({ type: Object })
   pieceNames: Partial<Record<ShogiPiece, string>> = {};
 
+  @property({ type: Object })
+  pieceSymbols: Partial<Record<ShogiPiece, string>> = {};
+
   /**
    * 2026 Zenith Tier: Roving Tabindex state.
    */
@@ -326,7 +329,8 @@ export class ShogiBoard extends LitElement {
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
     const pieceNames = (strings["pieceNames"] || {}) as Record<string, string>;
-    const handPieceCount = (strings["handPieceCount"] || "{piece}{count}") as string;
+    const handPieceCount = (strings["handPieceCount"] ||
+      "{piece}{count}") as string;
 
     return pieces.map((p) => {
       const count = hand[p];

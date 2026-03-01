@@ -1,11 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineStore } from "../store.js";
-import {
-  IEngine,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-} from "@multi-game-engines/core";
+import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
 
 describe("EngineStore", () => {
   const mockEngine = { status: "ready" } as unknown as IEngine<

@@ -1,3 +1,4 @@
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
 import {
   Brand,
   EngineError,
@@ -9,9 +10,8 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey,
+  createI18nKey,
 } from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /** 囲碁の盤面データ */
 export type GOBoard = Brand<string, "GOBoard">;
@@ -57,7 +57,7 @@ export interface IGoSearchResult extends IBaseSearchResult {
  */
 export function createGOBoard(pos: string): GOBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidGOBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -66,7 +66,7 @@ export function createGOBoard(pos: string): GOBoard {
   }
   ProtocolValidator.assertNoInjection(pos, "GOBoard");
   if (!/^[a-zA-Z0-9.\- ]+$/.test(pos)) {
-    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.illegalCharacters");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: translate(i18nKey),
@@ -77,11 +77,16 @@ export function createGOBoard(pos: string): GOBoard {
 }
 
 /**
- * 囲碁指し手のバリデータファクトリ。
+ * Validate and normalize a Go move string into a `GOMove`.
+ *
+ * @param move - The input move in GTP-like format (e.g., "A1", "t19", "pass", "resign"); whitespace-only strings are rejected.
+ * @returns The validated move as a `GOMove`, normalized to lowercase.
+ * @throws EngineError with code `SECURITY_ERROR` if `move` is not a non-empty string or contains illegal characters.
+ * @throws EngineError with code `VALIDATION_ERROR` if `move` does not match the allowed Go move formats (`[a-hj-z][1-25]`, `pass`, or `resign`).
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidGOMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -92,7 +97,7 @@ export function createGOMove(move: string): GOMove {
   // 2026 Best Practice: 正規化（小文字化）をバリデータ層で実施
   const normalized = move.toLowerCase();
   if (!/^[a-z0-9]+$/.test(normalized)) {
-    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.illegalCharacters");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: translate(i18nKey),
@@ -100,7 +105,7 @@ export function createGOMove(move: string): GOMove {
     });
   }
   if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
-    const i18nKey = "engine.errors.invalidGOMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidGOMove");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,

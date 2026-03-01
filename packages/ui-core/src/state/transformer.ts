@@ -1,9 +1,7 @@
-import {
-  createInitialState,
+import { createInitialState,
   EngineSearchState,
   PrincipalVariation,
-  SearchLogEntry,
-} from "../types.js";
+  SearchLogEntry, } from "../types.js";
 import { createPositionString } from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "../validation/schema.js";
 

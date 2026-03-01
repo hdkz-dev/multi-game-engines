@@ -1,17 +1,16 @@
 import { UCIAdapter } from "./UCIAdapter.js";
-import { EngineFacade } from "@multi-game-engines/core";
+import { EngineFacade, normalizeAndValidateSources } from "@multi-game-engines/core";
 import type {
   IEngineConfig,
   IEngine,
   IEngineSourceConfig,
-} from "@multi-game-engines/core";
+  I18nKey, } from "@multi-game-engines/core";
 import { OfficialRegistry } from "@multi-game-engines/registry";
 import { UCIParser } from "./UCIParser.js";
 import type {
   IChessSearchOptions,
   IChessSearchInfo,
-  IChessSearchResult,
-} from "@multi-game-engines/domain-chess";
+  IChessSearchResult, } from "@multi-game-engines/domain-chess";
 
 export type { IChessSearchOptions, IChessSearchInfo, IChessSearchResult };
 export { UCIParser, UCIAdapter };
@@ -25,14 +24,11 @@ export function createUCIEngine(
 ): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve(config.id || "stockfish", config.version) || {};
-
+    OfficialRegistry.resolve(config.id || "stockfish", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: {
-      ...(registrySources as Record<string, IEngineSourceConfig>),
-      ...(config.sources || {}),
-    } as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources, config, "stockfish"),
   };
 
   const adapter = new UCIAdapter(mergedConfig);

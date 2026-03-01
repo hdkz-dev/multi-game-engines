@@ -1,4 +1,5 @@
-import { ResourceMap, EngineErrorCode, I18nKey } from "../types.js";
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
+import { ResourceMap, EngineErrorCode } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
 interface MessagePayload {
@@ -56,11 +57,16 @@ export class ResourceInjector {
       const payload = data as MessagePayload;
 
       if (payload.type === "MG_INJECT_RESOURCES") {
-        if (!payload.resources || typeof payload.resources !== "object") {
+        if (
+          !payload.resources ||
+          typeof payload.resources !== "object" ||
+          payload.resources === null
+        ) {
           throw new EngineError({
             code: EngineErrorCode.PROTOCOL_ERROR,
-            message: "[ResourceInjector] Invalid or missing resources in MG_INJECT_RESOURCES",
-            i18nKey: "engine.errors.protocolError" as I18nKey,
+            message:
+              "[ResourceInjector] Invalid or missing resources in MG_INJECT_RESOURCES",
+            i18nKey: createI18nKey("engine.errors.protocolError"),
             i18nParams: { message: "Invalid resources payload" },
           });
         }
@@ -116,7 +122,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[ResourceInjector] Invalid URL encoding in path: "${path}"`,
-        i18nKey: "engine.errors.illegalCharacters" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.illegalCharacters"),
       });
     }
 
@@ -130,7 +136,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[ResourceInjector] Path pattern detected: "${path}"`,
-        i18nKey: "engine.errors.securityViolation" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.securityViolation"),
       });
     }
 
@@ -138,7 +144,12 @@ export class ResourceInjector {
     if (this.resources[lookupPath]) return this.resources[lookupPath];
 
     for (const [mountPath, blobUrl] of Object.entries(this.resources)) {
-      if (lookupPath.endsWith(mountPath)) {
+      // 2026: Precise suffix match (ensure it matches a whole segment or the whole path)
+      if (
+        lookupPath === mountPath ||
+        (lookupPath.endsWith(mountPath) &&
+          lookupPath.charAt(lookupPath.length - mountPath.length - 1) === "/")
+      ) {
         return blobUrl;
       }
     }
@@ -196,14 +207,16 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "ResourceInjector: Module instance or FS not found.",
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: "Module or FS not found" },
       });
     }
 
     const blobUrl = this.resolve(resourceKey);
     if (blobUrl === resourceKey) {
-      console.warn(`[ResourceInjector] Resource key "${resourceKey}" not resolved.`);
+      console.warn(
+        `[ResourceInjector] Resource key "${resourceKey}" not resolved.`,
+      );
     }
 
     try {
@@ -212,7 +225,7 @@ export class ResourceInjector {
         throw new EngineError({
           code: EngineErrorCode.NETWORK_ERROR,
           message: `Failed to fetch resource: ${response.statusText}`,
-          i18nKey: "engine.errors.networkError" as I18nKey,
+          i18nKey: createI18nKey("engine.errors.networkError"),
         });
       }
 
@@ -238,7 +251,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: `Failed to mount "${resourceKey}" to "${vfsPath}": ${error}`,
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: `Mount failed: ${resourceKey}` },
       });
     }

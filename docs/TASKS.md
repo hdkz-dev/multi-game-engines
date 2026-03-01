@@ -38,25 +38,54 @@
   - [x] **物理的パッケージ分離**: `i18n-core`, `common`, `chess`, `shogi`, `engines`, `dashboard` への分離。
   - [x] **Zero-Any Policy**: `DeepRecord` と `I18nKey` による型安全性の完遂。
   - [x] **旧パッケージ廃止**: monolithic な `packages/i18n` の完全削除。
-- [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
-- [ ] **WASM Integration**: 各エンジンの実 WASM バイナリ統合と SRI ハッシュの確定。
+- [x] **Zenith Hardening & Multi-Engine Integration Base** (task_0001): (High)
+  - [x] **Core Standardization**: `IBaseSearchInfo` 拡張、`ScoreNormalizer`, `PositionId` の実装。
+  - [x] **Security Hardening**: `ProtocolValidator` 全数監査、全アセット SRI、`ConsentHandshake` 実装。
+  - [x] **Flow Control**: `AbortSignal`, `onProgress`, `fetchWithRetry`, `ResumableFetch` 実装。
+  - [x] **Environment Guard**: `EnvironmentDetector`, `ResourceGovernor`, `BackgroundThrottle` 実装。
+  - [x] **Universal Storage**: `NodeFSStorage`, `MemoryStorage` の追加実装。
+  - [x] **Pluggable Storage**: `EngineBridge` へのカスタムストレージ注入機能。
+  - [x] **Advanced Features**: `EngineBatchAnalyzer` (Priority/Control), `BinaryVariantSelection` 実装。
+  - [x] **Gomoku Domain**: `@multi-game-engines/domain-gomoku` 新設、Branded Types。
+  - [x] **Reversi Precision**: `adapter-edax` 固有スコアパースと正規化。
+- [x] **Zenith Robustness & 100% Coverage**: (Critical)
+  - [x] **Extreme Coverage**: `core` パッケージで 98.4% 超のラインカバレッジを達成。
+  - [x] **Middleware Isolation**: 故障したミドルウェアがエンジン本体を道連れにしない「絶縁」を実装。
+  - [x] **Circular Protection**: `ProtocolValidator` に循環参照検知を追加し、スタックオーバーフローを防止。
+  - [x] **Native Resilience**: `NativeCommunicator` にパケット分割対応のバッファリングを導入。
+  - [x] **Async Integration**: `EngineBridge` の非同期アダプター生成対応。
+- [x] **Opening Book Provider**: 定跡書 (`.bin`, `.db`) の独立ロードと IndexedDB 共有管理層の実装。
+- [ ] **WASM Integration & SRI Sync**: 各エンジンの実バイナリ統合と SRI ハッシュの最終確定。
   - [ ] Stockfish (Chess)
   - [ ] やねうら王 (Shogi)
   - [ ] KataGo (Go)
   - [ ] Edax (Reversi)
   - [ ] Mortal (Mahjong)
+- [x] **WebNN / WebGPU Generalization**: NNUE や CNN モデルのハードウェア加速レイヤーの汎用実装。
+  - [x] `HardwareAccelerator` 診断ユーティリティの実装。
+- [x] **Segmented SRI (Zenith Loader)**: 100MB 超の巨大ファイルの分割ダウンロードとインクリメンタルハッシュ検証。
+  - [x] `SegmentedVerifier` による分割ハッシュ検証ロジックの実装。
+  - [x] `EngineLoader` への統合（全量取得後の分割検証）。
+- [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
 - [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
 - [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
-- [ ] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
+- [x] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
   - [x] プロトタイプと MajorityVote 実装。
   - [x] `BestScore`, `Weighted` 戦略の追加。
-- [ ] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-038以降)。
-  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+- [x] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-056)。
+  - `skills/` ディレクトリの標準化と `SKILL.md` 形式への統一。
+  - `zenith-audit`, `doc-sync` スキルの新規実装。
+  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
   - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
   - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
-- [ ] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` のプロトタイプ実装。
+- [x] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` の実装。
+  - [x] `@multi-game-engines/domain-xiangqi` 新設。
+  - [x] `@multi-game-engines/domain-janggi` 新設。
+  - [x] `@multi-game-engines/adapter-xiangqi` 実装・ハードニング完了。
+  - [x] `@multi-game-engines/adapter-janggi` 実装・ハードニング完了。
 - [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
+  - [x] `NativeCommunicator` (Node.js/child_process) の基盤実装。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
 - [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
 - [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
@@ -104,3 +133,12 @@
     - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
     - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
     - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。
+
+### 2026-02-27 更新 (実装担当: Testing and Validation Expansion)
+
+- [x] **Testing and Validation Expansion** (ADR-051)
+  - [x] **A11y**: 全盤面コンポーネントへのキーボードナビゲーション実装とテスト。
+  - [x] **Validation**: `engines.json` のスキーマバリデーション・テストの完備。
+  - [x] **Error Handling**: エンジンファクトリ関数の `EngineError` 移行と i18n 対応。
+  - [x] **Reliability**: SRI ミスマッチおよびタイムアウト時のエラーリカバリ検証テストの追加。
+  - [x] **Quality**: 全パッケージを通じた Zero-Any ポリシーの再検証と `as any` のテスト隔離。

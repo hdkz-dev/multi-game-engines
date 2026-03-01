@@ -1,19 +1,5 @@
-import {
-  IEngineAdapter,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult,
-  ISearchTask,
-  IProtocolParser,
-  IEngineLoader,
-  EngineErrorCode,
-  ResourceMap,
-  IEngineConfig,
-  I18nKey,
-} from "../types.js";
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
+import { IEngineAdapter, EngineStatus, ILoadProgress, ITelemetryEvent, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, ISearchTask, IProtocolParser, IEngineLoader, EngineErrorCode, ResourceMap, IEngineConfig, PositionId, IBookAsset, ProgressCallback, IEngineSourceConfig } from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
 import { EnvironmentDiagnostics } from "../utils/EnvironmentDiagnostics.js";
@@ -42,6 +28,7 @@ export abstract class BaseAdapter<
   protected pendingReject: ((reason?: unknown) => void) | null = null;
   protected infoController: ReadableStreamDefaultController<T_INFO> | null =
     null;
+  protected currentPositionId: PositionId | null = null;
 
   protected config: IEngineConfig;
 
@@ -58,6 +45,10 @@ export abstract class BaseAdapter<
     return this._status;
   }
 
+  updateStatus(status: EngineStatus): void {
+    this.emitStatusChange(status);
+  }
+
   /**
    * 2026 Best Practice: リソースソースの SRI ハッシュを検証します。
    * プレースホルダーの検出と形式チェックを一括で行います。
@@ -72,17 +63,19 @@ export abstract class BaseAdapter<
       /^sha256-[A-Za-z0-9+/]{43}=?$|^sha384-[A-Za-z0-9+/]{64}$|^sha512-[A-Za-z0-9+/]{86}={0,2}$/;
 
     for (const [key, source] of Object.entries(sources)) {
-      const sri = source?.sri;
-      if (sri && (!sriPattern.test(sri) || /placeholder/i.test(sri))) {
-        const i18nKey = "engine.errors.sriMismatch" as I18nKey;
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: `Engine Adapter "${this.id}": Source "${key}" has an invalid or placeholder SRI hash: "${sri}"`,
-          i18nKey,
-          remediation:
-            "Provide a valid Base64-encoded SRI hash for all engine resources in the constructor config.",
-          engineId: this.id,
-        });
+      if (source && typeof source === "object" && "sri" in source) {
+        const sri = (source as { sri?: string }).sri;
+        if (sri && (!sriPattern.test(sri) || /placeholder/i.test(sri))) {
+          const i18nKey = createI18nKey("engine.errors.sriMismatch");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: `Engine Adapter "${this.id}": Source "${key}" has an invalid or placeholder SRI hash: "${sri}"`,
+            i18nKey,
+            remediation:
+              "Provide a valid Base64-encoded SRI hash for all engine resources in the constructor config.",
+            engineId: this.id,
+          });
+        }
       }
     }
   }
@@ -90,9 +83,80 @@ export abstract class BaseAdapter<
   abstract load(loader?: IEngineLoader): Promise<void>;
 
   /**
+   * 2026 Zenith: 進捗通知と中断をサポートしたリソースロード。
+   */
+  protected async loadWithProgress(
+    loader: IEngineLoader,
+    configs: Record<string, import("../types.js").IEngineSourceConfig>,
+    signal?: AbortSignal,
+  ): Promise<Record<string, string>> {
+    const options: {
+      signal?: AbortSignal;
+      onProgress?: (p: import("../types.js").ILoadProgress) => void;
+    } = {
+      onProgress: (p) => this.emitProgress(p),
+    };
+    if (signal) options.signal = signal;
+
+    return await loader.loadResources(this.id, configs, options);
+  }
+
+  /**
+   * 2026 Zenith: 定跡書を設定します。
+   */
+  async setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void> {
+    if (!this.activeLoader) {
+      const i18nKey = createI18nKey("engine.errors.loaderRequired");
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: "Loader required to set book",
+        engineId: this.id,
+        i18nKey,
+      });
+    }
+
+    if (!asset.sri) {
+      const i18nKey = createI18nKey("engine.errors.sriMismatch");
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Engine Adapter "${this.id}": Book asset "${asset.id}" requires an SRI hash for security.`,
+        i18nKey,
+        engineId: this.id,
+      });
+    }
+
+    // 1. ローダー経由でロード
+    const config: IEngineSourceConfig = {
+      url: asset.url,
+      type: "asset",
+      sri: asset.sri,
+    };
+
+    if (asset.size) {
+      config.size = asset.size;
+    }
+
+    const blobUrl = await this.activeLoader.loadResource(
+      this.id,
+      config,
+      options,
+    );
+
+    // 2. 具象クラスでコマンド送信
+    await this.onBookLoaded(blobUrl);
+  }
+
+  /** 具象クラスで定跡ファイルの設定コマンドを送信します。 */
+  protected abstract onBookLoaded(url: string): Promise<void>;
+
+  /**
    * 2026 Best Practice: オプションを直接受け取って探索を開始するコンビニエンスメソッド。
    */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
+    this.currentPositionId = options.positionId ?? null;
     const command = this.parser.createSearchCommand(options);
     return this.searchRaw(command).result;
   }
@@ -110,8 +174,8 @@ export abstract class BaseAdapter<
   searchRaw(
     command: string | string[] | Uint8Array | Record<string, unknown>,
   ): ISearchTask<T_INFO, T_RESULT> {
-    if (this._status !== "ready") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+    if (this._status !== "ready" && this._status !== "busy") {
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not ready",
@@ -121,7 +185,7 @@ export abstract class BaseAdapter<
     }
 
     if (!this.communicator) {
-      const i18nKey = "engine.errors.initializationFailed" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.initializationFailed");
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Communicator not initialized",
@@ -130,7 +194,9 @@ export abstract class BaseAdapter<
       });
     }
 
-    this.cleanupPendingTask("Replaced by new search");
+    if (this._status === "busy") {
+      this.cleanupPendingTask("Replaced by new search", true);
+    }
     this.emitStatusChange("busy");
 
     // 2026 Best Practice: Safari 互換性のため ReadableStream を AsyncGenerator でラップ
@@ -154,6 +220,8 @@ export abstract class BaseAdapter<
           }
         } finally {
           reader.releaseLock();
+          // 2026: 早期リターン時にストリームをキャンセルし、探索を停止
+          void readableStream.cancel();
         }
       },
     };
@@ -197,7 +265,34 @@ export abstract class BaseAdapter<
 
     const input = data as string | Record<string, unknown>;
 
-    const info = this.parser.parseInfo(input);
+    // 2026 Zenith: エンジンからのテキストエラーを i18n キーに変換して処理
+    if (typeof input === "string" && this.parser.translateError) {
+      const errorKey = this.parser.translateError(input);
+      if (errorKey) {
+        console.error(`[BaseAdapter] Engine reported error: ${input}`);
+        if (this.pendingReject) {
+          this.pendingReject(
+            new EngineError({
+              code: EngineErrorCode.INTERNAL_ERROR,
+              message: `Engine reported error: ${input}`,
+              engineId: this.id,
+              i18nKey: errorKey,
+            }),
+          );
+          this.pendingReject = null;
+        }
+        // エラー発生時は状態を error に遷移させ、現在のタスクを中断
+        this.cleanupPendingTask(`Engine error: ${input}`);
+        this.emitStatusChange("error");
+        // 必要に応じてテレメトリ発行
+        return;
+      }
+    }
+
+    const info = this.parser.parseInfo(
+      input,
+      this.currentPositionId ?? undefined,
+    );
     if (info) {
       this.infoController?.enqueue(info);
       for (const listener of this.infoListeners) {
@@ -292,7 +387,7 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (this._status !== "ready" && this._status !== "busy") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: `Cannot set option: Engine is not ready (current status: ${this._status})`,
@@ -308,7 +403,7 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (!this.communicator) {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not loaded",
@@ -341,7 +436,7 @@ export abstract class BaseAdapter<
     skipReadyTransition = false,
   ): void {
     if (this.pendingReject) {
-      const i18nKey = "engine.errors.searchAborted" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.searchAborted");
       this.pendingReject(
         new EngineError({
           code: EngineErrorCode.SEARCH_ABORTED,

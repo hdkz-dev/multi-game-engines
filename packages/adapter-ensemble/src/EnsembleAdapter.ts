@@ -1,5 +1,5 @@
-import {
-  IEngine,
+import { tCommon as translate } from "@multi-game-engines/i18n-common";
+import { IEngine,
   IBaseSearchOptions,
   IBaseSearchResult,
   EngineStatus,
@@ -8,9 +8,9 @@ import {
   EngineErrorCode,
   EngineError,
   IMiddleware,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  IBookAsset,
+  ProgressCallback,
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * アンサンブル合議戦略のインターフェース。
@@ -71,9 +71,22 @@ export class EnsembleAdapter<
     }
   }
 
+  consent(): void {
+    this.engines.forEach((e) => {
+      if (typeof e.consent === "function") e.consent();
+    });
+  }
+
+  async setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void> {
+    await Promise.all(this.engines.map((e) => e.setBook(asset, options)));
+  }
+
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.status !== "ready") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: translate(i18nKey),

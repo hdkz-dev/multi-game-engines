@@ -1,10 +1,8 @@
-import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
-import {
-  createReversiMove,
+import { IProtocolParser, ProtocolValidator, ScoreNormalizer, PositionId } from "@multi-game-engines/core";
+import { createReversiMove,
   IReversiSearchOptions,
   IReversiSearchInfo,
-  IReversiSearchResult,
-} from "@multi-game-engines/domain-reversi";
+  IReversiSearchResult, } from "@multi-game-engines/domain-reversi";
 
 export class EdaxParser implements IProtocolParser<
   IReversiSearchOptions,
@@ -12,20 +10,38 @@ export class EdaxParser implements IProtocolParser<
   IReversiSearchResult
 > {
   // 2026 Best Practice: 正規表現の事前コンパイル
-  private static readonly DEPTH_REGEX = /depth (\d+)/;
+  // 例: "info depth 10 score cp 12 pv e6" あるいは "depth 10 score 12" 等、出力形式に合わせたパース
+  private static readonly DEPTH_REGEX = /depth\s+(\d+)/i;
+  private static readonly SCORE_REGEX = /score\s+([+-]?\d+)/i;
 
-  parseInfo(data: string | Record<string, unknown>): IReversiSearchInfo | null {
+  parseInfo(
+    data: string | Record<string, unknown>,
+    positionId?: PositionId,
+  ): IReversiSearchInfo | null {
     if (typeof data !== "string") return null;
-    if (!data.includes("depth")) return null;
 
-    const match = data.match(EdaxParser.DEPTH_REGEX);
-    if (match && match[1]) {
-      return {
-        raw: data,
-        depth: parseInt(match[1], 10),
+    // Edax の出力を想定
+    const lowerData = data.toLowerCase();
+    if (!lowerData.includes("depth") && !lowerData.includes("score")) return null;
+
+    const info: IReversiSearchInfo = { raw: data, positionId, depth: 0 };
+
+    const depthMatch = data.match(EdaxParser.DEPTH_REGEX);
+    if (depthMatch && depthMatch[1]) {
+      info.depth = parseInt(depthMatch[1], 10);
+    }
+
+    const scoreMatch = data.match(EdaxParser.SCORE_REGEX);
+    if (scoreMatch && scoreMatch[1]) {
+      const diff = parseInt(scoreMatch[1], 10);
+      info.score = {
+        unit: "diff",
+        points: diff,
+        normalized: ScoreNormalizer.normalize(diff, "diff", "reversi"),
       };
     }
-    return null;
+
+    return info;
   }
 
   parseResult(

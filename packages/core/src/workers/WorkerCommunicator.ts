@@ -1,5 +1,6 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode, I18nKey } from "../types.js";
+import { EngineErrorCode } from "../types.js";
 
 /**
  * Web Worker との通信をカプセル化し、バッファリングと期待メッセージの待機機能を提供します。
@@ -66,7 +67,7 @@ export class WorkerCommunicator {
       "Unknown worker error";
     console.error("Worker error:", message);
 
-    const i18nKey = "engine.errors.workerError" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.workerError");
     const i18nParams = { message };
     const error = new EngineError({
       code: EngineErrorCode.INTERNAL_ERROR,
@@ -88,7 +89,7 @@ export class WorkerCommunicator {
 
   async expectMessage<T>(
     predicate: (data: unknown) => boolean,
-    options: { timeoutMs?: number; signal?: AbortSignal } = {},
+    options: { timeoutMs?: number | undefined; signal?: AbortSignal | undefined } = {},
   ): Promise<T> {
     // まずバッファをチェック
     const bufferedIndex = this.buffer.findIndex(predicate);
@@ -134,7 +135,7 @@ export class WorkerCommunicator {
 
       if (options.timeoutMs) {
         timerId = setTimeout(() => {
-          const i18nKey = "engine.errors.timeout" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.timeout");
           wrappedReject(
             new EngineError({
               code: EngineErrorCode.SEARCH_TIMEOUT,
@@ -155,7 +156,7 @@ export class WorkerCommunicator {
 
   terminate(): void {
     this.worker.terminate();
-    const i18nKey = "engine.errors.disposed" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.disposed");
     const error = new EngineError({
       code: EngineErrorCode.LIFECYCLE_ERROR,
       message: "Worker terminated",

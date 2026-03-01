@@ -1,16 +1,15 @@
 import { MortalAdapter } from "./MortalAdapter.js";
-import { EngineFacade } from "@multi-game-engines/core";
+import { EngineFacade, normalizeAndValidateSources } from "@multi-game-engines/core";
 import type {
   IEngine,
   IEngineConfig,
   IEngineSourceConfig,
-} from "@multi-game-engines/core";
+  I18nKey, } from "@multi-game-engines/core";
 import { OfficialRegistry } from "@multi-game-engines/registry";
 import type {
   IMahjongSearchOptions,
   IMahjongSearchInfo,
-  IMahjongSearchResult,
-} from "@multi-game-engines/domain-mahjong";
+  IMahjongSearchResult, } from "@multi-game-engines/domain-mahjong";
 
 export { MortalAdapter };
 
@@ -22,13 +21,11 @@ export function createMortalEngine(
 ): IEngine<IMahjongSearchOptions, IMahjongSearchInfo, IMahjongSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve("mortal", config.version) || {};
+    OfficialRegistry.resolve("mortal", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: {
-      ...(registrySources as Record<string, IEngineSourceConfig>),
-      ...(config.sources || {}),
-    } as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources, config, "mortal"),
   };
 
   const adapter = new MortalAdapter(mergedConfig);

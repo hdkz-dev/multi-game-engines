@@ -1,8 +1,6 @@
 import React from "react";
-import {
-  EvaluationScore,
-  EvaluationPresenter,
-} from "@multi-game-engines/ui-core";
+import { EvaluationScore,
+  EvaluationPresenter, } from "@multi-game-engines/ui-core";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 
 interface ScoreBadgeProps {

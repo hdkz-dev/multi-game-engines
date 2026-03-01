@@ -1,9 +1,7 @@
 import React, { useRef, useEffect } from "react";
-import {
-  SearchLogEntry,
+import { SearchLogEntry,
   formatNumber,
-  formatTime,
-} from "@multi-game-engines/ui-core";
+  formatTime, } from "@multi-game-engines/ui-core";
 import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import { cn } from "../utils/cn.js";

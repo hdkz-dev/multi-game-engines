@@ -1,10 +1,38 @@
-import { ISecurityStatus } from "../types.js";
+import { ISecurityStatus, ICapabilities } from "../types.js";
 
 /**
  * 2026 Zenith Tier: 実行環境のセキュリティおよび能力を診断します。
  * 特に WASM Threads に必要な COOP/COEP ヘッダーの状態を検証します。
  */
 export class EnvironmentDiagnostics {
+  /**
+   * 統合された環境レポートを取得します。
+   */
+  static async getReport(): Promise<{
+    browser: string;
+    capabilities: ICapabilities;
+    security: ISecurityStatus;
+  }> {
+    const { EnvironmentDetector } =
+      await import("../capabilities/EnvironmentDetector.js");
+    return {
+      browser:
+        typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+      capabilities: await EnvironmentDetector.detect(),
+      security: this.getSecurityStatus(),
+    };
+  }
+
+  /**
+   * 高精度タイマーが利用可能かチェックします。
+   */
+  static hasHighResTimer(): boolean {
+    return (
+      typeof performance !== "undefined" &&
+      typeof performance.now === "function"
+    );
+  }
+
   /**
    * 現在の環境のセキュリティ状態を取得します。
    */
@@ -22,7 +50,11 @@ export class EnvironmentDiagnostics {
     return {
       sriEnabled: true, // Core 側で強制
       coopCoepEnabled: isCrossOriginIsolated,
-      sriSupported: "integrity" in document.createElement("script"),
+      sriSupported:
+        typeof document !== "undefined" &&
+        typeof document.createElement === "function"
+          ? "integrity" in document.createElement("script")
+          : false,
       canUseThreads:
         isCrossOriginIsolated && typeof SharedArrayBuffer !== "undefined",
       isCrossOriginIsolated,

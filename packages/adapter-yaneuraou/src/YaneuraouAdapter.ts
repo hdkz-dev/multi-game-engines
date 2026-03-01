@@ -1,10 +1,8 @@
 import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
 import { USIAdapter } from "@multi-game-engines/adapter-usi";
-import {
-  IShogiSearchOptions,
+import { IShogiSearchOptions,
   IShogiSearchInfo,
-  IShogiSearchResult,
-} from "@multi-game-engines/domain-shogi";
+  IShogiSearchResult, } from "@multi-game-engines/domain-shogi";
 
 /**
  * 2026 Zenith Tier: やねうら王専用アダプター。

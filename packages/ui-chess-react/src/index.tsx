@@ -1,6 +1,6 @@
 import React from "react";
-import "@multi-game-engines/ui-chess-elements";
 import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
+
 import { Move } from "@multi-game-engines/core";
 import { FEN, ChessPiece } from "@multi-game-engines/domain-chess";
 
@@ -19,6 +19,7 @@ declare module "react" {
         "board-label"?: string | undefined;
         "error-message"?: string | undefined;
         pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+        pieceSymbols?: Partial<Record<ChessPiece, string>> | undefined;
         locale?: string | undefined;
         ref?: React.Ref<ChessBoardElement> | undefined;
       };
@@ -34,6 +35,7 @@ export interface ChessBoardProps {
   boardLabel?: string;
   errorMessage?: string;
   pieceNames?: Partial<Record<ChessPiece, string>>;
+  pieceSymbols?: Partial<Record<ChessPiece, string>>;
   locale?: string;
 }
 
@@ -45,6 +47,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   boardLabel,
   errorMessage,
   pieceNames,
+  pieceSymbols,
   locale,
 }: ChessBoardProps) => {
   const ref = React.useRef<ChessBoardElement>(null);
@@ -52,8 +55,9 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   React.useLayoutEffect(() => {
     if (ref.current) {
       ref.current.pieceNames = pieceNames ?? {};
+      ref.current.pieceSymbols = pieceSymbols ?? {};
     }
-  }, [pieceNames]);
+  }, [pieceNames, pieceSymbols]);
 
   return (
     <chess-board

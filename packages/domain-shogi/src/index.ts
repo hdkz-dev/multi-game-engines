@@ -1,7 +1,8 @@
-import {
-  EngineErrorCode,
+import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
+import { EngineErrorCode,
   EngineError,
   PositionString,
+  createPositionString,
   Move,
   createMove,
   truncateLog,
@@ -9,9 +10,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
-  I18nKey,
-} from "@multi-game-engines/core";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
+  createI18nKey } from "@multi-game-engines/core";
 
 /**
  * Branded Type for SFEN (Shogi Forsyth-Edwards Notation) strings.
@@ -67,7 +66,7 @@ export interface IShogiSearchResult extends IBaseSearchResult {
  */
 export function createShogiMove(move: string): ShogiMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidShogiMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidShogiMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -77,7 +76,7 @@ export function createShogiMove(move: string): ShogiMove {
 
   // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
   if (/[\r\n\t\f\v\0]/.test(move)) {
-    const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.injectionDetected");
     const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
@@ -96,7 +95,7 @@ export function createShogiMove(move: string): ShogiMove {
       move,
     )
   ) {
-    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMoveFormat");
     const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -180,7 +179,7 @@ export interface ParsedSFEN {
  */
 export function createSFEN(pos: string): SFEN {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidSFEN" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSFEN");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -189,7 +188,7 @@ export function createSFEN(pos: string): SFEN {
   }
   const trimmedPos = pos.trim();
   if (!/^[0-9a-zA-Z/+ -]+$/.test(trimmedPos)) {
-    const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.illegalCharacters");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: translate(i18nKey),
@@ -200,7 +199,7 @@ export function createSFEN(pos: string): SFEN {
   }
   const fields = trimmedPos.split(/\s+/);
   if (fields.length !== 4) {
-    const i18nKey = "engine.errors.invalidSFENStructure" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSFENStructure");
     const i18nParams = { count: fields.length };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -213,7 +212,7 @@ export function createSFEN(pos: string): SFEN {
 
   // 2nd field: Turn (b or w)
   if (!/^[bw]$/.test(fields[1]!)) {
-    const i18nKey = "engine.errors.invalidSFENTurn" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSFENTurn");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -223,7 +222,7 @@ export function createSFEN(pos: string): SFEN {
 
   // 3rd field: Hand pieces (e.g., 2P3p or -)
   if (!/^(?:(?:[1-9][0-9]*)?[PLNSGBRplnsgbr])+$|^-$/.test(fields[2]!)) {
-    const i18nKey = "engine.errors.invalidSFENHand" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSFENHand");
     const i18nParams = { hand: fields[2]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -236,7 +235,7 @@ export function createSFEN(pos: string): SFEN {
   // 4th field: Move counter (>= 1)
   const moveCountNum = Number(fields[3]!);
   if (!Number.isInteger(moveCountNum) || moveCountNum < 1) {
-    const i18nKey = "engine.errors.invalidSFENMoveCounter" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSFENMoveCounter");
     const i18nParams = { counter: fields[3]! };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -246,7 +245,7 @@ export function createSFEN(pos: string): SFEN {
     });
   }
 
-  return trimmedPos as SFEN;
+  return createPositionString<"SFEN">(trimmedPos);
 }
 
 export function isValidShogiPiece(str: string): str is ShogiPiece {
@@ -268,7 +267,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
 
   const rows = position.split("/");
   if (rows.length !== 9) {
-    const i18nKey = "engine.errors.invalidSfenRanks" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidSfenRanks");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -293,7 +292,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
           boardRow.push(piece);
           i += 2;
         } else {
-          const i18nKey = "engine.errors.invalidSfenPiece" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.invalidSfenPiece");
           const i18nParams = { piece };
           throw new EngineError({
             code: EngineErrorCode.VALIDATION_ERROR,
@@ -306,7 +305,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
         boardRow.push(char);
         i++;
       } else {
-        const i18nKey = "engine.errors.invalidSfenChar" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.invalidSfenChar");
         const i18nParams = { char };
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
@@ -317,7 +316,7 @@ export function parseSFEN(sfen: SFEN): ParsedSFEN {
       }
     }
     if (boardRow.length !== 9) {
-      const i18nKey = "engine.errors.invalidSfenRankWidth" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.invalidSfenRankWidth");
       const i18nParams = { rank: r + 1, expected: 9, actual: boardRow.length };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,

@@ -11,6 +11,7 @@
 3. **Type Safety (型安全性)**: ジェネリクスを使用して、エンジン固有の機能へのアクセスを可能にします。`any` 型の使用は禁止です。
 4. **Async first (非同期第一)**: エンジンの操作（探索、指し手）は非同期（Promise/AsyncIterable）である必要があります。
 5. **WASM & Next-gen API**: WASM (WASI), OPFS, WebGPU 等の最新 Web 標準を積極的に活用します。
+6. **Zenith Tier Robustness**: 98% 以上のテストカバレッジ、ミドルウェアの絶縁 (Isolation)、循環参照保護、ストリームバッファリングなど、極限状態でもクラッシュしない堅牢性を維持してください。
 
 ## 行動原則 (Operational Principles)
 
