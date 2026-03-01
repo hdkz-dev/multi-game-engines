@@ -68,7 +68,9 @@ const SHOGI_MULTI_PV = 3;
 /**
  * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
  */
-type DeepRecord = { [key: string]: string | number | boolean | DeepRecord | undefined };
+type DeepRecord = {
+  [key: string]: string | number | boolean | DeepRecord | undefined;
+};
 
 /**
  * 2026 Zenith Tier: i18n キーへの動的アクセスを許可するための型定義。
@@ -78,6 +80,13 @@ interface DashboardLocale {
   engine: DeepRecord;
 }
 
+/**
+ * Renders the Zenith Hybrid Analysis Dashboard UI and manages engine initialization and state.
+ *
+ * Initializes a bridge and loads both chess and shogi engines, presents loading and error states while initializing, and displays interactive controls to switch locale and active engine, live engine monitoring, and game boards once engines are ready.
+ *
+ * @returns The rendered dashboard JSX element containing header controls, hero stats, engine monitor panel, and game board/insights.
+ */
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>(
     EngineType.CHESS,
@@ -150,7 +159,7 @@ export default function Dashboard() {
       }
     };
 
-    initEngines();
+    void initEngines();
 
     document.title = "Zenith Hybrid Analysis Dashboard";
 
@@ -168,12 +177,12 @@ export default function Dashboard() {
     ) as Record<string, Record<string, unknown>>;
     return {
       dashboard: {
-        ...(base["dashboard"] as Record<string, unknown> || {}),
-        ...(extra["dashboard"] as Record<string, unknown> || {}),
+        ...((base["dashboard"] as Record<string, unknown>) || {}),
+        ...((extra["dashboard"] as Record<string, unknown>) || {}),
       },
       engine: {
-        ...(base["engine"] as Record<string, unknown> || {}),
-        ...(extra["engine"] as Record<string, unknown> || {}),
+        ...((base["engine"] as Record<string, unknown>) || {}),
+        ...((extra["engine"] as Record<string, unknown>) || {}),
       },
     } as unknown as DashboardLocale;
   }, [locale]);
@@ -235,7 +244,8 @@ export default function Dashboard() {
                   </p>
                   <p className="text-xs font-bold opacity-70 leading-relaxed">
                     {initError === "__INITIALIZATION_FAILED__"
-                      ? (dashboardStrings["errors"] as DeepRecord)?.bridgeNotAvailable as string
+                      ? ((dashboardStrings["errors"] as DeepRecord)
+                          ?.bridgeNotAvailable as string)
                       : initError}
                   </p>
                 </>
@@ -284,8 +294,8 @@ export default function Dashboard() {
             >
               <Globe className="w-3.5 h-3.5 text-blue-400" />
               {locale === "ja"
-                ? (d.language as DeepRecord)?.en as string
-                : (d.language as DeepRecord)?.ja as string}
+                ? ((d.language as DeepRecord)?.en as string)
+                : ((d.language as DeepRecord)?.ja as string)}
             </button>
 
             <div className="w-px h-4 bg-white/10 mx-1" />
@@ -303,8 +313,8 @@ export default function Dashboard() {
             >
               <Sword className="w-3.5 h-3.5" />
               {activeEngine === EngineType.CHESS
-                ? d.shogiLabel as string
-                : d.chessLabel as string}
+                ? (d.shogiLabel as string)
+                : (d.chessLabel as string)}
             </button>
           </div>
         </header>
@@ -314,27 +324,59 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               icon={<Zap className="w-5 h-5 text-yellow-400" />}
-              label={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.label as string}
-              value={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.value as string}
-              sub={((d.stats as DeepRecord)?.engineRuntime as DeepRecord)?.sub as string}
+              label={
+                ((d.stats as DeepRecord)?.engineRuntime as DeepRecord)
+                  ?.label as string
+              }
+              value={
+                ((d.stats as DeepRecord)?.engineRuntime as DeepRecord)
+                  ?.value as string
+              }
+              sub={
+                ((d.stats as DeepRecord)?.engineRuntime as DeepRecord)
+                  ?.sub as string
+              }
             />
             <StatCard
               icon={<Cpu className="w-5 h-5 text-purple-400" />}
-              label={((d.stats as DeepRecord)?.hardware as DeepRecord)?.label as string}
-              value={((d.stats as DeepRecord)?.hardware as DeepRecord)?.value as string}
-              sub={((d.stats as DeepRecord)?.hardware as DeepRecord)?.sub as string}
+              label={
+                ((d.stats as DeepRecord)?.hardware as DeepRecord)
+                  ?.label as string
+              }
+              value={
+                ((d.stats as DeepRecord)?.hardware as DeepRecord)
+                  ?.value as string
+              }
+              sub={
+                ((d.stats as DeepRecord)?.hardware as DeepRecord)?.sub as string
+              }
             />
             <StatCard
               icon={<Gauge className="w-5 h-5 text-blue-400" />}
-              label={((d.stats as DeepRecord)?.performance as DeepRecord)?.label as string}
+              label={
+                ((d.stats as DeepRecord)?.performance as DeepRecord)
+                  ?.label as string
+              }
               value={npsLabel}
-              sub={((d.stats as DeepRecord)?.performance as DeepRecord)?.sub as string}
+              sub={
+                ((d.stats as DeepRecord)?.performance as DeepRecord)
+                  ?.sub as string
+              }
             />
             <StatCard
               icon={<Trophy className="w-5 h-5 text-pink-400" />}
-              label={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.label as string}
-              value={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.value as string}
-              sub={((d.stats as DeepRecord)?.accessibility as DeepRecord)?.sub as string}
+              label={
+                ((d.stats as DeepRecord)?.accessibility as DeepRecord)
+                  ?.label as string
+              }
+              value={
+                ((d.stats as DeepRecord)?.accessibility as DeepRecord)
+                  ?.value as string
+              }
+              sub={
+                ((d.stats as DeepRecord)?.accessibility as DeepRecord)
+                  ?.sub as string
+              }
             />
           </div>
 
@@ -352,8 +394,8 @@ export default function Dashboard() {
                 }
                 title={
                   activeEngine === EngineType.CHESS
-                    ? e.stockfishTitle as string
-                    : e.yaneuraouTitle as string
+                    ? (e.stockfishTitle as string)
+                    : (e.yaneuraouTitle as string)
                 }
               />
             </div>
@@ -394,9 +436,18 @@ export default function Dashboard() {
                         lastMove={chessBestMove as Move}
                         locale={locale}
                         className="w-full h-full rounded-xl shadow-2xl"
-                        boardLabel={(d.gameBoard as DeepRecord)?.title as string}
-                        errorMessage={(d.gameBoard as DeepRecord)?.invalidPosition as string}
-                        pieceNames={(d.gameBoard as DeepRecord)?.chessPieces as Record<string, string>}
+                        boardLabel={
+                          (d.gameBoard as DeepRecord)?.title as string
+                        }
+                        errorMessage={
+                          (d.gameBoard as DeepRecord)?.invalidPosition as string
+                        }
+                        pieceNames={
+                          (d.gameBoard as DeepRecord)?.chessPieces as Record<
+                            string,
+                            string
+                          >
+                        }
                       />
                     ) : (
                       <ShogiBoard
@@ -404,11 +455,24 @@ export default function Dashboard() {
                         lastMove={shogiBestMove as Move}
                         locale={locale}
                         className="w-full h-full rounded-xl shadow-2xl"
-                        boardLabel={(d.gameBoard as DeepRecord)?.title as string}
-                        errorMessage={(d.gameBoard as DeepRecord)?.invalidPosition as string}
-                        pieceNames={(d.gameBoard as DeepRecord)?.shogiPieces as Record<string, string>}
-                        handSenteLabel={(d.gameBoard as DeepRecord)?.handSente as string}
-                        handGoteLabel={(d.gameBoard as DeepRecord)?.handGote as string}
+                        boardLabel={
+                          (d.gameBoard as DeepRecord)?.title as string
+                        }
+                        errorMessage={
+                          (d.gameBoard as DeepRecord)?.invalidPosition as string
+                        }
+                        pieceNames={
+                          (d.gameBoard as DeepRecord)?.shogiPieces as Record<
+                            string,
+                            string
+                          >
+                        }
+                        handSenteLabel={
+                          (d.gameBoard as DeepRecord)?.handSente as string
+                        }
+                        handGoteLabel={
+                          (d.gameBoard as DeepRecord)?.handGote as string
+                        }
                       />
                     )}
                   </div>
@@ -438,15 +502,18 @@ export default function Dashboard() {
                     {[
                       {
                         icon: <Zap className="w-4 h-4" />,
-                        label: (d.zenithFeatures as DeepRecord)?.multiPv as string,
+                        label: (d.zenithFeatures as DeepRecord)
+                          ?.multiPv as string,
                       },
                       {
                         icon: <Gauge className="w-4 h-4" />,
-                        label: (d.zenithFeatures as DeepRecord)?.reactiveState as string,
+                        label: (d.zenithFeatures as DeepRecord)
+                          ?.reactiveState as string,
                       },
                       {
                         icon: <Cpu className="w-4 h-4" />,
-                        label: (d.zenithFeatures as DeepRecord)?.contractUi as string,
+                        label: (d.zenithFeatures as DeepRecord)
+                          ?.contractUi as string,
                       },
                     ].map((feature, i) => (
                       <li

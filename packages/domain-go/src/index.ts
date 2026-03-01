@@ -1,5 +1,6 @@
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import { Brand,
+import {
+  Brand,
   EngineError,
   EngineErrorCode,
   Move,
@@ -9,7 +10,8 @@ import { Brand,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  createI18nKey } from "@multi-game-engines/core";
+  createI18nKey,
+} from "@multi-game-engines/core";
 
 /** 囲碁の盤面データ */
 export type GOBoard = Brand<string, "GOBoard">;
@@ -75,7 +77,12 @@ export function createGOBoard(pos: string): GOBoard {
 }
 
 /**
- * 囲碁指し手のバリデータファクトリ。
+ * Validate and normalize a Go move string into a `GOMove`.
+ *
+ * @param move - The input move in GTP-like format (e.g., "A1", "t19", "pass", "resign"); whitespace-only strings are rejected.
+ * @returns The validated move as a `GOMove`, normalized to lowercase.
+ * @throws EngineError with code `SECURITY_ERROR` if `move` is not a non-empty string or contains illegal characters.
+ * @throws EngineError with code `VALIDATION_ERROR` if `move` does not match the allowed Go move formats (`[a-hj-z][1-25]`, `pass`, or `resign`).
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
