@@ -1,5 +1,5 @@
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode, IEngineConfig, IEngineSourceConfig } from "../types.js";
+import { EngineErrorCode, IEngineConfig } from "../types.js";
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
 
 /**

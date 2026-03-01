@@ -16,6 +16,14 @@ This document defines the peak design, implementation, and operational standards
 - **Requirement**: The `IEngine` interface must remain pure. Implementation details of adapters (WebWorker, Native Process) must be completely hidden.
 - **Implementation**: Domain-specific logic must be contained in `packages/domain-*` or injected via generics.
 
+### 1.5. Federated i18n Quality (Zero-Any i18n)
+
+- **Standard**: Localization resources must be physically isolated by domain, ensuring 100% type safety even for dynamic access.
+- **Implementation**:
+  - **Physical Isolation**: Contain translation data within dedicated packages like `i18n-chess`.
+  - **DeepRecord**: Use recursive Record types to structurally eliminate `any` casts or `unknown` rendering issues during i18n access.
+  - **Branded Keys**: Leverage the `I18nKey` brand type to decouple the adapter layer from concrete language implementations.
+
 ---
 
 ## 🛡️ 2. Security Standards

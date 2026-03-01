@@ -1,5 +1,23 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import { IEngine, IEngineAdapter, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IMiddleware, MiddlewareContext, EngineErrorCode, EngineTelemetry, EngineLoadingStrategy, IEngineLoader, ICapabilities, IBaseSearchInfo, PositionId, IEngineConfig, IBookAsset, ProgressCallback } from "../types.js";
+import {
+  IEngine,
+  IEngineAdapter,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  IMiddleware,
+  MiddlewareContext,
+  EngineErrorCode,
+  EngineTelemetry,
+  EngineLoadingStrategy,
+  IEngineLoader,
+  ICapabilities,
+  IBaseSearchInfo,
+  PositionId,
+  IEngineConfig,
+  IBookAsset,
+  ProgressCallback,
+} from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { ResourceGovernor } from "../capabilities/ResourceGovernor.js";
 
@@ -52,7 +70,7 @@ export class EngineFacade<
     this.adapterUnsubscribers.push(
       this.adapter.onStatusChange(async (status) => {
         // 2026: Middleware Isolation for Status Change
-        let currentStatus = status;
+        const currentStatus = status;
         for (const mw of this.middlewares) {
           if (mw.onStatusChange) {
             try {
@@ -388,6 +406,11 @@ export class EngineFacade<
   }
 
   async dispose(): Promise<void> {
+    const id = this.id;
+    const isAlreadyDisposed =
+      this.adapter.status === "disposed" ||
+      this.adapter.status === "terminated";
+
     for (const unsub of this.adapterUnsubscribers) {
       unsub();
     }
@@ -397,14 +420,23 @@ export class EngineFacade<
     this.resultListeners.clear();
     this.telemetryListeners.clear();
 
+    // 2026: 実行中の探索があれば CANCELLED エラーで中断
+    if (this.activeTaskStop) {
+      this.activeTaskStop();
+      this._lastError = new EngineError({
+        code: EngineErrorCode.CANCELLED,
+        message: "Engine disposed during search.",
+        engineId: id,
+      });
+    }
+
     // 2026: Cleanup consent promise
     if (this.consentDeferred) {
       this.consentDeferred.resolve(); // Resolve to let load finish/fail safely
       this.consentDeferred = null;
     }
 
-    if (this.ownAdapter) {
-      const id = this.id;
+    if (this.ownAdapter && !isAlreadyDisposed) {
       try {
         // 2026: Graceful Shutdown (quit 送信)
         await this.adapter.stop();

@@ -1,5 +1,23 @@
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import { IEngineAdapter, EngineStatus, ILoadProgress, ITelemetryEvent, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, ISearchTask, IProtocolParser, IEngineLoader, EngineErrorCode, ResourceMap, IEngineConfig, PositionId, IBookAsset, ProgressCallback, IEngineSourceConfig } from "../types.js";
+import {
+  IEngineAdapter,
+  EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  ISearchTask,
+  IProtocolParser,
+  IEngineLoader,
+  EngineErrorCode,
+  ResourceMap,
+  IEngineConfig,
+  PositionId,
+  IBookAsset,
+  ProgressCallback,
+  IEngineSourceConfig,
+} from "../types.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import { EngineError } from "../errors/EngineError.js";
 import { EnvironmentDiagnostics } from "../utils/EnvironmentDiagnostics.js";
@@ -51,14 +69,11 @@ export abstract class BaseAdapter<
 
   /**
    * 2026 Best Practice: リソースソースの SRI ハッシュを検証します。
-   * プレースホルダーの検出と形式チェックを一括で行います。
    */
   protected validateSources(): void {
     const sources = this.config.sources;
     if (!sources) return;
 
-    // 2026 Best Practice: SRI ハッシュのアルゴリズムに応じた正確な Base64 長さを検証。
-    // sha256: 44 chars, sha384: 64 chars, sha512: 88 chars.
     const sriPattern =
       /^sha256-[A-Za-z0-9+/]{43}=?$|^sha384-[A-Za-z0-9+/]{64}$|^sha512-[A-Za-z0-9+/]{86}={0,2}$/;
 
@@ -82,17 +97,14 @@ export abstract class BaseAdapter<
 
   abstract load(loader?: IEngineLoader): Promise<void>;
 
-  /**
-   * 2026 Zenith: 進捗通知と中断をサポートしたリソースロード。
-   */
   protected async loadWithProgress(
     loader: IEngineLoader,
-    configs: Record<string, import("../types.js").IEngineSourceConfig>,
+    configs: Record<string, IEngineSourceConfig>,
     signal?: AbortSignal,
   ): Promise<Record<string, string>> {
     const options: {
       signal?: AbortSignal;
-      onProgress?: (p: import("../types.js").ILoadProgress) => void;
+      onProgress?: (p: ILoadProgress) => void;
     } = {
       onProgress: (p) => this.emitProgress(p),
     };
@@ -101,9 +113,6 @@ export abstract class BaseAdapter<
     return await loader.loadResources(this.id, configs, options);
   }
 
-  /**
-   * 2026 Zenith: 定跡書を設定します。
-   */
   async setBook(
     asset: IBookAsset,
     options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
@@ -118,7 +127,7 @@ export abstract class BaseAdapter<
       });
     }
 
-    if (!asset.sri) {
+    if (!asset.sri && !asset.__unsafeNoSRI) {
       const i18nKey = createI18nKey("engine.errors.sriMismatch");
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
@@ -128,12 +137,9 @@ export abstract class BaseAdapter<
       });
     }
 
-    // 1. ローダー経由でロード
-    const config: IEngineSourceConfig = {
-      url: asset.url,
-      type: "asset",
-      sri: asset.sri,
-    };
+    const config: IEngineSourceConfig = asset.sri
+      ? { url: asset.url, type: "asset", sri: asset.sri }
+      : { url: asset.url, type: "asset", __unsafeNoSRI: true };
 
     if (asset.size) {
       config.size = asset.size;
@@ -145,25 +151,17 @@ export abstract class BaseAdapter<
       options,
     );
 
-    // 2. 具象クラスでコマンド送信
     await this.onBookLoaded(blobUrl);
   }
 
-  /** 具象クラスで定跡ファイルの設定コマンドを送信します。 */
   protected abstract onBookLoaded(url: string): Promise<void>;
 
-  /**
-   * 2026 Best Practice: オプションを直接受け取って探索を開始するコンビニエンスメソッド。
-   */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     this.currentPositionId = options.positionId ?? null;
     const command = this.parser.createSearchCommand(options);
     return this.searchRaw(command).result;
   }
 
-  /**
-   * 2026 Zenith Tier: 実行環境の能力チェックを追加。
-   */
   protected checkEnvironment(): void {
     EnvironmentDiagnostics.warnIfSuboptimal();
   }
@@ -199,13 +197,13 @@ export abstract class BaseAdapter<
     }
     this.emitStatusChange("busy");
 
-    // 2026 Best Practice: Safari 互換性のため ReadableStream を AsyncGenerator でラップ
     const readableStream = new ReadableStream<T_INFO>({
       start: (controller) => {
         this.infoController = controller;
       },
       cancel: () => {
-        void this.stop();
+        // 2026: 物理的なクリーンアップをトリガー
+        this.handleStreamCancel().catch(() => {});
       },
     });
 
@@ -219,9 +217,9 @@ export abstract class BaseAdapter<
             yield value;
           }
         } finally {
+          // 2026: 明示的なキャンセルによるライフサイクル完了を保証
+          await reader.cancel().catch(() => {});
           reader.releaseLock();
-          // 2026: 早期リターン時にストリームをキャンセルし、探索を停止
-          void readableStream.cancel();
         }
       },
     };
@@ -233,7 +231,6 @@ export abstract class BaseAdapter<
 
     this.messageUnsubscriber?.();
 
-    // 2026 Best Practice: 送信前にリスナーを登録
     this.messageUnsubscriber = this.communicator.onMessage((data) => {
       this.handleIncomingMessage(data);
     });
@@ -248,14 +245,17 @@ export abstract class BaseAdapter<
   }
 
   /**
-   * Worker からのメッセージを処理します。
+   * 2026 Zenith: ストリームが外部（ユーザー等）によってキャンセルされた際の処理。
+   * テスト容易性を高めるために独立したメソッドとして定義。
    */
+  protected async handleStreamCancel(): Promise<void> {
+    await this.stop();
+  }
+
   protected handleIncomingMessage(data: unknown): void {
     if (this._status === "terminated" || this._status === "disposed") {
       return;
     }
-    // 2026 Best Practice: 文字列とオブジェクトの両方をプロトコル解析に渡す
-    // UCI/USI/GTP は主に文字列、Mahjong (Mortal) は JSON オブジェクトを使用。
     if (
       typeof data !== "string" &&
       (typeof data !== "object" || data === null)
@@ -265,7 +265,6 @@ export abstract class BaseAdapter<
 
     const input = data as string | Record<string, unknown>;
 
-    // 2026 Zenith: エンジンからのテキストエラーを i18n キーに変換して処理
     if (typeof input === "string" && this.parser.translateError) {
       const errorKey = this.parser.translateError(input);
       if (errorKey) {
@@ -281,10 +280,8 @@ export abstract class BaseAdapter<
           );
           this.pendingReject = null;
         }
-        // エラー発生時は状態を error に遷移させ、現在のタスクを中断
         this.cleanupPendingTask(`Engine error: ${input}`);
         this.emitStatusChange("error");
-        // 必要に応じてテレメトリ発行
         return;
       }
     }
@@ -294,7 +291,11 @@ export abstract class BaseAdapter<
       this.currentPositionId ?? undefined,
     );
     if (info) {
-      this.infoController?.enqueue(info);
+      try {
+        this.infoController?.enqueue(info);
+      } catch {
+        // Stream closed
+      }
       for (const listener of this.infoListeners) {
         try {
           listener(info);
@@ -309,7 +310,6 @@ export abstract class BaseAdapter<
 
     const result = this.parser.parseResult(input);
     if (result) {
-      // 2026 Best Practice: 即座に参照をクリアして二重解決を防止
       const resolve = this.pendingResolve;
       this.pendingResolve = null;
       this.pendingReject = null;
@@ -328,9 +328,6 @@ export abstract class BaseAdapter<
     }
   }
 
-  /**
-   * 探索コマンドを Worker に送信します。
-   */
   protected sendSearchCommand(
     command: string | string[] | Uint8Array | Record<string, unknown>,
   ): void {
@@ -339,21 +336,15 @@ export abstract class BaseAdapter<
         this.communicator?.postMessage(cmd);
       }
     } else if (command instanceof Uint8Array) {
-      // 2026 Best Practice: ゼロコピー転送 (Transferable Objects)
       this.communicator?.postMessage(command, [command.buffer]);
     } else {
       this.communicator?.postMessage(command);
     }
   }
 
-  /**
-   * Worker にリソースマップを注入します。
-   * WASM の相対パス解決（NNUE 等）に使用されます。
-   */
   protected async injectResources(resources: ResourceMap): Promise<void> {
     if (!this.communicator) return;
 
-    // 2026 Best Practice: レースコンディション防止のため、注入完了のハンドシェイクを待機
     const readyPromise = this.communicator.expectMessage(
       (data) => {
         return (data as Record<string, unknown>)?.type === "MG_RESOURCES_READY";
@@ -369,19 +360,18 @@ export abstract class BaseAdapter<
     await readyPromise;
   }
 
-  /**
-   * 探索を停止します。
-   */
   async stop(): Promise<void> {
+    if (this._status !== "busy") {
+      return;
+    }
+
     if (this.communicator) {
-      this.communicator.postMessage(this.parser.createStopCommand());
+      await this.communicator.postMessage(this.parser.createStopCommand());
     }
     this.cleanupPendingTask("Search aborted");
+    this.emitStatusChange("ready");
   }
 
-  /**
-   * エンジンオプションを設定します。
-   */
   async setOption(
     name: string,
     value: string | number | boolean,
@@ -414,9 +404,6 @@ export abstract class BaseAdapter<
     this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
 
-  /**
-   * リソースを解放します。
-   */
   async dispose(): Promise<void> {
     this.cleanupPendingTask("Adapter disposed", true);
     this.messageUnsubscriber?.();
@@ -428,9 +415,6 @@ export abstract class BaseAdapter<
     this.clearListeners();
   }
 
-  /**
-   * 進行中のタスクをクリーンアップします。
-   */
   protected cleanupPendingTask(
     reason?: string,
     skipReadyTransition = false,
@@ -493,9 +477,6 @@ export abstract class BaseAdapter<
     return () => this.telemetryListeners.delete(callback);
   }
 
-  /**
-   * 状態変更を通知します。
-   */
   protected emitStatusChange(status: EngineStatus): void {
     this._status = status;
     for (const listener of this.statusListeners) {
@@ -503,27 +484,18 @@ export abstract class BaseAdapter<
     }
   }
 
-  /**
-   * ロード進捗を通知します。
-   */
   protected emitProgress(progress: ILoadProgress): void {
     for (const listener of this.progressListeners) {
       listener(progress);
     }
   }
 
-  /**
-   * テレメトリイベントを通知します。
-   */
   public emitTelemetry(event: ITelemetryEvent): void {
     for (const listener of this.telemetryListeners) {
       listener(event);
     }
   }
 
-  /**
-   * 全てのリスナーを解除します。
-   */
   protected clearListeners(): void {
     this.statusListeners.clear();
     this.progressListeners.clear();

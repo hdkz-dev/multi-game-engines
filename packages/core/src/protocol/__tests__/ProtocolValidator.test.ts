@@ -93,5 +93,30 @@ describe("ProtocolValidator", () => {
         expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
       );
     });
+
+    it("循環参照を検知して拒否すること (Zenith 6.4)", () => {
+      const circular: Record<string, unknown> = { a: "safe" };
+      circular.self = circular;
+
+      expect(() =>
+        ProtocolValidator.assertNoInjection(circular, "context", true),
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.nestedTooDeep" }),
+      );
+    });
+
+    it("過度なネスト構造を検知して拒否すること", () => {
+      // 32段階以上のネストを作成
+      let deep: Record<string, unknown> = { val: "end" };
+      for (let i = 0; i < 40; i++) {
+        deep = { child: deep };
+      }
+
+      expect(() =>
+        ProtocolValidator.assertNoInjection(deep, "context", true),
+      ).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.nestedTooDeep" }),
+      );
+    });
   });
 });
