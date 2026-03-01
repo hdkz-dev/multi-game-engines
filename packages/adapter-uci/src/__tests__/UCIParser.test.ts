@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { UCIParser } from "../UCIParser.js";
 import { createFEN } from "@multi-game-engines/domain-chess";
+import { PositionId } from "@multi-game-engines/core";
 
 describe("UCIParser", () => {
   beforeAll(() => {
@@ -14,9 +15,26 @@ describe("UCIParser", () => {
   const parser = new UCIParser();
 
   describe("parseInfo", () => {
-    it("should parse positive cp score as structured object", () => {
-      const info = parser.parseInfo("info depth 10 score cp 50 pv e2e4");
-      expect(info?.score).toEqual({ cp: 50 });
+    it("should parse positive cp score as standardized object", () => {
+      const info = parser.parseInfo(
+        "info depth 10 score cp 50 pv e2e4",
+        "pos1" as PositionId,
+      );
+      expect(info?.score).toMatchObject({
+        cp: 50,
+        unit: "cp",
+        normalized: expect.any(Number),
+      });
+      expect(info?.positionId).toBe("pos1");
+    });
+
+    it("should parse mate score with normalization", () => {
+      const info = parser.parseInfo("info depth 5 score mate 3 pv e2e4");
+      expect(info?.score).toMatchObject({
+        mate: 3,
+        unit: "mate",
+        normalized: 0.99,
+      });
     });
 
     it("should parse pv moves", () => {
@@ -36,23 +54,43 @@ describe("UCIParser", () => {
 
     it("should parse negative cp score", () => {
       const info = parser.parseInfo("info depth 8 score cp -120 pv d7d5");
-      expect(info?.score).toEqual({ cp: -120 });
+      expect(info?.score).toMatchObject({ cp: -120, unit: "cp" });
     });
 
     it("should parse mate score", () => {
       const info = parser.parseInfo("info depth 5 score mate 3 pv e2e4");
-      expect(info?.score).toEqual({ mate: 3 });
+      expect(info?.score).toMatchObject({
+        mate: 3,
+        unit: "mate",
+        normalized: 0.99,
+      });
     });
 
     it("should parse negative mate score", () => {
       const info = parser.parseInfo("info depth 5 score mate -2 pv d7d5");
-      expect(info?.score).toEqual({ mate: -2 });
+      expect(info?.score).toMatchObject({
+        mate: -2,
+        unit: "mate",
+        normalized: -0.99,
+      });
     });
 
     it("should parse info line without PV", () => {
       const info = parser.parseInfo("info depth 10 score cp 50");
-      expect(info?.score).toEqual({ cp: 50 });
+      expect(info?.score).toMatchObject({ cp: 50 });
       expect(info?.pv).toBeUndefined();
+    });
+  });
+
+  describe("translateError", () => {
+    it("should translate NNUE not found error", () => {
+      const key = parser.translateError("Error: NNUE file not found");
+      expect(key).toBe("engine.errors.missingSources");
+    });
+
+    it("should return null for unknown error", () => {
+      const key = parser.translateError("Some weird engine error");
+      expect(key).toBeNull();
     });
   });
 
@@ -108,7 +146,9 @@ describe("UCIParser", () => {
             fen: maliciousFen,
           }),
         ).toThrow(
-          expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+          expect.objectContaining({
+            i18nKey: "engine.errors.injectionDetected",
+          }),
         );
       },
     );

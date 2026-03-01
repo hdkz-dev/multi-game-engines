@@ -17,9 +17,14 @@ import {
   EngineRegistry,
   EngineErrorCode,
   I18nKey,
+  IEngineBridgeOptions,
+  IBookProvider,
 } from "../types.js";
 import { EngineFacade, INTERNAL_ADAPTER } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
+import { EngineConcurrencyController } from "./EngineConcurrencyController.js";
+import { MockAdapter } from "../mocks/MockAdapter.js";
+import { BookProvider } from "./BookProvider.js";
 
 /**
  * 全てのゲームエンジンのライフサイクルとミドルウェアを統括するブリッジ。
@@ -43,6 +48,14 @@ export class EngineBridge implements IEngineBridge {
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
       | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | Promise<
+          | IEngineAdapter<
+              IBaseSearchOptions,
+              IBaseSearchInfo,
+              IBaseSearchResult
+            >
+          | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+        >
   >();
   private registries: IEngineRegistry[] = [];
   private engineInstances = new Map<
@@ -62,6 +75,8 @@ export class EngineBridge implements IEngineBridge {
   private loaderPromise: Promise<IEngineLoader> | null = null;
   private capabilities: ICapabilities | null = null;
   private capsPromise: Promise<ICapabilities> | null = null;
+  private concurrencyController = new EngineConcurrencyController();
+  private _bookProvider: IBookProvider | null = null;
   private disposed = false;
 
   private statusListeners = new Set<
@@ -84,8 +99,19 @@ export class EngineBridge implements IEngineBridge {
     }
   });
 
-  constructor() {
+  constructor(private options: IEngineBridgeOptions = {}) {
     // 2026 Best Practice: 初期化時に能力検知を開始
+    if (options.capabilities) {
+      this.capabilities = {
+        wasmThreads: false,
+        wasmSimd: false,
+        ...options.capabilities,
+      } as ICapabilities;
+    }
+
+    // モックアダプターの標準登録
+    this.registerAdapterFactory("mock", (config) => new MockAdapter(config));
+
     void this.checkCapabilities();
   }
 
@@ -102,8 +128,19 @@ export class EngineBridge implements IEngineBridge {
       config: IEngineConfig,
     ) =>
       | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | Promise<
+          | IEngineAdapter<
+              IBaseSearchOptions,
+              IBaseSearchInfo,
+              IBaseSearchResult
+            >
+          | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+        >,
   ): void {
+    if (this.adapterFactories.has(type)) {
+      throw new Error(`Adapter factory for "${type}" is already registered.`);
+    }
     this.adapterFactories.set(type, factory);
   }
 
@@ -162,6 +199,7 @@ export class EngineBridge implements IEngineBridge {
     const unsubs: (() => void)[] = [];
     unsubs.push(
       adapter.onStatusChange((status) => {
+        this.concurrencyController.updateStatus(id, status);
         for (const cb of this.statusListeners) cb(id, status);
       }),
     );
@@ -259,6 +297,9 @@ export class EngineBridge implements IEngineBridge {
       });
     }
 
+    // 2026: Ensure environment detection is finished before variant selection
+    await this.checkCapabilities();
+
     const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
 
     if (!id) {
@@ -317,8 +358,9 @@ export class EngineBridge implements IEngineBridge {
         if (!adapter && resolvedConfig.adapter) {
           const factory = this.adapterFactories.get(resolvedConfig.adapter);
           if (factory) {
-            const result = factory(resolvedConfig);
+            const result = await factory(resolvedConfig);
             // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
+
             let newAdapter: IEngineAdapter<
               IBaseSearchOptions,
               IBaseSearchInfo,
@@ -471,9 +513,31 @@ export class EngineBridge implements IEngineBridge {
     for (const registry of this.registries) {
       const resolvedSources = registry.resolve(id, version);
       if (resolvedSources) {
-        // 見つかった場合、既存の設定を優先しつつ補完する
+        // 2026 Best Practice: Binary Variant Selection (SIMD/Threads)
+        // 環境に応じた最適なバリアントをマージ
+        const baseSources = { ...resolvedSources };
+        const variants = baseSources["variants"] as
+          | Record<string, Partial<IEngineConfig["sources"]>>
+          | undefined;
+
+        if (variants && this.capabilities) {
+          const isSIMD = this.capabilities.wasmSimd;
+          const isThreads = this.capabilities.wasmThreads;
+
+          let variantKey = "";
+          if (isSIMD && isThreads && variants["simd-mt"])
+            variantKey = "simd-mt";
+          else if (isSIMD && variants["simd"]) variantKey = "simd";
+          else if (isThreads && variants["mt"]) variantKey = "mt";
+          else if (variants["st"]) variantKey = "st";
+
+          if (variantKey && variants[variantKey]) {
+            Object.assign(baseSources, variants[variantKey]);
+          }
+        }
+
         const mergedSources = {
-          ...resolvedSources,
+          ...baseSources,
           ...(config.sources || {}),
         };
 
@@ -528,6 +592,20 @@ export class EngineBridge implements IEngineBridge {
     this.middlewares.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
     // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア
+    this.engineInstances.clear();
+    this.pendingEngines.clear();
+  }
+
+  unuse(middleware: IMiddleware<any, any, any> | string): void {
+    if (typeof middleware === "string") {
+      this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
+    } else {
+      const targetId = middleware.id;
+      this.middlewares = this.middlewares.filter(
+        (m) => m !== middleware && (!targetId || m.id !== targetId),
+      );
+    }
+    // 2026 Best Practice: キャッシュをクリア
     this.engineInstances.clear();
     this.pendingEngines.clear();
   }
@@ -624,7 +702,8 @@ export class EngineBridge implements IEngineBridge {
           });
         }
 
-        const loader = new EngineLoader(createFileStorage(caps));
+        const storage = this.options.storage || createFileStorage(caps);
+        const loader = new EngineLoader(storage);
         this.loader = loader;
         return loader;
       } finally {
@@ -633,6 +712,21 @@ export class EngineBridge implements IEngineBridge {
     })();
 
     return this.loaderPromise;
+  }
+
+  /**
+   * 定跡書プロバイダーを取得します。
+   */
+  async getBookProvider(): Promise<IBookProvider> {
+    if (this._bookProvider) return this._bookProvider;
+    if (this.options.bookProvider) {
+      this._bookProvider = this.options.bookProvider;
+      return this._bookProvider;
+    }
+
+    const loader = await this.getLoader();
+    this._bookProvider = new BookProvider(loader);
+    return this._bookProvider;
   }
 
   /**
@@ -696,13 +790,13 @@ export class EngineBridge implements IEngineBridge {
     this.capsPromise = null;
   }
 
-  private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
+  private isIEngineAdapter(obj: any): obj is IEngineAdapter {
     if (typeof obj !== "object" || obj === null) return false;
-    const r = obj as Record<string, unknown>;
+    const r = obj as Record<string, any>;
     const parser = r["parser"];
     if (typeof parser !== "object" || parser === null) return false;
 
-    const p = parser as Record<string, unknown>;
+    const p = parser as Record<string, any>;
     return (
       typeof r["id"] === "string" &&
       typeof r["name"] === "string" &&

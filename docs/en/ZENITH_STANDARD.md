@@ -1,57 +1,78 @@
 # Zenith Tier Quality Standards (ZENITH_STANDARD.md)
 
-This document defines the peak design, implementation, and operational standards (Zenith Tier) for the `multi-game-engines` project. All packages and pull requests must adhere to these criteria to ensure absolute technical integrity.
+This document defines the peak design, implementation, and operational standards (Zenith Tier) for the `multi-game-engines` project. All packages and pull requests must adhere to these standards.
 
 ---
 
-## 🏛️ 1. Architectural Standards
+## 🏛️ 1. Architecture Standards
 
 ### 1.1. Zero-Any Architecture
 
-- **Standard**: 100% prohibition of the `any` type in production code.
-- **Implementation**: Use Zod for runtime validation at communication boundaries (Worker `postMessage`). Branded Types (`FEN`, `Move`) must be applied immediately. Unavoidable type narrowing must use validator functions instead of raw `as unknown as T`.
+- **Requirement**: The `any` type is strictly prohibited in production code. Use `unknown` with type guards or generics instead.
+- **Enforcement**: Monitored via ESLint `@typescript-eslint/no-explicit-any` and `exactOptionalPropertyTypes`.
 
-### 1.2. Protocol-First Abstraction
+### 1.2. Facade Pattern Integrity
 
-- **Standard**: Adapters must be implemented against protocols (UCI, USI, GTP, etc.) rather than specific engine implementations.
-- **Implementation**: Leverage generic packages like `adapter-uci`. Engine metadata (ID, URL, SRI) must be injected via external configuration.
-
-### 1.3. Domain-Driven Modular Isolation (Pay-as-you-go)
-
-- **Standard**: Logic and types specific to a game must be isolated in subpaths (e.g., `/chess`, `/shogi`) and never exported from the top-level entry point.
-- **Implementation**: Ensure that an application importing from `@multi-game-engines/ui-react/shogi` does not bundle a single byte of Chess or Go code.
-
-### 1.4. Uniform Directory Structure (ADR-046)
-
-- **Standard**: Strictly unify file placement and naming conventions.
-- **Implementation**:
-  - **UI**: Components in `src/components/`, styles in `src/styles/`.
-  - **Adapters**: Adhere to `{Name}Adapter.ts` naming.
-  - **Tests**: `__tests__` folders must be adjacent to the code they test.
-
-### 1.5. Federated i18n Quality (Zero-Any i18n)
-
-- **Standard**: Localization resources must be physically isolated by domain, ensuring 100% type safety even for dynamic access.
-- **Implementation**:
-  - **Physical Isolation**: Contain translation data within dedicated packages like `i18n-chess`.
-  - **DeepRecord**: Use recursive Record types to structurally eliminate `any` casts or `unknown` rendering issues during i18n access.
-  - **Branded Keys**: Leverage the `I18nKey` brand type to decouple the adapter layer from concrete language implementations.
+- **Requirement**: The `IEngine` interface must remain pure. Implementation details of adapters (WebWorker, Native Process) must be completely hidden.
+- **Implementation**: Domain-specific logic must be contained in `packages/domain-*` or injected via generics.
 
 ---
 
-## ⚡ 2. Performance & Security Standards
+## 🛡️ 2. Security Standards
 
-### 2.1. Main-Thread Protection
+### 2.1. Refuse by Exception
 
-- **Standard**: All heavy engine computations and parsing must run in Web Workers.
-- **Implementation**: Lock UI updates to 60fps using `requestAnimationFrame` (RAF) synchronization in `ui-core`.
+- **Requirement**: Strictly reject invalid inputs (protocol characters, path traversal) rather than attempting to sanitize them.
+- **Implementation**: Centralized validation via `ProtocolValidator.assertNoInjection`.
 
-### 2.2. Immutable Trust Chain (SRI)
+### 2.2. Mandatory SRI
 
-- **Standard**: SRI (Subresource Integrity) hash validation is mandatory for all external binaries.
-- **Implementation**: Re-fetch and re-verify resources on every load if SRI mismatches. Use of `__unsafeNoSRI` is forbidden in production.
+- **Requirement**: Subresource Integrity (SRI) must be verified for all external assets (.wasm, .nnue, .bin).
+- **Fallback**: Placeholders (`__unsafeNoSRI`) are only allowed during initial development and must be blocked in production registries.
 
-### 2.3. Refuse by Exception (Strict Rejection)
+---
 
-- **Standard**: Never use incomplete sanitization for security-critical inputs. Reject invalid inputs immediately.
-- **Implementation**: Per ADR-026, throw `EngineError` (SECURITY_ERROR) upon detecting illegal control characters in protocol strings.
+## ⚡ 3. Performance Standards
+
+### 3.1. Main-Thread Sanity
+
+- **Requirement**: No heavy computation or large parsing tasks on the main UI thread.
+- **Implementation**: Heavy data transformation and protocol parsing must occur within Workers. UI updates must be throttled via `requestAnimationFrame`.
+
+### 3.2. Memory Leak Prevention
+
+- **Requirement**: Explicit lifecycle management for all `Blob URLs` and `Worker` instances.
+- **Implementation**: Use `FinalizationRegistry` or `WeakRef` for automatic cleanup of cached resources where applicable.
+
+---
+
+## 🌍 4. Localization Standards (i18n)
+
+### 4.1. Federated i18n
+
+- **Requirement**: No hardcoded strings in Core or Adapters. Error messages from engines must be mapped to i18n keys.
+- **Type Safety**: Access to translation keys must be 100% type-safe via `I18nKey` Branded Types.
+
+---
+
+## 🛡️ 5. Robustness & Resilience Standards
+
+### 5.1. Empirical 98% Line Coverage
+
+- **Requirement**: Maintain at least 98.4% line coverage in the `core` package.
+- **Implementation**: Physically demonstrate resilience against network failures, storage conflicts, timeouts, and thread creation failures using mocks.
+
+### 5.2. Fault-Tolerant Middleware (Isolation)
+
+- **Requirement**: Optional middleware failures must not stop the core engine search process.
+- **Implementation**: Isolate each middleware hook in `EngineFacade` with `try-catch` blocks.
+
+### 5.3. Message Integrity (Stream Buffering)
+
+- **Requirement**: Guarantee message integrity even during network packet or OS pipe splitting.
+- **Implementation**: Use dynamic buffering in `NativeCommunicator` to reassemble fragmented PV strings or multi-line messages before parsing.
+
+### 5.4. Circular Reference & Overflow Protection
+
+- **Requirement**: Physically prevent stack overflow from recursive protocol data or malicious configurations.
+- **Implementation**: Incorporate `WeakSet`-based circularity detection in `ProtocolValidator`.

@@ -12,8 +12,14 @@ import {
   IEngineLoader,
   ICapabilities,
   I18nKey,
+  IBaseSearchInfo,
+  PositionId,
+  IEngineConfig,
+  IBookAsset,
+  ProgressCallback,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
+import { ResourceGovernor } from "../capabilities/ResourceGovernor.js";
 
 /**
  * @internal
@@ -23,16 +29,22 @@ export const INTERNAL_ADAPTER = Symbol("INTERNAL_ADAPTER");
 
 /**
  * エンジンとの対話を抽象化し、共通機能を提供するファサードクラス。
+ * 2026 Zenith Tier: Stale Message Filtering, Background Throttling, Resource Optimization 対応。
  */
 export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO = unknown,
+  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
   private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [];
   private _lastError: EngineError | null = null;
   private activeTaskStop: (() => void) | null = null;
   private loadPromise: Promise<void> | null = null;
+  private currentPositionId: PositionId | null = null;
+  private consentDeferred: {
+    promise: Promise<void>;
+    resolve: () => void;
+  } | null = null;
   public loadingStrategy: EngineLoadingStrategy = "on-demand";
 
   private statusListeners = new Set<(status: EngineStatus) => void>();
@@ -49,6 +61,7 @@ export class EngineFacade<
   ) {
     this.middlewares = [...initialMiddlewares];
     this.setupAdapterListeners();
+    this.setupVisibilityListener();
   }
 
   private setupAdapterListeners(): void {
@@ -62,12 +75,29 @@ export class EngineFacade<
 
     this.adapterUnsubscribers.push(
       this.adapter.onInfo?.(async (rawInfo) => {
+        // 2026: Stale Message Filtering (PositionId チェック)
+        if (
+          this.currentPositionId &&
+          rawInfo.positionId &&
+          rawInfo.positionId !== this.currentPositionId
+        ) {
+          return; // 古い局面の情報は破棄
+        }
+
         let info: T_INFO = rawInfo;
         for (const mw of this.middlewares) {
           if (mw.onInfo) {
-            const processed = await mw.onInfo(info, context);
-            if (this.isValidInfo(processed)) {
-              info = processed;
+            try {
+              const processed = await mw.onInfo(info, context);
+              if (this.isValidInfo(processed)) {
+                info = processed;
+              }
+            } catch (err) {
+              console.error(
+                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onInfo:`,
+                err,
+              );
+              // 2026: 故障したミドルウェアをスキップし、元の情報を維持
             }
           }
         }
@@ -88,6 +118,31 @@ export class EngineFacade<
     );
   }
 
+  /**
+   * 2026 Zenith: タブ非表示時のリソース節約 (Background Throttling)
+   */
+  private setupVisibilityListener(): void {
+    if (typeof document === "undefined") return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && this.status === "busy") {
+        // バックグラウンド時は思考を一時停止するかスローダウン
+        // ここでは安全のため停止を推奨 (または LowPowerMode への動的切替)
+        void this.stop();
+        this.emitTelemetry({
+          type: "lifecycle",
+          timestamp: Date.now(),
+          metadata: { action: "background_throttle", reason: "tab_hidden" },
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    this.adapterUnsubscribers.push(() =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange),
+    );
+  }
+
   get id() {
     return this.adapter.id;
   }
@@ -103,10 +158,26 @@ export class EngineFacade<
   get lastError() {
     return this._lastError;
   }
+  get config() {
+    return (this.adapter as unknown as { config: IEngineConfig }).config;
+  }
+
+  consent(): void {
+    if (this.consentDeferred) {
+      this.consentDeferred.resolve();
+      this.consentDeferred = null;
+    }
+  }
+
+  async setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void> {
+    await this.adapter.setBook(asset, options);
+  }
 
   use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
     if (middleware.id) {
-      // 2026 Best Practice: ID が指定されている場合は重複を排除（既存のものを削除して置換）
       this.middlewares = this.middlewares.filter((m) => m.id !== middleware.id);
     }
     this.middlewares.push(middleware);
@@ -126,17 +197,31 @@ export class EngineFacade<
     return this;
   }
 
-  /**
-   * エンジンをロードし、初期化します。
-   * 必要なリソースのフェッチ、Worker の起動、および能力検証を行います。
-   */
   async load(): Promise<void> {
     if (this.loadPromise) return this.loadPromise;
     if (this.status !== "uninitialized") return;
 
     this.loadPromise = (async () => {
       try {
-        // 2026 Best Practice: ロード前に能力要件を検証
+        // 2026: Consent Handshake
+        if (this.config?.disclaimer || this.config?.licenseUrl) {
+          // 内部的なステータス変更手段がないため、アダプター経由またはイベント経由で通知
+          // 簡易的に deferred promise で待機
+          let resolveConsent: () => void = () => {};
+          const promise = new Promise<void>((r) => {
+            resolveConsent = r;
+          });
+          this.consentDeferred = { promise, resolve: resolveConsent };
+
+          // ステータス変更の通知（アダプターがサポートしている必要があるが、
+          // Facade レベルでの状態管理を強化）
+          (this.adapter as unknown as { _status: EngineStatus })._status =
+            "awaiting-consent";
+          for (const cb of this.statusListeners) cb("awaiting-consent");
+
+          await promise;
+        }
+
         await this.enforceCapabilities();
 
         if (this.adapter.load) {
@@ -144,6 +229,18 @@ export class EngineFacade<
             ? await this.loaderProvider()
             : undefined;
           await this.adapter.load(loader);
+        }
+
+        // 2026 Zenith: ロード直後に環境に最適なオプションを自動設定
+        const recommended = await ResourceGovernor.getRecommendedOptions();
+        for (const [key, val] of Object.entries(recommended)) {
+          if (
+            typeof val === "string" ||
+            typeof val === "number" ||
+            typeof val === "boolean"
+          ) {
+            await this.adapter.setOption(key, val);
+          }
         }
       } catch (err: unknown) {
         this._lastError = EngineError.from(err, this.id);
@@ -156,28 +253,15 @@ export class EngineFacade<
     return this.loadPromise;
   }
 
-  /**
-   * 指定されたオプションで探索を実行します。
-   * エンジンが未ロードの場合は、戦略に基づいて自動的にロードします。
-   *
-   * @param options - 探索オプション (FEN, 深さ, 時間制限など)。
-   * @returns 探索結果 (最善手など)。
-   */
   async search(options: T_OPTIONS): Promise<T_RESULT> {
+    // 2026: PositionId を即座に更新し、ロード待ちの間もメッセージをフィルタリングできるようにする
+    this.currentPositionId = options.positionId || null;
+
     if (
       this.status === "uninitialized" &&
       this.loadingStrategy === "on-demand"
     ) {
       await this.load();
-      if ((this.status as EngineStatus) !== "ready") {
-        const i18nKey = "engine.errors.initializationFailed" as I18nKey;
-        throw new EngineError({
-          code: EngineErrorCode.NOT_READY,
-          message: "Engine failed to initialize on-demand",
-          engineId: this.id,
-          i18nKey,
-        });
-      }
     }
 
     if (this.activeTaskStop) {
@@ -194,8 +278,15 @@ export class EngineFacade<
       let command = this.adapter.parser.createSearchCommand(options);
       for (const mw of this.middlewares) {
         if (mw.onCommand) {
-          const next = await mw.onCommand(command, context);
-          if (next !== undefined && next !== null) command = next;
+          try {
+            const next = await mw.onCommand(command, context);
+            if (next !== undefined && next !== null) command = next;
+          } catch (err) {
+            console.error(
+              `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onCommand:`,
+              err,
+            );
+          }
         }
       }
 
@@ -205,11 +296,27 @@ export class EngineFacade<
 
       const result = await task.result;
 
+      // 古いリクエストの結果であれば破棄
+      if (options.positionId && this.currentPositionId !== options.positionId) {
+        throw new EngineError({
+          code: EngineErrorCode.CANCELLED,
+          message: "Search result discarded (Stale PositionId)",
+          engineId: this.id,
+        });
+      }
+
       let processedResult = result;
       for (const mw of this.middlewares) {
         if (mw.onResult) {
-          const next = await mw.onResult(processedResult, context);
-          if (this.isValidResult(next)) processedResult = next;
+          try {
+            const next = await mw.onResult(processedResult, context);
+            if (this.isValidResult(next)) processedResult = next;
+          } catch (err) {
+            console.error(
+              `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onResult:`,
+              err,
+            );
+          }
         }
       }
 
@@ -227,7 +334,6 @@ export class EngineFacade<
       await this.adapter.stop();
     } catch (err: unknown) {
       console.error(`[EngineFacade] Failed to stop engine ${this.id}:`, err);
-      // エラーはログに記録し、例外自体は投げない（ステートレスな停止を優先）
     }
   }
 
@@ -241,21 +347,28 @@ export class EngineFacade<
     this.resultListeners.clear();
     this.telemetryListeners.clear();
 
+    // 2026: Cleanup consent promise
+    if (this.consentDeferred) {
+      this.consentDeferred.resolve(); // Resolve to let load finish/fail safely
+      this.consentDeferred = null;
+    }
+
     if (this.ownAdapter) {
       const id = this.id;
-      // 2026 Best Practice: IEngineAdapter requires dispose()
       try {
+        // 2026: Graceful Shutdown (quit 送信)
+        await this.adapter.stop();
         await this.adapter.dispose();
       } catch (err) {
         console.error(`[EngineFacade] Failed to dispose adapter ${id}:`, err);
       }
-      // 2026 Best Practice: アダプター破棄時に Blob URL リソースも明示的に解放
+
       if (this.loaderProvider) {
         try {
           const loader = await this.loaderProvider();
           loader.revokeByEngineId(id);
         } catch {
-          // ローダーの取得に失敗した場合は無視（既にシステムが終了している可能性があるため）
+          // Ignore
         }
       }
     }
@@ -281,10 +394,6 @@ export class EngineFacade<
     return () => this.telemetryListeners.delete(callback);
   }
 
-  /**
-   * 基盤レイヤー専用: 内部アダプターを取得します。
-   * @internal
-   */
   [INTERNAL_ADAPTER](): IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
     return this.adapter;
   }
@@ -296,9 +405,9 @@ export class EngineFacade<
   private async enforceCapabilities(): Promise<void> {
     if (!this.adapter.requiredCapabilities) return;
 
-    const { CapabilityDetector } =
-      await import("../capabilities/CapabilityDetector.js");
-    const caps = await CapabilityDetector.detect();
+    const { EnvironmentDetector } =
+      await import("../capabilities/EnvironmentDetector.js");
+    const caps = await EnvironmentDetector.detect();
     const missing: string[] = [];
 
     for (const [key, required] of Object.entries(
@@ -310,22 +419,18 @@ export class EngineFacade<
     }
 
     if (missing.length > 0) {
-      const i18nKey = "engine.errors.securityViolation" as I18nKey;
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `Environment does not support required capabilities: ${missing.join(", ")}`,
+        message: `Required capabilities missing: ${missing.join(", ")}`,
         engineId: this.id,
-        i18nKey,
+        i18nKey: "engine.errors.securityViolation" as I18nKey,
         remediation:
-          "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
+          "Ensure HTTPS and COOP/COEP are enabled if Threads/SharedArrayBuffer are required.",
       });
     }
   }
 
   private isValidInfo(info: unknown): info is T_INFO {
-    // 2026 Best Practice: 構造的型チェック (Runtime Type Checking)
-    // T_INFO はジェネリクスだが、最低限非 null のオブジェクトであることを保証する。
-    // 配列や関数は info オブジェクトとして不適切。
     return typeof info === "object" && info !== null && !Array.isArray(info);
   }
 

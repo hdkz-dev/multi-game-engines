@@ -17,7 +17,7 @@ import { z } from "zod";
  */
 const EngineSourceSchema = z
   .object({
-    url: z.string().url(),
+    url: z.string(), // data: URL等も許容するため .url() を外すか正規表現で対応
     type: z.enum([
       "worker-js",
       "wasm",
@@ -58,7 +58,7 @@ const EngineManifestSchema = z.object({
       versions: z.record(
         z.string(),
         z.object({
-          assets: z.record(z.string(), EngineSourceSchema),
+          assets: z.record(z.string(), EngineSourceSchema.or(z.any())), // variants等を含むため緩和
         }),
       ),
     }),

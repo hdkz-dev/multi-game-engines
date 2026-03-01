@@ -5,6 +5,8 @@ import {
   ProtocolValidator,
   truncateLog,
   I18nKey,
+  ScoreNormalizer,
+  PositionId,
 } from "@multi-game-engines/core";
 import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 import { tCommon, CommonKey } from "@multi-game-engines/i18n-common";
@@ -19,16 +21,20 @@ import {
  * 2026 Zenith Tier: 汎用 USI (Universal Shogi Interface) パーサー。
  * 境界チェック and 詳細なエラーメッセージを備え、堅牢な解析を提供します。
  */
-export class USIParser
-  implements
-    IProtocolParser<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult>
-{
-  parseInfo(data: string | Record<string, unknown>): IShogiSearchInfo | null {
+export class USIParser implements IProtocolParser<
+  IShogiSearchOptions,
+  IShogiSearchInfo,
+  IShogiSearchResult
+> {
+  parseInfo(
+    data: string | Record<string, unknown>,
+    positionId?: PositionId,
+  ): IShogiSearchInfo | null {
     if (typeof data !== "string") return null;
 
     if (!data.startsWith("info ")) return null;
 
-    const info: IShogiSearchInfo = { raw: data };
+    const info: IShogiSearchInfo = { positionId, raw: data };
     const parts = data.split(" ");
 
     // 2026 Best Practice: 配列境界チェックの徹底
@@ -57,15 +63,34 @@ export class USIParser
           break;
         case "score":
           if (i + 2 < parts.length) {
-            const type = parts[++i];
+            const scoreType = parts[++i];
             const valToken = parts[++i];
-            const value = valToken ? parseInt(valToken, 10) : NaN;
-            if (Number.isFinite(value)) {
-              if (type === "cp") {
-                info.score = { cp: value };
-              } else if (type === "mate") {
-                info.score = { mate: value };
+
+            if (scoreType === "cp") {
+              const value = valToken ? parseInt(valToken, 10) : NaN;
+              if (Number.isFinite(value)) {
+                info.score = {
+                  unit: "cp",
+                  cp: value,
+                  normalized: ScoreNormalizer.normalize(value, "cp", "shogi"),
+                };
               }
+            } else if (scoreType === "mate") {
+              // USI mate is usually 'mate +' or 'mate -' or 'mate <n>'
+              const isPlus = valToken === "+";
+              const isMinus = valToken === "-";
+              const value =
+                isPlus || isMinus
+                  ? isPlus
+                    ? 1
+                    : -1
+                  : parseInt(valToken || "0", 10);
+
+              info.score = {
+                unit: "mate",
+                mate: value,
+                normalized: ScoreNormalizer.normalize(value, "mate", "shogi"),
+              };
             }
           }
           break;
@@ -116,6 +141,20 @@ export class USIParser
     }
 
     return info;
+  }
+
+  /**
+   * 2026 Zenith: エンジンからのエラーメッセージを i18n キーに変換。
+   */
+  translateError(message: string): I18nKey | null {
+    const msg = message.toLowerCase();
+    if (msg.includes("nnue") && msg.includes("読み込みに失敗")) {
+      return "engine.errors.resourceLoadUnknown" as I18nKey;
+    }
+    if (msg.includes("nnue") && msg.includes("not found")) {
+      return "engine.errors.missingSources" as I18nKey;
+    }
+    return null;
   }
 
   parseResult(

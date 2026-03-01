@@ -53,7 +53,16 @@ export class BestScoreStrategy<
       const score = isScoreInfo(result.score) ? result.score : undefined;
       if (!score) continue;
 
-      // 2026 Best Practice: 詰み(mate) > センチポーン(cp) > 勝率(winrate) の順で優先評価
+      // 2026 Zenith Standard: normalized スコアがある場合はそれを最優先で比較
+      if (score.normalized !== undefined) {
+        if (score.normalized > maxScore) {
+          maxScore = score.normalized;
+          bestResult = result;
+        }
+        continue;
+      }
+
+      // 2026 Best Practice: フォールバック (詰み(mate) > センチポーン(cp) > 勝率(winrate))
       // mate score: 正の値は自分が勝ち（少ないほど良い）、負の値は自分が負け（大きいほど良い）
       let currentScore = -Infinity;
       if (score.mate !== undefined) {

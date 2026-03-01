@@ -1,4 +1,9 @@
-import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  ProtocolValidator,
+  ScoreNormalizer,
+  PositionId,
+} from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 import {
   createGOMove,
@@ -16,15 +21,31 @@ export class GTPParser implements IProtocolParser<
   IGoSearchInfo,
   IGoSearchResult
 > {
-  parseInfo(data: string | Record<string, unknown>): IGoSearchInfo | null {
+  parseInfo(
+    data: string | Record<string, unknown>,
+    positionId?: PositionId,
+  ): IGoSearchInfo | null {
     if (typeof data === "object" && data !== null) {
       // KataGo 拡張 JSON 出力
       if ("visits" in data || "winrate" in data) {
+        const winrate = Number(data.winrate) || 0;
+        const scoreLead =
+          typeof data.scoreLead === "number" ? data.scoreLead : undefined;
+
         return {
+          positionId,
           visits: Number(data.visits) || 0,
-          winrate: Number(data.winrate) || 0,
-          scoreLead:
-            typeof data.scoreLead === "number" ? data.scoreLead : undefined,
+          winrate,
+          score: {
+            unit: "winrate", // ベースは勝率とするが points にも対応
+            winrate,
+            points: scoreLead,
+            normalized:
+              scoreLead !== undefined
+                ? ScoreNormalizer.normalize(scoreLead, "points", "go")
+                : ScoreNormalizer.normalize(winrate, "winrate", "go"),
+          },
+          scoreLead,
           pv:
             Array.isArray(data.pv) && data.pv.length > 0
               ? data.pv
@@ -43,6 +64,19 @@ export class GTPParser implements IProtocolParser<
       }
     }
 
+    return null;
+  }
+
+  /**
+   * 2026 Zenith: エンジンからのエラーメッセージを i18n キーに変換。
+   */
+  translateError(
+    message: string,
+  ): import("@multi-game-engines/core").I18nKey | null {
+    const msg = message.toLowerCase();
+    if (msg.startsWith("?") && msg.includes("invalid")) {
+      return "adapters.gtp.errors.invalidResponse" as import("@multi-game-engines/core").I18nKey;
+    }
     return null;
   }
 

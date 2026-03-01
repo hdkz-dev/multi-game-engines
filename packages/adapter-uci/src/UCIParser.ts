@@ -7,6 +7,8 @@ import {
   createMove,
   truncateLog,
   I18nKey,
+  ScoreNormalizer,
+  PositionId,
 } from "@multi-game-engines/core";
 import { tChess as translate, ChessKey } from "@multi-game-engines/i18n-chess";
 import {
@@ -19,10 +21,11 @@ import {
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
  */
-export class UCIParser
-  implements
-    IProtocolParser<IChessSearchOptions, IChessSearchInfo, IChessSearchResult>
-{
+export class UCIParser implements IProtocolParser<
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult
+> {
   // 2026 Best Practice: 正規表現の事前コンパイルによる高速化 (NPSへの影響最小化)
   // UCI 指し手形式 (a2a4, e7e8q) および UCI 特有の nullmove (0000) をサポート。
   private static readonly MOVE_REGEX = /^([a-h][1-8][a-h][1-8][nbrq]?|0000)$/;
@@ -65,18 +68,21 @@ export class UCIParser
    * UCI 標準のトークン（depth, score, pv 等）を抽出し、構造化データとして返します。
    *
    * @param data - 受信したデータ（文字列）。
+   * @param positionId - 現在の局面 ID。
    * @returns 解析された思考情報。info 行でない場合は null。
    */
   parseInfo(
     data: string | Uint8Array | Record<string, unknown>,
+    positionId?: PositionId,
   ): IChessSearchInfo | null {
     if (typeof data !== "string") return null;
     const line = data;
     if (!line.startsWith("info ")) return null;
 
     const info: IChessSearchInfo = {
+      positionId,
       depth: 0,
-      score: { cp: 0 },
+      score: { cp: 0, unit: "cp" },
       raw: line,
     };
 
@@ -95,10 +101,17 @@ export class UCIParser
           break;
         case "score": {
           if (i + 2 < parts.length) {
-            const scoreType = parts[++i]; // "cp" or "mate"
+            const scoreType = parts[++i] as "cp" | "mate";
             const scoreValue = parseInt(parts[++i] || "0", 10) || 0;
-            info.score =
-              scoreType === "mate" ? { mate: scoreValue } : { cp: scoreValue };
+            info.score = {
+              unit: scoreType,
+              [scoreType]: scoreValue,
+              normalized: ScoreNormalizer.normalize(
+                scoreValue,
+                scoreType,
+                "chess",
+              ),
+            };
           }
           break;
         }
@@ -154,6 +167,20 @@ export class UCIParser
     }
 
     return info;
+  }
+
+  /**
+   * 2026 Zenith: エンジンからのエラーメッセージを i18n キーに変換。
+   */
+  translateError(message: string): I18nKey | null {
+    const msg = message.toLowerCase();
+    if (msg.includes("nnue") && msg.includes("not found")) {
+      return "engine.errors.missingSources" as I18nKey;
+    }
+    if (msg.includes("invalid") && msg.includes("option")) {
+      return "parsers.generic.invalidOptionValue" as I18nKey;
+    }
+    return null;
   }
 
   /**

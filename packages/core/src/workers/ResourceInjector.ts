@@ -59,7 +59,8 @@ export class ResourceInjector {
         if (!payload.resources || typeof payload.resources !== "object") {
           throw new EngineError({
             code: EngineErrorCode.PROTOCOL_ERROR,
-            message: "[ResourceInjector] Invalid or missing resources in MG_INJECT_RESOURCES",
+            message:
+              "[ResourceInjector] Invalid or missing resources in MG_INJECT_RESOURCES",
             i18nKey: "engine.errors.protocolError" as I18nKey,
             i18nParams: { message: "Invalid resources payload" },
           });
@@ -138,7 +139,12 @@ export class ResourceInjector {
     if (this.resources[lookupPath]) return this.resources[lookupPath];
 
     for (const [mountPath, blobUrl] of Object.entries(this.resources)) {
-      if (lookupPath.endsWith(mountPath)) {
+      // 2026: Precise suffix match (ensure it matches a whole segment or the whole path)
+      if (
+        lookupPath === mountPath ||
+        (lookupPath.endsWith(mountPath) &&
+          lookupPath.charAt(lookupPath.length - mountPath.length - 1) === "/")
+      ) {
         return blobUrl;
       }
     }
@@ -203,7 +209,9 @@ export class ResourceInjector {
 
     const blobUrl = this.resolve(resourceKey);
     if (blobUrl === resourceKey) {
-      console.warn(`[ResourceInjector] Resource key "${resourceKey}" not resolved.`);
+      console.warn(
+        `[ResourceInjector] Resource key "${resourceKey}" not resolved.`,
+      );
     }
 
     try {

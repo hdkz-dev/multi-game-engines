@@ -1,0 +1,31 @@
+{
+  "name": "@multi-game-engines/adapter-xiangqi",
+  "version": "0.1.0",
+  "description": "UCCI (Universal Chinese Chess Interface) adapter for multi-game-engines ecosystem",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/domain-xiangqi": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.6",
+    "typescript": "5.7.3",
+    "vitest": "^3.0.0"
+  }
+}

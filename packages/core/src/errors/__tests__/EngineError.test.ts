@@ -81,4 +81,12 @@ describe("EngineError", () => {
     expect(wrapped.i18nKey).toBe("errors.network");
     expect(wrapped.engineId).toBe("new-id");
   });
+
+  it("should provide remediation for TypeError and RangeError", () => {
+    const tErr = EngineError.from(new TypeError("Bad type"), "test");
+    expect(tErr.remediation).toContain("invalid values");
+
+    const rErr = EngineError.from(new RangeError("Out of range"), "test");
+    expect(rErr.remediation).toContain("allowed limits");
+  });
 });

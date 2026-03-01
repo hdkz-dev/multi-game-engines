@@ -99,6 +99,7 @@ describe("StockfishAdapter", () => {
       expect.objectContaining({
         main: expect.objectContaining({ url: "custom-stockfish.js" }),
       }),
+      expect.any(Object),
     );
   });
 

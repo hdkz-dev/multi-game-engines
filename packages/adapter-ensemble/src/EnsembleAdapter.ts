@@ -9,6 +9,8 @@ import {
   EngineError,
   IMiddleware,
   I18nKey,
+  IBookAsset,
+  ProgressCallback,
 } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -69,6 +71,19 @@ export class EnsembleAdapter<
       this.lastError = engineError;
       throw engineError;
     }
+  }
+
+  consent(): void {
+    this.engines.forEach((e) => {
+      if (typeof e.consent === "function") e.consent();
+    });
+  }
+
+  async setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void> {
+    await Promise.all(this.engines.map((e) => e.setBook(asset, options)));
   }
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {

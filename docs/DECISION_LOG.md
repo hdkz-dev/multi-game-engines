@@ -48,6 +48,9 @@
 - [ADR-045: Absolute Zenith Quality Audit の完遂と整合性同期](./adr/045-absolute-zenith-audit.md) (Pending Merge - 2026-02-23)
 - [ADR-050: Advanced Development Skills Integration](./adr/050-advanced-dev-skills-integration.md) (Proposed - 2026-02-27)
 - [ADR-051: Comprehensive Validation, A11y, and Robust Error Handling Expansion](./adr/051-validation-a11y-error-hardening.md) (Accepted - 2026-02-27)
+- [ADR-052: Zenith Hardening & Standardized Score Normalization](./adr/052-zenith-hardening-score-normalization.md) (Proposed - 2026-02-27)
+- [ADR-053: Pluggable Storage Architecture](./adr/053-pluggable-storage-architecture.md) (Proposed - 2026-02-27)
+- [ADR-054: Extreme Robustness and High Coverage Testing Strategy](./adr/054-extreme-robustness-strategy.md) (Proposed - 2026-02-28)
 
 ## 🎨 UI と表現層 (UI & Presentation)
 

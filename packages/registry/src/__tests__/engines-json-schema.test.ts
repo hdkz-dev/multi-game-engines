@@ -76,6 +76,7 @@ describe("engines.json schema validation", () => {
     for (const [engineId, engine] of Object.entries(enginesData.engines)) {
       for (const [versionId, version] of Object.entries(engine.versions)) {
         for (const [assetKey, asset] of Object.entries(version.assets)) {
+          if (assetKey === "variants") continue; // variants はアセット自体ではないためスキップ
           assetEntries.push([
             `${engineId}/${versionId}/${assetKey}`,
             asset as Record<string, unknown>,
@@ -89,7 +90,10 @@ describe("engines.json schema validation", () => {
       (_label, asset) => {
         expect(asset.url).toBeDefined();
         expect(typeof asset.url).toBe("string");
-        expect((asset.url as string).startsWith("http")).toBe(true);
+        // http または data: URL を許容
+        const isWebUrl = (asset.url as string).startsWith("http");
+        const isDataUrl = (asset.url as string).startsWith("data:");
+        expect(isWebUrl || isDataUrl).toBe(true);
 
         expect(asset.type).toBeDefined();
         const validTypes = [

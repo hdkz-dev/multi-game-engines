@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
+import { PositionId } from "@multi-game-engines/core";
 
 describe("USIParser", () => {
   beforeAll(() => {
@@ -14,9 +15,22 @@ describe("USIParser", () => {
   const parser = new USIParser();
 
   describe("parseInfo", () => {
-    it("should parse score cp as structured { cp } object", () => {
-      const info = parser.parseInfo("info depth 10 score cp 50 pv 7g7f");
-      expect(info?.score).toEqual({ cp: 50 });
+    it("should parse score cp as standardized object", () => {
+      const info = parser.parseInfo(
+        "info depth 10 score cp 50 pv 7g7f",
+        "pos1" as PositionId,
+      );
+      expect(info?.score).toMatchObject({
+        cp: 50,
+        unit: "cp",
+        normalized: expect.any(Number),
+      });
+      expect(info?.positionId).toBe("pos1");
+    });
+
+    it("should parse mate score with normalization", () => {
+      const info = parser.parseInfo("info score mate +");
+      expect(info?.score?.normalized).toBe(0.99);
     });
 
     it("should parse pv with multiple moves", () => {
@@ -55,6 +69,13 @@ describe("USIParser", () => {
   describe("parseInfo — null cases", () => {
     it("should return null for non-info line", () => {
       expect(parser.parseInfo("id name YaneuraOu")).toBeNull();
+    });
+  });
+
+  describe("translateError", () => {
+    it("should translate NNUE load failure", () => {
+      const key = parser.translateError("NNUEファイルの読み込みに失敗しました");
+      expect(key).toBe("engine.errors.resourceLoadUnknown");
     });
   });
 
@@ -102,7 +123,9 @@ describe("USIParser", () => {
             sfen: maliciousSfen,
           }),
         ).toThrow(
-          expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+          expect.objectContaining({
+            i18nKey: "engine.errors.injectionDetected",
+          }),
         );
       },
     );

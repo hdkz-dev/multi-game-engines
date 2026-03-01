@@ -134,4 +134,32 @@ export class SecurityAdvisor {
       missingHeaders: missingHeaders.length > 0 ? missingHeaders : undefined,
     };
   }
+
+  /**
+   * 2026 Zenith Tier: 隔離環境を有効化するための具体的なアドバイスを返します。
+   */
+  static getRemediationAdvice(): string {
+    return `
+To enable Multi-threading (SharedArrayBuffer), set the following HTTP headers:
+- Cross-Origin-Opener-Policy: same-origin
+- Cross-Origin-Embedder-Policy: require-corp
+
+Platform examples:
+[Vercel (vercel.json)]
+{ "headers": [{ "source": "/(.*)", "headers": [
+  { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+  { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+]}]}
+
+[Cloudflare Pages (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+[Netlify (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+`;
+  }
 }

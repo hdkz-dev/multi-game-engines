@@ -67,6 +67,45 @@ export class DefaultTelemetryMiddleware implements IMiddleware {
     return result;
   }
 
+  /**
+   * 中間思考情報の受信時にテレメトリを発行します。
+   */
+  async onInfo<T>(info: T, context: IMiddlewareContext): Promise<T> {
+    if (context.emitTelemetry) {
+      context.emitTelemetry({
+        type: "search",
+        timestamp: Date.now(),
+        metadata: {
+          action: "info",
+          engineId: context.engineId,
+          telemetryId: context.telemetryId,
+        },
+      });
+    }
+    return info;
+  }
+
+  /**
+   * ロード進捗の発生時にテレメトリを発行します。
+   */
+  async onProgress(
+    progress: import("../types.js").ILoadProgress,
+    context: IMiddlewareContext,
+  ): Promise<void> {
+    if (context.emitTelemetry) {
+      context.emitTelemetry({
+        type: "lifecycle",
+        timestamp: Date.now(),
+        metadata: {
+          action: "progress",
+          engineId: context.engineId,
+          status: progress.status,
+          loadedBytes: progress.loadedBytes,
+        },
+      });
+    }
+  }
+
   private async captureMemoryUsage(): Promise<
     Record<string, number> | undefined
   > {
