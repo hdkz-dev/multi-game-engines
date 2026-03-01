@@ -36,6 +36,8 @@ export class ScoreNormalizer {
     switch (domain) {
       case "shogi":
       case "chess":
+      case "xiangqi":
+      case "janggi":
         // センチポーン (cp) 基準: 600cp (約1ポーン/歩の差) を 0.5 付近にマッピング
         // シグモイド関数: 2 / (1 + exp(-raw / k)) - 1
         // k=600 のとき raw=600 -> 0.46, raw=1200 -> 0.76, raw=2500 -> 0.96

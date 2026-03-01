@@ -50,8 +50,28 @@ export class EngineFacade<
     const context: MiddlewareContext<T_OPTIONS> = { engineId: this.id };
 
     this.adapterUnsubscribers.push(
-      this.adapter.onStatusChange((status) => {
-        for (const cb of this.statusListeners) cb(status);
+      this.adapter.onStatusChange(async (status) => {
+        // 2026: Middleware Isolation for Status Change
+        let currentStatus = status;
+        for (const mw of this.middlewares) {
+          if (mw.onStatusChange) {
+            try {
+              await mw.onStatusChange(currentStatus, context);
+            } catch (err) {
+              console.error(
+                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onStatusChange:`,
+                err,
+              );
+            }
+          }
+        }
+        for (const cb of this.statusListeners) {
+          try {
+            cb(currentStatus);
+          } catch (err) {
+            console.error("[EngineFacade] Status listener failed:", err);
+          }
+        }
       }),
     );
 
@@ -83,19 +103,67 @@ export class EngineFacade<
             }
           }
         }
-        for (const cb of this.infoListeners) cb(info);
+        for (const cb of this.infoListeners) {
+          try {
+            cb(info);
+          } catch (err) {
+            console.error("[EngineFacade] Info listener failed:", err);
+          }
+        }
       }) || (() => {}),
     );
 
     this.adapterUnsubscribers.push(
-      this.adapter.onSearchResult((result) => {
-        for (const cb of this.resultListeners) cb(result);
+      this.adapter.onSearchResult(async (result) => {
+        // 2026: Middleware Isolation for Search Result
+        let currentResult = result;
+        for (const mw of this.middlewares) {
+          if (mw.onResult) {
+            try {
+              const processed = await mw.onResult(currentResult, context);
+              if (this.isValidResult(processed)) {
+                currentResult = processed;
+              }
+            } catch (err) {
+              console.error(
+                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onResult (internal hook):`,
+                err,
+              );
+            }
+          }
+        }
+        for (const cb of this.resultListeners) {
+          try {
+            cb(currentResult);
+          } catch (err) {
+            console.error("[EngineFacade] Search result listener failed:", err);
+          }
+        }
       }),
     );
 
     this.adapterUnsubscribers.push(
       this.adapter.onTelemetry((telemetry) => {
-        for (const cb of this.telemetryListeners) cb(telemetry);
+        // 2026: Middleware Isolation for Telemetry
+        for (const mw of this.middlewares) {
+          if (mw.onTelemetry) {
+            try {
+              mw.onTelemetry(telemetry, context);
+            } catch (err) {
+              console.error(
+                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onTelemetry:`,
+                err,
+              );
+            }
+          }
+        }
+        for (const cb of this.telemetryListeners) {
+          try {
+            cb(telemetry);
+          } catch (err) {
+            console.error("[EngineFacade] Telemetry listener failed:", err);
+          }
+        }
       }),
     );
   }

@@ -13,6 +13,7 @@ export class NativeCommunicator {
 
   async spawn(): Promise<void> {
     const { spawn } = await import("node:child_process");
+    this.buffer = ""; // 2026: 新しいプロセス起動時にバッファをリセット
     this.child = spawn(this.binaryPath, [], {
       stdio: ["pipe", "pipe", "pipe"],
     });

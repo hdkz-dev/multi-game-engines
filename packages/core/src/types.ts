@@ -300,6 +300,20 @@ export interface IMiddleware<
     result: T_RESULT,
     context: MiddlewareContext<T_OPTIONS>,
   ): Promise<T_RESULT | undefined | void> | T_RESULT | undefined | void;
+  /**
+   * エンジンのステータス変更時に呼び出されます。
+   */
+  onStatusChange?(
+    status: EngineStatus,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): Promise<void> | void;
+  /**
+   * テレメトリイベントの発生時に呼び出されます。
+   */
+  onTelemetry?(
+    telemetry: EngineTelemetry,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): void;
 }
 
 /**
