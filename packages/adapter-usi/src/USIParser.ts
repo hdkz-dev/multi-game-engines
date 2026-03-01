@@ -6,8 +6,7 @@ import {
   truncateLog,
   I18nKey,
   ScoreNormalizer,
-  PositionId,
-} from "@multi-game-engines/core";
+  PositionId, createI18nKey } from "@multi-game-engines/core";
 import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 import { tCommon, CommonKey } from "@multi-game-engines/i18n-common";
 import {
@@ -149,10 +148,10 @@ export class USIParser implements IProtocolParser<
   translateError(message: string): I18nKey | null {
     const msg = message.toLowerCase();
     if (msg.includes("nnue") && msg.includes("読み込みに失敗")) {
-      return "engine.errors.resourceLoadUnknown" as I18nKey;
+      return createI18nKey("engine.errors.resourceLoadUnknown");
     }
     if (msg.includes("nnue") && msg.includes("not found")) {
-      return "engine.errors.missingSources" as I18nKey;
+      return createI18nKey("engine.errors.missingSources");
     }
     return null;
   }
@@ -171,7 +170,7 @@ export class USIParser implements IProtocolParser<
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: tCommon(i18nKey, i18nParams),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
         i18nParams,
       });
     }

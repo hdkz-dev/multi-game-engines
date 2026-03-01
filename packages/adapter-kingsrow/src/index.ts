@@ -3,6 +3,7 @@ import {
   EngineFacade,
   EngineError,
   EngineErrorCode,
+  normalizeAndValidateSources
 } from "@multi-game-engines/core";
 import type {
   IEngine,
@@ -27,25 +28,11 @@ export function createKingsRowEngine(
 ): IEngine<ICheckersSearchOptions, ICheckersSearchInfo, ICheckersSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve("kingsrow", config.version) || {};
-  const sources = {
-    ...(registrySources as Record<string, IEngineSourceConfig>),
-    ...(config.sources || {}),
-  };
-
-  if (!sources.main) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `[createKingsRowEngine] Engine "kingsrow" requires a "main" source, but it was not found in the registry or config.`,
-      engineId: "kingsrow",
-      i18nKey: "factory.requiresMainSource" as I18nKey,
-      i18nParams: { id: "kingsrow" },
-    });
-  }
-
+    OfficialRegistry.resolve("kingsrow", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: sources as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "kingsrow"),
   };
 
   const adapter = new KingsRowAdapter(mergedConfig);

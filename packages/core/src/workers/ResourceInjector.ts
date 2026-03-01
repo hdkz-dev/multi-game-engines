@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import { ResourceMap, EngineErrorCode, I18nKey } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
@@ -61,7 +62,7 @@ export class ResourceInjector {
             code: EngineErrorCode.PROTOCOL_ERROR,
             message:
               "[ResourceInjector] Invalid or missing resources in MG_INJECT_RESOURCES",
-            i18nKey: "engine.errors.protocolError" as I18nKey,
+            i18nKey: createI18nKey("engine.errors.protocolError"),
             i18nParams: { message: "Invalid resources payload" },
           });
         }
@@ -117,7 +118,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[ResourceInjector] Invalid URL encoding in path: "${path}"`,
-        i18nKey: "engine.errors.illegalCharacters" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.illegalCharacters"),
       });
     }
 
@@ -131,7 +132,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `[ResourceInjector] Path pattern detected: "${path}"`,
-        i18nKey: "engine.errors.securityViolation" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.securityViolation"),
       });
     }
 
@@ -202,7 +203,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "ResourceInjector: Module instance or FS not found.",
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: "Module or FS not found" },
       });
     }
@@ -220,7 +221,7 @@ export class ResourceInjector {
         throw new EngineError({
           code: EngineErrorCode.NETWORK_ERROR,
           message: `Failed to fetch resource: ${response.statusText}`,
-          i18nKey: "engine.errors.networkError" as I18nKey,
+          i18nKey: createI18nKey("engine.errors.networkError"),
         });
       }
 
@@ -246,7 +247,7 @@ export class ResourceInjector {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: `Failed to mount "${resourceKey}" to "${vfsPath}": ${error}`,
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: `Mount failed: ${resourceKey}` },
       });
     }

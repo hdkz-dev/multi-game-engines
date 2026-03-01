@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import {
   IEngineAdapter,
   EngineStatus,
@@ -80,7 +81,7 @@ export abstract class BaseAdapter<
       if (source && typeof source === "object" && "sri" in source) {
         const sri = (source as { sri?: string }).sri;
         if (sri && (!sriPattern.test(sri) || /placeholder/i.test(sri))) {
-          const i18nKey = "engine.errors.sriMismatch" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.sriMismatch");
           throw new EngineError({
             code: EngineErrorCode.VALIDATION_ERROR,
             message: `Engine Adapter "${this.id}": Source "${key}" has an invalid or placeholder SRI hash: "${sri}"`,
@@ -123,7 +124,7 @@ export abstract class BaseAdapter<
     options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<void> {
     if (!this.activeLoader) {
-      const i18nKey = "engine.errors.loaderRequired" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.loaderRequired");
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: "Loader required to set book",
@@ -177,7 +178,7 @@ export abstract class BaseAdapter<
     command: string | string[] | Uint8Array | Record<string, unknown>,
   ): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready" && this._status !== "busy") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not ready",
@@ -187,7 +188,7 @@ export abstract class BaseAdapter<
     }
 
     if (!this.communicator) {
-      const i18nKey = "engine.errors.initializationFailed" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.initializationFailed");
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Communicator not initialized",
@@ -389,7 +390,7 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (this._status !== "ready" && this._status !== "busy") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: `Cannot set option: Engine is not ready (current status: ${this._status})`,
@@ -405,7 +406,7 @@ export abstract class BaseAdapter<
     value: string | number | boolean,
   ): Promise<void> {
     if (!this.communicator) {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: "Engine is not loaded",
@@ -438,7 +439,7 @@ export abstract class BaseAdapter<
     skipReadyTransition = false,
   ): void {
     if (this.pendingReject) {
-      const i18nKey = "engine.errors.searchAborted" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.searchAborted");
       this.pendingReject(
         new EngineError({
           code: EngineErrorCode.SEARCH_ABORTED,

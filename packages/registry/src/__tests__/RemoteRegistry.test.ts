@@ -131,6 +131,7 @@ describe("RemoteRegistry", () => {
   });
 
   it("should share loading promise for concurrent load calls", async () => {
+    vi.useFakeTimers();
     const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
     vi.mocked(fetch).mockResolvedValue({
       ok: true,
@@ -145,6 +146,7 @@ describe("RemoteRegistry", () => {
     // fetch should only be called once
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(registry.isLoaded).toBe(true);
+    vi.useRealTimers();
   });
 
   it("should skip load if already loaded", async () => {

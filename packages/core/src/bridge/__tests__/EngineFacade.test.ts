@@ -61,6 +61,10 @@ describe("EngineFacade", () => {
       load: vi.fn().mockImplementation(async () => {
         mockAdapter.status = "ready";
       }),
+      setOption: vi.fn().mockResolvedValue(undefined),
+      setBook: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
+      dispose: vi.fn().mockResolvedValue(undefined),
       searchRaw: vi.fn().mockImplementation(() => {
         // searchRaw が呼ばれたら登録済みリスナーに通知
         mockAdapter.infoListeners.forEach((l) => l({ raw: "info" }));

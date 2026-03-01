@@ -1,3 +1,4 @@
+import { createI18nKey } from "./ProtocolValidator.js";
 import { ISegmentedSRI, EngineErrorCode, I18nKey } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
@@ -48,7 +49,7 @@ export class SegmentedVerifier {
 
       const isValid = await this.verifySegment(segment, hashes[i]!);
       if (!isValid) {
-        const i18nKey = "engine.errors.sriMismatch" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.sriMismatch");
         throw new EngineError({
           code: EngineErrorCode.SRI_MISMATCH,
           message: `Segmented SRI verification failed at segment ${i}.`,

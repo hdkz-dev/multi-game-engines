@@ -32,6 +32,10 @@ class TestAdapter extends BaseAdapter<
   async load() {}
   async dispose() {}
 
+  protected async onBookLoaded(url: string): Promise<void> {
+    // mock implementation
+  }
+
   // テスト用の公開ラッパー
   public testEmitStatusChange(status: EngineStatus) {
     this.emitStatusChange(status);

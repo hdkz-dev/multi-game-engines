@@ -39,7 +39,7 @@ export class ProtocolValidator {
   ): void {
     // 2026: 防止: 無限再帰や深すぎるネストによるスタックオーバーフロー
     if (depth > 10) {
-      const i18nKey = "engine.errors.nestedTooDeep" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.nestedTooDeep");
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Input nesting too deep in ${context}.`,
@@ -52,7 +52,7 @@ export class ProtocolValidator {
         ? ProtocolValidator.LOOSE_REGEX
         : ProtocolValidator.STRICT_REGEX;
       if (regex.test(input)) {
-        const i18nKey = "engine.errors.injectionDetected" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.injectionDetected");
         const i18nParams = { context, input: truncateLog(input) };
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
@@ -69,7 +69,7 @@ export class ProtocolValidator {
 
     if (!recursive && input !== undefined && input !== null) {
       // 再帰が無効な場合、文字列以外の入力は原則として拒否（インジェクション対策）
-      const i18nKey = "engine.errors.illegalCharacters" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.illegalCharacters");
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Invalid non-string input detected in ${context}.`,
@@ -124,7 +124,7 @@ export class ProtocolValidator {
 /** 汎用指し手バリデータ (2026 Zenith Tier: Refuse by Exception) */
 export function createMove<T extends string = string>(move: string): Move<T> {
   if (typeof move !== "string" || !/^[a-z0-9+*#=/\- ()]+$/i.test(move)) {
-    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMoveFormat");
     const i18nParams = { move: truncateLog(move) };
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
@@ -142,7 +142,7 @@ export function createPositionString<T extends string = string>(
   pos: string,
 ): PositionString<T> {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidPositionString" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidPositionString");
     throw new EngineError({
       code: EngineErrorCode.SECURITY_ERROR,
       message: "Invalid PositionString: Input must be a non-empty string.",
@@ -156,7 +156,7 @@ export function createPositionString<T extends string = string>(
 /** 局面 ID バリデータ (2026 Zenith Tier: Refuse by Exception) */
 export function createPositionId(id: string): PositionId {
   if (typeof id !== "string" || !/^[a-zA-Z0-9-_.:]+$/.test(id)) {
-    const i18nKey = "engine.errors.invalidPositionId" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidPositionId");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: `Invalid PositionId format: "${truncateLog(id)}".`,
@@ -164,4 +164,19 @@ export function createPositionId(id: string): PositionId {
     });
   }
   return id as PositionId;
+}
+
+/**
+ * 国際化キー (I18nKey) を生成するためのファクトリ。
+ * 直接の型キャストを避け、この関数を経由することで安全性を担保します。
+ * (2026 Zenith Tier: Branded Type Validation)
+ */
+export function createI18nKey(key: string): I18nKey {
+  if (typeof key !== "string" || key.trim() === "") {
+    throw new EngineError({
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: `Invalid I18nKey format: "${truncateLog(key)}".`,
+    });
+  }
+  return key as I18nKey;
 }

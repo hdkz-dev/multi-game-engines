@@ -6,8 +6,7 @@ import {
   createPositionString,
   EngineErrorCode,
   I18nKey,
-  EngineError,
-} from "@multi-game-engines/core";
+  EngineError, createI18nKey } from "@multi-game-engines/core";
 import { SearchMonitor } from "./monitor.js";
 import { createInitialState, EngineSearchState } from "../types.js";
 
@@ -95,7 +94,7 @@ export class MonitorRegistry {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "[MonitorRegistry] Invalid monitor instance.",
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: "Invalid monitor instance" },
       });
     }
@@ -121,7 +120,7 @@ export class MonitorRegistry {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "[MonitorRegistry] Monitor must be defined",
-        i18nKey: "engine.errors.internalError" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.internalError"),
         i18nParams: { message: "Monitor undefined" },
       });
     }
@@ -150,7 +149,7 @@ export class MonitorRegistry {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: "[MonitorRegistry] Engine instance is required.",
-        i18nKey: "engine.errors.notReady" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.notReady"),
       });
     }
     const abstractEngine = engine as IEngine<

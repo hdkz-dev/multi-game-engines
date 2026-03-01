@@ -10,8 +10,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   IScoreInfo,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, createI18nKey } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
@@ -55,7 +54,7 @@ export function createXiangqiMove(move: string): XiangqiMove {
   // UCCI move format: [from_col][from_row][to_col][to_row]
   // col: a-i, row: 0-9
   if (!/^[a-i][0-9][a-i][0-9]$|^resign$|^none$/.test(move)) {
-    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMoveFormat");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey, { move }),
@@ -70,7 +69,7 @@ export function createXiangqiMove(move: string): XiangqiMove {
  */
 export function createXFEN(pos: string): XFEN {
   if (typeof pos !== "string" || pos.trim() === "") {
-    const i18nKey = "engine.errors.invalidPositionString" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidPositionString");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),

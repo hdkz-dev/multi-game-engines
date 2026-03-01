@@ -3,6 +3,7 @@ import {
   EngineFacade,
   EngineError,
   EngineErrorCode,
+  normalizeAndValidateSources
 } from "@multi-game-engines/core";
 import type {
   IEngine,
@@ -28,25 +29,11 @@ export function createStockfishEngine(
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   // これにより、アダプター自身を特定のレジストリから疎結合に保つ
   const registrySources =
-    OfficialRegistry.resolve("stockfish", config.version) || {};
-  const sources = {
-    ...(registrySources as Record<string, IEngineSourceConfig>),
-    ...(config.sources || {}),
-  };
-
-  if (!sources.main) {
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `[createStockfishEngine] Engine "stockfish" requires a "main" source, but it was not found in the registry or config.`,
-      engineId: "stockfish",
-      i18nKey: "factory.requiresMainSource" as I18nKey,
-      i18nParams: { id: "stockfish" },
-    });
-  }
-
+    OfficialRegistry.resolve("stockfish", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: sources as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "stockfish"),
   };
 
   const adapter = new StockfishAdapter(mergedConfig);

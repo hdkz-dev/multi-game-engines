@@ -1,3 +1,4 @@
+import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import {
@@ -28,6 +29,10 @@ describe("Loading Strategies", () => {
         this.status = "ready";
         return Promise.resolve();
       }),
+      setOption: vi.fn().mockResolvedValue(undefined),
+      setBook: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
+      dispose: vi.fn().mockResolvedValue(undefined),
       searchRaw: vi.fn().mockImplementation(function (this: {
         status: string;
       }) {
@@ -36,7 +41,7 @@ describe("Loading Strategies", () => {
             code: EngineErrorCode.INTERNAL_ERROR,
             message: "Engine is not initialized",
             engineId: "test",
-            i18nKey: "engine.errors.notLoaded" as I18nKey,
+            i18nKey: createI18nKey("engine.errors.notLoaded"),
           });
         }
         return {

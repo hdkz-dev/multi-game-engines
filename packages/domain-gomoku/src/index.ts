@@ -9,8 +9,7 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, createI18nKey } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
@@ -63,7 +62,7 @@ export function createGomokuMove(move: string): GomokuMove {
       move !== "resign" &&
       move !== "pass")
   ) {
-    const i18nKey = "engine.errors.invalidMoveFormat" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidMoveFormat");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -80,7 +79,7 @@ export function createGomokuMove(move: string): GomokuMove {
  */
 export function createGomokuPositionString(pos: string): GomokuPositionString {
   if (typeof pos !== "string" || pos.trim() === "") {
-    const i18nKey = "engine.errors.invalidPositionString" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidPositionString");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),

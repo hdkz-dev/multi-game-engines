@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import {
   IEngineBridge,
   IEngineAdapter,
@@ -182,7 +183,7 @@ export class EngineBridge implements IEngineBridge {
     // 2026 Best Practice: ID をサニタイズして正規化 (Path Traversal 対策とルックアップの一貫性)
     // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
     if (/[^a-zA-Z0-9-_]/.test(adapter.id)) {
-      const i18nKey = "engine.errors.invalidEngineId" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.invalidEngineId");
       const i18nParams = { id: adapter.id };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
@@ -289,7 +290,7 @@ export class EngineBridge implements IEngineBridge {
     strategy: EngineLoadingStrategy = "on-demand",
   ): Promise<IEngine<O, I, R>> {
     if (this.disposed) {
-      const i18nKey = "engine.errors.bridgeDisposed" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
       throw new EngineError({
         code: EngineErrorCode.LIFECYCLE_ERROR,
         message: "EngineBridge has already been disposed.",
@@ -312,7 +313,7 @@ export class EngineBridge implements IEngineBridge {
     // 2026 Security: Path Traversal Prevention
     // Ensure the ID (used for cache keys and storage paths) is strictly alphanumeric.
     if (!/^[a-zA-Z0-9-_]+$/.test(id)) {
-      const i18nKey = "engine.errors.invalidEngineId" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.invalidEngineId");
       const i18nParams = { id };
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
@@ -339,7 +340,7 @@ export class EngineBridge implements IEngineBridge {
     const enginePromise = (async () => {
       try {
         if (this.disposed) {
-          const i18nKey = "engine.errors.bridgeDisposed" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
           throw new EngineError({
             code: EngineErrorCode.LIFECYCLE_ERROR,
             message: "EngineBridge was disposed during engine initialization.",
@@ -383,7 +384,7 @@ export class EngineBridge implements IEngineBridge {
               >;
             } else {
               const i18nKey =
-                "engine.errors.adapterFactoryInvalidReturn" as I18nKey;
+                createI18nKey("engine.errors.adapterFactoryInvalidReturn");
               const i18nParams = { adapter: resolvedConfig.adapter as string };
               throw new EngineError({
                 code: EngineErrorCode.INTERNAL_ERROR,
@@ -399,7 +400,7 @@ export class EngineBridge implements IEngineBridge {
             newlyRegistered = true;
             if (this.disposed) {
               await newAdapter.dispose();
-              const i18nKey = "engine.errors.bridgeDisposed" as I18nKey;
+              const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
               throw new EngineError({
                 code: EngineErrorCode.LIFECYCLE_ERROR,
                 message:
@@ -413,7 +414,7 @@ export class EngineBridge implements IEngineBridge {
         }
 
         if (!adapter) {
-          const i18nKey = "engine.errors.adapterNotFound" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.adapterNotFound");
           const i18nParams = { id };
           throw new EngineError({
             code: EngineErrorCode.INTERNAL_ERROR,
@@ -432,7 +433,7 @@ export class EngineBridge implements IEngineBridge {
         // registerAdapter 内で既に実行されている場合はスキップ。
         // ただし実行前に再確認。
         if (this.disposed) {
-          const i18nKey = "engine.errors.bridgeDisposed" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
           throw new EngineError({
             code: EngineErrorCode.LIFECYCLE_ERROR,
             message: "EngineBridge was disposed before capability enforcement.",
@@ -446,7 +447,7 @@ export class EngineBridge implements IEngineBridge {
         }
 
         if (this.disposed) {
-          const i18nKey = "engine.errors.bridgeDisposed" as I18nKey;
+          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
           throw new EngineError({
             code: EngineErrorCode.LIFECYCLE_ERROR,
             message: "EngineBridge was disposed before creating facade.",
@@ -698,7 +699,7 @@ export class EngineBridge implements IEngineBridge {
           throw new EngineError({
             code: EngineErrorCode.LIFECYCLE_ERROR,
             message: "EngineBridge already disposed",
-            i18nKey: "engine.errors.bridgeDisposed" as I18nKey,
+            i18nKey: createI18nKey("engine.errors.bridgeDisposed"),
           });
         }
 

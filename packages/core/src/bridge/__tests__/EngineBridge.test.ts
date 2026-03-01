@@ -59,14 +59,15 @@ describe("EngineBridge", () => {
       stop: vi.fn(),
     })),
     stop: vi.fn().mockResolvedValue(undefined),
-    setOption: vi.fn().mockResolvedValue(undefined),
+    setBook: vi.fn().mockResolvedValue(undefined),
+    dispose: vi.fn().mockResolvedValue(undefined),
     onStatusChange: vi.fn().mockReturnValue(() => {}),
     onInfo: vi.fn().mockReturnValue(() => {}),
     onSearchResult: vi.fn().mockReturnValue(() => {}),
     onProgress: vi.fn().mockReturnValue(() => {}),
     onTelemetry: vi.fn().mockReturnValue(() => {}),
     emitTelemetry: vi.fn(),
-    dispose: vi.fn().mockResolvedValue(undefined),
+    setOption: vi.fn().mockResolvedValue(undefined),
   });
 
   it("アダプターを登録し、getEngine で取得できること", async () => {

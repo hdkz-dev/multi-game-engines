@@ -8,7 +8,7 @@ describe("SegmentedVerifier", () => {
   // Let's use a real calculation for the test.
 
   const calcHash = async (data: Uint8Array) => {
-    const digest = await crypto.subtle.digest("SHA-256", data);
+    const digest = await crypto.subtle.digest("SHA-256", data as unknown as ArrayBuffer);
     return "sha256-" + btoa(String.fromCharCode(...new Uint8Array(digest)));
   };
 

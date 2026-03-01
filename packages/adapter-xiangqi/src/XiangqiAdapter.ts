@@ -7,8 +7,7 @@ import {
   IEngineConfig,
   IEngineSourceConfig,
   I18nKey,
-  ResourceMap,
-} from "@multi-game-engines/core";
+  ResourceMap, createI18nKey } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 import {
   IXiangqiSearchOptions,
@@ -43,7 +42,7 @@ export class XiangqiAdapter extends BaseAdapter<
       this.validateSources();
 
       if (!loader) {
-        const i18nKey = "engine.errors.loaderRequired" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.loaderRequired");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -55,7 +54,7 @@ export class XiangqiAdapter extends BaseAdapter<
 
       const sources = this.config.sources;
       if (!sources) {
-        const i18nKey = "engine.errors.missingSources" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingSources");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),
@@ -78,7 +77,7 @@ export class XiangqiAdapter extends BaseAdapter<
       );
 
       if (!resources["main"]) {
-        const i18nKey = "engine.errors.missingMainEntryPoint" as I18nKey;
+        const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
           message: translate(i18nKey),

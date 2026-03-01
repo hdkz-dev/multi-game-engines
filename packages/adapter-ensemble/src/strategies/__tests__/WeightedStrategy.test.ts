@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { WeightedStrategy } from "../WeightedStrategy.js";
-import { IBaseSearchResult } from "@multi-game-engines/core";
+import { IBaseSearchResult, EngineError } from "@multi-game-engines/core";
 
 describe("WeightedStrategy", () => {
   it("should select the move with highest total weight", () => {
@@ -60,7 +60,7 @@ describe("WeightedStrategy", () => {
     const strategy = new WeightedStrategy();
     const resultsMap = new Map<string, IBaseSearchResult>();
 
-    expect(() => strategy.aggregateResults(resultsMap)).toThrow();
+    expect(() => strategy.aggregateResults(resultsMap)).toThrow(EngineError);
   });
 
   it("should fallback to first result when all bestMove values are falsy", () => {
@@ -85,7 +85,6 @@ describe("WeightedStrategy", () => {
       engine1: 2.0,
       // engine2 has no weight
     });
-    debugSpy.mockRestore();
 
     const resultsMap = new Map<string, IBaseSearchResult>([
       ["engine1", { bestMove: "a2a3" }],
@@ -94,8 +93,9 @@ describe("WeightedStrategy", () => {
 
     strategy.aggregateResults(resultsMap);
     // engine2 に重みが設定されていない旨の warn が出るはず
-    expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("engine2"));
+    
+    vi.restoreAllMocks();
   });
 
   it("should default weight to 1.0 for engines without explicit weight", () => {

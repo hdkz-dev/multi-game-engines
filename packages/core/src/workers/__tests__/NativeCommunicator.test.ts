@@ -55,7 +55,6 @@ describe("NativeCommunicator", () => {
   });
 
   it("should spawn and communicate with a process", async () => {
-    // @ts-expect-error Testing private property access or invalid input
     vi.mock("node:child_process", () => ({
       spawn: vi.fn(() => mockChild),
     }));

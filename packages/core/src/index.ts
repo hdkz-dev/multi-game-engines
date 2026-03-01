@@ -1,3 +1,4 @@
+import { createI18nKey } from "./protocol/ProtocolValidator.js";
 /**
  * @multi-game-engines/core
  * 2026年 Web 標準準拠のゲームエンジン・ブリッジ・ライブラリ。
@@ -28,11 +29,12 @@ export {
 // ユーティリティ
 export * from "./errors/index.js";
 export { ProtocolValidator } from "./protocol/index.js";
-export { deepMerge, ScoreNormalizer, truncateLog } from "./utils/index.js";
+export { deepMerge, ScoreNormalizer, truncateLog, normalizeAndValidateSources } from "./utils/index.js";
 export {
   createMove,
   createPositionString,
   createPositionId,
+  createI18nKey,
 } from "./protocol/ProtocolValidator.js";
 
 // ストレージ

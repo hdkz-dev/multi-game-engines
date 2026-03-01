@@ -13,8 +13,7 @@ import {
   IBaseSearchResult,
   EngineError,
   EngineErrorCode,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, createI18nKey } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
@@ -28,7 +27,7 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidCheckersBoard" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidCheckersBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -49,7 +48,7 @@ export type CheckersMove = Move<"CheckersMove">;
  */
 export function createCheckersMove(move: string): CheckersMove {
   if (typeof move !== "string" || move.trim().length === 0) {
-    const i18nKey = "engine.errors.invalidCheckersMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidCheckersMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
       message: translate(i18nKey),
@@ -58,7 +57,7 @@ export function createCheckersMove(move: string): CheckersMove {
   }
   ProtocolValidator.assertNoInjection(move, "CheckersMove");
   if (!/^\d+-\d+$/.test(move) && move !== "(none)") {
-    const i18nKey = "engine.errors.invalidCheckersMove" as I18nKey;
+    const i18nKey = createI18nKey("engine.errors.invalidCheckersMove");
     const i18nParams = { move };
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,

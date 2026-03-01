@@ -2,8 +2,7 @@ import {
   IBaseSearchResult,
   EngineError,
   EngineErrorCode,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, createI18nKey } from "@multi-game-engines/core";
 import {
   tEngines as translate,
   EnginesKey,
@@ -39,7 +38,7 @@ export class WeightedStrategy<
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: translate(i18nKey),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 

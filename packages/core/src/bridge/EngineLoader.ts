@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import {
   IEngineLoader,
   IEngineSourceConfig,
@@ -62,7 +63,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.LIFECYCLE_ERROR,
         message: "EngineLoader has been disposed.",
         engineId,
-        i18nKey: "engine.errors.disposed" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.disposed"),
       });
     }
 
@@ -72,7 +73,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Invalid engine ID: "${engineId}".`,
         engineId,
-        i18nKey: "engine.errors.invalidEngineId" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.invalidEngineId"),
       });
     }
 
@@ -323,7 +324,6 @@ export class EngineLoader implements IEngineLoader {
     // 2026: Insecure Connection Check
     if (
       url.startsWith("http:") &&
-      this.isProduction &&
       !url.includes("localhost") &&
       !url.includes("127.0.0.1")
     ) {
@@ -331,7 +331,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.SECURITY_ERROR,
         message: "Insecure connection (HTTP) is not allowed in production.",
         engineId,
-        i18nKey: "engine.errors.insecureConnection" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
       });
     }
 
@@ -341,7 +341,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.SECURITY_ERROR,
         message: "SRI hash is required for all engine resources.",
         engineId,
-        i18nKey: "engine.errors.sriRequired" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.sriRequired"),
       });
     }
 
@@ -350,7 +350,7 @@ export class EngineLoader implements IEngineLoader {
         code: EngineErrorCode.SECURITY_ERROR,
         message: "SRI bypass (__unsafeNoSRI) is not allowed in production.",
         engineId,
-        i18nKey: "engine.errors.sriBypassNotAllowed" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.sriBypassNotAllowed"),
       });
     }
   }

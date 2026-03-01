@@ -3,6 +3,7 @@ import {
   EngineFacade,
   EngineError,
   EngineErrorCode,
+  normalizeAndValidateSources
 } from "@multi-game-engines/core";
 import type {
   IEngine,
@@ -29,26 +30,11 @@ export function createUSIEngine(
 ): IEngine<IShogiSearchOptions, IShogiSearchInfo, IShogiSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve(config.id || "yaneuraou", config.version) || {};
-  const sources = {
-    ...(registrySources as Record<string, IEngineSourceConfig>),
-    ...(config.sources || {}),
-  };
-
-  if (!sources.main) {
-    const engineId = config.id || "yaneuraou";
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `[createUSIEngine] Engine "${engineId}" requires a "main" source, but it was not found in the registry or config.`,
-      engineId,
-      i18nKey: "factory.requiresMainSource" as I18nKey,
-      i18nParams: { id: engineId },
-    });
-  }
-
+    OfficialRegistry.resolve(config.id || "yaneuraou", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: sources as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "yaneuraou"),
   };
 
   const adapter = new USIAdapter(mergedConfig);

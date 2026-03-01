@@ -28,9 +28,9 @@ describe("PVList", () => {
 
   it("should render PV entries", () => {
     render(<PVList pvs={mockPvs} />);
-    expect(screen.getByText("e2e4")).toBeDefined();
-    expect(screen.getByText("e7e5")).toBeDefined();
-    expect(screen.getByText("g1f3")).toBeDefined();
+    screen.getByText("e2e4");
+    screen.getByText("e7e5");
+    screen.getByText("g1f3");
   });
 
   it("should call onMoveClick when a move is clicked", () => {

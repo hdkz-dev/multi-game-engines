@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import {
   IEngine,
   IEngineAdapter,
@@ -423,7 +424,7 @@ export class EngineFacade<
         code: EngineErrorCode.SECURITY_ERROR,
         message: `Required capabilities missing: ${missing.join(", ")}`,
         engineId: this.id,
-        i18nKey: "engine.errors.securityViolation" as I18nKey,
+        i18nKey: createI18nKey("engine.errors.securityViolation"),
         remediation:
           "Ensure HTTPS and COOP/COEP are enabled if Threads/SharedArrayBuffer are required.",
       });

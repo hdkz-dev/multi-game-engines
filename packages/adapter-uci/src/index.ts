@@ -3,6 +3,7 @@ import {
   EngineFacade,
   EngineError,
   EngineErrorCode,
+  normalizeAndValidateSources
 } from "@multi-game-engines/core";
 import type {
   IEngineConfig,
@@ -30,26 +31,11 @@ export function createUCIEngine(
 ): IEngine<IChessSearchOptions, IChessSearchInfo, IChessSearchResult> {
   // 2026 Best Practice: ファクトリ関数レベルでレジストリからデフォルトの URL/SRI を解決
   const registrySources =
-    OfficialRegistry.resolve(config.id || "stockfish", config.version) || {};
-  const sources = {
-    ...(registrySources as Record<string, IEngineSourceConfig>),
-    ...(config.sources || {}),
-  };
-
-  if (!sources.main) {
-    const engineId = config.id || "stockfish";
-    throw new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: `[createUCIEngine] Engine "${engineId}" requires a "main" source, but it was not found in the registry or config.`,
-      engineId,
-      i18nKey: "factory.requiresMainSource" as I18nKey,
-      i18nParams: { id: engineId },
-    });
-  }
-
+    OfficialRegistry.resolve(config.id || "stockfish", config.version);
+  
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: sources as Required<IEngineConfig>["sources"],
+    sources: normalizeAndValidateSources(registrySources as Record<string, IEngineSourceConfig>, config, "stockfish"),
   };
 
   const adapter = new UCIAdapter(mergedConfig);

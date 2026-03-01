@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { StaticRegistry } from "../index.js";
 import enginesData from "../../data/engines.json" with { type: "json" };
 
@@ -10,16 +10,25 @@ import enginesData from "../../data/engines.json" with { type: "json" };
  * - 各アセットに必須フィールドが含まれていること
  */
 describe("engines.json schema validation", () => {
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.spyOn(performance, "now").mockReturnValue(1234.56);
+    warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should pass EngineManifestSchema validation via StaticRegistry constructor", () => {
     // StaticRegistry は constructor 内で Zod バリデーションを実施する。
     // 不正なスキーマの場合は console.warn が発行され、フォールバックになる。
-    const warnSpy = vi
-      .spyOn(console, "warn")
-      .mockImplementation(() => undefined);
+    
     const registry = new StaticRegistry(enginesData);
     // warn が呼ばれていない → スキーマ検証成功
     expect(warnSpy).not.toHaveBeenCalled();
-    warnSpy.mockRestore();
+    
     // 基本的な統合チェック
     expect(registry.getSupportedEngines().length).toBeGreaterThan(0);
   });
@@ -135,29 +144,23 @@ describe("engines.json schema validation", () => {
   });
 
   it("should reject invalid manifest data", () => {
-    const warnSpy = vi
-      .spyOn(console, "warn")
-      .mockImplementation(() => undefined);
+    
     // 不正なデータを渡す
     new StaticRegistry({ invalid: true });
     // バリデーション失敗で warn が呼ばれる
     expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+    
   });
 
   it("should reject manifest with missing version field", () => {
-    const warnSpy = vi
-      .spyOn(console, "warn")
-      .mockImplementation(() => undefined);
+    
     new StaticRegistry({ engines: {} });
     expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+    
   });
 
   it("should reject manifest with invalid engine structure", () => {
-    const warnSpy = vi
-      .spyOn(console, "warn")
-      .mockImplementation(() => undefined);
+    
     new StaticRegistry({
       version: "1.0.0",
       engines: {
@@ -165,6 +168,27 @@ describe("engines.json schema validation", () => {
       },
     });
     expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+    
+  });
+
+  it("should recursively validate deep nested properties like assets", () => {
+    new StaticRegistry({
+      version: "1.0.0",
+      engines: {
+        foo: {
+          name: "foo",
+          adapter: "mock",
+          latest: "1.0.0",
+          versions: {
+            "1.0.0": {
+              assets: {
+                main: { url: "http://example.com/main.js", type: "invalid-type", sri: "invalid-sri" }
+              }
+            }
+          }
+        }
+      }
+    });
+    expect(warnSpy).toHaveBeenCalled();
   });
 });

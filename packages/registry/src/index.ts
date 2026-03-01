@@ -3,8 +3,7 @@ import {
   IEngineSourceConfig,
   EngineError,
   EngineErrorCode,
-  I18nKey,
-} from "@multi-game-engines/core";
+  I18nKey, createI18nKey } from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
 import {
   tEngines as translate,
@@ -58,7 +57,7 @@ const EngineManifestSchema = z.object({
       versions: z.record(
         z.string(),
         z.object({
-          assets: z.record(z.string(), EngineSourceSchema.or(z.any())), // variants等を含むため緩和
+          assets: z.record(z.string(), z.union([EngineSourceSchema, z.record(z.string(), z.record(z.string(), EngineSourceSchema))])), // variants等も厳密に検証
         }),
       ),
     }),
@@ -176,7 +175,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               status: response.statusText,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
 
@@ -199,7 +198,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               error: result.error.message,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
 
@@ -214,7 +213,7 @@ export class RemoteRegistry extends StaticRegistry {
               url: this.url,
               timeout: RemoteRegistry.FETCH_TIMEOUT_MS,
             }),
-            i18nKey: i18nKey as unknown as I18nKey,
+            i18nKey: createI18nKey(i18nKey),
           });
         }
         throw error;
@@ -240,7 +239,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { sri: expectedSri }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 
@@ -255,7 +254,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { algo: algo ?? "unknown" }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 
@@ -270,7 +269,7 @@ export class RemoteRegistry extends StaticRegistry {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: translate(i18nKey, { url: this.url }),
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
   }

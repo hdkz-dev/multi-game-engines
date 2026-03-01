@@ -1,3 +1,4 @@
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import { ISecurityStatus, EngineErrorCode, I18nKey } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 
@@ -40,7 +41,7 @@ export class SecurityAdvisor {
   static async assertSRI(data: ArrayBuffer, sri: string): Promise<void> {
     const isValid = await this.verifySRI(data, sri);
     if (!isValid) {
-      const i18nKey = "engine.errors.sriMismatch" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.sriMismatch");
       throw new EngineError({
         code: EngineErrorCode.SRI_MISMATCH,
         message: "SRI hash verification failed.",

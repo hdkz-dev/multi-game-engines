@@ -8,8 +8,7 @@ import {
   truncateLog,
   I18nKey,
   ScoreNormalizer,
-  PositionId,
-} from "@multi-game-engines/core";
+  PositionId, createI18nKey } from "@multi-game-engines/core";
 import { tChess as translate, ChessKey } from "@multi-game-engines/i18n-chess";
 import {
   createFEN,
@@ -175,10 +174,10 @@ export class UCIParser implements IProtocolParser<
   translateError(message: string): I18nKey | null {
     const msg = message.toLowerCase();
     if (msg.includes("nnue") && msg.includes("not found")) {
-      return "engine.errors.missingSources" as I18nKey;
+      return createI18nKey("engine.errors.missingSources");
     }
     if (msg.includes("invalid") && msg.includes("option")) {
-      return "parsers.generic.invalidOptionValue" as I18nKey;
+      return createI18nKey("parsers.generic.invalidOptionValue");
     }
     return null;
   }
@@ -265,7 +264,7 @@ export class UCIParser implements IProtocolParser<
         code: EngineErrorCode.INTERNAL_ERROR,
         message: translate(i18nKey),
         remediation: "Provide a valid FEN string in search options.",
-        i18nKey: i18nKey as unknown as I18nKey,
+        i18nKey: createI18nKey(i18nKey),
       });
     }
 

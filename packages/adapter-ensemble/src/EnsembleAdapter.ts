@@ -10,8 +10,7 @@ import {
   IMiddleware,
   I18nKey,
   IBookAsset,
-  ProgressCallback,
-} from "@multi-game-engines/core";
+  ProgressCallback, createI18nKey } from "@multi-game-engines/core";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
@@ -88,7 +87,7 @@ export class EnsembleAdapter<
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.status !== "ready") {
-      const i18nKey = "engine.errors.notReady" as I18nKey;
+      const i18nKey = createI18nKey("engine.errors.notReady");
       throw new EngineError({
         code: EngineErrorCode.NOT_READY,
         message: translate(i18nKey),

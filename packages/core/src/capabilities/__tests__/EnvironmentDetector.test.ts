@@ -107,7 +107,7 @@ describe("EnvironmentDetector", () => {
     // @ts-expect-error Testing private property access or invalid input
     globalThis.process = { versions: {} };
     vi.stubGlobal("window", undefined);
-    expect(EnvironmentDetector.getRuntime()).toBe("any");
+    expect(EnvironmentDetector.getRuntime()).toBe("unknown");
 
     // 3. Bun
     // @ts-expect-error Testing private property access or invalid input

@@ -12,6 +12,7 @@ describe("shogi-board keyboard navigation", () => {
   let el: ShogiBoard;
 
   beforeEach(async () => {
+    vi.spyOn(performance, "now").mockReturnValue(1234.56);
     document.body.innerHTML = "";
     el = document.createElement("shogi-board") as ShogiBoard;
     document.body.appendChild(el);

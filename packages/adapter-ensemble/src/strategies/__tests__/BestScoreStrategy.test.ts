@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BestScoreStrategy } from "../BestScoreStrategy.js";
-import { IBaseSearchResult, NormalizedScore } from "@multi-game-engines/core";
+import { IBaseSearchResult, NormalizedScore, EngineError } from "@multi-game-engines/core";
 
 describe("BestScoreStrategy", () => {
   it("should select the move with the highest cp score", () => {
@@ -66,7 +66,7 @@ describe("BestScoreStrategy", () => {
     const strategy = new BestScoreStrategy();
     const resultsMap = new Map<string, IBaseSearchResult>();
 
-    expect(() => strategy.aggregateResults(resultsMap)).toThrow();
+    expect(() => strategy.aggregateResults(resultsMap)).toThrow(EngineError);
   });
 
   it("should fallback to first result when no result has a score", () => {
@@ -94,6 +94,7 @@ describe("BestScoreStrategy", () => {
     // → fallback to first result
     const winner = strategy.aggregateResults(resultsMap);
     expect(winner).toBeDefined();
+    expect(winner.bestMove).toBe("a2a3");
   });
 
   it("should prioritize normalized score if present", () => {

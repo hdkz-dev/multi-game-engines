@@ -12,6 +12,7 @@ describe("chess-board keyboard navigation", () => {
   let el: ChessBoard;
 
   beforeEach(async () => {
+    vi.spyOn(performance, "now").mockReturnValue(1234.56);
     document.body.innerHTML = "";
     el = document.createElement("chess-board") as ChessBoard;
     document.body.appendChild(el);
