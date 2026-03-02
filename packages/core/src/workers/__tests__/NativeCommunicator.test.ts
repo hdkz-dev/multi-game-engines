@@ -79,10 +79,11 @@ describe("NativeCommunicator", () => {
     communicator.onMessage(messageSpy);
     await communicator.spawn();
 
-    const stdoutOnMock = mockChild.stdout.on as Mock;
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
     const stdoutCallback = stdoutOnMock.mock.calls.find(
-      (call: unknown[]) => call[0] === "data",
-    )?.[1] as (data: Buffer) => void;
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
 
     if (stdoutCallback) {
       stdoutCallback(Buffer.from("message from engine\n"));
@@ -97,10 +98,11 @@ describe("NativeCommunicator", () => {
     communicator.onMessage(messageSpy);
     await communicator.spawn();
 
-    const stdoutOnMock = mockChild.stdout.on as Mock;
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
     const stdoutCallback = stdoutOnMock.mock.calls.find(
-      (call: unknown[]) => call[0] === "data",
-    )?.[1] as (data: Buffer) => void;
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
 
     if (stdoutCallback) {
       stdoutCallback(Buffer.from("msg1\nmsg2\n"));
@@ -116,10 +118,11 @@ describe("NativeCommunicator", () => {
     communicator.onMessage(messageSpy);
     await communicator.spawn();
 
-    const stdoutOnMock = mockChild.stdout.on as Mock;
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
     const stdoutCallback = stdoutOnMock.mock.calls.find(
-      (call: unknown[]) => call[0] === "data",
-    )?.[1] as (data: Buffer) => void;
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
 
     if (stdoutCallback) {
       stdoutCallback(Buffer.from("partial"));
@@ -141,10 +144,14 @@ describe("NativeCommunicator", () => {
     const communicator = new NativeCommunicator("engine");
     await communicator.spawn();
 
-    const onMock = mockChild.on as Mock;
+    type OnMock = Mock<
+      (event: string, cb: (code: number, signal: string | null) => void) => void
+    >;
+    const onMock = mockChild.on as unknown as OnMock;
     const exitCallback = onMock.mock.calls.find(
-      (call: unknown[]) => call[0] === "exit",
-    )?.[1] as (code: number, signal: string | null) => void;
+      (call: [string, (code: number, signal: string | null) => void]) =>
+        call[0] === "exit",
+    )?.[1];
 
     if (exitCallback) {
       exitCallback(1, null);

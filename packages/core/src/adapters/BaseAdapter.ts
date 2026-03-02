@@ -205,7 +205,7 @@ export abstract class BaseAdapter<
         // 2026: 物理的なクリーンアップ完了を cancel 呼び出し元に伝播
         return this.handleStreamCancel().catch((err) => {
           console.error(
-            `[BaseAdapter] Stream cancel cleanup failed for engine ${this.id}:`,
+            `[BaseAdapter] Stream cancel cleanup failed for engine ${this.id ?? "unknown"}:`,
             err,
           );
         });
