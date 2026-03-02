@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import {
   IMiddleware,
@@ -20,7 +28,18 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
   >;
   let mockLoader: IEngineLoader;
 
+  beforeAll(() => {
+    vi.spyOn(performance, "now").mockReturnValue(0);
+    vi.useFakeTimers();
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
+    vi.clearAllMocks();
     adapter = {
       id: "test-engine",
       status: "uninitialized",
@@ -83,6 +102,7 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
     const p2 = facade.load();
     const p3 = facade.load();
 
+    await vi.advanceTimersByTimeAsync(50);
     await Promise.all([p1, p2, p3]);
     expect(adapter.load).toHaveBeenCalledTimes(1);
   });

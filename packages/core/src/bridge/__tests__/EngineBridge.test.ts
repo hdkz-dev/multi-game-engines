@@ -140,7 +140,13 @@ describe("EngineBridge", () => {
     const config: IEngineConfig = {
       id: "dynamic-engine",
       adapter: "test",
-      sources: { main: { url: "test.js", type: "script", sri: "sha256-..." } },
+      sources: {
+        main: {
+          url: "test.js",
+          type: "script",
+          sri: "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+        },
+      },
     };
 
     // アダプターファクトリが必要

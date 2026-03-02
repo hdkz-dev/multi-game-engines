@@ -427,6 +427,7 @@ export class EngineFacade<
         code: EngineErrorCode.CANCELLED,
         message: "Engine disposed during search.",
         engineId: id,
+        i18nKey: createI18nKey("engine.errors.disposedDuringSearch"),
       });
     }
 

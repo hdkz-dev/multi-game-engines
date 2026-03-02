@@ -3,7 +3,6 @@ import "../index.js";
 import { ChessBoard } from "../index.js";
 import { createFEN } from "@multi-game-engines/domain-chess";
 import { createMove } from "@multi-game-engines/core";
-import { waitFor } from "@testing-library/dom";
 
 describe("chess-board Web Component", () => {
   beforeEach(() => {

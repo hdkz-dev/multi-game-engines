@@ -1,9 +1,11 @@
-import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { NativeCommunicator } from "../NativeCommunicator.js";
 import { spawn } from "node:child_process";
 
-const { mockChild } = vi.hoisted(() => {
+const { mockChild, resetMockChildListeners } = vi.hoisted(() => {
   const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
+  const resetMockChildListeners = () => listeners.clear();
+
   const m = {
     on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
       if (!listeners.has(event)) listeners.set(event, new Set());
@@ -34,7 +36,7 @@ const { mockChild } = vi.hoisted(() => {
       on: vi.fn(),
     },
   };
-  return { mockChild: m };
+  return { mockChild: m, resetMockChildListeners };
 });
 
 vi.mock("node:child_process", () => ({
@@ -44,6 +46,12 @@ vi.mock("node:child_process", () => ({
 describe("NativeCommunicator", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    resetMockChildListeners();
+    vi.spyOn(performance, "now").mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should spawn a child process with the given path", async () => {

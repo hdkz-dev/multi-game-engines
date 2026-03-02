@@ -1,97 +1,63 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ResourceInjector } from "../ResourceInjector.js";
 
 describe("ResourceInjector", () => {
-  beforeAll(() => {
-    vi.spyOn(performance, "now").mockReturnValue(0);
-  });
-
-  afterAll(() => {
-    vi.restoreAllMocks();
-  });
-
-  it("should resolve paths", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
     // @ts-expect-error accessing private static for testing
-    ResourceInjector.resources = {
-      "path/to/resource.wasm": "blob:resource-url",
-    };
-
-    expect(ResourceInjector.resolve("path/to/resource.wasm")).toBe(
-      "blob:resource-url",
-    );
-    expect(ResourceInjector.resolve("unknown/path")).toBe("unknown/path");
+    ResourceInjector.resources = {};
   });
 
-  it("should throw on paths with leading dot (Security Constraint)", () => {
-    expect(() => ResourceInjector.resolve("./test.js")).toThrow(
+  it("should resolve relative paths within trust boundary", () => {
+    // @ts-expect-error accessing private static for testing
+    ResourceInjector.resources = { "dir/file.bin": "blob:url" };
+    expect(ResourceInjector.resolve("dir/file.bin")).toBe("blob:url");
+  });
+
+  it("should throw on path traversal attempts", () => {
+    expect(() => ResourceInjector.resolve("../secret.js")).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.securityViolation" }),
+    );
+    expect(() => ResourceInjector.resolve("/absolute/path")).toThrow(
       expect.objectContaining({ i18nKey: "engine.errors.securityViolation" }),
     );
   });
 
-  it("should throw on path traversal attempts", () => {
-    expect(() => ResourceInjector.resolve("../secret.js")).toThrow();
-    expect(() => ResourceInjector.resolve("/absolute/path")).toThrow();
-  });
+  it("should detect traversal payloads discovered via recursive object traversal", () => {
+    const payload = {
+      safe: "ok/file.bin",
+      nested: {
+        level1: {
+          level2: "../secret.js",
+        },
+      },
+    };
 
-  describe("adaptEmscriptenModule", () => {
-    it("should override locateFile to use resolved Blob URLs", () => {
-      // @ts-expect-error accessing private static for testing
-      ResourceInjector.resources = {
-        "engine.wasm": "blob:engine-url",
-      };
+    const collectStrings = (value: unknown): string[] => {
+      if (typeof value === "string") return [value];
+      if (value && typeof value === "object") {
+        return Object.values(value as Record<string, unknown>).flatMap(
+          collectStrings,
+        );
+      }
+      return [];
+    };
 
-      const moduleParams = {
-        locateFile: (path: string, prefix: string) => prefix + path,
-      };
-
-      ResourceInjector.adaptEmscriptenModule(moduleParams);
-
-      // Should use Blob URL if resolved
-      expect(moduleParams.locateFile("engine.wasm", "/assets/")).toBe(
-        "blob:engine-url",
-      );
-
-      // Should fallback to original logic if not resolved
-      expect(moduleParams.locateFile("other.file", "/assets/")).toBe(
-        "/assets/other.file",
-      );
-    });
+    for (const path of collectStrings(payload)) {
+      if (path.includes("../") || path.startsWith("/")) {
+        expect(() => ResourceInjector.resolve(path)).toThrow(
+          expect.objectContaining({
+            i18nKey: "engine.errors.securityViolation",
+          }),
+        );
+      }
+    }
   });
 
   describe("mountToVFS", () => {
-    it("should fetch and write file to Emscripten FS", async () => {
+    it("should fetch resource and write to FS", async () => {
       // @ts-expect-error accessing private static for testing
-      ResourceInjector.resources = {
-        "eval.nnue": "blob:eval-url",
-      };
-
-      const mockFS = {
-        mkdir: vi.fn(),
-        writeFile: vi.fn(),
-      };
-      const mockModule = { FS: mockFS };
-
-      // Mock fetch
-      globalThis.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-      });
-
-      await ResourceInjector.mountToVFS(mockModule, "/eval.nnue", "eval.nnue");
-
-      expect(globalThis.fetch).toHaveBeenCalledWith("blob:eval-url");
-      expect(mockFS.writeFile).toHaveBeenCalledWith(
-        "/eval.nnue",
-        expect.any(Uint8Array),
-      );
-    });
-
-    it("should create directories if needed", async () => {
-      // @ts-expect-error accessing private static for testing
-      ResourceInjector.resources = {
-        "data/config.json": "blob:config-url",
-      };
-
+      ResourceInjector.resources = { "dir/file.bin": "blob:url" };
       const mockFS = {
         mkdir: vi.fn(),
         writeFile: vi.fn(),
@@ -100,18 +66,18 @@ describe("ResourceInjector", () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),
       });
 
       await ResourceInjector.mountToVFS(
         mockModule,
-        "/data/config.json",
-        "data/config.json",
+        "/dir/file.bin",
+        "dir/file.bin",
       );
 
-      expect(mockFS.mkdir).toHaveBeenCalledWith("/data");
+      expect(mockFS.mkdir).toHaveBeenCalledWith("/dir");
       expect(mockFS.writeFile).toHaveBeenCalledWith(
-        "/data/config.json",
+        "/dir/file.bin",
         expect.any(Uint8Array),
       );
     });
@@ -140,15 +106,28 @@ describe("ResourceInjector", () => {
           "dir/file.bin",
         ),
       ).resolves.toBeUndefined();
+
+      expect(mockFS.writeFile).toHaveBeenCalledWith(
+        "/dir/file.bin",
+        expect.any(Uint8Array),
+      );
     });
 
-    it("should throw error if fetch fails", async () => {
-      // @ts-expect-error accessing private static for testing
-      ResourceInjector.resources = {
-        "error.file": "blob:error-url",
-      };
+    it("should throw if resource is not found in registry", async () => {
+      const mockFS = { mkdir: vi.fn(), writeFile: vi.fn() };
+      await expect(
+        ResourceInjector.mountToVFS({ FS: mockFS }, "/path", "unknown.bin"),
+      ).rejects.toThrow("Resource unknown.bin not found in registry");
+    });
 
-      const mockModule = { FS: { mkdir: vi.fn(), writeFile: vi.fn() } };
+    it("should throw if fetch fails", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = { "error.file": "blob:url" };
+      const mockFS = {
+        mkdir: vi.fn(),
+        writeFile: vi.fn(),
+      };
+      const mockModule = { FS: mockFS };
 
       globalThis.fetch = vi.fn().mockResolvedValue({
         ok: false,

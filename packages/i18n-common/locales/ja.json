@@ -73,7 +73,7 @@
   },
   "parsers": {
     "generic": {
-      "invalidOptionValue": "オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります",
+      "invalidOptionValue": "オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります。",
       "parseError": "[{parser}] {type} の解析に失敗しました: {error}"
     }
   }

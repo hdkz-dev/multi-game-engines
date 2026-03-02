@@ -213,10 +213,13 @@ export class ResourceInjector {
     }
 
     const blobUrl = this.resolve(resourceKey);
-    if (blobUrl === resourceKey) {
-      console.warn(
-        `[ResourceInjector] Resource key "${resourceKey}" not resolved.`,
-      );
+    if (blobUrl === resourceKey && !blobUrl.startsWith("blob:")) {
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: `Resource ${resourceKey} not found in registry`,
+        i18nKey: createI18nKey("engine.errors.internalError"),
+        i18nParams: { message: `Resource ${resourceKey} not found` },
+      });
     }
 
     try {

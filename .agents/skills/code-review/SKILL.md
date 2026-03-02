@@ -42,7 +42,7 @@ coderabbit auth status 2>&1
 **If CLI not installed**, tell user:
 "Please install CodeRabbit CLI first: curl -fsSL https://cli.coderabbit.ai/install.sh | sh"
 
-**If not authenticated**, tell user:
+**If not authenticated** (e.g., status output does not contain "Authenticated" or exit code is non-zero), tell user:
 "Please authenticate first: coderabbit auth login"
 
 ### 2. Run Review

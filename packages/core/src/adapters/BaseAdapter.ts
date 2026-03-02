@@ -202,8 +202,13 @@ export abstract class BaseAdapter<
         this.infoController = controller;
       },
       cancel: () => {
-        // 2026: 物理的なクリーンアップをトリガー
-        this.handleStreamCancel().catch(() => {});
+        // 2026: 物理的なクリーンアップ完了を cancel 呼び出し元に伝播
+        return this.handleStreamCancel().catch((err) => {
+          console.error(
+            `[BaseAdapter] Stream cancel cleanup failed for engine ${this.id}:`,
+            err,
+          );
+        });
       },
     });
 
@@ -369,7 +374,6 @@ export abstract class BaseAdapter<
       await this.communicator.postMessage(this.parser.createStopCommand());
     }
     this.cleanupPendingTask("Search aborted");
-    this.emitStatusChange("ready");
   }
 
   async setOption(
