@@ -1,11 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ResourceInjector } from "../ResourceInjector.js";
 
 describe("ResourceInjector", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(performance, "now").mockReturnValue(0);
     // @ts-expect-error accessing private static for testing
     ResourceInjector.resources = {};
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("should resolve relative paths within trust boundary", () => {
@@ -113,11 +118,20 @@ describe("ResourceInjector", () => {
       );
     });
 
-    it("should throw if resource is not found in registry", async () => {
+    it("should throw if resource is not found in registry (non-blob)", async () => {
       const mockFS = { mkdir: vi.fn(), writeFile: vi.fn() };
       await expect(
         ResourceInjector.mountToVFS({ FS: mockFS }, "/path", "unknown.bin"),
-      ).rejects.toThrow("Resource unknown.bin not found in registry");
+      ).rejects.toThrow("Resource not found or invalid scheme in registry");
+    });
+
+    it("should throw if resource registry entry points to external URL", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = { "evil.js": "https://evil.com/script.js" };
+      const mockFS = { mkdir: vi.fn(), writeFile: vi.fn() };
+      await expect(
+        ResourceInjector.mountToVFS({ FS: mockFS }, "/evil.js", "evil.js"),
+      ).rejects.toThrow("Resource not found or invalid scheme in registry");
     });
 
     it("should throw if fetch fails", async () => {

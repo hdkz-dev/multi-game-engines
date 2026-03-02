@@ -40,7 +40,12 @@ coderabbit auth status 2>&1
 "CodeRabbit CLI must be run from within an initialized Git repository. Please run this command from inside your project directory."
 
 **If CLI not installed**, tell user:
-"Please install CodeRabbit CLI first: curl -fsSL https://cli.coderabbit.ai/install.sh | sh"
+"Please install CodeRabbit CLI first:
+curl -fsSLo /tmp/coderabbit-install.sh https://cli.coderabbit.ai/install.sh
+
+# (Recommended) verify checksum/signature from official docs
+
+sh /tmp/coderabbit-install.sh"
 
 **If not authenticated** (e.g., status output does not contain "Authenticated" or exit code is non-zero), tell user:
 "Please authenticate first: coderabbit auth login"

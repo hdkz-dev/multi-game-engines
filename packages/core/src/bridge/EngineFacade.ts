@@ -422,7 +422,14 @@ export class EngineFacade<
 
     // 2026: 実行中の探索があれば CANCELLED エラーで中断
     if (this.activeTaskStop) {
-      this.activeTaskStop();
+      try {
+        await Promise.resolve(this.activeTaskStop());
+      } catch (err) {
+        console.error(
+          `[EngineFacade] Failed to stop active task for engine ${id}:`,
+          err,
+        );
+      }
       this._lastError = new EngineError({
         code: EngineErrorCode.CANCELLED,
         message: "Engine disposed during search.",
