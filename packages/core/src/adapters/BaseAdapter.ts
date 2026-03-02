@@ -412,7 +412,9 @@ export abstract class BaseAdapter<
     this.cleanupPendingTask("Adapter disposed", true);
     this.messageUnsubscriber?.();
     this.messageUnsubscriber = null;
-    this.communicator?.terminate();
+    if (this.communicator) {
+      await this.communicator.terminate();
+    }
     this.communicator = null;
     this.activeLoader = null;
     this.emitStatusChange("terminated");

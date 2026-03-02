@@ -107,6 +107,43 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
     expect(adapter.load).toHaveBeenCalledTimes(1);
   });
 
+  it("Consent Handshake 中の多重ロード呼び出しが原子的に集約されること", async () => {
+    type MockLoad = { mockImplementation: (fn: () => Promise<void>) => void };
+    (adapter.load as unknown as MockLoad).mockImplementation(() =>
+      Promise.resolve(),
+    );
+
+    // アダプターに config をインジェクト
+    (adapter as unknown as { config: { disclaimer: string } }).config = {
+      disclaimer: "Test Disclaimer",
+    };
+
+    const facade = new EngineFacade(adapter, [], () =>
+      Promise.resolve(mockLoader),
+    );
+
+    const p1 = facade.load();
+
+    // status が ready (consent待ち) になるのを待つ
+    // EngineFacade は consentDeferred が定義されている間、同意待ち状態となる
+    await vi.waitFor(() =>
+      expect(
+        (facade as unknown as { consentDeferred: unknown }).consentDeferred,
+      ).toBeDefined(),
+    );
+
+    const p2 = facade.load();
+    const p3 = facade.load();
+
+    // 同意を解決
+    facade.consent();
+
+    await Promise.all([p1, p2, p3]);
+
+    // 同意待ちの間に追加で load を呼んでも、アダプターの load は一度しか呼ばれない
+    expect(adapter.load).toHaveBeenCalledTimes(1);
+  });
+
   it("探索中に dispose() が呼ばれた場合、探索が適切に中断されリソースが解放されること (Interruption)", async () => {
     let rejectTask: (reason?: unknown) => void;
     const taskResultPromise = new Promise((_, reject) => {

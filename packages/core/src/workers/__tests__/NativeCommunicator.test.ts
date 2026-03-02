@@ -135,7 +135,7 @@ describe("NativeCommunicator", () => {
   it("should terminate the child process on terminate()", async () => {
     const communicator = new NativeCommunicator("engine");
     await communicator.spawn();
-    communicator.terminate();
+    await communicator.terminate();
 
     expect(mockChild.kill).toHaveBeenCalled();
   });

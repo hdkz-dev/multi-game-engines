@@ -1,4 +1,4 @@
-import { ChildProcess } from "node:child_process";
+import { ChildProcess, spawn } from "node:child_process";
 
 /**
  * 2026 Zenith Tier: OS ネイティブバイナリと通信するためのコミュニケーター。
@@ -6,59 +6,87 @@ import { ChildProcess } from "node:child_process";
  */
 export class NativeCommunicator {
   private child: ChildProcess | null = null;
-  private messageListeners = new Set<(data: unknown) => void>();
+  private messageListeners: Set<(data: unknown) => void> = new Set();
   private buffer = "";
 
-  constructor(private binaryPath: string) {}
+  constructor(private readonly binaryPath: string) {}
 
+  /**
+   * エンジンプロセスを起動します。
+   */
   async spawn(): Promise<void> {
-    const { spawn } = await import("node:child_process");
-    this.buffer = ""; // 2026: 新しいプロセス起動時にバッファをリセット
+    if (this.child) return;
+
     this.child = spawn(this.binaryPath, [], {
       stdio: ["pipe", "pipe", "pipe"],
+      windowsHide: true,
     });
 
-    this.child.stdout?.on("data", (data: Buffer) => {
-      this.buffer += data.toString();
-      const lines = this.buffer.split(/\r?\n/);
-      // 最後の要素は未完了の行である可能性があるため保持
+    if (!this.child.stdout || !this.child.stdin) {
+      throw new Error("Failed to initialize engine process streams.");
+    }
+
+    this.child.stdout.on("data", (chunk: Buffer) => {
+      this.buffer += chunk.toString();
+      const lines = this.buffer.split("\n");
       this.buffer = lines.pop() || "";
 
       for (const line of lines) {
-        if (line.trim()) {
-          for (const cb of this.messageListeners) cb(line.trim());
+        const trimmed = line.trim();
+        if (trimmed) {
+          for (const listener of this.messageListeners) {
+            listener(trimmed);
+          }
         }
       }
     });
 
-    this.child.on("error", (err: Error) => {
-      console.error("[NativeCommunicator] Process error:", err);
-    });
-
-    this.child.on("exit", (code, signal) => {
-      if (code !== 0 && code !== null) {
-        console.error(
-          `[NativeCommunicator] Process exited with code ${code}, signal ${signal}`,
-        );
-      }
+    // プロセス終了時のクリーンアップ
+    this.child.on("exit", () => {
+      this.child = null;
     });
   }
 
+  /**
+   * エンジンにメッセージを送信します。
+   */
   postMessage(message: string): void {
-    if (this.child?.stdin) {
-      this.child.stdin.write(`${message}\n`);
+    if (!this.child || !this.child.stdin) {
+      throw new Error("NativeCommunicator not connected.");
     }
+    this.child.stdin.write(`${message}\n`);
   }
 
+  /**
+   * メッセージ受信リスナーを登録します。
+   */
   onMessage(callback: (data: unknown) => void): () => void {
     this.messageListeners.add(callback);
     return () => this.messageListeners.delete(callback);
   }
 
-  terminate(): void {
-    if (this.child) {
-      this.child.kill();
-      this.child = null;
-    }
+  /**
+   * エンジンプロセスを物理的に終了し、完全に停止するまで待機します。
+   * (2026 Zenith Tier: Guaranteed Deterministic Cleanup)
+   */
+  async terminate(): Promise<void> {
+    if (!this.child) return;
+
+    const child = this.child;
+    this.child = null;
+
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        child.kill("SIGKILL");
+        resolve();
+      }, 2000); // 2秒待機して強制終了
+
+      child.on("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+
+      child.kill("SIGTERM");
+    });
   }
 }
