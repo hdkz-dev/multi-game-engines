@@ -1,0 +1,1451 @@
+[
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869898301",
+    "pull_request_review_id": 3873467039,
+    "id": 2869898301,
+    "node_id": "PRRC_kwDORJ0gd86rDyw9",
+    "diff_hunk": "@@ -134,6 +134,12 @@ export class ChessBoard extends LitElement {\n   @state()\n   private _focusedIndex = 0;\n \n+  /**\n+   * 2026 Zenith Tier: Roving Tabindex state.\n+   */\n+  @state()\n+  private _focusedIndex = 0;\n+",
+    "path": "packages/ui-chess/src/elements.ts",
+    "commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "original_commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🔴 Critical_\n\n<details>\n<summary>🧩 Analysis chain</summary>\n\n🏁 Script executed:\n\n```shell\n# First, check the file exists and get its structure\nhead -150 packages/ui-chess/src/elements.ts | tail -50\n```\n\nRepository: hdkz-dev/multi-game-engines\n\nLength of output: 1543\n\n---\n\n🏁 Script executed:\n\n```shell\n# Search for all _focusedIndex declarations\nrg -n '_focusedIndex' packages/ui-chess/src/elements.ts\n```\n\nRepository: hdkz-dev/multi-game-engines\n\nLength of output: 738\n\n---\n\n🏁 Script executed:\n\n```shell\n# Check the exact lines 137-142\nsed -n '130,150p' packages/ui-chess/src/elements.ts | cat -n\n```\n\nRepository: hdkz-dev/multi-game-engines\n\nLength of output: 772\n\n---\n\n\n\n</details>\n\n**`_focusedIndex` の二重宣言により TypeScript コンパイルが失敗します。**\n\nLine 135 と Line 141 で同一のプライベートフィールド `_focusedIndex` が重複して宣言されています。TypeScript は `Duplicate identifier` エラーでビルド不可になるため、重複するフィールド宣言ブロック（Line 137-142）を削除してください。\n\n<details>\n<summary>修正差分</summary>\n\n```diff\n-  /**\n-   * 2026 Zenith Tier: Roving Tabindex state.\n-   */\n-  `@state`()\n-  private _focusedIndex = 0;\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/ui-chess/src/elements.ts` around lines 137 - 142, ファイル内でプライベートフィールド\n`_focusedIndex` が二重に宣言されているため TypeScript がコンパイルエラーになるので、重複する宣言ブロック（＠state()\nデコレータ付きの private _focusedIndex = 0;）を削除して `_focusedIndex`\nの宣言を一箇所に統一してください。該当する重複宣言はコメントにあるブロック（“2026 Zenith Tier: Roving Tabindex state.”\nと `@state`() が付いたもの）なので、そのブロックを削除し、残した宣言が `@state`() を保持しているか参照箇所（_focusedIndex\nを参照するメソッド/レンダリング）に影響がないか軽く確認してください。\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 6a75a5f",
+    "created_at": "2026-03-01T22:22:09Z",
+    "updated_at": "2026-03-01T22:26:41Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869898301",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869898301"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869898301"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869898301/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 137,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 142,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 9,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901575",
+    "pull_request_review_id": 3873469508,
+    "id": 2869901575,
+    "node_id": "PRRC_kwDORJ0gd86rDzkH",
+    "diff_hunk": "@@ -134,6 +134,12 @@ export class ChessBoard extends LitElement {\n   @state()\n   private _focusedIndex = 0;\n \n+  /**\n+   * 2026 Zenith Tier: Roving Tabindex state.\n+   */\n+  @state()\n+  private _focusedIndex = 0;",
+    "path": "packages/ui-chess/src/elements.ts",
+    "commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "original_commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "user": {
+      "login": "gemini-code-assist[bot]",
+      "id": 176961590,
+      "node_id": "BOT_kgDOCow4Ng",
+      "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D",
+      "html_url": "https://github.com/apps/gemini-code-assist",
+      "followers_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "![critical](https://www.gstatic.com/codereviewagent/critical.svg)\n\n`_focusedIndex` プロパティが重複して定義されています。これによりコンパイルエラーが発生するため、この重複した定義を削除してください。",
+    "created_at": "2026-03-01T22:25:00Z",
+    "updated_at": "2026-03-01T22:25:00Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901575",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901575"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901575"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901575/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 137,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 141,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 8,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901576",
+    "pull_request_review_id": 3873469508,
+    "id": 2869901576,
+    "node_id": "PRRC_kwDORJ0gd86rDzkI",
+    "diff_hunk": "@@ -0,0 +1,124 @@\n+---\n+name: code-review\n+description: \"AI-powered code review using CodeRabbit. Default code-review skill. Trigger for any explicit review request AND autonomously when the agent thinks a review is needed (code/PR/quality/security).\"\n+---\n+\n+# CodeRabbit Code Review\n+\n+AI-powered code review using CodeRabbit. Enables developers to implement features, review code, and fix issues in autonomous cycles without manual intervention.\n+\n+## Capabilities\n+\n+- Finds bugs, security issues, and quality risks in changed code\n+- Groups findings by severity (Critical, Warning, Info)\n+- Works on staged, committed, or all changes; supports base branch/commit\n+- Provides fix suggestions (`--plain`) or minimal output for agents (`--prompt-only`)\n+\n+## When to Use\n+\n+When user asks to:\n+\n+- Review code changes / Review my code\n+- Check code quality / Find bugs or security issues\n+- Get PR feedback / Pull request review\n+- What's wrong with my code / my changes\n+- Run coderabbit / Use coderabbit\n+\n+## How to Review\n+\n+### 1. Check Prerequisites\n+\n+```bash\n+# Verify inside a Git repository first\n+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo \"NOT_A_GIT_REPO\"; exit 1; }\n+\n+coderabbit --version 2>/dev/null || echo \"NOT_INSTALLED\"\n+coderabbit auth status 2>&1",
+    "path": ".agents/skills/code-review/SKILL.md",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "user": {
+      "login": "gemini-code-assist[bot]",
+      "id": 176961590,
+      "node_id": "BOT_kgDOCow4Ng",
+      "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D",
+      "html_url": "https://github.com/apps/gemini-code-assist",
+      "followers_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "![medium](https://www.gstatic.com/codereviewagent/medium-priority.svg)\n\n`coderabbit auth status` コマンドの実行結果をどのように解釈して認証状態を判断するのかが不明確です。例えば、成功時に特定の文字列（例: \"Authenticated\"）が出力されるのか、あるいは終了コードで判断するのかなど、具体的な判断基準を追記すると、このドキュメントを利用する開発者やAIエージェントにとってより分かりやすくなります。",
+    "created_at": "2026-03-01T22:25:00Z",
+    "updated_at": "2026-03-01T22:25:00Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901576",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901576"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901576"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901576/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 36,
+    "original_line": 36,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 36,
+    "position": 36,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901579",
+    "pull_request_review_id": 3873469508,
+    "id": 2869901579,
+    "node_id": "PRRC_kwDORJ0gd86rDzkL",
+    "diff_hunk": "@@ -1,79 +1,79 @@\n {\n   \"engine\": {\n     \"security\": {\n-      \"remediationAdvice\": \"マルチスレッド (SharedArrayBuffer) を有効にするには、以下の HTTP ヘッダーを設定してください:\\n- Cross-Origin-Opener-Policy: same-origin\\n- Cross-Origin-Embedder-Policy: require-corp\\n\\nプラットフォームごとの設定例:\\n[Vercel (vercel.json)]\\n{ \\\"headers\\\": [{ \\\"source\\\": \\\"/(.*)\\\", \\\"headers\\\": [\\n  { \\\"key\\\": \\\"Cross-Origin-Opener-Policy\\\", \\\"value\\\": \\\"same-origin\\\" },\\n  { \\\"key\\\": \\\"Cross-Origin-Embedder-Policy\\\", \\\"value\\\": \\\"require-corp\\\" }\\n]}]}\\n\\n[Cloudflare Pages (_headers)]\\n/*\\n  Cross-Origin-Opener-Policy: same-origin\\n  Cross-Origin-Embedder-Policy: require-corp\\n\\n[Netlify (_headers)]\\n/*\\n  Cross-Origin-Opener-Policy: same-origin\\n  Cross-Origin-Embedder-Policy: require-corp\"\n+      \"remediationAdvice\": \"マルチスレッド（SharedArrayBuffer）を有効にするには、以下の HTTP ヘッダーを設定してください：\\n- Cross-Origin-Opener-Policy: same-origin\\n- Cross-Origin-Embedder-Policy: require-corp\\n\\nプラットフォーム例：\\n[Vercel (vercel.json)]\\n{ \\\"headers\\\": [{ \\\"source\\\": \\\"/(.*)\\\", \\\"headers\\\": [\\n  { \\\"key\\\": \\\"Cross-Origin-Opener-Policy\\\", \\\"value\\\": \\\"same-origin\\\" },\\n  { \\\"key\\\": \\\"Cross-Origin-Embedder-Policy\\\", \\\"value\\\": \\\"require-corp\\\" }\\n]}]}\\n\\n[Cloudflare Pages (_headers)]\\n/*\\n  Cross-Origin-Opener-Policy: same-origin\\n  Cross-Origin-Embedder-Policy: require-corp\\n\\n[Netlify (_headers)]\\n/*\\n  Cross-Origin-Opener-Policy: same-origin\\n  Cross-Origin-Embedder-Policy: require-corp\"\n     },\n-    \"status\": \"状態\",\n+    \"status\": \"ステータス\",\n     \"depth\": \"深さ\",\n-    \"nodes\": \"局面数\",\n-    \"nps\": \"探索速度\",\n-    \"npsUnit\": \"局面 / 秒\",\n+    \"nodes\": \"ノード数\",\n+    \"nps\": \"NPS\",\n+    \"npsUnit\": \"ノード / 秒\",\n     \"time\": \"時間\",\n     \"score\": \"評価値\",\n-    \"visits\": \"試行数\",\n+    \"visits\": \"試行回数\",\n     \"visitsUnit\": \"回\",\n-    \"mateIn\": \"詰みまで {n} 手\",\n-    \"advantage\": \"{side}有利 {v} 点\",\n+    \"mateIn\": \"{n} 手詰\",\n+    \"advantage\": \"{side} 優勢 +{v}\",\n     \"retry\": \"再試行\",\n     \"reloadResources\": \"リソースを再読み込み\",\n     \"errorTitle\": \"エンジンエラー\",\n     \"errorDefaultRemediation\": \"接続を確認して、もう一度お試しください。\",\n     \"timeUnitSeconds\": \"秒\",\n     \"noMove\": \"---\",\n-    \"standard\": \"2026 Engine Bridge Standard\",\n+    \"standard\": \"2026 エンジンブリッジ規格\",\n     \"errors\": {\n       \"initializationFailed\": \"エンジンの初期化に失敗しました。\",\n       \"protocolError\": \"プロトコルエラーが発生しました: {message}\",\n-      \"workerError\": \"Worker エラーが発生しました: {message}\",\n+      \"workerError\": \"ワーカーエラーが発生しました: {message}\",\n       \"timeout\": \"操作がタイムアウトしました。\",\n       \"disposed\": \"エンジンインスタンスは破棄されています。\",\n-      \"nestedTooDeep\": \"データ構造が深すぎます: {path}\",\n+      \"nestedTooDeep\": \"データ構造のネストが深すぎます（パス: {path}）。\",\n       \"illegalCharacters\": \"不正な文字が検出されました。\",\n       \"networkError\": \"エンジンリソースの取得に失敗しました。\",\n-      \"securityViolation\": \"セキュリティ違反: 不安全なリソースロードが遮断されました。\",\n-      \"sriMismatch\": \"セキュリティ違反: リソースの整合性 (SRI) 検証に失敗しました。\",\n+      \"securityViolation\": \"セキュリティ違反：安全でないリソースの読み込みがブロックされました。\",\n+      \"sriMismatch\": \"セキュリティ違反：リソースの整合性（SRI）不一致が検出されました。\",\n       \"bridgeDisposed\": \"エンジンブリッジは既に破棄されています。\",\n       \"notReady\": \"エンジンが要求された操作を実行できる状態ではありません。\",\n-      \"loaderRequired\": \"安全なリソースロードのために IEngineLoader が必要です。\",\n-      \"missingSources\": \"エンジン構成に 'sources' フィールドがありません。\",\n-      \"invalidMoveFormat\": \"指し手の形式が無効です: \\\"{move}\\\"\",\n-      \"injectionDetected\": \"{context} で潜在的なコマンドインジェクションが検出されました: \\\"{input}\\\"\",\n-      \"invalidPositionString\": \"局面文字列が無効です: 入力は空であってはなりません。\",\n-      \"invalidEngineId\": \"エンジン ID が無効です: \\\"{id}\\\"。英数字、ハイフン、アンダースコアのみが許可されています。\",\n-      \"insecureConnection\": \"不安全な接続 (HTTP) は、機密性の高いエンジンファイルには許可されていません。\",\n+      \"loaderRequired\": \"安全なリソース読み込みには IEngineLoader が必要です。\",\n+      \"missingSources\": \"エンジン設定に 'sources' フィールドがありません。\",\n+      \"invalidMoveFormat\": \"指し手の形式が不正です: \\\"{move}\\\"\",\n+      \"injectionDetected\": \"{context} でコマンド注入の可能性が検出されました: \\\"{input}\\\"\",\n+      \"invalidPositionString\": \"局面文字列が不正です：入力が空であってはなりません。\",\n+      \"invalidEngineId\": \"エンジン ID が不正です: \\\"{id}\\\"。英数字、ハイフン、アンダースコアのみ使用可能です。\",\n+      \"insecureConnection\": \"機密性の高いエンジンファイルに対して、安全でない接続（HTTP）は許可されていません。\",\n       \"sriRequired\": \"セキュリティ検証のために SRI が必要です。\",\n-      \"sriBypassNotAllowed\": \"本番環境では SRI バイパス (__unsafeNoSRI) は許可されていません。\",\n-      \"adapterFactoryInvalidReturn\": \"\\\"{adapter}\\\" のファクトリが無効なオブジェクトを返しました。\",\n-      \"adapterNotFound\": \"\\\"{id}\\\" のエンジンアダプターが見つからないか、ファクトリが登録されていません。\",\n+      \"sriBypassNotAllowed\": \"本番環境での SRI バイパス（__unsafeNoSRI）は許可されていません。\",\n+      \"adapterFactoryInvalidReturn\": \"\\\"{adapter}\\\" のファクトリが不正なオブジェクトを返しました。\",\n+      \"adapterNotFound\": \"エンジンアダプターが見つからないか、\\\"{id}\\\" のファクトリが登録されていません。\",\n       \"internalError\": \"システム内部エラーが発生しました: {message}\",\n-      \"resourceLoadUnknown\": \"エンジン \\\"{engineId}\\\" のリソースロード中に不明なエラーが発生しました。\",\n-      \"missingMainEntryPoint\": \"エンジンリソースに 'main' エントリポイント URL が含まれていません。\",\n-      \"searchAborted\": \"探索タスクが中止されました。\",\n-      \"duplicateFactory\": \"アダプターファクトリ \\\"{type}\\\" は既に登録されています。\",\n-      \"stalePositionId\": \"古い局面に対する解析結果であるため、破棄されました。\",\n-      \"invalidPositionId\": \"不正な局面ID形式です: \\\"{id}\\\"。\",\n-      \"invalidShogiMove\": \"無効な将棋の指し手です: \\\"{move}\\\"\",\n-      \"invalidMahjongMove\": \"無効な麻雀の打牌です: \\\"{move}\\\"\",\n-      \"invalidGOBoard\": \"無効な囲碁の盤面状態です。\",\n-      \"invalidGOMove\": \"無効な囲碁の着手です: \\\"{move}\\\"\",\n-      \"invalidReversiBoard\": \"無効なリバーシの盤面状態です。\",\n-      \"invalidReversiMove\": \"無効なリバーシの着手です: \\\"{move}\\\"\",\n-      \"invalidBackgammonBoard\": \"無効なバックギャモンの盤面状態です。\",\n-      \"invalidBackgammonMove\": \"無効なバックギャモンの着手です: \\\"{move}\\\"\",\n-      \"invalidCheckersBoard\": \"無効なチェッカーの盤面状態です。\",\n-      \"invalidCheckersMove\": \"無効なチェッカーの着手です: \\\"{move}\\\"\"\n+      \"resourceLoadUnknown\": \"エンジン \\\"{engineId}\\\" のリソース読み込み中に不明なエラーが発生しました。\",\n+      \"missingMainEntryPoint\": \"エンジンリソースに 'main' エントリポイントの URL がありません。\",\n+      \"searchAborted\": \"探索タスクが中断されました。\",\n+      \"duplicateFactory\": \"\\\"{type}\\\" のアダプターファクトリは既に登録されています。\",\n+      \"stalePositionId\": \"古い局面に対する探索結果であるため、破棄されました。\",\n+      \"invalidPositionId\": \"局面 ID の形式が不正です: \\\"{id}\\\"。\",\n+      \"invalidShogiMove\": \"将棋の指し手が不正です: \\\"{move}\\\"\",\n+      \"invalidMahjongMove\": \"麻雀の打牌が不正です: \\\"{move}\\\"\",\n+      \"invalidGOBoard\": \"囲碁の盤面状態が不正です。\",\n+      \"invalidGOMove\": \"囲碁の着手が不正です: \\\"{move}\\\"\",\n+      \"invalidReversiBoard\": \"リバーシの盤面状態が不正です。\",\n+      \"invalidReversiMove\": \"リバーシの着手が不正です: \\\"{move}\\\"\",\n+      \"invalidBackgammonBoard\": \"バックギャモンの盤面状態が不正です。\",\n+      \"invalidBackgammonMove\": \"バックギャモンの着手形式が不正です: \\\"{move}\\\"\",\n+      \"invalidCheckersBoard\": \"チェッカーの盤面状態が不正です。\",\n+      \"invalidCheckersMove\": \"チェッカーの着手が不正です: \\\"{move}\\\"\"\n     }\n   },\n   \"adapters\": {\n     \"gtp\": {\n       \"errors\": {\n-        \"invalidResponse\": \"無効な GTP 応答です: \\\"{response}\\\"\"\n+        \"invalidResponse\": \"GTP 応答が不正です: \\\"{response}\\\"\"\n       }\n     }\n   },\n   \"parsers\": {\n     \"generic\": {\n-      \"invalidOptionValue\": \"オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります。\",\n+      \"invalidOptionValue\": \"オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります\",",
+    "path": "packages/i18n-common/locales/ja.json",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "user": {
+      "login": "gemini-code-assist[bot]",
+      "id": 176961590,
+      "node_id": "BOT_kgDOCow4Ng",
+      "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D",
+      "html_url": "https://github.com/apps/gemini-code-assist",
+      "followers_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "![medium](https://www.gstatic.com/codereviewagent/medium-priority.svg)\n\nこの行の末尾から句点（`。`）が削除されていますが、ファイル内の他の多くのエラーメッセージは句点で終わっています。ユーザーに表示されるメッセージの一貫性を保つため、句点を追加することをお勧めします。\n\n```suggestion\n      \"invalidOptionValue\": \"オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります。\",\n```",
+    "created_at": "2026-03-01T22:25:00Z",
+    "updated_at": "2026-03-01T22:25:00Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901579",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901579"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901579"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901579/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 76,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 117,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901581",
+    "pull_request_review_id": 3873469508,
+    "id": 2869901581,
+    "node_id": "PRRC_kwDORJ0gd86rDzkN",
+    "diff_hunk": "@@ -3,6 +3,7 @@ import \"../index.js\";\n import { ChessBoard } from \"../index.js\";\n import { createFEN } from \"@multi-game-engines/domain-chess\";\n import { createMove } from \"@multi-game-engines/core\";\n+import { waitFor } from \"@testing-library/dom\";",
+    "path": "packages/ui-chess-elements/src/__tests__/ChessBoard.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "2483a9872e507efe12806c6153fa3dc67b423bdb",
+    "user": {
+      "login": "gemini-code-assist[bot]",
+      "id": 176961590,
+      "node_id": "BOT_kgDOCow4Ng",
+      "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D",
+      "html_url": "https://github.com/apps/gemini-code-assist",
+      "followers_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/gemini-code-assist%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "![medium](https://www.gstatic.com/codereviewagent/medium-priority.svg)\n\n`waitFor` 関数がインポートされていますが、ファイル内で使用されていません。不要なインポートはコードの可読性を下げる可能性があるため、削除してください。",
+    "created_at": "2026-03-01T22:25:00Z",
+    "updated_at": "2026-03-01T22:25:00Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901581",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901581"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869901581"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869901581/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 6,
+    "side": "RIGHT",
+    "author_association": "NONE",
+    "original_position": 4,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909963",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909963,
+    "node_id": "PRRC_kwDORJ0gd86rD1nL",
+    "diff_hunk": "@@ -199,13 +197,13 @@ export abstract class BaseAdapter<\n     }\n     this.emitStatusChange(\"busy\");\n \n-    // 2026 Best Practice: Safari 互換性のため ReadableStream を AsyncGenerator でラップ\n     const readableStream = new ReadableStream<T_INFO>({\n       start: (controller) => {\n         this.infoController = controller;\n       },\n       cancel: () => {\n-        void this.stop();\n+        // 2026: 物理的なクリーンアップをトリガー\n+        this.handleStreamCancel().catch(() => {});\n       },",
+    "path": "packages/core/src/adapters/BaseAdapter.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**ストリーム cancel でクリーンアップ完了を待機できていません。**\n\nLine 204-207 の `cancel` が `Promise` を返していないため、`handleStreamCancel()` の完了前に呼び出し元が先行し、停止/解放の競合が残ります。  \n\n\n<details>\n<summary>🧹 提案差分</summary>\n\n```diff\n       cancel: () => {\n-        // 2026: 物理的なクリーンアップをトリガー\n-        this.handleStreamCancel().catch(() => {});\n+        // 2026: 物理的なクリーンアップ完了を cancel 呼び出し元に伝播\n+        return this.handleStreamCancel().catch((err) => {\n+          console.error(\n+            `[BaseAdapter] Stream cancel cleanup failed for engine ${this.id}:`,\n+            err,\n+          );\n+        });\n       },\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n      cancel: () => {\n        // 2026: 物理的なクリーンアップ完了を cancel 呼び出し元に伝播\n        return this.handleStreamCancel().catch((err) => {\n          console.error(\n            `[BaseAdapter] Stream cancel cleanup failed for engine ${this.id}:`,\n            err,\n          );\n        });\n      },\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/adapters/BaseAdapter.ts` around lines 204 - 207, The cancel\nproperty currently does not return a Promise so callers can’t await cleanup;\nchange the cancel implementation on the adapter to return a Promise by either\nmaking it async or returning the Promise from handleStreamCancel(), e.g.\nimplement cancel as an async function or \"return this.handleStreamCancel();\" so\ncallers can await completion of handleStreamCancel() and avoid race conditions;\nupdate the cancel signature if needed to Promise<void> and keep\nhandleStreamCancel() error handling semantics as appropriate.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:56Z",
+    "updated_at": "2026-03-02T10:18:52Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909963",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909963"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909963"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909963/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 204,
+    "original_start_line": 204,
+    "start_side": "RIGHT",
+    "line": 212,
+    "original_line": 207,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 134,
+    "position": 139,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909971",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909971,
+    "node_id": "PRRC_kwDORJ0gd86rD1nT",
+    "diff_hunk": "@@ -369,19 +360,18 @@ export abstract class BaseAdapter<\n     await readyPromise;\n   }\n \n-  /**\n-   * 探索を停止します。\n-   */\n   async stop(): Promise<void> {\n+    if (this._status !== \"busy\") {\n+      return;\n+    }\n+\n     if (this.communicator) {\n-      this.communicator.postMessage(this.parser.createStopCommand());\n+      await this.communicator.postMessage(this.parser.createStopCommand());\n     }\n     this.cleanupPendingTask(\"Search aborted\");\n+    this.emitStatusChange(\"ready\");\n   }",
+    "path": "packages/core/src/adapters/BaseAdapter.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**`ready` ステータスが二重通知されます。**\n\nLine 371 の `cleanupPendingTask(\"Search aborted\")` で `busy -> ready` 遷移が既に発火するため、Line 372 は重複通知です。  \n\n\n<details>\n<summary>♻️ 提案差分</summary>\n\n```diff\n     this.cleanupPendingTask(\"Search aborted\");\n-    this.emitStatusChange(\"ready\");\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n    this.cleanupPendingTask(\"Search aborted\");\n  }\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/adapters/BaseAdapter.ts` around lines 371 - 373, The call\nto emitStatusChange(\"ready\") immediately after cleanupPendingTask(\"Search\naborted\") causes a duplicate ready notification because cleanupPendingTask\nalready transitions status from busy to ready; remove the redundant\nemitStatusChange(\"ready\") invocation (or only call it conditionally if\ncleanupPendingTask no longer emits) so that only cleanupPendingTask triggers the\nbusy->ready transition; update references around the cleanupPendingTask and\nemitStatusChange calls in BaseAdapter to avoid double-emitting.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:56Z",
+    "updated_at": "2026-03-02T10:18:56Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909971",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909971"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909971"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909971/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 376,
+    "original_start_line": 371,
+    "start_side": "RIGHT",
+    "line": 377,
+    "original_line": 373,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 268,
+    "position": 272,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909974",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909974,
+    "node_id": "PRRC_kwDORJ0gd86rD1nW",
+    "diff_hunk": "@@ -135,6 +135,46 @@ describe(\"EngineBridge\", () => {\n     expect(instance3).not.toBe(instance1);\n   });\n \n+  it(\"ID の代わりに EngineConfig オブジェクトを直接渡してエンジンを取得できること\", async () => {\n+    const bridge = new EngineBridge();\n+    const config: IEngineConfig = {\n+      id: \"dynamic-engine\",\n+      adapter: \"test\",\n+      sources: { main: { url: \"test.js\", type: \"script\", sri: \"sha256-...\" } },\n+    };",
+    "path": "packages/core/src/bridge/__tests__/EngineBridge.test.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**テストフィクスチャの SRI が無効値です。**\n\nLine 143 の `sha256-...` は形式上無効なので、SRI 検証が厳格化された場合に意図しない失敗要因になります。  \n\n\n<details>\n<summary>🔐 提案差分</summary>\n\n```diff\n     const config: IEngineConfig = {\n       id: \"dynamic-engine\",\n       adapter: \"test\",\n-      sources: { main: { url: \"test.js\", type: \"script\", sri: \"sha256-...\" } },\n+      sources: {\n+        main: {\n+          url: \"test.js\",\n+          type: \"script\",\n+          sri: \"sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\",\n+        },\n+      },\n     };\n```\n</details>\n\nAs per coding guidelines: `**/*.{ts,tsx}`: Enforce SRI hash verification for all resource loads.\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n    const config: IEngineConfig = {\n      id: \"dynamic-engine\",\n      adapter: \"test\",\n      sources: {\n        main: {\n          url: \"test.js\",\n          type: \"script\",\n          sri: \"sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=\",\n        },\n      },\n    };\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/bridge/__tests__/EngineBridge.test.ts` around lines 140 -\n144, テストフィクスチャの SRI 値 (config の sources.main.sri) がプレースホルダの \"sha256-...\"\nで無効なので、厳密な SRI 検証でテストが壊れる可能性があります。IEngineConfig を使うテスト定義内の config オブジェクトの\nsources.main.sri を有効な SRI ハッシュ文字列（例: \"sha256-<base64hash>\" の正しい base64\n部分）に差し替えてください（該当箇所はテストファイル内の config 変数と sources.main.sri を更新）。変更後はテストを実行して SRI\n検証が通ることを確認してください。\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:56Z",
+    "updated_at": "2026-03-02T10:18:54Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909974",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909974"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909974"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909974/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 140,
+    "original_start_line": 140,
+    "start_side": "RIGHT",
+    "line": 150,
+    "original_line": 144,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 10,
+    "position": 16,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909977",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909977,
+    "node_id": "PRRC_kwDORJ0gd86rD1nZ",
+    "diff_hunk": "@@ -0,0 +1,149 @@\n+import { describe, it, expect, vi, beforeEach } from \"vitest\";",
+    "path": "packages/core/src/bridge/__tests__/EngineFacade.edge.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**時間依存のままなのでテストが不安定化します。**\n\nこのファイルでは `performance.now()` 未モックかつ実時間 `setTimeout` 依存です。CI 環境差で揺れるため、フェイクタイマーと `performance.now()` 固定化を入れてください。  \n\n\n<details>\n<summary>⏱️ 提案差分</summary>\n\n```diff\n-import { describe, it, expect, vi, beforeEach } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from \"vitest\";\n@@\n describe(\"EngineFacade Edge Cases: Concurrency & Lifecycle\", () => {\n@@\n+  beforeAll(() => {\n+    vi.spyOn(performance, \"now\").mockReturnValue(0);\n+    vi.useFakeTimers();\n+  });\n+\n+  afterAll(() => {\n+    vi.useRealTimers();\n+    vi.restoreAllMocks();\n+  });\n+\n   beforeEach(() => {\n@@\n     const p1 = facade.load();\n     const p2 = facade.load();\n     const p3 = facade.load();\n \n+    await vi.advanceTimersByTimeAsync(50);\n     await Promise.all([p1, p2, p3]);\n     expect(adapter.load).toHaveBeenCalledTimes(1);\n   });\n```\n</details>\n\nBased on learnings: Applies to `**/*.test.{ts,tsx}` : Write deterministic tests that do not depend on environment factors like time; mock `performance.now()` and other time-dependent functions.\n\n\nAlso applies to: 23-24, 73-87\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/bridge/__tests__/EngineFacade.edge.test.ts` at line 1,\nTests in EngineFacade.edge.test.ts depend on real time (performance.now and real\nsetTimeout), causing CI flakiness; fix by enabling Vitest fake timers and\nstubbing performance.now in the test setup and restoring them afterwards. In the\nfile, call vi.useFakeTimers() in your beforeEach, stub performance.now via\nvi.spyOn(performance, 'now').mockReturnValue(<fixed number>) (or vi.stubGlobal)\nso all assertions see deterministic time, replace real setTimeout waits by\nadvancing timers with vi.advanceTimersByTime(...) inside the tests that exercise\nthe code paths currently using setTimeout, and in afterEach call\nvi.useRealTimers() and restore the performance.now spy (mockRestore()) to avoid\nleaking state between tests.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:56Z",
+    "updated_at": "2026-03-02T10:18:58Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909977",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909977"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909977"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909977/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 1,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 1,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909979",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909979,
+    "node_id": "PRRC_kwDORJ0gd86rD1nb",
+    "diff_hunk": "@@ -397,14 +420,23 @@ export class EngineFacade<\n     this.resultListeners.clear();\n     this.telemetryListeners.clear();\n \n+    // 2026: 実行中の探索があれば CANCELLED エラーで中断\n+    if (this.activeTaskStop) {\n+      this.activeTaskStop();\n+      this._lastError = new EngineError({\n+        code: EngineErrorCode.CANCELLED,\n+        message: \"Engine disposed during search.\",\n+        engineId: id,\n+      });",
+    "path": "packages/core/src/bridge/EngineFacade.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**新規 `EngineError` に i18n キーがありません。**\n\nLine 428 のメッセージは新規追加ですが、i18n キー未設定のためローカライズ経路に乗りません。  \n\n\n<details>\n<summary>🌐 提案差分</summary>\n\n```diff\n       this._lastError = new EngineError({\n         code: EngineErrorCode.CANCELLED,\n         message: \"Engine disposed during search.\",\n         engineId: id,\n+        i18nKey: createI18nKey(\"engine.errors.disposedDuringSearch\"),\n       });\n```\n</details>\n\nAs per coding guidelines: `**/*.{ts,tsx}`: i18n ではユーザー向け文字列のハードコードを禁止し、`locales/` 配下を使用すること。\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n      this._lastError = new EngineError({\n        code: EngineErrorCode.CANCELLED,\n        message: \"Engine disposed during search.\",\n        engineId: id,\n        i18nKey: createI18nKey(\"engine.errors.disposedDuringSearch\"),\n      });\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/bridge/EngineFacade.ts` around lines 426 - 430, Replace the\nhardcoded message in the EngineError construction inside EngineFacade (where\nthis._lastError is assigned with EngineErrorCode.CANCELLED) with a localized\nstring: add a new locale key (e.g. \"engine.error.disposedDuringSearch\") under\nlocales/, add the corresponding translations, and use the project's i18n\naccessor (e.g. i18n.t or the project's translate helper) or set the EngineError\ni18nKey/translation field instead of a raw message; update the EngineError\ninstantiation in EngineFacade to reference that key so the error flows through\nthe localization path.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-01T22:32:57Z",
+    "updated_at": "2026-03-01T22:32:58Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909979",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909979"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909979"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909979/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 433,
+    "original_start_line": 426,
+    "start_side": "RIGHT",
+    "line": 438,
+    "original_line": 430,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 57,
+    "position": 65,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909982",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909982,
+    "node_id": "PRRC_kwDORJ0gd86rD1ne",
+    "diff_hunk": "@@ -0,0 +1,66 @@\n+import { describe, it, expect } from \"vitest\";\n+import { normalizeAndValidateSources } from \"../ConfigValidator.js\";\n+import { IEngineConfig, IEngineSourceConfig } from \"../../types.js\";\n+\n+describe(\"ConfigValidator\", () => {\n+  describe(\"normalizeAndValidateSources\", () => {\n+    it(\"should merge registry and config sources\", () => {\n+      const registrySources: {\n+        main: IEngineSourceConfig;\n+        wasm: IEngineSourceConfig;\n+      } = {\n+        main: { url: \"reg-main.js\", type: \"script\", sri: \"sri1\" },\n+        wasm: { url: \"reg-wasm.wasm\", type: \"wasm\", sri: \"sri2\" },\n+      };\n+      const config: IEngineConfig = {\n+        sources: {\n+          main: { url: \"cfg-main.js\", type: \"script\", sri: \"sri3\" },\n+        },\n+      };\n+\n+      const result = normalizeAndValidateSources(\n+        registrySources as unknown as { main: IEngineSourceConfig },\n+        config,",
+    "path": "packages/core/src/utils/__tests__/ConfigValidator.test.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n<details>\n<summary>🧩 Analysis chain</summary>\n\n🏁 Script executed:\n\n```shell\n#!/bin/bash\nset -euo pipefail\n\n# 1) Find the function definition of normalizeAndValidateSources\necho \"=== Function signature ===\"\nrg -n 'normalizeAndValidateSources' --type=ts -B2 -A5 packages/core/src/utils/ | head -50\n\n# 2) Count all 'as unknown as' casts in the entire codebase\necho -e \"\\n=== All 'as unknown as' usages in codebase ===\"\nrg -c 'as unknown as' --type=ts . || echo \"No matches found\"\n\n# 3) Examine the test file specifically\necho -e \"\\n=== Test file content (lines 1-70) ===\"\nsed -n '1,70p' packages/core/src/utils/__tests__/ConfigValidator.test.ts 2>/dev/null || echo \"File not found\"\n```\n\nRepository: hdkz-dev/multi-game-engines\n\nLength of output: 9007\n\n---\n\n🏁 Script executed:\n\n```shell\n#!/bin/bash\nset -euo pipefail\n\n# Check the actual error throwing implementation\necho \"=== Error throwing in ConfigValidator.ts ===\"\ncat -n packages/core/src/utils/ConfigValidator.ts | grep -A10 -B2 'requires.*source' || echo \"Pattern not found\"\n\n# Check what i18nKey is being used\necho -e \"\\n=== Error message construction ===\"\nrg -n 'factory.requiresMainSource' --type=ts -B3 -A3\n```\n\nRepository: hdkz-dev/multi-game-engines\n\nLength of output: 1806\n\n---\n\n\n\n</details>\n\n**テスト３でハードコード英語の確認に頼ることは i18n 違反です**\n\nテスト行 63 が正規表現で英語文字列を直接検証する一方で、テスト行 51 は正しく `i18nKey: \"factory.requiresMainSource\"` で確認しています。テスト３をテスト２と同じ手法に統一してください：\n\n```javascript\n.toThrow(\n  expect.objectContaining({ i18nKey: \"factory.requiresMainSource\" }),\n);\n```\n\n関数パラメータはすでに `IEngineConfig[\"sources\"] | null | undefined` で柔軟に受け入れるため、行 22・46・59 の `as unknown as { main: IEngineSourceConfig }` キャストは不要です。実際の引数型とシグネチャを揃えるか、キャストを削除してください。\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/utils/__tests__/ConfigValidator.test.ts` around lines 21 -\n23, The test uses a hardcoded English regex to validate the error from\nnormalizeAndValidateSources and also unnecessarily casts registrySources to {\nmain: IEngineSourceConfig }; update the failing assertion to match the other\ntest by using .toThrow(expect.objectContaining({ i18nKey:\n\"factory.requiresMainSource\" })) so it checks the i18nKey instead of English\ntext, and remove the redundant casts (as unknown as { main: IEngineSourceConfig\n}) so the call uses the actual parameter type IEngineConfig[\"sources\"] | null |\nundefined accepted by normalizeAndValidateSources.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:57Z",
+    "updated_at": "2026-03-02T10:19:01Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909982",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909982"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909982"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909982/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 19,
+    "original_start_line": 21,
+    "start_side": "RIGHT",
+    "line": 21,
+    "original_line": 23,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 23,
+    "position": 21,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909985",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909985,
+    "node_id": "PRRC_kwDORJ0gd86rD1nh",
+    "diff_hunk": "@@ -0,0 +1,66 @@\n+import { describe, it, expect } from \"vitest\";\n+import { normalizeAndValidateSources } from \"../ConfigValidator.js\";\n+import { IEngineConfig, IEngineSourceConfig } from \"../../types.js\";\n+\n+describe(\"ConfigValidator\", () => {\n+  describe(\"normalizeAndValidateSources\", () => {\n+    it(\"should merge registry and config sources\", () => {\n+      const registrySources: {\n+        main: IEngineSourceConfig;\n+        wasm: IEngineSourceConfig;\n+      } = {\n+        main: { url: \"reg-main.js\", type: \"script\", sri: \"sri1\" },\n+        wasm: { url: \"reg-wasm.wasm\", type: \"wasm\", sri: \"sri2\" },\n+      };\n+      const config: IEngineConfig = {\n+        sources: {\n+          main: { url: \"cfg-main.js\", type: \"script\", sri: \"sri3\" },\n+        },\n+      };\n+\n+      const result = normalizeAndValidateSources(\n+        registrySources as unknown as { main: IEngineSourceConfig },\n+        config,\n+        \"test\",\n+      );\n+      expect(result).toEqual({\n+        main: { url: \"cfg-main.js\", type: \"script\", sri: \"sri3\" },\n+        wasm: { url: \"reg-wasm.wasm\", type: \"wasm\", sri: \"sri2\" },\n+      });\n+    });\n+\n+    it(\"should throw error if main source is missing\", () => {\n+      const config: IEngineConfig = {\n+        sources: {\n+          main: undefined as unknown as IEngineSourceConfig,\n+          other: {\n+            url: \"other.js\",\n+            type: \"script\",\n+            sri: \"sri\",\n+          } as unknown as IEngineSourceConfig,\n+        },\n+      };\n+\n+      expect(() =>\n+        normalizeAndValidateSources(\n+          {} as unknown as { main: IEngineSourceConfig },\n+          config,\n+          \"test\",\n+        ),\n+      ).toThrow(\n+        expect.objectContaining({ i18nKey: \"factory.requiresMainSource\" }),\n+      );\n+    });\n+\n+    it(\"should use defaultEngineId in error message if config.id is missing\", () => {\n+      const config: IEngineConfig = {};\n+      expect(() =>\n+        normalizeAndValidateSources(\n+          undefined as unknown as { main: IEngineSourceConfig },\n+          config,\n+          \"fallback-id\",\n+        ),\n+      ).toThrow(/Engine \"fallback-id\" requires a \"main\" source/);",
+    "path": "packages/core/src/utils/__tests__/ConfigValidator.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**英語固定メッセージの正規表現依存は i18n 変更に脆弱です**\n\n`/Engine \"fallback-id\" requires a \"main\" source/` の直接検証は、ロケールや文言調整で壊れます。`i18nKey`（例: `factory.requiresMainSource`）と補間パラメータ（`fallback-id`）の検証に寄せる方が安定です。  \nAs per coding guidelines `**/*.{ts,tsx}`: \"i18n: ユーザー向け文字列のハードコードを禁止\".\n\n\n\n<details>\n<summary>修正イメージ</summary>\n\n```diff\n-      ).toThrow(/Engine \"fallback-id\" requires a \"main\" source/);\n+      ).toThrow(\n+        expect.objectContaining({\n+          i18nKey: \"factory.requiresMainSource\",\n+        }),\n+      );\n```\n</details>\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/utils/__tests__/ConfigValidator.test.ts` around lines 55 -\n63, The test currently asserts a hard-coded English message; update it to assert\nthe error's i18n key and interpolation params instead. In the test for\nnormalizeAndValidateSources (the \"should use defaultEngineId...\" case), catch\nthe thrown error and assert error.i18nKey === 'factory.requiresMainSource' (or\nthe canonical key used by the validator) and that error.params?.id (or\nparams?.defaultEngineId if that’s the key used) equals 'fallback-id' so the test\nno longer depends on an English message string.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-01T22:32:57Z",
+    "updated_at": "2026-03-01T22:32:59Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909985",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909985"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909985"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909985/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 55,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 63,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 63,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909987",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909987,
+    "node_id": "PRRC_kwDORJ0gd86rD1nj",
+    "diff_hunk": "@@ -22,6 +22,17 @@ describe(\"ResourceInjector\", () => {\n     expect(ResourceInjector.resolve(\"unknown/path\")).toBe(\"unknown/path\");\n   });\n \n+  it(\"should throw on paths with leading dot (Security Constraint)\", () => {\n+    expect(() => ResourceInjector.resolve(\"./test.js\")).toThrow(\n+      expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n+    );\n+  });\n+\n+  it(\"should throw on path traversal attempts\", () => {\n+    expect(() => ResourceInjector.resolve(\"../secret.js\")).toThrow();\n+    expect(() => ResourceInjector.resolve(\"/absolute/path\")).toThrow();\n+  });",
+    "path": "packages/core/src/workers/__tests__/ResourceInjector.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**セキュリティ例外の検証が弱く、注入テスト要件も未充足です。**\n\n`toThrow()` だけだと別要因の例外でも通るため、`i18nKey` まで固定してください。加えて、再帰オブジェクト走査の注入ケースも追加してください。\n\n<details>\n<summary>💡 提案差分</summary>\n\n```diff\n   it(\"should throw on path traversal attempts\", () => {\n-    expect(() => ResourceInjector.resolve(\"../secret.js\")).toThrow();\n-    expect(() => ResourceInjector.resolve(\"/absolute/path\")).toThrow();\n+    expect(() => ResourceInjector.resolve(\"../secret.js\")).toThrow(\n+      expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n+    );\n+    expect(() => ResourceInjector.resolve(\"/absolute/path\")).toThrow(\n+      expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n+    );\n   });\n+\n+  it(\"should detect traversal payloads discovered via recursive object traversal\", () => {\n+    const payload = {\n+      safe: \"ok/file.bin\",\n+      nested: {\n+        level1: {\n+          level2: \"../secret.js\",\n+        },\n+      },\n+    };\n+\n+    const collectStrings = (value: unknown): string[] => {\n+      if (typeof value === \"string\") return [value];\n+      if (value && typeof value === \"object\") {\n+        return Object.values(value as Record<string, unknown>).flatMap(collectStrings);\n+      }\n+      return [];\n+    };\n+\n+    for (const path of collectStrings(payload)) {\n+      if (path.includes(\"../\") || path.startsWith(\"/\")) {\n+        expect(() => ResourceInjector.resolve(path)).toThrow(\n+          expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n+        );\n+      }\n+    }\n+  });\n```\n</details>\n\nBased on learnings: Applies to **/*.test.{ts,tsx} : Include recursive object traversal in injection validation tests.\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n  it(\"should throw on path traversal attempts\", () => {\n    expect(() => ResourceInjector.resolve(\"../secret.js\")).toThrow(\n      expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n    );\n    expect(() => ResourceInjector.resolve(\"/absolute/path\")).toThrow(\n      expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n    );\n  });\n\n  it(\"should detect traversal payloads discovered via recursive object traversal\", () => {\n    const payload = {\n      safe: \"ok/file.bin\",\n      nested: {\n        level1: {\n          level2: \"../secret.js\",\n        },\n      },\n    };\n\n    const collectStrings = (value: unknown): string[] => {\n      if (typeof value === \"string\") return [value];\n      if (value && typeof value === \"object\") {\n        return Object.values(value as Record<string, unknown>).flatMap(collectStrings);\n      }\n      return [];\n    };\n\n    for (const path of collectStrings(payload)) {\n      if (path.includes(\"../\") || path.startsWith(\"/\")) {\n        expect(() => ResourceInjector.resolve(path)).toThrow(\n          expect.objectContaining({ i18nKey: \"engine.errors.securityViolation\" }),\n        );\n      }\n    }\n  });\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/__tests__/ResourceInjector.test.ts` around lines 31\n- 34, Update the ResourceInjector tests to assert the specific security error\ni18nKey instead of a generic toThrow(): replace expect(() =>\nResourceInjector.resolve(\"../secret.js\")).toThrow() and the absolute path case\nwith expect(...).toThrowError(expect.objectContaining({ i18nKey:\n\"<EXPECTED_I18N_KEY>\" })) (use the actual i18nKey used by ResourceInjector).\nAlso add a test that attempts injection via a recursive object (e.g., an object\nthat references itself) and assert the same i18nKey error from\nResourceInjector.resolve when resolving that object to ensure recursive object\ntraversal injection is blocked.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:57Z",
+    "updated_at": "2026-03-02T10:19:08Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909987",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909987"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909987"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909987/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 31,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 34,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 13,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909989",
+    "pull_request_review_id": 3873476283,
+    "id": 2869909989,
+    "node_id": "PRRC_kwDORJ0gd86rD1nl",
+    "diff_hunk": "@@ -104,5 +115,49 @@ describe(\"ResourceInjector\", () => {\n         expect.any(Uint8Array),\n       );\n     });\n+\n+    it(\"should handle EEXIST error during directory creation\", async () => {\n+      // @ts-expect-error accessing private static for testing\n+      ResourceInjector.resources = { \"dir/file.bin\": \"blob:url\" };\n+      const mockFS = {\n+        mkdir: vi.fn().mockImplementation(() => {\n+          const err = new Error(\"EEXIST\");\n+          (err as unknown as { code: string }).code = \"EEXIST\";\n+          throw err;\n+        }),\n+        writeFile: vi.fn(),\n+      };\n+      globalThis.fetch = vi.fn().mockResolvedValue({\n+        ok: true,\n+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),\n+      });\n+\n+      // Should NOT throw\n+      await expect(\n+        ResourceInjector.mountToVFS(\n+          { FS: mockFS },\n+          \"/dir/file.bin\",\n+          \"dir/file.bin\",\n+        ),\n+      ).resolves.toBeUndefined();\n+    });",
+    "path": "packages/core/src/workers/__tests__/ResourceInjector.test.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "6a75a5fdeb7e720e786a622a186ec788230ed4ed",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**EEXIST テストが偽陽性になり得ます。**\n\n現状は「throwしない」だけの検証で、`mkdir` 後に `writeFile` まで進んだ保証がありません。`writeFile` 呼び出しも明示的に検証してください。\n\n<details>\n<summary>💡 提案差分</summary>\n\n```diff\n       await expect(\n         ResourceInjector.mountToVFS(\n           { FS: mockFS },\n           \"/dir/file.bin\",\n           \"dir/file.bin\",\n         ),\n       ).resolves.toBeUndefined();\n+\n+      expect(mockFS.writeFile).toHaveBeenCalledWith(\n+        \"/dir/file.bin\",\n+        expect.any(Uint8Array),\n+      );\n```\n</details>\n\n<!-- suggestion_start -->\n\n<details>\n<summary>📝 Committable suggestion</summary>\n\n> ‼️ **IMPORTANT**\n> Carefully review the code before committing. Ensure that it accurately replaces the highlighted code, contains no missing lines, and has no issues with indentation. Thoroughly test & benchmark the code to ensure it meets the requirements.\n\n```suggestion\n    it(\"should handle EEXIST error during directory creation\", async () => {\n      // `@ts-expect-error` accessing private static for testing\n      ResourceInjector.resources = { \"dir/file.bin\": \"blob:url\" };\n      const mockFS = {\n        mkdir: vi.fn().mockImplementation(() => {\n          const err = new Error(\"EEXIST\");\n          (err as unknown as { code: string }).code = \"EEXIST\";\n          throw err;\n        }),\n        writeFile: vi.fn(),\n      };\n      globalThis.fetch = vi.fn().mockResolvedValue({\n        ok: true,\n        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),\n      });\n\n      // Should NOT throw\n      await expect(\n        ResourceInjector.mountToVFS(\n          { FS: mockFS },\n          \"/dir/file.bin\",\n          \"dir/file.bin\",\n        ),\n      ).resolves.toBeUndefined();\n\n      expect(mockFS.writeFile).toHaveBeenCalledWith(\n        \"/dir/file.bin\",\n        expect.any(Uint8Array),\n      );\n    });\n```\n\n</details>\n\n<!-- suggestion_end -->\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/__tests__/ResourceInjector.test.ts` around lines\n119 - 143, The test currently only asserts that ResourceInjector.mountToVFS does\nnot throw when mockFS.mkdir throws an EEXIST error; update the test to also\nverify that the code proceeds to call the file write step by asserting\nmockFS.writeFile was invoked (and optionally with the expected path/data or at\nleast toHaveBeenCalledTimes(1)). Specifically, in the \"should handle EEXIST\nerror during directory creation\" test, after awaiting\nResourceInjector.mountToVFS(...), add an assertion like\nexpect(mockFS.writeFile).toHaveBeenCalled() (or toHaveBeenCalledWith(...)\nmatching the target path \"/dir/file.bin\") so the test guarantees mountToVFS\nprogressed past mkdir and attempted to write the file.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T22:32:57Z",
+    "updated_at": "2026-03-02T10:19:05Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909989",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909989"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869909989"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869909989/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 90,
+    "original_start_line": 119,
+    "start_side": "RIGHT",
+    "line": 135,
+    "original_line": 143,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 47,
+    "position": 192,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941932",
+    "pull_request_review_id": 3873505961,
+    "id": 2869941932,
+    "node_id": "PRRC_kwDORJ0gd86rD9as",
+    "diff_hunk": "@@ -1,48 +1,38 @@\n-import { describe, it, expect, vi, beforeEach, afterEach } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach, Mock } from \"vitest\";",
+    "path": "packages/core/src/workers/__tests__/NativeCommunicator.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**`performance.now()` をモックしてテストの決定性を担保してください。**\n\nこの `*.test.ts` では時間依存 API の固定化がないため、実装側が `performance.now()` を参照する場合に将来的なフレーク要因になります。`beforeEach` で固定し、`afterEach` で復元する形にしてください。\n\n<details>\n<summary>🔧 提案差分</summary>\n\n```diff\n-import { describe, it, expect, vi, beforeEach, Mock } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from \"vitest\";\n@@\n describe(\"NativeCommunicator\", () => {\n   beforeEach(() => {\n     vi.clearAllMocks();\n+    vi.spyOn(performance, \"now\").mockReturnValue(0);\n   });\n+\n+  afterEach(() => {\n+    vi.restoreAllMocks();\n+  });\n```\n</details>\n\n\nBased on learnings: Applies to **/*.test.{ts,tsx} : Write deterministic tests that do not depend on environment factors like time; mock `performance.now()` and other time-dependent functions.\n\n\nAlso applies to: 45-47\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/__tests__/NativeCommunicator.test.ts` at line 1,\nThis test file lacks deterministic handling of time: mock performance.now() in\nthe test setup by adding a beforeEach that stubs performance.now to return a\nfixed numeric value (e.g., 0 or a constant) and add an afterEach to restore the\noriginal performance.now implementation; update the test in\npackages/core/src/workers/__tests__/NativeCommunicator.test.ts to install the\nstub in beforeEach and restore it in afterEach so any code under test that calls\nperformance.now() (or time-dependent helpers) behaves deterministically.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T23:01:47Z",
+    "updated_at": "2026-03-02T10:19:09Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869941932",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941932"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869941932"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941932/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": null,
+    "original_line": 1,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 2,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941934",
+    "pull_request_review_id": 3873505961,
+    "id": 2869941934,
+    "node_id": "PRRC_kwDORJ0gd86rD9au",
+    "diff_hunk": "@@ -1,48 +1,38 @@\n-import { describe, it, expect, vi, beforeEach, afterEach } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach, Mock } from \"vitest\";\n import { NativeCommunicator } from \"../NativeCommunicator.js\";\n+import { spawn } from \"node:child_process\";\n \n const { mockChild } = vi.hoisted(() => {\n-  // Use a simple mock object that implements the necessary EventEmitter interface\n-  // to avoid issues with hoisted imports of node:events\n-  const listeners = new Map<string, Set<(...args: unknown[]) => unknown>>();\n-  const m: any = {\n-    on: vi.fn((event, cb) => {\n+  const listeners = new Map<string, Set<(...args: unknown[]) => void>>();\n+  const m = {\n+    on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {\n       if (!listeners.has(event)) listeners.set(event, new Set());\n       listeners.get(event)!.add(cb);\n       return m;\n     }),\n-    emit: vi.fn((event, ...args) => {\n+    emit: vi.fn((event: string, ...args: unknown[]) => {\n       listeners.get(event)?.forEach((cb) => {\n         cb(...args);\n       });\n       return true;\n     }),\n-    removeAllListeners: vi.fn(() => {\n-      listeners.clear();\n-      return m;\n-    }),\n+    send: vi.fn(),\n+    kill: vi.fn(),\n+    stdin: {\n+      write: vi.fn(),\n+      end: vi.fn(),\n+    },\n     stdout: {\n-      on: vi.fn((event, cb) => {\n-        if (!m._stdoutListeners) m._stdoutListeners = new Map();\n-        if (!m._stdoutListeners.has(event))\n-          m._stdoutListeners.set(event, new Set());\n-        m._stdoutListeners.get(event).add(cb);\n-        return m.stdout;\n-      }),\n-      emit: vi.fn((event, ...args) => {\n-        m._stdoutListeners?.get(event)?.forEach((cb: unknown) => {\n-          if (typeof cb === \"function\") cb(...args);\n-        });\n-        return true;\n-      }),\n-      removeAllListeners: vi.fn(() => {\n-        m._stdoutListeners?.clear();\n+      on: vi.fn((event: string, cb: (data: unknown) => void) => {\n+        const key = `stdout:${event}`;\n+        if (!listeners.has(key)) listeners.set(key, new Set());\n+        listeners.get(key)!.add(cb as (...args: unknown[]) => void);\n         return m.stdout;\n       }),\n     },\n-    stdin: { write: vi.fn() },\n-    kill: vi.fn(),\n-    _stdoutListeners: new Map(),\n+    stderr: {\n+      on: vi.fn(),\n+    },\n   };\n   return { mockChild: m };\n });",
+    "path": "packages/core/src/workers/__tests__/NativeCommunicator.test.ts",
+    "commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "original_commit_id": "ee7c97896147ac710bd8134df0d5c12ecb242018",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**hoisted な `listeners` がテスト間で残留しています。**\n\n`listeners` は `vi.hoisted` スコープで一度だけ生成されるため、Line 46 の `vi.clearAllMocks()` では初期化されません。イベント購読が積み上がると、将来のケース追加時にテスト間干渉が発生しやすくなります。\n\n<details>\n<summary>♻️ 提案差分</summary>\n\n```diff\n-const { mockChild } = vi.hoisted(() => {\n+const { mockChild, resetMockChildListeners } = vi.hoisted(() => {\n   const listeners = new Map<string, Set<(...args: unknown[]) => void>>();\n+  const resetMockChildListeners = () => listeners.clear();\n@@\n-  return { mockChild: m };\n+  return { mockChild: m, resetMockChildListeners };\n });\n@@\n   beforeEach(() => {\n     vi.clearAllMocks();\n+    resetMockChildListeners();\n   });\n```\n</details>\n\n\n\n\nAlso applies to: 45-47\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/__tests__/NativeCommunicator.test.ts` around lines\n5 - 38, The shared Map listeners created inside the vi.hoisted block is\npersistent across tests, causing event subscriptions on mockChild to leak\nbetween tests; fix by ensuring listeners is reinitialized per test instead of\nhoisted — either remove vi.hoisted and create mockChild (and its listeners Map)\nfresh in a beforeEach, or add an explicit reset that clears listeners (the Map)\nin a beforeEach/afterEach; update references to mockChild, listeners, and the\nvi.hoisted usage so each test gets a new listeners Map and no cross-test event\nbuildup.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->\n\n✅ Addressed in commit 80be01b",
+    "created_at": "2026-03-01T23:01:47Z",
+    "updated_at": "2026-03-02T10:19:12Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869941934",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941934"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2869941934"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2869941934/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 5,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 38,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 67,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614445",
+    "pull_request_review_id": 3875265973,
+    "id": 2871614445,
+    "node_id": "PRRC_kwDORJ0gd86rKVvt",
+    "diff_hunk": "@@ -0,0 +1,124 @@\n+---\n+name: code-review\n+description: \"AI-powered code review using CodeRabbit. Default code-review skill. Trigger for any explicit review request AND autonomously when the agent thinks a review is needed (code/PR/quality/security).\"\n+---\n+\n+# CodeRabbit Code Review\n+\n+AI-powered code review using CodeRabbit. Enables developers to implement features, review code, and fix issues in autonomous cycles without manual intervention.\n+\n+## Capabilities\n+\n+- Finds bugs, security issues, and quality risks in changed code\n+- Groups findings by severity (Critical, Warning, Info)\n+- Works on staged, committed, or all changes; supports base branch/commit\n+- Provides fix suggestions (`--plain`) or minimal output for agents (`--prompt-only`)\n+\n+## When to Use\n+\n+When user asks to:\n+\n+- Review code changes / Review my code\n+- Check code quality / Find bugs or security issues\n+- Get PR feedback / Pull request review\n+- What's wrong with my code / my changes\n+- Run coderabbit / Use coderabbit\n+\n+## How to Review\n+\n+### 1. Check Prerequisites\n+\n+```bash\n+# Verify inside a Git repository first\n+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo \"NOT_A_GIT_REPO\"; exit 1; }\n+\n+coderabbit --version 2>/dev/null || echo \"NOT_INSTALLED\"\n+coderabbit auth status 2>&1\n+```\n+\n+**If not in a Git repo**, tell user:\n+\"CodeRabbit CLI must be run from within an initialized Git repository. Please run this command from inside your project directory.\"\n+\n+**If CLI not installed**, tell user:\n+\"Please install CodeRabbit CLI first: curl -fsSL https://cli.coderabbit.ai/install.sh | sh\"\n+",
+    "path": ".agents/skills/code-review/SKILL.md",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "80be01bd76d2e6b2cd78d935939922af3234045b",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**インストール手順の `curl | sh` は供給網リスクを増やします**\n\nLine 43 の案内は、改ざん時に即時実行されるため安全性が低いです。検証ステップ付きの手順に変更してください。  \n\n\n<details>\n<summary>修正案（ドキュメント差分）</summary>\n\n```diff\n- \"Please install CodeRabbit CLI first: curl -fsSL https://cli.coderabbit.ai/install.sh | sh\"\n+ \"Please install CodeRabbit CLI first:\n+ curl -fsSLo /tmp/coderabbit-install.sh https://cli.coderabbit.ai/install.sh\n+ # (Recommended) verify checksum/signature from official docs\n+ sh /tmp/coderabbit-install.sh\"\n```\n</details>\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn @.agents/skills/code-review/SKILL.md around lines 42 - 44, Replace the unsafe\n\"curl -fsSL https://cli.coderabbit.ai/install.sh | sh\" guidance with a\nverified-install flow: instruct users to download the installer to a file,\nverify its integrity (SHA256 checksum and/or GPG signature) and inspect it\nbefore executing, and only run it explicitly if verification succeeds; update\nthe string \"Please install CodeRabbit CLI first: curl -fsSL\nhttps://cli.coderabbit.ai/install.sh | sh\" to describe those steps and include\ncommands to fetch the installer file, obtain and verify the checksum/signature,\nreview the script, and then run it with an explicit shell invocation.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:triton:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-02T10:25:00Z",
+    "updated_at": "2026-03-02T10:25:03Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614445",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614445"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614445"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614445/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 42,
+    "original_start_line": 42,
+    "start_side": "RIGHT",
+    "line": 48,
+    "original_line": 44,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 44,
+    "position": 48,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614450",
+    "pull_request_review_id": 3875265973,
+    "id": 2871614450,
+    "node_id": "PRRC_kwDORJ0gd86rKVvy",
+    "diff_hunk": "@@ -397,14 +420,24 @@ export class EngineFacade<\n     this.resultListeners.clear();\n     this.telemetryListeners.clear();\n \n+    // 2026: 実行中の探索があれば CANCELLED エラーで中断\n+    if (this.activeTaskStop) {\n+      this.activeTaskStop();\n+      this._lastError = new EngineError({\n+        code: EngineErrorCode.CANCELLED,\n+        message: \"Engine disposed during search.\",\n+        engineId: id,\n+        i18nKey: createI18nKey(\"engine.errors.disposedDuringSearch\"),\n+      });",
+    "path": "packages/core/src/bridge/EngineFacade.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "80be01bd76d2e6b2cd78d935939922af3234045b",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**`dispose()` 中の active task 停止を待機していません。**\n\n`activeTaskStop()` が非同期停止を返す実装でも待たずに後続処理へ進むため、停止/解放のレースが起こりえます。完了待機＋失敗時ログを入れてください。  \n\n\n<details>\n<summary>🧹 提案差分</summary>\n\n```diff\n     if (this.activeTaskStop) {\n-      this.activeTaskStop();\n+      try {\n+        await Promise.resolve(this.activeTaskStop());\n+      } catch (err) {\n+        console.error(`[EngineFacade] Failed to stop active task for ${id}:`, err);\n+      }\n       this._lastError = new EngineError({\n         code: EngineErrorCode.CANCELLED,\n         message: \"Engine disposed during search.\",\n         engineId: id,\n         i18nKey: createI18nKey(\"engine.errors.disposedDuringSearch\"),\n       });\n     }\n```\n</details>\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/bridge/EngineFacade.ts` around lines 424 - 431, In\ndispose(), await the potentially async activeTaskStop() instead of calling it\nfire-and-forgetting: call await this.activeTaskStop() inside a try/catch, and on\nerror set this._lastError (or log via existing logger) with context so failures\nare visible; keep setting this._lastError to the EngineError with\nEngineErrorCode.CANCELLED/ message/engineId/i18nKey as before but ensure it's\ndone after the awaited stop completes or in the catch to record stop failures\n(refer to activeTaskStop, _lastError, EngineError, EngineErrorCode,\ncreateI18nKey).\n```\n\n</details>\n\n<!-- fingerprinting:phantom:medusa:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-02T10:25:00Z",
+    "updated_at": "2026-03-02T10:25:03Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614450",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614450"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614450"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614450/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 424,
+    "original_start_line": 424,
+    "start_side": "RIGHT",
+    "line": 438,
+    "original_line": 431,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 58,
+    "position": 65,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614452",
+    "pull_request_review_id": 3875265973,
+    "id": 2871614452,
+    "node_id": "PRRC_kwDORJ0gd86rKVv0",
+    "diff_hunk": "@@ -1,108 +1,142 @@\n-import { describe, it, expect, vi, beforeAll, afterAll } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach } from \"vitest\";\n import { ResourceInjector } from \"../ResourceInjector.js\";\n \n describe(\"ResourceInjector\", () => {\n-  beforeAll(() => {\n-    vi.spyOn(performance, \"now\").mockReturnValue(0);\n-  });\n-\n-  afterAll(() => {\n-    vi.restoreAllMocks();\n+  beforeEach(() => {\n+    vi.clearAllMocks();\n+    // @ts-expect-error accessing private static for testing\n+    ResourceInjector.resources = {};\n   });",
+    "path": "packages/core/src/workers/__tests__/ResourceInjector.test.ts",
+    "commit_id": "2f6f31d1771b1c634aada7563ffe19d5a3280cc0",
+    "original_commit_id": "80be01bd76d2e6b2cd78d935939922af3234045b",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**`performance.now()` の固定化がなく、テスト決定性ルール未達です。**\n\nこのファイルのテストは時間依存を明示使用していなくても、プロジェクト規約上 `performance.now()` をモックして決定性を担保する必要があります。\n\n<details>\n<summary>💡 提案差分</summary>\n\n```diff\n-import { describe, it, expect, vi, beforeEach } from \"vitest\";\n+import { describe, it, expect, vi, beforeEach, afterEach } from \"vitest\";\n@@\n   beforeEach(() => {\n     vi.clearAllMocks();\n+    vi.spyOn(performance, \"now\").mockReturnValue(0);\n     // `@ts-expect-error` accessing private static for testing\n     ResourceInjector.resources = {};\n   });\n+\n+  afterEach(() => {\n+    vi.restoreAllMocks();\n+  });\n```\n</details>\n\nAs per coding guidelines: `**/*.{test,spec}.{ts,tsx,js}`: Ensure tests are deterministic by mocking `performance.now()`.\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/__tests__/ResourceInjector.test.ts` around lines 1\n- 9, The tests lack deterministic time control—mock performance.now() in the\ntest suite so results don't depend on real time; update the beforeEach in\nResourceInjector.test.ts to stub performance.now (e.g., vi.spyOn(performance,\n\"now\").mockReturnValue(<fixedNumber>)) and ensure you clear/restore the mock\n(vi.restoreAllMocks or performance.now.mockRestore) in afterEach so\nResourceInjector-related tests remain deterministic; reference the test suite's\nbeforeEach and the ResourceInjector resource reset to place the stub.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-02T10:25:00Z",
+    "updated_at": "2026-03-02T10:25:03Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614452",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614452"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614452"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614452/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 1,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 9,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 16,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614456",
+    "pull_request_review_id": 3875265973,
+    "id": 2871614456,
+    "node_id": "PRRC_kwDORJ0gd86rKVv4",
+    "diff_hunk": "@@ -213,10 +213,13 @@ export class ResourceInjector {\n     }\n \n     const blobUrl = this.resolve(resourceKey);\n-    if (blobUrl === resourceKey) {\n-      console.warn(\n-        `[ResourceInjector] Resource key \"${resourceKey}\" not resolved.`,\n-      );\n+    if (blobUrl === resourceKey && !blobUrl.startsWith(\"blob:\")) {\n+      throw new EngineError({\n+        code: EngineErrorCode.INTERNAL_ERROR,\n+        message: `Resource ${resourceKey} not found in registry`,\n+        i18nKey: createI18nKey(\"engine.errors.internalError\"),\n+        i18nParams: { message: `Resource ${resourceKey} not found` },\n+      });",
+    "path": "packages/core/src/workers/ResourceInjector.ts",
+    "commit_id": "2f6f31d1771b1c634aada7563ffe19d5a3280cc0",
+    "original_commit_id": "80be01bd76d2e6b2cd78d935939922af3234045b",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟠 Major_\n\n**非 `blob:` 解決値が通過できるため、リソース供給境界が不十分です。**\n\n現条件は「未解決時のみ」拒否するため、`resources` に `https://...` 等が入っているとそのまま fetch されます。ハードニング方針に合わせ、`blob:` 以外を拒否するか、整合性検証を必須化してください。\n\n<details>\n<summary>🔒 提案差分</summary>\n\n```diff\n-    if (blobUrl === resourceKey && !blobUrl.startsWith(\"blob:\")) {\n+    if (!blobUrl.startsWith(\"blob:\")) {\n       throw new EngineError({\n-        code: EngineErrorCode.INTERNAL_ERROR,\n-        message: `Resource ${resourceKey} not found in registry`,\n-        i18nKey: createI18nKey(\"engine.errors.internalError\"),\n-        i18nParams: { message: `Resource ${resourceKey} not found` },\n+        code: EngineErrorCode.SECURITY_ERROR,\n+        message: \"Resource URL must use blob scheme\",\n+        i18nKey: createI18nKey(\"engine.errors.securityViolation\"),\n+        i18nParams: { resourceKey },\n       });\n     }\n```\n</details>\n\n  \nAs per coding guidelines, \"Enforce SRI hash verification for all resource loads.\"\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/ResourceInjector.ts` around lines 216 - 222, The\ncondition in ResourceInjector that only throws when blobUrl === resourceKey and\nnot blob: allows external URLs (e.g., https://...) to be fetched; update the\ncheck in the ResourceInjector flow (where blobUrl and resourceKey are compared)\nto reject any non-blob scheme and require SRI/integrity verification: if blobUrl\ndoes not start with \"blob:\" or the resource entry lacks a valid integrity/hash,\nthrow the same EngineError (EngineErrorCode.INTERNAL_ERROR) with the existing\ni18n keys; ensure the enforcement point is the same place that currently throws\n(the block constructing EngineError) so external URLs cannot bypass the resource\nsupply boundary.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-02T10:25:01Z",
+    "updated_at": "2026-03-02T10:25:03Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614456",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614456"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614456"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614456/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": 216,
+    "start_side": "RIGHT",
+    "line": null,
+    "original_line": 222,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 14,
+    "position": 1,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614458",
+    "pull_request_review_id": 3875265973,
+    "id": 2871614458,
+    "node_id": "PRRC_kwDORJ0gd86rKVv6",
+    "diff_hunk": "@@ -213,10 +213,13 @@ export class ResourceInjector {\n     }\n \n     const blobUrl = this.resolve(resourceKey);\n-    if (blobUrl === resourceKey) {\n-      console.warn(\n-        `[ResourceInjector] Resource key \"${resourceKey}\" not resolved.`,\n-      );\n+    if (blobUrl === resourceKey && !blobUrl.startsWith(\"blob:\")) {\n+      throw new EngineError({\n+        code: EngineErrorCode.INTERNAL_ERROR,\n+        message: `Resource ${resourceKey} not found in registry`,\n+        i18nKey: createI18nKey(\"engine.errors.internalError\"),\n+        i18nParams: { message: `Resource ${resourceKey} not found` },\n+      });",
+    "path": "packages/core/src/workers/ResourceInjector.ts",
+    "commit_id": "e8d1355187f692024a489b58554b25e948538fac",
+    "original_commit_id": "80be01bd76d2e6b2cd78d935939922af3234045b",
+    "user": {
+      "login": "coderabbitai[bot]",
+      "id": 136622811,
+      "node_id": "BOT_kgDOCCSy2w",
+      "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/coderabbitai%5Bbot%5D",
+      "html_url": "https://github.com/apps/coderabbitai",
+      "followers_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/followers",
+      "following_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/following{/other_user}",
+      "gists_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/subscriptions",
+      "organizations_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/orgs",
+      "repos_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/repos",
+      "events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/coderabbitai%5Bbot%5D/received_events",
+      "type": "Bot",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "_⚠️ Potential issue_ | _🟡 Minor_\n\n**i18nキー利用時に英語文面を直書きしないでください。**\n\n`i18nParams.message` に文を入れるのではなく、翻訳可能な値（例: `resourceKey`）のみ渡し、表示文言は `locales/` 側で管理してください。\n\n<details>\n<summary>🌐 提案差分</summary>\n\n```diff\n       throw new EngineError({\n         code: EngineErrorCode.INTERNAL_ERROR,\n-        message: `Resource ${resourceKey} not found in registry`,\n+        message: \"Resource not found in registry\",\n         i18nKey: createI18nKey(\"engine.errors.internalError\"),\n-        i18nParams: { message: `Resource ${resourceKey} not found` },\n+        i18nParams: { resourceKey },\n       });\n```\n</details>\n\n  \nAs per coding guidelines, \"i18n: ユーザー向け文字列のハードコードを禁止し、`locales/` 配下の多言語対応ファイルの使用を求めること。\"\n\n<details>\n<summary>🤖 Prompt for AI Agents</summary>\n\n```\nVerify each finding against the current code and only fix it if needed.\n\nIn `@packages/core/src/workers/ResourceInjector.ts` around lines 217 - 222, The\ni18nParams currently includes an English sentence; change the EngineError\ncreation in ResourceInjector (where EngineError, EngineErrorCode and\ncreateI18nKey are used) to pass only translation variables (e.g., { resourceKey\n}) in i18nParams instead of a hardcoded message string, and move the\nhuman-readable message text into the locales files under the matching i18n key\nso the UI renders a localized sentence like \"Resource {resourceKey} not found\";\nkeep the top-level message property as a short machine message or the same i18n\nkey if required by your error shape.\n```\n\n</details>\n\n<!-- fingerprinting:phantom:poseidon:hawk -->\n\n<!-- This is an auto-generated comment by CodeRabbit -->",
+    "created_at": "2026-03-02T10:25:01Z",
+    "updated_at": "2026-03-02T10:25:03Z",
+    "html_url": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614458",
+    "pull_request_url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614458"
+      },
+      "html": {
+        "href": "https://github.com/hdkz-dev/multi-game-engines/pull/49#discussion_r2871614458"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/49"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/hdkz-dev/multi-game-engines/pulls/comments/2871614458/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": 219,
+    "original_start_line": 217,
+    "start_side": "RIGHT",
+    "line": 224,
+    "original_line": 222,
+    "side": "RIGHT",
+    "author_association": "CONTRIBUTOR",
+    "original_position": 14,
+    "position": 16,
+    "subject_type": "line"
+  }
+]

@@ -127,8 +127,8 @@ export abstract class BaseAdapter<
       });
     }
 
-    if (!asset.sri && !asset.__unsafeNoSRI) {
-      const i18nKey = createI18nKey("engine.errors.sriMismatch");
+    if (!asset.sri) {
+      const i18nKey = createI18nKey("engine.errors.sriRequired");
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
         message: `Engine Adapter "${this.id}": Book asset "${asset.id}" requires an SRI hash for security.`,
@@ -137,9 +137,11 @@ export abstract class BaseAdapter<
       });
     }
 
-    const config: IEngineSourceConfig = asset.sri
-      ? { url: asset.url, type: "asset", sri: asset.sri }
-      : { url: asset.url, type: "asset", __unsafeNoSRI: true };
+    const config: IEngineSourceConfig = {
+      url: asset.url,
+      type: "asset",
+      sri: asset.sri,
+    };
 
     if (asset.size) {
       config.size = asset.size;
