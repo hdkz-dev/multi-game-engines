@@ -1,10 +1,12 @@
 import { LitElement, html, css, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
-import { parseSFEN,
+import {
+  parseSFEN,
   SFEN,
   ShogiPiece,
   ShogiHand,
-  createSFEN } from "@multi-game-engines/domain-shogi";
+  createSFEN,
+} from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
 import { shogiLocales } from "@multi-game-engines/i18n-shogi";
 
@@ -44,10 +46,7 @@ export class ShogiBoard extends LitElement {
       width: 100%;
       max-width: 600px;
       margin: 0 auto;
-      font-family:
-        "Hiragino Mincho ProN",
-        "MS Mincho",
-        serif;
+      font-family: "Hiragino Mincho ProN", "MS Mincho", serif;
       container-type: size;
     }
     .container {
@@ -120,8 +119,15 @@ export class ShogiBoard extends LitElement {
     return this._sfen;
   }
 
-  set sfen(value: string) {
+  set sfen(value: string | null) {
     const old = this._sfen;
+    if (value == null || value === "") {
+      this._sfen = createSFEN(
+        "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+      );
+      this.requestUpdate("sfen", old);
+      return;
+    }
     try {
       this._sfen = createSFEN(value);
     } catch (e) {
@@ -137,10 +143,15 @@ export class ShogiBoard extends LitElement {
     return this._lastMove;
   }
 
-  set lastMove(value: string) {
+  set lastMove(value: string | null) {
     const old = this._lastMove;
+    if (value == null || value === "") {
+      this._lastMove = "";
+      this.requestUpdate("lastMove", old);
+      return;
+    }
     try {
-      this._lastMove = value === "" ? "" : createMove(value);
+      this._lastMove = createMove(value);
     } catch (e) {
       console.warn(`[ShogiBoard] Invalid move attribute: ${value}`, e);
       this._lastMove = "";
@@ -174,7 +185,9 @@ export class ShogiBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ShogiBoardStrings {
-    const data = (this.locale === "ja" ? shogiLocales.ja : shogiLocales.en) as unknown as DeepRecord;
+    const data = (this.locale === "ja"
+      ? shogiLocales.ja
+      : shogiLocales.en) as unknown as DeepRecord;
     const dashboard = (data["dashboard"] || {}) as DeepRecord;
     const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
     const engine = (data["engine"] || {}) as DeepRecord;
@@ -182,7 +195,9 @@ export class ShogiBoard extends LitElement {
     const pieces = (gameBoard["shogiPieces"] || {}) as Record<string, string>;
 
     return {
-      boardLabel: String(this.boardLabel || gameBoard["title"] || "Shogi Board"),
+      boardLabel: String(
+        this.boardLabel || gameBoard["title"] || "Shogi Board",
+      ),
       handSenteLabel: String(
         this.handSenteLabel ||
           gameBoard["handSente"] ||

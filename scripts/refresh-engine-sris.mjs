@@ -67,6 +67,10 @@ async function main() {
     console.log(`Processing engine: ${engineId}`);
     for (const [version, versionData] of Object.entries(engine.versions)) {
       console.log(`  Version: ${version}`);
+      if (!versionData.assets) {
+        console.log(`    ⚠️ No assets defined for version ${version}`);
+        continue;
+      }
       for (const [assetId, asset] of Object.entries(versionData.assets)) {
         try {
           updatedCount += await processAsset(assetId, asset);
