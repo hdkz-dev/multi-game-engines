@@ -213,14 +213,14 @@ export class ResourceInjector {
     }
 
     const blobUrl = this.resolve(resourceKey);
-    // 2026 Zenith Tier Hardening: Only allow blob: scheme for injected resources.
-    // This prevents external URL injection via the resource registry.
+    // 2026 Zenith Tier: 物理的なリソース境界の強制。
+    // レジストリ解決値が blob: スキームでない場合は、外部インジェクションとみなして拒否。
     if (!blobUrl.startsWith("blob:")) {
       throw new EngineError({
         code: EngineErrorCode.INTERNAL_ERROR,
         message: "Resource not found or invalid scheme in registry",
         i18nKey: createI18nKey("engine.errors.internalError"),
-        i18nParams: { resourceKey },
+        i18nParams: { resourceKey }, // 文面ではなくキーのみを渡す
       });
     }
 
