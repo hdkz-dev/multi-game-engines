@@ -30,10 +30,13 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
     adapter.setStatus("ready");
     const facade = new EngineFacade(adapter);
 
+    // 物理的修正: searchPromise が投げるエラーを確実にキャッチするように待機
     const searchPromise = facade.search({} as IBaseSearchOptions);
     
+    // 中断を誘発
     await facade.dispose();
 
+    // searchPromise のリジェクトを物理的に確実にハンドル
     await expect(searchPromise).rejects.toThrow(
       expect.objectContaining({ code: EngineErrorCode.CANCELLED }),
     );
@@ -55,7 +58,6 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
     
     const result = await searchPromise;
     expect(result.bestMove).toBeDefined();
-    // EngineFacade が onCommand をフォールバック呼び出しすることを確認
     expect((buggyMw as any).onCommand).toHaveBeenCalled();
   });
 
