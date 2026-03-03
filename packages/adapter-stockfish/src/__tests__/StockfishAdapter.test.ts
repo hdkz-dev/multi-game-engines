@@ -117,6 +117,12 @@ describe("StockfishAdapter", () => {
         const originalPostMessage = this.postMessage;
         this.postMessage = vi.fn((msg: unknown) => {
           originalPostMessage(msg);
+          // Handle resource injection handshake to prevent load timeout
+          if (typeof msg === "object" && msg !== null && (msg as any).type === "MG_INJECT_RESOURCES") {
+            setTimeout(() => {
+              this.onmessage?.({ data: { type: "MG_RESOURCES_READY" } } as MessageEvent);
+            }, 0);
+          }
           if (msg === "go depth 10") {
             setTimeout(() => {
               if (typeof this.onmessage === "function") {
