@@ -1,444 +1,206 @@
-import { createI18nKey } from "../protocol/ProtocolValidator.js";
-import { IEngineLoader, IEngineSourceConfig, IFileStorage, EngineErrorCode, ProgressCallback } from "../types.js";
-import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
+import {
+  IEngineLoader,
+  IEngineSourceConfig,
+  IEngineSourceType,
+  EngineErrorCode,
+} from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
-import { SegmentedVerifier } from "../protocol/SegmentedVerifier.js";
+import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 
 /**
- * 2026 Zenith Tier: エンジンバイナリのダウンロード、SRI検証、ストレージ保存を管理するローダー。
- * UI/CLI 共通の進捗通知、中断、リトライ、再開機能を備える。
+ * 2026 Zenith Tier: エンジンリソース（WASM, JS, Assets）の物理的ロードと SRI 検証を管理。
  */
 export class EngineLoader implements IEngineLoader {
-  private inflightLoads = new Map<string, Promise<string>>();
-  private inflightBatchLoads = new Map<
-    string,
-    Promise<Record<string, string>>
-  >();
-  private activeBlobs = new Map<string, string>(); // cacheKey -> blobUrl
-  private activeBlobsByUrl = new Map<string, string>(); // blobUrl -> cacheKey
-  private isProduction: boolean;
-  private disposed = false;
+  private activeBlobs = new Map<string, string>();
+  private inflight = new Map<string, Promise<string>>();
 
-  constructor(private storage: IFileStorage) {
-    const g = globalThis as unknown as {
-      process?: { env?: Record<string, string> };
-    };
-    this.isProduction = g.process?.env?.["NODE_ENV"] === "production";
-  }
-
-  private getMimeType(config: IEngineSourceConfig): string {
-    switch (config.type) {
-      case "wasm":
-        return "application/wasm";
-      case "eval-data":
-      case "native":
-      case "webgpu-compute":
-      case "asset":
-      case "json":
-      case "text":
-        return "application/octet-stream";
-      case "worker-js":
-      default:
-        return "application/javascript";
-    }
-  }
+  constructor(private readonly storage?: any) {}
 
   /**
-   * 単一のエンジンリソースをロードします。
+   * 単一のリソースをロードします。
    */
   async loadResource(
     engineId: string,
     config: IEngineSourceConfig,
-    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<string> {
-    if (this.disposed) {
-      throw new EngineError({
-        code: EngineErrorCode.LIFECYCLE_ERROR,
-        message: "EngineLoader has been disposed.",
-        engineId,
-        i18nKey: createI18nKey("engine.errors.disposed"),
-      });
+    this.validateResourceUrl(config, engineId);
+
+    const safeId = engineId.replace(/[^a-zA-Z0-9]/g, "_");
+    const cacheKey = `${safeId}-${encodeURIComponent(config.url)}`;
+
+    if (this.activeBlobs.has(cacheKey)) {
+      return this.activeBlobs.get(cacheKey)!;
     }
 
-    // 2026: 厳密な ID バリデーション
-    if (/[^a-zA-Z0-9-_]/.test(engineId)) {
-      throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid engine ID: "${engineId}".`,
-        engineId,
-        i18nKey: createI18nKey("engine.errors.invalidEngineId"),
-      });
+    if (this.inflight.has(cacheKey)) {
+      return this.inflight.get(cacheKey)!;
     }
 
-    const cacheKey = `${engineId}:${encodeURIComponent(config.url)}`;
-    const activeUrl = this.activeBlobs.get(cacheKey);
-    if (activeUrl) return activeUrl;
-
-    const existing = this.inflightLoads.get(cacheKey);
-    if (existing) return existing;
-
-    const promise = (async () => {
+    // 物理的整合性: ロード処理本体を独立した非同期スコープで実行
+    const performLoad = async (): Promise<string> => {
       try {
-        // 1. セキュリティ検証 (URL, Protocol)
-        this.validateResourceUrl(config, engineId);
+        if (this.storage) {
+          const cached = await this.storage.get(cacheKey);
+          if (cached) {
+            const url = URL.createObjectURL(new Blob([cached], { type: this.getMimeType(config.type) }));
+            this.activeBlobs.set(cacheKey, url);
+            return url;
+          }
+        }
 
-        // 2. キャッシュチェック
-        const cached = await this.storage.get(cacheKey);
-        if (cached) {
-          options?.onProgress?.({
-            status: "verifying",
-            loadedBytes: cached.byteLength,
-            totalBytes: cached.byteLength,
-            percentage: 100,
-            resource: config.url,
+        const fetchOptions = SecurityAdvisor.getSafeFetchOptions(config.sri);
+        const response = await fetch(config.url, {
+          ...fetchOptions,
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (!response.ok) {
+          throw new EngineError({
+            code: EngineErrorCode.NETWORK_ERROR,
+            message: `Failed to download engine resource: ${config.url} (${response.status})`,
+            engineId,
           });
-
-          if (config.sri) {
-            await SecurityAdvisor.assertSRI(cached, config.sri);
-          }
-
-          if (config.segmentedSri) {
-            await SegmentedVerifier.assertSegmented(
-              cached,
-              config.segmentedSri,
-            );
-          }
-
-          // SSR Guard
-          if (
-            typeof URL === "undefined" ||
-            typeof URL.createObjectURL !== "function"
-          ) {
-            return config.url;
-          }
-
-          const blobUrl = URL.createObjectURL(
-            new Blob([cached], { type: this.getMimeType(config) }),
-          );
-          this.updateBlobUrl(cacheKey, blobUrl);
-
-          options?.onProgress?.({
-            status: "completed",
-            loadedBytes: cached.byteLength,
-            totalBytes: cached.byteLength,
-            percentage: 100,
-            resource: config.url,
-          });
-          return blobUrl;
         }
 
-        // 3. フェッチ (Retry & Progress 対応)
-        const data = await this.fetchWithProgress(
-          config.url,
-          options?.onProgress,
-          options?.signal,
-        );
-
-        // 4. SRI 検証
-        options?.onProgress?.({
-          status: "verifying",
-          loadedBytes: data.byteLength,
-          totalBytes: data.byteLength,
-          resource: config.url,
-        });
-        if (config.sri) {
-          try {
-            await SecurityAdvisor.assertSRI(data, config.sri);
-          } catch (err) {
-            await this.storage.delete(cacheKey);
-            throw err;
-          }
+        const buffer = await response.arrayBuffer();
+        if (this.storage) {
+          void this.storage.set(cacheKey, buffer);
         }
 
-        if (config.segmentedSri) {
-          try {
-            await SegmentedVerifier.assertSegmented(data, config.segmentedSri);
-          } catch (err) {
-            await this.storage.delete(cacheKey);
-            throw err;
-          }
-        }
-
-        // 5. ストレージ保存と Blob URL 化
-        await this.storage.set(cacheKey, data);
-
-        // SSR Guard
-        if (
-          typeof URL === "undefined" ||
-          typeof URL.createObjectURL !== "function"
-        ) {
-          return config.url;
-        }
-
-        const blobUrl = URL.createObjectURL(
-          new Blob([data], { type: this.getMimeType(config) }),
-        );
-        this.updateBlobUrl(cacheKey, blobUrl);
-
-        options?.onProgress?.({
-          status: "completed",
-          loadedBytes: data.byteLength,
-          totalBytes: data.byteLength,
-          percentage: 100,
-          resource: config.url,
-        });
-        return blobUrl;
-      } finally {
-        this.inflightLoads.delete(cacheKey);
-      }
-    })();
-
-    this.inflightLoads.set(cacheKey, promise);
-    return promise;
-  }
-
-  /**
-   * 進捗通知・リトライ・レジューム付きのフェッチ。
-   */
-  private async fetchWithProgress(
-    url: string,
-    onProgress?: ProgressCallback,
-    signal?: AbortSignal,
-  ): Promise<ArrayBuffer> {
-    let lastError: Error | undefined;
-    let loadedBytes = 0;
-    const chunks: Uint8Array[] = [];
-
-    // 2026: 指数バックオフ付きリトライ (Max 3 times)
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (signal?.aborted) {
-        throw new EngineError({
-          code: EngineErrorCode.CANCELLED,
-          message: "Fetch aborted",
-        });
-      }
-
-      try {
-        onProgress?.({ status: "connecting", loadedBytes, resource: url });
-
-        const headers: Record<string, string> = {};
-        if (loadedBytes > 0) {
-          // 2026: Resumable Fetch (Range Request)
-          headers["Range"] = `bytes=${loadedBytes}-`;
-        }
-
-        const response = await fetch(url, { signal: signal ?? null, headers });
-
-        // 206 Partial Content または 200 OK
-        if (!response.ok && response.status !== 206) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const isPartial = response.status === 206;
-        if (loadedBytes > 0 && !isPartial) {
-          // 2026: サーバーが Range を無視して 200 OK を返した場合、
-          // 既存のチャンクを破棄して最初からやり直す。
-          loadedBytes = 0;
-          chunks.length = 0;
-        }
-
-        const contentLength = parseInt(
-          response.headers.get("Content-Length") || "0",
-          10,
-        );
-        const totalBytes = isPartial
-          ? parseInt(
-              response.headers.get("Content-Range")?.split("/")?.[1] || "0",
-              10,
-            ) || undefined
-          : contentLength || undefined;
-
-        const reader = response.body?.getReader();
-
-        if (!reader) {
-          const data = await response.arrayBuffer();
-          return data;
-        }
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          if (value) {
-            chunks.push(value);
-            loadedBytes += value.length;
-
-            onProgress?.({
-              status: "downloading",
-              loadedBytes,
-              totalBytes,
-              percentage: totalBytes
-                ? Math.floor((loadedBytes / totalBytes) * 100)
-                : undefined,
-              resource: url,
-            });
-          }
-        }
-
-        // 2026: データ整合性チェック (Incomplete Data Check)
-        if (
-          totalBytes !== undefined &&
-          !isPartial &&
-          loadedBytes !== totalBytes
-        ) {
-          throw new Error(
-            `Incomplete data: expected ${totalBytes} bytes, got ${loadedBytes}`,
-          );
-        }
-
-        const result = new Uint8Array(loadedBytes);
-        let offset = 0;
-        for (const chunk of chunks) {
-          result.set(chunk, offset);
-          offset += chunk.length;
-        }
-        return result.buffer as ArrayBuffer;
+        const url = URL.createObjectURL(new Blob([buffer], { type: this.getMimeType(config.type) }));
+        this.activeBlobs.set(cacheKey, url);
+        return url;
       } catch (err) {
-        lastError = err as Error;
-        if (
-          err instanceof Error &&
-          (err.name === "AbortError" || err.message.includes("aborted"))
-        ) {
-          throw err;
-        }
-
-        if (attempt < 2) {
-          const delay = Math.pow(2, attempt) * 1000;
-          await new Promise((resolve) => setTimeout(resolve, delay));
-        }
+        // 物理的絶縁: 失敗した Promise は即座にパージ
+        this.inflight.delete(cacheKey);
+        if (err instanceof EngineError) throw err;
+        throw new EngineError({
+          code: EngineErrorCode.NETWORK_ERROR,
+          message: `Failed to fetch engine resource: ${config.url}`,
+          engineId,
+          originalError: err,
+        });
+      } finally {
+        this.inflight.delete(cacheKey);
       }
-    }
+    };
 
-    throw new EngineError({
-      code: EngineErrorCode.NETWORK_ERROR,
-      message: `Failed to fetch after retries: ${lastError?.message}`,
-      originalError: lastError,
+    const loadPromise = performLoad();
+    this.inflight.set(cacheKey, loadPromise);
+
+    // 呼び出し側に Promise を返すが、その失敗時に inflight から消えていることを二重に保証
+    return loadPromise.finally(() => {
+      this.inflight.delete(cacheKey);
     });
   }
 
-  private validateResourceUrl(
-    config: IEngineSourceConfig,
-    engineId: string,
-  ): void {
-    const url = config.url;
-    const urlObj = new URL(url);
-    // 2026: Insecure Connection Check
-    if (
-      urlObj.protocol === "http:" &&
-      urlObj.hostname !== "localhost" &&
-      urlObj.hostname !== "127.0.0.1" &&
-      urlObj.hostname !== "[::1]"
-    ) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "Insecure connection (HTTP) is not allowed in production.",
-        engineId,
-        i18nKey: createI18nKey("engine.errors.insecureConnection"),
-      });
-    }
-
-    // SRI Check
-    if (!config.sri && !config.__unsafeNoSRI) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "SRI hash is required for all engine resources.",
-        engineId,
-        i18nKey: createI18nKey("engine.errors.sriRequired"),
-      });
-    }
-
-    if (config.__unsafeNoSRI && this.isProduction) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: "SRI bypass (__unsafeNoSRI) is not allowed in production.",
-        engineId,
-        i18nKey: createI18nKey("engine.errors.sriBypassNotAllowed"),
-      });
-    }
-  }
-
+  /**
+   * 複数のリソースをロードします。
+   */
   async loadResources(
     engineId: string,
-    configs: Record<string, IEngineSourceConfig>,
-    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+    sources: Record<string, IEngineSourceConfig>,
   ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
-    const entries = Object.entries(configs);
-
-    // 2026: アトミック一括ロード (一部失敗でロールバック)
-    const preExistingUrls = new Set(this.activeBlobs.values());
+    const localNewUrls = new Set<string>();
 
     try {
-      await Promise.all(
-        entries.map(async ([key, config]) => {
-          results[key] = await this.loadResource(engineId, config, options);
-        }),
-      );
+      for (const [key, config] of Object.entries(sources)) {
+        const safeId = engineId.replace(/[^a-zA-Z0-9]/g, "_");
+        const cacheKey = `${safeId}-${encodeURIComponent(config.url)}`;
+        const wasCached = this.activeBlobs.has(cacheKey);
+        
+        const url = await this.loadResource(engineId, config);
+        results[key] = url;
+        
+        if (!wasCached) {
+          localNewUrls.add(url);
+        }
+      }
       return results;
     } catch (err) {
-      // ロールバック: 新しく生成された Blob URL を破棄
-      for (const url of Object.values(results)) {
-        if (!preExistingUrls.has(url)) {
-          this.revoke(url);
-        }
+      for (const url of localNewUrls) {
+        this.revoke(url);
       }
       throw err;
     }
   }
 
-  private updateBlobUrl(cacheKey: string, newUrl: string): void {
-    if (this.disposed) {
-      URL.revokeObjectURL(newUrl);
-      return;
+  private validateResourceUrl(config: IEngineSourceConfig, engineId: string, forceProduction?: boolean): void {
+    const url = config.url;
+
+    if (!/^[a-zA-Z0-9_-]+$/.test(engineId)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Invalid engine ID: ${engineId}`,
+        engineId,
+        i18nKey: "engine.errors.invalidEngineId"
+      });
     }
-    const oldUrl = this.activeBlobs.get(cacheKey);
-    if (oldUrl) {
-      URL.revokeObjectURL(oldUrl);
-      this.activeBlobsByUrl.delete(oldUrl);
+
+    if (url.startsWith("http:") && !url.startsWith("http://localhost") && !url.startsWith("http://127.0.0.1")) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Insecure connection (HTTP) is not allowed for remote resources: ${url}`,
+        engineId,
+        i18nKey: "engine.errors.insecureConnection"
+      });
     }
-    this.activeBlobs.set(cacheKey, newUrl);
-    this.activeBlobsByUrl.set(newUrl, cacheKey);
+
+    if (config.__unsafeNoSRI) {
+      const isProd = forceProduction ?? 
+                     ((typeof process !== "undefined" && process.env["NODE_ENV"] === "production") || 
+                      (globalThis as any).NODE_ENV === "production");
+      if (isProd) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: "SRI bypass (__unsafeNoSRI) is not allowed in production.",
+          engineId,
+          i18nKey: "engine.errors.sriBypassNotAllowed"
+        });
+      }
+    } else if (!config.sri) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `SRI hash is required for resource: ${url}`,
+        engineId,
+        i18nKey: "engine.errors.securityError"
+      });
+    }
   }
 
-  revoke(url: string): void {
-    const cacheKey = this.activeBlobsByUrl.get(url);
-    if (cacheKey) {
-      try {
-        URL.revokeObjectURL(url);
-      } catch (err) {
-        console.error(`[EngineLoader] Failed to revoke URL ${url}:`, err);
+  revokeByEngineId(engineId: string): void {
+    const safeId = engineId.replace(/[^a-zA-Z0-9]/g, "_");
+    const prefix = `${safeId}-`;
+    for (const [key, url] of this.activeBlobs.entries()) {
+      if (key.startsWith(prefix)) {
+        this.revoke(url);
+        this.activeBlobs.delete(key);
       }
-      this.activeBlobs.delete(cacheKey);
-      this.activeBlobsByUrl.delete(url);
     }
   }
 
   revokeAll(): void {
-    this.disposed = true;
     for (const url of this.activeBlobs.values()) {
-      try {
-        URL.revokeObjectURL(url);
-      } catch {
-        // Ignore
-      }
+      URL.revokeObjectURL(url);
     }
     this.activeBlobs.clear();
-    this.activeBlobsByUrl.clear();
-    this.inflightLoads.clear();
-    this.inflightBatchLoads.clear();
+    this.inflight.clear();
   }
 
-  revokeByEngineId(engineId: string): void {
-    for (const [key, val] of this.activeBlobs.entries()) {
-      if (key.startsWith(`${engineId}:`)) {
-        try {
-          URL.revokeObjectURL(val);
-        } catch {
-          // Ignore
-        }
-        this.activeBlobs.delete(key);
-        this.activeBlobsByUrl.delete(val);
-      }
+  private revoke(url: string): void {
+    try {
+      URL.revokeObjectURL(url);
+    } catch { /* ignore */ }
+  }
+
+  private getMimeType(type: IEngineSourceType): string {
+    switch (type) {
+      case "script": return "application/javascript";
+      case "wasm": return "application/wasm";
+      case "json": return "application/json";
+      case "text": return "text/plain";
+      default: return "application/octet-stream";
     }
   }
 }

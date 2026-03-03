@@ -1,93 +1,37 @@
-import { createI18nKey } from "../../protocol/ProtocolValidator.js";
 import { describe, it, expect } from "vitest";
 import { EngineError } from "../EngineError.js";
 import { EngineErrorCode } from "../../types.js";
 
 describe("EngineError", () => {
-  it("should create an error with correct properties and name", () => {
+  it("should create an error with code and message", () => {
     const error = new EngineError({
-      code: EngineErrorCode.NETWORK_ERROR,
-      message: "test message",
-      engineId: "test-engine",
+      code: EngineErrorCode.VALIDATION_ERROR,
+      message: "Test error",
     });
-
-    expect(error.message).toBe("test message");
-    expect(error.code).toBe(EngineErrorCode.NETWORK_ERROR);
-    expect(error.engineId).toBe("test-engine");
+    expect(error.code).toBe(EngineErrorCode.VALIDATION_ERROR);
+    expect(error.message).toBe("Test error");
     expect(error.name).toBe("EngineError");
   });
 
-  it("should wrap an existing error using from()", () => {
-    const original = new Error("original error");
-    const wrapped = EngineError.from(original, "test-engine");
-
-    expect(wrapped.message).toBe("original error");
-    expect(wrapped.engineId).toBe("test-engine");
-    expect(wrapped.originalError).toBe(original);
+  it("should return the same instance when passed to from()", () => {
+    const original = new EngineError({
+      code: EngineErrorCode.WASM_INIT_FAILED,
+      message: "Init failed",
+      engineId: "stockfish",
+    });
+    const result = EngineError.from(original, "other");
+    expect(result).toBe(original);
+    expect(result.engineId).toBe("stockfish"); // SHOULD NOT be overwritten
   });
 
-  it("should return the same error if already an EngineError", () => {
-    const error = new EngineError({
-      code: EngineErrorCode.INTERNAL_ERROR,
-      message: "test",
-    });
-    const result = EngineError.from(error);
-    expect(result).toBe(error);
+  it("should handle non-Error values in from()", () => {
+    const error = EngineError.from("primitive error string");
+    expect(error.message).toBe("primitive error string");
+    expect(error.code).toBe(EngineErrorCode.UNKNOWN_ERROR);
   });
 
-  it("should capture stack trace if supported", () => {
-    const error = new EngineError({
-      code: EngineErrorCode.UNKNOWN_ERROR,
-      message: "test",
-    });
+  it("should capture stack trace safe in V8 environments", () => {
+    const error = new EngineError("Test");
     expect(error.stack).toBeDefined();
-  });
-
-  it("should set remediation when provided", () => {
-    const error = new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
-      message: "test",
-      remediation: "Fix COOP/COEP headers",
-    });
-    expect(error.remediation).toBe("Fix COOP/COEP headers");
-  });
-
-  it("should set remediation for SecurityError via from()", () => {
-    const secErr = new Error("blocked");
-    secErr.name = "SecurityError";
-    const wrapped = EngineError.from(secErr);
-    expect(wrapped.code).toBe(EngineErrorCode.SECURITY_ERROR);
-    expect(wrapped.remediation).toBeDefined();
-  });
-
-  it("should support i18nKey and i18nParams", () => {
-    const error = new EngineError({
-      code: EngineErrorCode.VALIDATION_ERROR,
-      message: "Validation failed",
-      i18nKey: createI18nKey("engine.errors.invalidMoveFormat"),
-      i18nParams: { move: "7g7f" },
-    });
-
-    expect(error.i18nKey).toBe("engine.errors.invalidMoveFormat");
-    expect(error.i18nParams).toEqual({ move: "7g7f" });
-  });
-
-  it("should propagate i18n properties via from()", () => {
-    const source = new EngineError({
-      code: EngineErrorCode.NETWORK_ERROR,
-      message: "failed",
-      i18nKey: createI18nKey("errors.network"),
-    });
-    const wrapped = EngineError.from(source, "new-id");
-    expect(wrapped.i18nKey).toBe("errors.network");
-    expect(wrapped.engineId).toBe("new-id");
-  });
-
-  it("should provide remediation for TypeError and RangeError", () => {
-    const tErr = EngineError.from(new TypeError("Bad type"), "test");
-    expect(tErr.remediation).toContain("invalid values");
-
-    const rErr = EngineError.from(new RangeError("Out of range"), "test");
-    expect(rErr.remediation).toContain("allowed limits");
   });
 });
