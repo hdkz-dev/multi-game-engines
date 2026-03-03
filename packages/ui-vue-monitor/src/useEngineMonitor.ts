@@ -1,13 +1,23 @@
-import { ref,
+import {
+  ref,
   watch,
   computed,
   toValue,
   Ref,
   ComputedRef,
   MaybeRefOrGetter,
-  onWatcherCleanup, } from "vue";
-import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, createPositionString } from "@multi-game-engines/core";
-import { MonitorRegistry,
+  onWatcherCleanup,
+  nextTick,
+} from "vue";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  createPositionString,
+} from "@multi-game-engines/core";
+import {
+  MonitorRegistry,
   SearchStateTransformer,
   EngineSearchState,
   ExtendedSearchInfo,
@@ -15,7 +25,8 @@ import { MonitorRegistry,
   SearchMonitor,
   CommandDispatcher,
   createInitialState,
-  UI_NORMALIZER_MIDDLEWARE_ID, } from "@multi-game-engines/ui-core";
+  UI_NORMALIZER_MIDDLEWARE_ID,
+} from "@multi-game-engines/ui-core";
 
 /**
  * useEngineMonitor の戻り値型を明示的に定義。
@@ -138,7 +149,15 @@ export function useEngineMonitor<
       engineStatus.value = newEngine.status;
       const unsubStatus = newEngine.onStatusChange((newStatus) => {
         engineStatus.value = newStatus;
-        optimisticStatus.value = null;
+        // 2026: optimisticStatus と engineStatus が一致した時点で非同期にリセット
+        // これにより、Vue のレンダリングサイクルがステータス遷移を確実に捉えられるようにする
+        if (optimisticStatus.value === newStatus) {
+          void nextTick(() => {
+            if (optimisticStatus.value === newStatus) {
+              optimisticStatus.value = null;
+            }
+          });
+        }
       });
 
       // クリーンアップ登録 (Vue 3.5+)
@@ -160,7 +179,9 @@ export function useEngineMonitor<
   );
 
   const search = (searchOptions: T_OPTIONS) => {
+    // console.log("[useEngineMonitor] search called with:", JSON.stringify(searchOptions));
     if (!dispatcher.value) {
+      console.error("[useEngineMonitor] search failed: dispatcher is null");
       return Promise.reject(new Error("ENGINE_NOT_AVAILABLE"));
     }
     return dispatcher.value.dispatchSearch(searchOptions);

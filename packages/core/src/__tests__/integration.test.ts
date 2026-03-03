@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge.js";
 import { MockAdapter } from "../mocks/MockAdapter.js";
 import { createPositionId } from "../index.js";
@@ -38,7 +38,7 @@ describe("Core Integration", () => {
       onSearch: async (options) => {
         log.push(`search:${options.positionId}`);
         return options;
-      }
+      },
     });
 
     const engine = await bridge.getEngine({ id: "e1", adapter: "mock" });

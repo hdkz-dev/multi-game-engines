@@ -1,10 +1,11 @@
-import { EngineErrorCode, IEngineError } from "../types.js";
+import { EngineErrorCode, IEngineError, I18nKey } from "../types.js";
 
 /**
  * V8 エンジンの Error コンストラクタ定義。
  */
 interface V8ErrorConstructor {
-  captureStackTrace?: (target: object, ctor?: Function) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  captureStackTrace?: (target: object, ctor?: any) => void;
 }
 
 /**
@@ -15,7 +16,7 @@ export class EngineError extends Error implements IEngineError {
   public readonly engineId?: string | undefined;
   public readonly originalError?: unknown | undefined;
   public readonly remediation?: string | undefined;
-  public readonly i18nKey?: string | undefined;
+  public readonly i18nKey?: I18nKey | undefined;
   public readonly i18nParams?: Record<string, string | number> | undefined;
 
   constructor(params: IEngineError | string) {
@@ -34,7 +35,6 @@ export class EngineError extends Error implements IEngineError {
 
     this.name = "EngineError";
 
-    // 物理的安全なスタックトレース取得
     const v8Error = Error as unknown as V8ErrorConstructor;
     v8Error.captureStackTrace?.(this, EngineError);
   }
@@ -44,7 +44,7 @@ export class EngineError extends Error implements IEngineError {
    */
   static from(err: unknown, engineId?: string): EngineError {
     if (err instanceof EngineError) {
-      return err; // ショートカット
+      return err;
     }
     const message = err instanceof Error ? err.message : String(err);
     return new EngineError({

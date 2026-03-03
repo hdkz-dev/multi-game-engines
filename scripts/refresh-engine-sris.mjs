@@ -1,106 +1,92 @@
-import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
 
-const ENGINES_JSON_PATH = path.resolve("packages/registry/data/engines.json");
-const ALGORITHM = "sha384";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const registryPath = path.resolve(__dirname, "../packages/registry/data/engines.json");
+const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
 
 async function calculateSRI(url) {
-  console.log(`  Fetching ${url}...`);
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
+      return null;
     }
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const hash = crypto.createHash(ALGORITHM).update(buffer).digest("base64");
-    return `${ALGORITHM}-${hash}`;
+    const buffer = await response.arrayBuffer();
+    // 2026 standard: sha384 is preferred for public assets
+    const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
+    return `sha384-${hash}`;
   } catch (err) {
-    console.error(`  Error fetching ${url}: ${err.message}`);
+    console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
     return null;
   }
 }
 
-async function processAsset(assetId, asset) {
-  if (!asset || typeof asset !== "object") return 0;
+async function refresh() {
+  let updated = false;
+  console.log(`Refreshing SRI hashes in ${registryPath}...`);
 
-  // variants 等の入れ子構造を再帰的に処理
-  if (assetId === "variants") {
-    let count = 0;
-    for (const [variantId, variantData] of Object.entries(asset)) {
-      console.log(`    Variant: ${variantId}`);
-      for (const [subAssetId, subAsset] of Object.entries(variantData)) {
-        count += await processAsset(subAssetId, subAsset);
-      }
-    }
-    return count;
+  if (!registry.engines) {
+    throw new Error("Invalid registry format: registry.engines not found");
   }
 
-  // 単一アセットの処理
-  if (asset.url && !asset.url.startsWith("data:")) {
-    const sri = await calculateSRI(asset.url);
-    if (sri) {
-      if (asset.sri !== sri || asset.__unsafeNoSRI) {
-        asset.sri = sri;
-        delete asset.__unsafeNoSRI;
-        console.log(`      ✅ Updated ${assetId}`);
-        return 1;
-      } else {
-        console.log(`      ℹ️ No change for ${assetId}`);
-        return 0;
-      }
-    } else {
-      throw new Error(`Failed to calculate SRI for ${assetId}`);
-    }
-  }
-  return 0;
-}
-
-async function main() {
-  console.log(`Refreshing SRI hashes in ${ENGINES_JSON_PATH}...`);
-
-  const data = JSON.parse(fs.readFileSync(ENGINES_JSON_PATH, "utf-8"));
-  let updatedCount = 0;
-  let errorCount = 0;
-
-  for (const [engineId, engine] of Object.entries(data.engines)) {
+  for (const [engineId, engineData] of Object.entries(registry.engines)) {
     console.log(`Processing engine: ${engineId}`);
-    for (const [version, versionData] of Object.entries(engine.versions)) {
+    
+    if (!engineData.versions) continue;
+
+    for (const [version, versionData] of Object.entries(engineData.versions)) {
       console.log(`  Version: ${version}`);
-      if (!versionData.assets) {
-        console.log(`    ⚠️ No assets defined for version ${version}`);
-        continue;
+      
+      const assets = versionData.assets;
+      if (!assets) continue;
+
+      // Regular assets
+      for (const [assetKey, assetConfig] of Object.entries(assets)) {
+        if (assetKey === "variants") continue; // Handle separately
+
+        if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
+          const sri = await calculateSRI(assetConfig.url);
+          if (sri && assetConfig.sri !== sri) {
+            console.log(`    ✅ Updated SRI for ${assetKey} in ${engineId}@${version}`);
+            assetConfig.sri = sri;
+            updated = true;
+          }
+        }
       }
-      for (const [assetId, asset] of Object.entries(versionData.assets)) {
-        try {
-          updatedCount += await processAsset(assetId, asset);
-        } catch (err) {
-          console.error(`    ❌ Error processing ${assetId}: ${err.message}`);
-          errorCount++;
+
+      // Variants
+      if (assets.variants) {
+        for (const [variantId, variantData] of Object.entries(assets.variants)) {
+          for (const [assetKey, assetConfig] of Object.entries(variantData)) {
+            if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
+              const sri = await calculateSRI(assetConfig.url);
+              if (sri && assetConfig.sri !== sri) {
+                console.log(`    ✅ Updated SRI for variant ${variantId} asset ${assetKey} in ${engineId}@${version}`);
+                assetConfig.sri = sri;
+                updated = true;
+              }
+            }
+          }
         }
       }
     }
   }
 
-  if (updatedCount > 0) {
-    fs.writeFileSync(
-      ENGINES_JSON_PATH,
-      JSON.stringify(data, null, 2) + "\n",
-      "utf-8",
-    );
-    console.log(`\nSuccess: Updated ${updatedCount} assets.`);
+  if (updated) {
+    fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n");
+    console.log("Successfully updated registry with new SRI hashes.");
   } else {
-    console.log("\nNo updates needed.");
-  }
-
-  if (errorCount > 0) {
-    console.warn(`\nWarning: Encountered ${errorCount} errors during update.`);
-    // 完全に失敗した場合は終了コード 1 を返す
-    // ただし、一部成功している場合は警告のみにとどめる運用も可能
+    console.log("No SRI updates required.");
   }
 }
 
-main().catch((err) => {
-  console.error("Fatal error:", err);
-  process.exit(1);
+// Trap errors to continue build process if SRI refresh fails (e.g. offline)
+refresh().catch(err => {
+  console.error("SRI Refresh failed but continuing build:", err);
+  process.exit(0); 
 });

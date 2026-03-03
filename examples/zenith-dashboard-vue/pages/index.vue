@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, markRaw } from "vue";
+import { ref, computed, onMounted, shallowRef, watch } from "vue";
 import {
   EngineMonitorPanel,
   EngineUIProvider,
@@ -50,42 +50,51 @@ const activeEngine = ref<EngineType>("chess");
 const locale = ref("ja");
 
 const localeData = computed(() => {
-  const base = (
-    locale.value === "ja" ? commonLocales.ja : commonLocales.en
-  ) as Record<string, Record<string, unknown>>;
-  const extra = (
-    locale.value === "ja" ? dashboardLocales.ja : dashboardLocales.en
-  ) as Record<string, Record<string, unknown>>;
+  const base = locale.value === "ja" ? commonLocales.ja : commonLocales.en;
+  const extra =
+    locale.value === "ja" ? dashboardLocales.ja : dashboardLocales.en;
+
   return {
     dashboard: {
-      ...((base["dashboard"] as Record<string, unknown>) || {}),
-      ...((extra["dashboard"] as Record<string, unknown>) || {}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...((base as any)?.dashboard || {}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...((extra as any)?.dashboard || {}),
     },
     engine: {
-      ...((base["engine"] as Record<string, unknown>) || {}),
-      ...((extra["engine"] as Record<string, unknown>) || {}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...((base as any)?.engine || {}),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...((extra as any)?.engine || {}),
     },
   };
 });
 
 const { bridge } = useEngines();
 
-// エンジンインスタンスの保持 (2026: getBridge が非同期のため)
-const chessEngine = ref<IEngine<
+// 2026 Zenith: Use shallowRef for engine instances to avoid Proxy corruption
+const chessEngine = shallowRef<IEngine<
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult
 > | null>(null);
-const shogiEngine = ref<IEngine<
+const shogiEngine = shallowRef<IEngine<
   IShogiSearchOptions,
   IShogiSearchInfo,
   IShogiSearchResult
 > | null>(null);
 const initError = ref<string | null>(null);
+const isInitializing = ref(false);
 
 const initEngines = async () => {
+  if (isInitializing.value || (chessEngine.value && shogiEngine.value)) return;
+  isInitializing.value = true;
+
   const bridgeInstance = bridge.value;
-  if (!bridgeInstance) return;
+  if (!bridgeInstance) {
+    isInitializing.value = false;
+    return;
+  }
 
   try {
     const [chess, shogi] = await Promise.all([
@@ -98,14 +107,9 @@ const initEngines = async () => {
         adapter: "stockfish",
         sources: {
           main: {
-            url: "/mock-stockfish.js",
-            sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
+            url: `${window.location.origin}/mock-stockfish.js`,
+            __unsafeNoSRI: true,
             type: "worker-js",
-          },
-          wasm: {
-            url: "/mock-stockfish.wasm",
-            sri: "sha384-2CA0XC0DuF44TijPmnyH+96/9A0CQ7smsVy4Cc6U7j7dKy8gZlRnIEw2mGAEu+jm",
-            type: "wasm",
           },
         },
       }),
@@ -113,7 +117,17 @@ const initEngines = async () => {
         IShogiSearchOptions,
         IShogiSearchInfo,
         IShogiSearchResult
-      >({ id: "yaneuraou", adapter: "yaneuraou" }),
+      >({
+        id: "yaneuraou",
+        adapter: "yaneuraou",
+        sources: {
+          main: {
+            url: `${window.location.origin}/mock-stockfish.js`,
+            __unsafeNoSRI: true,
+            type: "worker-js",
+          },
+        },
+      }),
     ]);
 
     chessEngine.value = chess;
@@ -122,6 +136,8 @@ const initEngines = async () => {
     console.error("Failed to initialize engines:", error);
     initError.value =
       error instanceof Error ? error.message : "Initialization Failed";
+  } finally {
+    isInitializing.value = false;
   }
 };
 
@@ -132,34 +148,65 @@ onMounted(() => {
 const CHESS_MULTI_PV = 3;
 const SHOGI_MULTI_PV = 3;
 
-// チェス用の設定
-const chessOptions = {
-  initialPosition: createFEN(
+const chessOptions = computed(() => ({
+  fen: createFEN(
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   ),
   multipv: CHESS_MULTI_PV,
   depth: 20,
-};
+}));
 
-const { state: chessState } = useEngineMonitor(chessEngine, chessOptions);
+const { state: chessState, status: chessEngineStatus } = useEngineMonitor(chessEngine, {
+  autoMiddleware: true,
+});
 
-// 将棋用の設定
-const shogiOptions = {
-  initialPosition: createSFEN(
+watch(chessEngineStatus, (s) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof window !== "undefined") (window as any).__CHESS_STATUS__ = s;
+}, { immediate: true });
+
+const shogiOptions = computed(() => ({
+  sfen: createSFEN(
     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
   ),
   multipv: SHOGI_MULTI_PV,
-};
+}));
 
-const { state: shogiState } = useEngineMonitor(shogiEngine, shogiOptions);
+const { state: shogiState, status: shogiEngineStatus } = useEngineMonitor(shogiEngine, {
+  autoMiddleware: true,
+});
+
+watch(shogiEngineStatus, (s) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (typeof window !== "undefined") (window as any).__SHOGI_STATUS__ = s;
+}, { immediate: true });
 
 const chessBestMove = computed(() =>
   chessState.value.pvs[0] ? chessState.value.pvs[0].moves[0] : null,
 );
-
 const shogiBestMove = computed(() =>
   shogiState.value.pvs[0] ? shogiState.value.pvs[0].moves[0] : null,
 );
+
+const chessBoardProps = computed(() => ({
+  fen: chessOptions.value.fen,
+  lastMove: chessBestMove.value,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  boardLabel: (localeData.value.dashboard as any)?.gameBoard?.title,
+}));
+
+const shogiBoardProps = computed(() => ({
+  sfen: shogiOptions.value.sfen,
+  lastMove: shogiBestMove.value,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  boardLabel: (localeData.value.dashboard as any)?.gameBoard?.title,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handSenteLabel: (localeData.value.dashboard as any)?.gameBoard?.handSente,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handGoteLabel: (localeData.value.dashboard as any)?.gameBoard?.handGote,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pieceNames: (localeData.value.dashboard as any)?.gameBoard?.shogiPieces,
+}));
 
 const toggleEngine = () => {
   activeEngine.value = activeEngine.value === "chess" ? "shogi" : "chess";
@@ -168,306 +215,104 @@ const toggleEngine = () => {
 const toggleLocale = () => {
   locale.value = locale.value === "ja" ? "en" : "ja";
 };
-
-// アイコンのリアクティブな生成（Vue 3 Best Practice）
-const icons = {
-  zap: markRaw(Zap),
-  cpu: markRaw(Cpu),
-  gauge: markRaw(Gauge),
-  trophy: markRaw(Trophy),
-};
 </script>
 
 <template>
-  <EngineUIProvider>
-    <div
-      v-if="initError || !bridge || !chessEngine || !shogiEngine"
-      class="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-6"
-    >
-      <div class="max-w-md w-full">
-        <div
-          class="bg-[#111] border border-white/5 rounded-3xl p-8 text-center shadow-2xl"
-        >
-          <div v-if="initError">
-            <Zap class="w-8 h-8 mx-auto mb-3 text-red-500 animate-pulse" />
-            <p class="font-black tracking-tighter text-lg mb-1">
-              {{ (localeData.dashboard as any)?.initializationFailed }}
-            </p>
-            <p class="text-xs font-bold opacity-70 leading-relaxed">
-              {{
-                initError === "__INITIALIZATION_FAILED__"
-                  ? (localeData.dashboard as any)?.errors?.bridgeNotAvailable
-                  : initError
-              }}
-            </p>
-          </div>
-          <div v-else>
-            <Globe class="w-8 h-8 mx-auto mb-3 text-blue-500 animate-spin-slow" />
-            <p class="font-black tracking-tighter text-lg animate-pulse">
-              {{ (localeData.dashboard as any)?.initializingEngines }}
-            </p>
+  <EngineUIProvider :locale-data="localeData">
+    <ClientOnly>
+      <div
+        v-if="initError || !bridge || !chessEngine || !shogiEngine"
+        class="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center p-6"
+      >
+        <div class="max-w-md w-full">
+          <div
+            class="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center"
+          >
+            <Zap class="w-8 h-8 text-red-500 mx-auto mb-6" />
+            <h2 class="text-2xl font-bold mb-2">
+              {{ (localeData.dashboard as any)?.initializationFailed || "Initialization Failed" }}
+            </h2>
+            <p class="text-gray-400 mb-6">{{ initError || "Preparing Engines..." }}</p>
+            <button
+              class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl"
+              @click="initEngines"
+            >
+              Retry
+            </button>
           </div>
         </div>
       </div>
-    </div>
 
-    <main
-      v-else
-      class="min-h-screen bg-[#0a0a0a] text-[#e0e0e0] font-sans selection:bg-blue-500/30"
-    >
-      <!-- Header -->
-      <header
-        class="px-8 py-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-6 backdrop-blur-md sticky top-0 z-50 bg-[#0a0a0a]/80"
+      <main
+        v-else
+        class="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 font-sans"
       >
-        <div class="flex items-center gap-4">
-          <div
-            class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20"
-          >
-            <LayoutGrid class="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h1 class="text-2xl font-black tracking-tighter text-white">
-              {{ (localeData.dashboard as any)?.title }}
-            </h1>
-            <p
-              class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase"
-            >
-              {{ (localeData.dashboard as any)?.subtitle }}
-            </p>
-          </div>
-        </div>
-
-        <div
-          class="flex items-center gap-3 bg-[#111] p-1.5 rounded-2xl border border-white/5"
-        >
-          <button
-            class="px-4 py-2 rounded-xl text-xs font-black transition-all hover:bg-white/5 flex items-center gap-2"
-            :aria-label="(localeData.dashboard as any)?.languageSelector"
-            @click="toggleLocale"
-          >
-            <Globe class="w-3.5 h-3.5 text-blue-400" />
-            {{
-              locale === "ja"
-                ? (localeData.dashboard as any)?.language?.en
-                : (localeData.dashboard as any)?.language?.ja
-            }}
-          </button>
-
-          <div class="w-px h-4 bg-white/10 mx-1" />
-
-          <button
-            class="px-4 py-2 rounded-xl text-xs font-black transition-all bg-blue-600 text-white shadow-lg shadow-blue-600/20 flex items-center gap-2"
-            :aria-label="(localeData.dashboard as any)?.engineSelector"
-            @click="toggleEngine"
-          >
-            <Sword class="w-3.5 h-3.5" />
-            {{
-              activeEngine === "chess"
-                ? (localeData.dashboard as any)?.shogiLabel
-                : (localeData.dashboard as any)?.chessLabel
-            }}
-          </button>
-        </div>
-      </header>
-
-      <div class="p-8">
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            :label="(localeData.dashboard as any)?.stats?.engineRuntime?.label"
-            :value="(localeData.dashboard as any)?.stats?.engineRuntime?.value"
-            :sub="(localeData.dashboard as any)?.stats?.engineRuntime?.sub"
-          >
-            <template #icon>
-              <component :is="icons.zap" class="w-5 h-5 text-yellow-400" />
-            </template>
-          </StatCard>
-          <StatCard
-            :label="(localeData.dashboard as any)?.stats?.hardware?.label"
-            :value="(localeData.dashboard as any)?.stats?.hardware?.value"
-            :sub="(localeData.dashboard as any)?.stats?.hardware?.sub"
-          >
-            <template #icon>
-              <component :is="icons.cpu" class="w-5 h-5 text-purple-400" />
-            </template>
-          </StatCard>
-          <StatCard
-            :label="(localeData.dashboard as any)?.stats?.performance?.label"
-            :value="(localeData.dashboard as any)?.stats?.performance?.value"
-            :sub="(localeData.dashboard as any)?.stats?.performance?.sub"
-          >
-            <template #icon>
-              <component :is="icons.gauge" class="w-5 h-5 text-blue-400" />
-            </template>
-          </StatCard>
-          <StatCard
-            :label="(localeData.dashboard as any)?.stats?.accessibility?.label"
-            :value="(localeData.dashboard as any)?.stats?.accessibility?.value"
-            :sub="(localeData.dashboard as any)?.stats?.accessibility?.sub"
-          >
-            <template #icon>
-              <component :is="icons.trophy" class="w-5 h-5 text-pink-400" />
-            </template>
-          </StatCard>
-        </div>
-
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
-          <!-- Monitor Panel -->
-          <div class="xl:col-span-4">
-            <EngineMonitorPanel
-              :engine="activeEngine === 'chess' ? chessEngine : shogiEngine"
-              :search-options="activeEngine === 'chess' ? chessOptions : shogiOptions"
-              :title="
-                activeEngine === 'chess'
-                  ? (localeData.engine as any)?.stockfishTitle
-                  : (localeData.engine as any)?.yaneuraouTitle
-              "
-            />
-          </div>
-
-          <!-- Board Area -->
-          <div class="xl:col-span-8 space-y-8">
-            <div
-              class="bg-[#111] rounded-[2rem] p-10 border border-white/5 shadow-2xl relative overflow-hidden group"
-            >
-              <div
-                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"
-              />
-
-              <div class="flex items-center justify-between mb-10">
-                <div>
-                  <h2 class="text-3xl font-black tracking-tighter text-white mb-1">
-                    {{ (localeData.dashboard as any)?.gameBoard?.title }}
-                  </h2>
-                  <p
-                    class="text-xs font-bold text-white/30 uppercase tracking-widest"
-                  >
-                    {{ (localeData.dashboard as any)?.gameBoard?.subtitle }}
-                  </p>
-                </div>
-                <div
-                  class="px-6 py-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-4"
-                >
-                  <div class="flex flex-col items-end">
-                    <span
-                      class="text-[10px] font-black text-white/20 uppercase tracking-tighter"
-                    >
-                      {{ (localeData.engine as any)?.topCandidate }}
-                    </span>
-                    <span class="text-xl font-mono font-black text-blue-400">
-                      {{
-                        activeEngine === "chess"
-                          ? chessBestMove || "---"
-                          : shogiBestMove || "---"
-                      }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex justify-center">
-                <div class="w-full max-w-[600px] aspect-square relative">
-                  <ChessBoard
-                    v-if="activeEngine === 'chess'"
-                    class="w-full h-full rounded-xl shadow-2xl"
-                    :fen="(chessState.position as any)"
-                    :last-move="(chessBestMove as any)"
-                    :locale="locale"
-                    :board-label="(localeData.dashboard as any)?.gameBoard?.title"
-                    :error-message="(localeData.dashboard as any)?.gameBoard?.invalidPosition"
-                    :piece-names="(localeData.dashboard as any)?.gameBoard?.chessPieces"
-                  />
-                  <ShogiBoard
-                    v-else
-                    class="w-full h-full rounded-xl shadow-2xl"
-                    :sfen="(shogiState.position as any)"
-                    :last-move="(shogiBestMove as any)"
-                    :locale="locale"
-                    :board-label="(localeData.dashboard as any)?.gameBoard?.title"
-                    :error-message="(localeData.dashboard as any)?.gameBoard?.invalidPosition"
-                    :piece-names="(localeData.dashboard as any)?.gameBoard?.shogiPieces"
-                    :hand-sente-label="(localeData.dashboard as any)?.gameBoard?.handSente"
-                    :hand-gote-label="(localeData.dashboard as any)?.gameBoard?.handGote"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Bottom Info -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div class="bg-[#111] rounded-[2rem] p-8 border border-white/5">
-                <div class="flex items-center gap-3 mb-4">
-                  <div
-                    class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                  />
-                  <h3
-                    class="text-sm font-black text-white uppercase tracking-tighter"
-                  >
-                    {{ (localeData.dashboard as any)?.technicalInsight?.title }}
-                  </h3>
-                </div>
-                <p class="text-xs font-bold text-white/50 leading-relaxed">
-                  {{ (localeData.dashboard as any)?.technicalInsight?.description }}
+        <div class="max-w-7xl mx-auto space-y-8">
+          <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+              <LayoutGrid class="w-12 h-12 text-blue-600" />
+              <div>
+                <h1 class="text-2xl font-black tracking-tight">
+                  {{ (localeData.dashboard as any)?.title }}
+                </h1>
+                <p class="text-xs font-bold text-blue-500 uppercase">
+                  {{ (localeData.dashboard as any)?.subtitle }}
                 </p>
               </div>
+            </div>
 
-              <div
-                class="bg-blue-600 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-600/10 relative overflow-hidden group"
+            <div class="flex items-center gap-2">
+              <button
+                class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
+                @click="toggleLocale"
               >
-                <Zap
-                  class="absolute -bottom-4 -right-4 w-32 h-32 text-white/5 transition-transform group-hover:scale-110 duration-700"
+                <Globe class="w-3.5 h-3.5 text-blue-400" />
+                {{ locale === "ja" ? (localeData.dashboard as any)?.language?.en : (localeData.dashboard as any)?.language?.ja }}
+              </button>
+
+              <button
+                class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
+                @click="toggleEngine"
+              >
+                <Sword class="w-3.5 h-3.5 text-amber-400" />
+                {{ activeEngine === "chess" ? (localeData.dashboard as any)?.shogiLabel : (localeData.dashboard as any)?.chessLabel }}
+              </button>
+            </div>
+          </header>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-8">
+              <div v-if="chessEngine" v-show="activeEngine === 'chess'" class="h-full">
+                <EngineMonitorPanel
+                  :engine="chessEngine"
+                  :search-options="chessOptions"
+                  :board-component="ChessBoard"
+                  :board-props="chessBoardProps"
+                  :title="(localeData.engine as any)?.stockfishTitle"
                 />
-                <h3
-                  class="text-sm font-black uppercase tracking-tighter mb-6 relative z-10"
-                >
-                  {{ (localeData.dashboard as any)?.zenithFeatures?.title }}
-                </h3>
-                <ul class="space-y-4 relative z-10">
-                  <li
-                    v-for="(feature, i) in [
-                      {
-                        icon: icons.zap,
-                        label: (localeData.dashboard as any)?.zenithFeatures?.multiPv,
-                      },
-                      {
-                        icon: icons.gauge,
-                        label: (localeData.dashboard as any)?.zenithFeatures?.reactiveState,
-                      },
-                      {
-                        icon: icons.cpu,
-                        label: (localeData.dashboard.zenithFeatures as any)?.contractUi,
-                      },
-                    ]"
-                    :key="i"
-                    class="flex items-center gap-3 text-xs font-black"
-                  >
-                    <div
-                      class="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center"
-                    >
-                      <component :is="feature.icon" class="w-4 h-4" />
-                    </div>
-                    {{ feature.label }}
-                  </li>
-                </ul>
+              </div>
+              <div v-if="shogiEngine" v-show="activeEngine === 'shogi'" class="h-full">
+                <EngineMonitorPanel
+                  :engine="shogiEngine"
+                  :search-options="shogiOptions"
+                  :board-component="ShogiBoard"
+                  :board-props="shogiBoardProps"
+                  :title="(localeData.engine as any)?.yaneuraouTitle"
+                />
               </div>
             </div>
+
+            <aside class="lg:col-span-4 space-y-6">
+              <div class="grid grid-cols-2 gap-4">
+                <StatCard :icon="Cpu" :label="(localeData.dashboard as any)?.stats?.engineRuntime?.label" :value="(localeData.dashboard as any)?.stats?.engineRuntime?.value" sub="" color="blue" />
+                <StatCard :icon="Zap" :label="(localeData.dashboard as any)?.stats?.hardware?.label" :value="(localeData.dashboard as any)?.stats?.hardware?.value" sub="" color="amber" />
+                <StatCard :icon="Gauge" :label="(localeData.dashboard as any)?.stats?.performance?.label" :value="(localeData.dashboard as any)?.stats?.performance?.value" sub="" color="emerald" />
+                <StatCard :icon="Trophy" :label="(localeData.dashboard as any)?.stats?.accessibility?.label" :value="(localeData.dashboard as any)?.stats?.accessibility?.value" sub="" color="purple" />
+              </div>
+            </aside>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </ClientOnly>
   </EngineUIProvider>
 </template>
-
-<style scoped>
-.animate-spin-slow {
-  animation: spin 3s linear infinite;
-}
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>

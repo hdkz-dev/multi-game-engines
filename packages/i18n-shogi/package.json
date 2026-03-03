@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm && tsc -p tsconfig.build.json --emitDeclarationOnly --declarationDir dist",
+    "build": "tsup",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

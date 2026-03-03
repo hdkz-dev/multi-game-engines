@@ -1,8 +1,20 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  IEngineConfig,
+  IEngineSourceConfig,
+  ResourceMap,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IJanggiSearchOptions,
+import {
+  IJanggiSearchOptions,
   IJanggiSearchInfo,
-  IJanggiSearchResult, } from "@multi-game-engines/domain-janggi";
+  IJanggiSearchResult,
+} from "@multi-game-engines/domain-janggi";
 import { JanggiParser } from "./JanggiParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -99,7 +111,7 @@ export class JanggiAdapter extends BaseAdapter<
         { timeoutMs: 10000, signal },
       );
 
-      this.communicator.postMessage("ujci");
+      void this.communicator?.postMessage("ujci");
       await ujciOkPromise;
 
       this.emitStatusChange("ready");
@@ -109,7 +121,7 @@ export class JanggiAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

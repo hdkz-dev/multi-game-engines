@@ -1,8 +1,21 @@
-import { BaseAdapter, IEngineAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  IEngineConfig,
+  IEngineSourceConfig,
+  ResourceMap,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { ICheckersSearchOptions,
+import {
+  ICheckersSearchOptions,
   ICheckersSearchInfo,
-  ICheckersSearchResult, } from "@multi-game-engines/domain-checkers";
+  ICheckersSearchResult,
+} from "@multi-game-engines/domain-checkers";
 import { KingsRowParser } from "./KingsRowParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -102,7 +115,7 @@ export class KingsRowAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

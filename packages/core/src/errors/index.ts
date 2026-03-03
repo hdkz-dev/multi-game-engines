@@ -1,1 +1,1 @@
-export { EngineError, type IEngineErrorOptions } from "./EngineError.js";
+export { EngineError } from "./EngineError.js";

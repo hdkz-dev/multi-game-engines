@@ -19,13 +19,17 @@ export class IndexedDBStorage implements IFileStorage {
     const db = await this.ensureDb();
     return new Promise((resolve, reject) => {
       try {
-        const transaction = db.transaction([IndexedDBStorage.STORE_NAME], "readonly");
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readonly",
+        );
         const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
         const request = store.get(key);
 
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => reject(request.error);
-        transaction.onabort = () => reject(transaction.error || new Error("Transaction aborted"));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
       } catch (err) {
         this.handleDbError(err);
         reject(err);
@@ -37,13 +41,17 @@ export class IndexedDBStorage implements IFileStorage {
     const db = await this.ensureDb();
     return new Promise((resolve, reject) => {
       try {
-        const transaction = db.transaction([IndexedDBStorage.STORE_NAME], "readwrite");
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
         const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
         const request = store.put(data, key);
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-        transaction.onabort = () => reject(transaction.error || new Error("Transaction aborted"));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
       } catch (err) {
         this.handleDbError(err);
         reject(err);
@@ -55,13 +63,17 @@ export class IndexedDBStorage implements IFileStorage {
     const db = await this.ensureDb();
     return new Promise((resolve, reject) => {
       try {
-        const transaction = db.transaction([IndexedDBStorage.STORE_NAME], "readwrite");
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
         const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
         const request = store.delete(key);
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-        transaction.onabort = () => reject(transaction.error || new Error("Transaction aborted"));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
       } catch (err) {
         this.handleDbError(err);
         reject(err);
@@ -73,13 +85,17 @@ export class IndexedDBStorage implements IFileStorage {
     const db = await this.ensureDb();
     return new Promise((resolve, reject) => {
       try {
-        const transaction = db.transaction([IndexedDBStorage.STORE_NAME], "readonly");
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readonly",
+        );
         const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
         const request = store.count(key);
 
         request.onsuccess = () => resolve(request.result > 0);
         request.onerror = () => reject(request.error);
-        transaction.onabort = () => reject(transaction.error || new Error("Transaction aborted"));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
       } catch (err) {
         this.handleDbError(err);
         reject(err);
@@ -91,13 +107,17 @@ export class IndexedDBStorage implements IFileStorage {
     const db = await this.ensureDb();
     return new Promise((resolve, reject) => {
       try {
-        const transaction = db.transaction([IndexedDBStorage.STORE_NAME], "readwrite");
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
         const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
         const request = store.clear();
 
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
-        transaction.onabort = () => reject(transaction.error || new Error("Transaction aborted"));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
       } catch (err) {
         this.handleDbError(err);
         reject(err);
@@ -127,17 +147,27 @@ export class IndexedDBStorage implements IFileStorage {
       };
       request.onsuccess = () => {
         this.db = request.result;
-        this.db.onclose = () => { this.db = null; };
-        this.db.onerror = () => { this.db = null; };
+        this.db.onclose = () => {
+          this.db = null;
+        };
+        this.db.onerror = () => {
+          this.db = null;
+        };
         resolve(this.db);
       };
       request.onerror = () => reject(request.error);
     });
   }
 
-  private handleDbError(err: any): void {
-    if (err && (err.name === "InvalidStateError" || err.name === "TransactionInactiveError")) {
-      this.db = null;
+  private handleDbError(err: unknown): void {
+    if (err && typeof err === "object" && "name" in err) {
+      const error = err as { name: string };
+      if (
+        error.name === "InvalidStateError" ||
+        error.name === "TransactionInactiveError"
+      ) {
+        this.db = null;
+      }
     }
   }
 }

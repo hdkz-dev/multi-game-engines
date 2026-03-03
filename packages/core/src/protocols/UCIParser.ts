@@ -16,20 +16,23 @@ export class UCIParser implements IProtocolParser<
   IBaseSearchResult
 > {
   // 物理的整合性: PV 等での誤検出を避けるため "none" を正規表現から除外
-  private static readonly MOVE_REGEX = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
+  // private static readonly MOVE_REGEX = /^[a-h][1-8][a-h][1-8][qrbn]?$/;
 
   isReadyCommand = "isready";
   readyResponse = "readyok";
 
-  createSearchCommand(options: IBaseSearchOptions): MiddlewareCommand {
-    return "go"; // 簡易実装
+  createSearchCommand(_options: IBaseSearchOptions): MiddlewareCommand {
+    return "go";
   }
 
   createStopCommand(): MiddlewareCommand {
     return "stop";
   }
 
-  createOptionCommand(name: string, value: string | number | boolean): MiddlewareCommand {
+  createOptionCommand(
+    name: string,
+    value: string | number | boolean,
+  ): MiddlewareCommand {
     return `setoption name ${name} value ${value}`;
   }
 
@@ -39,14 +42,19 @@ export class UCIParser implements IProtocolParser<
     const info: IBaseSearchInfo = { raw: line };
 
     for (let i = 0; i < parts.length; i++) {
-      if (parts[i] === "depth" && parts[i + 1]) {
-        // 防御的コーディング: undefined/NaN チェック
-        const depth = parseInt(parts[++i], 10);
-        if (!isNaN(depth)) info.depth = depth;
+      if (parts[i] === "depth") {
+        const val = parts[++i];
+        if (val) {
+          const depth = parseInt(val, 10);
+          if (!isNaN(depth)) info.depth = depth;
+        }
       }
-      if (parts[i] === "nodes" && parts[i + 1]) {
-        const nodes = parseInt(parts[++i], 10);
-        if (!isNaN(nodes)) info.nodes = nodes;
+      if (parts[i] === "nodes") {
+        const val = parts[++i];
+        if (val) {
+          const nodes = parseInt(val, 10);
+          if (!isNaN(nodes)) info.nodes = nodes;
+        }
       }
     }
     return info;

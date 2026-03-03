@@ -1,6 +1,5 @@
 import { BaseAdapter } from "../adapters/BaseAdapter.js";
 import {
-  IEngineLoader,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -16,6 +15,7 @@ import {
 } from "../types.js";
 import { createMove } from "../protocol/ProtocolValidator.js";
 import { EngineError } from "../errors/EngineError.js";
+import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 
 /**
  * CI/CD および開発用の軽量なモックアダプター。
@@ -25,18 +25,23 @@ export class MockAdapter extends BaseAdapter<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  // 初期化順序問題を避けるため、readonly プロパティとしての宣言を親クラスに委譲
   public override readonly version: string = "1.0.0-mock";
-  public override readonly engineLicense: ILicenseInfo = { name: "MIT", url: "" };
-  public override readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
+  public override readonly engineLicense: ILicenseInfo = {
+    name: "MIT",
+    url: "",
+  };
+  public override readonly adapterLicense: ILicenseInfo = {
+    name: "MIT",
+    url: "",
+  };
   public override readonly parser: IProtocolParser<
     IBaseSearchOptions,
     IBaseSearchInfo,
     IBaseSearchResult
   >;
 
-  private mockPendingReject: ((err: any) => void) | null = null;
-  private activeTimer: any = null;
+  private mockPendingReject: ((err: unknown) => void) | null = null;
+  private activeTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(config: IEngineConfig = {}) {
     super(config.id ?? "mock-engine", config.name ?? "Mock Engine", config);
@@ -58,8 +63,8 @@ export class MockAdapter extends BaseAdapter<
     this.handleIncomingMessage(data);
   }
 
-  public setCommunicator(comm: any): void {
-    this.communicator = comm;
+  public setCommunicator(comm: unknown): void {
+    this.communicator = comm as WorkerCommunicator;
   }
 
   protected async onInitialize(): Promise<void> {}
@@ -71,7 +76,6 @@ export class MockAdapter extends BaseAdapter<
   public searchRaw(
     _command: MiddlewareCommand,
   ): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    // 状態チェックをスキップするため super を呼ばず、物理的に生成
     this._status = "busy";
     this.emitStatusChange("busy");
 
@@ -115,7 +119,13 @@ export class MockAdapter extends BaseAdapter<
     if (this.mockPendingReject) {
       const reject = this.mockPendingReject;
       this.mockPendingReject = null;
-      reject(new EngineError({ code: EngineErrorCode.SEARCH_ABORTED, message: "Stopped", engineId: this.id }));
+      reject(
+        new EngineError({
+          code: EngineErrorCode.SEARCH_ABORTED,
+          message: "Stopped",
+          engineId: this.id,
+        }),
+      );
     }
     this._status = "ready";
     this.emitStatusChange("ready");
@@ -163,9 +173,9 @@ class MockParser implements IProtocolParser<
   parseInfo(line: unknown): IBaseSearchInfo | null {
     return typeof line === "string" ? { raw: line } : null;
   }
-  parseResult(
-    line: unknown,
-  ): IBaseSearchResult | null {
-    return typeof line === "string" ? { bestMove: createMove("e2e4"), raw: line } : null;
+  parseResult(line: unknown): IBaseSearchResult | null {
+    return typeof line === "string"
+      ? { bestMove: createMove("e2e4"), raw: line }
+      : null;
   }
 }

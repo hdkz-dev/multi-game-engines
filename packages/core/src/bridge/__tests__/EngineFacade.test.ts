@@ -1,13 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import { MockAdapter } from "../../mocks/MockAdapter.js";
+import { IEngineLoader } from "../../types.js";
 
 describe("EngineFacade", () => {
-  let mockLoader: any;
+  let mockLoader: IEngineLoader;
 
   beforeEach(() => {
     mockLoader = {
       loadResource: vi.fn().mockResolvedValue("blob:url"),
+      loadResources: vi.fn().mockResolvedValue({ main: "blob:url" }),
+      revoke: vi.fn(),
       revokeAll: vi.fn(),
       revokeByEngineId: vi.fn(),
     };
@@ -15,7 +18,11 @@ describe("EngineFacade", () => {
 
   it("should atomic load: concurrent load() calls should be shared", async () => {
     const adapter = new MockAdapter({ id: "test" });
-    const loadSpy = vi.spyOn(adapter, "load").mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
+    const loadSpy = vi
+      .spyOn(adapter, "load")
+      .mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 50)),
+      );
     const facade = new EngineFacade(adapter, [], async () => mockLoader);
 
     const p1 = facade.load();

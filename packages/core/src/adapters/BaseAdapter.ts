@@ -6,6 +6,7 @@ import {
   ITelemetryEvent,
   IEngineConfig,
   IEngineSourceConfig,
+  IEngineLoader,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -27,51 +28,100 @@ export abstract class BaseAdapter<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
   T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-> implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>
-{
+> implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
   protected _status: EngineStatus = "uninitialized";
   protected communicator: WorkerCommunicator | null = null;
   protected activeLoader: {
-    loadResource: (engineId: string, config: IEngineSourceConfig) => Promise<string>;
+    loadResource: (
+      engineId: string,
+      config: IEngineSourceConfig,
+    ) => Promise<string>;
   } | null = null;
 
-  protected readonly statusListeners = new Set<(status: EngineStatus) => void>();
+  protected readonly statusListeners = new Set<
+    (status: EngineStatus) => void
+  >();
   protected readonly infoListeners = new Set<(info: T_INFO) => void>();
   protected readonly resultListeners = new Set<(result: T_RESULT) => void>();
-  protected readonly progressListeners = new Set<(progress: ILoadProgress) => void>();
-  protected readonly telemetryListeners = new Set<(event: ITelemetryEvent) => void>();
+  protected readonly progressListeners = new Set<
+    (progress: ILoadProgress) => void
+  >();
+  protected readonly telemetryListeners = new Set<
+    (event: ITelemetryEvent) => void
+  >();
 
   protected pendingResolve: ((value: T_RESULT) => void) | null = null;
   protected pendingReject: ((reason?: unknown) => void) | null = null;
   protected messageUnsubscriber: (() => void) | null = null;
-  protected infoController: ReadableStreamDefaultController<T_INFO> | null = null;
+  protected infoController: ReadableStreamDefaultController<T_INFO> | null =
+    null;
 
   // 物理的な識別子。public readonly プロパティとして保持し、サブクラスでのプロパティ上書きを避ける。
   public readonly id: string;
   public readonly name: string;
+  protected readonly config: IEngineConfig;
 
   constructor(
-    id: string,
-    name: string,
-    protected readonly config: IEngineConfig = {}
+    idOrConfig: string | IEngineConfig,
+    nameOrUndefined?: string,
+    configOrUndefined?: IEngineConfig,
   ) {
-    this.id = id;
-    this.name = name;
-    this.config = config || {};
+    if (typeof idOrConfig === "string") {
+      this.id = idOrConfig;
+      this.name = nameOrUndefined ?? idOrConfig;
+      this.config = configOrUndefined || {};
+    } else {
+      this.config = idOrConfig;
+      this.id = idOrConfig.id ?? "unknown";
+      this.name = idOrConfig.name ?? "Unknown Engine";
+    }
+
     if (this.config.sources) {
       this.validateSources();
     }
   }
 
   abstract readonly version: string;
-  abstract readonly engineLicense: ILicenseInfo;
-  abstract readonly adapterLicense: ILicenseInfo;
+  public readonly engineLicense: ILicenseInfo = { name: "Unknown", url: "" };
+  public readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
   abstract readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
 
-  get status(): EngineStatus { return this._status; }
-  get progress(): ILoadProgress { return { status: this._status, loadedBytes: 0 }; }
+  get status(): EngineStatus {
+    return this._status;
+  }
+  get progress(): ILoadProgress {
+    return { status: this._status, loadedBytes: 0 };
+  }
 
-  private validateSources(): void {
+  /**
+   * 2026 Zenith Tier: 進捗通知付きのリソースロード。
+   */
+  protected async loadWithProgress(
+    loader: IEngineLoader,
+    sources: Record<string, IEngineSourceConfig>,
+    signal?: AbortSignal,
+  ): Promise<Record<string, string>> {
+    return loader.loadResources(this.id, sources, {
+      ...(signal ? { signal } : {}),
+      onProgress: (p: ILoadProgress) => this.emitProgress(p),
+    });
+  }
+
+  /**
+   * 2026 Zenith Tier: Worker へのリソース注入。
+   */
+  protected async injectResources(
+    resourceMap: Record<string, string>,
+  ): Promise<void> {
+    if (this.communicator) {
+      await this.communicator.postMessage({
+        type: "inject-resources",
+        resourceMap,
+      });
+    }
+  }
+
+  protected validateSources(): void {
     const sources = this.config.sources;
     if (!sources || !sources.main) {
       throw new EngineError({
@@ -91,16 +141,24 @@ export abstract class BaseAdapter<
           i18nKey: createI18nKey("engine.errors.validationError"),
         });
       }
+      if (sri && sri.includes("Placeholder")) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Placeholder SRI hash detected for source "${key}".`,
+          engineId: this.id,
+          i18nKey: createI18nKey("engine.errors.sriMismatch"),
+        });
+      }
     }
   }
 
   async setBook(asset: IBookAsset): Promise<void> {
     if (!this.activeLoader) throw new Error("No loader");
-    const config: IEngineSourceConfig = { 
-      url: asset.url, 
-      type: "asset", 
+    const config: IEngineSourceConfig = {
+      url: asset.url,
+      type: "asset",
       sri: asset.sri,
-      __unsafeNoSRI: asset.sri ? undefined : true 
+      __unsafeNoSRI: asset.sri ? undefined : true,
     } as IEngineSourceConfig;
     const blobUrl = await this.activeLoader.loadResource(this.id, config);
     await this.onBookLoaded(blobUrl);
@@ -115,20 +173,26 @@ export abstract class BaseAdapter<
 
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready" && this._status !== "busy") {
-      throw new EngineError({ 
-        code: EngineErrorCode.NOT_READY, 
-        message: "Engine not ready", 
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine not ready",
         engineId: this.id,
-        i18nKey: createI18nKey("engine.errors.notLoaded")
+        i18nKey: createI18nKey("engine.errors.notLoaded"),
       });
     }
     if (this._status === "busy") this.cleanupPendingTask("Restart", true);
-    
+
+    if (!this.communicator) throw new Error("No communicator");
+
     this.emitStatusChange("busy");
 
     const readableStream = new ReadableStream<T_INFO>({
-      start: (controller) => { this.infoController = controller; },
-      cancel: () => { void this.handleStreamCancel(); }
+      start: (controller) => {
+        this.infoController = controller;
+      },
+      cancel: () => {
+        void this.handleStreamCancel();
+      },
     });
 
     const infoStream: AsyncIterable<T_INFO> = {
@@ -151,20 +215,22 @@ export abstract class BaseAdapter<
       this.pendingReject = reject;
     });
 
-    if (this.communicator) {
-      this.messageUnsubscriber?.();
-      this.messageUnsubscriber = this.communicator.onMessage((data) => this.handleIncomingMessage(data));
-      try {
-        this.sendSearchCommand(command);
-      } catch (err) {
-        this.pendingResolve = null;
-        this.pendingReject = null;
-        this.emitStatusChange("ready");
-        throw err;
-      }
+    try {
+      this.sendSearchCommand(command);
+    } catch (err) {
+      this.pendingResolve = null;
+      this.pendingReject = null;
+      this.emitStatusChange("ready");
+      throw err;
     }
 
-    return { info: infoStream, result: resultPromise, stop: () => { void this.stop(); } };
+    return {
+      info: infoStream,
+      result: resultPromise,
+      stop: () => {
+        void this.stop();
+      },
+    };
   }
 
   async stop(): Promise<void> {
@@ -175,8 +241,14 @@ export abstract class BaseAdapter<
     this.cleanupPendingTask("Stop requested");
   }
 
-  async setOption(name: string, value: string | number | boolean): Promise<void> {
-    if (this.communicator) await this.communicator.postMessage(this.parser.createOptionCommand(name, value));
+  async setOption(
+    name: string,
+    value: string | number | boolean,
+  ): Promise<void> {
+    if (this.communicator)
+      await this.communicator.postMessage(
+        this.parser.createOptionCommand(name, value),
+      );
   }
 
   async dispose(): Promise<void> {
@@ -214,32 +286,46 @@ export abstract class BaseAdapter<
   }
 
   public emitTelemetry(event: ITelemetryEvent): void {
-    this.telemetryListeners.forEach(l => l(event));
+    this.telemetryListeners.forEach((l) => l(event));
   }
 
-  protected async handleStreamCancel() { await this.stop(); }
+  protected async handleStreamCancel() {
+    await this.stop();
+  }
 
   protected handleIncomingMessage(data: unknown): void {
     if (this._status === "error" || this._status === "terminated") return;
-    const info = this.parser.parseInfo(data as any);
+
+    // 物理的安全なキャスト
+    const rawData = data as string | Record<string, unknown>;
+    const info = this.parser.parseInfo(rawData);
     if (info) {
-      try { this.infoController?.enqueue(info); } catch {}
-      this.infoListeners.forEach(l => l(info));
+      try {
+        this.infoController?.enqueue(info);
+      } catch {
+        /* ignore */
+      }
+      this.infoListeners.forEach((l) => l(info));
       return;
     }
-    const result = this.parser.parseResult(data as any);
+
+    const result = this.parser.parseResult(rawData);
     if (result) {
       if (this.pendingResolve) {
         this.pendingResolve(result);
         this.pendingResolve = null;
         this.pendingReject = null;
       }
-      this.resultListeners.forEach(l => l(result));
+      this.resultListeners.forEach((l) => l(result));
       this.emitStatusChange("ready");
       return;
     }
 
-    if (typeof data === "string" && data.startsWith("error") && this.parser.translateError) {
+    if (
+      typeof data === "string" &&
+      data.startsWith("error") &&
+      this.parser.translateError
+    ) {
       const message = this.parser.translateError(data);
       if (message) {
         this.emitStatusChange("error");
@@ -248,37 +334,61 @@ export abstract class BaseAdapter<
         if (reject) {
           this.pendingReject = null;
           this.pendingResolve = null;
-          reject(new EngineError({ code: EngineErrorCode.PROTOCOL_ERROR, message, engineId: this.id }));
+          reject(
+            new EngineError({
+              code: EngineErrorCode.PROTOCOL_ERROR,
+              message,
+              engineId: this.id,
+            }),
+          );
         }
       }
     }
   }
 
-  protected cleanupPendingTask(reason?: string, skipReadyTransition = false): void {
+  protected cleanupPendingTask(
+    reason?: string,
+    skipReadyTransition = false,
+  ): void {
     if (this.pendingReject) {
       const reject = this.pendingReject;
       this.pendingReject = null;
       this.pendingResolve = null;
       void Promise.resolve().then(() => {
-        reject(new EngineError({ code: EngineErrorCode.SEARCH_ABORTED, message: reason ?? "Aborted", engineId: this.id }));
+        reject(
+          new EngineError({
+            code: EngineErrorCode.SEARCH_ABORTED,
+            message: reason ?? "Aborted",
+            engineId: this.id,
+          }),
+        );
       });
     }
-    try { this.infoController?.close(); } catch {}
+    try {
+      this.infoController?.close();
+    } catch {
+      /* ignore */
+    }
     this.infoController = null;
-    if (this._status === "busy" && !skipReadyTransition) this.emitStatusChange("ready");
+    if (this._status === "busy" && !skipReadyTransition)
+      this.emitStatusChange("ready");
   }
 
   protected emitStatusChange(status: EngineStatus): void {
     this._status = status;
     if (status === "error" || status === "terminated") {
-      try { this.infoController?.close(); } catch {}
+      try {
+        this.infoController?.close();
+      } catch {
+        /* ignore */
+      }
       this.infoController = null;
     }
-    this.statusListeners.forEach(l => l(status));
+    this.statusListeners.forEach((l) => l(status));
   }
 
   protected emitProgress(progress: ILoadProgress): void {
-    this.progressListeners.forEach(l => l(progress));
+    this.progressListeners.forEach((l) => l(progress));
   }
 
   protected clearListeners(): void {
@@ -290,12 +400,12 @@ export abstract class BaseAdapter<
   }
 
   protected sendSearchCommand(command: MiddlewareCommand): void {
-    void this.communicator?.postMessage(command);
+    this.communicator?.postMessage(command);
   }
 
-  protected abstract onInitialize(): Promise<void>;
-  protected abstract onSearchRaw(command: unknown): Promise<void>;
-  protected abstract onStop(): Promise<void>;
-  protected abstract onDispose(): Promise<void>;
-  protected abstract onBookLoaded(url: string): Promise<void>;
+  protected async onInitialize(): Promise<void> {}
+  protected async onSearchRaw(_command: unknown): Promise<void> {}
+  protected async onStop(): Promise<void> {}
+  protected async onDispose(): Promise<void> {}
+  protected async onBookLoaded(_url: string): Promise<void> {}
 }

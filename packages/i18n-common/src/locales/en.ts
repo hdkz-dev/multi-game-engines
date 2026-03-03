@@ -1,0 +1,127 @@
+export default {
+  engine: {
+    security: {
+      remediationAdvice: `To enable Multi-threading (SharedArrayBuffer), set the following HTTP headers:
+- Cross-Origin-Opener-Policy: same-origin
+- Cross-Origin-Embedder-Policy: require-corp
+
+Platform examples:
+[Vercel (vercel.json)]
+{ "headers": [{ "source": "/(.*)", "headers": [
+  { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+  { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+]}]}
+
+[Cloudflare Pages (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+[Netlify (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp`,
+    },
+    status: "Status",
+    depth: "Depth",
+    nodes: "Nodes",
+    nps: "NPS",
+    npsUnit: "Nodes / Second",
+    time: "Time",
+    score: "Score",
+    visits: "Visits",
+    visitsUnit: "v",
+    mateIn: "Mate in {n}",
+    advantage: "{side} +{v}",
+    retry: "Retry",
+    reloadResources: "Reload Resources",
+    errorTitle: "Engine Error",
+    errorDefaultRemediation: "Please check the connection and try again.",
+    timeUnitSeconds: "s",
+    noMove: "---",
+    standard: "2026 Engine Bridge Standard",
+    ready: "Ready",
+    start: "START",
+    stop: "STOP",
+    searching: "Searching...",
+    initializing: "Initializing...",
+    topCandidate: "Top Candidate",
+    principalVariations: "PVs",
+    searchLog: "Log",
+    errors: {
+      initializationFailed: "Engine initialization failed.",
+      protocolError: "A protocol error occurred: {message}.",
+      workerError: "Worker error occurred: {message}.",
+      timeout: "Operation timed out.",
+      disposed: "Engine instance is disposed.",
+      nestedTooDeep: "Data structure is too deeply nested at: {path}.",
+      illegalCharacters: "Illegal characters detected.",
+      networkError: "Failed to fetch engine resources.",
+      securityViolation: "Security violation: Unsafe resource loading blocked.",
+      sriMismatch:
+        "Security violation: Resource integrity (SRI) mismatch detected.",
+      bridgeDisposed: "Engine bridge has already been disposed.",
+      notReady: "Engine is not ready for the requested operation.",
+      loaderRequired: "IEngineLoader is required for secure resource loading.",
+      missingSources: "Engine configuration is missing 'sources' field.",
+      invalidMoveFormat: 'Invalid move format: "{move}".',
+      injectionDetected:
+        'Potential command injection detected in {context}: "{input}".',
+      invalidPositionString:
+        "Invalid position string: Input must not be empty.",
+      invalidEngineId:
+        'Invalid engine ID: "{id}". Only alphanumeric characters, hyphens, and underscores are allowed.',
+      insecureConnection:
+        "Insecure connection (HTTP) is not allowed for sensitive engine files.",
+      sriRequired: "SRI required for security verification.",
+      sriBypassNotAllowed:
+        "SRI bypass (__unsafeNoSRI) is not allowed in production environment.",
+      adapterFactoryInvalidReturn:
+        'Factory for "{adapter}" returned an invalid object.',
+      adapterNotFound:
+        'Engine adapter not found or factory not registered for "{id}".',
+      internalError: "A system internal error occurred: {message}.",
+      resourceLoadUnknown:
+        'Unknown error during resource loading for engine "{engineId}".',
+      missingMainEntryPoint:
+        "Engine resources are missing 'main' entry point URL.",
+      searchAborted: "The search task was aborted.",
+      duplicateFactory: 'Adapter factory for "{type}" is already registered.',
+      stalePositionId:
+        "The search result was discarded because it belongs to a stale position.",
+      invalidPositionId: 'Invalid Position ID format: "{id}".',
+      invalidShogiMove: 'Invalid Shogi move: "{move}".',
+      invalidMahjongMove: 'Invalid Mahjong move: "{move}".',
+      invalidGOBoard: "Invalid Go board state.",
+      invalidGOMove: 'Invalid Go move: "{move}".',
+      invalidReversiBoard: "Invalid Reversi board state.",
+      invalidReversiMove: 'Invalid Reversi move: "{move}".',
+      invalidBackgammonBoard: "Invalid Backgammon board state.",
+      invalidBackgammonMove: 'Invalid Backgammon move format: "{move}".',
+      invalidCheckersBoard: "Invalid Checkers board state.",
+      invalidCheckersMove: 'Invalid Checkers move: "{move}".',
+      validationError: "A validation error occurred.",
+      alreadyInitialized: "Engine is already initialized.",
+      disposedDuringSearch: "Engine was disposed during search.",
+    },
+    factory: {
+      unknownAdapter: "Unknown adapter type: {type}.",
+      requiresMainSource:
+        'Engine "{id}" requires a "main" source configuration.',
+    },
+  },
+  adapters: {
+    gtp: {
+      errors: {
+        invalidResponse: 'Invalid GTP response: "{response}".',
+      },
+    },
+  },
+  parsers: {
+    generic: {
+      invalidOptionValue:
+        "Option value must be a primitive (string, number, or boolean).",
+      parseError: "[{parser}] Failed to parse {type}: {error}.",
+    },
+  },
+};

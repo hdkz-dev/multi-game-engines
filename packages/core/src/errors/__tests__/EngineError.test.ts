@@ -15,7 +15,7 @@ describe("EngineError", () => {
 
   it("should return the same instance when passed to from()", () => {
     const original = new EngineError({
-      code: EngineErrorCode.WASM_INIT_FAILED,
+      code: EngineErrorCode.INTERNAL_ERROR,
       message: "Init failed",
       engineId: "stockfish",
     });

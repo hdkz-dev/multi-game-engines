@@ -1,0 +1,128 @@
+export default {
+  engine: {
+    security: {
+      remediationAdvice: `マルチスレッド（SharedArrayBuffer）を有効にするには、以下の HTTP ヘッダーを設定してください：
+- Cross-Origin-Opener-Policy: same-origin
+- Cross-Origin-Embedder-Policy: require-corp
+
+プラットフォーム例：
+[Vercel (vercel.json)]
+{ "headers": [{ "source": "/(.*)", "headers": [
+  { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+  { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
+]}]}
+
+[Cloudflare Pages (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+[Netlify (_headers)]
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp`,
+    },
+    status: "ステータス",
+    depth: "深さ",
+    nodes: "ノード数",
+    nps: "NPS",
+    npsUnit: "ノード / 秒",
+    time: "時間",
+    score: "評価値",
+    visits: "試行回数",
+    visitsUnit: "回",
+    mateIn: "{n} 手詰",
+    advantage: "{side} 優勢 +{v}",
+    retry: "再試行",
+    reloadResources: "リソースを再読み込み",
+    errorTitle: "エンジンエラー",
+    errorDefaultRemediation: "接続を確認して、もう一度お試しください。",
+    timeUnitSeconds: "秒",
+    noMove: "---",
+    standard: "2026 エンジンブリッジ規格",
+    ready: "準備完了",
+    start: "開始",
+    stop: "停止",
+    searching: "探索中...",
+    initializing: "初期化中...",
+    topCandidate: "最善手候補",
+    principalVariations: "読み筋 (PVs)",
+    searchLog: "ログ",
+    errors: {
+      initializationFailed: "エンジンの初期化に失敗しました。",
+      protocolError: "プロトコルエラーが発生しました: {message}。",
+      workerError: "ワーカーエラーが発生しました: {message}。",
+      timeout: "処理がタイムアウトしました。",
+      disposed: "エンジンインスタンスは破棄されています。",
+      nestedTooDeep: "データ構造のネストが深すぎます: {path}。",
+      illegalCharacters: "不正な文字が検出されました。",
+      networkError: "エンジンのリソース取得に失敗しました。",
+      securityViolation:
+        "セキュリティ違反: 安全でないリソースのロードがブロックされました。",
+      sriMismatch:
+        "セキュリティ違反: リソース整合性（SRI）の不一致が検出されました。",
+      bridgeDisposed: "エンジンブリッジは既に破棄されています。",
+      notReady: "エンジンが要求された操作の準備完了状態ではありません。",
+      loaderRequired: "安全なリソースロードのために IEngineLoader が必要です。",
+      missingSources: "エンジン設定に 'sources' フィールドがありません。",
+      invalidMoveFormat: '指し手の形式が不正です: "{move}"。',
+      injectionDetected:
+        '{context} で潜在的なコマンド注入が検出されました: "{input}"。',
+      invalidPositionString:
+        "局面文字列が不正です: 入力は空であってはなりません。",
+      invalidEngineId:
+        '不正なエンジン ID です: "{id}"。英数字、ハイフン、アンダースコアのみ使用可能です。',
+      insecureConnection:
+        "機密性の高いエンジンファイルに対して、安全でない接続（HTTP）は許可されません。",
+      sriRequired: "セキュリティ検証のため SRI が必須です。",
+      sriBypassNotAllowed:
+        "本番環境では SRI バイパス（__unsafeNoSRI）は許可されません。",
+      adapterFactoryInvalidReturn:
+        '"{adapter}" のファクトリが無効なオブジェクトを返しました。',
+      adapterNotFound:
+        '"{id}" のエンジンアダプターが見つからないか、ファクトリが登録されていません。',
+      internalError: "システム内部エラーが発生しました: {message}。",
+      resourceLoadUnknown:
+        'エンジン "{engineId}" のリソースロード中に不明なエラーが発生しました。',
+      missingMainEntryPoint:
+        "エンジンリソースに 'main' エントリポイントの URL がありません。",
+      searchAborted: "探索タスクが中断されました。",
+      duplicateFactory:
+        '"{type}" のアダプターファクトリは既に登録されています。',
+      stalePositionId: "古い局面の結果であるため、探索結果は破棄されました。",
+      invalidPositionId: '不正な局面 ID 形式です: "{id}"。',
+      invalidShogiMove: '将棋の指し手が不正です: "{move}"。',
+      invalidMahjongMove: '麻雀の打牌が不正です: "{move}"。',
+      invalidGOBoard: "不正な囲碁の盤面状態です。",
+      invalidGOMove: '囲碁の着手が不正です: "{move}"。',
+      invalidReversiBoard: "不正なリバーシの盤面状態です。",
+      invalidReversiMove: 'リバーシの着手が不正です: "{move}"。',
+      invalidBackgammonBoard: "不正なバックギャモンの盤面状態です。",
+      invalidBackgammonMove: 'バックギャモンの着手形式が不正です: "{move}"。',
+      invalidCheckersBoard: "不正なチェッカーの盤面状態です。",
+      invalidCheckersMove: 'チェッカーの着手が不正です: "{move}"。',
+      validationError: "バリデーションエラーが発生しました。",
+      alreadyInitialized: "エンジンは既に初期化されています。",
+      disposedDuringSearch: "探索中にエンジンが破棄されました。",
+    },
+    factory: {
+      unknownAdapter: "不明なアダプタータイプです: {type}。",
+      requiresMainSource:
+        'エンジン "{id}" には "main" ソースの設定が必須です。',
+    },
+  },
+  adapters: {
+    gtp: {
+      errors: {
+        invalidResponse: 'GTP 応答が不正です: "{response}"。',
+      },
+    },
+  },
+  parsers: {
+    generic: {
+      invalidOptionValue:
+        "オプション値はプリミティブ型（文字列、数値、または真偽値）である必要があります。",
+      parseError: "[{parser}] {type} の解析に失敗しました: {error}。",
+    },
+  },
+};

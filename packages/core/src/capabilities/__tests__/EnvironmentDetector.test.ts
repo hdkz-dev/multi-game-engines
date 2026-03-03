@@ -66,8 +66,7 @@ describe("EnvironmentDetector", () => {
 
   it("should return false for wasmThreads if SharedArrayBuffer is missing", () => {
     const originalSAB = globalThis.SharedArrayBuffer;
-    // @ts-expect-error Testing private property access or invalid input
-    delete globalThis.SharedArrayBuffer;
+    delete (globalThis as unknown as Record<string, unknown>).SharedArrayBuffer;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((EnvironmentDetector as any).checkWasmThreads()).toBe(false);
@@ -77,8 +76,7 @@ describe("EnvironmentDetector", () => {
 
   it("should return false for wasmSimd if WebAssembly is missing", () => {
     const originalWA = globalThis.WebAssembly;
-    // @ts-expect-error Testing private property access or invalid input
-    delete globalThis.WebAssembly;
+    delete (globalThis as unknown as Record<string, unknown>).WebAssembly;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((EnvironmentDetector as any).checkWasmSimd()).toBe(false);
@@ -98,29 +96,32 @@ describe("EnvironmentDetector", () => {
 
   it("should detect various runtimes", () => {
     const originalProcess = globalThis.process;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const originalWindow = (globalThis as any).window;
+    const originalWindow = (globalThis as unknown as Record<string, unknown>)
+      .window;
 
     // 1. Browser
-    // @ts-expect-error Testing private property access or invalid input
-    globalThis.process = { versions: {} };
+    (globalThis as unknown as Record<string, unknown>).process = {
+      versions: {},
+    } as unknown;
     vi.stubGlobal("window", {});
     expect(EnvironmentDetector.getRuntime()).toBe("browser");
 
     // 2. Unknown
-    // @ts-expect-error Testing private property access or invalid input
-    globalThis.process = { versions: {} };
+    (globalThis as unknown as Record<string, unknown>).process = {
+      versions: {},
+    } as unknown;
     vi.stubGlobal("window", undefined);
     expect(EnvironmentDetector.getRuntime()).toBe("unknown");
 
     // 3. Bun
-    // @ts-expect-error Testing private property access or invalid input
-    globalThis.process = { versions: { bun: "1.0" } };
+    (globalThis as unknown as Record<string, unknown>).process = {
+      versions: { bun: "1.0" },
+    } as unknown;
     expect(EnvironmentDetector.getRuntime()).toBe("bun");
 
-    globalThis.process = originalProcess;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).window = originalWindow;
+    (globalThis as unknown as Record<string, unknown>).process =
+      originalProcess;
+    (globalThis as unknown as Record<string, unknown>).window = originalWindow;
   });
 
   it("should handle error in checkWasmThreads gracefully", () => {

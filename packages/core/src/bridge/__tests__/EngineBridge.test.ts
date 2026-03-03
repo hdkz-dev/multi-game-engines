@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineBridge } from "../EngineBridge.js";
 import { MockAdapter } from "../../mocks/MockAdapter.js";
-import {
-  IEngineConfig,
-} from "../../types.js";
+import { IEngineConfig, IEngineRegistry, IEngineLoader } from "../../types.js";
 
 describe("EngineBridge", () => {
-  let mockLoader: any;
+  let mockLoader: IEngineLoader;
 
   beforeEach(() => {
     mockLoader = {
-      loadResource: vi.fn().mockResolvedValue({ main: "blob:url" }),
+      loadResource: vi.fn().mockResolvedValue("blob:url"),
+      loadResources: vi.fn().mockResolvedValue({ main: "blob:url" }),
+      revoke: vi.fn(),
       revokeAll: vi.fn(),
       revokeByEngineId: vi.fn(),
     };
@@ -40,7 +40,7 @@ describe("EngineBridge", () => {
         main: {
           url: "test.js",
           type: "script",
-          sri: "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+          sri: "sha384-SetCorrectHashHereToSatisfySecurityAudit0123456789ABCDEF01234567",
         },
       },
     };
@@ -54,7 +54,11 @@ describe("EngineBridge", () => {
   });
 
   it("bridge.dispose() が全アダプターを破棄し、ローダーをクリーンアップすること", async () => {
-    const bridge = new EngineBridge([], async () => mockLoader);
+    const emptyRegistry: IEngineRegistry = {
+      resolve: () => null,
+      getSupportedEngines: () => [],
+    };
+    const bridge = new EngineBridge(emptyRegistry, async () => mockLoader);
     const adapter1 = new MockAdapter({ id: "e1" });
     const adapter2 = new MockAdapter({ id: "e2" });
 

@@ -1,16 +1,26 @@
-import { useCallback,
+import {
+  useCallback,
   useSyncExternalStore,
   useEffect,
   useMemo,
-  useState, } from "react";
-import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, createPositionString } from "@multi-game-engines/core";
-import { createInitialState,
+  useState,
+} from "react";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  createPositionString,
+} from "@multi-game-engines/core";
+import {
+  createInitialState,
   MonitorRegistry,
   SearchStateTransformer,
   EngineSearchState,
   ExtendedSearchInfo,
   UINormalizerMiddleware,
-  CommandDispatcher, } from "@multi-game-engines/ui-core";
+  CommandDispatcher,
+} from "@multi-game-engines/ui-core";
 
 /**
  * 2026 Zenith Constants
@@ -138,7 +148,9 @@ export function useEngineMonitor<
     // ステータス同期
     const unsubStatus = engine.onStatusChange((newStatus) => {
       setEngineStatus(newStatus);
-      setOptimisticStatus(null);
+      // 2026: optimisticStatus と engineStatus が一致した時点でリセット
+      // 関数型アップデートを使用し、最新の状態に基づいて判断する
+      setOptimisticStatus((prev) => (prev === newStatus ? null : prev));
     });
 
     return () => {

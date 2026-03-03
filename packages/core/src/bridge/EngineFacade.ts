@@ -2,11 +2,9 @@ import {
   IEngine,
   IEngineAdapter,
   IBaseSearchOptions,
-  IBaseSearchInfo,
   IBaseSearchResult,
   EngineStatus,
   ILoadProgress,
-  ITelemetryEvent,
   IMiddleware,
   ISearchTask,
   MiddlewareContext,
@@ -22,6 +20,7 @@ import {
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { ResourceGovernor } from "../capabilities/ResourceGovernor.js";
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 
 /**
  * 2026 Zenith Tier: エンジンの公開 Facade。
@@ -30,8 +29,7 @@ export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
   T_INFO = unknown,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-> implements IEngine<T_OPTIONS, T_INFO, T_RESULT>
-{
+> implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
   private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [];
   private currentSearchTask: ISearchTask<T_INFO, T_RESULT> | null = null;
   private currentPositionId: string | null = null;
@@ -47,15 +45,18 @@ export class EngineFacade<
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
     middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
-    loaderProvider?: () => Promise<IEngineLoader>
+    loaderProvider?: () => Promise<IEngineLoader>,
   ) {
     this.middlewares = [...middlewares];
-    this.loaderProvider = loaderProvider || (async () => {
-      if (this.resolvedLoader) return this.resolvedLoader;
-      const { EngineLoader } = await import("./EngineLoader.js");
-      const { IndexedDBStorage } = await import("../storage/IndexedDBStorage.js");
-      return new EngineLoader(new IndexedDBStorage());
-    });
+    this.loaderProvider =
+      loaderProvider ||
+      (async () => {
+        if (this.resolvedLoader) return this.resolvedLoader;
+        const { EngineLoader } = await import("./EngineLoader.js");
+        const { IndexedDBStorage } =
+          await import("../storage/IndexedDBStorage.js");
+        return new EngineLoader(new IndexedDBStorage());
+      });
 
     // アダプターからのイベントをミドルウェアチェーンに流す
     this.adapter.onTelemetry((event) => {
@@ -64,28 +65,47 @@ export class EngineFacade<
       const context = this.createContext({} as T_OPTIONS);
       for (const mw of this.middlewares) {
         try {
-          const m = mw as any;
-          if (m && typeof m.onTelemetry === "function") {
-            processed = m.onTelemetry(processed, context) || processed;
+          const m = mw as Record<string, unknown>;
+          const handler = m["onTelemetry"];
+          if (typeof handler === "function") {
+            const res = (
+              handler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processed, context);
+            if (res) processed = res as EngineTelemetry;
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
       }
     });
 
     this.adapter.onInfo?.(async (info) => {
       if (this.disposed) return;
-      const infoAny = info as any;
-      if (infoAny && infoAny.positionId && infoAny.positionId !== this.currentPositionId) return;
-      
+
+      // 物理的安全なプロパティアクセス
+      const infoObj = info as Record<string, unknown>;
+      if (
+        infoObj &&
+        typeof infoObj["positionId"] === "string" &&
+        infoObj["positionId"] !== this.currentPositionId
+      )
+        return;
+
       let processed: T_INFO = info;
       const context = this.createContext({} as T_OPTIONS);
       for (const mw of this.middlewares) {
         try {
-          const m = mw as any;
-          if (m && typeof m.onInfo === "function") {
-            processed = (await m.onInfo(processed, context)) || processed;
+          const m = mw as Record<string, unknown>;
+          const handler = m["onInfo"];
+          if (typeof handler === "function") {
+            const res = await (
+              handler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processed, context);
+            if (res) processed = res as T_INFO;
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
       }
     });
 
@@ -95,21 +115,46 @@ export class EngineFacade<
       const context = this.createContext({} as T_OPTIONS);
       for (const mw of this.middlewares) {
         try {
-          const m = mw as any;
-          if (m && typeof m.onResult === "function") {
-            processed = (await m.onResult(processed, context)) || processed;
+          const m = mw as Record<string, unknown>;
+          const handler = m["onResult"];
+          if (typeof handler === "function") {
+            const res = await (
+              handler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processed, context);
+            if (res) processed = res as T_RESULT;
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
       }
     });
   }
 
-  get id(): string { return this.adapter.id; }
-  get name(): string { return this.adapter.name; }
-  get version(): string { return this.adapter.version; }
-  get status(): EngineStatus { return this._internalStatusOverride || this.adapter.status; }
-  get lastError(): IEngineError | null { return this._lastError; }
-  get config(): IEngineConfig | undefined { return (this.adapter as any).config; }
+  get id(): string {
+    return this.adapter.id;
+  }
+  get name(): string {
+    return this.adapter.name;
+  }
+  get version(): string {
+    return this.adapter.version;
+  }
+  get status(): EngineStatus {
+    return this._internalStatusOverride || this.adapter.status;
+  }
+  get engineLicense(): ILicenseInfo {
+    return this.adapter.engineLicense;
+  }
+  get adapterLicense(): ILicenseInfo {
+    return this.adapter.adapterLicense;
+  }
+  get lastError(): IEngineError | null {
+    return this._lastError;
+  }
+  get config(): IEngineConfig | undefined {
+    const a = this.adapter as unknown as Record<string, unknown>;
+    return a["config"] as IEngineConfig | undefined;
+  }
 
   async load(): Promise<void> {
     if (this.disposed) throw new Error("Object disposed");
@@ -131,7 +176,7 @@ export class EngineFacade<
   }
 
   consent(): void {
-    // 物理的な同意プロトコル
+    /* protocol */
   }
 
   async setBook(
@@ -144,30 +189,46 @@ export class EngineFacade<
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
     if (this.disposed) throw new Error("Object disposed");
-    
-    // 1. 同期チェック & ステータス物理ロック (Race Condition 根絶)
-    if (this.status === "busy") {
-      throw new EngineError({ code: EngineErrorCode.NOT_READY, message: "Engine is busy", engineId: this.id });
+
+    const currentStatus: EngineStatus = this.status;
+
+    if (currentStatus === "busy") {
+      throw new EngineError({
+        code: EngineErrorCode.NOT_READY,
+        message: "Engine is busy",
+        engineId: this.id,
+      });
     }
 
-    if (this.status !== "ready") {
-      if (this.loadingStrategy === "on-demand") {
+    if (currentStatus !== "ready") {
+      // 2026 Zenith: on-demand または eager の場合は自動ロードを試みる
+      if (this.loadingStrategy !== "manual") {
         await this.load();
       } else {
-        throw new EngineError({ code: EngineErrorCode.NOT_READY, message: "Engine not ready", engineId: this.id, i18nKey: "engine.errors.notLoaded" });
+        throw new EngineError({
+          code: EngineErrorCode.NOT_READY,
+          message: "Engine not ready",
+          engineId: this.id,
+          i18nKey: createI18nKey("engine.errors.notLoaded"),
+        });
       }
     }
 
-    // 物理的なオーバーライドを即座に行い、後続の並行リクエストを遮断する
     this._internalStatusOverride = "busy";
 
     try {
-      this.currentPositionId = (options.positionId as string) || null;
-      
-      // 2. 割り込みチェック付き非同期解決
-      const recommended = await ResourceGovernor.getRecommendedOptions(options as Record<string, unknown>);
+      const posId = (options as Record<string, unknown>)["positionId"];
+      this.currentPositionId = typeof posId === "string" ? posId : null;
+
+      const recommended = await ResourceGovernor.getRecommendedOptions(
+        options as Record<string, unknown>,
+      );
       if (this.disposed) {
-        throw new EngineError({ code: EngineErrorCode.CANCELLED, message: "Search cancelled due to dispose", engineId: this.id });
+        throw new EngineError({
+          code: EngineErrorCode.CANCELLED,
+          message: "Search cancelled due to dispose",
+          engineId: this.id,
+        });
       }
 
       const finalOptions = { ...options, ...recommended } as T_OPTIONS;
@@ -175,47 +236,77 @@ export class EngineFacade<
       let processedOptions = finalOptions;
       const context = this.createContext(processedOptions);
       for (const mw of this.middlewares) {
+        const m = mw as Record<string, unknown>;
         try {
-          const m = mw as any;
-          if (m && typeof m.onSearch === "function") {
-            processedOptions = (await m.onSearch(processedOptions, context)) || processedOptions;
+          const searchHandler = m["onSearch"];
+          if (typeof searchHandler === "function") {
+            const res = await (
+              searchHandler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processedOptions, context);
+            if (res) processedOptions = res as T_OPTIONS;
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
 
         try {
-          const m = mw as any;
-          if (m && typeof m.onCommand === "function") {
-            await m.onCommand(processedOptions, context);
+          const commandHandler = m["onCommand"];
+          if (typeof commandHandler === "function") {
+            await (
+              commandHandler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processedOptions, context);
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
       }
+
       if (this.disposed) {
-        throw new EngineError({ code: EngineErrorCode.CANCELLED, message: "Search cancelled due to dispose", engineId: this.id });
+        throw new EngineError({
+          code: EngineErrorCode.CANCELLED,
+          message: "Search cancelled due to dispose",
+          engineId: this.id,
+        });
       }
 
-      this.currentSearchTask = this.adapter.searchRaw(this.adapter.parser.createSearchCommand(processedOptions));
-      
+      this.currentSearchTask = this.adapter.searchRaw(
+        this.adapter.parser.createSearchCommand(processedOptions),
+      );
+
       const result = await this.currentSearchTask.result;
       if (this.disposed) {
-        throw new EngineError({ code: EngineErrorCode.CANCELLED, message: "Search cancelled due to dispose", engineId: this.id });
+        throw new EngineError({
+          code: EngineErrorCode.CANCELLED,
+          message: "Search cancelled due to dispose",
+          engineId: this.id,
+        });
       }
 
       let processedResult = result;
       for (const mw of this.middlewares) {
         try {
-          const m = mw as any;
-          if (m && typeof m.onResult === "function") {
-            processedResult = (await m.onResult(processedResult, context)) || processedResult;
+          const m = mw as Record<string, unknown>;
+          const handler = m["onResult"];
+          if (typeof handler === "function") {
+            const res = await (
+              handler as (arg: unknown, ctx: unknown) => unknown
+            ).call(mw, processedResult, context);
+            if (res) processedResult = res as T_RESULT;
           }
-        } catch { /* 絶縁 */ }
+        } catch {
+          /* ignore */
+        }
       }
       return processedResult;
     } catch (err) {
-      const error = err instanceof EngineError ? err : new EngineError({ 
-        code: EngineErrorCode.UNKNOWN_ERROR, 
-        message: String(err), 
-        engineId: this.id 
-      });
+      const error =
+        err instanceof EngineError
+          ? err
+          : new EngineError({
+              code: EngineErrorCode.UNKNOWN_ERROR,
+              message: String(err),
+              engineId: this.id,
+            });
       this._lastError = error;
       throw error;
     } finally {
@@ -235,8 +326,7 @@ export class EngineFacade<
     if (this.disposed) return;
     this.disposed = true;
 
-    // 1. クリーンアップ処理を最優先
-    const loader = this.resolvedLoader || await this.loaderProvider();
+    const loader = this.resolvedLoader || (await this.loaderProvider());
     if (loader) {
       loader.revokeByEngineId(this.id);
       if (this.id.includes("test") && typeof loader.revokeAll === "function") {
@@ -244,13 +334,12 @@ export class EngineFacade<
       }
     }
 
-    // 2. アダプターの破棄
     if (this.currentSearchTask) {
       void this.adapter.stop();
     }
-    
+
     void this.adapter.dispose().catch(() => {});
-    
+
     this.middlewares = [];
     this.currentSearchTask = null;
     this._internalStatusOverride = null;
@@ -263,15 +352,21 @@ export class EngineFacade<
 
   unuse(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT> | string): this {
     if (typeof middleware === "string") {
-      this.middlewares = this.middlewares.filter(m => (m as any).id !== middleware);
+      this.middlewares = this.middlewares.filter((m) => {
+        const mo = m as unknown as Record<string, unknown>;
+        return mo["id"] !== middleware;
+      });
     } else {
-      this.middlewares = this.middlewares.filter(m => m !== middleware);
+      this.middlewares = this.middlewares.filter((m) => m !== middleware);
     }
     return this;
   }
 
   onInfo(callback: (info: T_INFO) => void): () => void {
-    return this.adapter.onInfo ? this.adapter.onInfo(callback) : (() => {});
+    const onInfo = this.adapter.onInfo;
+    return typeof onInfo === "function"
+      ? onInfo.call(this.adapter, callback)
+      : () => {};
   }
 
   onSearchResult(callback: (result: T_RESULT) => void): () => void {
@@ -284,6 +379,10 @@ export class EngineFacade<
 
   onTelemetry(callback: (telemetry: EngineTelemetry) => void): () => void {
     return this.adapter.onTelemetry(callback);
+  }
+
+  onProgress(callback: (progress: ILoadProgress) => void): () => void {
+    return this.adapter.onProgress(callback);
   }
 
   emitTelemetry(telemetry: EngineTelemetry): void {

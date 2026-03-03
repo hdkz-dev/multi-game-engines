@@ -3,6 +3,7 @@ import { EngineFacade } from "../EngineFacade.js";
 import { MockAdapter } from "../../mocks/MockAdapter.js";
 import {
   IBaseSearchOptions,
+  IBaseSearchResult,
   EngineErrorCode,
   IMiddleware,
 } from "../../types.js";
@@ -12,11 +13,19 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
 
   beforeEach(() => {
     adapter = new MockAdapter({ id: "test-engine" });
-    adapter.setCommunicator({ postMessage: vi.fn(), onMessage: vi.fn(), terminate: vi.fn() });
+    adapter.setCommunicator({
+      postMessage: vi.fn(),
+      onMessage: vi.fn(),
+      terminate: vi.fn(),
+    });
   });
 
   it("アトミック・ロード: 同時に load() を呼んでも、アダプターの load は一度しか呼ばれないこと (Race Condition)", async () => {
-    const loadSpy = vi.spyOn(adapter, "load").mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
+    const loadSpy = vi
+      .spyOn(adapter, "load")
+      .mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 50)),
+      );
     const facade = new EngineFacade(adapter);
 
     const p1 = facade.load();
@@ -32,7 +41,7 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
 
     // 物理的修正: searchPromise が投げるエラーを確実にキャッチするように待機
     const searchPromise = facade.search({} as IBaseSearchOptions);
-    
+
     // 中断を誘発
     await facade.dispose();
 
@@ -44,20 +53,24 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
 
   it("ミドルウェアが例外を投げた際の絶縁性 (Fault Tolerance)", async () => {
     adapter.setStatus("ready");
-    const buggyMw: IMiddleware<any, any, any> = {
-      id: "buggy",
-      onSearch: () => { throw new Error("Mw error"); },
-      onCommand: vi.fn() as any, 
-    };
-    
+    const buggyMw: IMiddleware<IBaseSearchOptions, unknown, IBaseSearchResult> =
+      {
+        id: "buggy",
+        onSearch: () => {
+          throw new Error("Mw error");
+        },
+        onCommand: vi.fn(),
+      };
+
     const facade = new EngineFacade(adapter, [buggyMw]);
     const searchPromise = facade.search({} as IBaseSearchOptions);
-    
+
     adapter.setStatus("busy");
     adapter.testHandleIncomingMessage("bestmove e2e4");
-    
+
     const result = await searchPromise;
     expect(result.bestMove).toBeDefined();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((buggyMw as any).onCommand).toHaveBeenCalled();
   });
 
@@ -67,7 +80,7 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
 
     await facade.dispose();
     await facade.dispose();
-    
+
     expect(adapter.dispose).toHaveBeenCalledTimes(1);
   });
 });

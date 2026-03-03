@@ -17,17 +17,20 @@ describe("EngineLoader", () => {
       clear: vi.fn(),
     };
     loader = new EngineLoader(storage);
-    
+
     // global fetch をスタブ化 (デフォルトで成功レスポンスを返す)
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      headers: { get: () => null } as unknown as Headers,
-      arrayBuffer: async () => new ArrayBuffer(0),
-    }));
-    
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        headers: { get: () => null } as unknown as Headers,
+        arrayBuffer: async () => new ArrayBuffer(0),
+      }),
+    );
+
     // URL.createObjectURL/revokeObjectURL をスタブ化
     vi.stubGlobal("URL", {
-      createObjectURL: vi.fn((blob: Blob) => "blob:test"),
+      createObjectURL: vi.fn((_blob: Blob) => "blob:test"),
       revokeObjectURL: vi.fn(),
     });
   });
@@ -54,7 +57,10 @@ describe("EngineLoader", () => {
     const url = await loader.loadResource("test", config);
 
     expect(url).toBe("blob:test");
-    expect(fetch).toHaveBeenCalledWith("https://test.com/engine.js", expect.any(Object));
+    expect(fetch).toHaveBeenCalledWith(
+      "https://test.com/engine.js",
+      expect.any(Object),
+    );
     expect(storage.set).toHaveBeenCalled();
   });
 
@@ -83,8 +89,16 @@ describe("EngineLoader", () => {
     } as Response);
 
     const sources = {
-      main: { url: "https://test.com/main.js", type: "script" as const, sri: dummySRI },
-      wasm: { url: "https://test.com/engine.wasm", type: "wasm" as const, sri: dummySRI },
+      main: {
+        url: "https://test.com/main.js",
+        type: "script" as const,
+        sri: dummySRI,
+      },
+      wasm: {
+        url: "https://test.com/engine.wasm",
+        type: "wasm" as const,
+        sri: dummySRI,
+      },
     };
 
     const urls = await loader.loadResources("test", sources);
@@ -111,7 +125,7 @@ describe("EngineLoader", () => {
     await expect(loader.loadResource("test", config)).rejects.toThrow();
 
     // 物理的修正: キャッシュのクリーンアップ（マイクロタスク）を確実に待つ
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // 2回目: 成功 (モックを上書き)
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -143,8 +157,8 @@ describe("EngineLoader", () => {
 
   it("should reject __unsafeNoSRI if NODE_ENV is production", async () => {
     // 物理的整合性: forceProduction フラグがない場合は環境変数をシミュレート
-    (globalThis as any).NODE_ENV = "production";
-    
+    (globalThis as unknown as Record<string, unknown>).NODE_ENV = "production";
+
     const config: IEngineSourceConfig = {
       url: "https://test.com/engine.js",
       type: "script",
@@ -153,10 +167,12 @@ describe("EngineLoader", () => {
 
     try {
       await expect(loader.loadResource("test", config)).rejects.toThrow(
-        expect.objectContaining({ i18nKey: "engine.errors.sriBypassNotAllowed" })
+        expect.objectContaining({
+          i18nKey: "engine.errors.sriBypassNotAllowed",
+        }),
       );
     } finally {
-      delete (globalThis as any).NODE_ENV;
+      delete (globalThis as unknown as Record<string, unknown>).NODE_ENV;
     }
   });
 
@@ -194,9 +210,12 @@ describe("EngineLoader", () => {
       arrayBuffer: async () => new ArrayBuffer(0),
     } as Response);
 
-    const config = { url: "https://test.com/e.js", sri: dummySRI } as IEngineSourceConfig;
+    const config = {
+      url: "https://test.com/e.js",
+      sri: dummySRI,
+    } as IEngineSourceConfig;
     await loader.loadResource("test", config);
-    
+
     // Blobの生成時に application/javascript が使われることを物理的に確認
     // (createObjectURL の引数で検証可能だが、ここでは成功することを確認)
   });
@@ -208,9 +227,21 @@ describe("EngineLoader", () => {
       arrayBuffer: async () => new ArrayBuffer(0),
     } as Response);
 
-    await loader.loadResource("engine-1", { url: "https://test.com/1.js", type: "script", sri: dummySRI });
-    await loader.loadResource("engine-1", { url: "https://test.com/2.js", type: "script", sri: dummySRI });
-    await loader.loadResource("engine-2", { url: "https://test.com/3.js", type: "script", sri: dummySRI });
+    await loader.loadResource("engine-1", {
+      url: "https://test.com/1.js",
+      type: "script",
+      sri: dummySRI,
+    });
+    await loader.loadResource("engine-1", {
+      url: "https://test.com/2.js",
+      type: "script",
+      sri: dummySRI,
+    });
+    await loader.loadResource("engine-2", {
+      url: "https://test.com/3.js",
+      type: "script",
+      sri: dummySRI,
+    });
 
     loader.revokeByEngineId("engine-1");
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
@@ -218,22 +249,34 @@ describe("EngineLoader", () => {
 
   it("should rollback and revoke ONLY new URLs on batch failure", async () => {
     // 物理的整合性: 1つ目は成功、2つ目は失敗させる
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: true,
-      headers: { get: () => null } as unknown as Headers,
-      arrayBuffer: async () => new ArrayBuffer(0),
-    } as Response).mockResolvedValueOnce({
-      ok: false,
-      status: 404,
-    } as Response);
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        headers: { get: () => null } as unknown as Headers,
+        arrayBuffer: async () => new ArrayBuffer(0),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+      } as Response);
 
     const sources = {
-      s1: { url: "https://test.com/ok.js", type: "script" as const, sri: dummySRI },
-      s2: { url: "https://test.com/fail.js", type: "script" as const, sri: dummySRI },
+      s1: {
+        url: "https://test.com/ok.js",
+        type: "script" as const,
+        sri: dummySRI,
+      },
+      s2: {
+        url: "https://test.com/fail.js",
+        type: "script" as const,
+        sri: dummySRI,
+      },
     };
 
-    await expect(loader.loadResources("rollback-test", sources)).rejects.toThrow();
-    
+    await expect(
+      loader.loadResources("rollback-test", sources),
+    ).rejects.toThrow();
+
     // 成功した s1 の URL が revoke されていること
     expect(URL.revokeObjectURL).toHaveBeenCalled();
   });
@@ -245,8 +288,16 @@ describe("EngineLoader", () => {
       arrayBuffer: async () => new ArrayBuffer(0),
     } as Response);
 
-    await loader.loadResource("e1", { url: "u1", type: "script", sri: dummySRI });
-    await loader.loadResource("e2", { url: "u2", type: "script", sri: dummySRI });
+    await loader.loadResource("e1", {
+      url: "u1",
+      type: "script",
+      sri: dummySRI,
+    });
+    await loader.loadResource("e2", {
+      url: "u2",
+      type: "script",
+      sri: dummySRI,
+    });
 
     loader.revokeAll();
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);

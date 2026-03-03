@@ -2,16 +2,10 @@ import {
   IEngine,
   IEngineAdapter,
   IBaseSearchOptions,
-  IBaseSearchInfo,
   IBaseSearchResult,
   IEngineConfig,
   IEngineRegistry,
   IEngineLoader,
-  EngineStatus,
-  ILoadProgress,
-  ITelemetryEvent,
-  IBookAsset,
-  ILicenseInfo,
   IMiddleware,
 } from "../types.js";
 import { EngineFacade } from "./EngineFacade.js";
@@ -24,7 +18,7 @@ import { createI18nKey } from "../protocol/ProtocolValidator.js";
  */
 export type AdapterFactory<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_INFO = unknown,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > = (config: IEngineConfig) => IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>;
 
@@ -32,40 +26,93 @@ export type AdapterFactory<
  * 2026 Zenith Tier: エンジン管理の中枢ブリッジ。
  */
 export class EngineBridge {
-  private factories = new Map<string, AdapterFactory<any, any, any>>();
-  private engines = new Map<string, EngineFacade<any, any, any>>();
-  private globalMiddlewares: IMiddleware<any, any, any>[] = [];
+  private factories = new Map<
+    string,
+    AdapterFactory<IBaseSearchOptions, unknown, IBaseSearchResult>
+  >();
+  private engines = new Map<
+    string,
+    EngineFacade<IBaseSearchOptions, unknown, IBaseSearchResult>
+  >();
+  private globalMiddlewares: IMiddleware<
+    IBaseSearchOptions,
+    unknown,
+    IBaseSearchResult
+  >[] = [];
   private loaderInstance: IEngineLoader | null = null;
+  private registries: IEngineRegistry[] = [];
 
   constructor(
-    private readonly registry: IEngineRegistry = {
-      resolve: () => null,
-      getSupportedEngines: () => [],
-    },
-    private readonly loaderProvider?: () => Promise<IEngineLoader>
-  ) {}
+    registry?: IEngineRegistry,
+    private readonly loaderProvider?: () => Promise<IEngineLoader>,
+  ) {
+    if (registry) {
+      this.registries.push(registry);
+    }
+  }
 
-  use(middleware: IMiddleware<any, any, any>): this {
-    this.globalMiddlewares.push(middleware);
+  /**
+   * メタデータ解決のためのレジストリを追加します。
+   */
+  addRegistry(registry: IEngineRegistry): void {
+    this.registries.unshift(registry);
+  }
+
+  /**
+   * グローバルミドルウェアを登録します。
+   */
+  use<
+    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+    T_INFO = unknown,
+    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+  >(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
+    this.globalMiddlewares.push(
+      middleware as unknown as IMiddleware<
+        IBaseSearchOptions,
+        unknown,
+        IBaseSearchResult
+      >,
+    );
     for (const engine of this.engines.values()) {
-      engine.use(middleware);
+      engine.use(
+        middleware as unknown as IMiddleware<
+          IBaseSearchOptions,
+          unknown,
+          IBaseSearchResult
+        >,
+      );
     }
     return this;
   }
 
+  /**
+   * アダプターファクトリを登録します。
+   */
   registerAdapterFactory<
     T_OPTIONS extends IBaseSearchOptions,
-    T_INFO extends IBaseSearchInfo,
+    T_INFO,
     T_RESULT extends IBaseSearchResult,
   >(type: string, factory: AdapterFactory<T_OPTIONS, T_INFO, T_RESULT>): void {
-    this.factories.set(type, factory);
+    this.factories.set(
+      type,
+      factory as unknown as AdapterFactory<
+        IBaseSearchOptions,
+        unknown,
+        IBaseSearchResult
+      >,
+    );
   }
 
+  /**
+   * エンジンを取得します。
+   */
   async getEngine<
     T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-    T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+    T_INFO = unknown,
     T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-  >(idOrConfig: string | IEngineConfig): Promise<IEngine<T_OPTIONS, T_INFO, T_RESULT>> {
+  >(
+    idOrConfig: string | IEngineConfig,
+  ): Promise<IEngine<T_OPTIONS, T_INFO, T_RESULT>> {
     const config = this.resolveConfig(idOrConfig);
     const id = config.id;
 
@@ -78,7 +125,11 @@ export class EngineBridge {
     }
 
     if (this.engines.has(id)) {
-      return this.engines.get(id) as unknown as IEngine<T_OPTIONS, T_INFO, T_RESULT>;
+      return this.engines.get(id) as unknown as IEngine<
+        T_OPTIONS,
+        T_INFO,
+        T_RESULT
+      >;
     }
 
     const adapterType = config.adapter;
@@ -113,21 +164,35 @@ export class EngineBridge {
 
     const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
       adapter as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-      [...this.globalMiddlewares],
-      this.loaderProvider
+      [...this.globalMiddlewares] as unknown as IMiddleware<
+        T_OPTIONS,
+        T_INFO,
+        T_RESULT
+      >[],
+      this.loaderProvider,
     );
 
-    this.engines.set(id, facade);
+    this.engines.set(
+      id,
+      facade as unknown as EngineFacade<
+        IBaseSearchOptions,
+        unknown,
+        IBaseSearchResult
+      >,
+    );
     return facade;
   }
 
+  /**
+   * ブリッジを破棄します。
+   */
   async dispose(): Promise<void> {
-    // 物理的に全エンジンを破棄
-    const disposePromises = Array.from(this.engines.values()).map((e) => e.dispose());
+    const disposePromises = Array.from(this.engines.values()).map((e) =>
+      e.dispose(),
+    );
     await Promise.all(disposePromises);
     this.engines.clear();
 
-    // ローダー自体のクリーンアップ (テスト用 mockLoader への適合)
     if (this.loaderProvider) {
       const loader = await this.loaderProvider();
       if (loader && typeof loader.revokeAll === "function") {
@@ -141,11 +206,15 @@ export class EngineBridge {
 
   private resolveConfig(idOrConfig: string | IEngineConfig): IEngineConfig {
     if (typeof idOrConfig === "string") {
-      const sources = this.registry.resolve(idOrConfig);
+      let sources = null;
+      for (const registry of this.registries) {
+        sources = registry.resolve(idOrConfig);
+        if (sources) break;
+      }
       if (!sources) {
         throw new EngineError({
           code: EngineErrorCode.VALIDATION_ERROR,
-          message: `Engine "${idOrConfig}" not found in registry.`,
+          message: `Engine "${idOrConfig}" not found in any registry.`,
           engineId: idOrConfig,
           i18nKey: createI18nKey("engine.errors.invalidEngineId"),
         });
@@ -157,8 +226,8 @@ export class EngineBridge {
 
   private isIEngineAdapter(obj: unknown): boolean {
     if (!obj || typeof obj !== "object") return false;
-    const a = obj as Record<string, any>;
-    
+    const a = obj as Record<string, unknown>;
+
     return (
       typeof a["id"] === "string" &&
       typeof a["name"] === "string" &&

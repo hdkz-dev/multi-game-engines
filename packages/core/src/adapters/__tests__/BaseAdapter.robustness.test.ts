@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { BaseAdapter } from "../BaseAdapter.js";
+import { WorkerCommunicator } from "../../workers/WorkerCommunicator.js";
 import {
   IBaseSearchOptions,
   IBaseSearchInfo,
@@ -51,8 +52,8 @@ class RobustTestAdapter extends BaseAdapter<
     this.handleIncomingMessage(data);
   }
 
-  public setCommunicator(comm: any) {
-    this.communicator = comm;
+  public setCommunicator(comm: unknown): void {
+    this.communicator = comm as WorkerCommunicator;
   }
 }
 
@@ -63,13 +64,15 @@ describe("BaseAdapter: Low-Level Robustness & Stress Tests", () => {
 
     const hugeData = "info ".repeat(10000);
     expect(() => adapter.testHandleIncomingMessage(hugeData)).not.toThrow();
-    expect(() => adapter.testHandleIncomingMessage({ complex: { nested: null } })).not.toThrow();
+    expect(() =>
+      adapter.testHandleIncomingMessage({ complex: { nested: null } }),
+    ).not.toThrow();
   });
 
   it("メッセージ送信中に communicator が同期的に失敗した場合でも、busy 状態が解除され ready に戻ること", async () => {
     const adapter = new RobustTestAdapter();
     adapter.setStatus("ready");
-    
+
     // ダミーの communicator をセット
     adapter.setCommunicator({
       postMessage: () => {
