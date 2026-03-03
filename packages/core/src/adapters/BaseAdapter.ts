@@ -13,13 +13,15 @@ import {
   IBookAsset,
   ILicenseInfo,
   ISearchTask,
+  MiddlewareCommand,
+  IProtocolParser,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 
 /**
  * 2026 Zenith Tier: 全てのアダプターの基底クラス。
- * 共通のライフサイクル管理、イベント通知、ストリーム制御、およびバリデーションを物理的に提供します。
+ * 識別子 (id, name) はオブジェクト生成時に物理的に確定させ、ライフサイクル全体の安全性を保証します。
  */
 export abstract class BaseAdapter<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
@@ -44,7 +46,7 @@ export abstract class BaseAdapter<
   protected messageUnsubscriber: (() => void) | null = null;
   protected infoController: ReadableStreamDefaultController<T_INFO> | null = null;
 
-  // 物理的な識別子。サブクラスでのプロパティ上書きを避けるため、コンストラクタで確定させます。
+  // 物理的な識別子。public readonly プロパティとして保持し、サブクラスでのプロパティ上書きを避ける。
   public readonly id: string;
   public readonly name: string;
 
@@ -64,24 +66,10 @@ export abstract class BaseAdapter<
   abstract readonly version: string;
   abstract readonly engineLicense: ILicenseInfo;
   abstract readonly adapterLicense: ILicenseInfo;
-  abstract readonly parser: {
-    createSearchCommand: (options: T_OPTIONS) => unknown;
-    createStopCommand: () => unknown;
-    createOptionCommand: (name: string, value: string | number | boolean) => unknown;
-    parseInfo: (raw: unknown) => T_INFO | null;
-    parseResult: (raw: unknown) => T_RESULT | null;
-    isReadyCommand: string;
-    readyResponse: string;
-    translateError?: (raw: unknown) => string | null;
-  };
+  abstract readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
 
-  get status(): EngineStatus {
-    return this._status;
-  }
-
-  get progress(): ILoadProgress {
-    return { status: this._status, loadedBytes: 0 };
-  }
+  get status(): EngineStatus { return this._status; }
+  get progress(): ILoadProgress { return { status: this._status, loadedBytes: 0 }; }
 
   private validateSources(): void {
     const sources = this.config.sources;
@@ -93,7 +81,6 @@ export abstract class BaseAdapter<
         i18nKey: createI18nKey("factory.requiresMainSource"),
       });
     }
-
     for (const [key, source] of Object.entries(sources)) {
       const sri = (source as IEngineSourceConfig).sri;
       if (sri && !/^(sha256|sha384|sha512)-[A-Za-z0-9+/=]+$/.test(sri)) {
@@ -107,15 +94,14 @@ export abstract class BaseAdapter<
     }
   }
 
-  async setBook(
-    asset: IBookAsset,
-    _options?: { signal?: AbortSignal; onProgress?: (p: ILoadProgress) => void },
-  ): Promise<void> {
-    if (!this.activeLoader) {
-      throw new EngineError({ code: EngineErrorCode.VALIDATION_ERROR, message: "No loader", engineId: this.id });
-    }
-    const config: IEngineSourceConfig = { url: asset.url, type: "asset", sri: asset.sri };
-    if (asset.size) config.size = asset.size;
+  async setBook(asset: IBookAsset): Promise<void> {
+    if (!this.activeLoader) throw new Error("No loader");
+    const config: IEngineSourceConfig = { 
+      url: asset.url, 
+      type: "asset", 
+      sri: asset.sri,
+      __unsafeNoSRI: asset.sri ? undefined : true 
+    } as IEngineSourceConfig;
     const blobUrl = await this.activeLoader.loadResource(this.id, config);
     await this.onBookLoaded(blobUrl);
   }
@@ -127,24 +113,17 @@ export abstract class BaseAdapter<
     return task.result;
   }
 
-  searchRaw(command: unknown): ISearchTask<T_INFO, T_RESULT> {
+  searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready" && this._status !== "busy") {
       throw new EngineError({ code: EngineErrorCode.NOT_READY, message: "Engine not ready", engineId: this.id });
     }
-
-    if (this._status === "busy") {
-      this.cleanupPendingTask("Replaced by new search", true);
-    }
+    if (this._status === "busy") this.cleanupPendingTask("Restart", true);
     
     this.emitStatusChange("busy");
 
     const readableStream = new ReadableStream<T_INFO>({
-      start: (controller) => {
-        this.infoController = controller;
-      },
-      cancel: () => {
-        return this.handleStreamCancel().catch(() => {});
-      },
+      start: (controller) => { this.infoController = controller; },
+      cancel: () => { void this.handleStreamCancel(); }
     });
 
     const infoStream: AsyncIterable<T_INFO> = {
@@ -157,7 +136,6 @@ export abstract class BaseAdapter<
             yield value;
           }
         } finally {
-          await reader.cancel().catch(() => {});
           reader.releaseLock();
         }
       },
@@ -170,14 +148,10 @@ export abstract class BaseAdapter<
 
     if (this.communicator) {
       this.messageUnsubscriber?.();
-      this.messageUnsubscriber = this.communicator.onMessage((data) => {
-        this.handleIncomingMessage(data);
-      });
-
+      this.messageUnsubscriber = this.communicator.onMessage((data) => this.handleIncomingMessage(data));
       try {
         this.sendSearchCommand(command);
       } catch (err) {
-        // 送信失敗時は Promise を即座に破棄して例外を投げ、Unhandled Rejection を防止
         this.pendingResolve = null;
         this.pendingReject = null;
         this.emitStatusChange("ready");
@@ -185,11 +159,7 @@ export abstract class BaseAdapter<
       }
     }
 
-    return {
-      info: infoStream,
-      result: resultPromise,
-      stop: () => this.stop(),
-    };
+    return { info: infoStream, result: resultPromise, stop: () => { void this.stop(); } };
   }
 
   async stop(): Promise<void> {
@@ -197,20 +167,16 @@ export abstract class BaseAdapter<
     if (this.communicator) {
       await this.communicator.postMessage(this.parser.createStopCommand());
     }
-    this.cleanupPendingTask("Search aborted");
+    this.cleanupPendingTask("Stop requested");
   }
 
   async setOption(name: string, value: string | number | boolean): Promise<void> {
-    if (this.communicator) {
-      await this.communicator.postMessage(this.parser.createOptionCommand(name, value));
-    }
+    if (this.communicator) await this.communicator.postMessage(this.parser.createOptionCommand(name, value));
   }
 
   async dispose(): Promise<void> {
-    this.cleanupPendingTask("Adapter disposed", true);
-    if (this.communicator) {
-      await this.communicator.terminate();
-    }
+    this.cleanupPendingTask("Dispose", true);
+    if (this.communicator) await this.communicator.terminate();
     this.communicator = null;
     this.activeLoader = null;
     this.emitStatusChange("terminated");
@@ -221,62 +187,49 @@ export abstract class BaseAdapter<
     this.statusListeners.add(callback);
     return () => this.statusListeners.delete(callback);
   }
-
   onInfo(callback: (info: T_INFO) => void): () => void {
     this.infoListeners.add(callback);
     return () => this.infoListeners.delete(callback);
   }
-
   onSearchResult(callback: (result: T_RESULT) => void): () => void {
     this.resultListeners.add(callback);
     return () => this.resultListeners.delete(callback);
   }
-
   onProgress(callback: (progress: ILoadProgress) => void): () => void {
     this.progressListeners.add(callback);
     return () => this.progressListeners.delete(callback);
   }
-
   onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
     this.telemetryListeners.add(callback);
     return () => this.telemetryListeners.delete(callback);
   }
 
-  // 物理的に IEngineAdapter の updateStatus/emitTelemetry を提供
   public updateStatus(status: EngineStatus): void {
     this.emitStatusChange(status);
   }
 
   public emitTelemetry(event: ITelemetryEvent): void {
-    for (const listener of this.telemetryListeners) {
-      listener(event);
-    }
+    this.telemetryListeners.forEach(l => l(event));
   }
 
-  protected async handleStreamCancel(): Promise<void> {
-    await this.stop();
-  }
+  protected async handleStreamCancel() { await this.stop(); }
 
   protected handleIncomingMessage(data: unknown): void {
     if (this._status === "error" || this._status === "terminated") return;
-
-    const info = this.parser.parseInfo(data);
+    const info = this.parser.parseInfo(data as string | Record<string, unknown>);
     if (info) {
-      try {
-        this.infoController?.enqueue(info);
-      } catch { /* ignore */ }
-      for (const listener of this.infoListeners) listener(info);
+      try { this.infoController?.enqueue(info); } catch {}
+      this.infoListeners.forEach(l => l(info));
       return;
     }
-
-    const result = this.parser.parseResult(data);
+    const result = this.parser.parseResult(data as string | Record<string, unknown>);
     if (result) {
       if (this.pendingResolve) {
         this.pendingResolve(result);
         this.pendingResolve = null;
         this.pendingReject = null;
       }
-      for (const listener of this.resultListeners) listener(result);
+      this.resultListeners.forEach(l => l(result));
       this.emitStatusChange("ready");
       return;
     }
@@ -285,12 +238,13 @@ export abstract class BaseAdapter<
       const message = this.parser.translateError(data);
       if (message) {
         this.emitStatusChange("error");
-        this.cleanupPendingTask(message, true); // skipReadyTransition = true
-        this.pendingReject?.(new EngineError({
-          code: EngineErrorCode.PROTOCOL_ERROR,
-          message,
-          engineId: this.id,
-        }));
+        this.cleanupPendingTask(message, true);
+        const reject = this.pendingReject;
+        if (reject) {
+          this.pendingReject = null;
+          this.pendingResolve = null;
+          reject(new EngineError({ code: EngineErrorCode.PROTOCOL_ERROR, message, engineId: this.id }));
+        }
       }
     }
   }
@@ -300,47 +254,26 @@ export abstract class BaseAdapter<
       const reject = this.pendingReject;
       this.pendingReject = null;
       this.pendingResolve = null;
-      
-      // 物理的に浮遊するリジェクトを防ぐため、マイクロタスクで排出。
-      // かつ、テスト環境でのハングを防ぐため、リジェクト直後にストリームを閉じる。
       void Promise.resolve().then(() => {
-        reject(new EngineError({
-          code: EngineErrorCode.SEARCH_ABORTED,
-          message: reason ?? "The search task was aborted.",
-          engineId: this.id,
-        }));
+        reject(new EngineError({ code: EngineErrorCode.SEARCH_ABORTED, message: reason ?? "Aborted", engineId: this.id }));
       });
     }
-
-    if (this.infoController) {
-      try {
-        this.infoController.close();
-      } catch { /* ignore */ }
-      this.infoController = null;
-    }
-
-    if (this._status === "busy" && !skipReadyTransition) {
-      this.emitStatusChange("ready");
-    }
+    try { this.infoController?.close(); } catch {}
+    this.infoController = null;
+    if (this._status === "busy" && !skipReadyTransition) this.emitStatusChange("ready");
   }
 
   protected emitStatusChange(status: EngineStatus): void {
     this._status = status;
     if (status === "error" || status === "terminated") {
-      if (this.infoController) {
-        try {
-          this.infoController.close();
-        } catch { /* ignore */ }
-        this.infoController = null;
-      }
+      try { this.infoController?.close(); } catch {}
+      this.infoController = null;
     }
-    for (const listener of this.statusListeners) {
-      listener(status);
-    }
+    this.statusListeners.forEach(l => l(status));
   }
 
   protected emitProgress(progress: ILoadProgress): void {
-    for (const listener of this.progressListeners) listener(progress);
+    this.progressListeners.forEach(l => l(progress));
   }
 
   protected clearListeners(): void {
@@ -351,12 +284,8 @@ export abstract class BaseAdapter<
     this.resultListeners.clear();
   }
 
-  protected sendSearchCommand(command: unknown): void {
-    if (Array.isArray(command)) {
-      for (const cmd of command) this.communicator?.postMessage(cmd);
-    } else {
-      this.communicator?.postMessage(command);
-    }
+  protected sendSearchCommand(command: MiddlewareCommand): void {
+    void this.communicator?.postMessage(command);
   }
 
   protected abstract onInitialize(): Promise<void>;

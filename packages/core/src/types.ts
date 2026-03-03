@@ -32,6 +32,15 @@ export type PositionId = Brand<string, "PositionId">;
 // 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
 /**
+ * ライセンス情報。
+ */
+export interface ILicenseInfo {
+  name: string;
+  url?: string | undefined;
+  text?: string | undefined;
+}
+
+/**
  * エンジンの状態。
  */
 export type EngineStatus =
@@ -369,6 +378,8 @@ export interface IEngineAdapter<
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
+  readonly engineLicense: ILicenseInfo;
+  readonly adapterLicense: ILicenseInfo;
   readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
   readonly requiredCapabilities?: Partial<ICapabilities>;
 

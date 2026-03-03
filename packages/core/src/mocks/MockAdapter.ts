@@ -8,7 +8,6 @@ import {
   IProtocolParser,
   IEngineConfig,
   MiddlewareCommand,
-  NormalizedScore,
   EngineStatus,
   ILoadProgress,
   ITelemetryEvent,
@@ -24,7 +23,6 @@ export class MockAdapter extends BaseAdapter<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  // サブクラスでは初期化順序問題を避けるため、これらを「プロパティ」としては定義せず、ゲッターまたは親への委譲のみを行う。
   readonly version: string = "1.0.0-mock";
   readonly engineLicense: ILicenseInfo = { name: "MIT", url: "" };
   readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
@@ -35,12 +33,11 @@ export class MockAdapter extends BaseAdapter<
   >;
 
   constructor(config: IEngineConfig = {}) {
-    // 物理的な ID/Name を親クラスに委譲し、自身のプロパティとしては定義しない（シャドウイング回避）
     super(config.id ?? "mock-engine", config.name ?? "Mock Engine", config);
     this.parser = new MockParser();
   }
 
-  public async load(_loader?: IEngineLoader): Promise<void> {
+  public async load(_loader?: unknown): Promise<void> {
     this.emitStatusChange("loading");
     this.emitStatusChange("ready");
   }
@@ -51,7 +48,6 @@ export class MockAdapter extends BaseAdapter<
   protected async onDispose(): Promise<void> {}
   protected async onBookLoaded(_url: string): Promise<void> {}
 
-  // 物理的に IEngineAdapter の全メソッドを明示的に定義
   public searchRaw(
     _command: MiddlewareCommand,
   ): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
@@ -89,7 +85,6 @@ export class MockAdapter extends BaseAdapter<
     // NOP
   }
 
-  // 購読系メソッドの明示的な再定義
   onStatusChange(callback: (status: EngineStatus) => void): () => void {
     return super.onStatusChange(callback);
   }
@@ -112,6 +107,8 @@ class MockParser implements IProtocolParser<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
+  isReadyCommand = "isready";
+  readyResponse = "readyok";
   createSearchCommand(_options: IBaseSearchOptions): MiddlewareCommand {
     return "go";
   }
@@ -121,11 +118,11 @@ class MockParser implements IProtocolParser<
   createOptionCommand(_name: string, _value: unknown): MiddlewareCommand {
     return "setoption";
   }
-  parseInfo(line: string | Record<string, unknown>): IBaseSearchInfo | null {
+  parseInfo(line: unknown): IBaseSearchInfo | null {
     return typeof line === "string" ? { raw: line } : null;
   }
   parseResult(
-    line: string | Record<string, unknown>,
+    line: unknown,
   ): IBaseSearchResult | null {
     return typeof line === "string" ? { bestMove: createMove("e2e4"), raw: line } : null;
   }

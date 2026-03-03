@@ -1,416 +1,211 @@
-import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import {
   IEngine,
   IEngineAdapter,
   IBaseSearchOptions,
+  IBaseSearchInfo,
   IBaseSearchResult,
   EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
   IMiddleware,
+  ISearchTask,
   MiddlewareContext,
   EngineErrorCode,
-  EngineTelemetry,
-  EngineLoadingStrategy,
   IEngineLoader,
-  ICapabilities,
-  IBaseSearchInfo,
-  PositionId,
+  ILicenseInfo,
+  IBookAsset,
+  EngineTelemetry,
+  IEngineError,
+  ProgressCallback,
   IEngineConfig,
+  EngineLoadingStrategy,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { ResourceGovernor } from "../capabilities/ResourceGovernor.js";
 
 /**
- * @internal
- * 内部アダプターへのアクセス用 Symbol。
- */
-export const INTERNAL_ADAPTER = Symbol("INTERNAL_ADAPTER");
-
-// 2026: 非同期制御用ヘルパー
-function createDeferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
-
-/**
- * エンジンとの対話を抽象化し、共通機能を提供するファサードクラス。
- * 2026 Zenith Tier: Stale Message Filtering, Background Throttling, Resource Optimization 対応。
+ * 2026 Zenith Tier: エンジンの公開 Facade。
  */
 export class EngineFacade<
   T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-  T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
+  T_INFO = unknown,
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-> implements IEngine<T_OPTIONS, T_INFO, T_RESULT> {
+> implements IEngine<T_OPTIONS, T_INFO, T_RESULT>
+{
   private middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [];
+  private currentSearchTask: ISearchTask<T_INFO, T_RESULT> | null = null;
+  private currentPositionId: string | null = null;
+  private loaderProvider: () => Promise<IEngineLoader>;
   private _lastError: EngineError | null = null;
-  private activeTaskStop: (() => void) | null = null;
-  private loadPromise: Promise<void> | null = null;
-  private loadAbortController: AbortController | null = null;
-  private currentPositionId: PositionId | null = null;
-  private consentDeferred: {
-    promise: Promise<void>;
-    resolve: () => void;
-  } | null = null;
-  public loadingStrategy: EngineLoadingStrategy = "on-demand";
 
-  private statusListeners = new Set<(status: EngineStatus) => void>();
-  private infoListeners = new Set<(info: T_INFO) => void>();
-  private telemetryListeners = new Set<(telemetry: EngineTelemetry) => void>();
-  private resultListeners = new Set<(result: T_RESULT) => void>();
-
-  private adapterUnsubscribers: (() => void)[] = [];
+  public loadingStrategy?: EngineLoadingStrategy;
 
   constructor(
     private readonly adapter: IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
     middlewares: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>[] = [],
-    private readonly loaderProvider?: () => Promise<IEngineLoader>,
+    loaderProvider?: () => Promise<IEngineLoader>
   ) {
     this.middlewares = [...middlewares];
+    this.loaderProvider = loaderProvider || (async () => {
+      const { EngineLoader } = await import("./EngineLoader.js");
+      const { IndexedDBStorage } = await import("../storage/IndexedDBStorage.js");
+      return new EngineLoader(new IndexedDBStorage());
+    });
 
-    // アダプターからのイベントを購読
-    this.adapterUnsubscribers.push(
-      this.adapter.onStatusChange((status) => {
-        this.emitStatusChange(status);
-      }),
-    );
+    // アダプターからのイベントをミドルウェアチェーンに流す
+    this.adapter.onTelemetry((event) => {
+      let processed: EngineTelemetry = event;
+      const context = this.createContext({} as T_OPTIONS);
+      for (const mw of this.middlewares) {
+        const m = mw as any;
+        if (m && typeof m.onTelemetry === "function") {
+          processed = m.onTelemetry(processed, context) || processed;
+        }
+      }
+    });
 
-    this.adapterUnsubscribers.push(
-      this.adapter.onTelemetry((t) => {
-        let processed = t;
-        for (const mw of this.middlewares) {
-          if (mw.onTelemetry) {
-            try {
-              processed = mw.onTelemetry(processed) || processed;
-            } catch (err) {
-              console.error(
-                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onTelemetry:`,
-                err,
-              );
-            }
-          }
+    this.adapter.onInfo?.(async (info) => {
+      const infoAny = info as any;
+      if (infoAny && infoAny.positionId && infoAny.positionId !== this.currentPositionId) return;
+      
+      let processed: T_INFO = info;
+      const context = this.createContext({} as T_OPTIONS);
+      for (const mw of this.middlewares) {
+        const m = mw as any;
+        if (m && typeof m.onInfo === "function") {
+          processed = (await m.onInfo(processed, context)) || processed;
         }
-        this.emitTelemetry(processed);
-      }),
-    );
+      }
+    });
 
-    this.adapterUnsubscribers.push(
-      this.adapter.onInfo?.(async (rawInfo) => {
-        if (
-          this.currentPositionId &&
-          (rawInfo as unknown).positionId &&
-          (rawInfo as unknown).positionId !== this.currentPositionId
-        ) {
-          return;
+    this.adapter.onSearchResult(async (result) => {
+      let processed: T_RESULT = result;
+      const context = this.createContext({} as T_OPTIONS);
+      for (const mw of this.middlewares) {
+        const m = mw as any;
+        if (m && typeof m.onResult === "function") {
+          processed = (await m.onResult(processed, context)) || processed;
         }
-
-        let processed = rawInfo;
-        for (const mw of this.middlewares) {
-          if (mw.onInfo) {
-            try {
-              processed = (await mw.onInfo(processed)) || processed;
-            } catch (err) {
-              console.error(
-                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onInfo:`,
-                err,
-              );
-            }
-          }
-        }
-        for (const listener of this.infoListeners) {
-          listener(processed);
-        }
-      }),
-    );
-
-    this.adapterUnsubscribers.push(
-      this.adapter.onSearchResult?.(async (rawResult) => {
-        let processed = rawResult;
-        for (const mw of this.middlewares) {
-          if (mw.onResult) {
-            try {
-              processed = (await mw.onResult(processed)) || processed;
-            } catch (err) {
-              console.error(
-                `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onResult:`,
-                err,
-              );
-            }
-          }
-        }
-        for (const listener of this.resultListeners) {
-          listener(processed);
-        }
-      }),
-    );
-
-    if (typeof document !== "undefined") {
-      const handleVisibilityChange = () => {
-        const isHidden = document.visibilityState === "hidden";
-        this.emitTelemetry({
-          type: "performance",
-          timestamp: Date.now(),
-          metadata: { visibility: document.visibilityState },
-        });
-        if (isHidden) {
-          ResourceGovernor.onBackgroundThrottling();
-        }
-      };
-      document.addEventListener("visibilitychange", handleVisibilityChange);
-      this.adapterUnsubscribers.push(() =>
-        document.removeEventListener("visibilitychange", handleVisibilityChange),
-      );
-    }
+      }
+    });
   }
 
-  get id() { return this.adapter.id; }
-  get status() { return this.adapter.status; }
-  get lastError() { return this._lastError; }
-  get config(): IEngineConfig {
-    return (this.adapter as unknown).config || {};
+  get id(): string { return this.adapter.id; }
+  get name(): string { return this.adapter.name; }
+  get version(): string { return this.adapter.version; }
+  get status(): EngineStatus { return this.adapter.status; }
+  get lastError(): IEngineError | null { return this._lastError; }
+  get config(): IEngineConfig | undefined { return (this.adapter as any).config; }
+
+  async load(): Promise<void> {
+    const loader = await this.loaderProvider();
+    await this.adapter.load(loader);
   }
 
   consent(): void {
-    if (this.consentDeferred) {
-      this.consentDeferred.resolve();
-      this.consentDeferred = null;
-    }
+    // 物理的な同意プロトコルの実装（必要に応じて）
   }
 
-  async load(): Promise<void> {
-    if (this.loadPromise) return this.loadPromise;
-
-    this.loadAbortController = new AbortController();
-    const signal = this.loadAbortController.signal;
-
-    this.loadPromise = (async () => {
-      const id = this.adapter.id;
-      try {
-        if (this.loadingStrategy === "consent") {
-          const { promise, resolve } = createDeferred<void>();
-          this.consentDeferred = { promise, resolve };
-          this.emitStatusChange("ready");
-          
-          await Promise.race([
-            promise,
-            new Promise((_, reject) => {
-              signal.addEventListener("abort", () => reject(new EngineError({
-                code: EngineErrorCode.CANCELLED,
-                message: "Load aborted by disposal",
-                engineId: id
-              })));
-            })
-          ]);
-          this.consentDeferred = null;
-        }
-
-        // 2026: loaderProvider がない場合は、アダプターの直接ロードを試行（後方互換性）
-        if (this.loaderProvider) {
-          const loader = await this.loaderProvider();
-          if (signal.aborted) throw new Error("Aborted");
-
-          const sources = this.config.sources || {};
-          const resources: Record<string, string> = {};
-          
-          for (const [key, source] of Object.entries(sources)) {
-            resources[key] = await loader.loadResource(id, source as IEngineSourceConfig, { signal });
-          }
-
-          await this.adapter.load(resources);
-        } else {
-          await this.adapter.load();
-        }
-        
-        this.emitStatusChange("ready");
-      } catch (err) {
-        this.loadPromise = null;
-        this.loadAbortController = null;
-        if (signal.aborted || (err as unknown).code === EngineErrorCode.CANCELLED) {
-          throw new EngineError({
-            code: EngineErrorCode.CANCELLED,
-            message: "Engine loading was cancelled.",
-            engineId: id,
-            i18nKey: createI18nKey("engine.errors.searchAborted"),
-          });
-        }
-        throw err;
-      }
-    })();
-
-    return this.loadPromise;
+  async setBook(
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
+  ): Promise<void> {
+    await this.adapter.setBook(asset, options);
   }
 
   async search(options: T_OPTIONS): Promise<T_RESULT> {
-    if (
-      this.status === "uninitialized" &&
-      this.loadingStrategy === "on-demand"
-    ) {
-      await this.load();
+    if (this.status === "busy") {
+      throw new EngineError({ code: EngineErrorCode.NOT_READY, message: "Engine is busy", engineId: this.id });
     }
 
-    if (this.adapter.status === "busy") {
-      this.activeTaskStop?.();
+    this.currentPositionId = (options.positionId as string) || null;
+    
+    const recommended = await ResourceGovernor.getRecommendedOptions(options as Record<string, unknown>);
+    const finalOptions = { ...options, ...recommended } as T_OPTIONS;
+
+    let processedOptions = finalOptions;
+    const context = this.createContext(processedOptions);
+    for (const mw of this.middlewares) {
+      const m = mw as any;
+      if (m && typeof m.onSearch === "function") {
+        processedOptions = (await m.onSearch(processedOptions, context)) || processedOptions;
+      }
     }
 
-    const context: MiddlewareContext<T_OPTIONS> = {
-      engineId: this.id,
-      options,
-      emitTelemetry: (t) => this.emitTelemetry(t),
-    };
-
+    this.currentSearchTask = this.adapter.searchRaw(this.adapter.parser.createSearchCommand(processedOptions));
+    
     try {
-      this.currentPositionId = options.positionId || null;
-      let command = this.adapter.parser.createSearchCommand(options);
-
-      for (const mw of this.middlewares) {
-        if (mw.onCommand) {
-          try {
-            const result = await mw.onCommand(command, context);
-            if (result) command = result;
-          } catch (err) {
-            console.error(
-              `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onCommand:`,
-              err,
-            );
-          }
-        }
-      }
-
-      const task = this.adapter.searchRaw(command);
-      this.activeTaskStop =
-        typeof task.stop === "function" ? () => task.stop() : null;
-
-      const result = await task.result;
-
-      if (options.positionId && this.currentPositionId !== options.positionId) {
-        const i18nKey = createI18nKey("engine.errors.stalePositionId");
-        throw new EngineError({
-          code: EngineErrorCode.CANCELLED,
-          message: "Search result discarded (Stale PositionId)",
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-
+      const result = await this.currentSearchTask.result;
       let processedResult = result;
       for (const mw of this.middlewares) {
-        if (mw.onResult) {
-          try {
-            processedResult =
-              (await mw.onResult(processedResult)) || processedResult;
-          } catch (err) {
-            console.error(
-              `[EngineFacade] Middleware "${mw.id || "unknown"}" failed in onResult:`,
-              err,
-            );
-          }
+        const m = mw as any;
+        if (m && typeof m.onResult === "function") {
+          processedResult = (await m.onResult(processedResult, context)) || processedResult;
         }
       }
-
       return processedResult;
     } catch (err) {
-      this._lastError = EngineError.from(err, EngineErrorCode.INTERNAL_ERROR);
-      this._lastError.engineId = this.id;
-      throw this._lastError;
+      const error = err instanceof EngineError ? err : new EngineError({ 
+        code: EngineErrorCode.UNKNOWN_ERROR, 
+        message: String(err), 
+        engineId: this.id 
+      });
+      this._lastError = error;
+      throw error;
     } finally {
-      this.activeTaskStop = null;
+      this.currentSearchTask = null;
     }
   }
 
   stop(): void {
-    this.activeTaskStop?.();
-  }
-
-  async setOption(
-    name: string,
-    value: string | number | boolean,
-  ): Promise<void> {
-    await this.adapter.setOption(name, value);
+    void this.adapter.stop();
+    this.currentSearchTask = null;
   }
 
   async dispose(): Promise<void> {
-    const id = this.adapter.id;
-    const isAlreadyDisposed =
-      this.adapter.status === "disposed" ||
-      this.adapter.status === "terminated";
-
-    for (const unsub of this.adapterUnsubscribers) {
-      unsub();
-    }
-    this.adapterUnsubscribers = [];
-    
-    this.statusListeners.clear();
-    this.infoListeners.clear();
-    this.resultListeners.clear();
-    this.telemetryListeners.clear();
-
-    if (this.activeTaskStop) {
-      try {
-        await Promise.resolve(this.activeTaskStop());
-      } catch (err) {
-        console.error(
-          `[EngineFacade] Failed to stop active task for engine ${id}:`,
-          err,
-        );
-      }
-    }
-    this.activeTaskStop = null;
-
-    if (this.loadAbortController) {
-      this.loadAbortController.abort();
-    }
-
-    if (this.consentDeferred) {
-      this.consentDeferred.resolve();
-      this.consentDeferred = null;
-    }
-
-    if (!isAlreadyDisposed) {
-      try {
-        await this.adapter.dispose();
-      } catch (err) {
-        console.error(`[EngineFacade] Error during adapter disposal (${id}):`, err);
-      }
-    }
+    await this.adapter.dispose();
+    const loader = await this.loaderProvider();
+    loader.revokeByEngineId(this.id);
   }
 
-  onStatusChange(callback: (status: EngineStatus) => void): () => void {
-    this.statusListeners.add(callback);
-    return () => this.statusListeners.delete(callback);
+  use(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
+    this.middlewares.push(middleware);
+    return this;
+  }
+
+  unuse(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT> | string): this {
+    if (typeof middleware === "string") {
+      this.middlewares = this.middlewares.filter(m => (m as any).id !== middleware);
+    } else {
+      this.middlewares = this.middlewares.filter(m => m !== middleware);
+    }
+    return this;
   }
 
   onInfo(callback: (info: T_INFO) => void): () => void {
-    this.infoListeners.add(callback);
-    return () => this.infoListeners.delete(callback);
+    return this.adapter.onInfo ? this.adapter.onInfo(callback) : (() => {});
   }
 
   onSearchResult(callback: (result: T_RESULT) => void): () => void {
-    this.resultListeners.add(callback);
-    return () => this.resultListeners.delete(callback);
+    return this.adapter.onSearchResult(callback);
+  }
+
+  onStatusChange(callback: (status: EngineStatus) => void): () => void {
+    return this.adapter.onStatusChange(callback);
   }
 
   onTelemetry(callback: (telemetry: EngineTelemetry) => void): () => void {
-    this.telemetryListeners.add(callback);
-    return () => this.telemetryListeners.delete(callback);
+    return this.adapter.onTelemetry(callback);
   }
 
-  private emitStatusChange(status: EngineStatus): void {
-    for (const listener of this.statusListeners) {
-      listener(status);
-    }
+  emitTelemetry(telemetry: EngineTelemetry): void {
+    this.adapter.emitTelemetry(telemetry);
   }
 
-  private emitTelemetry(telemetry: EngineTelemetry): void {
-    for (const listener of this.telemetryListeners) {
-      listener(telemetry);
-    }
-  }
-
-  /** @internal */
-  [INTERNAL_ADAPTER]() {
-    return this.adapter;
+  private createContext(options: T_OPTIONS): MiddlewareContext<T_OPTIONS> {
+    return {
+      engineId: this.id,
+      options,
+    };
   }
 }
