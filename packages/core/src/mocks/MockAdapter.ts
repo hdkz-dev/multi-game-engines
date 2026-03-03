@@ -12,8 +12,10 @@ import {
   ILoadProgress,
   ITelemetryEvent,
   ILicenseInfo,
+  EngineErrorCode,
 } from "../types.js";
 import { createMove } from "../protocol/ProtocolValidator.js";
+import { EngineError } from "../errors/EngineError.js";
 
 /**
  * CI/CD および開発用の軽量なモックアダプター。
@@ -23,14 +25,18 @@ export class MockAdapter extends BaseAdapter<
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  readonly version: string = "1.0.0-mock";
-  readonly engineLicense: ILicenseInfo = { name: "MIT", url: "" };
-  readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
-  readonly parser: IProtocolParser<
+  // 初期化順序問題を避けるため、readonly プロパティとしての宣言を親クラスに委譲
+  public override readonly version: string = "1.0.0-mock";
+  public override readonly engineLicense: ILicenseInfo = { name: "MIT", url: "" };
+  public override readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
+  public override readonly parser: IProtocolParser<
     IBaseSearchOptions,
     IBaseSearchInfo,
     IBaseSearchResult
   >;
+
+  private mockPendingReject: ((err: any) => void) | null = null;
+  private activeTimer: any = null;
 
   constructor(config: IEngineConfig = {}) {
     super(config.id ?? "mock-engine", config.name ?? "Mock Engine", config);
@@ -39,7 +45,21 @@ export class MockAdapter extends BaseAdapter<
 
   public async load(_loader?: unknown): Promise<void> {
     this.emitStatusChange("loading");
+    this._status = "ready";
     this.emitStatusChange("ready");
+  }
+
+  public setStatus(status: EngineStatus): void {
+    this._status = status;
+    this.emitStatusChange(status);
+  }
+
+  public testHandleIncomingMessage(data: unknown): void {
+    this.handleIncomingMessage(data);
+  }
+
+  public setCommunicator(comm: any): void {
+    this.communicator = comm;
   }
 
   protected async onInitialize(): Promise<void> {}
@@ -51,38 +71,60 @@ export class MockAdapter extends BaseAdapter<
   public searchRaw(
     _command: MiddlewareCommand,
   ): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    const task = super.searchRaw(_command);
-    
-    const resultPromise = new Promise<IBaseSearchResult>((resolve) => {
-      setTimeout(() => {
+    // 状態チェックをスキップするため super を呼ばず、物理的に生成
+    this._status = "busy";
+    this.emitStatusChange("busy");
+
+    const resultPromise = new Promise<IBaseSearchResult>((resolve, reject) => {
+      this.mockPendingReject = reject;
+      this.activeTimer = setTimeout(() => {
         if (this._status === "busy") {
           const result: IBaseSearchResult = {
             bestMove: createMove("e2e4"),
             raw: "bestmove e2e4",
           };
           resolve(result);
+          this._status = "ready";
           this.emitStatusChange("ready");
+          this.mockPendingReject = null;
+          this.activeTimer = null;
         }
-      }, 500);
+      }, 10);
     });
 
+    const infoStream: AsyncIterable<IBaseSearchInfo> = {
+      [Symbol.asyncIterator]: async function* () {
+        yield { raw: "info depth 1" };
+      },
+    };
+
     return {
-      ...task,
+      info: infoStream,
       result: resultPromise,
+      stop: () => {
+        void this.stop();
+      },
     };
   }
 
   public async stop(): Promise<void> {
-    if (this._status === "busy") {
-      this.emitStatusChange("ready");
+    if (this.activeTimer) {
+      clearTimeout(this.activeTimer);
+      this.activeTimer = null;
     }
+    if (this.mockPendingReject) {
+      const reject = this.mockPendingReject;
+      this.mockPendingReject = null;
+      reject(new EngineError({ code: EngineErrorCode.SEARCH_ABORTED, message: "Stopped", engineId: this.id }));
+    }
+    this._status = "ready";
+    this.emitStatusChange("ready");
   }
 
-  public async setOption(
-    _name: string,
-    _value: string | number | boolean,
-  ): Promise<void> {
-    // NOP
+  public async dispose(): Promise<void> {
+    await this.stop();
+    this._status = "terminated";
+    this.emitStatusChange("terminated");
   }
 
   onStatusChange(callback: (status: EngineStatus) => void): () => void {

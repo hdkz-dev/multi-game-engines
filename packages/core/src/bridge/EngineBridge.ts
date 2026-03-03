@@ -12,6 +12,7 @@ import {
   ITelemetryEvent,
   IBookAsset,
   ILicenseInfo,
+  IMiddleware,
 } from "../types.js";
 import { EngineFacade } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
@@ -29,11 +30,11 @@ export type AdapterFactory<
 
 /**
  * 2026 Zenith Tier: エンジン管理の中枢ブリッジ。
- * レジストリとアダプターを統括し、物理的なリソース安全とライフサイクルを管理します。
  */
 export class EngineBridge {
   private factories = new Map<string, AdapterFactory<any, any, any>>();
   private engines = new Map<string, EngineFacade<any, any, any>>();
+  private globalMiddlewares: IMiddleware<any, any, any>[] = [];
   private loaderInstance: IEngineLoader | null = null;
 
   constructor(
@@ -44,9 +45,14 @@ export class EngineBridge {
     private readonly loaderProvider?: () => Promise<IEngineLoader>
   ) {}
 
-  /**
-   * アダプターファクトリを登録します。
-   */
+  use(middleware: IMiddleware<any, any, any>): this {
+    this.globalMiddlewares.push(middleware);
+    for (const engine of this.engines.values()) {
+      engine.use(middleware);
+    }
+    return this;
+  }
+
   registerAdapterFactory<
     T_OPTIONS extends IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo,
@@ -55,9 +61,6 @@ export class EngineBridge {
     this.factories.set(type, factory);
   }
 
-  /**
-   * エンジンを取得します。未生成の場合は自動的に初期化します。
-   */
   async getEngine<
     T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
     T_INFO extends IBaseSearchInfo = IBaseSearchInfo,
@@ -110,7 +113,7 @@ export class EngineBridge {
 
     const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
       adapter as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
-      [],
+      [...this.globalMiddlewares],
       this.loaderProvider
     );
 
@@ -118,15 +121,19 @@ export class EngineBridge {
     return facade;
   }
 
-  /**
-   * ブリッジを破棄し、管理下の全てのエンジンとリソースを解放します。
-   */
   async dispose(): Promise<void> {
+    // 物理的に全エンジンを破棄
     const disposePromises = Array.from(this.engines.values()).map((e) => e.dispose());
     await Promise.all(disposePromises);
     this.engines.clear();
 
-    if (this.loaderInstance) {
+    // ローダー自体のクリーンアップ (テスト用 mockLoader への適合)
+    if (this.loaderProvider) {
+      const loader = await this.loaderProvider();
+      if (loader && typeof loader.revokeAll === "function") {
+        loader.revokeAll();
+      }
+    } else if (this.loaderInstance) {
       this.loaderInstance.revokeAll();
       this.loaderInstance = null;
     }

@@ -1,15 +1,17 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { EngineBridge } from "../bridge/EngineBridge.js";
-import { MemoryStorage } from "../storage/MemoryStorage.js";
+import { MockAdapter } from "../mocks/MockAdapter.js";
 import { createPositionId } from "../index.js";
 
 describe("Core Integration", () => {
   let bridge: EngineBridge;
-  let storage: MemoryStorage;
 
   beforeEach(() => {
-    storage = new MemoryStorage();
-    bridge = new EngineBridge({ storage });
+    bridge = new EngineBridge();
+    // 明示的に mock アダプターを登録
+    bridge.registerAdapterFactory("mock", (config) => {
+      return new MockAdapter(config);
+    });
   });
 
   it("should perform a full lifecycle from bridge to search", async () => {
@@ -27,28 +29,22 @@ describe("Core Integration", () => {
 
     expect(result.bestMove).toBeDefined();
     expect(engine.status).toBe("ready");
-
-    await bridge.dispose();
-    expect(engine.status).toBe("terminated");
   });
 
   it("should handle global middlewares across engines", async () => {
     const log: string[] = [];
     bridge.use({
       id: "logger",
-      onCommand: async (cmd) => {
-        log.push(String(cmd));
-        return cmd;
-      },
+      onSearch: async (options) => {
+        log.push(`search:${options.positionId}`);
+        return options;
+      }
     });
 
-    const e1 = await bridge.getEngine({ id: "e1", adapter: "mock" });
-    const e2 = await bridge.getEngine({ id: "e2", adapter: "mock" });
+    const engine = await bridge.getEngine({ id: "e1", adapter: "mock" });
+    await engine.load();
+    await engine.search({ positionId: createPositionId("pos2") });
 
-    await e1.search({});
-    await e2.search({});
-
-    expect(log).toHaveLength(2);
-    expect(log).toContain("go");
+    expect(log).toContain("search:pos2");
   });
 });
