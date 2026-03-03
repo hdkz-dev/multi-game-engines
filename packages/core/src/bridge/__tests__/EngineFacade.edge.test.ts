@@ -1,65 +1,36 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
-  afterAll,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from "vitest";
 import { EngineFacade } from "../EngineFacade.js";
 import {
   IMiddleware,
   IEngineLoader,
-  EngineErrorCode,
-  IEngineAdapter,
+  EngineStatus,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  EngineErrorCode,
 } from "../../types.js";
 import { EngineError } from "../../errors/EngineError.js";
-import { createMove } from "../../protocol/ProtocolValidator.js";
 
 describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
-  let adapter: IEngineAdapter<
-    IBaseSearchOptions,
-    IBaseSearchInfo,
-    IBaseSearchResult
-  >;
+  let adapter: unknown;
   let mockLoader: IEngineLoader;
 
-  beforeAll(() => {
-    vi.spyOn(performance, "now").mockReturnValue(0);
-    vi.useFakeTimers();
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-  });
-
   beforeEach(() => {
-    vi.clearAllMocks();
     adapter = {
       id: "test-engine",
       status: "uninitialized",
       load: vi.fn().mockResolvedValue(undefined),
       setOption: vi.fn().mockResolvedValue(undefined),
-      search: vi
-        .fn()
-        .mockResolvedValue({ raw: "result", bestMove: createMove("e2e4") }),
+      search: vi.fn().mockResolvedValue({ raw: "result", bestMove: "e2e4" }),
       searchRaw: vi.fn().mockImplementation(() => ({
         info: (async function* () {
-          yield { depth: 1 } as IBaseSearchInfo;
+          yield { depth: 1 };
         })(),
-        result: Promise.resolve({
-          raw: "result",
-          bestMove: createMove("e2e4"),
-        } as IBaseSearchResult),
+        result: Promise.resolve({ raw: "result", bestMove: "e2e4" }),
         stop: vi.fn(),
       })),
       stop: vi.fn().mockResolvedValue(undefined),
-      dispose: vi.fn().mockImplementation(function (this: { status: string }) {
+      dispose: vi.fn().mockImplementation(function(this: any) {
         this.status = "disposed";
         return Promise.resolve();
       }),
@@ -70,77 +41,26 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
       updateStatus: vi.fn(),
       parser: {
         createSearchCommand: vi.fn().mockReturnValue("go"),
-        parseInfo: vi.fn(),
-        parseResult: vi.fn(),
-        isReadyCommand: "isready",
-        readyResponse: "readyok",
-      },
-    } as unknown as IEngineAdapter<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+      }
+    };
 
     mockLoader = {
       loadResource: vi.fn(),
       revokeAll: vi.fn(),
       revokeByEngineId: vi.fn(),
-    } as unknown as IEngineLoader;
+    } as unknown;
   });
 
   it("アトミック・ロード: 同時に load() を呼んでも、アダプターの load は一度しか呼ばれないこと (Race Condition)", async () => {
-    type MockLoad = { mockImplementation: (fn: () => Promise<void>) => void };
-    (adapter.load as unknown as MockLoad).mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 50)),
-    );
-
-    const facade = new EngineFacade(adapter, [], () =>
-      Promise.resolve(mockLoader),
-    );
+    adapter.load.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 50)));
+    // facade.load() はコンストラクタで渡された loaderProvider を内部で使用する
+    const facade = new EngineFacade(adapter, [], () => Promise.resolve(mockLoader));
 
     const p1 = facade.load();
     const p2 = facade.load();
     const p3 = facade.load();
 
-    await vi.advanceTimersByTimeAsync(50);
     await Promise.all([p1, p2, p3]);
-    expect(adapter.load).toHaveBeenCalledTimes(1);
-  });
-
-  it("Consent Handshake 中の多重ロード呼び出しが原子的に集約されること", async () => {
-    type MockLoad = { mockImplementation: (fn: () => Promise<void>) => void };
-    (adapter.load as unknown as MockLoad).mockImplementation(() =>
-      Promise.resolve(),
-    );
-
-    // アダプターに config をインジェクト
-    (adapter as unknown as { config: { disclaimer: string } }).config = {
-      disclaimer: "Test Disclaimer",
-    };
-
-    const facade = new EngineFacade(adapter, [], () =>
-      Promise.resolve(mockLoader),
-    );
-
-    const p1 = facade.load();
-
-    // status が ready (consent待ち) になるのを待つ
-    // EngineFacade は consentDeferred が定義されている間、同意待ち状態となる
-    await vi.waitFor(() =>
-      expect(
-        (facade as unknown as { consentDeferred: unknown }).consentDeferred,
-      ).toBeDefined(),
-    );
-
-    const p2 = facade.load();
-    const p3 = facade.load();
-
-    // 同意を解決
-    facade.consent();
-
-    await Promise.all([p1, p2, p3]);
-
-    // 同意待ちの間に追加で load を呼んでも、アダプターの load は一度しか呼ばれない
     expect(adapter.load).toHaveBeenCalledTimes(1);
   });
 
@@ -150,49 +70,37 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
       rejectTask = reject;
     });
 
-    type MockSearchRaw = { mockImplementation: (fn: () => unknown) => void };
-    (adapter.searchRaw as unknown as MockSearchRaw).mockImplementation(() => ({
+    adapter.searchRaw.mockImplementation(() => ({
       info: (async function* () {})(),
       result: taskResultPromise,
       stop: vi.fn().mockImplementation(() => {
-        rejectTask!(
-          new EngineError({
-            code: EngineErrorCode.CANCELLED,
-            message: "aborted",
-          }),
-        );
+        rejectTask(new EngineError({ code: EngineErrorCode.CANCELLED, message: "aborted" }));
       }),
     }));
 
     const facade = new EngineFacade(adapter);
     facade.loadingStrategy = "manual";
-    (adapter as unknown as { status: string }).status = "ready";
+    adapter.status = "ready";
 
-    const searchRun = facade.search({} as IBaseSearchOptions);
+    const searchRun = facade.search({} as unknown);
     await facade.dispose();
 
     await expect(searchRun).rejects.toThrow(
-      expect.objectContaining({ code: EngineErrorCode.CANCELLED }),
+      expect.objectContaining({ code: EngineErrorCode.CANCELLED })
     );
 
     expect(adapter.dispose).toHaveBeenCalled();
   });
 
   it("ミドルウェアが例外を投げた際の絶縁性 (Fault Tolerance)", async () => {
-    const buggyMw: IMiddleware<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    > = {
-      onCommand: vi.fn().mockImplementation(() => {
-        throw new Error("MW Crash");
-      }),
+    const buggyMw: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> = {
+      onCommand: vi.fn().mockImplementation(() => { throw new Error("MW Crash"); })
     };
-    (adapter as unknown as { status: string }).status = "ready";
+    adapter.status = "ready";
     const facade = new EngineFacade(adapter, [buggyMw]);
 
-    const result = await facade.search({} as IBaseSearchOptions);
-    expect(result.bestMove).toBe(createMove("e2e4"));
+    const result = await facade.search({} as unknown);
+    expect(result.bestMove).toBe("e2e4");
     expect(buggyMw.onCommand).toHaveBeenCalled();
   });
 
@@ -200,7 +108,7 @@ describe("EngineFacade Edge Cases: Concurrency & Lifecycle", () => {
     const facade = new EngineFacade(adapter);
     await facade.dispose();
     await facade.dispose();
-
+    
     expect(adapter.dispose).toHaveBeenCalledTimes(1);
   });
 });

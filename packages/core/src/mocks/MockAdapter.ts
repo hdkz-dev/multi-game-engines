@@ -1,5 +1,6 @@
 import { BaseAdapter } from "../adapters/BaseAdapter.js";
-import { IEngineLoader,
+import {
+  IEngineLoader,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -7,21 +8,26 @@ import { IEngineLoader,
   IProtocolParser,
   IEngineConfig,
   MiddlewareCommand,
-  NormalizedScore, } from "../types.js";
+  NormalizedScore,
+  EngineStatus,
+  ILoadProgress,
+  ITelemetryEvent,
+  ILicenseInfo,
+} from "../types.js";
 import { createMove } from "../protocol/ProtocolValidator.js";
 
 /**
  * CI/CD および開発用の軽量なモックアダプター。
- * 外部アセットをロードせず、即座に「ready」になり、ランダムまたは固定の回答を返します。
  */
 export class MockAdapter extends BaseAdapter<
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult
 > {
-  readonly id: string;
-  readonly name: string;
+  // サブクラスでは初期化順序問題を避けるため、これらを「プロパティ」としては定義せず、ゲッターまたは親への委譲のみを行う。
   readonly version: string = "1.0.0-mock";
+  readonly engineLicense: ILicenseInfo = { name: "MIT", url: "" };
+  readonly adapterLicense: ILicenseInfo = { name: "MIT", url: "" };
   readonly parser: IProtocolParser<
     IBaseSearchOptions,
     IBaseSearchInfo,
@@ -29,25 +35,29 @@ export class MockAdapter extends BaseAdapter<
   >;
 
   constructor(config: IEngineConfig = {}) {
-    super(config);
-    this.id = config.id ?? "mock-engine";
-    this.name = config.name ?? "Mock Engine";
+    // 物理的な ID/Name を親クラスに委譲し、自身のプロパティとしては定義しない（シャドウイング回避）
+    super(config.id ?? "mock-engine", config.name ?? "Mock Engine", config);
     this.parser = new MockParser();
   }
 
-  async load(_loader?: IEngineLoader): Promise<void> {
+  public async load(_loader?: IEngineLoader): Promise<void> {
     this.emitStatusChange("loading");
-    // 即座に完了
     this.emitStatusChange("ready");
   }
 
-  searchRaw(
+  protected async onInitialize(): Promise<void> {}
+  protected async onSearchRaw(_command: unknown): Promise<void> {}
+  protected async onStop(): Promise<void> {}
+  protected async onDispose(): Promise<void> {}
+  protected async onBookLoaded(_url: string): Promise<void> {}
+
+  // 物理的に IEngineAdapter の全メソッドを明示的に定義
+  public searchRaw(
     _command: MiddlewareCommand,
   ): ISearchTask<IBaseSearchInfo, IBaseSearchResult> {
-    this.emitStatusChange("busy");
-
+    const task = super.searchRaw(_command);
+    
     const resultPromise = new Promise<IBaseSearchResult>((resolve) => {
-      // 500ms 後に回答を返す（シミュレーション）
       setTimeout(() => {
         if (this._status === "busy") {
           const result: IBaseSearchResult = {
@@ -60,43 +70,40 @@ export class MockAdapter extends BaseAdapter<
       }, 500);
     });
 
-    const infoStream: AsyncIterable<IBaseSearchInfo> = {
-      [Symbol.asyncIterator]: async function* () {
-        yield {
-          depth: 1,
-          score: { cp: 10, normalized: 0.01 as NormalizedScore },
-          raw: "info depth 1 score cp 10",
-        };
-        yield {
-          depth: 2,
-          score: { cp: 20, normalized: 0.02 as NormalizedScore },
-          raw: "info depth 2 score cp 20",
-        };
-      },
-    };
-
     return {
-      info: infoStream,
+      ...task,
       result: resultPromise,
-      stop: () => {
-        this.emitStatusChange("ready");
-      },
     };
   }
 
-  async stop(): Promise<void> {
-    this.emitStatusChange("ready");
+  public async stop(): Promise<void> {
+    if (this._status === "busy") {
+      this.emitStatusChange("ready");
+    }
   }
 
-  protected async onBookLoaded(_url: string): Promise<void> {
-    // NOP
-  }
-
-  async setOption(
+  public async setOption(
     _name: string,
     _value: string | number | boolean,
   ): Promise<void> {
     // NOP
+  }
+
+  // 購読系メソッドの明示的な再定義
+  onStatusChange(callback: (status: EngineStatus) => void): () => void {
+    return super.onStatusChange(callback);
+  }
+  onInfo(callback: (info: IBaseSearchInfo) => void): () => void {
+    return super.onInfo(callback);
+  }
+  onSearchResult(callback: (result: IBaseSearchResult) => void): () => void {
+    return super.onSearchResult(callback);
+  }
+  onProgress(callback: (progress: ILoadProgress) => void): () => void {
+    return super.onProgress(callback);
+  }
+  onTelemetry(callback: (event: ITelemetryEvent) => void): () => void {
+    return super.onTelemetry(callback);
   }
 }
 

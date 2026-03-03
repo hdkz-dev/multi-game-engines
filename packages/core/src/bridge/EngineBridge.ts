@@ -90,7 +90,10 @@ export class EngineBridge implements IEngineBridge {
     }
 
     // モックアダプターの標準登録
-    this.registerAdapterFactory("mock", (config) => new MockAdapter(config));
+    this.registerAdapterFactory(
+      "mock",
+      (config) => new MockAdapter({ ...config, id: config.id || "mock-engine" }),
+    );
 
     void this.checkCapabilities();
   }

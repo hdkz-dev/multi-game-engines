@@ -7,18 +7,17 @@ import {
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  ILicenseInfo,
 } from "../../types.js";
 import { createMove } from "../../protocol/ProtocolValidator.js";
 import { WorkerCommunicator } from "../../workers/WorkerCommunicator.js";
 
-class TestAdapter extends BaseAdapter<
-  IBaseSearchOptions,
-  IBaseSearchInfo,
-  IBaseSearchResult
-> {
-  readonly id = "test-adapter";
-  readonly name = "Test Adapter";
+const mockLicense: ILicenseInfo = { name: "MIT", url: "" };
+
+class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
   readonly version = "1.0.0";
+  readonly engineLicense = mockLicense;
+  readonly adapterLicense = mockLicense;
   readonly parser = {
     createSearchCommand: vi.fn(),
     createStopCommand: vi.fn(),
@@ -30,30 +29,21 @@ class TestAdapter extends BaseAdapter<
     translateError: vi.fn(),
   };
 
+  constructor(id = "test-adapter", name = "Test Adapter", config = {}) {
+    super(id, name, config);
+  }
+
   public async load(): Promise<void> {
     this.emitStatusChange("ready");
   }
 
-  protected async onInitialize(): Promise<void> {
-    // mock implementation
-  }
+  protected async onInitialize(): Promise<void> {}
+  protected async onSearchRaw(_command: string): Promise<void> {}
+  protected async onStop(): Promise<void> {}
+  protected async onDispose(): Promise<void> {}
+  protected async onBookLoaded(_url: string): Promise<void> {}
 
-  protected async onSearchRaw(_command: string): Promise<void> {
-    // mock implementation
-  }
-
-  protected async onStop(): Promise<void> {
-    // mock implementation
-  }
-
-  protected async onDispose(): Promise<void> {
-    // mock implementation
-  }
-
-  protected async onBookLoaded(_url: string): Promise<void> {
-    // mock implementation
-  }
-
+  // テスト用に内部 protected メソッドを公開
   public testEmitStatusChange(status: EngineStatus) {
     this.emitStatusChange(status);
   }
@@ -64,6 +54,10 @@ class TestAdapter extends BaseAdapter<
 
   public testEmitProgress(p: ILoadProgress) {
     this.emitProgress(p);
+  }
+
+  public testEmitTelemetry(e: ITelemetryEvent) {
+    this.emitTelemetry(e);
   }
 
   public setCommunicator(comm: unknown) {
@@ -156,7 +150,7 @@ describe("BaseAdapter", () => {
       timestamp: 12345,
       metadata: {},
     };
-    adapter.emitTelemetry(mockEvent);
+    adapter.testEmitTelemetry(mockEvent);
 
     expect(telemetrySpy).toHaveBeenCalledWith(mockEvent);
   });
@@ -192,27 +186,24 @@ describe("BaseAdapter", () => {
   });
 
   it("should validate SRI hashes and throw on invalid formats", () => {
-    const adapter = new TestAdapter({
+    expect(() => new TestAdapter("test", "Test", {
       sources: {
         main: { url: "test.js", type: "script", sri: "invalid-hash" },
       },
-    });
-    expect(() =>
-      (adapter as unknown as { validateSources: () => void }).validateSources(),
-    ).toThrow();
+    })).toThrow(/Invalid SRI hash format/);
   });
 
   it("should handle engine-reported errors through parser.translateError", () => {
     const adapter = new TestAdapter();
     adapter.setStatus("ready");
-    adapter.setCommunicator({ postMessage: vi.fn(), onMessage: vi.fn() });
+    adapter.setCommunicator({ postMessage: vi.fn(), onMessage: vi.fn() } as unknown);
 
     const task = adapter.searchRaw("go");
     adapter.setStatus("busy");
 
     if (adapter.parser.translateError) {
       vi.mocked(adapter.parser.translateError).mockReturnValue(
-        "engine.errors.protocolError" as unknown as string,
+        "engine.errors.protocolError" as unknown as unknown,
       );
     }
 
