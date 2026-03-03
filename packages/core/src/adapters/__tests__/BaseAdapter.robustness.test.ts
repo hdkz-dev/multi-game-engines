@@ -5,6 +5,7 @@ import {
   IBaseSearchInfo,
   IBaseSearchResult,
   ILicenseInfo,
+  EngineStatus,
 } from "../../types.js";
 
 const mockLicense: ILicenseInfo = { name: "MIT", url: "" };
@@ -41,12 +42,17 @@ class RobustTestAdapter extends BaseAdapter<
   protected async onDispose(): Promise<void> {}
   protected async onBookLoaded(): Promise<void> {}
 
-  public setStatus(status: any) {
+  public setStatus(status: EngineStatus) {
+    this._status = status;
     this.emitStatusChange(status);
   }
 
   public testHandleIncomingMessage(data: unknown) {
     this.handleIncomingMessage(data);
+  }
+
+  public setCommunicator(comm: any) {
+    this.communicator = comm;
   }
 }
 
@@ -63,11 +69,15 @@ describe("BaseAdapter: Low-Level Robustness & Stress Tests", () => {
   it("メッセージ送信中に communicator が同期的に失敗した場合でも、busy 状態が解除され ready に戻ること", async () => {
     const adapter = new RobustTestAdapter();
     adapter.setStatus("ready");
-
-    // @ts-ignore: private access for testing
-    adapter.sendSearchCommand = () => {
-      throw new Error("Network split");
-    };
+    
+    // ダミーの communicator をセット
+    adapter.setCommunicator({
+      postMessage: () => {
+        throw new Error("Network split");
+      },
+      onMessage: vi.fn(),
+      terminate: vi.fn(),
+    });
 
     expect(() => adapter.searchRaw("go")).toThrow("Network split");
     expect(adapter.status).toBe("ready");
@@ -76,6 +86,11 @@ describe("BaseAdapter: Low-Level Robustness & Stress Tests", () => {
   it("AsyncGenerator でのメッセージ受信中、エンジンが error 状態に遷移した場合、イテレータが適切に close されること", async () => {
     const adapter = new RobustTestAdapter();
     adapter.setStatus("ready");
+    adapter.setCommunicator({
+      postMessage: vi.fn(),
+      onMessage: vi.fn(),
+      terminate: vi.fn(),
+    });
 
     const task = adapter.searchRaw("go");
     const infoIter = task.info[Symbol.asyncIterator]();

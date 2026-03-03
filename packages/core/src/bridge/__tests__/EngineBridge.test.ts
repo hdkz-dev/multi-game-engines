@@ -1,47 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { EngineBridge } from "../EngineBridge.js";
-import { BaseAdapter } from "../../adapters/BaseAdapter.js";
+import { MockAdapter } from "../../mocks/MockAdapter.js";
 import {
   IEngineConfig,
-  ILicenseInfo,
 } from "../../types.js";
 
-const mockLicense: ILicenseInfo = { name: "MIT", url: "" };
-
-function createMockAdapter(id: string, name = "Mock engine") {
-  class MockAdapter extends BaseAdapter {
-    readonly version = "1.0.0";
-    readonly engineLicense = mockLicense;
-    readonly adapterLicense = mockLicense;
-    readonly parser = {
-      createSearchCommand: vi.fn().mockReturnValue("go"),
-      createStopCommand: vi.fn().mockReturnValue("stop"),
-      createOptionCommand: vi.fn().mockReturnValue("setoption"),
-      parseInfo: vi.fn(),
-      parseResult: vi.fn(),
-      isReadyCommand: "isready",
-      readyResponse: "readyok",
-    };
-
-    constructor() {
-      // 物理的な ID/Name を親クラスに渡す。自身のプロパティとしては定義しない。
-      super(id, name, {});
-    }
-
-    protected async onInitialize() {}
-    protected async onSearchRaw() {}
-    protected async onStop() {}
-    protected async onDispose() {}
-    protected async onBookLoaded() {}
-    public async load() {
-      this.emitStatusChange("ready");
-    }
-  }
-  return new MockAdapter();
-}
-
 describe("EngineBridge", () => {
-  let mockLoader: unknown;
+  let mockLoader: any;
 
   beforeEach(() => {
     mockLoader = {
@@ -53,7 +18,7 @@ describe("EngineBridge", () => {
 
   it("アダプターを登録し、getEngine で取得できること", async () => {
     const bridge = new EngineBridge();
-    const adapter = createMockAdapter("test", "Mock test");
+    const adapter = new MockAdapter({ id: "test", name: "Mock test" });
 
     bridge.registerAdapterFactory("test-type", () => adapter);
 
@@ -81,7 +46,7 @@ describe("EngineBridge", () => {
     };
 
     bridge.registerAdapterFactory("test", (cfg) => {
-      return createMockAdapter(cfg.id!, cfg.name);
+      return new MockAdapter(cfg);
     });
 
     const engine = await bridge.getEngine(config);
@@ -89,9 +54,9 @@ describe("EngineBridge", () => {
   });
 
   it("bridge.dispose() が全アダプターを破棄し、ローダーをクリーンアップすること", async () => {
-    const bridge = new EngineBridge([], () => Promise.resolve(mockLoader));
-    const adapter1 = createMockAdapter("e1");
-    const adapter2 = createMockAdapter("e2");
+    const bridge = new EngineBridge([], async () => mockLoader);
+    const adapter1 = new MockAdapter({ id: "e1" });
+    const adapter2 = new MockAdapter({ id: "e2" });
 
     vi.spyOn(adapter1, "dispose");
     vi.spyOn(adapter2, "dispose");

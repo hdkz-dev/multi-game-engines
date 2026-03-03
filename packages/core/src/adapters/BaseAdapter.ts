@@ -115,7 +115,12 @@ export abstract class BaseAdapter<
 
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT> {
     if (this._status !== "ready" && this._status !== "busy") {
-      throw new EngineError({ code: EngineErrorCode.NOT_READY, message: "Engine not ready", engineId: this.id });
+      throw new EngineError({ 
+        code: EngineErrorCode.NOT_READY, 
+        message: "Engine not ready", 
+        engineId: this.id,
+        i18nKey: createI18nKey("engine.errors.notLoaded")
+      });
     }
     if (this._status === "busy") this.cleanupPendingTask("Restart", true);
     
@@ -216,13 +221,13 @@ export abstract class BaseAdapter<
 
   protected handleIncomingMessage(data: unknown): void {
     if (this._status === "error" || this._status === "terminated") return;
-    const info = this.parser.parseInfo(data as string | Record<string, unknown>);
+    const info = this.parser.parseInfo(data as any);
     if (info) {
       try { this.infoController?.enqueue(info); } catch {}
       this.infoListeners.forEach(l => l(info));
       return;
     }
-    const result = this.parser.parseResult(data as string | Record<string, unknown>);
+    const result = this.parser.parseResult(data as any);
     if (result) {
       if (this.pendingResolve) {
         this.pendingResolve(result);
