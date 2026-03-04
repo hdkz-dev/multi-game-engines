@@ -1,0 +1,23 @@
+{
+  "name": "@multi-game-engines/eslint-config-react",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared ESLint configuration for React packages in multi-game-engines monorepo",
+  "type": "module",
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@eslint-react/eslint-plugin": "^1.49.0",
+    "eslint-plugin-react-hooks": "^7.0.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript-eslint": "^8.0.0"
+  },
+  "license": "MIT"
+}

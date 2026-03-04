@@ -125,14 +125,15 @@
   - [x] **Release**: `.changeset` によるリリースノート自動化準備。
   - [x] **API**: `ValidI18nKey` や `createFileStorage` 等の公開 API 整備 (Public API Polish)。
   - [x] **Documentation**: ADR-001〜046 の全エントリの形式統一とインデックス整理。
-  - [x] **Zenith Polish (Final Re-Audit)**:
-    - [x] **Structure**: 全パッケージの構成整理。`src/components/` 集約とアダプター命名規則の統一。
-    - [x] **Reliability**: `loadResources` の設定ハッシュによるデデュプリケーション精密化。
-    - [x] **Leak Prevention**: ロールバック時の既存リソース保護（スナップショット方式）。
-    - [x] **Domain**: Mahjong での指し手なし（null）の正規化。
-    - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
-    - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
-    - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。
+- [x] **Zenith Polish (Final Re-Audit)**:
+  - [x] **Structure**: 全パッケージの構成整理。`src/components/` 集約とアダプター命名規則の統一。
+  - [x] **Reliability**: `loadResources` の設定ハッシュによるデデュプリケーション精密化。
+  - [x] **Leak Prevention**: ロールバック時の既存リソース保護（スナップショット方式）。
+  - [x] **Domain**: Mahjong での指し手なし（null）の正規化。
+  - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
+  - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
+  - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。
+  - [x] **Tooling**: `@multi-game-engines/eslint-config-react` 共有パッケージの作成と重複排除、および `zenith-dashboard-react` における `eslint-config-next` の完全脱却。
 
 ### 2026-02-27 更新 (実装担当: Testing and Validation Expansion)
 

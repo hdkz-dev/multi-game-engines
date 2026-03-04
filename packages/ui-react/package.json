@@ -48,6 +48,7 @@
   "devDependencies": {
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
+    "@multi-game-engines/eslint-config-react": "workspace:*",
     "@storybook/react": "10.2.10",
     "@storybook/react-vite": "10.2.10",
     "@tailwindcss/cli": "^4.2.0",
