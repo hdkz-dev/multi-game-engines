@@ -1,6 +1,6 @@
 # [実装計画書] ESLint React 設定の近代化と共有構成パッケージの導入
 
-> 作成日: 2026-03-04 | 関連 ADR: ADR-056 (主参照) / ADR-044 (後継)
+> 作成日: 2026-03-04 | 関連 ADR: ADR-044 (後継)
 
 ## 1. 目的と概要
 
@@ -46,14 +46,14 @@
 
 ### Phase 1: 共有 ESLint React 設定パッケージの作成
 
-- [x] `packages/eslint-config-react/` パッケージの新規作成
-  - [x] `package.json` (name: `@multi-game-engines/eslint-config-react`)
-  - [x] `tsconfig.json`
-  - [x] `src/index.mjs` — 共有設定のエクスポート
-- [x] 依存パッケージのインストール
-  - `@eslint-react/eslint-plugin` (TypeScript ファースト의 React リンティング)
+- [ ] `packages/eslint-config-react/` パッケージの新規作成
+  - [ ] `package.json` (name: `@multi-game-engines/eslint-config-react`)
+  - [ ] `tsconfig.json`
+  - [ ] `src/index.ts` — 共有設定のエクスポート
+- [ ] 依存パッケージのインストール
+  - `@eslint-react/eslint-plugin` (TypeScript ファーストの React リンティング)
   - `eslint-plugin-react-hooks` (既存、ESLint v10 対応済み)
-- [x] 共有設定の実装
+- [ ] 共有設定の実装
   - `@eslint-react` の `recommended-typescript` プリセット
   - `eslint-plugin-react-hooks` の `flat.recommended` プリセット
   - ファイルフィルター (`**/*.ts`, `**/*.tsx`)
@@ -62,13 +62,13 @@
 
 対象パッケージ (7個):
 
-- [x] `packages/ui-react-core/eslint.config.mjs`
-- [x] `packages/ui-react/eslint.config.mjs`
-- [x] `packages/ui-react-monitor/eslint.config.mjs`
-- [x] `packages/ui-chess-react/eslint.config.mjs`
-- [x] `packages/ui-chess/eslint.config.mjs`
-- [x] `packages/ui-shogi-react/eslint.config.mjs`
-- [x] `packages/ui-shogi/eslint.config.mjs`
+- [ ] `packages/ui-react-core/eslint.config.mjs`
+- [ ] `packages/ui-react/eslint.config.mjs`
+- [ ] `packages/ui-react-monitor/eslint.config.mjs`
+- [ ] `packages/ui-chess-react/eslint.config.mjs`
+- [ ] `packages/ui-chess/eslint.config.mjs`
+- [ ] `packages/ui-shogi-react/eslint.config.mjs`
+- [ ] `packages/ui-shogi/eslint.config.mjs`
 
 各パッケージの変更パターン:
 
@@ -97,18 +97,18 @@ export default [
 
 ### Phase 3: zenith-dashboard-react の脱 eslint-config-next
 
-- [x] `eslint-config-next`, `@eslint/compat` 依存の削除
-- [x] `@next/eslint-plugin-next` を直接使用する構成に変更
-- [x] `eslint-plugin-jsx-a11y` の Next.js 固有ルールの再構成
-- [x] `eslint-plugin-import` の必要なルールの再構成
-- [x] `eslint-config-next` が設定していた Next.js 固有のオーバーライドの適用
+- [ ] `eslint-config-next`, `@eslint/compat` 依存の削除
+- [ ] `@next/eslint-plugin-next` を直接使用する構成に変更
+- [ ] `eslint-plugin-jsx-a11y` の Next.js 固有ルールの再構成
+- [ ] `eslint-plugin-import` の必要なルールの再構成
+- [ ] `eslint-config-next` が設定していた Next.js 固有のオーバーライドの適用
 
 ### Phase 4: 検証と仕上げ
 
-- [x] `pnpm lint` で全パッケージの lint 成功を確認
-- [x] `pnpm typecheck` で型チェック成功を確認
-- [x] `pnpm test` で既存テストの通過確認
-- [x] 新規 lint エラー・警告の対処
+- [ ] `pnpm lint` で全パッケージの lint 成功を確認
+- [ ] `pnpm typecheck` で型チェック成功を確認
+- [ ] `pnpm test` で既存テストの通過確認
+- [ ] 新規 lint エラー・警告の対処
 
 ---
 
