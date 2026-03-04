@@ -109,6 +109,15 @@ describe("SecurityAdvisor", () => {
       ).resolves.toBeDefined();
     });
 
+    it("should allow HTTP for *.localhost subdomains (Portless)", async () => {
+      await expect(
+        SecurityAdvisor.safeFetch("http://myapp.localhost:3000/engine"),
+      ).resolves.toBeDefined();
+      await expect(
+        SecurityAdvisor.safeFetch("http://api.engine.localhost:8080/v1"),
+      ).resolves.toBeDefined();
+    });
+
     it("should reject HTTP for remote hosts", async () => {
       await expect(
         SecurityAdvisor.safeFetch("http://example.com/engine.wasm"),

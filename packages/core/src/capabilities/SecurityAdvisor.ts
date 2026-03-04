@@ -40,13 +40,27 @@ export class SecurityAdvisor {
   /**
    * Loopback hostnames considered safe for HTTP connections.
    * Per W3C Secure Contexts spec, loopback addresses are "potentially trustworthy".
+   * Subdomains of localhost (e.g. myapp.localhost) are also safe per RFC 6761 §6.3.
    * @see https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy
+   * @see https://www.rfc-editor.org/rfc/rfc6761#section-6.3
    */
   private static readonly LOOPBACK_HOSTS = new Set([
     "localhost",
     "127.0.0.1",
     "[::1]",
   ]);
+
+  /**
+   * Determines if a hostname is a loopback address.
+   * Includes exact matches (localhost, 127.0.0.1, [::1]) and
+   * *.localhost subdomains (e.g. myapp.localhost for Portless).
+   */
+  private static isLoopbackHost(hostname: string): boolean {
+    return (
+      SecurityAdvisor.LOOPBACK_HOSTS.has(hostname) ||
+      hostname.endsWith(".localhost")
+    );
+  }
 
   /**
    * Performs a fetch with protocol-level security enforcement.
@@ -67,7 +81,7 @@ export class SecurityAdvisor {
     );
     const isLoopbackHttp =
       resolved.protocol === "http:" &&
-      SecurityAdvisor.LOOPBACK_HOSTS.has(resolved.hostname);
+      SecurityAdvisor.isLoopbackHost(resolved.hostname);
 
     if (!isAllowedProtocol && !isLoopbackHttp) {
       throw new EngineError({
