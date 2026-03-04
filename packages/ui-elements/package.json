@@ -43,7 +43,7 @@
     "@storybook/addon-links": "10.2.15",
     "@storybook/web-components": "10.2.15",
     "@storybook/web-components-vite": "10.2.15",
-    "@swc/core": "^1.15.11",
+    "@swc/core": "^1.15.18",
     "@vueless/storybook-dark-mode": "^10.0.7",
     "jsdom": "^28.1.0",
     "storybook": "10.2.15",
