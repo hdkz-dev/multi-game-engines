@@ -1,4 +1,4 @@
-# ADR-057: ESLint v10 への即時アップグレードと Peer Dependency 警告の抑制 (Immediate ESLint v10 Upgrade and Peer Dependency Suppression)
+# ADR-057: Immediate ESLint v10 Upgrade and Peer Dependency Suppression
 
 ## ステータス
 
