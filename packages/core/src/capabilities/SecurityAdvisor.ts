@@ -38,8 +38,21 @@ export class SecurityAdvisor {
   ]);
 
   /**
+   * Loopback hostnames considered safe for HTTP connections.
+   * Per W3C Secure Contexts spec, loopback addresses are "potentially trustworthy".
+   * @see https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy
+   */
+  private static readonly LOOPBACK_HOSTS = new Set([
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+  ]);
+
+  /**
    * Performs a fetch with protocol-level security enforcement.
-   * Only HTTPS, blob:, and data: protocols are permitted.
+   * Allowed protocols: HTTPS, blob:, data:.
+   * HTTP is permitted only for loopback hosts (localhost, 127.0.0.1, [::1])
+   * per W3C Secure Contexts specification.
    * This prevents man-in-the-middle attacks on engine resource downloads.
    */
   static async safeFetch(
@@ -49,10 +62,17 @@ export class SecurityAdvisor {
     // Resolve relative URLs against the current origin (browser) or reject them (non-browser).
     const resolved = new URL(url, globalThis.location?.href);
 
-    if (!SecurityAdvisor.ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+    const isAllowedProtocol = SecurityAdvisor.ALLOWED_PROTOCOLS.has(
+      resolved.protocol,
+    );
+    const isLoopbackHttp =
+      resolved.protocol === "http:" &&
+      SecurityAdvisor.LOOPBACK_HOSTS.has(resolved.hostname);
+
+    if (!isAllowedProtocol && !isLoopbackHttp) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `Insecure protocol "${resolved.protocol}" is not allowed. Use HTTPS.`,
+        message: `Insecure protocol "${resolved.protocol}" is not allowed for remote hosts. Use HTTPS or connect to localhost.`,
         i18nKey: createI18nKey("engine.errors.insecureConnection"),
       });
     }
