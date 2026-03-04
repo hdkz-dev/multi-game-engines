@@ -1,14 +1,37 @@
-import { fixupConfigRules } from "@eslint/compat";
-import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
-import nextTypescript from "eslint-config-next/typescript";
+import rootConfig from "../../eslint.config.mjs";
+import reactConfig from "@multi-game-engines/eslint-config-react";
+import nextPlugin from "@next/eslint-plugin-next";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import importPlugin from "eslint-plugin-import";
 
-const eslintConfig = [
-  ...fixupConfigRules([...nextCoreWebVitals, ...nextTypescript]),
+export default [
+  ...rootConfig,
+  ...reactConfig,
   {
-    settings: {
-      react: {
-        version: "detect",
-      },
+    plugins: {
+      "@next/next": nextPlugin,
+      "jsx-a11y": jsxA11y,
+      import: importPlugin,
+    },
+    rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
+      ...jsxA11y.configs.recommended.rules,
+      "jsx-a11y/alt-text": [
+        "warn",
+        {
+          elements: ["img"],
+          img: ["Image"],
+        },
+      ],
+      "jsx-a11y/aria-props": "warn",
+      "jsx-a11y/aria-proptypes": "warn",
+      "jsx-a11y/aria-unsupported-elements": "warn",
+      "jsx-a11y/role-has-required-aria-props": "warn",
+      "jsx-a11y/role-supports-aria-props": "warn",
+      "import/no-anonymous-default-export": "warn",
+      "@next/next/no-img-element": "warn",
+      "@next/next/no-html-link-for-pages": ["warn", "src/app"],
     },
   },
   {
@@ -21,5 +44,3 @@ const eslintConfig = [
     ],
   },
 ];
-
-export default eslintConfig;

@@ -45,6 +45,7 @@
     "@multi-game-engines/ui-core": "workspace:*"
   },
   "devDependencies": {
+    "@multi-game-engines/eslint-config-react": "workspace:*",
     "@open-wc/testing": "^4.0.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.14",

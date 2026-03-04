@@ -28,6 +28,7 @@
 - [ADR-047: Pluggable Engine Metadata Registry](./adr/047-pluggable-engine-registry.md) (Completed - 2026-02-24)
 - [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
 - [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
+- [ADR-056: ESLint React 設定の近代化と eslint-config-next 脱却](./adr/056-eslint-react-modernization.md) (Accepted - 2026-03-04)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 

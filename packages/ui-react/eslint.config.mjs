@@ -1,13 +1,10 @@
 import rootConfig from "../../eslint.config.mjs";
-import reactHooks from "eslint-plugin-react-hooks";
+import reactConfig from "@multi-game-engines/eslint-config-react";
 
 export default [
   ...rootConfig,
   {
     ignores: ["dist", "node_modules", "storybook-static", ".turbo"],
   },
-  {
-    ...reactHooks.configs.flat.recommended,
-    files: ["**/*.ts", "**/*.tsx"],
-  },
+  ...reactConfig,
 ];
