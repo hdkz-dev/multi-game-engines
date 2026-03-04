@@ -53,7 +53,18 @@ export class EngineLoader implements IEngineLoader {
         }
 
         const fetchOptions = SecurityAdvisor.getSafeFetchOptions(config.sri);
-        const response = await fetch(config.url, {
+
+        // CodeQL Mitigation: Ensure non-localhost HTTP URLs are rewritten to HTTPS
+        let safeUrl = config.url;
+        if (
+          safeUrl.startsWith("http://") &&
+          !safeUrl.startsWith("http://localhost") &&
+          !safeUrl.startsWith("http://127.0.0.1")
+        ) {
+          safeUrl = safeUrl.replace(/^http:\/\//i, "https://");
+        }
+
+        const response = await fetch(safeUrl, {
           ...fetchOptions,
           signal: AbortSignal.timeout(30000),
         });
