@@ -18,15 +18,17 @@ import reactHooks from "eslint-plugin-react-hooks";
  * ```
  */
 
+const reactFiles = ["**/*.ts", "**/*.tsx"];
+
 /** @type {import("eslint").Linter.Config[]} */
 const config = [
   {
     ...eslintReact.configs["recommended-typescript"],
-    files: ["**/*.ts", "**/*.tsx"],
+    files: reactFiles,
   },
   {
     ...reactHooks.configs.flat.recommended,
-    files: ["**/*.ts", "**/*.tsx"],
+    files: reactFiles,
   },
 ];
 
