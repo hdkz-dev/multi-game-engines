@@ -1,6 +1,6 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年3月1日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年3月4日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
 
@@ -19,6 +19,13 @@
 - [x] Playwright E2E テストの拡充
 - [x] ビルドプロセスへの SRI 自動再計算 (`sri:refresh`) の統合
 - [x] **アクセシビリティ強化 (ADR-051)**: キーボードナビゲーションの完全実装と物理的実証テストの追加。
+
+## 🏆 到達ハイライト (2026-03-04 Security Hardening & CodeQL Compliance)
+
+- **CodeQL 準拠のネットワークセキュリティ強化**:
+  - `EngineLoader` において URL オブジェクトを用いた厳格なプロトコル検証を実装し、HTTPS をデフォルトで強制。これにより CodeQL のセキュリティ警告（Cleartext transmission of sensitive information）を解消。
+  - 開発体験を損なわないよう、例外として `127.0.0.1`, `::1`, `localhost`, および `*.localhost`（Portless 等のローカル開発ツール用サブドメイン）のみ HTTP 通信を許可する安全なフォールバックを `SecurityAdvisor` に集約・実装。
+  - GitHub Actions の SRI 再計算ワークフロー (`refresh-sri.yml`) における `GITHUB_TOKEN` の重複認証を修正し、セキュリティと安定性を向上。
 
 ## 🏆 到達ハイライト (2026-03-03 UI Reactivity & E2E Test Hardening)
 
