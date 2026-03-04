@@ -10,9 +10,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1, // 2026: データベース競合（Lock）を防ぐため並列度を制限
-  reporter: "html",
+  reporter: [["html", { open: "never" }]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3001",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -23,8 +23,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run start",
-    url: "http://localhost:3000",
+    command: "npm run build && PORT=3001 npm run start",
+    url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

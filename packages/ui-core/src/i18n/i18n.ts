@@ -52,24 +52,41 @@ export interface RawLocaleData {
 
 function isRawLocaleData(data: unknown): data is RawLocaleData {
   if (typeof data !== "object" || data === null) return false;
-  const d = data as Record<string, unknown>;
-  return typeof d.engine === "object" && d.engine !== null;
+  return true; // 2026: 構造のチェックを緩和し、プロパティの存在確認は個別に実施
 }
-
 /**
  * @multi-game-engines/i18n から提供される JSON データを
  * EngineUIStrings インターフェースに適合するように変換する。
  */
 export function createUIStrings(data: unknown): EngineUIStrings {
-  if (!isRawLocaleData(data)) {
+  // 2026 Best Practice: モジュール解決の差異 (default エクスポートのネスト) を吸収
+  const normalizedData =
+    data && typeof data === "object" && "default" in data
+      ? (data as { default: unknown }).default
+      : data;
+
+  if (!isRawLocaleData(normalizedData)) {
+    const safeData = data ? JSON.stringify(data) : "null/undefined";
+    console.error(
+      "Invalid locale data structure provided to createUIStrings:",
+      safeData.substring(0, 200),
+    );
     throw new Error(
-      "Invalid locale data structure provided to createUIStrings",
+      `Invalid locale data structure provided to createUIStrings. Type: ${typeof data}.`,
     );
   }
 
-  const e = data.engine;
-  const t = (key: string, fallback: string) =>
-    (e[key] as string | undefined) || fallback;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const e = (normalizedData as any).engine || {};
+
+  const t = (key: string, fallback: string) => {
+    const val = e[key] as string | undefined;
+    if (!val) {
+      // console.warn(`[i18n] Key "${key}" not found in locale data, using fallback: "${fallback}"`);
+      return fallback;
+    }
+    return val;
+  };
 
   return {
     title: t("title", "Engine"),

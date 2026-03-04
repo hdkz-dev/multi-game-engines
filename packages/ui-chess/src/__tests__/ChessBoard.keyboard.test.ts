@@ -132,12 +132,53 @@ describe("chess-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("8"); // row 1, col 0
   });
 
-  // --- End ---
   it("End should move focus to the last column of the current row", async () => {
     await focusSquare(11); // row 1, col 3
     pressKey("End");
     await el.updateComplete;
     expect(getFocusedIndex()).toBe("15"); // row 1, col 7
+  });
+
+  it("PageUp should move focus to the same column in the first row", async () => {
+    await focusSquare(27); // row 3, col 3
+    pressKey("PageUp");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("3"); // row 0, col 3
+  });
+
+  it("PageDown should move focus to the same column in the last row", async () => {
+    await focusSquare(27); // row 3, col 3
+    pressKey("PageDown");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("59"); // row 7, col 3
+  });
+
+  it("Home (ctrl) should move focus to index 0", async () => {
+    await focusSquare(27);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Home",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("0");
+  });
+
+  it("End (ctrl) should move focus to index 63", async () => {
+    await focusSquare(27);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "End",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("63");
   });
 
   // --- 複合テスト ---

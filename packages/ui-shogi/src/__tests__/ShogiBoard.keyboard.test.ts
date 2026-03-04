@@ -101,12 +101,12 @@ describe("shogi-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("9");
   });
 
-  it("ArrowDown should clamp at index 80 (last row)", async () => {
+  it("ArrowDown should not move focus beyond the last row", async () => {
     await focusSquare(76); // row 8, col 4
     pressKey("ArrowDown");
     await el.updateComplete;
-    // 76 + 9 = 85 > 80 → clamped to 80
-    expect(getFocusedIndex()).toBe("80");
+    // 2026 Zenith Tier: Should stay at the same square to preserve column position
+    expect(getFocusedIndex()).toBe("76");
   });
 
   // --- ArrowUp ---
@@ -117,11 +117,12 @@ describe("shogi-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("9");
   });
 
-  it("ArrowUp should clamp at index 0 (first row)", async () => {
+  it("ArrowUp should not move focus beyond the first row", async () => {
     await focusSquare(4); // row 0, col 4
     pressKey("ArrowUp");
     await el.updateComplete;
-    expect(getFocusedIndex()).toBe("0");
+    // 2026 Zenith Tier: Should stay at the same square to preserve column position
+    expect(getFocusedIndex()).toBe("4");
   });
 
   // --- Home ---
@@ -138,6 +139,48 @@ describe("shogi-board keyboard navigation", () => {
     pressKey("End");
     await el.updateComplete;
     expect(getFocusedIndex()).toBe("17"); // row 1, col 8
+  });
+
+  it("PageUp should move focus to the same column in the first row", async () => {
+    await focusSquare(40); // row 4, col 4
+    pressKey("PageUp");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("4"); // row 0, col 4
+  });
+
+  it("PageDown should move focus to the same column in the last row", async () => {
+    await focusSquare(40); // row 4, col 4
+    pressKey("PageDown");
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("76"); // row 8, col 4
+  });
+
+  it("Home (ctrl) should move focus to index 0", async () => {
+    await focusSquare(40);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Home",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("0");
+  });
+
+  it("End (ctrl) should move focus to index 80", async () => {
+    await focusSquare(40);
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "End",
+        ctrlKey: true,
+        bubbles: true,
+      }),
+    );
+    await el.updateComplete;
+    expect(getFocusedIndex()).toBe("80");
   });
 
   // --- 複合テスト ---

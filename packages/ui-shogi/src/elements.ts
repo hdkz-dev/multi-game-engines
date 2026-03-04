@@ -205,10 +205,10 @@ export class ShogiBoard extends LitElement {
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, this._focusedIndex - 9);
+        newIndex = row > 0 ? this._focusedIndex - 9 : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = Math.min(80, this._focusedIndex + 9);
+        newIndex = row < 8 ? this._focusedIndex + 9 : this._focusedIndex;
         break;
       case "ArrowLeft":
         newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
@@ -217,10 +217,16 @@ export class ShogiBoard extends LitElement {
         newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 9;
+        newIndex = e.ctrlKey ? 0 : row * 9;
         break;
       case "End":
-        newIndex = row * 9 + 8;
+        newIndex = e.ctrlKey ? 80 : row * 9 + 8;
+        break;
+      case "PageUp":
+        newIndex = col; // same column, first row
+        break;
+      case "PageDown":
+        newIndex = 72 + col; // same column, last row
         break;
       default:
         return;
@@ -284,7 +290,12 @@ export class ShogiBoard extends LitElement {
             role="gridcell"
             aria-label="${ariaLabel}"
             tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
-            @click="${() => (this._focusedIndex = squareIdx)}"
+            @click="${(e: MouseEvent) => {
+              this._focusedIndex = squareIdx;
+              void this.updateComplete.then(() => {
+                (e.currentTarget as HTMLElement)?.focus();
+              });
+            }}"
           >
             ${piece
               ? html`<span

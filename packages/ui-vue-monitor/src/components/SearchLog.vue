@@ -42,10 +42,14 @@ const scrollToBottom = async () => {
   }
 };
 
-watch(() => props.log.length, scrollToBottom, {
-  immediate: true,
-  flush: "post",
-});
+watch(
+  () => [props.log.length, props.log[props.log.length - 1]?.id],
+  scrollToBottom,
+  {
+    immediate: true,
+    flush: "post",
+  },
+);
 </script>
 
 <template>

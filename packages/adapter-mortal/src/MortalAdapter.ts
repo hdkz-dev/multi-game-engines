@@ -1,8 +1,19 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, IEngineConfig, IEngineSourceConfig, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  IEngineConfig,
+  IEngineSourceConfig,
+  EngineErrorCode,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IMahjongSearchOptions,
+import {
+  IMahjongSearchOptions,
   IMahjongSearchInfo,
-  IMahjongSearchResult, } from "@multi-game-engines/domain-mahjong";
+  IMahjongSearchResult,
+} from "@multi-game-engines/domain-mahjong";
 import { MahjongJSONParser } from "./MahjongJSONParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -90,7 +101,7 @@ export class MortalAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

@@ -9,7 +9,11 @@
     "start": "next start",
     "test:e2e": "node ../../scripts/copy-shared-mocks.mjs && rm -rf .next && npm run build && playwright test",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "copy-mocks": "node ../../scripts/copy-shared-mocks.mjs",
+    "predev": "pnpm copy-mocks",
+    "prebuild": "pnpm copy-mocks",
+    "pretest:e2e": "pnpm copy-mocks"
   },
   "dependencies": {
     "@multi-game-engines/adapter-edax": "workspace:*",

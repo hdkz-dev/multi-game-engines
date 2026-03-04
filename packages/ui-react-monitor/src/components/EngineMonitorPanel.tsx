@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useCallback, useId, useMemo } from "react";
-import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { EngineStats } from "./EngineStats.js";
 import { PVList } from "./PVList.js";
@@ -11,12 +16,14 @@ import { EvaluationGraph } from "./EvaluationGraph.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import * as ScrollArea from "@radix-ui/react-scroll-area";
 import * as Separator from "@radix-ui/react-separator";
-import { Play,
+import {
+  Play,
   Square,
   Settings2,
   AlertCircle,
   List,
-  History, } from "lucide-react";
+  History,
+} from "lucide-react";
 import { cn } from "../utils/cn.js";
 
 interface EngineMonitorPanelProps<
@@ -173,25 +180,35 @@ export function EngineMonitorPanel<
         </div>
 
         <div className="flex items-center gap-2">
-          {status === "busy" ? (
-            <button
-              onClick={handleStop}
-              className="group flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 rounded-md text-xs font-bold hover:bg-red-600 hover:text-white transition-all focus:ring-2 focus:ring-red-500 focus:ring-offset-2 outline-none active:scale-95"
-              aria-label={strings.stop}
-            >
+          <button
+            onClick={
+              status === "busy" || status === "loading"
+                ? handleStop
+                : handleStart
+            }
+            className={cn(
+              "group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition-all focus:ring-2 focus:ring-offset-2 outline-none active:scale-95",
+              status === "busy" || status === "loading"
+                ? "bg-red-50 text-red-600 hover:bg-red-600 hover:text-white focus:ring-red-500"
+                : "bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white focus:ring-blue-500",
+            )}
+            aria-label={
+              status === "busy" || status === "loading"
+                ? strings.stop
+                : strings.start
+            }
+          >
+            {status === "busy" || status === "loading" ? (
               <Square className="w-3 h-3 fill-current" />
-              <span className="hidden sm:inline">{strings.stop}</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleStart}
-              className="group flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-md text-xs font-bold hover:bg-blue-600 hover:text-white transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 outline-none active:scale-95"
-              aria-label={strings.start}
-            >
+            ) : (
               <Play className="w-3 h-3 fill-current" />
-              <span className="hidden sm:inline">{strings.start}</span>
-            </button>
-          )}
+            )}
+            <span className="hidden sm:inline">
+              {status === "busy" || status === "loading"
+                ? strings.stop
+                : strings.start}
+            </span>
+          </button>
         </div>
       </header>
 

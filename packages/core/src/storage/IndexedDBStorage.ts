@@ -1,173 +1,173 @@
 import { IFileStorage } from "../types.js";
 
 /**
- * IndexedDB を使用したファイルストレージ実装。
- * OPFS が利用できない環境（古いブラウザや特定のコンテキスト）でのフォールバックとして使用されます。
+ * 2026 Zenith Tier: IndexedDB を使用した物理ストレージ実装。
  */
 export class IndexedDBStorage implements IFileStorage {
-  private static DB_NAME = "multi-game-engines-cache";
-  private static STORE_NAME = "files";
+  private static readonly DB_NAME = "multi-game-engines";
+  private static readonly STORE_NAME = "engine-cache";
   private db: IDBDatabase | null = null;
-  private dbPromise: Promise<IDBDatabase> | null = null;
 
-  private async getDB(): Promise<IDBDatabase> {
-    if (this.db) return this.db;
-    if (this.dbPromise) return this.dbPromise;
+  /**
+   * テスト用: 内部 DB インスタンスを取得します。
+   */
+  async getDB(): Promise<IDBDatabase> {
+    return this.ensureDb();
+  }
 
-    this.dbPromise = new Promise((resolve, reject) => {
+  async get(key: string): Promise<ArrayBuffer | null> {
+    const db = await this.ensureDb();
+    return new Promise((resolve, reject) => {
+      try {
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readonly",
+        );
+        const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
+        const request = store.get(key);
+
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
+      } catch (err) {
+        this.handleDbError(err);
+        reject(err);
+      }
+    });
+  }
+
+  async set(key: string, data: ArrayBuffer): Promise<void> {
+    const db = await this.ensureDb();
+    return new Promise((resolve, reject) => {
+      try {
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
+        const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
+        const request = store.put(data, key);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
+      } catch (err) {
+        this.handleDbError(err);
+        reject(err);
+      }
+    });
+  }
+
+  async delete(key: string): Promise<void> {
+    const db = await this.ensureDb();
+    return new Promise((resolve, reject) => {
+      try {
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
+        const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
+        const request = store.delete(key);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
+      } catch (err) {
+        this.handleDbError(err);
+        reject(err);
+      }
+    });
+  }
+
+  async has(key: string): Promise<boolean> {
+    const db = await this.ensureDb();
+    return new Promise((resolve, reject) => {
+      try {
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readonly",
+        );
+        const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
+        const request = store.count(key);
+
+        request.onsuccess = () => resolve(request.result > 0);
+        request.onerror = () => reject(request.error);
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
+      } catch (err) {
+        this.handleDbError(err);
+        reject(err);
+      }
+    });
+  }
+
+  async clear(): Promise<void> {
+    const db = await this.ensureDb();
+    return new Promise((resolve, reject) => {
+      try {
+        const transaction = db.transaction(
+          [IndexedDBStorage.STORE_NAME],
+          "readwrite",
+        );
+        const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
+        const request = store.clear();
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("Transaction aborted"));
+      } catch (err) {
+        this.handleDbError(err);
+        reject(err);
+      }
+    });
+  }
+
+  private async ensureDb(): Promise<IDBDatabase> {
+    // 物理的な接続ロスや InvalidState を検知
+    if (this.db) {
+      try {
+        // ダミーのトランザクションで生存確認
+        this.db.transaction([IndexedDBStorage.STORE_NAME], "readonly");
+        return this.db;
+      } catch {
+        this.db = null;
+      }
+    }
+
+    return new Promise((resolve, reject) => {
       const request = indexedDB.open(IndexedDBStorage.DB_NAME, 1);
-      let blockedTimer: ReturnType<typeof setTimeout> | null = null;
-
       request.onupgradeneeded = () => {
         const db = request.result;
         if (!db.objectStoreNames.contains(IndexedDBStorage.STORE_NAME)) {
           db.createObjectStore(IndexedDBStorage.STORE_NAME);
         }
       };
-
-      request.onblocked = () => {
-        // 2026 Best Practice: ブロックは一時的な可能性があるため、短時間のタイムアウト待機を導入
-        if (!blockedTimer) {
-          blockedTimer = setTimeout(() => {
-            if (this.dbPromise === promise) {
-              this.dbPromise = null;
-            }
-            reject(
-              new Error(
-                "IndexedDB open blocked by another connection. Please close other tabs.",
-              ),
-            );
-          }, 3000);
-        }
-      };
-
       request.onsuccess = () => {
-        if (blockedTimer) {
-          clearTimeout(blockedTimer);
-          blockedTimer = null;
-        }
-        const db = request.result;
-        this.db = db;
-
-        // 2026 Best Practice: 接続が無効になったらキャッシュをクリア
-        db.onclose = () => {
-          if (this.db === db) this.db = null;
-          if (this.dbPromise === promise) this.dbPromise = null;
+        this.db = request.result;
+        this.db.onclose = () => {
+          this.db = null;
         };
-        db.onversionchange = () => {
-          db.close();
-          if (this.db === db) this.db = null;
-          if (this.dbPromise === promise) this.dbPromise = null;
+        this.db.onerror = () => {
+          this.db = null;
         };
-
-        resolve(db);
-      };
-
-      request.onerror = () => {
-        if (blockedTimer) {
-          clearTimeout(blockedTimer);
-          blockedTimer = null;
-        }
-        if (this.dbPromise === promise) {
-          this.dbPromise = null;
-        }
-        reject(request.error);
-      };
-    });
-
-    const promise = this.dbPromise;
-    return promise;
-  }
-
-  async get(key: string): Promise<ArrayBuffer | null> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-        IndexedDBStorage.STORE_NAME,
-        "readonly",
-      );
-      const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      const request = store.get(key);
-
-      request.onsuccess = () => {
-        const result = request.result;
-        if (result instanceof ArrayBuffer) {
-          resolve(result);
-        } else if (result === undefined || result === null) {
-          resolve(null);
-        } else {
-          // 2026 Best Practice: 期待しない型（any）のデータに対する防御的検証
-          reject(
-            new TypeError(
-              `IndexedDB: Expected ArrayBuffer but got ${typeof result} for key "${key}"`,
-            ),
-          );
-        }
+        resolve(this.db);
       };
       request.onerror = () => reject(request.error);
     });
   }
 
-  async set(key: string, data: ArrayBuffer): Promise<void> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-        IndexedDBStorage.STORE_NAME,
-        "readwrite",
-      );
-      const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      store.put(data, key);
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
-  }
-
-  async delete(key: string): Promise<void> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-        IndexedDBStorage.STORE_NAME,
-        "readwrite",
-      );
-      const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      store.delete(key);
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
-  }
-
-  async has(key: string): Promise<boolean> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-        IndexedDBStorage.STORE_NAME,
-        "readonly",
-      );
-      const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      const request = store.count(key);
-
-      request.onsuccess = () => resolve(request.result > 0);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  async clear(): Promise<void> {
-    const db = await this.getDB();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(
-        IndexedDBStorage.STORE_NAME,
-        "readwrite",
-      );
-      const store = transaction.objectStore(IndexedDBStorage.STORE_NAME);
-      store.clear();
-
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
+  private handleDbError(err: unknown): void {
+    if (err && typeof err === "object" && "name" in err) {
+      const error = err as { name: string };
+      if (
+        error.name === "InvalidStateError" ||
+        error.name === "TransactionInactiveError"
+      ) {
+        this.db = null;
+      }
+    }
   }
 }

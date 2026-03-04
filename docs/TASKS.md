@@ -75,7 +75,7 @@
 - [x] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-056)。
   - `skills/` ディレクトリの標準化と `SKILL.md` 形式への統一。
   - `zenith-audit`, `doc-sync` スキルの新規実装。
-  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。 - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
   - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
   - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
@@ -142,3 +142,10 @@
   - [x] **Error Handling**: エンジンファクトリ関数の `EngineError` 移行と i18n 対応。
   - [x] **Reliability**: SRI ミスマッチおよびタイムアウト時のエラーリカバリ検証テストの追加。
   - [x] **Quality**: 全パッケージを通じた Zero-Any ポリシーの再検証と `as any` のテスト隔離。
+
+### 2026-03-04 更新 (実装担当: Security Hardening)
+
+- [x] **Security Hardening & CodeQL Compliance**
+  - [x] **Security**: `EngineLoader` における HTTPS 強制 (CodeQL 対応) と `URL` オブジェクトを用いた厳格なプロトコル検証。
+  - [x] **DevEx**: `SecurityAdvisor` におけるローカル開発環境 (`127.0.0.1`, `::1`, `*.localhost`) の HTTP フォールバック許可。
+  - [x] **CI/CD**: `refresh-sri.yml` ワークフローの `GITHUB_TOKEN` 重複定義エラーの解消。

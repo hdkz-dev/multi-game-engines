@@ -1,8 +1,20 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineAdapter, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  IEngineConfig,
+  IEngineAdapter,
+  IEngineSourceConfig,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IGoSearchOptions,
+import {
+  IGoSearchOptions,
   IGoSearchInfo,
-  IGoSearchResult, } from "@multi-game-engines/domain-go";
+  IGoSearchResult,
+} from "@multi-game-engines/domain-go";
 import { GTPParser } from "./GTPParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -91,7 +103,7 @@ export class GTPAdapter extends BaseAdapter<
         (line) => String(line).startsWith("="),
         { timeoutMs: 5000, signal },
       );
-      this.communicator.postMessage("version");
+      void this.communicator?.postMessage("version");
       await versionPromise;
 
       this.emitStatusChange("ready");
@@ -101,7 +113,7 @@ export class GTPAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

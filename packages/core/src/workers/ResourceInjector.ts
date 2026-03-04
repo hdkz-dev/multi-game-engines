@@ -213,10 +213,15 @@ export class ResourceInjector {
     }
 
     const blobUrl = this.resolve(resourceKey);
-    if (blobUrl === resourceKey) {
-      console.warn(
-        `[ResourceInjector] Resource key "${resourceKey}" not resolved.`,
-      );
+    // 2026 Zenith Tier: 物理的なリソース境界の強制。
+    // レジストリ解決値が blob: スキームでない場合は、外部インジェクションとみなして拒否。
+    if (!blobUrl.startsWith("blob:")) {
+      throw new EngineError({
+        code: EngineErrorCode.INTERNAL_ERROR,
+        message: "Resource not found or invalid scheme in registry",
+        i18nKey: createI18nKey("engine.errors.internalError"),
+        i18nParams: { resourceKey }, // 文面ではなくキーのみを渡す
+      });
     }
 
     try {

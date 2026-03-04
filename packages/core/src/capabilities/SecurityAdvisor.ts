@@ -30,6 +30,70 @@ export class SecurityAdvisor {
     };
   }
 
+  /** Allowed protocols for secure resource downloads. */
+  private static readonly ALLOWED_PROTOCOLS = new Set([
+    "https:",
+    "blob:",
+    "data:",
+  ]);
+
+  /**
+   * Loopback hostnames considered safe for HTTP connections.
+   * Per W3C Secure Contexts spec, loopback addresses are "potentially trustworthy".
+   * Subdomains of localhost (e.g. myapp.localhost) are also safe per RFC 6761 §6.3.
+   * @see https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy
+   * @see https://www.rfc-editor.org/rfc/rfc6761#section-6.3
+   */
+  private static readonly LOOPBACK_HOSTS = new Set([
+    "localhost",
+    "127.0.0.1",
+    "[::1]",
+  ]);
+
+  /**
+   * Determines if a hostname is a loopback address.
+   * Includes exact matches (localhost, 127.0.0.1, [::1]) and
+   * *.localhost subdomains (e.g. myapp.localhost for Portless).
+   */
+  private static isLoopbackHost(hostname: string): boolean {
+    return (
+      SecurityAdvisor.LOOPBACK_HOSTS.has(hostname) ||
+      hostname.endsWith(".localhost")
+    );
+  }
+
+  /**
+   * Performs a fetch with protocol-level security enforcement.
+   * Allowed protocols: HTTPS, blob:, data:.
+   * HTTP is permitted only for loopback hosts (localhost, 127.0.0.1, [::1])
+   * per W3C Secure Contexts specification.
+   * This prevents man-in-the-middle attacks on engine resource downloads.
+   */
+  static async safeFetch(
+    url: string,
+    options?: RequestInit,
+  ): Promise<Response> {
+    // Resolve relative URLs against the current origin (browser) or reject them (non-browser).
+    const resolved = new URL(url, globalThis.location?.href);
+
+    const isAllowedProtocol = SecurityAdvisor.ALLOWED_PROTOCOLS.has(
+      resolved.protocol,
+    );
+    const isLoopbackHttp =
+      resolved.protocol === "http:" &&
+      SecurityAdvisor.isLoopbackHost(resolved.hostname);
+
+    if (!isAllowedProtocol && !isLoopbackHttp) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Insecure protocol "${resolved.protocol}" is not allowed for remote hosts. Use HTTPS or connect to localhost.`,
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
+
+    return fetch(resolved.href, options);
+  }
+
   /**
    * W3C勧告に基づいたマルチハッシュSRI検証。
    * 最強のアルゴリズムを優先して検証します。

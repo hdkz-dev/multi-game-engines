@@ -1,6 +1,6 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年3月1日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年3月4日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
 
@@ -19,6 +19,25 @@
 - [x] Playwright E2E テストの拡充
 - [x] ビルドプロセスへの SRI 自動再計算 (`sri:refresh`) の統合
 - [x] **アクセシビリティ強化 (ADR-051)**: キーボードナビゲーションの完全実装と物理的実証テストの追加。
+
+## 🏆 到達ハイライト (2026-03-04 Security Hardening & CodeQL Compliance)
+
+- **CodeQL 準拠のネットワークセキュリティ強化**:
+  - `EngineLoader` において URL オブジェクトを用いた厳格なプロトコル検証を実装し、HTTPS をデフォルトで強制。これにより CodeQL のセキュリティ警告（Cleartext transmission of sensitive information）を解消。
+  - 開発体験を損なわないよう、例外として `127.0.0.1`, `::1`, `localhost`, および `*.localhost`（Portless 等のローカル開発ツール用サブドメイン）のみ HTTP 通信を許可する安全なフォールバックを `SecurityAdvisor` に集約・実装。
+  - GitHub Actions の SRI 再計算ワークフロー (`refresh-sri.yml`) における `GITHUB_TOKEN` の重複認証を修正し、セキュリティと安定性を向上。
+
+## 🏆 到達ハイライト (2026-03-03 UI Reactivity & E2E Test Hardening)
+
+- **i18n 基盤のアーキテクチャ刷新**:
+  - JSON インポートに起因する Nuxt/Vite/Next.js 環境でのモジュール解決の不安定さ（500エラー等）を根本から排除するため、全ての `i18n-*` パッケージのロケールデータを `.ts` 化し、`src` ディレクトリへ統合しました。これにより、バンドルと型チェックの完全な安全性が担保されました。
+- **UI フレームワークのリアクティビティ最適化**:
+  - **Vue ダッシュボード**: エンジンインスタンスを `ref` ではなく `shallowRef` で管理することで、Vue の Proxy 介入による `WorkerCommunicator` の予期せぬ破棄や内部状態の崩壊を物理的に防止しました。また、コンポーネントの再マウントを抑える `v-show` の活用や、非同期レンダリングのタイミングを `nextTick` で緻密に制御する手法を導入しました。
+  - **React ダッシュボード**: 厳格な Lint ルール (`@typescript-eslint/no-explicit-any`) への準拠と、`EngineMonitorPanel` への安全なプロパティ受け渡しを徹底し、本番同等のビルド環境での安定動作を確認しました。
+- **E2E テストの究極的安定化 (100% Pass Rate)**:
+  - Playwright によるテストにおいて、ハイドレーション待機 (`networkidle`)、ステータスの日英両対応判定、リトライループ、および要素クリックの強制 (`force: true`) を導入しました。非同期 UI の状態遷移に左右されない堅牢なテストスイートが完成し、並列探索テストを含む全てのブラウザ検証がグリーンに到達しました。
+- **初期化ロード戦略と SRI バイパスの整備**:
+  - `EngineFacade` および `BaseAdapter` のステータスガードを本来の厳格な仕様に復元し、ユニットテストの信頼性を確保しました。同時に、E2E テスト環境用には Mock Worker の SRI チェックを安全にバイパス (`__unsafeNoSRI: true`) する仕組みを確立しました。
 
 ## 🏆 到達ハイライト (2026-03-01 Zenith Quality Finalization)
 

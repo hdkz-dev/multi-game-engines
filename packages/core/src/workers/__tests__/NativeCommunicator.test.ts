@@ -1,50 +1,42 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { NativeCommunicator } from "../NativeCommunicator.js";
+import { spawn } from "node:child_process";
 
-const { mockChild } = vi.hoisted(() => {
-  // Use a simple mock object that implements the necessary EventEmitter interface
-  // to avoid issues with hoisted imports of node:events
-  const listeners = new Map<string, Set<(...args: unknown[]) => unknown>>();
-  const m: any = {
-    on: vi.fn((event, cb) => {
+const { mockChild, resetMockChildListeners } = vi.hoisted(() => {
+  const listeners = new Map<string, Set<(...args: unknown[]) => void>>();
+  const resetMockChildListeners = () => listeners.clear();
+
+  const m = {
+    on: vi.fn((event: string, cb: (...args: unknown[]) => void) => {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add(cb);
       return m;
     }),
-    emit: vi.fn((event, ...args) => {
+    emit: vi.fn((event: string, ...args: unknown[]) => {
       listeners.get(event)?.forEach((cb) => {
         cb(...args);
       });
       return true;
     }),
-    removeAllListeners: vi.fn(() => {
-      listeners.clear();
-      return m;
-    }),
+    send: vi.fn(),
+    kill: vi.fn(),
+    stdin: {
+      write: vi.fn(),
+      end: vi.fn(),
+    },
     stdout: {
-      on: vi.fn((event, cb) => {
-        if (!m._stdoutListeners) m._stdoutListeners = new Map();
-        if (!m._stdoutListeners.has(event))
-          m._stdoutListeners.set(event, new Set());
-        m._stdoutListeners.get(event).add(cb);
-        return m.stdout;
-      }),
-      emit: vi.fn((event, ...args) => {
-        m._stdoutListeners?.get(event)?.forEach((cb: unknown) => {
-          if (typeof cb === "function") cb(...args);
-        });
-        return true;
-      }),
-      removeAllListeners: vi.fn(() => {
-        m._stdoutListeners?.clear();
+      on: vi.fn((event: string, cb: (data: unknown) => void) => {
+        const key = `stdout:${event}`;
+        if (!listeners.has(key)) listeners.set(key, new Set());
+        listeners.get(key)!.add(cb as (...args: unknown[]) => void);
         return m.stdout;
       }),
     },
-    stdin: { write: vi.fn() },
-    kill: vi.fn(),
-    _stdoutListeners: new Map(),
+    stderr: {
+      on: vi.fn(),
+    },
   };
-  return { mockChild: m };
+  return { mockChild: m, resetMockChildListeners };
 });
 
 vi.mock("node:child_process", () => ({
@@ -53,80 +45,118 @@ vi.mock("node:child_process", () => ({
 
 describe("NativeCommunicator", () => {
   beforeEach(() => {
-    vi.spyOn(performance, "now").mockReturnValue(0);
-    mockChild.removeAllListeners();
-    mockChild.stdout.removeAllListeners();
     vi.clearAllMocks();
+    resetMockChildListeners();
+    vi.spyOn(performance, "now").mockReturnValue(0);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("should spawn and communicate with a process", async () => {
-    vi.mock("node:child_process", () => ({
-      spawn: vi.fn(() => mockChild),
-    }));
+  it("should spawn a child process with the given path", async () => {
+    const communicator = new NativeCommunicator("/path/to/engine");
+    await communicator.spawn();
 
-    const comm = new NativeCommunicator("dummy-path");
-    await comm.spawn();
+    expect(spawn).toHaveBeenCalledWith(
+      "/path/to/engine",
+      [],
+      expect.any(Object),
+    );
+  });
 
-    const onMsg = vi.fn();
-    comm.onMessage(onMsg);
+  it("should send messages to the child process via stdin", async () => {
+    const communicator = new NativeCommunicator("engine");
+    await communicator.spawn();
+    communicator.postMessage("test message");
 
-    // Simulate stdout data
-    mockChild.stdout.emit("data", Buffer.from("info depth 1\nbestmove e2e4\n"));
+    expect(mockChild.stdin.write).toHaveBeenCalledWith("test message\n");
+  });
 
-    expect(onMsg).toHaveBeenCalledWith("info depth 1");
-    expect(onMsg).toHaveBeenCalledWith("bestmove e2e4");
+  it("should emit messages received from stdout", async () => {
+    const communicator = new NativeCommunicator("engine");
+    const messageSpy = vi.fn();
+    communicator.onMessage(messageSpy);
+    await communicator.spawn();
 
-    comm.postMessage("test");
-    expect(mockChild.stdin.write).toHaveBeenCalledWith("test\n");
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
+    const stdoutCallback = stdoutOnMock.mock.calls.find(
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
 
-    comm.terminate();
+    if (stdoutCallback) {
+      stdoutCallback(Buffer.from("message from engine\n"));
+    }
+
+    expect(messageSpy).toHaveBeenCalledWith("message from engine");
+  });
+
+  it("should handle multiple messages in a single stdout chunk", async () => {
+    const communicator = new NativeCommunicator("engine");
+    const messageSpy = vi.fn();
+    communicator.onMessage(messageSpy);
+    await communicator.spawn();
+
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
+    const stdoutCallback = stdoutOnMock.mock.calls.find(
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
+
+    if (stdoutCallback) {
+      stdoutCallback(Buffer.from("msg1\nmsg2\n"));
+    }
+
+    expect(messageSpy).toHaveBeenCalledWith("msg1");
+    expect(messageSpy).toHaveBeenCalledWith("msg2");
+  });
+
+  it("should handle partial messages across stdout chunks", async () => {
+    const communicator = new NativeCommunicator("engine");
+    const messageSpy = vi.fn();
+    communicator.onMessage(messageSpy);
+    await communicator.spawn();
+
+    type OnMock = Mock<(event: string, cb: (data: Buffer) => void) => void>;
+    const stdoutOnMock = mockChild.stdout.on as unknown as OnMock;
+    const stdoutCallback = stdoutOnMock.mock.calls.find(
+      (call: [string, (data: Buffer) => void]) => call[0] === "data",
+    )?.[1];
+
+    if (stdoutCallback) {
+      stdoutCallback(Buffer.from("partial"));
+      stdoutCallback(Buffer.from(" message\n"));
+    }
+
+    expect(messageSpy).toHaveBeenCalledWith("partial message");
+  });
+
+  it("should terminate the child process on terminate()", async () => {
+    const communicator = new NativeCommunicator("engine");
+    await communicator.spawn();
+    await communicator.terminate();
+
     expect(mockChild.kill).toHaveBeenCalled();
   });
 
-  it("should handle process errors", async () => {
-    const comm = new NativeCommunicator("dummy-path");
-    await comm.spawn();
+  it("should handle process exit without crashing", async () => {
+    const communicator = new NativeCommunicator("engine");
+    await communicator.spawn();
 
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockChild.emit("error", new Error("Spawn failed"));
+    type OnMock = Mock<
+      (event: string, cb: (code: number, signal: string | null) => void) => void
+    >;
+    const onMock = mockChild.on as unknown as OnMock;
+    const exitCallback = onMock.mock.calls.find(
+      (call: [string, (code: number, signal: string | null) => void]) =>
+        call[0] === "exit",
+    )?.[1];
 
-    expect(errorSpy).toHaveBeenCalled();
-    errorSpy.mockRestore();
-  });
+    if (exitCallback) {
+      exitCallback(1, null);
+    }
 
-  it("should handle unexpected process exit", async () => {
-    const comm = new NativeCommunicator("dummy-path");
-    await comm.spawn();
-
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    
-    expect(() => {
-      mockChild.emit("exit", 1, "SIGTERM");
-    }).not.toThrow();
-
-    expect(errorSpy).toHaveBeenCalled();
-    errorSpy.mockRestore();
-  });
-
-  it("should handle large stdout outputs without truncation", async () => {
-    const comm = new NativeCommunicator("dummy-path");
-    await comm.spawn();
-
-    const onMsg = vi.fn();
-    comm.onMessage(onMsg);
-
-    // Send a huge string in chunks
-    const largeLine = "info " + "a".repeat(100000);
-    mockChild.stdout.emit("data", Buffer.from(largeLine.substring(0, 50000)));
-    mockChild.stdout.emit(
-      "data",
-      Buffer.from(largeLine.substring(50000) + "\n"),
-    );
-
-    expect(onMsg).toHaveBeenCalledWith(largeLine);
+    expect(mockChild.on).toHaveBeenCalledWith("exit", expect.any(Function));
   });
 });

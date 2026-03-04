@@ -1,811 +1,241 @@
-import { createI18nKey, ProtocolValidator } from "../protocol/ProtocolValidator.js";
-import { IEngineBridge, IEngineAdapter, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, EngineStatus, ILoadProgress, ITelemetryEvent, EngineLoadingStrategy, IMiddleware, ICapabilities, IEngineLoader, IEngine, IEngineConfig, IEngineRegistry, EngineRegistry, EngineErrorCode, IEngineBridgeOptions, IBookProvider } from "../types.js";
-import { EngineFacade, INTERNAL_ADAPTER } from "./EngineFacade.js";
+import {
+  IEngine,
+  IEngineAdapter,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  IEngineConfig,
+  IEngineRegistry,
+  IEngineLoader,
+  IMiddleware,
+} from "../types.js";
+import { EngineFacade } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
-import { EngineConcurrencyController } from "./EngineConcurrencyController.js";
-import { MockAdapter } from "../mocks/MockAdapter.js";
-import { BookProvider } from "./BookProvider.js";
+import { EngineErrorCode } from "../types.js";
+import { createI18nKey } from "../protocol/ProtocolValidator.js";
 
 /**
- * 全てのゲームエンジンのライフサイクルとミドルウェアを統括するブリッジ。
- *
- * シングルトンとしてではなく、アプリケーションのコンテキストごとにインスタンス化することを推奨します。
- * 主要な機能:
- * - アダプターの登録と管理
- * - エンジンの動的ロードと依存性注入
- * - グローバルイベント（ステータス、進捗、テレメトリ）の集約
- * - ミドルウェアの適用と実行
+ * アダプター生成のためのファクトリ型。
  */
-export class EngineBridge implements IEngineBridge {
-  private adapters = new Map<
+export type AdapterFactory<
+  T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+  T_INFO = unknown,
+  T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+> = (config: IEngineConfig) => IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>;
+
+/**
+ * 2026 Zenith Tier: エンジン管理の中枢ブリッジ。
+ */
+export class EngineBridge {
+  private factories = new Map<
     string,
-    IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+    AdapterFactory<IBaseSearchOptions, unknown, IBaseSearchResult>
   >();
-  private adapterFactories = new Map<
+  private engines = new Map<
     string,
-    (
-      config: IEngineConfig,
-    ) =>
-      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | Promise<
-          | IEngineAdapter<
-              IBaseSearchOptions,
-              IBaseSearchInfo,
-              IBaseSearchResult
-            >
-          | EngineFacade<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-        >
+    EngineFacade<IBaseSearchOptions, unknown, IBaseSearchResult>
   >();
-  private registries: IEngineRegistry[] = [];
-  private engineInstances = new Map<
-    string,
-    WeakRef<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>
-  >();
-  private middlewares: IMiddleware<
+  private globalMiddlewares: IMiddleware<
     IBaseSearchOptions,
-    IBaseSearchInfo,
+    unknown,
     IBaseSearchResult
   >[] = [];
-  private pendingEngines = new Map<
-    string,
-    Promise<IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>>
-  >();
-  private loader: IEngineLoader | null = null;
-  private loaderPromise: Promise<IEngineLoader> | null = null;
-  private capabilities: ICapabilities | null = null;
-  private capsPromise: Promise<ICapabilities> | null = null;
-  private concurrencyController = new EngineConcurrencyController();
-  private _bookProvider: IBookProvider | null = null;
-  private disposed = false;
+  private loaderInstance: IEngineLoader | null = null;
+  private registries: IEngineRegistry[] = [];
 
-  private statusListeners = new Set<
-    (id: string, status: EngineStatus) => void
-  >();
-  private progressListeners = new Set<
-    (id: string, progress: ILoadProgress) => void
-  >();
-  private telemetryListeners = new Set<
-    (id: string, event: ITelemetryEvent) => void
-  >();
-  private adapterUnsubscribers = new Map<string, (() => void)[]>();
-
-  // 2026 Best Practice: インスタンスの破棄を監視し、リークを追跡可能にする
-  private finalizationRegistry = new FinalizationRegistry((id: string) => {
-    if (this.disposed) return;
-    const ref = this.engineInstances.get(id);
-    if (ref && !ref.deref()) {
-      this.engineInstances.delete(id);
+  constructor(
+    registry?: IEngineRegistry,
+    private readonly loaderProvider?: () => Promise<IEngineLoader>,
+  ) {
+    if (registry) {
+      this.registries.push(registry);
     }
-  });
-
-  constructor(private options: IEngineBridgeOptions = {}) {
-    // 2026 Best Practice: 初期化時に能力検知を開始
-    if (options.capabilities) {
-      this.capabilities = {
-        wasmThreads: false,
-        wasmSimd: false,
-        ...options.capabilities,
-      } as ICapabilities;
-    }
-
-    // モックアダプターの標準登録
-    this.registerAdapterFactory("mock", (config) => new MockAdapter(config));
-
-    void this.checkCapabilities();
-  }
-
-  /**
-   * 汎用アダプター（UCI/USI/GTP等）を生成するためのファクトリ関数を登録します。
-   * これにより、`getEngine` に設定オブジェクトを渡すだけで、事前にインスタンス化することなくエンジンを利用可能になります。
-   *
-   * @param type - アダプターの種類識別子（例: "uci", "usi"）。IEngineConfig.adapter と一致させる必要があります。
-   * @param factory - 設定を受け取りアダプターまたはエンジンを返す関数。
-   */
-  registerAdapterFactory(
-    type: string,
-    factory: (
-      config: IEngineConfig,
-    ) =>
-      | IEngineAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
-      | Promise<
-          IEngineAdapter<
-            IBaseSearchOptions,
-            IBaseSearchInfo,
-            IBaseSearchResult
-          >
-        >,
-  ): void {
-    if (this.adapterFactories.has(type)) {
-      const i18nKey = createI18nKey("engine.errors.duplicateFactory");
-      throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Adapter factory for "${type}" is already registered.`,
-        i18nKey,
-        i18nParams: { type },
-      });
-    }
-    this.adapterFactories.set(type, factory);
   }
 
   /**
    * メタデータ解決のためのレジストリを追加します。
-   * 後から追加されたレジストリが優先的に検索されます。
    */
   addRegistry(registry: IEngineRegistry): void {
-    // 2026 Best Practice: LIFO 順でレジストリを管理し、ユーザー定義を優先
     this.registries.unshift(registry);
   }
 
   /**
-   * アダプターインスタンスをブリッジに登録します。
-   *
-   * 処理内容:
-   * 1. 環境能力（Capabilities）の検証。不足している場合はエラーをスロー。
-   * 2. 同一 ID の既存アダプターの破棄（リソースリーク防止）。
-   * 3. ステータス、進捗、テレメトリイベントのグローバルリスナーへの接続。
-   *
-   * @param adapter - 登録する IEngineAdapter 実装。
+   * グローバルミドルウェアを登録します。
    */
-  async registerAdapter<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(adapter: IEngineAdapter<O, I, R>): Promise<void> {
-    if (this.disposed) return;
-
-    // 2026 Best Practice: アダプター登録時に能力要件を検証
-    await this.enforceCapabilities(
-      adapter as IEngineAdapter<
+  use<
+    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+    T_INFO = unknown,
+    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
+  >(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
+    this.globalMiddlewares.push(
+      middleware as unknown as IMiddleware<
         IBaseSearchOptions,
-        IBaseSearchInfo,
+        unknown,
         IBaseSearchResult
       >,
     );
-
-    // 2026 Best Practice: ID をサニタイズして正規化 (Path Traversal 対策とルックアップの一貫性)
-    // 2026 Best Practice: 厳密な ID バリデーション (Silent sanitization 排除)
-    if (/[^a-zA-Z0-9-_]/.test(adapter.id)) {
-      const i18nKey = createI18nKey("engine.errors.invalidEngineId");
-      const i18nParams = { id: adapter.id };
-      throw new EngineError({
-        code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid engine ID: "${adapter.id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
-        i18nKey,
-        i18nParams,
-      });
+    for (const engine of this.engines.values()) {
+      engine.use(
+        middleware as unknown as IMiddleware<
+          IBaseSearchOptions,
+          unknown,
+          IBaseSearchResult
+        >,
+      );
     }
-    const id = adapter.id;
-
-    // 2026 Best Practice: 同一 ID の上書き時に古いリソースを確実に解放 (Leak Prevention)
-    await this.unregisterAdapter(id);
-
-    const unsubs: (() => void)[] = [];
-    unsubs.push(
-      adapter.onStatusChange((status) => {
-        this.concurrencyController.updateStatus(id, status);
-        for (const cb of this.statusListeners) cb(id, status);
-      }),
-    );
-    unsubs.push(
-      adapter.onProgress((progress) => {
-        for (const cb of this.progressListeners) cb(id, progress);
-      }),
-    );
-    unsubs.push(
-      adapter.onTelemetry((event) => {
-        for (const cb of this.telemetryListeners) cb(id, event);
-      }),
-    );
-
-    this.adapterUnsubscribers.set(id, unsubs);
-    // 2026 Best Practice: アダプターの型を IBase 型へ正規化して保存。
-    const abstractAdapter = adapter as IEngineAdapter<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
-    this.adapters.set(id, abstractAdapter);
+    return this;
   }
 
-  async unregisterAdapter(id: string): Promise<void> {
-    const adapter = this.adapters.get(id);
-    if (adapter) {
-      const unsubs = this.adapterUnsubscribers.get(id);
-      if (unsubs) {
-        for (const unsub of unsubs) unsub();
-      }
-      this.adapterUnsubscribers.delete(id);
-      try {
-        await adapter.dispose();
-      } catch (err) {
-        console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
-      }
-      // 2026 Best Practice: アダプター登録解除時に Blob URL リソースも明示的に解放
-      if (this.loader) {
-        this.loader.revokeByEngineId(id);
-      }
-    }
-    this.adapters.delete(id);
-    this.engineInstances.delete(id);
-    this.pendingEngines.delete(id);
-  }
-
-  getEngine<K extends keyof EngineRegistry>(
-    id: K,
-    strategy?: EngineLoadingStrategy,
-  ): Promise<EngineRegistry[K]>;
-  getEngine<
-    O extends IBaseSearchOptions = IBaseSearchOptions,
-    I extends IBaseSearchInfo = IBaseSearchInfo,
-    R extends IBaseSearchResult = IBaseSearchResult,
-  >(
-    config: IEngineConfig,
-    strategy?: EngineLoadingStrategy,
-  ): Promise<IEngine<O, I, R>>;
-  getEngine<
-    O extends IBaseSearchOptions = IBaseSearchOptions,
-    I extends IBaseSearchInfo = IBaseSearchInfo,
-    R extends IBaseSearchResult = IBaseSearchResult,
-  >(
-    idOrConfig: string | IEngineConfig,
-    strategy?: EngineLoadingStrategy,
-  ): Promise<IEngine<O, I, R>>;
   /**
-   * 指定された ID または設定に基づいてエンジンインスタンスを取得します。
-   *
-   * 特徴:
-   * - **キャッシュ**: 既にインスタンスが存在する場合は、WeakRef キャッシュから即座に返却します。
-   * - **並行性制御**: 同一 ID に対する同時リクエストはデデュプリケーション（Promise 共有）され、競合を防ぎます。
-   * - **動的生成**: ID の代わりに IEngineConfig を渡すことで、未登録のアダプターをオンデマンドで生成・登録できます。
-   *
-   * @param idOrConfig - エンジン ID (string) または設定オブジェクト (IEngineConfig)。
-   * @param strategy - ロード戦略 ('on-demand' | 'manual' | 'eager')。デフォルトは 'on-demand'。
-   * @returns IEngine インターフェースを実装した Facade インスタンス。
-   * @throws {EngineError} アダプターが見つからない、または初期化に失敗した場合。
+   * アダプターファクトリを登録します。
+   */
+  registerAdapterFactory<
+    T_OPTIONS extends IBaseSearchOptions,
+    T_INFO,
+    T_RESULT extends IBaseSearchResult,
+  >(type: string, factory: AdapterFactory<T_OPTIONS, T_INFO, T_RESULT>): void {
+    this.factories.set(
+      type,
+      factory as unknown as AdapterFactory<
+        IBaseSearchOptions,
+        unknown,
+        IBaseSearchResult
+      >,
+    );
+  }
+
+  /**
+   * エンジンを取得します。
    */
   async getEngine<
-    O extends IBaseSearchOptions = IBaseSearchOptions,
-    I extends IBaseSearchInfo = IBaseSearchInfo,
-    R extends IBaseSearchResult = IBaseSearchResult,
+    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
+    T_INFO = unknown,
+    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
   >(
     idOrConfig: string | IEngineConfig,
-    strategy: EngineLoadingStrategy = "on-demand",
-  ): Promise<IEngine<O, I, R>> {
-    if (this.disposed) {
-      const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
-      throw new EngineError({
-        code: EngineErrorCode.LIFECYCLE_ERROR,
-        message: "EngineBridge has already been disposed.",
-        i18nKey,
-      });
-    }
-
-    // 2026: Ensure environment detection is finished before variant selection
-    await this.checkCapabilities();
-
-    const id = typeof idOrConfig === "string" ? idOrConfig : idOrConfig.id;
+  ): Promise<IEngine<T_OPTIONS, T_INFO, T_RESULT>> {
+    const config = this.resolveConfig(idOrConfig);
+    const id = config.id;
 
     if (!id) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: "Engine ID is required to get or create an engine instance.",
+        message: "Engine configuration must have an ID.",
+        i18nKey: createI18nKey("engine.errors.validationError"),
       });
     }
 
-    // 2026 Security: Path Traversal Prevention
-    // Ensure the ID (used for cache keys and storage paths) is strictly alphanumeric.
-    if (!/^[a-zA-Z0-9-_]+$/.test(id)) {
-      const i18nKey = createI18nKey("engine.errors.invalidEngineId");
-      const i18nParams = { id };
+    if (this.engines.has(id)) {
+      return this.engines.get(id) as unknown as IEngine<
+        T_OPTIONS,
+        T_INFO,
+        T_RESULT
+      >;
+    }
+
+    const adapterType = config.adapter;
+    if (!adapterType) {
       throw new EngineError({
         code: EngineErrorCode.VALIDATION_ERROR,
-        message: `Invalid engine ID: "${id}". Only alphanumeric characters, hyphens, and underscores are allowed.`,
-        i18nKey,
-        i18nParams,
+        message: `Engine "${id}" has no adapter type defined.`,
+        engineId: id,
+        i18nKey: createI18nKey("engine.errors.invalidAdapter"),
       });
     }
 
-    // 2026 Best Practice: Check if already disposed
-
-    // 2026 Best Practice: インフライトの初期化をデデュプリケーション (TOCTOU レースコンディション対策)
-    const pending = this.pendingEngines.get(id);
-    if (pending) return pending as Promise<IEngine<O, I, R>>;
-
-    // 2026 Best Practice: インスタンスのキャッシュ (WeakRef ベース)
-    const ref = this.engineInstances.get(id);
-    const cached = ref?.deref();
-    if (cached) {
-      cached.loadingStrategy = strategy;
-      return cached as IEngine<O, I, R>;
-    }
-
-    const enginePromise = (async () => {
-      try {
-        if (this.disposed) {
-          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
-          throw new EngineError({
-            code: EngineErrorCode.LIFECYCLE_ERROR,
-            message: "EngineBridge was disposed during engine initialization.",
-            engineId: id,
-            i18nKey,
-          });
-        }
-
-        let adapter = this.adapters.get(id);
-        let newlyRegistered = false;
-
-        // 2026 Best Practice: メタデータの解決 (Decentralized Registry)
-        const resolvedConfig = this.resolveEngineConfig(idOrConfig);
-
-        // 2026 Zenith Tier: 設定オブジェクトからの動的インスタンス化
-        if (!adapter && resolvedConfig.adapter) {
-          const factory = this.adapterFactories.get(resolvedConfig.adapter);
-          if (factory) {
-            const result = await factory(resolvedConfig);
-            // 2026 Best Practice: ファクトリが Facade を返した場合は内部アダプターを抽出
-
-            let newAdapter: IEngineAdapter<
-              IBaseSearchOptions,
-              IBaseSearchInfo,
-              IBaseSearchResult
-            >;
-
-            if (result instanceof EngineFacade) {
-              newAdapter = (
-                result as EngineFacade<
-                  IBaseSearchOptions,
-                  IBaseSearchInfo,
-                  IBaseSearchResult
-                >
-              )[INTERNAL_ADAPTER]();
-            } else if (this.isIEngineAdapter(result)) {
-              newAdapter = result as IEngineAdapter<
-                IBaseSearchOptions,
-                IBaseSearchInfo,
-                IBaseSearchResult
-              >;
-            } else {
-              const i18nKey =
-                createI18nKey("engine.errors.adapterFactoryInvalidReturn");
-              const i18nParams = { adapter: resolvedConfig.adapter as string };
-              throw new EngineError({
-                code: EngineErrorCode.INTERNAL_ERROR,
-                message: `Factory for "${resolvedConfig.adapter}" returned an object that does not implement IEngineAdapter.`,
-                engineId: id,
-                i18nKey,
-                i18nParams,
-              });
-            }
-
-            // 生成されたアダプターをブリッジに登録（セキュリティ検証を含むため await する）
-            await this.registerAdapter(newAdapter);
-            newlyRegistered = true;
-            if (this.disposed) {
-              await newAdapter.dispose();
-              const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
-              throw new EngineError({
-                code: EngineErrorCode.LIFECYCLE_ERROR,
-                message:
-                  "EngineBridge was disposed during adapter registration.",
-                engineId: id,
-                i18nKey,
-              });
-            }
-            adapter = this.adapters.get(id);
-          }
-        }
-
-        if (!adapter) {
-          const i18nKey = createI18nKey("engine.errors.adapterNotFound");
-          const i18nParams = { id };
-          throw new EngineError({
-            code: EngineErrorCode.INTERNAL_ERROR,
-            message: `Engine adapter not found or factory not registered: ${id}`,
-            engineId: id,
-            i18nKey,
-            i18nParams,
-            remediation:
-              typeof idOrConfig !== "string"
-                ? `Ensure registerAdapterFactory('${resolvedConfig.adapter}', ... ) is called before getEngine.`
-                : "Register the adapter instance first or provide a full IEngineConfig.",
-          });
-        }
-
-        // 2026 Best Practice: セキュリティと環境能力の強制検証 (Zenith Tier Security)
-        // registerAdapter 内で既に実行されている場合はスキップ。
-        // ただし実行前に再確認。
-        if (this.disposed) {
-          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
-          throw new EngineError({
-            code: EngineErrorCode.LIFECYCLE_ERROR,
-            message: "EngineBridge was disposed before capability enforcement.",
-            engineId: id,
-            i18nKey,
-          });
-        }
-
-        if (!newlyRegistered) {
-          await this.enforceCapabilities(adapter);
-        }
-
-        if (this.disposed) {
-          const i18nKey = createI18nKey("engine.errors.bridgeDisposed");
-          throw new EngineError({
-            code: EngineErrorCode.LIFECYCLE_ERROR,
-            message: "EngineBridge was disposed before creating facade.",
-            engineId: id,
-            i18nKey,
-          });
-        }
-
-        // 2026 Best Practice: ミドルウェアのフィルタリング (Architectural Isolation)
-        const filteredMiddlewares = this.middlewares.filter(
-          (mw) => !mw.supportedEngines || mw.supportedEngines.includes(id),
-        );
-
-        const facade = new EngineFacade(
-          adapter,
-          filteredMiddlewares,
-          async () => this.getLoader(),
-          false, // EngineBridge がアダプターのライフサイクルを管理するため
-        );
-        facade.loadingStrategy = strategy;
-
-        const engine = facade as IEngine<
-          IBaseSearchOptions,
-          IBaseSearchInfo,
-          IBaseSearchResult
-        >;
-
-        if (this.disposed) {
-          // ファサードが生成されていても、破棄されていたらキャッシュしない
-          return engine;
-        }
-
-        this.engineInstances.set(id, new WeakRef(engine));
-        this.finalizationRegistry.register(engine, id);
-
-        return engine;
-      } finally {
-        this.pendingEngines.delete(id);
-      }
-    })();
-
-    this.pendingEngines.set(id, enginePromise);
-    return enginePromise as Promise<IEngine<O, I, R>>;
-  }
-
-  /**
-   * レジストリチェーンを走査して設定を解決します。
-   */
-  private resolveEngineConfig(
-    idOrConfig: string | IEngineConfig,
-  ): IEngineConfig {
-    const config: IEngineConfig =
-      typeof idOrConfig === "string" ? { id: idOrConfig } : { ...idOrConfig };
-
-    const id = config.id!;
-    const version = config.version;
-
-    // 2026 Zenith Tier: Input Hardening
-    ProtocolValidator.assertNoInjection(id, "Engine ID");
-    if (version) {
-      ProtocolValidator.assertNoInjection(version, "Engine Version");
-    }
-
-    // 既に sources が完全に揃っている場合は何もしない
-    if (config.sources?.main) {
-      return config;
-    }
-
-    // レジストリを順番に検索
-    for (const registry of this.registries) {
-      const resolvedSources = registry.resolve(id, version);
-      if (resolvedSources) {
-        // 2026 Best Practice: Binary Variant Selection (SIMD/Threads)
-        // 環境に応じた最適なバリアントをマージ
-        const baseSources = { ...resolvedSources };
-        const variants = baseSources["variants"] as
-          | Record<string, Partial<IEngineConfig["sources"]>>
-          | undefined;
-
-        if (variants && this.capabilities) {
-          const isSIMD = this.capabilities.wasmSimd;
-          const isThreads = this.capabilities.wasmThreads;
-
-          let variantKey = "";
-          if (isSIMD && isThreads && variants["simd-mt"])
-            variantKey = "simd-mt";
-          else if (isSIMD && variants["simd"]) variantKey = "simd";
-          else if (isThreads && variants["mt"]) variantKey = "mt";
-          else if (variants["st"]) variantKey = "st";
-
-          if (variantKey && variants[variantKey]) {
-            Object.assign(baseSources, variants[variantKey]);
-          }
-        }
-
-        const mergedSources = {
-          ...baseSources,
-          ...(config.sources || {}),
-        };
-
-        // 2026 Best Practice: IEngineConfig.sources の型（main を必須とする）に適合させる。
-        // registry.resolve は IEngineConfig["sources"] を返すが、
-        // 少なくとも 'main' が含まれていることを前提とする（またはバリデーション）。
-        if (mergedSources["main"]) {
-          config.sources = mergedSources as Required<IEngineConfig>["sources"];
-        }
-
-        // アダプタータイプが未指定なら推論を試みる (レジストリがメタデータとして持っている想定)
-        // 現在の IEngineRegistry インターフェースには adapter 取得がないが、
-        // 慣習として id を adapter 名としてフォールバックする
-        if (!config.adapter) {
-          config.adapter = id;
-        }
-        break;
-      }
-    }
-
-    return config;
-  }
-
-  /**
-   * 現在稼働中の（メモリ上に存在する）エンジンインスタンス数を取得します。
-   */
-  getActiveEngineCount(): number {
-    let count = 0;
-    for (const [id, ref] of this.engineInstances.entries()) {
-      if (ref.deref()) {
-        count++;
-      } else {
-        // 2026 Best Practice: 参照が切れたエントリを明示的にパージ
-        this.engineInstances.delete(id);
-      }
-    }
-    return count;
-  }
-
-  use<
-    O extends IBaseSearchOptions,
-    I extends IBaseSearchInfo,
-    R extends IBaseSearchResult,
-  >(middleware: IMiddleware<O, I, R>): void {
-    // 2026 Best Practice: ミドルウェアを IBase 型へ正規化して保存。
-    const abstractMiddleware = middleware as IMiddleware<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
-    this.middlewares.push(abstractMiddleware);
-    this.middlewares.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-
-    // 2026 Best Practice: ミドルウェア更新時にキャッシュをクリア
-    this.engineInstances.clear();
-    this.pendingEngines.clear();
-  }
-
-  unuse(middleware: IMiddleware<unknown, unknown, unknown> | string): void {
-    if (typeof middleware === "string") {
-      this.middlewares = this.middlewares.filter((m) => m.id !== middleware);
-    } else {
-      const targetId = middleware.id;
-      this.middlewares = this.middlewares.filter(
-        (m) => m !== middleware && (!targetId || m.id !== targetId),
-      );
-    }
-    // 2026 Best Practice: キャッシュをクリア
-    this.engineInstances.clear();
-    this.pendingEngines.clear();
-  }
-
-  onGlobalStatusChange(
-    callback: (id: string, status: EngineStatus) => void,
-  ): () => void {
-    this.statusListeners.add(callback);
-    return () => this.statusListeners.delete(callback);
-  }
-
-  onGlobalProgress(
-    callback: (id: string, progress: ILoadProgress) => void,
-  ): () => void {
-    this.progressListeners.add(callback);
-    return () => this.progressListeners.delete(callback);
-  }
-
-  onGlobalTelemetry(
-    callback: (id: string, event: ITelemetryEvent) => void,
-  ): () => void {
-    this.telemetryListeners.add(callback);
-    return () => this.telemetryListeners.delete(callback);
-  }
-
-  async checkCapabilities(): Promise<ICapabilities> {
-    if (this.capabilities) return this.capabilities;
-    if (this.capsPromise) return this.capsPromise;
-
-    this.capsPromise = (async () => {
-      try {
-        const { CapabilityDetector } =
-          await import("../capabilities/CapabilityDetector.js");
-        const caps = await CapabilityDetector.detect();
-        this.capabilities = caps;
-        return caps;
-      } finally {
-        this.capsPromise = null;
-      }
-    })();
-
-    return this.capsPromise;
-  }
-
-  private async enforceCapabilities(
-    adapter: IEngineAdapter<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >,
-  ): Promise<void> {
-    if (!adapter.requiredCapabilities) return;
-
-    const caps = await this.checkCapabilities();
-    const missing: string[] = [];
-
-    for (const [key, required] of Object.entries(
-      adapter.requiredCapabilities,
-    )) {
-      if (required && !caps[key as keyof ICapabilities]) {
-        missing.push(key);
-      }
-    }
-
-    if (missing.length > 0) {
+    const factory = this.factories.get(adapterType);
+    if (!factory) {
       throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: `Environment does not support required capabilities: ${missing.join(", ")}`,
-        engineId: adapter.id,
-        remediation:
-          "Ensure the site is served over HTTPS and Cross-Origin Isolation headers (COOP/COEP) are enabled if Threads/SharedArrayBuffer are required.",
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `No factory registered for adapter type "${adapterType}".`,
+        engineId: id,
+        i18nKey: createI18nKey("engine.errors.invalidAdapter"),
       });
     }
-  }
 
-  /**
-   * 2026 Best Practice: アトミック初期化と Dispose ガード
-   */
-  async getLoader(): Promise<IEngineLoader> {
-    if (this.loader) return this.loader;
-    if (this.loaderPromise) return this.loaderPromise;
-
-    this.loaderPromise = (async () => {
-      try {
-        const { EngineLoader } = await import("./EngineLoader.js");
-        const { createFileStorage } = await import("../storage/index.js");
-        const caps = await this.checkCapabilities();
-
-        if (this.disposed) {
-          throw new EngineError({
-            code: EngineErrorCode.LIFECYCLE_ERROR,
-            message: "EngineBridge already disposed",
-            i18nKey: createI18nKey("engine.errors.bridgeDisposed"),
-          });
-        }
-
-        const storage = this.options.storage || createFileStorage(caps);
-        const loader = new EngineLoader(storage);
-        this.loader = loader;
-        return loader;
-      } finally {
-        this.loaderPromise = null;
-      }
-    })();
-
-    return this.loaderPromise;
-  }
-
-  /**
-   * 定跡書プロバイダーを取得します。
-   */
-  async getBookProvider(): Promise<IBookProvider> {
-    if (this._bookProvider) return this._bookProvider;
-    if (this.options.bookProvider) {
-      this._bookProvider = this.options.bookProvider;
-      return this._bookProvider;
+    const adapter = factory(config);
+    if (!this.isIEngineAdapter(adapter)) {
+      throw new EngineError({
+        code: EngineErrorCode.VALIDATION_ERROR,
+        message: `Factory for "${adapterType}" returned an object that does not implement IEngineAdapter.`,
+        engineId: id,
+        i18nKey: createI18nKey("engine.errors.validationError"),
+      });
     }
 
-    const loader = await this.getLoader();
-    this._bookProvider = new BookProvider(loader);
-    return this._bookProvider;
+    const facade = new EngineFacade<T_OPTIONS, T_INFO, T_RESULT>(
+      adapter as IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT>,
+      [...this.globalMiddlewares] as unknown as IMiddleware<
+        T_OPTIONS,
+        T_INFO,
+        T_RESULT
+      >[],
+      this.loaderProvider,
+    );
+
+    this.engines.set(
+      id,
+      facade as unknown as EngineFacade<
+        IBaseSearchOptions,
+        unknown,
+        IBaseSearchResult
+      >,
+    );
+    return facade;
   }
 
   /**
-   * ブリッジを破棄し、管理下の全てのリソースを解放します。
-   *
-   * 処理内容:
-   * 1. 登録された全アダプターの `dispose()` を呼び出し、Worker を停止。
-   * 2. イベントリスナーの解除。
-   * 3. 内部キャッシュ（インスタンス、ミドルウェア）のクリア。
-   * 4. 実行中のローダー処理の待機とクリーンアップ。
-   *
-   * このメソッド呼び出し後、ブリッジは使用不能になります。
+   * ブリッジを破棄します。
    */
   async dispose(): Promise<void> {
-    this.disposed = true;
-    const pendingLoader = this.loaderPromise;
-    const pendingEngines = Array.from(this.pendingEngines.values());
+    const disposePromises = Array.from(this.engines.values()).map((e) =>
+      e.dispose(),
+    );
+    await Promise.all(disposePromises);
+    this.engines.clear();
 
-    // 2026 Best Practice: アダプターのイベントリスナーを破棄前に解除
-    // これにより、破棄中に発生したイベントがブリッジ経由で通知されるのを防ぎます。
-    for (const unsubs of this.adapterUnsubscribers.values()) {
-      for (const unsub of unsubs) unsub();
-    }
-    this.adapterUnsubscribers.clear();
-
-    const promises = Array.from(this.adapters.keys()).map(async (id) => {
-      const adapter = this.adapters.get(id);
-      if (adapter) {
-        try {
-          await adapter.dispose();
-        } catch (err) {
-          console.error(`[EngineBridge] Failed to dispose adapter ${id}:`, err);
-        }
+    if (this.loaderProvider) {
+      const loader = await this.loaderProvider();
+      if (loader && typeof loader.revokeAll === "function") {
+        loader.revokeAll();
       }
-    });
-    await Promise.all(promises);
-
-    // 2026 Best Practice: 破棄失敗時も Blob URL リソースは強制的に解放 (Leak Prevention)
-    // 個別の ID に依存せず、このブリッジコンテキストで生成された全 Blob を一括消去する。
-    if (this.loader) {
-      this.loader.revokeAll();
+    } else if (this.loaderInstance) {
+      this.loaderInstance.revokeAll();
+      this.loaderInstance = null;
     }
-
-    // 2026 Best Practice: 進行中のエンジン生成とロード処理の完了を待機（または例外吸収）
-    await Promise.all([
-      ...pendingEngines.map((p) => p.catch(() => {})),
-      pendingLoader ? pendingLoader.catch(() => {}) : Promise.resolve(),
-    ]);
-
-    this.adapters.clear();
-    this.engineInstances.clear();
-    this.pendingEngines.clear();
-    this.adapterFactories.clear();
-    this.statusListeners.clear();
-    this.progressListeners.clear();
-    this.telemetryListeners.clear();
-    this.middlewares = [];
-    this.loader = null;
-    this.loaderPromise = null;
-    this.capabilities = null;
-    this.capsPromise = null;
   }
 
-  private isIEngineAdapter(obj: unknown): obj is IEngineAdapter {
-    if (typeof obj !== "object" || obj === null) return false;
-    const r = obj as Record<string, unknown>;
-    const parser = r["parser"];
-    if (typeof parser !== "object" || parser === null) return false;
+  private resolveConfig(idOrConfig: string | IEngineConfig): IEngineConfig {
+    if (typeof idOrConfig === "string") {
+      let sources = null;
+      for (const registry of this.registries) {
+        sources = registry.resolve(idOrConfig);
+        if (sources) break;
+      }
+      if (!sources) {
+        throw new EngineError({
+          code: EngineErrorCode.VALIDATION_ERROR,
+          message: `Engine "${idOrConfig}" not found in any registry.`,
+          engineId: idOrConfig,
+          i18nKey: createI18nKey("engine.errors.invalidEngineId"),
+        });
+      }
+      return { id: idOrConfig, adapter: idOrConfig, sources };
+    }
+    return idOrConfig;
+  }
 
-    const p = parser as Record<string, unknown>;
+  private isIEngineAdapter(obj: unknown): boolean {
+    if (!obj || typeof obj !== "object") return false;
+    const a = obj as Record<string, unknown>;
+
     return (
-      typeof r["id"] === "string" &&
-      typeof r["name"] === "string" &&
-      typeof r["version"] === "string" &&
-      typeof r["status"] === "string" &&
-      typeof r["load"] === "function" &&
-      typeof r["search"] === "function" &&
-      typeof r["searchRaw"] === "function" &&
-      typeof r["stop"] === "function" &&
-      typeof r["setOption"] === "function" &&
-      typeof r["dispose"] === "function" &&
-      typeof r["onSearchResult"] === "function" &&
-      typeof r["onStatusChange"] === "function" &&
-      typeof r["onProgress"] === "function" &&
-      typeof r["onTelemetry"] === "function" &&
-      typeof r["emitTelemetry"] === "function" &&
-      typeof p["createSearchCommand"] === "function" &&
-      typeof p["parseInfo"] === "function" &&
-      typeof p["parseResult"] === "function"
+      typeof a["id"] === "string" &&
+      typeof a["name"] === "string" &&
+      typeof a["status"] === "string" &&
+      typeof a["load"] === "function" &&
+      typeof a["searchRaw"] === "function" &&
+      typeof a["stop"] === "function" &&
+      typeof a["onStatusChange"] === "function"
     );
   }
 }

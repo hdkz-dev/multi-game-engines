@@ -64,7 +64,9 @@ export class SegmentedVerifier {
     for (let i = 0; i < expectedSegments; i++) {
       const start = i * segmentSize;
       const end = Math.min(start + segmentSize, bytes.length);
-      const segment = bytes.slice(start, end);
+
+      // 2026 Zenith Tier: subarray() を使用して物理的なメモリコピーを回避
+      const segment = bytes.subarray(start, end);
 
       const isValid = await this.verifySegment(segment, hashes[i]!);
       if (!isValid) {
@@ -74,6 +76,12 @@ export class SegmentedVerifier {
           message: `Segmented SRI verification failed at segment ${i}.`,
           i18nKey,
         });
+      }
+
+      // 2026 Zenith Tier: 大規模検証中のメインスレッド・ブロッキングを防止
+      // 5セグメントごとにイベントループへ制御を戻す
+      if (i % 5 === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
   }

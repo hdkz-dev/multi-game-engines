@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import en from "../../locales/en.json" with { type: "json" };
-import ja from "../../locales/ja.json" with { type: "json" };
+import en from "../locales/en.js";
+import ja from "../locales/ja.js";
 
 function getKeys(obj: unknown, prefix = ""): string[] {
   if (typeof obj !== "object" || obj === null) return [];
@@ -21,8 +21,8 @@ describe("i18n key synchronization (chess)", () => {
     const enKeys = getKeys(en).sort();
     const jaKeys = getKeys(ja).sort();
 
-    const missingInJa = enKeys.filter(k => !jaKeys.includes(k));
-    const extraInJa = jaKeys.filter(k => !enKeys.includes(k));
+    const missingInJa = enKeys.filter((k) => !jaKeys.includes(k));
+    const extraInJa = jaKeys.filter((k) => !enKeys.includes(k));
 
     if (missingInJa.length > 0) {
       console.error("Keys missing in ja.json:", missingInJa);

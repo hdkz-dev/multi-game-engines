@@ -1,21 +1,12 @@
-import ja from "../locales/ja.json" with { type: "json" };
-import en from "../locales/en.json" with { type: "json" };
-import { createTranslator } from "@multi-game-engines/i18n-core";
-import { DashboardKey } from "./types.js";
-
-export * from "./types.js";
+import ja from "./locales/ja.js";
+import en from "./locales/en.js";
 
 /**
- * ダッシュボード専用のロケールデータ。
+ * ダッシュボード用のロケールデータ。
  */
 export const dashboardLocales = {
-  ja: ja as unknown as Record<string, unknown>,
-  en: en as unknown as Record<string, unknown>,
+  ja: ja,
+  en: en,
 };
-
-/**
- * ダッシュボード専用の型安全な翻訳関数。
- */
-export const tDashboard = createTranslator<DashboardKey>(dashboardLocales.en);
 
 export { ja as dashboardJa, en as dashboardEn };

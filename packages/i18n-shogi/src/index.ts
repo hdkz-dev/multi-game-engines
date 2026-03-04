@@ -1,5 +1,5 @@
-import ja from "../locales/ja.json" with { type: "json" };
-import en from "../locales/en.json" with { type: "json" };
+import ja from "./locales/ja.js";
+import en from "./locales/en.js";
 import { createTranslator } from "@multi-game-engines/i18n-core";
 import { ShogiKey } from "./types.js";
 

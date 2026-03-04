@@ -1,8 +1,20 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  ResourceMap,
+  IEngineConfig,
+  IEngineSourceConfig,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IChessSearchOptions,
+import {
+  IChessSearchOptions,
   IChessSearchInfo,
-  IChessSearchResult, } from "@multi-game-engines/domain-chess";
+  IChessSearchResult,
+} from "@multi-game-engines/domain-chess";
 import { UCIParser } from "./UCIParser.js";
 import { tChess as translate } from "@multi-game-engines/i18n-chess";
 
@@ -109,7 +121,7 @@ export class UCIAdapter extends BaseAdapter<
         { timeoutMs: 10000, signal },
       );
 
-      this.communicator.postMessage("uci");
+      void this.communicator?.postMessage("uci");
       await uciOkPromise;
 
       this.emitStatusChange("ready");
@@ -119,7 +131,7 @@ export class UCIAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

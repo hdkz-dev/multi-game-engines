@@ -1,10 +1,11 @@
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode,
+import {
+  EngineErrorCode,
   Move,
   PositionString,
   PositionId,
   I18nKey,
-  } from "../types.js";
+} from "../types.js";
 import { truncateLog } from "../utils/Sanitizer.js";
 
 /**
@@ -77,9 +78,14 @@ export class ProtocolValidator {
     }
 
     if (recursive && typeof input === "object" && input !== null) {
-      // 2026: 循環参照チェック
+      // 2026: 循環参照チェック (Zenith 6.4)
       if (visited.has(input)) {
-        return; // 既にチェック済み
+        const i18nKey = createI18nKey("engine.errors.nestedTooDeep");
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Circular reference detected in ${context}.`,
+          i18nKey,
+        });
       }
       visited.add(input);
 

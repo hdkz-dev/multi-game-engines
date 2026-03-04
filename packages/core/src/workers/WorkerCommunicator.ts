@@ -1,173 +1,134 @@
-import { createI18nKey } from "../protocol/ProtocolValidator.js";
 import { EngineError } from "../errors/EngineError.js";
 import { EngineErrorCode } from "../types.js";
 
 /**
- * Web Worker との通信をカプセル化し、バッファリングと期待メッセージの待機機能を提供します。
+ * 2026 Zenith Tier: Worker との物理的な通信を管理。
  */
 export class WorkerCommunicator {
   private worker: Worker;
-  private buffer: unknown[] = [];
-  private maxBufferSize = 100;
-  private listeners = new Set<(data: unknown) => void>();
-  private expectations = new Set<{
-    predicate: (data: unknown) => boolean;
-    resolve: (data: unknown) => void;
-    reject: (reason: unknown) => void;
-    cleanup?: () => void;
-  }>();
+  private pendingExpectations = new Map<
+    string,
+    {
+      resolve: (data: unknown) => void;
+      reject: (err: unknown) => void;
+      predicate: (data: unknown) => boolean;
+    }
+  >();
+  private messageListeners = new Set<(data: unknown) => void>();
 
-  constructor(scriptUrl: string) {
-    this.worker = new Worker(scriptUrl);
-    this.worker.onmessage = (ev) => this.handleMessage(ev.data);
-    this.worker.onerror = (ev) => this.handleError(ev);
+  constructor(workerUrl: string) {
+    this.worker = new Worker(workerUrl);
+    this.worker.onmessage = (event) => this.handleMessage(event.data);
+    this.worker.onerror = (error) => this.handleError(error);
   }
 
-  postMessage(message: unknown, transfer?: Transferable[]): void {
-    if (transfer) {
-      this.worker.postMessage(message, transfer);
-    } else {
-      this.worker.postMessage(message);
-    }
-  }
-
-  private handleMessage(data: unknown): void {
-    // 期待されているメッセージか確認
-    for (const exp of this.expectations) {
-      try {
-        if (exp.predicate(data)) {
-          this.expectations.delete(exp); // 解決前に削除 (Atomic Resolution)
-          exp.resolve(data);
-          // 2026 Best Practice: 他のリスナーもメッセージを必要とする場合があるため、ここで return しない
-        }
-      } catch (err) {
-        console.error("Error in message predicate:", err);
-      }
-    }
-
-    // 全体のリスナーに通知
-    for (const listener of this.listeners) {
-      listener(data);
-    }
-
-    // バッファに保存
-    this.buffer.push(data);
-    if (this.buffer.length > this.maxBufferSize) {
-      this.buffer.shift();
-      console.warn(
-        "WorkerCommunicator buffer overflow. Oldest message dropped.",
-      );
-    }
-  }
-
-  private handleError(ev: ErrorEvent | { message: string }): void {
-    const message =
-      (ev as ErrorEvent).message ||
-      (ev as { message: string }).message ||
-      "Unknown worker error";
-    console.error("Worker error:", message);
-
-    const i18nKey = createI18nKey("engine.errors.workerError");
-    const i18nParams = { message };
-    const error = new EngineError({
-      code: EngineErrorCode.INTERNAL_ERROR,
-      message: `Worker execution error: ${message}`,
-      i18nKey,
-      i18nParams,
-    });
-
-    for (const exp of this.expectations) {
-      exp.reject(error);
-    }
-    this.expectations.clear();
+  /**
+   * Worker へメッセージを送信します。
+   */
+  postMessage(message: unknown): void {
+    this.worker.postMessage(message);
   }
 
   onMessage(callback: (data: unknown) => void): () => void {
-    this.listeners.add(callback);
-    return () => this.listeners.delete(callback);
+    this.messageListeners.add(callback);
+    return () => this.messageListeners.delete(callback);
   }
 
-  async expectMessage<T>(
+  /**
+   * 特定の条件を満たすメッセージを待機します。
+   */
+  expectMessage<T>(
     predicate: (data: unknown) => boolean,
-    options: { timeoutMs?: number | undefined; signal?: AbortSignal | undefined } = {},
+    options:
+      | number
+      | {
+          timeoutMs?: number | undefined;
+          signal?: AbortSignal | undefined;
+        } = 5000,
   ): Promise<T> {
-    // まずバッファをチェック
-    const bufferedIndex = this.buffer.findIndex(predicate);
-    if (bufferedIndex !== -1) {
-      const data = this.buffer.splice(bufferedIndex, 1)[0];
-      return data as T;
-    }
+    const timeoutMs =
+      typeof options === "number" ? options : (options.timeoutMs ?? 5000);
+    const signal = typeof options === "number" ? undefined : options.signal;
 
+    const id = Math.random().toString(36).substring(2);
     return new Promise<T>((resolve, reject) => {
-      let timerId: ReturnType<typeof setTimeout> | undefined;
+      const timer = setTimeout(() => {
+        if (this.pendingExpectations.has(id)) {
+          this.pendingExpectations.delete(id);
+          reject(
+            new EngineError({
+              code: EngineErrorCode.TIMEOUT,
+              message: "Timed out waiting for worker message",
+            }),
+          );
+        }
+      }, timeoutMs);
 
-      // 2026 Best Practice: リスナーとタイマーの確実な解除 (Memory Leak 防止)
       const cleanup = () => {
-        this.expectations.delete(expectation);
-        if (timerId !== undefined) clearTimeout(timerId);
-        if (options.signal) {
-          options.signal.removeEventListener("abort", onAbort);
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abortHandler);
+      };
+
+      const abortHandler = () => {
+        if (this.pendingExpectations.has(id)) {
+          this.pendingExpectations.delete(id);
+          cleanup();
+          reject(
+            new EngineError({
+              code: EngineErrorCode.CANCELLED,
+              message: "Operation cancelled",
+            }),
+          );
         }
       };
 
-      const wrappedResolve = (data: unknown) => {
-        cleanup();
-        resolve(data as T);
-      };
+      signal?.addEventListener("abort", abortHandler);
 
-      const wrappedReject = (reason: unknown) => {
-        cleanup();
-        reject(reason);
-      };
-
-      const onAbort = () => {
-        wrappedReject(options.signal?.reason);
-      };
-
-      const expectation = {
+      this.pendingExpectations.set(id, {
+        resolve: (data) => {
+          cleanup();
+          resolve(data as T);
+        },
+        reject: (err) => {
+          cleanup();
+          reject(err);
+        },
         predicate,
-        resolve: wrappedResolve,
-        reject: wrappedReject,
-        cleanup,
-      };
-
-      this.expectations.add(expectation);
-
-      if (options.timeoutMs) {
-        timerId = setTimeout(() => {
-          const i18nKey = createI18nKey("engine.errors.timeout");
-          wrappedReject(
-            new EngineError({
-              code: EngineErrorCode.SEARCH_TIMEOUT,
-              message: "Message expectation timed out",
-              i18nKey,
-              remediation:
-                "Check if the engine worker is hanging or if the command sequence is correct.",
-            }),
-          );
-        }, options.timeoutMs);
-      }
-
-      if (options.signal) {
-        options.signal.addEventListener("abort", onAbort);
-      }
+      });
     });
   }
 
-  terminate(): void {
-    this.worker.terminate();
-    const i18nKey = createI18nKey("engine.errors.disposed");
-    const error = new EngineError({
-      code: EngineErrorCode.LIFECYCLE_ERROR,
-      message: "Worker terminated",
-      i18nKey,
-      remediation:
-        "This occurs during engine disposal or forced reset. If unexpected, check for resource exhaustion.",
-    });
-    for (const exp of this.expectations) {
-      exp.reject(error);
+  /**
+   * Worker を物理的に終了し、保留中のタスクを全てリジェクトします。
+   */
+  async terminate(): Promise<void> {
+    for (const expectation of this.pendingExpectations.values()) {
+      expectation.reject(new Error("Worker terminated"));
     }
-    this.expectations.clear();
-    this.listeners.clear();
+    this.pendingExpectations.clear();
+    this.messageListeners.clear();
+
+    this.worker.terminate();
+  }
+
+  private handleMessage(data: unknown): void {
+    for (const [id, expectation] of this.pendingExpectations.entries()) {
+      if (expectation.predicate(data)) {
+        expectation.resolve(data);
+        this.pendingExpectations.delete(id);
+      }
+    }
+    for (const listener of this.messageListeners) {
+      listener(data);
+    }
+  }
+
+  private handleError(error: ErrorEvent): void {
+    console.error("Worker error:", error);
+    const err = new Error(error.message || "Worker error");
+    for (const expectation of this.pendingExpectations.values()) {
+      expectation.reject(err);
+    }
+    this.pendingExpectations.clear();
   }
 }

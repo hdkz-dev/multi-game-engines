@@ -21,7 +21,8 @@ export default defineNuxtConfig({
       "@multi-game-engines/core",
       "@multi-game-engines/ui-core",
       "@multi-game-engines/ui-vue",
-      "@multi-game-engines/i18n-common", "@multi-game-engines/i18n-dashboard",
+      "@multi-game-engines/i18n-common",
+      "@multi-game-engines/i18n-dashboard",
     ],
   },
 
@@ -32,6 +33,12 @@ export default defineNuxtConfig({
         "Cross-Origin-Opener-Policy": "same-origin",
         "Cross-Origin-Embedder-Policy": "require-corp",
       },
+    },
+  },
+
+  vue: {
+    compilerOptions: {
+      isCustomElement: (tag) => ["shogi-board", "chess-board"].includes(tag),
     },
   },
 

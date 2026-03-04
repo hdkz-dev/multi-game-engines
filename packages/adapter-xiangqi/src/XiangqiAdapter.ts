@@ -1,8 +1,20 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  IEngineConfig,
+  IEngineSourceConfig,
+  ResourceMap,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IXiangqiSearchOptions,
+import {
+  IXiangqiSearchOptions,
   IXiangqiSearchInfo,
-  IXiangqiSearchResult, } from "@multi-game-engines/domain-xiangqi";
+  IXiangqiSearchResult,
+} from "@multi-game-engines/domain-xiangqi";
 import { XiangqiParser } from "./XiangqiParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -99,7 +111,8 @@ export class XiangqiAdapter extends BaseAdapter<
         { timeoutMs: 10000, signal },
       );
 
-      this.communicator.postMessage("ucci");
+      void this.communicator?.postMessage("ucci");
+
       await ucciOkPromise;
 
       this.emitStatusChange("ready");
@@ -109,7 +122,7 @@ export class XiangqiAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

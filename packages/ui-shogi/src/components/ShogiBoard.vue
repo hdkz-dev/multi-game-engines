@@ -14,7 +14,6 @@ defineProps<{
   locale?: string | undefined;
 }>();
 </script>
-
 <template>
   <shogi-board
     :sfen="sfen"
@@ -23,7 +22,7 @@ defineProps<{
     :error-message="errorMessage"
     :hand-sente-label="handSenteLabel"
     :hand-gote-label="handGoteLabel"
-    :locale="locale"
     :piece-names="pieceNames"
-  ></shogi-board>
+    :locale="locale"
+  />
 </template>

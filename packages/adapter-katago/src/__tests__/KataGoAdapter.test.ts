@@ -1,10 +1,12 @@
-import { describe,
+import {
+  describe,
   it,
   expect,
   vi,
   beforeAll,
   afterAll,
-  beforeEach, } from "vitest";
+  beforeEach,
+} from "vitest";
 import { KataGoAdapter } from "../index.js";
 import { IEngineLoader } from "@multi-game-engines/core";
 import { IGoSearchOptions } from "@multi-game-engines/adapter-gtp";
@@ -85,20 +87,21 @@ describe("KataGoAdapter", () => {
     expect(adapter.status).toBe("ready");
   });
 
-  it("should reject placeholder SRI hashes on load", async () => {
-    const adapter = new KataGoAdapter({
-      sources: {
-        main: {
-          url: "test.js",
-          type: "worker-js",
-          sri: "sha384-ThisIsAPlaceholderSRIHashThatShouldBeRejectedByValidation64Chars",
-        },
-      },
-    });
-    await expect(adapter.load(mockLoader as IEngineLoader)).rejects.toThrow(
+  it("should reject placeholder SRI hashes on load", () => {
+    expect(
+      () =>
+        new KataGoAdapter({
+          sources: {
+            main: {
+              url: "test.js",
+              type: "worker-js",
+              sri: "sha384-ThisIsAPlaceholderSRIHashThatShouldBeRejectedByValidation64Chars",
+            },
+          },
+        }),
+    ).toThrow(
       expect.objectContaining({ i18nKey: "engine.errors.sriMismatch" }),
     );
-    expect(adapter.status).not.toBe("ready");
   });
 
   it("should reject control characters in search options (injection guard)", () => {

@@ -11,6 +11,10 @@ export interface EngineUIContext {
  * UI コンテキストを提供します。
  */
 export function provideEngineUI(localeData: unknown) {
+  // console.log("[provideEngineUI] localeData type:", typeof localeData);
+  // if (localeData && typeof localeData === 'object') {
+  //   console.log("[provideEngineUI] localeData keys:", Object.keys(localeData));
+  // }
   const strings = ref(createUIStrings(localeData));
 
   const context: EngineUIContext = {

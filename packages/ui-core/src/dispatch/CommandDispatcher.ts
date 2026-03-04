@@ -1,4 +1,9 @@
-import { IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
+import {
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  IBaseSearchInfo,
+} from "@multi-game-engines/core";
 import { SearchMonitor } from "../monitor/monitor.js";
 
 /**
@@ -28,14 +33,21 @@ export class CommandDispatcher<
     const previousStatus = this.monitor.getStatus();
 
     try {
+      // console.log("[CommandDispatcher] Starting search with options:", JSON.stringify(options));
       this.updateStatus("busy");
       const result = await this.monitor.search(options);
 
+      // console.log("[CommandDispatcher] Search finished successfully");
       // 成功時は実状態（または待機状態）へ確定
       this.updateStatus("ready");
       return result;
     } catch (error: unknown) {
       console.error("[CommandDispatcher] Search failed:", error);
+      if (typeof window !== "undefined") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).__LAST_ERROR__ =
+          error instanceof Error ? error.message : String(error);
+      }
       this.updateStatus(previousStatus);
       throw error;
     }

@@ -1,8 +1,21 @@
-import { BaseAdapter, IEngineAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, IEngineConfig, IEngineSourceConfig, ResourceMap, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  IEngineConfig,
+  IEngineSourceConfig,
+  ResourceMap,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IBackgammonSearchOptions,
+import {
+  IBackgammonSearchOptions,
   IBackgammonSearchInfo,
-  IBackgammonSearchResult, } from "@multi-game-engines/domain-backgammon";
+  IBackgammonSearchResult,
+} from "@multi-game-engines/domain-backgammon";
 import { GNUBGParser } from "./GNUBGParser.js";
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
@@ -102,7 +115,7 @@ export class GNUBGAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

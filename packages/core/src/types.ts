@@ -32,6 +32,15 @@ export type PositionId = Brand<string, "PositionId">;
 // 2026 Best Practice: Brand type factories are consolidated in ProtocolValidator.ts for security.
 
 /**
+ * ライセンス情報。
+ */
+export interface ILicenseInfo {
+  name: string;
+  url?: string | undefined;
+  text?: string | undefined;
+}
+
+/**
  * エンジンの状態。
  */
 export type EngineStatus =
@@ -212,6 +221,8 @@ export interface IEngineError {
   i18nKey?: I18nKey | undefined;
   /** メッセージの埋め込みパラメータ */
   i18nParams?: Record<string, string | number> | undefined;
+  /** 元のエラー（原因となった例外） */
+  originalError?: unknown | undefined;
 }
 
 /**
@@ -266,6 +277,16 @@ export interface IMiddleware<
   id?: string;
   priority?: number;
   supportedEngines?: string[];
+  /**
+   * 探索開始時に呼び出されます。
+   * @param options 探索オプション
+   * @param context コンテキスト情報
+   * @returns 変更されたオプション、または undefined (変更なし)
+   */
+  onSearch?(
+    options: T_OPTIONS,
+    context: MiddlewareContext<T_OPTIONS>,
+  ): Promise<T_OPTIONS | undefined | void> | T_OPTIONS | undefined | void;
   /**
    * エンジンへのコマンド送信前に呼び出されます。
    * @param command 送信されるコマンド
@@ -369,6 +390,8 @@ export interface IEngineAdapter<
   readonly name: string;
   readonly version: string;
   readonly status: EngineStatus;
+  readonly engineLicense: ILicenseInfo;
+  readonly adapterLicense: ILicenseInfo;
   readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
   readonly requiredCapabilities?: Partial<ICapabilities>;
 

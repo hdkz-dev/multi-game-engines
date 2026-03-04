@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { JanggiParser } from "../JanggiParser.js";
-import { PositionId, createPositionId } from "@multi-game-engines/core";
+import { createPositionId } from "@multi-game-engines/core";
 
 describe("JanggiParser", () => {
   const parser = new JanggiParser();

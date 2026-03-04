@@ -1,8 +1,20 @@
-import { BaseAdapter, IEngineLoader, WorkerCommunicator, EngineError, EngineErrorCode, ResourceMap, IEngineConfig, IEngineSourceConfig, createI18nKey } from "@multi-game-engines/core";
+import {
+  BaseAdapter,
+  IEngineLoader,
+  WorkerCommunicator,
+  EngineError,
+  EngineErrorCode,
+  ResourceMap,
+  IEngineConfig,
+  IEngineSourceConfig,
+  createI18nKey,
+} from "@multi-game-engines/core";
 
-import { IShogiSearchOptions,
+import {
+  IShogiSearchOptions,
   IShogiSearchInfo,
-  IShogiSearchResult, } from "@multi-game-engines/domain-shogi";
+  IShogiSearchResult,
+} from "@multi-game-engines/domain-shogi";
 import { USIParser } from "./USIParser.js";
 import { tShogi as translate } from "@multi-game-engines/i18n-shogi";
 
@@ -97,7 +109,7 @@ export class USIAdapter extends BaseAdapter<
         (line) => line === "usiok",
         { timeoutMs: 10000, signal },
       );
-      this.communicator.postMessage("usi");
+      void this.communicator?.postMessage("usi");
       await usiOk;
       this.emitStatusChange("ready");
     } catch (e) {
@@ -106,7 +118,7 @@ export class USIAdapter extends BaseAdapter<
         this.messageUnsubscriber = null;
       }
       if (this.communicator) {
-        this.communicator.terminate();
+        void this.communicator.terminate();
         this.communicator = null;
       }
       this.emitStatusChange("error");

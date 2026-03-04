@@ -1,21 +1,21 @@
-import ja from "../locales/ja.json" with { type: "json" };
-import en from "../locales/en.json" with { type: "json" };
+import ja from "./locales/ja.js";
+import en from "./locales/en.js";
 import { createTranslator } from "@multi-game-engines/i18n-core";
 import { EnginesKey } from "./types.js";
 
 export * from "./types.js";
 
 /**
- * エンジン・レジストリ関連のロケールデータ。
+ * エンジン・レジストリドメインのロケールデータ。
  */
-export const enginesLocales = {
+export const engineLocales = {
   ja: ja as unknown as Record<string, unknown>,
   en: en as unknown as Record<string, unknown>,
 };
 
 /**
- * エンジン・レジストリ関連の型安全な翻訳関数。
+ * エンジン・レジストリドメイン用の型安全な翻訳関数。
  */
-export const tEngines = createTranslator<EnginesKey>(enginesLocales.en);
+export const tEngines = createTranslator<EnginesKey>(engineLocales.en);
 
 export { ja as enginesJa, en as enginesEn };
