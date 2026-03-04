@@ -6,6 +6,11 @@ import {
 } from "@multi-game-engines/core";
 import { SearchMonitor } from "../monitor/monitor.js";
 
+declare global {
+  interface Window {
+    __LAST_ERROR__?: string | null;
+  }
+}
 /**
  * UI からのコマンド実行を管理し、楽観的な状態更新と
  * 失敗時のロールバックを制御するディスパッチャー。
@@ -44,8 +49,7 @@ export class CommandDispatcher<
     } catch (error: unknown) {
       console.error("[CommandDispatcher] Search failed:", error);
       if (typeof window !== "undefined") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).__LAST_ERROR__ =
+        window.__LAST_ERROR__ =
           error instanceof Error ? error.message : String(error);
       }
       this.updateStatus(previousStatus);

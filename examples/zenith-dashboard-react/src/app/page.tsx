@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -73,11 +72,38 @@ type DeepRecord = {
   [key: string]: string | number | boolean | DeepRecord | undefined;
 };
 
+interface DashboardLocaleStat {
+  label?: string;
+  value?: string;
+}
+
+interface DashboardSection {
+  title?: string;
+  subtitle?: string;
+  chessLabel?: string;
+  shogiLabel?: string;
+  language?: DeepRecord;
+  stats?: {
+    engineRuntime?: DashboardLocaleStat;
+    hardware?: DashboardLocaleStat;
+    performance?: DashboardLocaleStat;
+    accessibility?: DashboardLocaleStat;
+    [key: string]: DashboardLocaleStat | undefined;
+  };
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | DeepRecord
+    | DashboardSection["stats"]
+    | undefined;
+}
+
 /**
  * 2026 Zenith Tier: i18n キーへの動的アクセスを許可するための型定義。
  */
 interface DashboardLocale {
-  dashboard: DeepRecord;
+  dashboard: DashboardSection;
   engine: DeepRecord;
 }
 
@@ -169,17 +195,25 @@ export default function Dashboard() {
     };
   }, []);
 
-  const localeData = useMemo(() => {
-     
-    const base = (locale === "ja" ? commonLocales.ja : commonLocales.en) as any;
-     
-    const extra = (
-      locale === "ja" ? dashboardLocales.ja : dashboardLocales.en
-    ) as any;
+  const localeData = useMemo((): DashboardLocale => {
+    const base = locale === "ja" ? commonLocales.ja : commonLocales.en;
+    const extra = locale === "ja" ? dashboardLocales.ja : dashboardLocales.en;
+    const baseObj = (
+      typeof base === "object" && base !== null ? base : {}
+    ) as Record<string, unknown>;
+    const extraObj = (
+      typeof extra === "object" && extra !== null ? extra : {}
+    ) as Record<string, unknown>;
     return {
-      dashboard: { ...(base?.dashboard || {}), ...(extra?.dashboard || {}) },
-      engine: { ...(base?.engine || {}), ...(extra?.engine || {}) },
-    } as unknown as DashboardLocale;
+      dashboard: {
+        ...((baseObj.dashboard as DashboardSection) || {}),
+        ...((extraObj.dashboard as DashboardSection) || {}),
+      },
+      engine: {
+        ...((baseObj.engine as DeepRecord) || {}),
+        ...((extraObj.engine as DeepRecord) || {}),
+      },
+    };
   }, [locale]);
 
   const chessOptions = useMemo(
@@ -253,10 +287,14 @@ export default function Dashboard() {
               className="px-4 py-2 rounded-xl text-xs font-black bg-white/5 hover:bg-white/10 flex items-center gap-2"
             >
               <Globe className="w-3.5 h-3.5 text-blue-400" />
-              { }
+              {}
               {locale === "ja"
-                ? (d.language as any)?.en
-                : (d.language as any)?.ja}
+                ? ((d.language as DeepRecord | undefined)?.en as
+                    | string
+                    | undefined)
+                : ((d.language as DeepRecord | undefined)?.ja as
+                    | string
+                    | undefined)}
             </button>
             <button
               onClick={() =>
@@ -280,33 +318,26 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               icon={<Zap className="w-5 h-5 text-yellow-400" />}
-               
-              label={(d.stats as any)?.engineRuntime?.label}
-               
-              value={(d.stats as any)?.engineRuntime?.value}
+              label={d.stats?.engineRuntime?.label ?? ""}
+              value={d.stats?.engineRuntime?.value ?? ""}
               sub=""
             />
             <StatCard
               icon={<Cpu className="w-5 h-5 text-purple-400" />}
-               
-              label={(d.stats as any)?.hardware?.label}
-               
-              value={(d.stats as any)?.hardware?.value}
+              label={d.stats?.hardware?.label ?? ""}
+              value={d.stats?.hardware?.value ?? ""}
               sub=""
             />
             <StatCard
               icon={<Gauge className="w-5 h-5 text-blue-400" />}
-               
-              label={(d.stats as any)?.performance?.label}
+              label={d.stats?.performance?.label ?? ""}
               value={formatNumber(chessState.stats.nps)}
               sub=""
             />
             <StatCard
               icon={<Trophy className="w-5 h-5 text-pink-400" />}
-               
-              label={(d.stats as any)?.accessibility?.label}
-               
-              value={(d.stats as any)?.accessibility?.value}
+              label={d.stats?.accessibility?.label ?? ""}
+              value={d.stats?.accessibility?.value ?? ""}
               sub=""
             />
           </div>
@@ -319,9 +350,9 @@ export default function Dashboard() {
                 }}
               >
                 <EngineMonitorPanel
-                   
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   engine={chessEngine as any}
-                   
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   searchOptions={chessOptions as any}
                   title={e.stockfishTitle as string}
                 />
@@ -332,9 +363,9 @@ export default function Dashboard() {
                 }}
               >
                 <EngineMonitorPanel
-                   
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   engine={shogiEngine as any}
-                   
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   searchOptions={shogiOptions as any}
                   title={e.yaneuraouTitle as string}
                 />
