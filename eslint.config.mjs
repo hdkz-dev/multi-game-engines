@@ -15,6 +15,7 @@ export default [
       "**/next-env.d.ts",
       "fixtures/shared-mocks/**",
       "**/.storybook/**",
+      "**/coverage/**",
       "**/scripts/**",
     ],
   },

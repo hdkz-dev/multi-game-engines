@@ -55,24 +55,10 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  // SSR 対応およびエンジン不在時のフォールバック用初期状態
+  // SSR 対応およびエラー伝搬用の初期状態
   const dummyState = useMemo(() => {
-    try {
-      const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as T_STATE;
-    } catch (err) {
-      if (process.env.NODE_ENV !== "production") {
-        console.warn(
-          `[useEngineMonitor] Validation failed for initialPosition: "${initialPosition}". 
-          The position format may be invalid for this engine type. 
-          Falling back to "startpos". Error details:`,
-          err,
-        );
-      }
-      // バリデーション失敗時は安全なデフォルト値で復旧
-      const safePos = createPositionString("startpos");
-      return createInitialState(safePos) as T_STATE;
-    }
+    const brandedPos = createPositionString(initialPosition);
+    return createInitialState(brandedPos) as T_STATE;
   }, [initialPosition]);
 
   // 1. Monitor の共有取得

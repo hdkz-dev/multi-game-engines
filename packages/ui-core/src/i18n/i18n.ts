@@ -76,8 +76,7 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const e = (normalizedData as any).engine || {};
+  const e = (normalizedData as RawLocaleData).engine || {};
 
   const t = (key: string, fallback: string) => {
     const val = e[key] as string | undefined;
