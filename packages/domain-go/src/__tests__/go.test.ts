@@ -53,7 +53,7 @@ describe("domain-go", () => {
         expect(err).toBeInstanceOf(EngineError);
         if (err instanceof EngineError) {
           expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-          expect(err.i18nKey).toBe("engine.errors.illegalCharacters");
+          expect(err.i18nKey).toBe("engine.errors.injectionDetected");
         }
       }
     });
@@ -85,7 +85,7 @@ describe("domain-go", () => {
         expect(err).toBeInstanceOf(EngineError);
         if (err instanceof EngineError) {
           expect(err.code).toBe(EngineErrorCode.SECURITY_ERROR);
-          expect(err.i18nKey).toBe("engine.errors.illegalCharacters");
+          expect(err.i18nKey).toBe("engine.errors.injectionDetected");
         }
       }
     });

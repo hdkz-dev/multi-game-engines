@@ -40,8 +40,8 @@ export function createGOBoard(pos: string): GOBoard {
  *
  * @param move - The input move in GTP-like format (e.g., "A1", "t19", "pass", "resign"); whitespace-only strings are rejected.
  * @returns The validated move as a `GOMove`, normalized to lowercase.
- * @throws EngineError with code `SECURITY_ERROR` if `move` is not a non-empty string or contains illegal characters.
- * @throws EngineError with code `VALIDATION_ERROR` if `move` does not match the allowed Go move formats (`[a-hj-z][1-25]`, `pass`, or `resign`).
+ * @throws EngineError with code `SECURITY_ERROR` if `move` contains illegal characters or injection is detected.
+ * @throws EngineError with code `VALIDATION_ERROR` if `move` is not a non-empty string or does not match the allowed Go move formats.
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
@@ -49,6 +49,7 @@ export function createGOMove(move: string): GOMove {
       code: EngineErrorCode.VALIDATION_ERROR,
       message: "Invalid GOMove: Input must be a non-empty string.",
       i18nKey: "engine.errors.invalidGOMove",
+      i18nParams: { move },
     });
   }
   ProtocolValidator.assertNoInjection(move, "GOMove");
@@ -64,7 +65,7 @@ export function createGOMove(move: string): GOMove {
   if (!/^([a-hj-z]([1-9]|1[0-9]|2[0-5])|pass|resign)$/.test(normalized)) {
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: `Invalid GOMove format: "${move}"`,
+      message: "Invalid GOMove format.",
       i18nKey: "engine.errors.invalidGOMove",
       i18nParams: { move },
     });
