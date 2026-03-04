@@ -132,7 +132,7 @@
   - [x] **Domain**: Mahjong での指し手なし（null）の正規化。
   - [x] **Security**: 全アダプターへの SRI 検証とプレースホルダー検知の横断適用。
   - [x] **Robustness**: GTP/USI パーサーにおける PV 解析時のバリデーション安全性向上（Safe Mapping）。
-  - [x] **Build**: モノレポ依存関係の完全固定（react-hooks v7.0.0）と静的解析エラーの根絶。
+  - [x] **Build**: `@multi-game-engines/eslint-config-react` による集約と ESLint v10 への移行完了。
   - [x] **Tooling**: `@multi-game-engines/eslint-config-react` 共有パッケージの作成と重複排除、および `zenith-dashboard-react` における `eslint-config-next` の完全脱却。
 
 ### 2026-02-27 更新 (実装担当: Testing and Validation Expansion)

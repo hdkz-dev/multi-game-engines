@@ -17,7 +17,7 @@ export class ScoreNormalizer {
     unit: "cp" | "mate" | "points" | "winrate" | "diff" | string,
     domain?: string,
   ): NormalizedScore {
-    let normalized = 0;
+    let normalized: number;
 
     // 詰みの特殊処理
     if (unit === "mate") {
