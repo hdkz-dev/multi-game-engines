@@ -81,16 +81,17 @@ export function createGOBoard(pos: string): GOBoard {
  *
  * @param move - The input move in GTP-like format (e.g., "A1", "t19", "pass", "resign"); whitespace-only strings are rejected.
  * @returns The validated move as a `GOMove`, normalized to lowercase.
- * @throws EngineError with code `SECURITY_ERROR` if `move` is not a non-empty string or contains illegal characters.
- * @throws EngineError with code `VALIDATION_ERROR` if `move` does not match the allowed Go move formats (`[a-hj-z][1-25]`, `pass`, or `resign`).
+ * @throws EngineError with code `SECURITY_ERROR` if `move` contains illegal characters or injection is detected.
+ * @throws EngineError with code `VALIDATION_ERROR` if `move` is not a non-empty string or does not match the allowed Go move formats.
  */
 export function createGOMove(move: string): GOMove {
   if (typeof move !== "string" || move.trim().length === 0) {
     const i18nKey = createI18nKey("engine.errors.invalidGOMove");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
-      message: translate(i18nKey),
+      message: translate(i18nKey, { move }),
       i18nKey,
+      i18nParams: { move },
     });
   }
   ProtocolValidator.assertNoInjection(move, "GOMove");
