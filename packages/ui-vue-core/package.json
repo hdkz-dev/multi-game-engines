@@ -56,5 +56,8 @@
   "bugs": {
     "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
   },
-  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme",
+  "engines": {
+    "node": ">=24.0.0"
+  }
 }
