@@ -16,7 +16,7 @@ export class SegmentedVerifier {
   ): Promise<boolean> {
     const [algo, expectedBase64] = expectedHash.split("-") as [string, string];
 
-    let webCryptoAlgo = "";
+    let webCryptoAlgo: string;
     if (algo === "sha256") webCryptoAlgo = "SHA-256";
     else if (algo === "sha384") webCryptoAlgo = "SHA-384";
     else if (algo === "sha512") webCryptoAlgo = "SHA-512";

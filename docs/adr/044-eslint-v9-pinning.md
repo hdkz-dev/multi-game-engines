@@ -2,7 +2,7 @@
 
 ## ステータス
 
-承認済み
+Superseded (by [ADR-057](./057-eslint-v10-upgrade.md))
 
 ## 日付
 
