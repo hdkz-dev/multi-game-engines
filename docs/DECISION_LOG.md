@@ -24,11 +24,12 @@
 - [ADR-038: プライバシー保護のためのログ・サニタイズポリシー (Privacy-First Logging)](./adr/038-privacy-first-logging.md) (Accepted - 2026-02-20)
 - [ADR-039: OPFS Storage Implementation](./adr/039-opfs-storage-implementation.md) (Completed - 2026-02-21)
 - [ADR-043: ResourceInjector Handshake Protocol for Reliable Initialization](./adr/043-resource-injector-handshake.md) (Completed - 2026-02-21)
-- [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Pending Merge - 2026-02-23)
+- [ADR-044: ESLint v9 ピン留めとモノレポ設定の安定化](./adr/044-eslint-v9-pinning.md) (Superseded by ADR-057 - 2026-03-04)
 - [ADR-047: Pluggable Engine Metadata Registry](./adr/047-pluggable-engine-registry.md) (Completed - 2026-02-24)
 - [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
 - [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
 - [ADR-056: ESLint React 設定の近代化と eslint-config-next 脱却](./adr/056-eslint-react-modernization.md) (Accepted - 2026-03-04)
+- [ADR-057: Immediate ESLint v10 Upgrade and Peer Dependency Suppression](./adr/057-eslint-v10-upgrade.md) (Accepted - 2026-03-04)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 
