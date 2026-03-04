@@ -34,13 +34,13 @@ describe("EngineLoader Security", () => {
       ).not.toThrow();
     });
 
-    it("should allow http exact localhost", () => {
-      expect(() =>
-        callValidate("http://localhost/e.js", "sha256-abc"),
-      ).not.toThrow();
-      expect(() =>
-        callValidate("http://127.0.0.1/e.js", "sha256-abc"),
-      ).not.toThrow();
+    it("should throw SECURITY_ERROR for all http including localhost", () => {
+      expect(() => callValidate("http://localhost/e.js", "sha256-abc")).toThrow(
+        /Insecure connection \(HTTP\)/,
+      );
+      expect(() => callValidate("http://127.0.0.1/e.js", "sha256-abc")).toThrow(
+        /Insecure connection \(HTTP\)/,
+      );
     });
 
     it("should throw SECURITY_ERROR for non-localhost http", () => {

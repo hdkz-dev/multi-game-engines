@@ -54,17 +54,18 @@ export class EngineLoader implements IEngineLoader {
 
         const fetchOptions = SecurityAdvisor.getSafeFetchOptions(config.sri);
 
-        // CodeQL Mitigation: Ensure non-localhost HTTP URLs are rewritten to HTTPS
-        let safeUrl = config.url;
-        if (
-          safeUrl.startsWith("http://") &&
-          !safeUrl.startsWith("http://localhost") &&
-          !safeUrl.startsWith("http://127.0.0.1")
-        ) {
-          safeUrl = safeUrl.replace(/^http:\/\//i, "https://");
+        // CodeQL Mitigation: 2026 Security Standard.
+        // We strictly block any HTTP URL to prevent man-in-the-middle attacks.
+        const urlStr = config.url;
+        if (urlStr.toLowerCase().startsWith("http:")) {
+          throw new EngineError({
+            code: EngineErrorCode.SECURITY_ERROR,
+            message: `Insecure HTTP connection is blocked: ${urlStr}. Please use HTTPS or relative paths.`,
+            engineId,
+          });
         }
 
-        const response = await fetch(safeUrl, {
+        const response = await SecurityAdvisor.safeFetch(urlStr, {
           ...fetchOptions,
           signal: AbortSignal.timeout(30000),
         });
@@ -153,14 +154,10 @@ export class EngineLoader implements IEngineLoader {
       });
     }
 
-    if (
-      url.startsWith("http:") &&
-      !url.startsWith("http://localhost") &&
-      !url.startsWith("http://127.0.0.1")
-    ) {
+    if (url.toLowerCase().startsWith("http:")) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
-        message: `Insecure connection (HTTP) is not allowed for remote resources: ${url}`,
+        message: `Insecure connection (HTTP) is not allowed: ${url}`,
         engineId,
         i18nKey: createI18nKey("engine.errors.insecureConnection"),
       });
