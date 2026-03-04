@@ -54,18 +54,8 @@ export class EngineLoader implements IEngineLoader {
 
         const fetchOptions = SecurityAdvisor.getSafeFetchOptions(config.sri);
 
-        // CodeQL Mitigation: 2026 Security Standard.
-        // We strictly block any HTTP URL to prevent man-in-the-middle attacks.
-        const urlStr = config.url;
-        if (urlStr.toLowerCase().startsWith("http:")) {
-          throw new EngineError({
-            code: EngineErrorCode.SECURITY_ERROR,
-            message: `Insecure HTTP connection is blocked: ${urlStr}. Please use HTTPS or relative paths.`,
-            engineId,
-          });
-        }
-
-        const response = await SecurityAdvisor.safeFetch(urlStr, {
+        // Protocol safety (HTTPS enforcement) is handled inside SecurityAdvisor.safeFetch().
+        const response = await SecurityAdvisor.safeFetch(config.url, {
           ...fetchOptions,
           signal: AbortSignal.timeout(30000),
         });

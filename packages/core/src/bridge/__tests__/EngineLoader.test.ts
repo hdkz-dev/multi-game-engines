@@ -29,10 +29,15 @@ describe("EngineLoader", () => {
     );
 
     // URL.createObjectURL/revokeObjectURL をスタブ化
-    vi.stubGlobal("URL", {
-      createObjectURL: vi.fn((_blob: Blob) => "blob:test"),
-      revokeObjectURL: vi.fn(),
-    });
+    // new URL() コンストラクタは保持する（safeFetch 内で使用されるため）
+    const OriginalURL = globalThis.URL;
+    vi.stubGlobal(
+      "URL",
+      class extends OriginalURL {
+        static createObjectURL = vi.fn((_blob: Blob) => "blob:test");
+        static revokeObjectURL = vi.fn();
+      },
+    );
   });
 
   afterEach(() => {
@@ -289,12 +294,12 @@ describe("EngineLoader", () => {
     } as Response);
 
     await loader.loadResource("e1", {
-      url: "u1",
+      url: "https://test.com/u1.js",
       type: "script",
       sri: dummySRI,
     });
     await loader.loadResource("e2", {
-      url: "u2",
+      url: "https://test.com/u2.js",
       type: "script",
       sri: dummySRI,
     });

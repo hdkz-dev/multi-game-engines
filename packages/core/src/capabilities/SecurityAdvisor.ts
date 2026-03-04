@@ -30,16 +30,34 @@ export class SecurityAdvisor {
     };
   }
 
+  /** Allowed protocols for secure resource downloads. */
+  private static readonly ALLOWED_PROTOCOLS = new Set([
+    "https:",
+    "blob:",
+    "data:",
+  ]);
+
   /**
-   * Performs a fetch with security monitoring suppression.
-   * This is used for engine resource downloads where protocol safety is handled externally.
+   * Performs a fetch with protocol-level security enforcement.
+   * Only HTTPS, blob:, and data: protocols are permitted.
+   * This prevents man-in-the-middle attacks on engine resource downloads.
    */
   static async safeFetch(
     url: string,
     options?: RequestInit,
   ): Promise<Response> {
-    // codeql[js/insecure-download] - Protocol safety is validated before calling this method.
-    return fetch(url, options);
+    // Resolve relative URLs against the current origin (browser) or reject them (non-browser).
+    const resolved = new URL(url, globalThis.location?.href);
+
+    if (!SecurityAdvisor.ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: `Insecure protocol "${resolved.protocol}" is not allowed. Use HTTPS.`,
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
+
+    return fetch(resolved.href, options);
   }
 
   /**
