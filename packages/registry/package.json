@@ -35,5 +35,8 @@
   "dependencies": {
     "@multi-game-engines/i18n-engines": "workspace:*",
     "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }
