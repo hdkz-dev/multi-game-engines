@@ -8,14 +8,14 @@
 
 ### 技術スタック
 
-| 分類             | 選定プラグイン                          | 役割                                                 |
-| :--------------- | :-------------------------------------- | :--------------------------------------------------- |
-| **全般**         | `eslint-plugin-unicorn`                 | 洗練されたコードスタイルの強制                       |
-| **モジュール**   | `eslint-plugin-import-x`                | 循環参照防止、インポート位置の最適化                 |
-| **非同期**       | `eslint-plugin-promise`                 | Promise チェーンと async/await の安全な使用          |
-| **テスト**       | `eslint-plugin-vitest`, `no-only-tests` | テストコードの品質と誤デバッグコードの防止           |
-| **UI/A11y**      | `eslint-plugin-jsx-a11y`                | アクセシビリティの適合（Lit テンプレート内にも適用） |
-| **ドキュメント** | `eslint-plugin-tsdoc`                   | JSDoc の構文検証                                     |
+| 分類             | 選定プラグイン                          | 役割                                                                           |
+| :--------------- | :-------------------------------------- | :----------------------------------------------------------------------------- |
+| **全般**         | `eslint-plugin-unicorn`                 | 洗練されたコードスタイルの強制                                                 |
+| **モジュール**   | `eslint-plugin-import-x`                | 循環参照防止、インポート位置の最適化                                           |
+| **非同期**       | `eslint-plugin-promise`                 | Promise チェーンと async/await の安全な使用                                    |
+| **テスト**       | `eslint-plugin-vitest`, `no-only-tests` | テストコードの品質と誤デバッグコードの防止                                     |
+| **UI/A11y**      | `eslint-plugin-jsx-a11y`                | React/JSX コンポーネントにおけるアクセシビリティ（Lit は `eslint-plugin-lit`） |
+| **ドキュメント** | `eslint-plugin-tsdoc`                   | JSDoc の構文検証                                                               |
 
 ## コンポーネントとインターフェース
 

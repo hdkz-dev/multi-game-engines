@@ -7,14 +7,7 @@ import {
   createFEN,
 } from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
-import { chessLocales } from "@multi-game-engines/i18n-chess";
-
-/**
- * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
- */
-type DeepRecord = {
-  [key: string]: string | number | boolean | DeepRecord | undefined;
-};
+import { chessLocales, DeepRecord } from "@multi-game-engines/i18n-chess";
 
 interface ChessBoardStrings {
   boardLabel: string;
@@ -127,19 +120,13 @@ export class ChessBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ChessBoardStrings {
-    const data = (this.locale === "ja"
-      ? chessLocales.ja
-      : chessLocales.en) as unknown as DeepRecord;
-    const dashboard = (data["dashboard"] || {}) as DeepRecord;
-    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
-    const engine = (data["engine"] || {}) as DeepRecord;
-    const errors = (engine["errors"] || {}) as DeepRecord;
+    const data = this.locale === "ja" ? chessLocales.ja : chessLocales.en;
+    const gameBoard = (data["gameBoard"] || {}) as DeepRecord;
+    const errors = (data["errors"] || {}) as DeepRecord;
     const pieces = (gameBoard["chessPieces"] || {}) as Record<string, string>;
 
     return {
-      boardLabel: String(
-        this.boardLabel || gameBoard["title"] || "Chess Board",
-      ),
+      boardLabel: String(this.boardLabel || gameBoard["title"] || ""),
       errorMessage: String(this.errorMessage || errors["invalidFEN"] || ""),
       pieceNames: { ...pieces, ...this.pieceNames },
       squareLabel: (f: string, r: number) => `${f}${r}`,

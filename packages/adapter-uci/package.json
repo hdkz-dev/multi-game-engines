@@ -40,7 +40,6 @@
     "@multi-game-engines/core": "^0.1.0"
   },
   "devDependencies": {
-    "@multi-game-engines/core": "workspace:*",
     "eslint": "^10.0.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

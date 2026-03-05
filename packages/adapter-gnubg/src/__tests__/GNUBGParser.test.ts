@@ -84,5 +84,19 @@ describe("GNUBGParser", () => {
     ).toThrow(
       expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
     );
+
+    expect(() =>
+      parser.createSearchCommand({
+        board: createBackgammonBoard(new Array(26).fill(0)),
+        dice: [6, 5],
+        nested: {
+          safe: "ok",
+          bad: "x\nquit",
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any),
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });
