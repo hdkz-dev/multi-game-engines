@@ -81,14 +81,16 @@ test("vue dashboard engine search lifecycle", async ({ page }) => {
     }
 
     // Check internal error
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const lastError = await page.evaluate(() => (window as any).__LAST_ERROR__);
+    const lastError = await page.evaluate(() => {
+      type WindowWithLastError = Window & { __LAST_ERROR__?: unknown };
+      return (window as WindowWithLastError).__LAST_ERROR__;
+    });
     if (lastError) {
       console.error(`[Lifecycle Retry ${i}] Engine Error:`, lastError);
       // Clear error to retry
       await page.evaluate(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (window as any).__LAST_ERROR__ = null;
+        type WindowWithLastError = Window & { __LAST_ERROR__?: unknown };
+        (window as WindowWithLastError).__LAST_ERROR__ = null;
       });
     }
 

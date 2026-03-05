@@ -33,7 +33,35 @@ describe("GTPParser", () => {
     expect(info!.visits).toBe(100);
     expect(info!.winrate).toBe(0.55);
     expect(info!.scoreLead).toBe(2.5);
-    expect(info!.pv).toEqual(["d4", "q16"]); // Normalized to lowercase
+    expect(info!.pv).toEqual(["d4", "q16"]);
+  });
+
+  it("should handle KataGo JSON edge cases (missing winrate, zero winrate, empty PV, invalid moves, and scoreLead fallback)", () => {
+    // 1. Missing winrate: defaults to 0
+    const info1 = parser.parseInfo({ visits: 50 });
+    expect(info1!.winrate).toBe(0);
+    expect(info1!.score!.winrate).toBe(0);
+
+    // 2. Winrate is explicitly 0
+    const info2 = parser.parseInfo({ visits: 50, winrate: 0 });
+    expect(info2!.winrate).toBe(0);
+
+    // 3. Empty PV array
+    const info3 = parser.parseInfo({ visits: 50, pv: [] });
+    expect(info3!.pv).toBeUndefined();
+
+    // 4. Invalid moves in PV should be filtered out
+    const info4 = parser.parseInfo({
+      visits: 50,
+      pv: ["D4", "invalid", "Q16"],
+    });
+    expect(info4!.pv).toEqual(["d4", "q16"]);
+
+    // 5. scoreLead is undefined: normalization falls back to winrate
+    // ScoreNormalizer.normalize(winrate, "winrate", "go")
+    const info5 = parser.parseInfo({ visits: 50, winrate: 0.6 });
+    expect(info5!.score!.points).toBeUndefined();
+    expect(info5!.score!.normalized).toBeDefined(); // Normalized winrate
   });
 
   it("should handle non-string PV entries gracefully in KataGo JSON", () => {

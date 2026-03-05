@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { useEngineMonitor } from "../useEngineMonitor.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  IBaseSearchInfo,
+} from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 
 // 2026 Best Practice: SearchMonitor が必要とするメソッドを完全に網羅したモック
@@ -50,5 +56,28 @@ describe("useEngineMonitor (Vue)", () => {
 
     const wrapper = mount(TestComponent);
     expect(wrapper.vm.result.status.value).toBe("ready");
+  });
+
+  it("should throw EngineError for invalid initialPosition (empty, whitespace, injection)", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
+
+    // Case 1: Empty string
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "" });
+    }).toThrow(/Invalid PositionString/);
+
+    // Case 2: Whitespace only
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "   " });
+    }).toThrow(/Invalid PositionString/);
+
+    // Case 3: Command injection
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "startpos\nquit" });
+    }).toThrow(/Potential command injection/);
   });
 });

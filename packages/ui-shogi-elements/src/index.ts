@@ -8,14 +8,7 @@ import {
   createSFEN,
 } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
-import { shogiLocales } from "@multi-game-engines/i18n-shogi";
-
-/**
- * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
- */
-type DeepRecord = {
-  [key: string]: string | number | boolean | DeepRecord | undefined;
-};
+import { shogiLocales, DeepRecord } from "@multi-game-engines/i18n-shogi";
 
 interface ShogiBoardStrings {
   boardLabel: string;
@@ -185,35 +178,21 @@ export class ShogiBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ShogiBoardStrings {
-    const data = (this.locale === "ja"
-      ? shogiLocales.ja
-      : shogiLocales.en) as unknown as DeepRecord;
-    const dashboard = (data["dashboard"] || {}) as DeepRecord;
-    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
-    const engine = (data["engine"] || {}) as DeepRecord;
-    const errors = (engine["errors"] || {}) as DeepRecord;
+    const data = this.locale === "ja" ? shogiLocales.ja : shogiLocales.en;
+    const gameBoard = (data["gameBoard"] || {}) as DeepRecord;
+    const errors = (data["errors"] || {}) as DeepRecord;
     const pieces = (gameBoard["shogiPieces"] || {}) as Record<string, string>;
 
     return {
-      boardLabel: String(
-        this.boardLabel || gameBoard["title"] || "Shogi Board",
-      ),
+      boardLabel: String(this.boardLabel || gameBoard["title"] || ""),
       handSenteLabel: String(
-        this.handSenteLabel ||
-          gameBoard["handSente"] ||
-          (this.locale === "ja" ? "先手 持ち駒" : "Sente Hand"),
+        this.handSenteLabel || gameBoard["handSente"] || "",
       ),
-      handGoteLabel: String(
-        this.handGoteLabel ||
-          gameBoard["handGote"] ||
-          (this.locale === "ja" ? "後手 持ち駒" : "Gote Hand"),
-      ),
+      handGoteLabel: String(this.handGoteLabel || gameBoard["handGote"] || ""),
       errorMessage: String(this.errorMessage || errors["invalidSFEN"] || ""),
       pieceNames: { ...pieces, ...this.pieceNames },
       handPieceCount: String(
-        this.handPieceCount ||
-          gameBoard["handPieceCount"] ||
-          (this.locale === "ja" ? "{piece}{count}枚" : "{count} {piece}s"),
+        this.handPieceCount || gameBoard["handPieceCount"] || "",
       ),
       squareLabel: (f: number, r: number) => `${f}${r}`,
       squarePieceLabel: (f: number, r: number, p: string) => `${p} at ${f}${r}`,

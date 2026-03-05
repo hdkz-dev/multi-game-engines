@@ -21,6 +21,11 @@ export class CommandDispatcher<
   T_INFO extends IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult,
 > {
+  /**
+   * CommandDispatcher を初期化します。
+   * @param monitor - エンジンの状態を監視するモニターインスタンス。
+   * @param updateStatus - UI 状態を更新するためのコールバック関数。
+   */
   constructor(
     private readonly monitor: SearchMonitor<
       T_STATE,
@@ -32,12 +37,18 @@ export class CommandDispatcher<
   ) {}
 
   /**
-   * 探索を開始する (楽観的更新付き)
+   * 探索を開始します。
+   * 実行前に window.__LAST_ERROR__ をリセットし、実行中のエラーをキャッチして記録します。
+   * @param options - 探索オプション。
+   * @returns 探索結果の Promise。
    */
   async dispatchSearch(options: T_OPTIONS): Promise<T_RESULT> {
     const previousStatus = this.monitor.getStatus();
 
     try {
+      if (typeof window !== "undefined") {
+        window.__LAST_ERROR__ = null;
+      }
       // console.log("[CommandDispatcher] Starting search with options:", JSON.stringify(options));
       this.updateStatus("busy");
       const result = await this.monitor.search(options);
@@ -58,11 +69,9 @@ export class CommandDispatcher<
   }
 
   /**
-   * 探索を停止する
-   *
-   * 2026 Zenith Practice:
-   * 停止処理自体が失敗するエッジケースも考慮し、
-   * 常に以前の状態への復帰経路を確保。
+   * 探索を停止します。
+   * 停止処理自体が失敗した場合でも、以前の状態への復帰を試みます。
+   * @returns 停止処理の Promise。
    */
   async dispatchStop(): Promise<void> {
     const previousStatus = this.monitor.getStatus();

@@ -287,7 +287,6 @@ export default function Dashboard() {
               className="px-4 py-2 rounded-xl text-xs font-black bg-white/5 hover:bg-white/10 flex items-center gap-2"
             >
               <Globe className="w-3.5 h-3.5 text-blue-400" />
-              {}
               {locale === "ja"
                 ? ((d.language as DeepRecord | undefined)?.en as
                     | string
@@ -349,26 +348,26 @@ export default function Dashboard() {
                   display: activeEngine === EngineType.CHESS ? "block" : "none",
                 }}
               >
-                <EngineMonitorPanel
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  engine={chessEngine as any}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  searchOptions={chessOptions as any}
-                  title={e.stockfishTitle as string}
-                />
+                {chessEngine && (
+                  <EngineMonitorPanel
+                    engine={chessEngine}
+                    searchOptions={chessOptions}
+                    title={e.stockfishTitle as string}
+                  />
+                )}
               </div>
               <div
                 style={{
                   display: activeEngine === EngineType.SHOGI ? "block" : "none",
                 }}
               >
-                <EngineMonitorPanel
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  engine={shogiEngine as any}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  searchOptions={shogiOptions as any}
-                  title={e.yaneuraouTitle as string}
-                />
+                {shogiEngine && (
+                  <EngineMonitorPanel
+                    engine={shogiEngine}
+                    searchOptions={shogiOptions}
+                    title={e.yaneuraouTitle as string}
+                  />
+                )}
               </div>
             </div>
             <div className="xl:col-span-8 bg-[#111] rounded-[2rem] p-10 border border-white/5">

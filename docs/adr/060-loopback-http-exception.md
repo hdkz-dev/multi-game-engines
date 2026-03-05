@@ -1,4 +1,4 @@
-# ADR-058: Secure Loopback HTTP Exception for Development
+# ADR-060: Secure Loopback HTTP Exception for Development
 
 ## ステータス
 

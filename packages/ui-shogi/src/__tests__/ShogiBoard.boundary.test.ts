@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import "../elements.js";
 import type { ShogiBoard } from "../elements.js";
 
@@ -6,9 +6,16 @@ describe("ShogiBoard: Absolute Boundary Keyboard Navigation", () => {
   let el: ShogiBoard;
 
   beforeEach(async () => {
+    // 2026 Zenith: Ensure deterministic timing
+    vi.spyOn(performance, "now").mockReturnValue(0);
     el = document.createElement("shogi-board") as ShogiBoard;
     document.body.appendChild(el);
     await el.updateComplete;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    el.remove();
   });
 
   const getFocusedIndex = () => {
@@ -20,8 +27,7 @@ describe("ShogiBoard: Absolute Boundary Keyboard Navigation", () => {
 
   const focusSquare = async (index: number) => {
     // 内部状態を先に更新して tabindex="0" にしてからフォーカスを当てる
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any)._focusedIndex = index;
+    (el as unknown as { _focusedIndex: number })._focusedIndex = index;
     await el.updateComplete;
 
     const square = el.shadowRoot?.querySelector(

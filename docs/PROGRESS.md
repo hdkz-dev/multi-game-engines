@@ -11,7 +11,7 @@
 - [x] `eslint-plugin-unicorn`, `eslint-plugin-promise`, `eslint-plugin-jsx-a11y` の統合
 - [x] `eslint-plugin-vitest`, `eslint-plugin-tsdoc`, `eslint-plugin-no-only-tests` による開発プロセスのガード
 - [x] `eslint-plugin-lit`, `eslint-plugin-wc` による Web Components 実装の品質担保
-- [x] 全 89 パッケージでの `pnpm lint` パス確認 (89 パッケージ)
+- [x] 全 51 パッケージでの `pnpm lint` パス確認 (51 パッケージ)
 
 ## 🏆 到達ハイライト (2026-03-05 Monorepo Re-Build & Test Stability)
 

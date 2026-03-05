@@ -33,6 +33,7 @@ import {
 import type { IEngine } from "@multi-game-engines/core";
 import { useEngines } from "../composables/useEngines";
 import StatCard from "../components/StatCard.vue";
+import { formatNumber } from "@multi-game-engines/ui-core";
 
 declare global {
   interface Window {
@@ -340,7 +341,7 @@ const toggleLocale = () => {
               <div class="grid grid-cols-2 gap-4">
                 <StatCard :icon="Cpu" :label="localeData.dashboard.stats?.engineRuntime?.label ?? ''" :value="localeData.dashboard.stats?.engineRuntime?.value ?? ''" sub="" color="blue" />
                 <StatCard :icon="Zap" :label="localeData.dashboard.stats?.hardware?.label ?? ''" :value="localeData.dashboard.stats?.hardware?.value ?? ''" sub="" color="amber" />
-                <StatCard :icon="Gauge" :label="localeData.dashboard.stats?.performance?.label ?? ''" :value="localeData.dashboard.stats?.performance?.value ?? ''" sub="" color="emerald" />
+                <StatCard :icon="Gauge" :label="localeData.dashboard.stats?.performance?.label ?? ''" :value="formatNumber(activeEngine === 'chess' ? chessState.stats.nps : shogiState.stats.nps)" sub="NPS" color="emerald" />
                 <StatCard :icon="Trophy" :label="localeData.dashboard.stats?.accessibility?.label ?? ''" :value="localeData.dashboard.stats?.accessibility?.value ?? ''" sub="" color="purple" />
               </div>
             </aside>
