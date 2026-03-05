@@ -61,7 +61,7 @@ describe("GNUBGParser", () => {
   it("should create valid search commands", () => {
     const parser = new GNUBGParser();
     // Use factory or proper casting if available
-    const board = createBackgammonBoard(Array(26).fill(0));
+    const board = createBackgammonBoard(new Array(26).fill(0));
     const commands = parser.createSearchCommand({
       board,
       dice: [6, 5],
@@ -77,10 +77,12 @@ describe("GNUBGParser", () => {
     const parser = new GNUBGParser();
     expect(() =>
       parser.createSearchCommand({
-        board: createBackgammonBoard(Array(26).fill(0)),
+        board: createBackgammonBoard(new Array(26).fill(0)),
         dice: [6, 5],
         "malicious\nkey": "value",
       }),
-    ).toThrow(expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }));
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });

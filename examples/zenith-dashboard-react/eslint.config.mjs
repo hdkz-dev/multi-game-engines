@@ -10,7 +10,6 @@ export default [
   {
     plugins: {
       "@next/next": nextPlugin,
-      "jsx-a11y": jsxA11y,
       import: importPlugin,
     },
     rules: {

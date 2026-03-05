@@ -210,9 +210,11 @@ export class ChessBoard extends LitElement {
       const parsed = parseFEN(this.fen);
       board = parsed.board;
     } catch {
-      return html`<div class="board" role="alert">
-        <div class="error-overlay">${strings.errorMessage}</div>
-      </div>`;
+      return html`
+        <div class="board" role="alert">
+          <div class="error-overlay">${strings.errorMessage}</div>
+        </div>
+      `;
     }
     const highlightedSquares = new Set<number>();
     if (this.lastMove && this.lastMove.length >= 4) {
@@ -251,25 +253,29 @@ export class ChessBoard extends LitElement {
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<img
+              ? html`
+                <img
                   class="piece"
                   src="${PIECE_SVG[piece]}"
                   alt=""
                   aria-hidden="true"
-                />`
+                />
+              `
               : ""}
           </div>
         `);
       }
     }
-    return html`<div
-      class="board"
-      role="grid"
-      aria-label="${strings.boardLabel}"
-      @keydown="${this._handleKeyDown}"
-    >
-      ${squares}
-    </div>`;
+    return html`
+      <div
+        class="board"
+        role="grid"
+        aria-label="${strings.boardLabel}"
+        @keydown="${this._handleKeyDown}"
+      >
+        ${squares}
+      </div>
+    `;
   }
 }
 

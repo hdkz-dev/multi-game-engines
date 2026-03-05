@@ -1,7 +1,14 @@
-import { IBaseSearchResult, EngineError, EngineErrorCode, createI18nKey } from "@multi-game-engines/core";
-import { EnginesKey } from "@multi-game-engines/i18n-engines";
+import {
+  IBaseSearchResult,
+  EngineError,
+  EngineErrorCode,
+  createI18nKey,
+} from "@multi-game-engines/core";
+import {
+  EnginesKey,
+  tEngines as translate,
+} from "@multi-game-engines/i18n-engines";
 import { IEnsembleStrategy } from "../EnsembleAdapter.js";
-import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * 多数決による合議戦略。

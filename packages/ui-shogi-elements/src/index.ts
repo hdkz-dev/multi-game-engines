@@ -251,10 +251,16 @@ export class ShogiBoard extends LitElement {
         newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 9;
+        newIndex = e.ctrlKey ? 0 : row * 9;
         break;
       case "End":
-        newIndex = row * 9 + 8;
+        newIndex = e.ctrlKey ? 80 : row * 9 + 8;
+        break;
+      case "PageUp":
+        newIndex = col;
+        break;
+      case "PageDown":
+        newIndex = 72 + col;
         break;
       default:
         return;
@@ -311,7 +317,6 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const usiRank = String.fromCharCode(97 + r); // a, b, c, ...
         const displayFile = usiFile;
-        const displayRank = usiRank;
         const pieceLabel = piece
           ? (this.pieceNames[piece] as string) ||
             (strings.pieceNames[piece] as string)
@@ -334,12 +339,14 @@ export class ShogiBoard extends LitElement {
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<span
+              ? html`
+                <span
                   class="piece ${isGotePiece(piece) ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
                   >${pieceSymbol}</span
-                >`
+                >
+              `
               : ""}
           </div>
         `);
@@ -390,9 +397,11 @@ export class ShogiBoard extends LitElement {
               .replace("{piece}", pieceLabel || "")
               .replace("{count}", String(count))
           : pieceLabel;
-      return html`<span title="${pieceLabel}" aria-label="${ariaLabel}"
-        >${pieceSymbol}${count > 1 ? count : ""}</span
-      >`;
+      return html`
+        <span title="${pieceLabel}" aria-label="${ariaLabel}"
+          >${pieceSymbol}${count > 1 ? count : ""}</span
+        >
+      `;
     });
   }
 }
