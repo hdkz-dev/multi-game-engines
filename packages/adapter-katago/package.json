@@ -34,7 +34,7 @@
     "multi-game-engines"
   ],
   "peerDependencies": {
-    "@multi-game-engines/core": "^0.1.0"
+    "@multi-game-engines/core": "workspace:*"
   },
   "dependencies": {
     "@multi-game-engines/adapter-gtp": "workspace:*",
