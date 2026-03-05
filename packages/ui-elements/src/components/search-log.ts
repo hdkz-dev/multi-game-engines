@@ -1,9 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
-import { SearchLogEntry,
+import {
+  SearchLogEntry,
   createUIStrings,
   formatNumber,
-  formatTime, } from "@multi-game-engines/ui-core";
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import "./score-badge.js";
 
@@ -226,27 +228,35 @@ export class SearchLogElement extends LitElement {
         <tbody>
           ${this.log.length === 0
             ? html`
-                <tr>
-                  <td colspan="6" class="empty">
-                    ${strings.searching || "Searching..."}
-                  </td>
-                </tr>
-              `
+              <tr>
+                <td colspan="6" class="empty">
+                  ${strings.searching || "Searching..."}
+                </td>
+              </tr>
+            `
             : this.log.map(
                 (entry, index) => html`
                   <tr role="row" aria-rowindex="${index + 1}">
                     <td class="col-depth text-center">
                       ${entry.visits
-                        ? html`<span title="${strings.visits}"
-                            >${formatNumber(entry.visits)}${strings.visitsUnit}
+                        ? html`
+                          <span title="${strings.visits}"
+                            >${formatNumber(
+                                entry.visits,
+                              )}${strings.visitsUnit}
                             <span class="sr-only">${strings.visits}</span>
-                          </span>`
-                        : html`<span class="sr-only">${strings.depth}: </span>
-                            ${entry.depth}${entry.seldepth
-                              ? html`<span class="seldepth"
+                          </span>
+                        `
+                        : html`
+                          <span class="sr-only">${strings.depth}: </span>
+                          ${entry.depth}${entry.seldepth
+                              ? html`
+                                <span class="seldepth"
                                   >/${entry.seldepth}</span
-                                >`
-                              : ""}`}
+                                >
+                              `
+                              : ""}
+                        `}
                     </td>
                     <td class="col-score">
                       <div class="score-wrapper">

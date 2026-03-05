@@ -7,10 +7,10 @@ import {
   IEngineRegistry,
   IEngineLoader,
   IMiddleware,
+  EngineErrorCode,
 } from "../types.js";
 import { EngineFacade } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode } from "../types.js";
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
 
 /**

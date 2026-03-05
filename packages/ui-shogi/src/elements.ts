@@ -276,7 +276,9 @@ export class ShogiBoard extends LitElement {
         const displayFile = usiFile;
         const displayRank = r + 1;
         const pieceLabel = piece
-          ? this.pieceNames[piece] || strings.pieceNames[piece]
+          ? (this.pieceNames[piece] as string) ||
+            (strings.pieceNames[piece] as string) ||
+            piece
           : "";
         const ariaLabel = piece
           ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
@@ -298,12 +300,14 @@ export class ShogiBoard extends LitElement {
             }}"
           >
             ${piece
-              ? html`<span
+              ? html`
+                <span
                   class="piece ${isGote ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
                   >${pieceLabel}</span
-                >`
+                >
+              `
               : ""}
           </div>
         `);
@@ -346,16 +350,21 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const label = this.pieceNames[p as ShogiPiece] || pieceNames[p];
+      const label =
+        (this.pieceNames[p as ShogiPiece] as string) ||
+        (pieceNames[p] as string) ||
+        (p as string);
       const ariaLabel =
         count > 1
           ? handPieceCount
               .replace("{piece}", label || "")
               .replace("{count}", String(count))
           : label;
-      return html`<span title="${label}" aria-label="${ariaLabel}"
-        >${label}${count > 1 ? count : ""}</span
-      >`;
+      return html`
+        <span title="${label}" aria-label="${ariaLabel}"
+          >${label}${count > 1 ? count : ""}</span
+        >
+      `;
     });
   }
 }

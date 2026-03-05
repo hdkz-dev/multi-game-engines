@@ -1,9 +1,11 @@
 import { LitElement, html, css, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
-import { parseFEN,
+import {
+  parseFEN,
   FEN,
   ChessPiece,
-  createFEN, } from "@multi-game-engines/domain-chess";
+  createFEN,
+} from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
 import { chessLocales } from "@multi-game-engines/i18n-chess";
 
@@ -117,14 +119,17 @@ export class ChessBoard extends LitElement {
   errorMessage = "";
   @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
     {};
-  @property({ type: Object }) pieceSymbols: Partial<Record<ChessPiece, string>> =
-    {};
+  @property({ type: Object }) pieceSymbols: Partial<
+    Record<ChessPiece, string>
+  > = {};
 
   @state()
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ChessBoardStrings {
-    const data = (this.locale === "ja" ? chessLocales.ja : chessLocales.en) as unknown as DeepRecord;
+    const data = (this.locale === "ja"
+      ? chessLocales.ja
+      : chessLocales.en) as unknown as DeepRecord;
     const dashboard = (data["dashboard"] || {}) as DeepRecord;
     const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
     const engine = (data["engine"] || {}) as DeepRecord;
@@ -132,7 +137,9 @@ export class ChessBoard extends LitElement {
     const pieces = (gameBoard["chessPieces"] || {}) as Record<string, string>;
 
     return {
-      boardLabel: String(this.boardLabel || gameBoard["title"] || "Chess Board"),
+      boardLabel: String(
+        this.boardLabel || gameBoard["title"] || "Chess Board",
+      ),
       errorMessage: String(this.errorMessage || errors["invalidFEN"] || ""),
       pieceNames: { ...pieces, ...this.pieceNames },
       squareLabel: (f: string, r: number) => `${f}${r}`,
@@ -224,17 +231,18 @@ export class ChessBoard extends LitElement {
         // orientation が black の場合、行と列を反転させる
         const row = this.orientation === "white" ? r : 7 - r;
         const col = this.orientation === "white" ? f : 7 - f;
-        
+
         const squareIdx = row * 8 + col;
         const piece = board[row]?.[col];
         const isWhiteSquare = (row + col) % 2 === 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
-        
+
         const displayFile = files[col]!;
         const displayRank = 8 - row;
         const pieceLabel = piece
           ? (this.pieceNames[piece] as string) ||
-            (strings.pieceNames[piece] as string)
+            (strings.pieceNames[piece] as string) ||
+            piece
           : "";
         const pieceSymbol = piece
           ? (this.pieceSymbols[piece] as string) || pieceLabel
@@ -256,9 +264,11 @@ export class ChessBoard extends LitElement {
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<span class="piece" role="img" aria-hidden="true"
+              ? html`
+                <span class="piece" role="img" aria-hidden="true"
                   >${pieceSymbol}</span
-                >`
+                >
+              `
               : ""}
           </div>
         `);

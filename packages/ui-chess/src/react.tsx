@@ -2,8 +2,7 @@ import React from "react";
 import { ChessBoard as ChessBoardElement } from "./elements.js";
 
 import { Move } from "@multi-game-engines/core";
-import { FEN } from "@multi-game-engines/domain-chess";
-import { ChessPiece } from "@multi-game-engines/domain-chess";
+import { FEN, ChessPiece } from "@multi-game-engines/domain-chess";
 
 declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
