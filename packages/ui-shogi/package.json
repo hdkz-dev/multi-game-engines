@@ -42,7 +42,8 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
     "@multi-game-engines/i18n-shogi": "workspace:*",
-    "@multi-game-engines/ui-core": "workspace:*"
+    "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-shogi-elements": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/eslint-config-react": "workspace:*",
