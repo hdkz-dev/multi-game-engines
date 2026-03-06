@@ -49,6 +49,7 @@ type DeepRecord = {
 interface DashboardLocaleStat {
   label?: string;
   value?: string;
+  sub?: string;
 }
 
 interface DashboardSection {
@@ -339,10 +340,34 @@ const toggleLocale = () => {
 
             <aside class="lg:col-span-4 space-y-6">
               <div class="grid grid-cols-2 gap-4">
-                <StatCard :icon="Cpu" :label="localeData.dashboard.stats?.engineRuntime?.label ?? ''" :value="localeData.dashboard.stats?.engineRuntime?.value ?? ''" sub="" color="blue" />
-                <StatCard :icon="Zap" :label="localeData.dashboard.stats?.hardware?.label ?? ''" :value="localeData.dashboard.stats?.hardware?.value ?? ''" sub="" color="amber" />
-                <StatCard :icon="Gauge" :label="localeData.dashboard.stats?.performance?.label ?? ''" :value="formatNumber(activeEngine === 'chess' ? chessState.stats.nps : shogiState.stats.nps)" sub="NPS" color="emerald" />
-                <StatCard :icon="Trophy" :label="localeData.dashboard.stats?.accessibility?.label ?? ''" :value="localeData.dashboard.stats?.accessibility?.value ?? ''" sub="" color="purple" />
+                <StatCard
+                  :icon="Cpu"
+                  :label="localeData.dashboard.stats?.engineRuntime?.label ?? ''"
+                  :value="localeData.dashboard.stats?.engineRuntime?.value ?? ''"
+                  :sub="localeData.dashboard.stats?.engineRuntime?.sub ?? ''"
+                  color="blue"
+                />
+                <StatCard
+                  :icon="Zap"
+                  :label="localeData.dashboard.stats?.hardware?.label ?? ''"
+                  :value="localeData.dashboard.stats?.hardware?.value ?? ''"
+                  :sub="localeData.dashboard.stats?.hardware?.sub ?? ''"
+                  color="amber"
+                />
+                <StatCard
+                  :icon="Gauge"
+                  :label="localeData.dashboard.stats?.performance?.label ?? ''"
+                  :value="formatNumber(activeEngine === 'chess' ? chessState.stats.nps : shogiState.stats.nps)"
+                  :sub="localeData.dashboard.stats?.performance?.sub ?? 'NPS'"
+                  color="emerald"
+                />
+                <StatCard
+                  :icon="Trophy"
+                  :label="localeData.dashboard.stats?.accessibility?.label ?? ''"
+                  :value="localeData.dashboard.stats?.accessibility?.value ?? ''"
+                  :sub="localeData.dashboard.stats?.accessibility?.sub ?? ''"
+                  color="purple"
+                />
               </div>
             </aside>
           </div>
