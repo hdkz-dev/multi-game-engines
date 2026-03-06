@@ -42,7 +42,8 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/i18n-chess": "workspace:*",
-    "@multi-game-engines/ui-core": "workspace:*"
+    "@multi-game-engines/ui-core": "workspace:*",
+    "@multi-game-engines/ui-chess-elements": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/eslint-config-react": "workspace:*",

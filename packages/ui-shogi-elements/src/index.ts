@@ -221,10 +221,10 @@ export class ShogiBoard extends LitElement {
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, this._focusedIndex - 9);
+        newIndex = row > 0 ? this._focusedIndex - 9 : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = Math.min(80, this._focusedIndex + 9);
+        newIndex = row < 8 ? this._focusedIndex + 9 : this._focusedIndex;
         break;
       case "ArrowLeft":
         newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;

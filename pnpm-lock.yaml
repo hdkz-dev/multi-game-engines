@@ -1088,6 +1088,9 @@ importers:
       '@multi-game-engines/i18n-chess':
         specifier: workspace:*
         version: link:../i18n-chess
+      '@multi-game-engines/ui-chess-elements':
+        specifier: workspace:*
+        version: link:../ui-chess-elements
       '@multi-game-engines/ui-core':
         specifier: workspace:*
         version: link:../ui-core
@@ -1571,6 +1574,9 @@ importers:
       '@multi-game-engines/ui-core':
         specifier: workspace:*
         version: link:../ui-core
+      '@multi-game-engines/ui-shogi-elements':
+        specifier: workspace:*
+        version: link:../ui-shogi-elements
     devDependencies:
       '@multi-game-engines/eslint-config-react':
         specifier: workspace:*

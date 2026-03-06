@@ -149,10 +149,10 @@ export class ChessBoard extends LitElement {
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, this._focusedIndex - 8);
+        newIndex = row > 0 ? this._focusedIndex - 8 : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = Math.min(63, this._focusedIndex + 8);
+        newIndex = row < 7 ? this._focusedIndex + 8 : this._focusedIndex;
         break;
       case "ArrowLeft":
         newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
@@ -161,10 +161,16 @@ export class ChessBoard extends LitElement {
         newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 8;
+        newIndex = e.ctrlKey ? 0 : row * 8;
         break;
       case "End":
-        newIndex = row * 8 + 7;
+        newIndex = e.ctrlKey ? 63 : row * 8 + 7;
+        break;
+      case "PageUp":
+        newIndex = col;
+        break;
+      case "PageDown":
+        newIndex = 56 + col;
         break;
       default:
         return;
