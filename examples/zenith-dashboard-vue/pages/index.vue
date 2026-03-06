@@ -266,7 +266,7 @@ const toggleLocale = () => {
           >
             <Zap class="w-8 h-8 text-red-500 mx-auto mb-6" />
             <h2 class="text-2xl font-bold mb-2">
-              {{ localeData.dashboard.initializationFailed || "Initialization Failed" }}
+              {{ localeData.dashboard.initializationFailed }}
             </h2>
             <p class="text-gray-400 mb-6">{{ initError || "Preparing Engines..." }}</p>
             <button

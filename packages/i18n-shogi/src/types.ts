@@ -7,6 +7,40 @@ export type DeepRecord = {
   [key: string]: string | number | boolean | DeepRecord | undefined;
 };
 
+export interface ShogiLocale {
+  engine: {
+    title: string;
+    status: string;
+    depth: string;
+    nodes: string;
+    nps: string;
+    time: string;
+    score: string;
+    visits: string;
+    mateIn: string;
+    advantage: string;
+    sideSente: string;
+    sideGote: string;
+  };
+  gameBoard: {
+    title: string;
+    handSente: string;
+    handGote: string;
+    handPieceCount: string;
+    shogiPieces: Record<string, string>;
+  };
+  board: {
+    senteHand: string;
+    goteHand: string;
+    lastMove: string;
+    initialPosition: string;
+  };
+  errors: {
+    missingSFEN: string;
+    invalidSFEN: string;
+  };
+}
+
 /**
  * 将棋固有キー (shogi)
  */

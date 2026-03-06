@@ -7,6 +7,31 @@ export type DeepRecord = {
   [key: string]: string | number | boolean | DeepRecord | undefined;
 };
 
+export interface ChessLocale {
+  engine: {
+    title: string;
+    status: string;
+    depth: string;
+    nodes: string;
+    nps: string;
+    time: string;
+    score: string;
+    visits: string;
+    mateIn: string;
+    advantage: string;
+    sideWhite: string;
+    sideBlack: string;
+  };
+  gameBoard: {
+    title: string;
+    chessPieces: Record<string, string>;
+  };
+  errors: {
+    missingFEN: string;
+    invalidFEN: string;
+  };
+}
+
 /**
  * チェス固有キー (chess)
  */

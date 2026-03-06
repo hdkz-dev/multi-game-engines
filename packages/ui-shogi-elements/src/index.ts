@@ -178,7 +178,10 @@ export class ShogiBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ShogiBoardStrings {
-    const data = this.locale === "ja" ? shogiLocales.ja : shogiLocales.en;
+    const primaryLocale = (
+      (this.locale || "").split(/[-_]/)[0] || ""
+    ).toLowerCase();
+    const data = primaryLocale === "ja" ? shogiLocales.ja : shogiLocales.en;
     const gameBoard = (data["gameBoard"] || {}) as DeepRecord;
     const errors = (data["errors"] || {}) as DeepRecord;
     const pieces = (gameBoard["shogiPieces"] || {}) as Record<string, string>;
@@ -262,6 +265,13 @@ export class ShogiBoard extends LitElement {
     }
   }
 
+  private _resolvePieceLabel(
+    piece: ShogiPiece | string,
+    strings: ShogiBoardStrings,
+  ): string {
+    return (strings.pieceNames[piece] as string) || piece;
+  }
+
   override render() {
     const strings = this._getLocalizedStrings();
     let board: (ShogiPiece | null)[][];
@@ -296,11 +306,7 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const usiRank = String.fromCharCode(97 + r); // a, b, c, ...
         const displayFile = usiFile;
-        const pieceLabel = piece
-          ? (this.pieceNames[piece] as string) ||
-            (strings.pieceNames[piece] as string) ||
-            piece
-          : "";
+        const pieceLabel = piece ? this._resolvePieceLabel(piece, strings) : "";
         const pieceSymbol = piece
           ? (this.pieceSymbols[piece] as string) || pieceLabel
           : "";
@@ -367,8 +373,7 @@ export class ShogiBoard extends LitElement {
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const pieceLabel =
-        (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p] || p;
+      const pieceLabel = this._resolvePieceLabel(p, strings);
       const pieceSymbol =
         (this.pieceSymbols[p as ShogiPiece] as string) || pieceLabel;
       const ariaLabel =

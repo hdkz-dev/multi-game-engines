@@ -1,4 +1,4 @@
-import { DeepRecord } from "../types.js";
+import { ShogiLocale } from "../types.js";
 
 export default {
   engine: {
@@ -35,6 +35,20 @@ export default {
       "+S": "Promoted Silver",
       "+B": "Horse",
       "+R": "Dragon",
+      p: "Pawn",
+      l: "Lance",
+      n: "Knight",
+      s: "Silver",
+      g: "Gold",
+      b: "Bishop",
+      r: "Rook",
+      k: "King",
+      "+p": "Promoted Pawn",
+      "+l": "Promoted Lance",
+      "+n": "Promoted Knight",
+      "+s": "Promoted Silver",
+      "+b": "Horse",
+      "+r": "Dragon",
     },
   },
   board: {
@@ -47,4 +61,4 @@ export default {
     missingSFEN: "SFEN string is missing in search options.",
     invalidSFEN: 'Invalid SFEN format: "{sfen}".',
   },
-} satisfies DeepRecord;
+} satisfies ShogiLocale;
