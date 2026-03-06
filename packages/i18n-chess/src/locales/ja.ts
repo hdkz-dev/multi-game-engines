@@ -1,3 +1,5 @@
+import { DeepRecord } from "../types.js";
+
 export default {
   engine: {
     title: "チェスエンジン",
@@ -34,4 +36,4 @@ export default {
     missingFEN: "探索オプションに FEN 文字列がありません。",
     invalidFEN: 'FEN 形式が不正です: "{fen}"。',
   },
-};
+} satisfies DeepRecord;

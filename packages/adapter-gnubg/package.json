@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@multi-game-engines/domain-backgammon": "workspace:*",
+    "@multi-game-engines/core": "workspace:*",
     "eslint": "^10.0.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",

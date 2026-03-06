@@ -58,24 +58,34 @@ describe("useEngineMonitor (Vue)", () => {
     expect(wrapper.vm.result.status.value).toBe("ready");
   });
 
-  it("should throw EngineError for invalid initialPosition (empty, whitespace, injection)", () => {
+  it("should throw EngineError for empty initialPosition", () => {
     const engine = new LocalMockEngine() as unknown as IEngine<
       IBaseSearchOptions,
       ExtendedSearchInfo,
       IBaseSearchResult
     >;
-
-    // Case 1: Empty string
     expect(() => {
       useEngineMonitor(engine, { initialPosition: "" });
     }).toThrow(/Invalid PositionString/);
+  });
 
-    // Case 2: Whitespace only
+  it("should throw EngineError for whitespace-only initialPosition", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
     expect(() => {
       useEngineMonitor(engine, { initialPosition: "   " });
     }).toThrow(/Invalid PositionString/);
+  });
 
-    // Case 3: Command injection
+  it("should throw EngineError for injection-like initialPosition", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
     expect(() => {
       useEngineMonitor(engine, { initialPosition: "startpos\nquit" });
     }).toThrow(/Potential command injection/);

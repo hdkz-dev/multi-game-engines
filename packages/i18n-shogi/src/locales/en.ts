@@ -1,3 +1,5 @@
+import { DeepRecord } from "../types.js";
+
 export default {
   engine: {
     title: "Shogi Engine",
@@ -41,4 +43,8 @@ export default {
     lastMove: "Last Move",
     initialPosition: "Initial Position",
   },
-};
+  errors: {
+    missingSFEN: "SFEN string is missing in search options.",
+    invalidSFEN: 'Invalid SFEN format: "{sfen}".',
+  },
+} satisfies DeepRecord;

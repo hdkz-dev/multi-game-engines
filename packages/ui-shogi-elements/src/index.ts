@@ -298,7 +298,8 @@ export class ShogiBoard extends LitElement {
         const displayFile = usiFile;
         const pieceLabel = piece
           ? (this.pieceNames[piece] as string) ||
-            (strings.pieceNames[piece] as string)
+            (strings.pieceNames[piece] as string) ||
+            piece
           : "";
         const pieceSymbol = piece
           ? (this.pieceSymbols[piece] as string) || pieceLabel
@@ -367,7 +368,7 @@ export class ShogiBoard extends LitElement {
       const count = hand[p];
       if (count === 0) return null;
       const pieceLabel =
-        (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p];
+        (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p] || p;
       const pieceSymbol =
         (this.pieceSymbols[p as ShogiPiece] as string) || pieceLabel;
       const ariaLabel =

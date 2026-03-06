@@ -145,12 +145,15 @@ export class EngineLoader implements IEngineLoader {
     }
 
     if (url.toLowerCase().startsWith("http:")) {
-      throw new EngineError({
-        code: EngineErrorCode.SECURITY_ERROR,
-        message: `Insecure connection (HTTP) is not allowed: ${url}`,
-        engineId,
-        i18nKey: createI18nKey("engine.errors.insecureConnection"),
-      });
+      const parsedUrl = new URL(url);
+      if (!SecurityAdvisor.isLoopbackHost(parsedUrl.hostname)) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Insecure connection (HTTP) is not allowed: ${url}`,
+          engineId,
+          i18nKey: createI18nKey("engine.errors.insecureConnection"),
+        });
+      }
     }
 
     if (config.__unsafeNoSRI) {

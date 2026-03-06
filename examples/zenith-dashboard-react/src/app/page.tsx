@@ -17,7 +17,12 @@ import {
   IShogiSearchResult,
   SFEN,
 } from "@multi-game-engines/domain-shogi";
-import { IEngine, EngineBridge, Move } from "@multi-game-engines/core";
+import {
+  IEngine,
+  EngineBridge,
+  Move,
+  createMove,
+} from "@multi-game-engines/core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
 import { formatNumber } from "@multi-game-engines/ui-core";
@@ -371,21 +376,27 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="xl:col-span-8 bg-[#111] rounded-[2rem] p-10 border border-white/5">
-              {activeEngine === EngineType.CHESS ? (
-                <ChessBoard
-                  fen={chessState.position as FEN}
-                  lastMove={chessBestMove as Move}
-                  locale={locale}
-                  className="w-full max-w-[600px] mx-auto"
-                />
-              ) : (
-                <ShogiBoard
-                  sfen={shogiState.position as SFEN}
-                  lastMove={shogiBestMove as Move}
-                  locale={locale}
-                  className="w-full max-w-[600px] mx-auto"
-                />
-              )}
+              {activeEngine === EngineType.CHESS
+                ? chessState.position && (
+                    <ChessBoard
+                      fen={createFEN(chessState.position)}
+                      lastMove={
+                        chessBestMove ? createMove(chessBestMove) : undefined
+                      }
+                      locale={locale}
+                      className="w-full max-w-[600px] mx-auto"
+                    />
+                  )
+                : shogiState.position && (
+                    <ShogiBoard
+                      sfen={createSFEN(shogiState.position)}
+                      lastMove={
+                        shogiBestMove ? createMove(shogiBestMove) : undefined
+                      }
+                      locale={locale}
+                      className="w-full max-w-[600px] mx-auto"
+                    />
+                  )}
             </div>
           </div>
         </div>
