@@ -156,12 +156,12 @@
   - [x] **Modern Suite**: `import-x`, `unicorn`, `promise`, `jsx-a11y`, `vitest`, `tsdoc`, `no-only-tests` の導入。
   - [x] **Compatibility**: ESLint v10 Flat Config におけるマルチパッケージ間プラグイン競合の解消。
   - [x] **Standardization**: Web Components 用プラグイン (`lit`, `wc`) の導入と設定の共通化。
-- [x] **Quality**: 全 51 パッケージでの `pnpm lint` パス確認。
+- [x] **Quality**: 全 73 パッケージでの `pnpm lint` パス確認。
 
 ### 2026-03-05 更新 (実装担当: Zenith Quality Engineer)
 
 - [x] **Monorepo Build & Test Persistence**
   - [x] **Cleanup**: 依存関係・キャッシュの完全初期化によるデッドロック・不整合の解消。
   - [x] **Build**: モノレポ全域のクリーンビルド（`pnpm build`）パス確認。
-  - [x] **Verification**: 全 51 パッケージにおけるテスト一括走査（`pnpm test`）の 100% 成功。
+  - [x] **Verification**: 全 52 パッケージにおけるテスト一括走査（`pnpm test`）の 100% 成功。
   - [x] **Hardening**: `ui-shogi`, `ui-elements` における JSDOM 固有のカスタム要素テスト問題を解消。
