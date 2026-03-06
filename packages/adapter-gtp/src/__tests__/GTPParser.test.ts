@@ -61,7 +61,7 @@ describe("GTPParser", () => {
     // ScoreNormalizer.normalize(winrate, "winrate", "go")
     const info5 = parser.parseInfo({ visits: 50, winrate: 0.6 });
     expect(info5!.score!.points).toBeUndefined();
-    expect(info5!.score!.normalized).toBeDefined(); // Normalized winrate
+    expect(info5!.score!.normalized).toBeCloseTo(0.2, 8); // (0.6 - 0.5) * 2
   });
 
   it("should handle non-string PV entries gracefully in KataGo JSON", () => {

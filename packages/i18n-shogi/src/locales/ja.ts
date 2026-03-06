@@ -1,3 +1,5 @@
+import { DeepRecord } from "../types.js";
+
 export default {
   engine: {
     title: "将棋エンジン",
@@ -41,4 +43,8 @@ export default {
     lastMove: "最終手",
     initialPosition: "初期局面",
   },
-};
+  errors: {
+    missingSFEN: "探索オプションに SFEN 文字列がありません。",
+    invalidSFEN: 'SFEN 形式が不正です: "{sfen}"。',
+  },
+} satisfies DeepRecord;

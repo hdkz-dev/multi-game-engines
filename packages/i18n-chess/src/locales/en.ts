@@ -1,3 +1,5 @@
+import { DeepRecord } from "../types.js";
+
 export default {
   engine: {
     title: "Chess Engine",
@@ -34,4 +36,4 @@ export default {
     missingFEN: "FEN string is missing in search options.",
     invalidFEN: 'Invalid FEN format: "{fen}".',
   },
-};
+} satisfies DeepRecord;

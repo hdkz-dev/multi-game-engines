@@ -195,7 +195,7 @@ importers:
         version: 10.0.2(jiti@2.6.1)
       eslint-plugin-import:
         specifier: ^2.32.0
-        version: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0)(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))
+        version: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@10.0.2(jiti@2.6.1))
       eslint-plugin-jsx-a11y:
         specifier: ^6.10.2
         version: 6.10.2(eslint@10.0.2(jiti@2.6.1))
@@ -375,9 +375,6 @@ importers:
 
   packages/adapter-ensemble:
     dependencies:
-      '@multi-game-engines/core':
-        specifier: workspace:*
-        version: link:../core
       '@multi-game-engines/i18n-common':
         specifier: workspace:*
         version: link:../i18n-common
@@ -385,6 +382,9 @@ importers:
         specifier: workspace:*
         version: link:../i18n-engines
     devDependencies:
+      '@multi-game-engines/core':
+        specifier: workspace:*
+        version: link:../core
       eslint:
         specifier: ^10.0.2
         version: 10.0.2(jiti@2.6.1)
@@ -400,9 +400,6 @@ importers:
 
   packages/adapter-gnubg:
     dependencies:
-      '@multi-game-engines/core':
-        specifier: workspace:*
-        version: link:../core
       '@multi-game-engines/i18n-common':
         specifier: workspace:*
         version: link:../i18n-common
@@ -410,6 +407,9 @@ importers:
         specifier: workspace:*
         version: link:../registry
     devDependencies:
+      '@multi-game-engines/core':
+        specifier: workspace:*
+        version: link:../core
       '@multi-game-engines/domain-backgammon':
         specifier: workspace:*
         version: link:../domain-backgammon
@@ -649,6 +649,9 @@ importers:
 
   packages/adapter-xiangqi:
     dependencies:
+      '@multi-game-engines/core':
+        specifier: workspace:*
+        version: link:../core
       '@multi-game-engines/domain-xiangqi':
         specifier: workspace:*
         version: link:../domain-xiangqi
@@ -671,13 +674,13 @@ importers:
       '@multi-game-engines/adapter-usi':
         specifier: workspace:*
         version: link:../adapter-usi
-      '@multi-game-engines/core':
-        specifier: workspace:*
-        version: link:../core
       '@multi-game-engines/registry':
         specifier: workspace:*
         version: link:../registry
     devDependencies:
+      '@multi-game-engines/core':
+        specifier: workspace:*
+        version: link:../core
       '@multi-game-engines/domain-shogi':
         specifier: workspace:*
         version: link:../domain-shogi
@@ -13172,12 +13175,12 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0)(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@10.0.2(jiti@2.6.1))
       eslint-plugin-import-x: 4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0)(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1)):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@10.0.2(jiti@2.6.1)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -13206,7 +13209,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0)(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@4.4.4)(eslint@10.0.2(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -13217,7 +13220,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 10.0.2(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4(eslint-plugin-import-x@4.16.1(@typescript-eslint/utils@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint@10.0.2(jiti@2.6.1)))(eslint-plugin-import@2.32.0)(eslint@10.0.2(jiti@2.6.1)))(eslint@10.0.2(jiti@2.6.1))
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.56.1(eslint@10.0.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@4.4.4)(eslint@10.0.2(jiti@2.6.1))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

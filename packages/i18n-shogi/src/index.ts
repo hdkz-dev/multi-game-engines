@@ -9,8 +9,8 @@ export * from "./types.js";
  * 将棋ドメインのロケールデータ。
  */
 export const shogiLocales = {
-  ja: ja as unknown as DeepRecord,
-  en: en as unknown as DeepRecord,
+  ja: ja,
+  en: en,
 };
 
 /**

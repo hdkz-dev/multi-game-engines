@@ -9,8 +9,8 @@ export * from "./types.js";
  * チェスドメインのロケールデータ。
  */
 export const chessLocales = {
-  ja: ja as unknown as DeepRecord,
-  en: en as unknown as DeepRecord,
+  ja: ja,
+  en: en,
 };
 
 /**

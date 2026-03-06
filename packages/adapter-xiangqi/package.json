@@ -19,6 +19,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-xiangqi": "workspace:*",
     "@multi-game-engines/i18n-common": "workspace:*"
   },
