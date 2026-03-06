@@ -145,7 +145,17 @@ export class EngineLoader implements IEngineLoader {
     }
 
     if (url.toLowerCase().startsWith("http:")) {
-      const parsedUrl = new URL(url);
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch (e) {
+        throw new EngineError({
+          code: EngineErrorCode.SECURITY_ERROR,
+          message: `Invalid URL format: ${url}`,
+          engineId,
+          i18nKey: createI18nKey("engine.errors.insecureConnection"),
+        });
+      }
       if (!SecurityAdvisor.isLoopbackHost(parsedUrl.hostname)) {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,

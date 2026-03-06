@@ -1,4 +1,4 @@
-import { DeepRecord } from "../types.js";
+import { ShogiLocale } from "../types.js";
 
 export default {
   engine: {
@@ -35,6 +35,20 @@ export default {
       "+S": "成銀",
       "+B": "馬",
       "+R": "龍",
+      p: "歩",
+      l: "香",
+      n: "桂",
+      s: "銀",
+      g: "金",
+      b: "角",
+      r: "飛",
+      k: "玉",
+      "+p": "と",
+      "+l": "成香",
+      "+n": "成桂",
+      "+s": "成銀",
+      "+b": "馬",
+      "+r": "龍",
     },
   },
   board: {
@@ -47,4 +61,4 @@ export default {
     missingSFEN: "探索オプションに SFEN 文字列がありません。",
     invalidSFEN: 'SFEN 形式が不正です: "{sfen}"。',
   },
-} satisfies DeepRecord;
+} satisfies ShogiLocale;

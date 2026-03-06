@@ -112,6 +112,14 @@ interface DashboardLocale {
   engine: DeepRecord;
 }
 
+function isDashboardSection(value: unknown): value is DashboardSection {
+  return typeof value === "object" && value !== null;
+}
+
+function isDeepRecord(value: unknown): value is DeepRecord {
+  return typeof value === "object" && value !== null;
+}
+
 export default function Dashboard() {
   const [activeEngine, setActiveEngine] = useState<EngineType>(
     EngineType.CHESS,
@@ -209,14 +217,24 @@ export default function Dashboard() {
     const extraObj = (
       typeof extra === "object" && extra !== null ? extra : {}
     ) as Record<string, unknown>;
+
+    const baseDashboard = isDashboardSection(baseObj.dashboard)
+      ? baseObj.dashboard
+      : {};
+    const extraDashboard = isDashboardSection(extraObj.dashboard)
+      ? extraObj.dashboard
+      : {};
+    const baseEngine = isDeepRecord(baseObj.engine) ? baseObj.engine : {};
+    const extraEngine = isDeepRecord(extraObj.engine) ? extraObj.engine : {};
+
     return {
       dashboard: {
-        ...((baseObj.dashboard as DashboardSection) || {}),
-        ...((extraObj.dashboard as DashboardSection) || {}),
+        ...baseDashboard,
+        ...extraDashboard,
       },
       engine: {
-        ...((baseObj.engine as DeepRecord) || {}),
-        ...((extraObj.engine as DeepRecord) || {}),
+        ...baseEngine,
+        ...extraEngine,
       },
     };
   }, [locale]);
@@ -293,12 +311,8 @@ export default function Dashboard() {
             >
               <Globe className="w-3.5 h-3.5 text-blue-400" />
               {locale === "ja"
-                ? ((d.language as DeepRecord | undefined)?.en as
-                    | string
-                    | undefined)
-                : ((d.language as DeepRecord | undefined)?.ja as
-                    | string
-                    | undefined)}
+                ? (d.language?.en as string | undefined)
+                : (d.language?.ja as string | undefined)}
             </button>
             <button
               onClick={() =>

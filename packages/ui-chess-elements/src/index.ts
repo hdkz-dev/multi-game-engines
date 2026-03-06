@@ -120,15 +120,15 @@ export class ChessBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ChessBoardStrings {
-    const data = this.locale === "ja" ? chessLocales.ja : chessLocales.en;
-    const gameBoard = (data["gameBoard"] || {}) as DeepRecord;
-    const errors = (data["errors"] || {}) as DeepRecord;
-    const pieces = (gameBoard["chessPieces"] || {}) as Record<string, string>;
+    const primaryLocale = (
+      (this.locale || "").split(/[-_]/)[0] || ""
+    ).toLowerCase();
+    const data = primaryLocale === "ja" ? chessLocales.ja : chessLocales.en;
 
     return {
-      boardLabel: String(this.boardLabel || gameBoard["title"] || ""),
-      errorMessage: String(this.errorMessage || errors["invalidFEN"] || ""),
-      pieceNames: { ...pieces, ...this.pieceNames },
+      boardLabel: this.boardLabel || data.gameBoard.title || "",
+      errorMessage: this.errorMessage || data.errors.invalidFEN || "",
+      pieceNames: { ...data.gameBoard.chessPieces, ...this.pieceNames },
       squareLabel: (f: string, r: number) => `${f}${r}`,
       squarePieceLabel: (f: string, r: number, p: string) => `${p} at ${f}${r}`,
     };

@@ -63,26 +63,12 @@ export class EngineBridge {
    * @param middleware 登録するミドルウェア
    * @returns ブリッジのインスタンス（メソッドチェーン用）
    */
-  use<
-    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-    T_INFO = unknown,
-    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-  >(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
-    this.globalMiddlewares.push(
-      middleware as unknown as IMiddleware<
-        IBaseSearchOptions,
-        unknown,
-        IBaseSearchResult
-      >,
-    );
+  use(
+    middleware: IMiddleware<IBaseSearchOptions, unknown, IBaseSearchResult>,
+  ): this {
+    this.globalMiddlewares.push(middleware);
     for (const engine of this.engines.values()) {
-      engine.use(
-        middleware as unknown as IMiddleware<
-          IBaseSearchOptions,
-          unknown,
-          IBaseSearchResult
-        >,
-      );
+      engine.use(middleware);
     }
     return this;
   }

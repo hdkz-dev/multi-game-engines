@@ -1,6 +1,16 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    let now = 0;
+    Object.defineProperty(performance, "now", {
+      configurable: true,
+      value: () => {
+        now += 16.6667;
+        return now;
+      },
+    });
+  });
   await page.goto("/");
 
   // 2026: Wait for hydration

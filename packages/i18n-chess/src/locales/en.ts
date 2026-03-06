@@ -1,4 +1,4 @@
-import { DeepRecord } from "../types.js";
+import { ChessLocale } from "../types.js";
 
 export default {
   engine: {
@@ -36,4 +36,4 @@ export default {
     missingFEN: "FEN string is missing in search options.",
     invalidFEN: 'Invalid FEN format: "{fen}".',
   },
-} satisfies DeepRecord;
+} satisfies ChessLocale;
