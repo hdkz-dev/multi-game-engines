@@ -1,3 +1,5 @@
+import { ChessLocale } from "../types.js";
+
 export default {
   engine: {
     title: "チェスエンジン",
@@ -13,8 +15,25 @@ export default {
     sideWhite: "先手 (白)",
     sideBlack: "後手 (黒)",
   },
+  gameBoard: {
+    title: "チェス盤",
+    chessPieces: {
+      P: "歩 (白)",
+      N: "ナイト (白)",
+      B: "ビショップ (白)",
+      R: "ルーク (白)",
+      Q: "クイーン (白)",
+      K: "キング (白)",
+      p: "歩 (黒)",
+      n: "ナイト (黒)",
+      b: "ビショップ (黒)",
+      r: "ルーク (黒)",
+      q: "クイーン (黒)",
+      k: "キング (黒)",
+    },
+  },
   errors: {
     missingFEN: "探索オプションに FEN 文字列がありません。",
     invalidFEN: 'FEN 形式が不正です: "{fen}"。',
   },
-};
+} satisfies ChessLocale;

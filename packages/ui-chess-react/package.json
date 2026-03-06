@@ -31,7 +31,7 @@
     "@multi-game-engines/eslint-config-react": "workspace:*",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.14",
-    "eslint-plugin-react-hooks": "7.0.0",
+    "eslint-plugin-react-hooks": "7.0.1",
     "jsdom": "^28.1.0",
     "react": "^19.2.4",
     "tsup": "^8.5.1",
@@ -47,5 +47,8 @@
   "bugs": {
     "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
   },
-  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme",
+  "engines": {
+    "node": ">=24.0.0"
+  }
 }

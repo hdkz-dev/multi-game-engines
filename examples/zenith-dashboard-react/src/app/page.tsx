@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -18,7 +17,12 @@ import {
   IShogiSearchResult,
   SFEN,
 } from "@multi-game-engines/domain-shogi";
-import { IEngine, EngineBridge, Move } from "@multi-game-engines/core";
+import {
+  IEngine,
+  EngineBridge,
+  Move,
+  createMove,
+} from "@multi-game-engines/core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
 import { formatNumber } from "@multi-game-engines/ui-core";
@@ -73,12 +77,47 @@ type DeepRecord = {
   [key: string]: string | number | boolean | DeepRecord | undefined;
 };
 
+interface DashboardLocaleStat {
+  label?: string;
+  value?: string;
+}
+
+interface DashboardSection {
+  title?: string;
+  subtitle?: string;
+  chessLabel?: string;
+  shogiLabel?: string;
+  language?: DeepRecord;
+  stats?: {
+    engineRuntime?: DashboardLocaleStat;
+    hardware?: DashboardLocaleStat;
+    performance?: DashboardLocaleStat;
+    accessibility?: DashboardLocaleStat;
+    [key: string]: DashboardLocaleStat | undefined;
+  };
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | DeepRecord
+    | DashboardSection["stats"]
+    | undefined;
+}
+
 /**
  * 2026 Zenith Tier: i18n キーへの動的アクセスを許可するための型定義。
  */
 interface DashboardLocale {
-  dashboard: DeepRecord;
+  dashboard: DashboardSection;
   engine: DeepRecord;
+}
+
+function isDashboardSection(value: unknown): value is DashboardSection {
+  return typeof value === "object" && value !== null;
+}
+
+function isDeepRecord(value: unknown): value is DeepRecord {
+  return typeof value === "object" && value !== null;
 }
 
 export default function Dashboard() {
@@ -169,17 +208,35 @@ export default function Dashboard() {
     };
   }, []);
 
-  const localeData = useMemo(() => {
-     
-    const base = (locale === "ja" ? commonLocales.ja : commonLocales.en) as any;
-     
-    const extra = (
-      locale === "ja" ? dashboardLocales.ja : dashboardLocales.en
-    ) as any;
+  const localeData = useMemo((): DashboardLocale => {
+    const base = locale === "ja" ? commonLocales.ja : commonLocales.en;
+    const extra = locale === "ja" ? dashboardLocales.ja : dashboardLocales.en;
+    const baseObj = (
+      typeof base === "object" && base !== null ? base : {}
+    ) as Record<string, unknown>;
+    const extraObj = (
+      typeof extra === "object" && extra !== null ? extra : {}
+    ) as Record<string, unknown>;
+
+    const baseDashboard = isDashboardSection(baseObj.dashboard)
+      ? baseObj.dashboard
+      : {};
+    const extraDashboard = isDashboardSection(extraObj.dashboard)
+      ? extraObj.dashboard
+      : {};
+    const baseEngine = isDeepRecord(baseObj.engine) ? baseObj.engine : {};
+    const extraEngine = isDeepRecord(extraObj.engine) ? extraObj.engine : {};
+
     return {
-      dashboard: { ...(base?.dashboard || {}), ...(extra?.dashboard || {}) },
-      engine: { ...(base?.engine || {}), ...(extra?.engine || {}) },
-    } as unknown as DashboardLocale;
+      dashboard: {
+        ...baseDashboard,
+        ...extraDashboard,
+      },
+      engine: {
+        ...baseEngine,
+        ...extraEngine,
+      },
+    };
   }, [locale]);
 
   const chessOptions = useMemo(
@@ -253,10 +310,9 @@ export default function Dashboard() {
               className="px-4 py-2 rounded-xl text-xs font-black bg-white/5 hover:bg-white/10 flex items-center gap-2"
             >
               <Globe className="w-3.5 h-3.5 text-blue-400" />
-              { }
               {locale === "ja"
-                ? (d.language as any)?.en
-                : (d.language as any)?.ja}
+                ? (d.language?.en as string | undefined)
+                : (d.language?.ja as string | undefined)}
             </button>
             <button
               onClick={() =>
@@ -280,33 +336,26 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               icon={<Zap className="w-5 h-5 text-yellow-400" />}
-               
-              label={(d.stats as any)?.engineRuntime?.label}
-               
-              value={(d.stats as any)?.engineRuntime?.value}
+              label={d.stats?.engineRuntime?.label ?? ""}
+              value={d.stats?.engineRuntime?.value ?? ""}
               sub=""
             />
             <StatCard
               icon={<Cpu className="w-5 h-5 text-purple-400" />}
-               
-              label={(d.stats as any)?.hardware?.label}
-               
-              value={(d.stats as any)?.hardware?.value}
+              label={d.stats?.hardware?.label ?? ""}
+              value={d.stats?.hardware?.value ?? ""}
               sub=""
             />
             <StatCard
               icon={<Gauge className="w-5 h-5 text-blue-400" />}
-               
-              label={(d.stats as any)?.performance?.label}
+              label={d.stats?.performance?.label ?? ""}
               value={formatNumber(chessState.stats.nps)}
               sub=""
             />
             <StatCard
               icon={<Trophy className="w-5 h-5 text-pink-400" />}
-               
-              label={(d.stats as any)?.accessibility?.label}
-               
-              value={(d.stats as any)?.accessibility?.value}
+              label={d.stats?.accessibility?.label ?? ""}
+              value={d.stats?.accessibility?.value ?? ""}
               sub=""
             />
           </div>
@@ -318,44 +367,50 @@ export default function Dashboard() {
                   display: activeEngine === EngineType.CHESS ? "block" : "none",
                 }}
               >
-                <EngineMonitorPanel
-                   
-                  engine={chessEngine as any}
-                   
-                  searchOptions={chessOptions as any}
-                  title={e.stockfishTitle as string}
-                />
+                {chessEngine && (
+                  <EngineMonitorPanel
+                    engine={chessEngine}
+                    searchOptions={chessOptions}
+                    title={e.stockfishTitle as string}
+                  />
+                )}
               </div>
               <div
                 style={{
                   display: activeEngine === EngineType.SHOGI ? "block" : "none",
                 }}
               >
-                <EngineMonitorPanel
-                   
-                  engine={shogiEngine as any}
-                   
-                  searchOptions={shogiOptions as any}
-                  title={e.yaneuraouTitle as string}
-                />
+                {shogiEngine && (
+                  <EngineMonitorPanel
+                    engine={shogiEngine}
+                    searchOptions={shogiOptions}
+                    title={e.yaneuraouTitle as string}
+                  />
+                )}
               </div>
             </div>
             <div className="xl:col-span-8 bg-[#111] rounded-[2rem] p-10 border border-white/5">
-              {activeEngine === EngineType.CHESS ? (
-                <ChessBoard
-                  fen={chessState.position as FEN}
-                  lastMove={chessBestMove as Move}
-                  locale={locale}
-                  className="w-full max-w-[600px] mx-auto"
-                />
-              ) : (
-                <ShogiBoard
-                  sfen={shogiState.position as SFEN}
-                  lastMove={shogiBestMove as Move}
-                  locale={locale}
-                  className="w-full max-w-[600px] mx-auto"
-                />
-              )}
+              {activeEngine === EngineType.CHESS
+                ? chessState.position && (
+                    <ChessBoard
+                      fen={createFEN(chessState.position)}
+                      lastMove={
+                        chessBestMove ? createMove(chessBestMove) : undefined
+                      }
+                      locale={locale}
+                      className="w-full max-w-[600px] mx-auto"
+                    />
+                  )
+                : shogiState.position && (
+                    <ShogiBoard
+                      sfen={createSFEN(shogiState.position)}
+                      lastMove={
+                        shogiBestMove ? createMove(shogiBestMove) : undefined
+                      }
+                      locale={locale}
+                      className="w-full max-w-[600px] mx-auto"
+                    />
+                  )}
             </div>
           </div>
         </div>

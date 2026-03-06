@@ -1,3 +1,5 @@
+import { ShogiLocale } from "../types.js";
+
 export default {
   engine: {
     title: "Shogi Engine",
@@ -13,10 +15,50 @@ export default {
     sideSente: "Sente",
     sideGote: "Gote",
   },
+  gameBoard: {
+    title: "Shogi Board",
+    handSente: "Sente Hand",
+    handGote: "Gote Hand",
+    handPieceCount: "{count} {piece}s",
+    shogiPieces: {
+      P: "Pawn",
+      L: "Lance",
+      N: "Knight",
+      S: "Silver",
+      G: "Gold",
+      B: "Bishop",
+      R: "Rook",
+      K: "King",
+      "+P": "Promoted Pawn",
+      "+L": "Promoted Lance",
+      "+N": "Promoted Knight",
+      "+S": "Promoted Silver",
+      "+B": "Horse",
+      "+R": "Dragon",
+      p: "Pawn",
+      l: "Lance",
+      n: "Knight",
+      s: "Silver",
+      g: "Gold",
+      b: "Bishop",
+      r: "Rook",
+      k: "King",
+      "+p": "Promoted Pawn",
+      "+l": "Promoted Lance",
+      "+n": "Promoted Knight",
+      "+s": "Promoted Silver",
+      "+b": "Horse",
+      "+r": "Dragon",
+    },
+  },
   board: {
     senteHand: "Sente Hand",
     goteHand: "Gote Hand",
     lastMove: "Last Move",
     initialPosition: "Initial Position",
   },
-};
+  errors: {
+    missingSFEN: "SFEN string is missing in search options.",
+    invalidSFEN: 'Invalid SFEN format: "{sfen}".',
+  },
+} satisfies ShogiLocale;

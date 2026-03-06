@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { defineComponent, h } from "vue";
 import { mount } from "@vue/test-utils";
 import { useEngineMonitor } from "../useEngineMonitor.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  IBaseSearchInfo,
+} from "@multi-game-engines/core";
 import { ExtendedSearchInfo } from "@multi-game-engines/ui-core";
 
 // 2026 Best Practice: SearchMonitor が必要とするメソッドを完全に網羅したモック
@@ -50,5 +56,38 @@ describe("useEngineMonitor (Vue)", () => {
 
     const wrapper = mount(TestComponent);
     expect(wrapper.vm.result.status.value).toBe("ready");
+  });
+
+  it("should throw EngineError for empty initialPosition", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "" });
+    }).toThrow(/Invalid PositionString/);
+  });
+
+  it("should throw EngineError for whitespace-only initialPosition", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "   " });
+    }).toThrow(/Invalid PositionString/);
+  });
+
+  it("should throw EngineError for injection-like initialPosition", () => {
+    const engine = new LocalMockEngine() as unknown as IEngine<
+      IBaseSearchOptions,
+      ExtendedSearchInfo,
+      IBaseSearchResult
+    >;
+    expect(() => {
+      useEngineMonitor(engine, { initialPosition: "startpos\nquit" });
+    }).toThrow(/Potential command injection/);
   });
 });

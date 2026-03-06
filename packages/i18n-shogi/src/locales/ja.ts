@@ -1,3 +1,5 @@
+import { ShogiLocale } from "../types.js";
+
 export default {
   engine: {
     title: "将棋エンジン",
@@ -13,10 +15,50 @@ export default {
     sideSente: "先手",
     sideGote: "後手",
   },
+  gameBoard: {
+    title: "将棋盤",
+    handSente: "先手 持ち駒",
+    handGote: "後手 持ち駒",
+    handPieceCount: "{piece}{count}枚",
+    shogiPieces: {
+      P: "歩",
+      L: "香",
+      N: "桂",
+      S: "銀",
+      G: "金",
+      B: "角",
+      R: "飛",
+      K: "玉",
+      "+P": "と",
+      "+L": "成香",
+      "+N": "成桂",
+      "+S": "成銀",
+      "+B": "馬",
+      "+R": "龍",
+      p: "歩",
+      l: "香",
+      n: "桂",
+      s: "銀",
+      g: "金",
+      b: "角",
+      r: "飛",
+      k: "玉",
+      "+p": "と",
+      "+l": "成香",
+      "+n": "成桂",
+      "+s": "成銀",
+      "+b": "馬",
+      "+r": "龍",
+    },
+  },
   board: {
     senteHand: "先手持駒",
     goteHand: "後手持駒",
     lastMove: "最終手",
     initialPosition: "初期局面",
   },
-};
+  errors: {
+    missingSFEN: "探索オプションに SFEN 文字列がありません。",
+    invalidSFEN: 'SFEN 形式が不正です: "{sfen}"。',
+  },
+} satisfies ShogiLocale;

@@ -7,10 +7,10 @@ import {
   IEngineRegistry,
   IEngineLoader,
   IMiddleware,
+  EngineErrorCode,
 } from "../types.js";
 import { EngineFacade } from "./EngineFacade.js";
 import { EngineError } from "../errors/EngineError.js";
-import { EngineErrorCode } from "../types.js";
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
 
 /**
@@ -59,34 +59,24 @@ export class EngineBridge {
   }
 
   /**
-   * グローバルミドルウェアを登録します。
+   * グローバルミドルウェアを登録します。登録されたミドルウェアは、今後取得される全てのエンジンに適用されます。
+   * @param middleware 登録するミドルウェア
+   * @returns ブリッジのインスタンス（メソッドチェーン用）
    */
-  use<
-    T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,
-    T_INFO = unknown,
-    T_RESULT extends IBaseSearchResult = IBaseSearchResult,
-  >(middleware: IMiddleware<T_OPTIONS, T_INFO, T_RESULT>): this {
-    this.globalMiddlewares.push(
-      middleware as unknown as IMiddleware<
-        IBaseSearchOptions,
-        unknown,
-        IBaseSearchResult
-      >,
-    );
+  use(
+    middleware: IMiddleware<IBaseSearchOptions, unknown, IBaseSearchResult>,
+  ): this {
+    this.globalMiddlewares.push(middleware);
     for (const engine of this.engines.values()) {
-      engine.use(
-        middleware as unknown as IMiddleware<
-          IBaseSearchOptions,
-          unknown,
-          IBaseSearchResult
-        >,
-      );
+      engine.use(middleware);
     }
     return this;
   }
 
   /**
-   * アダプターファクトリを登録します。
+   * 特定のエンジンタイプに対するアダプターファクトリを登録します。
+   * @param type アダプターのタイプ名（例: "stockfish", "yaneuraou"）
+   * @param factory アダプターを生成するファクトリ関数
    */
   registerAdapterFactory<
     T_OPTIONS extends IBaseSearchOptions,
@@ -104,7 +94,11 @@ export class EngineBridge {
   }
 
   /**
-   * エンジンを取得します。
+   * 指定された設定またはIDに基づいてエンジンインスタンスを取得します。
+   * すでに同じIDのエンジンが生成されている場合は、既存のインスタンスを返します。
+   * @param idOrConfig エンジンIDまたは詳細な設定オブジェクト
+   * @returns 準備完了またはロード中のエンジンインスタンス（Facade）
+   * @throws EngineError IDが不足している場合やアダプターが見つからない場合
    */
   async getEngine<
     T_OPTIONS extends IBaseSearchOptions = IBaseSearchOptions,

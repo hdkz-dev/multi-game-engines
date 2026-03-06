@@ -1,18 +1,13 @@
 import { LitElement, html, css, PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
-import { parseFEN,
+import {
+  parseFEN,
   FEN,
   ChessPiece,
-  createFEN, } from "@multi-game-engines/domain-chess";
+  createFEN,
+} from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
-import { chessLocales } from "@multi-game-engines/i18n-chess";
-
-/**
- * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
- */
-type DeepRecord = {
-  [key: string]: string | number | boolean | DeepRecord | undefined;
-};
+import { chessLocales, DeepRecord } from "@multi-game-engines/i18n-chess";
 
 interface ChessBoardStrings {
   boardLabel: string;
@@ -117,24 +112,23 @@ export class ChessBoard extends LitElement {
   errorMessage = "";
   @property({ type: Object }) pieceNames: Partial<Record<ChessPiece, string>> =
     {};
-  @property({ type: Object }) pieceSymbols: Partial<Record<ChessPiece, string>> =
-    {};
+  @property({ type: Object }) pieceSymbols: Partial<
+    Record<ChessPiece, string>
+  > = {};
 
   @state()
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ChessBoardStrings {
-    const data = (this.locale === "ja" ? chessLocales.ja : chessLocales.en) as unknown as DeepRecord;
-    const dashboard = (data["dashboard"] || {}) as DeepRecord;
-    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
-    const engine = (data["engine"] || {}) as DeepRecord;
-    const errors = (engine["errors"] || {}) as DeepRecord;
-    const pieces = (gameBoard["chessPieces"] || {}) as Record<string, string>;
+    const primaryLocale = (
+      (this.locale || "").split(/[-_]/)[0] || ""
+    ).toLowerCase();
+    const data = primaryLocale === "ja" ? chessLocales.ja : chessLocales.en;
 
     return {
-      boardLabel: String(this.boardLabel || gameBoard["title"] || "Chess Board"),
-      errorMessage: String(this.errorMessage || errors["invalidFEN"] || ""),
-      pieceNames: { ...pieces, ...this.pieceNames },
+      boardLabel: this.boardLabel || data.gameBoard.title || "",
+      errorMessage: this.errorMessage || data.errors.invalidFEN || "",
+      pieceNames: { ...data.gameBoard.chessPieces, ...this.pieceNames },
       squareLabel: (f: string, r: number) => `${f}${r}`,
       squarePieceLabel: (f: string, r: number, p: string) => `${p} at ${f}${r}`,
     };
@@ -155,10 +149,10 @@ export class ChessBoard extends LitElement {
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, this._focusedIndex - 8);
+        newIndex = row > 0 ? this._focusedIndex - 8 : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = Math.min(63, this._focusedIndex + 8);
+        newIndex = row < 7 ? this._focusedIndex + 8 : this._focusedIndex;
         break;
       case "ArrowLeft":
         newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
@@ -167,10 +161,16 @@ export class ChessBoard extends LitElement {
         newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 8;
+        newIndex = e.ctrlKey ? 0 : row * 8;
         break;
       case "End":
-        newIndex = row * 8 + 7;
+        newIndex = e.ctrlKey ? 63 : row * 8 + 7;
+        break;
+      case "PageUp":
+        newIndex = col;
+        break;
+      case "PageDown":
+        newIndex = 56 + col;
         break;
       default:
         return;
@@ -224,17 +224,18 @@ export class ChessBoard extends LitElement {
         // orientation が black の場合、行と列を反転させる
         const row = this.orientation === "white" ? r : 7 - r;
         const col = this.orientation === "white" ? f : 7 - f;
-        
+
         const squareIdx = row * 8 + col;
         const piece = board[row]?.[col];
         const isWhiteSquare = (row + col) % 2 === 0;
         const isHighlighted = highlightedSquares.has(squareIdx);
-        
+
         const displayFile = files[col]!;
         const displayRank = 8 - row;
         const pieceLabel = piece
           ? (this.pieceNames[piece] as string) ||
-            (strings.pieceNames[piece] as string)
+            (strings.pieceNames[piece] as string) ||
+            piece
           : "";
         const pieceSymbol = piece
           ? (this.pieceSymbols[piece] as string) || pieceLabel
@@ -256,9 +257,11 @@ export class ChessBoard extends LitElement {
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<span class="piece" role="img" aria-hidden="true"
+              ? html`
+                <span class="piece" role="img" aria-hidden="true"
                   >${pieceSymbol}</span
-                >`
+                >
+              `
               : ""}
           </div>
         `);

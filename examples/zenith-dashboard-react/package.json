@@ -38,27 +38,30 @@
     "@multi-game-engines/ui-react-monitor": "workspace:*",
     "@multi-game-engines/ui-shogi-react": "workspace:*",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^0.577.0",
     "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@eslint-react/eslint-plugin": "^1.53.1",
+    "@eslint-react/eslint-plugin": "^2.13.0",
     "@multi-game-engines/eslint-config-react": "workspace:*",
     "@next/eslint-plugin-next": "^16.1.6",
     "@playwright/test": "^1.58.2",
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.11.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.0.1",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.2.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=24.0.0"
   }
 }

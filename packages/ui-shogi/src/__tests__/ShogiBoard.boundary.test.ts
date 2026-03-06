@@ -1,35 +1,45 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { fixture, html } from "@open-wc/testing";
-import "../index.js";
-import { ShogiBoard } from "../index.js";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "../elements.js";
+import type { ShogiBoard } from "../elements.js";
 
 describe("ShogiBoard: Absolute Boundary Keyboard Navigation", () => {
   let el: ShogiBoard;
 
   beforeEach(async () => {
-    el = await fixture(html`<shogi-board></shogi-board>`);
+    // 2026 Zenith: Ensure deterministic timing
+    vi.spyOn(performance, "now").mockReturnValue(0);
+    el = document.createElement("shogi-board") as ShogiBoard;
+    document.body.appendChild(el);
     await el.updateComplete;
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+    el.remove();
+  });
+
   const getFocusedIndex = () => {
-    const active = el.shadowRoot?.activeElement || document.activeElement;
-    return active?.getAttribute("data-index");
+    const square = el.shadowRoot?.querySelector(
+      '.square[tabindex="0"]',
+    ) as HTMLElement;
+    return square?.getAttribute("data-index");
   };
 
   const focusSquare = async (index: number) => {
+    // 内部状態を先に更新して tabindex="0" にしてからフォーカスを当てる
+    (el as unknown as { _focusedIndex: number })._focusedIndex = index;
+    await el.updateComplete;
+
     const square = el.shadowRoot?.querySelector(
       `[data-index="${index}"]`,
     ) as HTMLElement;
     square?.focus();
-    // 内部状態を同期させるために直接代入（テストの安定性のため）
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any)._focusedIndex = index;
     await el.updateComplete;
   };
 
   const pressKey = (key: string, ctrl = false) => {
-    const active = el.shadowRoot?.activeElement || document.activeElement;
-    active?.dispatchEvent(
+    const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
+    board?.dispatchEvent(
       new KeyboardEvent("keydown", {
         key,
         ctrlKey: ctrl,

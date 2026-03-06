@@ -101,12 +101,12 @@ describe("chess-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("8");
   });
 
-  it("ArrowDown should clamp at index 63 (last row)", async () => {
+  it("ArrowDown should not move focus beyond the last row", async () => {
     await focusSquare(60); // row 7, col 4
     pressKey("ArrowDown");
     await el.updateComplete;
-    // 60 + 8 = 68 > 63 → clamped to 63
-    expect(getFocusedIndex()).toBe("63");
+    // 2026 Zenith Tier: Should stay at the same square to preserve column position
+    expect(getFocusedIndex()).toBe("60");
   });
 
   // --- ArrowUp ---
@@ -117,11 +117,12 @@ describe("chess-board keyboard navigation", () => {
     expect(getFocusedIndex()).toBe("8");
   });
 
-  it("ArrowUp should clamp at index 0 (first row)", async () => {
+  it("ArrowUp should not move focus beyond the first row", async () => {
     await focusSquare(3); // row 0, col 3
     pressKey("ArrowUp");
     await el.updateComplete;
-    expect(getFocusedIndex()).toBe("0");
+    // 2026 Zenith Tier: Should stay at the same square to preserve column position
+    expect(getFocusedIndex()).toBe("3");
   });
 
   // --- Home ---

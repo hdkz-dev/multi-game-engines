@@ -1,8 +1,40 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年3月4日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年3月5日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
+
+### 1. モダン ESLint スイートの統合と品質強化 (ADR-059)
+
+- [x] ESLint v10 (Flat Config) への完全移行とプラグイン・スイートの導入
+- [x] `eslint-plugin-import-x` による ESM 解決の近代化
+- [x] `eslint-plugin-unicorn`, `eslint-plugin-promise`, `eslint-plugin-jsx-a11y` の統合
+- [x] `eslint-plugin-vitest`, `eslint-plugin-tsdoc`, `eslint-plugin-no-only-tests` による開発プロセスのガード
+- [x] `eslint-plugin-lit`, `eslint-plugin-wc` による Web Components 実装の品質担保
+- [x] 全 51 パッケージでの `pnpm lint` パス確認 (51 パッケージ)
+
+## 🏆 到達ハイライト (2026-03-05 Monorepo Re-Build & Test Stability)
+
+- **クリーンビルドと全テストの完遂 (100% Pass)**:
+  - 依存関係の不整合を排除するため、全パッケージの `node_modules` およびロックファイルを削除し、クリーンな環境での再構築（`pnpm install`, `pnpm build`）と検証（`pnpm test`）を実施しました。
+  - 全 51 パラレル・ワークスペースにおけるテストスイートの 100% パスを確認しました。
+- **UI レプリケーションとテスト堅牢性の強化**:
+  - `ui-shogi` における局面再生および駒情報のレンダリングにおいて、翻訳データの欠落に対するフォールバック（生の駒文字表示）を実装し、実行時の堅牢性を向上させました。
+  - Web Components 固有のテスト課題（JSDOM におけるカスタム要素の登録タイミングやフォーカス制御）を、副作用を考慮したインポート構造の最適化と標準 `DOM` API への移行により解消。`boundary.test.ts` を含む難易度の高いテストの決定論的動作を保証しました。
+- **キーボードナビゲーションの高度な同期**:
+  - `ui-shogi-elements` において、`Ctrl + Home/End` や `PageUp/Down` を含む高度なキーボードショートカットを実装し、プロジェクト全体のアクセシビリティ基準を Zenith Tier へ引き上げました。
+
+## 🏆 到達ハイライト (2026-03-05 Modern ESLint Suite Integration)
+
+- **モダン ESLint スイートの全面導入**:
+  - プロジェクトのコード品質基準を大幅に引き上げるため、`import-x`, `unicorn`, `promise`, `jsx-a11y`, `vitest`, `tsdoc`, `no-only-tests` 等の最新プラグイン群を統合しました。
+  - 特に `import-x` への移行により、ESM ファーストなモノレポ環境における循環参照検知やモジュール解決の静的検証が強化されました。
+- **マルチパッケージ構成におけるプラグイン競合の解消**:
+  - ESLint v10 の Flat Config 仕様に伴う「プラグインの二重定義制限」に起因するサブパッケージ（`zenith-dashboard-react` 等）でのビルドクラッシュを、ルート設定との整合性維持により物理的に解消しました。
+- **段階的なルール適用戦略の確立**:
+  - `unicorn` や `jsx-a11y` の厳格すぎるルールについては、既存コードへの影響を最小限に抑えるため一時的に緩和し、将来的な段階的強化（Hardening）のためのベースラインを策定しました。
+- **テスト・ドキュメント品質の自動ガード**:
+  - `vitest` プラグインによるテストコードの検定、`tsdoc` によるドキュメント構文の検証、および `no-only-tests` による CI 事故の未然防止を標準化しました。
 
 ### 1. Zenith Robustness & 100% Coverage Challenge (品質の極致)
 
