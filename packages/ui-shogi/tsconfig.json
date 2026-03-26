@@ -4,7 +4,12 @@
     "outDir": "./dist",
     "jsx": "react-jsx",
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "paths": {
+      "@multi-game-engines/ui-shogi-elements": [
+        "../ui-shogi-elements/src/index.ts"
+      ]
+    }
   },
   "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -103,6 +103,7 @@ High-performance, accessible UI foundation delivering engine results through a l
 1.  **Reactive Core (`ui-core`)**: Framework-agnostic logic, state management, and adaptive throttling.
 2.  **Localization Layer (Federated i18n)**: Physically isolated, domain-optimized language packages with 100% Zero-Any type safety.
 3.  **Framework Adapters**: Modular suites for React, Vue, and Web Components (Lit).
+4.  **Keyboard-first Board Interaction**: Board components in the `ui-elements` family support not only relative Arrow-key movement but also `Home` / `End`, `Ctrl+Home` / `Ctrl+End`, and `PageUp` / `PageDown` jumps for fast traversal across rows, columns, and board boundaries.
 
 ### Contract-driven UI
 
@@ -114,6 +115,7 @@ In alignment with 2026 Zenith Tier standards, all UI components adhere to **WCAG
 
 - **Semantic HTML**: Proper use of landmarks (`<nav>`, `<main>`, `<grid>`) and roles communicates document structure to assistive technologies.
 - **Full Keyboard Navigation**: Every action (board selection, move inspection, engine control) is executable via keyboard, with strict logical tab order and focus management.
+- **Localized Type Resolution Stability**: UI hub packages explicitly declare `tsconfig.paths` to their internal Web Components dependencies so exported component types resolve deterministically even when monorepo `build` and `typecheck` tasks run in parallel.
 - **ARIA Live Regions**: Dynamic updates (search results, errors) are announced in real-time using `aria-live` attributes.
 - **Automated A11y Testing**: Integration of `axe-core` in Playwright tests prevents accessibility regressions throughout the development lifecycle.
 

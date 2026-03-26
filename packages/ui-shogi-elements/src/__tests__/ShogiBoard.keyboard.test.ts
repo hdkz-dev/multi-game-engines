@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import "../index.js";
-import { ShogiBoard } from "../index.js";
+import type { ShogiBoard } from "../index.js";
 
 describe("shogi-board keyboard navigation", () => {
   let el: ShogiBoard;
@@ -22,9 +22,11 @@ describe("shogi-board keyboard navigation", () => {
     ) as HTMLElement;
   };
 
-  const pressKey = (key: string) => {
+  const pressKey = (key: string, ctrlKey = false) => {
     const board = el.shadowRoot?.querySelector(".board") as HTMLElement;
-    board.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    board.dispatchEvent(
+      new KeyboardEvent("keydown", { key, ctrlKey, bubbles: true }),
+    );
   };
 
   it("should have initial focus on square index 0 (9a)", () => {
@@ -71,6 +73,58 @@ describe("shogi-board keyboard navigation", () => {
 
     expect(getSquare(5).tabIndex).toBe(-1);
     expect(getSquare(0).tabIndex).toBe(0);
+  });
+
+  it("should move focus to the first square with Ctrl+Home", async () => {
+    const square40 = getSquare(40);
+    square40.click();
+    await el.updateComplete;
+    expect(square40.tabIndex).toBe(0);
+
+    pressKey("Home", true);
+    await el.updateComplete;
+
+    expect(getSquare(40).tabIndex).toBe(-1);
+    expect(getSquare(0).tabIndex).toBe(0);
+  });
+
+  it("should move focus to the last square with Ctrl+End", async () => {
+    const square40 = getSquare(40);
+    square40.click();
+    await el.updateComplete;
+    expect(square40.tabIndex).toBe(0);
+
+    pressKey("End", true);
+    await el.updateComplete;
+
+    expect(getSquare(40).tabIndex).toBe(-1);
+    expect(getSquare(80).tabIndex).toBe(0);
+  });
+
+  it("should move focus to the top row with PageUp", async () => {
+    const square40 = getSquare(40);
+    square40.click();
+    await el.updateComplete;
+    expect(square40.tabIndex).toBe(0);
+
+    pressKey("PageUp");
+    await el.updateComplete;
+
+    expect(getSquare(40).tabIndex).toBe(-1);
+    expect(getSquare(4).tabIndex).toBe(0);
+  });
+
+  it("should move focus to the bottom row with PageDown", async () => {
+    const square40 = getSquare(40);
+    square40.click();
+    await el.updateComplete;
+    expect(square40.tabIndex).toBe(0);
+
+    pressKey("PageDown");
+    await el.updateComplete;
+
+    expect(getSquare(40).tabIndex).toBe(-1);
+    expect(getSquare(76).tabIndex).toBe(0);
   });
 
   it("should not move focus out of bounds (top/left)", async () => {

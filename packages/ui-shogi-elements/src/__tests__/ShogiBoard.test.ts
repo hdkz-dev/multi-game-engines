@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import "../index.js";
 import { ShogiBoard } from "../index.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
 
 import { waitFor } from "@testing-library/dom";
+
+void ShogiBoard;
 
 describe("shogi-board Web Component", () => {
   beforeEach(() => {

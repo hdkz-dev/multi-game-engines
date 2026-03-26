@@ -117,7 +117,9 @@ All UI components must strictly adhere to the following accessibility standards:
 - **Keyboard Navigation**:
   - Proper `tabindex` management and visible focus indicators using `:focus-visible`.
   - Arrow key support for board navigation; Enter/Space for details.
+  - `Home` / `End` / `Ctrl+Home` / `Ctrl+End` / `PageUp` / `PageDown` support for deterministic jumps to row edges and board edges.
   - Proper focus trapping for modal/overlay elements.
+- **Workspace Type Resolution**: UI hub packages must use `tsconfig.paths` to reference internal Web Components type definitions directly so monorepo-parallel `build` and `typecheck` runs do not depend on package build order.
 - **Visual & Layout**:
   - Minimum contrast ratio of 4.5:1 for text and 3:1 for UI elements.
   - Supports 400% zoom without horizontal scrolling (Reflow).
@@ -136,6 +138,7 @@ Standardized framework for extending AI agent capabilities across the monorepo.
 ### 7-1. Skill Structure (SKILL.md)
 
 Each skill is a self-contained directory in `skills/` containing:
+
 - **`SKILL.md`**: Frontmatter metadata (name, description) and instructions.
 - **`README.md`** (Optional): User-facing documentation.
 - **`tools/`** (Optional): Scripts or local MCP tools associated with the skill.

@@ -368,7 +368,7 @@ export class ShogiBoard extends LitElement {
       side === "sente"
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
-    const { pieceNames, handPieceCount } = strings;
+    const { handPieceCount } = strings;
 
     return pieces.map((p) => {
       const count = hand[p];
