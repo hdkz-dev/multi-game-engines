@@ -29,10 +29,10 @@
     "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
-    "eslint": "^9.39.3",
+    "eslint": "^10.1.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": "^20 || ^22 || >=24"

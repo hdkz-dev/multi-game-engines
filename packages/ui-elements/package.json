@@ -38,18 +38,18 @@
     "lit": "^3.3.2"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.2.10",
-    "@storybook/addon-docs": "10.2.10",
-    "@storybook/addon-links": "10.2.10",
-    "@storybook/web-components": "10.2.10",
-    "@storybook/web-components-vite": "10.2.10",
-    "@swc/core": "^1.15.11",
+    "@storybook/addon-a11y": "10.3.3",
+    "@storybook/addon-docs": "10.3.3",
+    "@storybook/addon-links": "10.3.3",
+    "@storybook/web-components": "10.3.3",
+    "@storybook/web-components-vite": "10.3.3",
+    "@swc/core": "^1.15.21",
     "@vueless/storybook-dark-mode": "^10.0.7",
-    "jsdom": "^28.1.0",
-    "storybook": "10.2.10",
+    "jsdom": "^29.0.1",
+    "storybook": "10.3.3",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "author": "hdkz-dev",
   "repository": {
