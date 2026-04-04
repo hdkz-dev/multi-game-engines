@@ -24,7 +24,7 @@ export type CheckersBoard = Brand<string, "CheckersBoard">;
 
 /**
  * チェッカー盤面データのバリデータファクトリ。
- * @throws {Error} インジェクション攻撃が検出された場合
+ * @throws Error インジェクション攻撃が検出された場合。
  */
 export function createCheckersBoard(pos: string): CheckersBoard {
   if (typeof pos !== "string" || pos.trim().length === 0) {
@@ -40,7 +40,8 @@ export function createCheckersBoard(pos: string): CheckersBoard {
 }
 
 /**
- * チェッカーの指し手表現（例: `"11-15"`）。
+ * チェッカーの指し手表現。
+ * 例: `11-15`
  */
 export type CheckersMove = Move<"CheckersMove">;
 

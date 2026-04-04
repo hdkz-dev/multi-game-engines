@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, createContext, useContext, useEffect } from "react";
+import React, { createContext, use, useEffect, useState } from "react";
 import "./globals.css";
 import "@multi-game-engines/ui-react/index.css";
 
@@ -23,14 +23,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [locale]);
 
   return (
-    <LanguageContext.Provider value={{ locale, setLocale }}>
-      {children}
-    </LanguageContext.Provider>
+    <LanguageContext value={{ locale, setLocale }}>{children}</LanguageContext>
   );
 }
 
 export function useLocale() {
-  const context = useContext(LanguageContext);
+  const context = use(LanguageContext);
   if (!context) {
     throw new Error("useLocale must be used within a LanguageProvider");
   }

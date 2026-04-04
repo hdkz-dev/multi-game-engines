@@ -8,14 +8,12 @@ import {
   IChessSearchOptions,
   IChessSearchInfo,
   IChessSearchResult,
-  FEN,
 } from "@multi-game-engines/domain-chess";
 import {
   createSFEN,
   IShogiSearchOptions,
   IShogiSearchInfo,
   IShogiSearchResult,
-  SFEN,
 } from "@multi-game-engines/domain-shogi";
 import {
   IEngine,

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { XiangqiParser } from "../XiangqiParser.js";
 
-import { PositionId, createPositionId } from "@multi-game-engines/core";
+import { createPositionId } from "@multi-game-engines/core";
 
 describe("XiangqiParser", () => {
   const parser = new XiangqiParser();
