@@ -58,7 +58,10 @@
     ],
     "overrides": {
       "@rushstack/ts-command-line": "5.2.0",
-      "@microsoft/api-extractor": "7.56.3"
+      "@microsoft/api-extractor": "7.56.3",
+      "brace-expansion": "5.0.5",
+      "flatted": "3.4.2",
+      "picomatch": "4.0.4"
     }
   },
   "devDependencies": {
