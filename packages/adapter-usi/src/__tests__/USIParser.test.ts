@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { USIParser } from "../USIParser.js";
 import { createSFEN } from "@multi-game-engines/domain-shogi";
-import { PositionId, createPositionId } from "@multi-game-engines/core";
+import { createPositionId } from "@multi-game-engines/core";
 
 describe("USIParser", () => {
   beforeAll(() => {

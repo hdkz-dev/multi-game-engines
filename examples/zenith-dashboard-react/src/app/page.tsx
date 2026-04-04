@@ -15,12 +15,7 @@ import {
   IShogiSearchInfo,
   IShogiSearchResult,
 } from "@multi-game-engines/domain-shogi";
-import {
-  IEngine,
-  EngineBridge,
-  Move,
-  createMove,
-} from "@multi-game-engines/core";
+import { IEngine, EngineBridge, createMove } from "@multi-game-engines/core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
 import { formatNumber } from "@multi-game-engines/ui-core";
