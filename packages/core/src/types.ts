@@ -1,13 +1,13 @@
 /**
  * ブランド型を生成するためのヘルパー型。
- * @template T_BASE ベースとなる型（例: string）
- * @template T_BRAND ブランド名（ユニークな文字列リテラル）
+ * T_BASE はベースとなる型（例: string）。
+ * T_BRAND はブランド名（ユニークな文字列リテラル）。
  */
 export type Brand<T_BASE, T_BRAND> = T_BASE & { readonly __brand: T_BRAND };
 
 /**
  * 指し手を表すブランド型。
- * 各ゲームアダプターで Move<"GameMove"> のように拡張可能です。
+ * 各ゲームアダプターで `Move<"GameMove">` のように拡張可能です。
  * デフォルトでは全てのブランド化された指し手と互換性があります。
  */
 export type Move<T extends string = string> = Brand<string, T>;
@@ -227,7 +227,7 @@ export interface IEngineError {
 
 /**
  * 国際化対応のための翻訳キーを表すブランド型。
- * 実装（@multi-game-engines/i18n）によって具体的な文字列リテラルの型が提供される。
+ * 実装（\@multi-game-engines/i18n）によって具体的な文字列リテラルの型が提供される。
  */
 export type I18nKey = Brand<string, "I18nKey">;
 
@@ -279,8 +279,8 @@ export interface IMiddleware<
   supportedEngines?: string[];
   /**
    * 探索開始時に呼び出されます。
-   * @param options 探索オプション
-   * @param context コンテキスト情報
+   * @param options - 探索オプション
+   * @param context - コンテキスト情報
    * @returns 変更されたオプション、または undefined (変更なし)
    */
   onSearch?(
@@ -289,8 +289,8 @@ export interface IMiddleware<
   ): Promise<T_OPTIONS | undefined | void> | T_OPTIONS | undefined | void;
   /**
    * エンジンへのコマンド送信前に呼び出されます。
-   * @param command 送信されるコマンド
-   * @param context コンテキスト情報
+   * @param command - 送信されるコマンド
+   * @param context - コンテキスト情報
    * @returns 変更されたコマンド、または undefined (変更なし)
    */
   onCommand?(
@@ -303,8 +303,8 @@ export interface IMiddleware<
     | void;
   /**
    * エンジンからの情報受信時に呼び出されます。
-   * @param info 受信した情報
-   * @param context コンテキスト情報
+   * @param info - 受信した情報
+   * @param context - コンテキスト情報
    * @returns 変更された情報、または undefined (変更なし)
    */
   onInfo?(
@@ -313,8 +313,8 @@ export interface IMiddleware<
   ): Promise<T_INFO | undefined | void> | T_INFO | undefined | void;
   /**
    * 探索結果の受信時に呼び出されます。
-   * @param result 受信した結果
-   * @param context コンテキスト情報
+   * @param result - 受信した結果
+   * @param context - コンテキスト情報
    * @returns 変更された結果、または undefined (変更なし)
    */
   onResult?(
@@ -363,8 +363,8 @@ export interface IProtocolParser<
   createOptionCommand(name: string, value: unknown): MiddlewareCommand;
   /**
    * info 行を解析します。
-   * @param line エンジンからの出力
-   * @param positionId 現在の局面 ID (オプション)
+   * @param line - エンジンからの出力
+   * @param positionId - 現在の局面 ID (オプション)
    */
   parseInfo(
     line: string | Record<string, unknown>,
@@ -373,7 +373,7 @@ export interface IProtocolParser<
   parseResult(line: string | Record<string, unknown>): T_RESULT | null;
   /**
    * エンジンが出力する独自のエラーメッセージを i18n キーに変換します。
-   * @param message エンジンからのエラー文字列
+   * @param message - エンジンからのエラー文字列
    */
   translateError?(message: string): I18nKey | null;
 }
