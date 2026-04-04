@@ -6,7 +6,7 @@
 
 ### 1. モダン ESLint スイートの統合と品質強化 (ADR-059)
 
-- [x] ESLint v10 (Flat Config) への完全移行とプラグイン・スイートの導入
+- [x] ESLint 10.0.2 (Flat Config) への完全移行とプラグイン・スイートの導入
 - [x] `eslint-plugin-import-x` による ESM 解決の近代化
 - [x] `eslint-plugin-unicorn`, `eslint-plugin-promise`, `eslint-plugin-jsx-a11y` の統合
 - [x] `eslint-plugin-vitest`, `eslint-plugin-tsdoc`, `eslint-plugin-no-only-tests` による開発プロセスのガード
