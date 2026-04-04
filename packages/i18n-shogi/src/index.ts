@@ -1,7 +1,7 @@
 import ja from "./locales/ja.js";
 import en from "./locales/en.js";
 import { createTranslator } from "@multi-game-engines/i18n-core";
-import { ShogiKey, DeepRecord } from "./types.js";
+import { ShogiKey } from "./types.js";
 
 export * from "./types.js";
 

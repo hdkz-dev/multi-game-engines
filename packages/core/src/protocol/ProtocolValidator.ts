@@ -22,12 +22,12 @@ export class ProtocolValidator {
 
   /**
    * 入力文字列（またはオブジェクト内の全文字列値）に制御文字が含まれていないか検証します。
-   * @param input 検証対象の文字列またはオブジェクト
-   * @param context エラーメッセージに使用するコンテキスト名
-   * @param recursive オブジェクトや配列を再帰的に走査するかどうか
-   * @param allowSemicolon セミコロンを許可するかどうか (GTP/SGF 用)
-   * @param depth 現在の再帰深度 (内部用)
-   * @param visited 循環参照検知用のセット (内部用)
+   * @param input - 検証対象の文字列またはオブジェクト
+   * @param context - エラーメッセージに使用するコンテキスト名
+   * @param recursive - オブジェクトや配列を再帰的に走査するかどうか
+   * @param allowSemicolon - セミコロンを許可するかどうか (GTP/SGF 用)
+   * @param depth - 現在の再帰深度 (内部用)
+   * @param visited - 循環参照検知用のセット (内部用)
    */
   static assertNoInjection(
     input: unknown,

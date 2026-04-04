@@ -148,7 +148,7 @@ export class EngineLoader implements IEngineLoader {
       let parsedUrl: URL;
       try {
         parsedUrl = new URL(url);
-      } catch (e) {
+      } catch {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,
           message: `Invalid URL format: ${url}`,
