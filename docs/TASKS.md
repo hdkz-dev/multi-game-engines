@@ -166,5 +166,5 @@
 - [x] **Monorepo Build & Test Persistence**
   - [x] **Cleanup**: 依存関係・キャッシュの完全初期化によるデッドロック・不整合の解消。
   - [x] **Build**: モノレポ全域のクリーンビルド（`pnpm build`）パス確認。
-  - [x] **Verification**: 全 52 パッケージにおけるテスト一括走査（`pnpm test`）の 100% 成功。
+  - [x] **Verification**: 全 48 パッケージにおけるテスト一括走査（`pnpm test`）の 100% 成功。
   - [x] **Hardening**: `ui-shogi`, `ui-elements` における JSDOM 固有のカスタム要素テスト問題を解消。

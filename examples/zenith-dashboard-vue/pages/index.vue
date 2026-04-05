@@ -57,7 +57,10 @@ interface DashboardSection {
   subtitle?: string;
   chessLabel?: string;
   shogiLabel?: string;
-  language?: DeepRecord;
+  language?: {
+    en?: string;
+    ja?: string;
+  };
   stats?: {
     engineRuntime?: DashboardLocaleStat;
     hardware?: DashboardLocaleStat;
@@ -298,13 +301,17 @@ const toggleLocale = () => {
             </div>
 
             <div class="flex items-center gap-2">
-              <button
-                class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
-                @click="toggleLocale"
-              >
-                <Globe class="w-3.5 h-3.5 text-blue-400" />
-                {{ locale === "ja" ? (localeData.dashboard.language as DeepRecord | undefined)?.en : (localeData.dashboard.language as DeepRecord | undefined)?.ja }}
-              </button>
+                <button
+                  class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
+                  @click="toggleLocale"
+                >
+                  <Globe class="w-3.5 h-3.5 text-blue-400" />
+                  {{
+                    locale === "ja"
+                      ? localeData.dashboard.language?.en
+                      : localeData.dashboard.language?.ja
+                  }}
+                </button>
 
               <button
                 class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
