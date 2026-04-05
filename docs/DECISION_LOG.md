@@ -29,7 +29,11 @@
 - [ADR-048: Zenith Tier Quality Reinforcement](./adr/048-zenith-tier-quality-reinforcement.md) (Completed - 2026-02-24)
 - [ADR-049: Federated i18n Architecture](./adr/049-federated-i18n-architecture.md) (Completed - 2026-02-26)
 - [ADR-056: ESLint React 設定の近代化と eslint-config-next 脱却](./adr/056-eslint-react-modernization.md) (Accepted - 2026-03-04)
+<<<<<<< HEAD
+- [ADR-057: Immediate ESLint v10 Upgrade and Peer Dependency Suppression](./adr/057-eslint-v10-upgrade.md) (Accepted - 2026-03-04)
+=======
 - [ADR-057: ESLint v10 への即時アップグレードと Peer Dependency 警告の抑制](./adr/057-eslint-v10-upgrade.md) (Accepted - 2026-03-04)
+- [ADR-059: モダン ESLint スイート (import-x, unicorn, jsx-a11y 等) の統合](./adr/059-modern-eslint-suite-integration.md) (Accepted - 2026-03-05)
 
 ## 🔌 インターフェースと通信 (Interfaces & Protocol)
 
@@ -66,3 +70,4 @@
 - [ADR-037: Core とドメイン（Chess/Shogi等）の物理的隔離とライフサイクル堅牢化](./adr/037-core-domain-isolation-and-lifecycle-hardening.md) (Accepted - 2026-02-20)
 - [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed - 2026-02-21)
 - [ADR-055: Standardization of Piece Visualization through pieceSymbols property](./adr/055-piece-symbols-standardization.md) (Accepted - 2026-03-01)
+- [ADR-058: Lit と Web Components 用の ESLint プラグインの導入](./adr/058-eslint-lit-wc-introduction.md) (Accepted - 2026-03-05)

@@ -23,6 +23,7 @@
 ### 運用ルール
 
 エージェントは、以下のタイミングで自律的にスキルを適用しなければなりません。
+
 1. **実装開始前**: `doc-sync` で最新の設計思想を同期。
 2. **実装完了後**: `zenith-audit` で不安全なキャストや `any` を一掃。
 3. **PR作成前**: `code-review` で最終的な品質ゲートを通過。
@@ -64,6 +65,12 @@ gemini "docs/xxx.md を読み込み、以下の観点から厳しくレビュー
 3. **Security Auditor (Snyk)**: 依存関係とコードのセキュリティスキャンを実行。
 4. **Reviewer (CodeRabbit)**: 客観的なコードレビュー（論理・意図）を行う。
 5. **Fixer (Gemini)**: 指摘事項を修正し、再検証。
+
+### 実運用の補足
+
+- `pnpm audit --prod` の結果は lockfile と `package.json` の整合性に強く依存するため、依存更新後は必ず両者を同時に確認する。
+- TSDoc の警告は `@param` / `@throws` の表記ゆれで再発しやすいので、`doc-sync` と `lint` をセットで回す。
+- React 19 系の警告は `useContext` と `.Provider` の組み合わせで起きやすいため、`use` と新しいコンテキスト要素形式を優先する。
 
 ---
 
@@ -122,3 +129,4 @@ AI相互レビュー完了とみなす基準：
 1. **論理的整合性**: 設計書と実装コードに矛盾がないこと。
 2. **静的解析パス**: Lint, Typecheck, Test が全て通っていること。
 3. **AI監査パス**: CodeRabbit のレビューで `Critical` および `High` の指摘がゼロであること。
+4. **依存関係整合**: `pnpm audit --prod` と CI の `build-and-test` が両方 green であること。

@@ -1,5 +1,6 @@
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import { Brand,
+import {
+  Brand,
   EngineError,
   EngineErrorCode,
   Move,
@@ -9,7 +10,8 @@ import { Brand,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
-  createI18nKey } from "@multi-game-engines/core";
+  createI18nKey,
+} from "@multi-game-engines/core";
 
 /**
  * 五目並べの指し手（例: "h8" 等の座標）。
@@ -52,7 +54,7 @@ export interface IGomokuSearchResult extends IBaseSearchResult {
  * 文字列を検証して GomokuMove に変換します。
  * (2026 Zenith Tier: Refuse by Exception)
  *
- * @param move 検証する文字列 (例: "h8", "resign")
+ * @param move - 検証する文字列 (例: "h8", "resign")
  */
 export function createGomokuMove(move: string): GomokuMove {
   if (

@@ -66,8 +66,8 @@ export class ScoreNormalizer {
 
   /**
    * シグモイド関数によるスケーリング。
-   * @param x 入力値
-   * @param k スケール係数 (x=k の時に 0.46 付近、x=2k の時に 0.76 付近)
+   * @param x - 入力値
+   * @param k - スケール係数 (x=k の時に 0.46 付近、x=2k の時に 0.76 付近)
    */
   private static sigmoid(x: number, k: number): number {
     return 2 / (1 + Math.exp(-x / k)) - 1;

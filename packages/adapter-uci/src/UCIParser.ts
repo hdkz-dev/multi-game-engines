@@ -1,6 +1,23 @@
-import { IProtocolParser, Move, ProtocolValidator, EngineError, EngineErrorCode, createMove, truncateLog, ScoreNormalizer, PositionId, I18nKey, createI18nKey } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  Move,
+  ProtocolValidator,
+  EngineError,
+  EngineErrorCode,
+  createMove,
+  truncateLog,
+  ScoreNormalizer,
+  PositionId,
+  I18nKey,
+  createI18nKey,
+} from "@multi-game-engines/core";
 import { ChessKey, tChess as translate } from "@multi-game-engines/i18n-chess";
-import { createFEN, IChessSearchOptions, IChessSearchInfo, IChessSearchResult } from "@multi-game-engines/domain-chess";
+import {
+  createFEN,
+  IChessSearchOptions,
+  IChessSearchInfo,
+  IChessSearchResult,
+} from "@multi-game-engines/domain-chess";
 
 /**
  * 汎用的な UCI (Universal Chess Interface) プロトコルパーサー。
@@ -236,12 +253,12 @@ export class UCIParser implements IProtocolParser<
   }
 
   /**
-   * 探索開始コマンド (position ... -> go ...) を生成します。
+   * 探索開始コマンド (position ... -&gt; go ...) を生成します。
    * FEN のバリデーションおよびインジェクション対策を含みます。
    *
    * @param options - 探索オプション (fen, depth, time, nodes)。
    * @returns 実行すべき UCI コマンド配列。
-   * @throws {EngineError} FEN が未指定または不正な場合。
+   * @throws EngineError FEN が未指定または不正な場合。
    */
   createSearchCommand(options: IChessSearchOptions): string[] {
     // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック (ADR-038)

@@ -17,12 +17,16 @@ export default [
         parser: tseslint.parser,
         sourceType: "module",
         extraFileExtensions: [".vue"],
+        tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
       "vue/multi-word-component-names": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_" },
+      ],
       "no-undef": "off", // Nuxt auto-imports make this rule noisy
     },
   },

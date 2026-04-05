@@ -27,12 +27,12 @@
     "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.13.0",
-    "tsup": "^8.3.6",
-    "typescript": "5.7.3",
-    "vitest": "^3.0.0"
+    "@types/node": "^24.11.0",
+    "tsup": "^8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
   },
   "engines": {
-    "node": "^20 || ^22 || >=24"
+    "node": ">=24.0.0"
   }
 }

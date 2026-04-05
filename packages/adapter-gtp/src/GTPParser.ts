@@ -1,10 +1,17 @@
-import { IProtocolParser, ProtocolValidator, ScoreNormalizer, PositionId } from "@multi-game-engines/core";
+import {
+  IProtocolParser,
+  ProtocolValidator,
+  ScoreNormalizer,
+  PositionId,
+} from "@multi-game-engines/core";
 
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import { createGOMove,
+import {
+  createGOMove,
   IGoSearchOptions,
   IGoSearchInfo,
-  IGoSearchResult, } from "@multi-game-engines/domain-go";
+  IGoSearchResult,
+} from "@multi-game-engines/domain-go";
 
 /**
  * 2026 Zenith Tier: 汎用 GTP (Go Text Protocol) パーサー。
@@ -19,43 +26,44 @@ export class GTPParser implements IProtocolParser<
     data: string | Record<string, unknown>,
     positionId?: PositionId,
   ): IGoSearchInfo | null {
-    if (typeof data === "object" && data !== null) {
-      // KataGo 拡張 JSON 出力
-      if ("visits" in data || "winrate" in data) {
-        const winrate = Number(data.winrate) || 0;
-        const scoreLead =
-          typeof data.scoreLead === "number" ? data.scoreLead : undefined;
+    if (
+      typeof data === "object" &&
+      data !== null && // KataGo 拡張 JSON 出力
+      ("visits" in data || "winrate" in data)
+    ) {
+      const winrate = Number(data.winrate) || 0;
+      const scoreLead =
+        typeof data.scoreLead === "number" ? data.scoreLead : undefined;
 
-        return {
-          positionId,
-          visits: Number(data.visits) || 0,
+      return {
+        positionId,
+        visits: Number(data.visits) || 0,
+        winrate,
+        score: {
+          unit: "winrate", // ベースは勝率とするが points にも対応
           winrate,
-          score: {
-            unit: "winrate", // ベースは勝率とするが points にも対応
-            winrate,
-            points: scoreLead,
-            normalized:
-              scoreLead !== undefined
-                ? ScoreNormalizer.normalize(scoreLead, "points", "go")
-                : ScoreNormalizer.normalize(winrate, "winrate", "go"),
-          },
-          scoreLead,
-          pv:
-            Array.isArray(data.pv) && data.pv.length > 0
-              ? data.pv
-                  .filter((m): m is string => typeof m === "string" && !!m)
-                  .map((m) => {
-                    try {
-                      return createGOMove(m);
-                    } catch {
-                      return null;
-                    }
-                  })
-                  .filter((m): m is NonNullable<typeof m> => m !== null)
-              : undefined,
-          raw: data,
-        };
-      }
+          points: scoreLead,
+          normalized:
+            scoreLead !== undefined
+              ? ScoreNormalizer.normalize(scoreLead, "points", "go")
+              : ScoreNormalizer.normalize(winrate, "winrate", "go"),
+        },
+        scoreLead,
+        pv:
+          Array.isArray(data.pv) && data.pv.length > 0
+            ? data.pv
+                .filter((m): m is string => typeof m === "string" && !!m)
+                .map((m) => {
+                  try {
+                    return createGOMove(m);
+                  } catch {
+                    return null;
+                  }
+                })
+                .filter((m): m is NonNullable<typeof m> => m !== null)
+            : undefined,
+        raw: data,
+      };
     }
 
     return null;

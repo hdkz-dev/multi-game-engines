@@ -67,6 +67,7 @@
   - [x] `SegmentedVerifier` による分割ハッシュ検証ロジックの実装。
   - [x] `EngineLoader` への統合（全量取得後の分割検証）。
 - [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
+  - [x] 主要な TSDoc 警告の解消と、CI の doc-sync / lint 収束。
 - [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
 - [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
 - [x] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。
@@ -75,10 +76,12 @@
 - [x] **Advanced Development Skills Integration**: 高度な開発スキルの統合 (ADR-056)。
   - `skills/` ディレクトリの標準化と `SKILL.md` 形式への統一。
   - `zenith-audit`, `doc-sync` スキルの新規実装。
-  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。 - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+  - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。
+  - [ ] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
   - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
   - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
+  - [x] PR #60 の品質ゲート完走と `pnpm audit --prod` 修正完了。
 - [x] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` の実装。
   - [x] `@multi-game-engines/domain-xiangqi` 新設。
   - [x] `@multi-game-engines/domain-janggi` 新設。
@@ -149,4 +152,19 @@
 - [x] **Security Hardening & CodeQL Compliance**
   - [x] **Security**: `EngineLoader` における HTTPS 強制 (CodeQL 対応) と `URL` オブジェクトを用いた厳格なプロトコル検証。
   - [x] **DevEx**: `SecurityAdvisor` におけるローカル開発環境 (`127.0.0.1`, `::1`, `*.localhost`) の HTTP フォールバック許可。
-  - [x] **CI/CD**: `refresh-sri.yml` ワークフローの `GITHUB_TOKEN` 重複定義エラーの解消。
+
+### 2026-03-05 更新 (実装担当: Modern ESLint Suite Integration)
+
+- [x] **モダン ESLint スイートの統合 (ADR-059)**
+  - [x] **Modern Suite**: `import-x`, `unicorn`, `promise`, `jsx-a11y`, `vitest`, `tsdoc`, `no-only-tests` の導入。
+  - [x] **Compatibility**: ESLint v10 Flat Config におけるマルチパッケージ間プラグイン競合の解消。
+  - [x] **Standardization**: Web Components 用プラグイン (`lit`, `wc`) の導入と設定の共通化。
+- [x] **Quality**: 全 73 パッケージでの `pnpm lint` パス確認。
+
+### 2026-03-05 更新 (実装担当: Zenith Quality Engineer)
+
+- [x] **Monorepo Build & Test Persistence**
+  - [x] **Cleanup**: 依存関係・キャッシュの完全初期化によるデッドロック・不整合の解消。
+  - [x] **Build**: モノレポ全域のクリーンビルド（`pnpm build`）パス確認。
+  - [x] **Verification**: 全 48 パッケージにおけるテスト一括走査（`pnpm test`）の 100% 成功。
+  - [x] **Hardening**: `ui-shogi`, `ui-elements` における JSDOM 固有のカスタム要素テスト問題を解消。

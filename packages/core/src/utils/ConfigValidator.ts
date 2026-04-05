@@ -7,9 +7,9 @@ import { createI18nKey } from "../protocol/ProtocolValidator.js";
  * 複数のアダプターファクトリ間でロジックを共有するために使用されます。
  * (2026 Zenith Tier: Centralized Validation)
  *
- * @param registrySources レジストリから取得したデフォルトのリソース設定
- * @param config ユーザーから渡されたエンジン設定
- * @param defaultEngineId IDが指定されなかった場合のフォールバックID
+ * @param registrySources - レジストリから取得したデフォルトのリソース設定
+ * @param config - ユーザーから渡されたエンジン設定
+ * @param defaultEngineId - IDが指定されなかった場合のフォールバックID
  * @returns 検証済みで必須の sources.main を含むリソース設定
  */
 export function normalizeAndValidateSources(

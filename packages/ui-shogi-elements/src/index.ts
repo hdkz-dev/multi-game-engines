@@ -8,14 +8,7 @@ import {
   createSFEN,
 } from "@multi-game-engines/domain-shogi";
 import { Move, createMove } from "@multi-game-engines/core";
-import { shogiLocales } from "@multi-game-engines/i18n-shogi";
-
-/**
- * 2026 Zenith Tier: 再帰的な Record 型による Zero-Any ポリシーの遵守。
- */
-type DeepRecord = {
-  [key: string]: string | number | boolean | DeepRecord | undefined;
-};
+import { shogiLocales, DeepRecord } from "@multi-game-engines/i18n-shogi";
 
 interface ShogiBoardStrings {
   boardLabel: string;
@@ -185,35 +178,24 @@ export class ShogiBoard extends LitElement {
   private _focusedIndex = 0;
 
   private _getLocalizedStrings(): ShogiBoardStrings {
-    const data = (this.locale === "ja"
-      ? shogiLocales.ja
-      : shogiLocales.en) as unknown as DeepRecord;
-    const dashboard = (data["dashboard"] || {}) as DeepRecord;
-    const gameBoard = (dashboard["gameBoard"] || {}) as DeepRecord;
-    const engine = (data["engine"] || {}) as DeepRecord;
-    const errors = (engine["errors"] || {}) as DeepRecord;
+    const primaryLocale = (
+      (this.locale || "").split(/[-_]/)[0] || ""
+    ).toLowerCase();
+    const data = primaryLocale === "ja" ? shogiLocales.ja : shogiLocales.en;
+    const gameBoard = (data["gameBoard"] || {}) as DeepRecord;
+    const errors = (data["errors"] || {}) as DeepRecord;
     const pieces = (gameBoard["shogiPieces"] || {}) as Record<string, string>;
 
     return {
-      boardLabel: String(
-        this.boardLabel || gameBoard["title"] || "Shogi Board",
-      ),
+      boardLabel: String(this.boardLabel || gameBoard["title"] || ""),
       handSenteLabel: String(
-        this.handSenteLabel ||
-          gameBoard["handSente"] ||
-          (this.locale === "ja" ? "先手 持ち駒" : "Sente Hand"),
+        this.handSenteLabel || gameBoard["handSente"] || "",
       ),
-      handGoteLabel: String(
-        this.handGoteLabel ||
-          gameBoard["handGote"] ||
-          (this.locale === "ja" ? "後手 持ち駒" : "Gote Hand"),
-      ),
+      handGoteLabel: String(this.handGoteLabel || gameBoard["handGote"] || ""),
       errorMessage: String(this.errorMessage || errors["invalidSFEN"] || ""),
       pieceNames: { ...pieces, ...this.pieceNames },
       handPieceCount: String(
-        this.handPieceCount ||
-          gameBoard["handPieceCount"] ||
-          (this.locale === "ja" ? "{piece}{count}枚" : "{count} {piece}s"),
+        this.handPieceCount || gameBoard["handPieceCount"] || "",
       ),
       squareLabel: (f: number, r: number) => `${f}${r}`,
       squarePieceLabel: (f: number, r: number, p: string) => `${p} at ${f}${r}`,
@@ -239,10 +221,10 @@ export class ShogiBoard extends LitElement {
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = Math.max(0, this._focusedIndex - 9);
+        newIndex = row > 0 ? this._focusedIndex - 9 : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = Math.min(80, this._focusedIndex + 9);
+        newIndex = row < 8 ? this._focusedIndex + 9 : this._focusedIndex;
         break;
       case "ArrowLeft":
         newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
@@ -251,10 +233,16 @@ export class ShogiBoard extends LitElement {
         newIndex = col < 8 ? this._focusedIndex + 1 : this._focusedIndex;
         break;
       case "Home":
-        newIndex = row * 9;
+        newIndex = e.ctrlKey ? 0 : row * 9;
         break;
       case "End":
-        newIndex = row * 9 + 8;
+        newIndex = e.ctrlKey ? 80 : row * 9 + 8;
+        break;
+      case "PageUp":
+        newIndex = col;
+        break;
+      case "PageDown":
+        newIndex = 72 + col;
         break;
       default:
         return;
@@ -275,6 +263,13 @@ export class ShogiBoard extends LitElement {
     if (changedProperties.has("locale")) {
       this.requestUpdate();
     }
+  }
+
+  private _resolvePieceLabel(
+    piece: ShogiPiece | string,
+    strings: ShogiBoardStrings,
+  ): string {
+    return (strings.pieceNames[piece] as string) || piece;
   }
 
   override render() {
@@ -311,11 +306,7 @@ export class ShogiBoard extends LitElement {
         const usiFile = 9 - f;
         const usiRank = String.fromCharCode(97 + r); // a, b, c, ...
         const displayFile = usiFile;
-        const displayRank = usiRank;
-        const pieceLabel = piece
-          ? (this.pieceNames[piece] as string) ||
-            (strings.pieceNames[piece] as string)
-          : "";
+        const pieceLabel = piece ? this._resolvePieceLabel(piece, strings) : "";
         const pieceSymbol = piece
           ? (this.pieceSymbols[piece] as string) || pieceLabel
           : "";
@@ -334,12 +325,14 @@ export class ShogiBoard extends LitElement {
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
             ${piece
-              ? html`<span
+              ? html`
+                <span
                   class="piece ${isGotePiece(piece) ? "gote" : ""}"
                   role="img"
                   aria-hidden="true"
                   >${pieceSymbol}</span
-                >`
+                >
+              `
               : ""}
           </div>
         `);
@@ -375,13 +368,12 @@ export class ShogiBoard extends LitElement {
       side === "sente"
         ? (["R", "B", "G", "S", "N", "L", "P"] as const)
         : (["r", "b", "g", "s", "n", "l", "p"] as const);
-    const { pieceNames, handPieceCount } = strings;
+    const { handPieceCount } = strings;
 
     return pieces.map((p) => {
       const count = hand[p];
       if (count === 0) return null;
-      const pieceLabel =
-        (this.pieceNames[p as ShogiPiece] as string) || pieceNames[p];
+      const pieceLabel = this._resolvePieceLabel(p, strings);
       const pieceSymbol =
         (this.pieceSymbols[p as ShogiPiece] as string) || pieceLabel;
       const ariaLabel =
@@ -390,9 +382,11 @@ export class ShogiBoard extends LitElement {
               .replace("{piece}", pieceLabel || "")
               .replace("{count}", String(count))
           : pieceLabel;
-      return html`<span title="${pieceLabel}" aria-label="${ariaLabel}"
-        >${pieceSymbol}${count > 1 ? count : ""}</span
-      >`;
+      return html`
+        <span title="${pieceLabel}" aria-label="${ariaLabel}"
+          >${pieceSymbol}${count > 1 ? count : ""}</span
+        >
+      `;
     });
   }
 }

@@ -2,8 +2,7 @@ import React from "react";
 import { ShogiBoard as ShogiBoardElement } from "./elements.js";
 
 import { Move } from "@multi-game-engines/core";
-import { SFEN } from "@multi-game-engines/domain-shogi";
-import { ShogiPiece } from "@multi-game-engines/domain-shogi";
+import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
 declare module "react" {
   // eslint-disable-next-line @typescript-eslint/no-namespace

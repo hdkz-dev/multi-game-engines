@@ -1,12 +1,20 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchResult, EngineStatus, IBaseSearchInfo } from "@multi-game-engines/core";
-import { MonitorRegistry,
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+  EngineStatus,
+  IBaseSearchInfo,
+} from "@multi-game-engines/core";
+import {
+  MonitorRegistry,
   EngineSearchState,
   SearchStateTransformer,
   CommandDispatcher,
   UINormalizerMiddleware,
-  createUIStrings, } from "@multi-game-engines/ui-core";
+  createUIStrings,
+} from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 
 import "./score-badge.js";
@@ -340,109 +348,115 @@ export class EngineMonitorElement extends LitElement {
         </div>
         <div class="actions">
           ${this._status === "busy" || this._status === "loading"
-            ? html`<button class="btn-stop" @click="${this._handleStop}">
+            ? html`
+              <button class="btn-stop" @click="${this._handleStop}">
                 ${strings.stop}
-              </button>`
-            : html`<button class="btn-start" @click="${this._handleStart}">
+              </button>
+            `
+            : html`
+              <button class="btn-start" @click="${this._handleStart}">
                 ${strings.start}
-              </button>`}
+              </button>
+            `}
         </div>
       </header>
 
       <div class="content">
         ${this._status === "error"
           ? html`
-              <div class="error-container">
-                <strong>${strings.errorTitle}</strong>
-                <div style="font-size: 0.75rem; margin-top: 0.5rem">
-                  ${this.engine.lastError?.remediation ||
+            <div class="error-container">
+              <strong>${strings.errorTitle}</strong>
+              <div style="font-size: 0.75rem; margin-top: 0.5rem">
+                ${this.engine.lastError?.remediation ||
                   strings.errorDefaultRemediation}
-                </div>
               </div>
-            `
+            </div>
+          `
           : html`
-              <section class="best-move-section">
-                <span class="label-xs">${strings.topCandidate}</span>
-                <div class="best-move-row">
-                  <div class="best-move-value">
-                    ${bestPV?.moves[0] || strings.noMove}
-                  </div>
-                  ${bestPV
-                    ? html`<score-badge
+            <section class="best-move-section">
+              <span class="label-xs">${strings.topCandidate}</span>
+              <div class="best-move-row">
+                <div class="best-move-value">
+                  ${bestPV?.moves[0] || strings.noMove}
+                </div>
+                ${bestPV
+                    ? html`
+                      <score-badge
                         .score="${bestPV.score}"
                         .locale="${this.locale}"
-                      ></score-badge>`
+                      ></score-badge>
+                    `
                     : ""}
-                </div>
-              </section>
-
-              <div class="graph-container">
-                <evaluation-graph
-                  .entries="${state.evaluationHistory.entries}"
-                  .height="${40}"
-                ></evaluation-graph>
               </div>
+            </section>
 
-              <engine-stats
-                .stats="${state.stats}"
-                .locale="${this.locale}"
-              ></engine-stats>
+            <div class="graph-container">
+              <evaluation-graph
+                .entries="${state.evaluationHistory.entries}"
+                .height="${40}"
+              ></evaluation-graph>
+            </div>
 
-              <div
-                class="tab-header"
-                role="tablist"
-                aria-orientation="horizontal"
-                @keydown="${this._handleTabKeyDown}"
+            <engine-stats
+              .stats="${state.stats}"
+              .locale="${this.locale}"
+            ></engine-stats>
+
+            <div
+              class="tab-header"
+              role="tablist"
+              aria-orientation="horizontal"
+              @keydown="${this._handleTabKeyDown}"
+            >
+              <button
+                id="tab-pv"
+                role="tab"
+                aria-selected="${this._activeTab === "pv"}"
+                aria-controls="panel-pv"
+                tabindex="${this._activeTab === "pv" ? "0" : "-1"}"
+                class="tab-btn ${this._activeTab === "pv" ? "active" : ""}"
+                @click="${() => (this._activeTab = "pv")}"
               >
-                <button
-                  id="tab-pv"
-                  role="tab"
-                  aria-selected="${this._activeTab === "pv"}"
-                  aria-controls="panel-pv"
-                  tabindex="${this._activeTab === "pv" ? "0" : "-1"}"
-                  class="tab-btn ${this._activeTab === "pv" ? "active" : ""}"
-                  @click="${() => (this._activeTab = "pv")}"
-                >
-                  ${strings.principalVariations}
-                </button>
-                <button
-                  id="tab-log"
-                  role="tab"
-                  aria-selected="${this._activeTab === "log"}"
-                  aria-controls="panel-log"
-                  tabindex="${this._activeTab === "log" ? "0" : "-1"}"
-                  class="tab-btn ${this._activeTab === "log" ? "active" : ""}"
-                  @click="${() => (this._activeTab = "log")}"
-                >
-                  ${strings.searchLog}
-                </button>
-              </div>
+                ${strings.principalVariations}
+              </button>
+              <button
+                id="tab-log"
+                role="tab"
+                aria-selected="${this._activeTab === "log"}"
+                aria-controls="panel-log"
+                tabindex="${this._activeTab === "log" ? "0" : "-1"}"
+                class="tab-btn ${this._activeTab === "log" ? "active" : ""}"
+                @click="${() => (this._activeTab = "log")}"
+              >
+                ${strings.searchLog}
+              </button>
+            </div>
 
-              <div class="tab-content">
-                <div
-                  id="panel-pv"
-                  role="tabpanel"
-                  aria-labelledby="tab-pv"
-                  ?hidden="${this._activeTab !== "pv"}"
-                >
-                  <pv-list
-                    .pvs="${state.pvs}"
-                    .locale="${this.locale}"
-                  ></pv-list>
-                </div>
-                <div
-                  id="panel-log"
-                  role="tabpanel"
-                  aria-labelledby="tab-log"
-                  ?hidden="${this._activeTab !== "log"}"
-                >
-                  <search-log
-                    .log="${state.searchLog}"
-                    .locale="${this.locale}"
-                  ></search-log>
-                </div>
+            <div class="tab-content">
+              <div
+                id="panel-pv"
+                role="tabpanel"
+                aria-labelledby="tab-pv"
+                ?hidden="${this._activeTab !== "pv"}"
+              >
+                <pv-list
+                  .pvs="${state.pvs}"
+                  .locale="${this.locale}"
+                ></pv-list>
               </div>
-            `}
+              <div
+                id="panel-log"
+                role="tabpanel"
+                aria-labelledby="tab-log"
+                ?hidden="${this._activeTab !== "log"}"
+              >
+                <search-log
+                  .log="${state.searchLog}"
+                  .locale="${this.locale}"
+                ></search-log>
+              </div>
+            </div>
+          `}
       </div>
     `;
   }

@@ -55,7 +55,7 @@ export class SecurityAdvisor {
    * Includes exact matches (localhost, 127.0.0.1, [::1]) and
    * *.localhost subdomains (e.g. myapp.localhost for Portless).
    */
-  private static isLoopbackHost(hostname: string): boolean {
+  public static isLoopbackHost(hostname: string): boolean {
     return (
       SecurityAdvisor.LOOPBACK_HOSTS.has(hostname) ||
       hostname.endsWith(".localhost")

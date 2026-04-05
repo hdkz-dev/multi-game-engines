@@ -69,21 +69,10 @@ export function useEngineMonitor<
     autoMiddleware = true,
   } = options;
 
-  // ダミー状態の作成 (初期化前やエラー時のフォールバック)
+  // ダミー状態の作成 (初期化前やエラー時は利用側で処理させる)
   const createDummyState = (): T_STATE => {
-    try {
-      const brandedPos = createPositionString(initialPosition);
-      return createInitialState(brandedPos) as T_STATE;
-    } catch (err) {
-      console.warn(
-        `[useEngineMonitor] Validation failed for initialPosition: "${initialPosition}". 
-        Check if the position string matches the engine's protocol (e.g., FEN for Chess, SFEN for Shogi). 
-        Falling back to "startpos". Original error:`,
-        err,
-      );
-      const safePos = createPositionString("startpos");
-      return createInitialState(safePos) as T_STATE;
-    }
+    const brandedPos = createPositionString(initialPosition);
+    return createInitialState(brandedPos) as T_STATE;
   };
 
   const state = ref<T_STATE>(createDummyState()) as Ref<T_STATE>;

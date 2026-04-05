@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, use, useMemo } from "react";
 import { EngineUIStrings, createUIStrings } from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 
@@ -45,7 +45,7 @@ export const EngineUIProvider: React.FC<EngineUIProviderProps> = ({
  * UI 設定を取得するカスタムフック
  */
 export const useEngineUI = () => {
-  const context = useContext(EngineUIContext);
+  const context = use(EngineUIContext);
   if (!context) {
     // プロバイダーがない場合はデフォルト（日本語）を返す
     return { strings: defaultStrings };

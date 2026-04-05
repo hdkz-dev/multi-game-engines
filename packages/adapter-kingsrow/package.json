@@ -35,12 +35,11 @@
     "@multi-game-engines/registry": "workspace:*"
   },
   "peerDependencies": {
-    "@multi-game-engines/core": "^0.1.0"
+    "@multi-game-engines/core": "workspace:*"
   },
   "devDependencies": {
-    "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-checkers": "workspace:*",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.2",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
@@ -53,7 +52,7 @@
     "lint": "eslint ."
   },
   "engines": {
-    "node": "^20 || ^22 || >=24"
+    "node": ">=24.0.0"
   },
   "bugs": {
     "url": "https://github.com/hdkz-dev/multi-game-engines/issues"

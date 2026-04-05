@@ -13,6 +13,8 @@ The `core` package provides abstract definitions independent of specific games.
 
 ### 1-2. Search Info (IBaseSearchInfo)
 
+Recent CI cleanup kept the TSDoc/doc-sync gate stable across the adapter and UI packages by removing stale import warnings and standardizing block tags.
+
 Highly standardized structure for engine candidate data.
 
 - **`positionId`**: Unique identifier for the board position, used for stale message filtering.
@@ -78,6 +80,8 @@ Manages huge book assets independently.
 
 ### 4-2. Protocol Validation (Structural Defense)
 
+The current implementation follows a strict refuse-by-exception policy and passes the latest CI runs after TSDoc cleanup in UCI/USI/GTP-related parsers.
+
 Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 
 - **Target**: `createSearchCommand` (positions), `createOptionCommand` (names/values).
@@ -117,7 +121,9 @@ All UI components must strictly adhere to the following accessibility standards:
 - **Keyboard Navigation**:
   - Proper `tabindex` management and visible focus indicators using `:focus-visible`.
   - Arrow key support for board navigation; Enter/Space for details.
+  - `Home` / `End` / `Ctrl+Home` / `Ctrl+End` / `PageUp` / `PageDown` support for deterministic jumps to row edges and board edges.
   - Proper focus trapping for modal/overlay elements.
+- **Workspace Type Resolution**: UI hub packages must use `tsconfig.paths` to reference internal Web Components type definitions directly so monorepo-parallel `build` and `typecheck` runs do not depend on package build order.
 - **Visual & Layout**:
   - Minimum contrast ratio of 4.5:1 for text and 3:1 for UI elements.
   - Supports 400% zoom without horizontal scrolling (Reflow).
@@ -136,6 +142,7 @@ Standardized framework for extending AI agent capabilities across the monorepo.
 ### 7-1. Skill Structure (SKILL.md)
 
 Each skill is a self-contained directory in `skills/` containing:
+
 - **`SKILL.md`**: Frontmatter metadata (name, description) and instructions.
 - **`README.md`** (Optional): User-facing documentation.
 - **`tools/`** (Optional): Scripts or local MCP tools associated with the skill.

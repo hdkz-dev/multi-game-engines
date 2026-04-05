@@ -1,7 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    let now = 0;
+    Object.defineProperty(performance, "now", {
+      configurable: true,
+      value: () => {
+        now += 16.6667;
+        return now;
+      },
+    });
+  });
   await page.goto("/");
 
   // 2026: Wait for hydration
@@ -82,12 +91,16 @@ test("vue dashboard engine search lifecycle", async ({ page }) => {
     }
 
     // Check internal error
-    const lastError = await page.evaluate(() => (window as any).__LAST_ERROR__);
+    const lastError = await page.evaluate(() => {
+      type WindowWithLastError = Window & { __LAST_ERROR__?: unknown };
+      return (window as WindowWithLastError).__LAST_ERROR__;
+    });
     if (lastError) {
       console.error(`[Lifecycle Retry ${i}] Engine Error:`, lastError);
       // Clear error to retry
       await page.evaluate(() => {
-        (window as any).__LAST_ERROR__ = null;
+        type WindowWithLastError = Window & { __LAST_ERROR__?: unknown };
+        (window as WindowWithLastError).__LAST_ERROR__ = null;
       });
     }
 

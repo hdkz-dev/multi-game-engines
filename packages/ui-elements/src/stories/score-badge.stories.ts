@@ -18,10 +18,9 @@ export const Centipawns: Story = {
   },
   render: (args: unknown) => {
     const a = args as { score: EvaluationScore; inverted?: boolean };
-    return html`<score-badge
-      .score="${a.score}"
-      ?inverted="${a.inverted}"
-    ></score-badge>`;
+    return html`
+      <score-badge .score="${a.score}" ?inverted="${a.inverted}"></score-badge>
+    `;
   },
 };
 

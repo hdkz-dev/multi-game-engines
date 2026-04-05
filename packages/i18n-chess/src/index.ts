@@ -9,8 +9,8 @@ export * from "./types.js";
  * チェスドメインのロケールデータ。
  */
 export const chessLocales = {
-  ja: ja as unknown as Record<string, unknown>,
-  en: en as unknown as Record<string, unknown>,
+  ja: ja,
+  en: en,
 };
 
 /**

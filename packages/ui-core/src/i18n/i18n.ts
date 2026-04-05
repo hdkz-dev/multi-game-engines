@@ -55,7 +55,7 @@ function isRawLocaleData(data: unknown): data is RawLocaleData {
   return true; // 2026: 構造のチェックを緩和し、プロパティの存在確認は個別に実施
 }
 /**
- * @multi-game-engines/i18n から提供される JSON データを
+ * i18n パッケージから提供される JSON データを
  * EngineUIStrings インターフェースに適合するように変換する。
  */
 export function createUIStrings(data: unknown): EngineUIStrings {
@@ -76,8 +76,7 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const e = (normalizedData as any).engine || {};
+  const e = (normalizedData as RawLocaleData).engine || {};
 
   const t = (key: string, fallback: string) => {
     const val = e[key] as string | undefined;
