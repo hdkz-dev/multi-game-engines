@@ -24,10 +24,10 @@
   "license": "MIT",
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "stockfish": "18.0.5",
+    "stockfish": "18.0.7",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "workspace:*"

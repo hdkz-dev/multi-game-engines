@@ -39,10 +39,10 @@
     "@multi-game-engines/i18n-common": "workspace:*"
   },
   "devDependencies": {
-    "eslint": "^10.0.2",
+    "eslint": "^10.2.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=24.0.0"
