@@ -62,6 +62,7 @@
 - [x] **Binary Variant Selection**: SIMD/Threads に応じた最適な WASM バイナリの自動ディスパッチ。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
+- [x] **Quality Gate Stabilization**: PR #60 で `lint`, `typecheck`, `build`, `test`, `CodeQL`, `CodeRabbit` を全て green に収束。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。

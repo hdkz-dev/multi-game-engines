@@ -31,6 +31,7 @@ Leveraging 2026 Web standards to deliver industry-leading game analysis performa
 - [ ] **Swarm (Ensemble) Architecture**:
   - **Meta-Adapters**: Multi-engine consensus and expertise-based weighting.
 - [ ] **Release Automation**: Full CI/CD with automatic CHANGELOG generation via Changesets.
+- [x] **Quality Gate Stabilization**: PR #60 reached green status for `lint`, `typecheck`, `build`, `test`, `CodeQL`, and `CodeRabbit`.
 
 ---
 

@@ -13,6 +13,8 @@ The `core` package provides abstract definitions independent of specific games.
 
 ### 1-2. Search Info (IBaseSearchInfo)
 
+Recent CI cleanup kept the TSDoc/doc-sync gate stable across the adapter and UI packages by removing stale import warnings and standardizing block tags.
+
 Highly standardized structure for engine candidate data.
 
 - **`positionId`**: Unique identifier for the board position, used for stale message filtering.
@@ -77,6 +79,8 @@ Manages huge book assets independently.
 - **30s Timeout**: Prevents hang-ups during network fetch with detailed Error Cause API tracking.
 
 ### 4-2. Protocol Validation (Structural Defense)
+
+The current implementation follows a strict refuse-by-exception policy and passes the latest CI runs after TSDoc cleanup in UCI/USI/GTP-related parsers.
 
 Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 

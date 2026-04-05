@@ -1,6 +1,6 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年3月5日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年4月5日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
 
@@ -12,6 +12,7 @@
 - [x] `eslint-plugin-vitest`, `eslint-plugin-tsdoc`, `eslint-plugin-no-only-tests` による開発プロセスのガード
 - [x] `eslint-plugin-lit`, `eslint-plugin-wc` による Web Components 実装の品質担保
 - [x] 全 51 パッケージでの `pnpm lint` パス確認 (51 パッケージ)
+- [x] 直近の品質ゲートでの残警告解消（`adapter-uci`, `adapter-gnubg`, `adapter-gtp`, `adapter-usi`, `adapter-katago`, `adapter-yaneuraou`, `ui-react-core`, `zenith-dashboard-react`）
 
 ## 🏆 到達ハイライト (2026-03-05 Monorepo Re-Build & Test Stability)
 
@@ -23,6 +24,17 @@
   - Web Components 固有のテスト課題（JSDOM におけるカスタム要素の登録タイミングやフォーカス制御）を、副作用を考慮したインポート構造の最適化と標準 `DOM` API への移行により解消。`boundary.test.ts` を含む難易度の高いテストの決定論的動作を保証しました。
 - **キーボードナビゲーションの高度な同期**:
   - `ui-shogi-elements` において、`Ctrl + Home/End` や `PageUp/Down` を含む高度なキーボードショートカットを実装し、プロジェクト全体のアクセシビリティ基準を Zenith Tier へ引き上げました。
+
+## 🏆 到達ハイライト (2026-04-05 Quality Gate Finalization)
+
+- **最新の CI 収束**:
+  - `build-and-test`, `CodeQL`, `CodeRabbit` を含む PR #60 の全チェックをグリーンに到達させました。
+  - `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test` のローカル品質ゲートを再実行し、再現性を確認しました。
+- **警告ゼロ運用の前進**:
+  - `adapter-*` 群と `ui-react-core`、`zenith-dashboard-react` の未使用 import / TSDoc 警告を解消しました。
+  - React 19 互換の `use` / Provider 形式へ UI プロバイダーを更新し、将来の互換性警告を減らしました。
+- **依存関係と監査の安定化**:
+  - lockfile と package manifest の不整合を解消し、`pnpm audit --prod` の脆弱性を解決しました。
 
 ## 🏆 到達ハイライト (2026-03-05 Modern ESLint Suite Integration)
 
