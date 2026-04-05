@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false
+  },
+  "include": [
+    ".storybook/**/*",
+    "src/**/*.d.ts",
+    "src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "src/**/*.mdx",
+    "../ui-vue-monitor/src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

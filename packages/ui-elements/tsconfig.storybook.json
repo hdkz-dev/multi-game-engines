@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false
+  },
+  "include": [
+    ".storybook/**/*",
+    "src/**/*.d.ts",
+    "src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "src/**/*.mdx"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

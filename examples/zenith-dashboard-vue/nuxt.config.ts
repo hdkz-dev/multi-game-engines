@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   vite: {
-    // @ts-expect-error - tailwindcss() returns Plugin[], but versions might mismatch in monorepo
     plugins: [tailwindcss()],
   },
 

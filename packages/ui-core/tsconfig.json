@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "src",
+    "types": ["node"],
     "paths": {
       "@multi-game-engines/core": ["../core/dist/index.d.ts"],
       "@multi-game-engines/i18n-common": ["../i18n-common/src/index.ts"]

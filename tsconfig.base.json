@@ -20,6 +20,6 @@
     "sourceMap": true,
     "composite": true,
     "baseUrl": ".",
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "6.0"
   }
 }
