@@ -19,6 +19,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "composite": true,
-    "baseUrl": "."
+    "baseUrl": ".",
+    "ignoreDeprecations": "5.0"
   }
 }
