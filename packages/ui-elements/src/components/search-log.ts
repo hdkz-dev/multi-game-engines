@@ -307,3 +307,5 @@ export class SearchLogElement extends LitElement {
     `;
   }
 }
+
+

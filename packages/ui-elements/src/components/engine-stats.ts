@@ -1,9 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { SearchStatistics,
+import {
+  SearchStatistics,
   createUIStrings,
   formatNumber,
-  formatTime, } from "@multi-game-engines/ui-core";
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("engine-stats")
@@ -81,3 +83,5 @@ export class EngineStatsElement extends LitElement {
     `;
   }
 }
+
+

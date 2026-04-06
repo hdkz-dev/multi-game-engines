@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import { html } from "lit";
 import { EvaluationScore } from "@multi-game-engines/ui-core";
-import "../score-badge.ts";
+import "../components/score-badge.js";
 
 const meta: Meta = {
   title: "Components/ScoreBadge",

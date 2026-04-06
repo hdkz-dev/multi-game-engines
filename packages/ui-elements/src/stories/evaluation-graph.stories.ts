@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import { html } from "lit";
-import "../evaluation-graph.js";
+import "../components/evaluation-graph.js";
 
 const meta: Meta = {
   title: "Atoms/evaluation-graph",

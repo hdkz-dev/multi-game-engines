@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/web-components";
 import { html } from "lit";
-import "../search-log.js";
+import "../components/search-log.js";
 import { createMove } from "@multi-game-engines/core";
 
 const meta: Meta = {

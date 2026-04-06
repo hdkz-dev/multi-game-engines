@@ -1,7 +1,9 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { PrincipalVariation,
-  createUIStrings, } from "@multi-game-engines/ui-core";
+import {
+  PrincipalVariation,
+  createUIStrings,
+} from "@multi-game-engines/ui-core";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import "./score-badge.js";
 
@@ -117,3 +119,5 @@ export class PVListElement extends LitElement {
     `;
   }
 }
+
+

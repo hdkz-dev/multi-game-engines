@@ -2,5 +2,5 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "outDir": "./dist" },
   "include": ["src/**/*"],
-  "exclude": ["src/stories/**/*", ".storybook/**/*"]
+  "exclude": [".storybook/**/*"]
 }

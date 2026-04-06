@@ -1,6 +1,6 @@
 import { html } from "lit";
 import type { Meta, StoryObj } from "@storybook/web-components";
-import "../pv-list.js";
+import "../components/pv-list.js";
 
 const meta: Meta = {
   title: "Molecules/PVList",
