@@ -40,10 +40,10 @@
   "devDependencies": {
     "@multi-game-engines/domain-shogi": "workspace:*",
     "@multi-game-engines/core": "workspace:*",
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.2"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4"
   },
   "scripts": {
     "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
