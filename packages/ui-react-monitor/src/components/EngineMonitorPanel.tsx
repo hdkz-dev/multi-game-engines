@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useId, useMemo } from "react";
+import React, { useCallback, useId, useMemo, useState, useRef } from "react";
 import {
   IEngine,
   IBaseSearchOptions,
@@ -54,9 +54,9 @@ export function EngineMonitorPanel<
 }: EngineMonitorPanelProps<T_OPTIONS, T_INFO, T_RESULT>) {
   const { strings } = useEngineUI();
   const { state, status, search, stop } = useEngineMonitor(engine);
-  const [activeTab, setActiveTab] = React.useState<"pv" | "log">("pv");
-  const pvTabRef = React.useRef<HTMLButtonElement>(null);
-  const logTabRef = React.useRef<HTMLButtonElement>(null);
+  const [activeTab, setActiveTab] = useState<"pv" | "log">("pv");
+  const pvTabRef = useRef<HTMLButtonElement>(null);
+  const logTabRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const titleId = `engine-monitor-title-${panelId}`;
 

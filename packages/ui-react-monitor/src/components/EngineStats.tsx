@@ -1,8 +1,10 @@
-import React from "react";
-import { SearchStatistics,
+import React, { memo } from "react";
+import {
+  SearchStatistics,
   EngineUIStrings,
   formatNumber,
-  formatTime, } from "@multi-game-engines/ui-core";
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { Gauge, Cpu, Layers, Timer } from "lucide-react";
 import { cn } from "../utils/cn.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
@@ -16,7 +18,7 @@ interface EngineStatsProps {
 /**
  * 探索の統計情報（Depth, Nodes, NPS, Time）を表示するコンポーネント。
  */
-export const EngineStats: React.FC<EngineStatsProps> = React.memo(
+export const EngineStats: React.FC<EngineStatsProps> = memo(
   ({ stats, className, strings: propStrings }) => {
     const { strings: contextStrings } = useEngineUI();
     const strings = propStrings || contextStrings;

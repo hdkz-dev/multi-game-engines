@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { SearchMonitor } from "../monitor.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 
 // Mock type definitions
 type MockState = { count: number; lastRaw: string };
@@ -50,6 +55,7 @@ describe("SearchMonitor (Throttling)", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
@@ -120,5 +126,68 @@ describe("SearchMonitor (Throttling)", () => {
 
     // Updates should not be reflected after stopping
     expect(monitor.getState().lastRaw).toBe("");
+  });
+
+  it("should use requestAnimationFrame when available and cancel on stop", async () => {
+    const cancelRAF = vi.fn();
+    vi.stubGlobal("cancelAnimationFrame", cancelRAF);
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      setTimeout(cb, 16);
+      return 42;
+    });
+
+    const transformer = (state: MockState) => state;
+    const monitor = new SearchMonitor<
+      MockState,
+      IBaseSearchOptions,
+      MockInfo & IBaseSearchInfo,
+      IBaseSearchResult
+    >(mockEngine, { count: 0, lastRaw: "" }, transformer);
+
+    monitor.startMonitoring();
+    infoCallback(createMockInfo("msg1"));
+    monitor.stopMonitoring();
+
+    await vi.runAllTimersAsync();
+    expect(cancelRAF).toHaveBeenCalledWith(42);
+  });
+
+  it("should handle empty pendingUpdates in processUpdates (timer fires after stop)", async () => {
+    const transformer = (state: MockState) => state;
+    const monitor = new SearchMonitor<
+      MockState,
+      IBaseSearchOptions,
+      MockInfo & IBaseSearchInfo,
+      IBaseSearchResult
+    >(mockEngine, { count: 0, lastRaw: "" }, transformer);
+
+    monitor.startMonitoring();
+    infoCallback(createMockInfo("msg1"));
+    monitor.stopMonitoring();
+    await vi.runAllTimersAsync();
+    expect(monitor.getState().lastRaw).toBe("");
+  });
+
+  it("should expose getSnapshot, search, stop, and getStatus", async () => {
+    const transformer = (state: MockState) => state;
+    const monitor = new SearchMonitor<
+      MockState,
+      IBaseSearchOptions,
+      MockInfo & IBaseSearchInfo,
+      IBaseSearchResult
+    >(mockEngine, { count: 0, lastRaw: "" }, transformer);
+
+    monitor.startMonitoring();
+
+    expect(monitor.getSnapshot()).toEqual({ count: 0, lastRaw: "" });
+    expect(monitor.getStatus()).toBe("ready");
+
+    vi.mocked(mockEngine.search).mockResolvedValue({} as IBaseSearchResult);
+    await monitor.search({} as IBaseSearchOptions);
+    expect(mockEngine.search).toHaveBeenCalled();
+
+    vi.mocked(mockEngine.stop).mockResolvedValue(undefined);
+    await monitor.stop();
+    expect(mockEngine.stop).toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
 import { MockEngine } from "../mocks/MockEngine.js";
@@ -25,9 +25,9 @@ type Story = StoryObj<typeof EngineMonitorPanel>;
  * 基本的な表示と操作のテスト
  */
 const InteractivePanel = () => {
-  const engine = React.useMemo(() => new MockEngine(), []);
+  const engine = useMemo(() => new MockEngine(), []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       void engine.dispose();
     };

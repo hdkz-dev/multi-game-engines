@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createTranslator } from "../index.js";
+import { createTranslator, getObjectPath } from "../index.js";
 
 describe("createTranslator", () => {
   const locales = {
@@ -60,5 +60,15 @@ describe("createTranslator", () => {
     };
     const t = createTranslator(deepLocales.en);
     expect(t("a.b.c.d")).toBe("Found");
+  });
+});
+
+describe("getObjectPath", () => {
+  it("should return undefined when intermediate key is not an object", () => {
+    expect(getObjectPath({ a: "string" }, "a.b")).toBeUndefined();
+  });
+
+  it("should return undefined for null input", () => {
+    expect(getObjectPath(null, "a")).toBeUndefined();
   });
 });
