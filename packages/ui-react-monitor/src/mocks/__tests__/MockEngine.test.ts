@@ -97,4 +97,81 @@ describe("MockEngine", () => {
     expect(onInfo).toHaveBeenCalled();
     cleanup();
   });
+
+  it("should call onSearchResult listeners when search completes", async () => {
+    const onResult = vi.fn();
+    const cleanup = engine.onSearchResult(onResult);
+
+    await engine.search({});
+    // Advance past 10 ticks (depth 10 triggers result)
+    await vi.advanceTimersByTimeAsync(1100);
+
+    expect(onResult).toHaveBeenCalled();
+    cleanup();
+  });
+
+  it("should load: go through loading -> ready status", async () => {
+    const statuses: string[] = [];
+    engine.onStatusChange((s) => statuses.push(s));
+    const loadPromise = engine.load();
+    await vi.advanceTimersByTimeAsync(600);
+    await loadPromise;
+    expect(statuses).toContain("loading");
+    expect(statuses).toContain("ready");
+  });
+
+  it("should set lastError and throw when failOnSearch is true", async () => {
+    const failEngine = new MockEngine({ failOnSearch: true });
+    await expect(failEngine.search({})).rejects.toThrow();
+    expect(failEngine.lastError).not.toBeNull();
+    expect(failEngine.status).toBe("error");
+    await failEngine.dispose();
+  });
+
+  it("should support use and unuse middleware without throwing", () => {
+    const middleware = {
+      id: "test-middleware",
+      onInfo: vi.fn(),
+    };
+    const result = engine.use(middleware as never);
+    expect(result).toBe(engine);
+
+    engine.unuse(middleware as never);
+    engine.unuse("test-middleware");
+  });
+
+  it("should return unsubscribe noop from onProgress", () => {
+    const cleanup = engine.onProgress(vi.fn());
+    expect(typeof cleanup).toBe("function");
+    cleanup();
+  });
+
+  it("should call onTelemetry listeners and support unsubscribe", () => {
+    const onTelemetry = vi.fn();
+    const cleanup = engine.onTelemetry(onTelemetry);
+
+    engine.emitTelemetry({
+      type: "lifecycle",
+      timestamp: Date.now(),
+      metadata: {
+        component: "test",
+        action: "test_action",
+        engineId: engine.id,
+      },
+    });
+
+    expect(onTelemetry).toHaveBeenCalledTimes(1);
+
+    cleanup();
+    engine.emitTelemetry({
+      type: "lifecycle",
+      timestamp: Date.now(),
+      metadata: {
+        component: "test",
+        action: "after_unsubscribe",
+        engineId: engine.id,
+      },
+    });
+    expect(onTelemetry).toHaveBeenCalledTimes(1);
+  });
 });

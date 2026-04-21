@@ -164,4 +164,60 @@ describe("RemoteRegistry", () => {
     await registry.load();
     expect(fetch).toHaveBeenCalledTimes(1);
   });
+
+  it("should fire abort via timer and throw NETWORK_ERROR", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.mocked(fetch).mockImplementation(
+        (_url, init) =>
+          new Promise((_resolve, reject) => {
+            const signal = (init as RequestInit).signal as AbortSignal;
+            signal.addEventListener("abort", () => {
+              reject(
+                new DOMException("The operation was aborted", "AbortError"),
+              );
+            });
+          }),
+      );
+
+      const registry = new RemoteRegistry(mockUrl);
+      const loadPromise = registry.load();
+      // Attach a no-op catch before advancing timers to prevent the
+      // unhandled rejection report that fires when the abort timer triggers
+      // and the promise rejects before our expect handler is registered.
+      void loadPromise.catch(() => {});
+      await vi.advanceTimersByTimeAsync(10_001);
+      await expect(loadPromise).rejects.toThrow(
+        expect.objectContaining({ code: "NETWORK_ERROR" }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("should throw invalidSriFormat when SRI has no dash", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl, "invalidsriformat");
+    await expect(registry.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "registry.invalidSriFormat" }),
+    );
+  });
+
+  it("should throw SECURITY_ERROR for unsupported SRI algorithm", async () => {
+    const encodedData = new TextEncoder().encode(JSON.stringify(mockData));
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => encodedData.buffer,
+    } as Response);
+
+    const registry = new RemoteRegistry(mockUrl, "sha1-abc");
+    await expect(registry.load()).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "registry.unsupportedAlgorithm" }),
+    );
+  });
 });

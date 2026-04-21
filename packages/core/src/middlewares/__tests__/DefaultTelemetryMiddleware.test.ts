@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { DefaultTelemetryMiddleware } from "../DefaultTelemetryMiddleware.js";
-import { IMiddlewareContext,
+import {
+  IMiddlewareContext,
   ITelemetryEvent,
-  MiddlewarePriority, } from "../../types.js";
+  MiddlewarePriority,
+} from "../../types.js";
 
 describe("DefaultTelemetryMiddleware", () => {
   let middleware: DefaultTelemetryMiddleware;
@@ -103,5 +105,85 @@ describe("DefaultTelemetryMiddleware", () => {
   it("should not emit telemetry if start time is missing (e.g. unexpected result flow)", async () => {
     await middleware.onResult({}, context);
     expect(emitTelemetrySpy).not.toHaveBeenCalled();
+  });
+
+  it("should emit search telemetry from onInfo", async () => {
+    const info = { depth: 5, raw: "info depth 5" };
+    const result = await middleware.onInfo(info, context);
+    expect(result).toBe(info);
+    expect(emitTelemetrySpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "search" }),
+    );
+  });
+
+  it("should not throw from onInfo when emitTelemetry is missing", async () => {
+    const { emitTelemetry: _omit, ...contextNoEmit } = context;
+    const info = { raw: "info" };
+    const result = await middleware.onInfo(info, contextNoEmit);
+    expect(result).toBe(info);
+  });
+
+  it("should emit lifecycle telemetry from onProgress", async () => {
+    const progress = {
+      status: "loading" as const,
+      loadedBytes: 500,
+      totalBytes: 1000,
+    };
+    await middleware.onProgress(progress, context);
+    expect(emitTelemetrySpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "lifecycle" }),
+    );
+  });
+
+  it("should not throw from onProgress when emitTelemetry is missing", async () => {
+    const { emitTelemetry: _omit2, ...contextNoEmit } = context;
+    await middleware.onProgress(
+      { status: "loading" as const, loadedBytes: 0, totalBytes: 100 },
+      contextNoEmit,
+    );
+  });
+
+  it("should capture memory from performance.memory if available", async () => {
+    const mockPerf = performance as Performance & {
+      memory?: { usedJSHeapSize: number; totalJSHeapSize: number };
+    };
+    Object.defineProperty(mockPerf, "memory", {
+      value: { usedJSHeapSize: 1000, totalJSHeapSize: 2000 },
+      configurable: true,
+      writable: true,
+    });
+
+    await middleware.onCommand("go", context);
+    advanceTime(10);
+    await middleware.onResult({}, context);
+
+    const call = emitTelemetrySpy.mock.calls[0]?.[0] as {
+      metadata?: { memory?: unknown };
+    };
+    expect(call?.metadata?.memory).toBeDefined();
+
+    Object.defineProperty(mockPerf, "memory", {
+      value: undefined,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it("should capture memory from measureUserAgentSpecificMemory if available", async () => {
+    const mockPerf = performance as Performance & {
+      measureUserAgentSpecificMemory?: () => Promise<{ bytes: number }>;
+    };
+    mockPerf.measureUserAgentSpecificMemory = async () => ({ bytes: 4096 });
+
+    await middleware.onCommand("go", context);
+    advanceTime(10);
+    await middleware.onResult({}, context);
+
+    const call = emitTelemetrySpy.mock.calls[0]?.[0] as {
+      metadata?: { memory?: unknown };
+    };
+    expect(call?.metadata?.memory).toBeDefined();
+
+    delete mockPerf.measureUserAgentSpecificMemory;
   });
 });

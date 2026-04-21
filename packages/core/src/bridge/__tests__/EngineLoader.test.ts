@@ -286,6 +286,36 @@ describe("EngineLoader", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalled();
   });
 
+  it("should reject invalid URL format", async () => {
+    const config: IEngineSourceConfig = {
+      url: "not a valid url with spaces",
+      type: "script",
+      sri: dummySRI,
+    };
+    await expect(loader.loadResource("test", config)).rejects.toThrow();
+  });
+
+  it("should handle json and text resource types", async () => {
+    vi.mocked(storage.get).mockResolvedValue(null);
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      headers: { get: () => null } as unknown as Headers,
+      arrayBuffer: async () => new ArrayBuffer(0),
+    } as Response);
+
+    await loader.loadResource("test", {
+      url: "https://test.com/data.json",
+      type: "json" as never,
+      sri: dummySRI,
+    });
+    await loader.loadResource("test2", {
+      url: "https://test.com/data.txt",
+      type: "text" as never,
+      sri: dummySRI,
+    });
+    expect(URL.createObjectURL).toHaveBeenCalledTimes(2);
+  });
+
   it("物理的な URL 解放の検証: dispose 時に全ての Blob URL が確実に破棄されること", async () => {
     vi.mocked(fetch).mockResolvedValue({
       ok: true,

@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **Comprehensive Test Coverage Uplift (2026-04-21)**: Systematically improved unit test coverage across 9 core packages, adding new test files and extending existing test suites to cover edge cases, error paths, and async lifecycle behaviours:
+  - `core`: 76.26% → 84.23% — Added coverage for `BaseAdapter` stream-cancel lifecycle, `EngineFacade` concurrent search/dispose, `EngineBatchAnalyzer` cancel/pause/priority paths, `EngineConcurrencyController` status transitions, `EngineLoader` JSON/text MIME types and invalid URL rejection, `ResourceInjector` VFS mounting and Emscripten module adaptation, `DefaultTelemetryMiddleware` `onInfo`/`onProgress` paths and memory sampling, `MockAdapter` stop-mid-search and listener override paths.
+  - `ui-react-monitor`: 63.76% → 97.7% — Added `SearchLog.test.tsx` (new), extended `EngineMonitorPanel.test.tsx` (keyboard navigation, error states, mate score), `useEngineMonitor.test.tsx` (status propagation, cleanup on unmount), `MockEngine.test.ts` (load lifecycle, failOnSearch, middleware, telemetry).
+  - `ui-elements`: 68.21% → 96.02% — Added scroll and move-click dispatch tests for `SearchLogElement`.
+  - `ui-shogi-elements`: 75.91% → 98.54% — Extended keyboard navigation and board interaction tests for `ShogiBoard`.
+  - `ui-vue-monitor`: 78.32% → 94.4% — Added component rendering and event tests.
+  - `ui-vue-core`: ~80% → 93.33% — Extended `EngineUIProvider` locale and slot tests.
+  - `registry`: 85.86% → 93.47% — Extended registry lifecycle and error path tests.
+  - `ui-react-core`: 71.42% → 100% — Full coverage of hooks and provider.
+  - `i18n-core`: ~85% → 100% — Full coverage of translation utilities.
+  - **New test files**: `packages/ui-elements/src/__tests__/components.test.ts`, `packages/ui-react-monitor/src/__tests__/SearchLog.test.tsx`, `packages/ui-vue-monitor/src/__tests__/components.test.ts`, `packages/adapter-katago/src/__tests__/createKataGoEngine.test.ts`, and domain edge-case test files for all 10 game domains (backgammon, checkers, chess, go, gomoku, janggi, mahjong, reversi, shogi, xiangqi).
+
 - **Federated i18n Architecture (ADR-049)**: Decoupled the monolithic i18n package into domain-isolated physical packages (`i18n-core`, `common`, `chess`, `shogi`, `engines`, `dashboard`). This ensures "Pay-as-you-go" bundle sizes and physically prevents cross-domain knowledge leakage.
 - **Zero-Any i18n Safety**: Achieved 100% type safety for dynamic translation access via recursive `DeepRecord` types and Branded `I18nKey`, structurally eliminating unsafe casts project-wide.
 - **Standardized Directory Structure (ADR-046)**: Reorganized all 39 packages into a predictable, best-practice layout. Consolidated components into `src/components/`, styles into `src/styles/`, and modularized `ui-core`.

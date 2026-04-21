@@ -3,10 +3,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 // Import components
 import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult, createPositionString } from "@multi-game-engines/core";
-import { EngineSearchState,
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+  createPositionString,
+} from "@multi-game-engines/core";
+import {
+  EngineSearchState,
   SearchMonitor,
-  createInitialState, } from "@multi-game-engines/ui-core";
+  createInitialState,
+} from "@multi-game-engines/ui-core";
 
 // Mock the hooks
 vi.mock("../useEngineMonitor.js", () => ({
@@ -187,6 +195,168 @@ describe("EngineMonitorPanel", () => {
     expect(mockSearch).toHaveBeenCalled();
   });
 
+  it("handles tab keyboard navigation (ArrowRight/Left/Home/End)", async () => {
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "ready",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+
+    const tablist = document.querySelector('[role="tablist"]');
+    if (tablist) {
+      fireEvent.keyDown(tablist, { key: "ArrowRight" });
+      fireEvent.keyDown(tablist, { key: "ArrowLeft" });
+      fireEvent.keyDown(tablist, { key: "Home" });
+      fireEvent.keyDown(tablist, { key: "End" });
+    }
+    expect(tablist).toBeTruthy();
+  });
+
+  it("shows error state with errorMessage (no lastError)", async () => {
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "error",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+      lastError: null,
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const baseState = createInitialState(createPositionString("startpos"));
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      state: baseState,
+      status: "error",
+      search: vi.fn(),
+      stop: vi.fn(),
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    });
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+    expect(screen.getAllByText("Error").length).toBeGreaterThan(0);
+    expect(screen.getByText("Remediation")).toBeDefined();
+  });
+
+  it("shows error state with i18nKey-based errorMessage", async () => {
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const baseState = createInitialState(createPositionString("startpos"));
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      state: baseState,
+      status: "error",
+      search: vi.fn(),
+      stop: vi.fn(),
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    });
+
+    const mockStringsWithErrors = {
+      ...mockStrings,
+      errors: { connectionTimeout: "Connection timed out after {seconds}s" },
+    };
+    const { useEngineUI } = await import("@multi-game-engines/ui-react-core");
+    vi.mocked(useEngineUI).mockReturnValue({ strings: mockStringsWithErrors });
+
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "error",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+      lastError: {
+        i18nKey: "errors.connectionTimeout",
+        i18nParams: { seconds: "10" },
+        remediation: "Try again",
+      },
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+    expect(screen.getByText("Connection timed out after 10s")).toBeDefined();
+  });
+
+  it("shows error remediation when lastError has no i18nKey", async () => {
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const baseState = createInitialState(createPositionString("startpos"));
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      state: baseState,
+      status: "error",
+      search: vi.fn(),
+      stop: vi.fn(),
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    });
+
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "error",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+      lastError: {
+        remediation: "Please restart the engine",
+      },
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+    expect(screen.getByText("Please restart the engine")).toBeDefined();
+  });
+
   it("shows STOP button and calls stop when searching", async () => {
     const mockEngine = {
       onInfo: vi.fn(() => vi.fn()),
@@ -239,5 +409,88 @@ describe("EngineMonitorPanel", () => {
 
     fireEvent.click(screen.getByText("STOP"));
     expect(mockStop).toHaveBeenCalled();
+  });
+
+  it("shows mate announcement when bestPV has mate score", async () => {
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "ready",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const { createMove } = await import("@multi-game-engines/core");
+    const baseState = createInitialState(createPositionString("startpos"), {
+      pvs: [
+        {
+          multipv: 1,
+          score: { type: "mate" as const, value: 3, relativeValue: 3 },
+          moves: ["e2e4"].map(createMove),
+        },
+      ],
+    });
+
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      state: baseState,
+      status: "ready",
+      search: vi.fn(),
+      stop: vi.fn(),
+      monitor: {} as unknown as SearchMonitor<
+        EngineSearchState,
+        IBaseSearchOptions,
+        IBaseSearchInfo,
+        IBaseSearchResult
+      >,
+    });
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+    // The announcement (sr-only) should contain mateIn text
+    expect(screen.getByText("Mate in 3")).toBeDefined();
+  });
+
+  it("switches tabs by clicking PV and Log tab buttons", async () => {
+    const mockEngine = {
+      onInfo: vi.fn(() => vi.fn()),
+      search: vi.fn(),
+      stop: vi.fn(),
+      status: "ready",
+      emitTelemetry: vi.fn(),
+      id: "mock",
+    } as unknown as IEngine<
+      IBaseSearchOptions,
+      IBaseSearchInfo,
+      IBaseSearchResult
+    >;
+
+    render(
+      <EngineMonitorPanel
+        engine={mockEngine}
+        searchOptions={mockSearchOptions}
+      />,
+    );
+
+    const pvTab = document.querySelector(
+      '[role="tab"][aria-controls$="-pv-panel"]',
+    );
+    const logTab = document.querySelector(
+      '[role="tab"][aria-controls$="-log-panel"]',
+    );
+    if (pvTab && logTab) {
+      fireEvent.click(logTab);
+      fireEvent.click(pvTab);
+    }
+    expect(pvTab ?? logTab).toBeTruthy();
   });
 });

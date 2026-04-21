@@ -144,4 +144,106 @@ describe("GTPParser", () => {
       expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
     );
   });
+
+  describe("createOptionCommand() type validation", () => {
+    it("should throw TypeError when value is null", () => {
+      expect(() =>
+        parser.createOptionCommand("opt", null as unknown as string),
+      ).toThrow(TypeError);
+    });
+
+    it("should throw TypeError when value is undefined", () => {
+      expect(() =>
+        parser.createOptionCommand("opt", undefined as unknown as string),
+      ).toThrow(TypeError);
+    });
+
+    it("should throw TypeError when value is an object", () => {
+      expect(() =>
+        parser.createOptionCommand("opt", {} as unknown as string),
+      ).toThrow(TypeError);
+    });
+
+    it("should accept boolean value", () => {
+      expect(parser.createOptionCommand("analysis_ponder", true)).toBe(
+        "set_option analysis_ponder true",
+      );
+    });
+  });
+
+  describe("translateError() edge cases", () => {
+    it("should return null when message does not start with '?'", () => {
+      expect(parser.translateError("ERROR invalid move")).toBeNull();
+    });
+
+    it("should return null when message starts with '?' but has no 'invalid'", () => {
+      expect(parser.translateError("? unknown command")).toBeNull();
+    });
+
+    it("should return i18n key when message starts with '?' and contains 'invalid'", () => {
+      expect(parser.translateError("? invalid move")).toBe(
+        "adapters.gtp.errors.invalidResponse",
+      );
+    });
+
+    it("should be case-insensitive for 'invalid' check", () => {
+      expect(parser.translateError("? INVALID COORDINATE")).toBe(
+        "adapters.gtp.errors.invalidResponse",
+      );
+    });
+  });
+
+  describe("createSearchCommand() kataInterval edge cases", () => {
+    it("should include kata-analyze when kataInterval is 0 (finite)", () => {
+      const cmds = parser.createSearchCommand({
+        kataInterval: 0,
+        color: "black",
+      });
+      expect(cmds).toContain("kata-analyze interval 0");
+    });
+
+    it("should exclude kata-analyze when kataInterval is Infinity", () => {
+      const cmds = parser.createSearchCommand({
+        kataInterval: Infinity,
+        color: "black",
+      });
+      expect(cmds.some((c) => c.startsWith("kata-analyze"))).toBe(false);
+    });
+
+    it("should exclude kata-analyze when kataInterval is NaN", () => {
+      const cmds = parser.createSearchCommand({
+        kataInterval: NaN,
+        color: "black",
+      });
+      expect(cmds.some((c) => c.startsWith("kata-analyze"))).toBe(false);
+    });
+
+    it("should include kata-analyze when kataInterval is a numeric string '5'", () => {
+      const cmds = parser.createSearchCommand({
+        kataInterval: "5" as unknown as number,
+        color: "black",
+      });
+      expect(cmds).toContain("kata-analyze interval 5");
+    });
+
+    it("should not include kata-analyze when kataInterval is null", () => {
+      const cmds = parser.createSearchCommand({
+        kataInterval: null as unknown as number,
+        color: "black",
+      });
+      expect(cmds.some((c) => c.startsWith("kata-analyze"))).toBe(false);
+    });
+
+    it("should include loadsgf command when board is provided", () => {
+      const board = "A1 B2" as unknown as GOBoard;
+      const cmds = parser.createSearchCommand({ board, color: "black" });
+      expect(cmds).toContain("loadsgf A1 B2");
+    });
+  });
+
+  describe("createStopCommand", () => {
+    it("should return 'stop'", () => {
+      expect(parser.createStopCommand()).toBe("stop");
+    });
+  });
 });

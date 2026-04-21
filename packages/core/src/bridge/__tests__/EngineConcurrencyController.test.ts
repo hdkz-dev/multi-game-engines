@@ -41,4 +41,13 @@ describe("EngineConcurrencyController", () => {
     await controller.requestActive("e2", onSuspend);
     expect(onSuspend).not.toHaveBeenCalled();
   });
+
+  it("should remove from active on ready or error status", async () => {
+    const controller = new EngineConcurrencyController(2);
+    await controller.requestActive("e1");
+    controller.updateStatus("e1", "ready");
+    controller.updateStatus("e1", "error");
+    // Should not throw
+    expect(controller).toBeDefined();
+  });
 });

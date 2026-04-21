@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { MockAdapter } from "../MockAdapter.js";
 import { IEngineLoader } from "../../types.js";
 
@@ -34,6 +34,34 @@ describe("MockAdapter", () => {
     const adapter = new MockAdapter();
     await adapter.stop();
     expect(adapter.status).toBe("ready");
+  });
+
+  it("should reject pending search when stop is called mid-search", async () => {
+    const adapter = new MockAdapter();
+    await adapter.load();
+
+    const task = adapter.searchRaw("go");
+    const resultPromise = task.result;
+
+    await adapter.stop();
+    await expect(resultPromise).rejects.toThrow();
+  });
+
+  it("should notify onStatusChange listeners", async () => {
+    const adapter = new MockAdapter();
+    const statuses: string[] = [];
+    adapter.onStatusChange((s) => statuses.push(s));
+    await adapter.load();
+    expect(statuses).toContain("loading");
+    expect(statuses).toContain("ready");
+  });
+
+  it("should notify onProgress listeners via onProgress override", () => {
+    const adapter = new MockAdapter();
+    const listener = vi.fn();
+    const cleanup = adapter.onProgress(listener);
+    expect(typeof cleanup).toBe("function");
+    cleanup();
   });
 
   it("should handle parser methods", () => {

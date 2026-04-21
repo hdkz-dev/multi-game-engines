@@ -60,7 +60,9 @@ describe("KingsRowParser", () => {
         // Testing injection via custom field due to index signature
         "malicious\nkey": "data",
       }),
-    ).toThrow(expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }));
+    ).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 
   it("should reject injection in nested option values", () => {
@@ -72,5 +74,48 @@ describe("KingsRowParser", () => {
     expect(() => parser.createOptionCommand("Threads", "4\rstop")).toThrow(
       /Potential command injection/,
     );
+  });
+});
+
+describe("KingsRowParser – uncovered branches", () => {
+  const parser = new KingsRowParser();
+
+  it("should return null for non-string in parseInfo", () => {
+    expect(parser.parseInfo({ type: "info" })).toBeNull();
+    expect(parser.parseInfo(null as unknown as string)).toBeNull();
+  });
+
+  it("should return null for non-string in parseResult", () => {
+    expect(parser.parseResult({ type: "result" })).toBeNull();
+  });
+
+  it("should return bestMove null for 'bestmove: none' variant", () => {
+    const result = parser.parseResult("bestmove: none");
+    expect(result?.bestMove).toBeNull();
+  });
+
+  it("should return bestMove null when moveToken fails createCheckersMove (catch block)", () => {
+    // "-15" matches /[\d-]+/ regex but is an invalid checkers move (leading dash)
+    const result = parser.parseResult("bestmove: -15");
+    expect(result).not.toBeNull();
+    expect(result?.bestMove).toBeNull();
+  });
+
+  it("should return null for string matching 'bestmove: ' but no move pattern", () => {
+    expect(parser.parseResult("bestmove: (invalid_text)")).toBeNull();
+  });
+
+  it("should create search command with board option", () => {
+    const board = createCheckersBoard("11-15");
+    const commands = parser.createSearchCommand({ board });
+    expect(commands).toContain(`set board ${board}`);
+    expect(commands).toContain("go");
+  });
+
+  it("should create search command with no board", () => {
+    const commands = parser.createSearchCommand(
+      {} as Parameters<typeof parser.createSearchCommand>[0],
+    );
+    expect(commands).toEqual(["go"]);
   });
 });
