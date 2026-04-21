@@ -129,10 +129,9 @@ describe("PVList.vue", () => {
   it("should emit move-click on button click", async () => {
     const wrapper = mount(PVList, { props: { pvs } });
     const buttons = wrapper.findAll("button");
-    if (buttons.length > 0) {
-      await buttons[0]!.trigger("click");
-      expect(wrapper.emitted("move-click")).toBeTruthy();
-    }
+    expect(buttons.length).toBeGreaterThan(0);
+    await buttons[0]!.trigger("click");
+    expect(wrapper.emitted("move-click")).toBeTruthy();
   });
 });
 
@@ -199,10 +198,9 @@ describe("SearchLog.vue", () => {
   it("should emit move-click when a move button is clicked", async () => {
     const wrapper = mount(SearchLog, { props: { log } });
     const buttons = wrapper.findAll("button");
-    if (buttons.length > 0) {
-      await buttons[0]!.trigger("click");
-      expect(wrapper.emitted("move-click")).toBeTruthy();
-    }
+    expect(buttons.length).toBeGreaterThan(0);
+    await buttons[0]!.trigger("click");
+    expect(wrapper.emitted("move-click")).toBeTruthy();
   });
 
   it("should respect autoScroll prop", () => {

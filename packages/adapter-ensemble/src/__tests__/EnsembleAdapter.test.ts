@@ -4,7 +4,7 @@ import { MajorityVoteStrategy } from "../strategies/MajorityVoteStrategy.js";
 import {
   IEngine,
   IBaseSearchResult,
-  PositionString,
+  createPositionString,
   EngineTelemetry,
   IMiddleware,
 } from "@multi-game-engines/core";
@@ -50,7 +50,7 @@ describe("EnsembleAdapter", () => {
 
     await ensemble.load();
     const result = await ensemble.search({
-      fen: "startpos" as PositionString,
+      fen: createPositionString("startpos"),
     });
 
     expect(result.bestMove).toBe("e2e4");
@@ -80,7 +80,7 @@ describe("EnsembleAdapter", () => {
     );
     // status is "uninitialized" — not "ready"
     await expect(
-      ensemble.search({ fen: "startpos" as PositionString }),
+      ensemble.search({ fen: createPositionString("startpos") }),
     ).rejects.toMatchObject({
       code: "NOT_READY",
     });
@@ -103,7 +103,7 @@ describe("EnsembleAdapter", () => {
     await ensemble.load();
 
     await expect(
-      ensemble.search({ fen: "startpos" as PositionString }),
+      ensemble.search({ fen: createPositionString("startpos") }),
     ).rejects.toBeDefined();
     expect(ensemble.status).toBe("error");
     expect(ensemble.lastError).not.toBeNull();

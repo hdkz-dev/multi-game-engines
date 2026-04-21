@@ -1,13 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { USIAdapter } from "../USIAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
@@ -59,20 +50,12 @@ describe("USIAdapter", () => {
     revokeByEngineId: vi.fn(),
   };
 
-  beforeAll(() => {
+  beforeEach(() => {
+    vi.stubGlobal("Worker", MockWorker);
     vi.stubGlobal("URL", {
       createObjectURL: vi.fn().mockReturnValue("blob:mock"),
       revokeObjectURL: vi.fn(),
     });
-  });
-
-  afterAll(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
-
-  beforeEach(() => {
-    vi.stubGlobal("Worker", MockWorker);
     mockLoader.loadResource.mockClear();
     mockLoader.loadResources.mockClear();
     mockLoader.revoke.mockClear();
@@ -82,6 +65,7 @@ describe("USIAdapter", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it("should initialize with config", () => {

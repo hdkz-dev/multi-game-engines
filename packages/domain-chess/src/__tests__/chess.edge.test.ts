@@ -36,7 +36,7 @@ describe("createFEN – valid inputs", () => {
   });
 
   it("accepts all four castling rights 'KQkq'", () => {
-    expect(() => createFEN(`${INITIAL.replace("KQkq", "KQkq")}`)).not.toThrow();
+    expect(() => createFEN(INITIAL)).not.toThrow();
   });
 
   it("accepts only K castling right", () => {

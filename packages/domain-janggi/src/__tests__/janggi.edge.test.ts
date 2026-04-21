@@ -6,8 +6,9 @@
  *   - Column: a-i (9 columns)
  *   - Row: 0-9 (10 rows, unlike most Western games that start from 1)
  *
- * Note: the implementation does NOT perform injection detection on moves or
- * positions — control characters cause VALIDATION_ERROR via regex failure.
+ * Note: createJanggiMove performs injection detection (control characters →
+ * SECURITY_ERROR) before format validation. createJanggiPosition delegates to
+ * createPositionString which also rejects control characters with SECURITY_ERROR.
  */
 import { describe, it, expect } from "vitest";
 import { createJanggiMove, createJanggiPosition } from "../index.js";
@@ -92,9 +93,9 @@ describe("createJanggiMove – invalid inputs", () => {
     );
   });
 
-  it("throws VALIDATION_ERROR for control character injection (regex failure)", () => {
+  it("throws SECURITY_ERROR for control character injection", () => {
     expect(() => createJanggiMove("a0a1\nstop")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.VALIDATION_ERROR }),
+      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
     );
   });
 

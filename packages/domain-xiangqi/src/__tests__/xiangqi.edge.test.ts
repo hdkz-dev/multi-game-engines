@@ -10,9 +10,9 @@
  *
  * XFEN: minimal validation (non-empty string only; no field parsing).
  *
- * Note: the implementation currently lacks injection detection for both
- * createXiangqiMove and createXFEN — control characters cause a
- * VALIDATION_ERROR (regex mismatch) rather than SECURITY_ERROR.
+ * Note: createXiangqiMove performs injection detection (control characters →
+ * SECURITY_ERROR) before format validation. createXFEN delegates to
+ * createPositionString which also rejects control characters with SECURITY_ERROR.
  */
 import { describe, it, expect } from "vitest";
 import { createXiangqiMove, createXFEN } from "../index.js";
@@ -105,9 +105,9 @@ describe("createXiangqiMove – invalid inputs", () => {
     );
   });
 
-  it("throws VALIDATION_ERROR for control character injection (regex failure)", () => {
+  it("throws SECURITY_ERROR for control character injection", () => {
     expect(() => createXiangqiMove("a0a1\nstop")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.VALIDATION_ERROR }),
+      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
     );
   });
 

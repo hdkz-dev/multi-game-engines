@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { EdaxParser } from "../EdaxParser.js";
-import { ReversiBoard } from "@multi-game-engines/domain-reversi";
+import {
+  ReversiBoard,
+  createReversiBoard,
+} from "@multi-game-engines/domain-reversi";
 
 describe("EdaxParser", () => {
   beforeAll(() => {
@@ -107,8 +110,7 @@ describe("EdaxParser", () => {
 
   it("should create valid search command with board and depth", () => {
     const commands = parser.createSearchCommand({
-      board:
-        "start" as unknown as import("@multi-game-engines/domain-reversi").ReversiBoard,
+      board: createReversiBoard("start"),
       depth: 15,
     });
     expect(commands).toEqual(["setboard start", "go 15"]);
@@ -116,8 +118,7 @@ describe("EdaxParser", () => {
 
   it("should use default depth 20 when depth not specified", () => {
     const commands = parser.createSearchCommand({
-      board:
-        "start" as unknown as import("@multi-game-engines/domain-reversi").ReversiBoard,
+      board: createReversiBoard("start"),
     });
     expect(commands[1]).toBe("go 20");
   });

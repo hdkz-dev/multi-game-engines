@@ -40,10 +40,12 @@ describe("createBackgammonBoard – edge cases", () => {
     expect(() => createBackgammonBoard(board)).not.toThrow();
   });
 
-  it("accepts floating-point numbers (no integer constraint)", () => {
+  // TODO: createBackgammonBoard currently uses isFinite (not isInteger), so
+  // floating-point values pass. Consider tightening to Number.isInteger in a
+  // follow-up to match the real game constraint (pieces are always whole numbers).
+  it("currently accepts floating-point numbers (isFinite only — not isInteger)", () => {
     const board = new Array(26).fill(0);
-    board[5] = 1.5; // floating point is technically invalid in real backgammon
-    // but createBackgammonBoard only checks isFinite, not isInteger
+    board[5] = 1.5;
     expect(() => createBackgammonBoard(board)).not.toThrow();
   });
 
@@ -216,7 +218,10 @@ describe("createBackgammonMove – invalid inputs", () => {
     );
   });
 
-  it("throws for semicolon injection '24/18; stop'", () => {
+  // Semicolons are not in the control-character injection list ([\r\n\t\f\v\0]),
+  // so they are rejected by the format regex with VALIDATION_ERROR rather than
+  // SECURITY_ERROR. The input is still safely rejected before reaching any engine.
+  it("throws VALIDATION_ERROR for semicolon in move '24/18; stop' (format rejection)", () => {
     expect(() => createBackgammonMove("24/18; stop")).toThrow(
       expect.objectContaining({
         i18nKey: "engine.errors.invalidBackgammonMove",

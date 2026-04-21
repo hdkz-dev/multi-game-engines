@@ -81,9 +81,9 @@ describe("createGomokuMove – invalid inputs", () => {
     );
   });
 
-  it("throws for injection attempt 'h8\\nquit'", () => {
+  it("throws SECURITY_ERROR for injection attempt 'h8\\nquit'", () => {
     expect(() => createGomokuMove("h8\nquit")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.VALIDATION_ERROR }),
+      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
     );
   });
 

@@ -85,7 +85,7 @@ describe("KingsRowAdapter", () => {
         ...mockConfig.sources,
         book: {
           url: "book.bin",
-          __unsafeNoSRI: true,
+          sri: "sha384-ValidBookSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
           type: "binary",
           mountPath: "/book.bin",
         },

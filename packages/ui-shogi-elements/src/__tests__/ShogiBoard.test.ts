@@ -139,8 +139,7 @@ describe("shogi-board Web Component", () => {
     document.body.appendChild(el);
     el.sfen = createSFEN("9/9/9/9/9/9/9/9/9 b - 1");
     await el.updateComplete;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).sfen = null;
+    (el as unknown as { sfen: unknown }).sfen = null;
     await el.updateComplete;
     expect(el.shadowRoot?.querySelector(".board")).not.toBeNull();
   });
@@ -151,8 +150,7 @@ describe("shogi-board Web Component", () => {
       .mockImplementation(() => undefined);
     const el = document.createElement("shogi-board") as ShogiBoard;
     document.body.appendChild(el);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).sfen = "TOTALLY_INVALID_SFEN_STRING";
+    (el as unknown as { sfen: unknown }).sfen = "TOTALLY_INVALID_SFEN_STRING";
     await el.updateComplete;
     expect(warnSpy).toHaveBeenCalled();
   });
@@ -162,8 +160,7 @@ describe("shogi-board Web Component", () => {
     document.body.appendChild(el);
     el.lastMove = "7g7f";
     await el.updateComplete;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (el as any).lastMove = null;
+    (el as unknown as { lastMove: unknown }).lastMove = null;
     await el.updateComplete;
     expect(el.lastMove).toBe("");
   });

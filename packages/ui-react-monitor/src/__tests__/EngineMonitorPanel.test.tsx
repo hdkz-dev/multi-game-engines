@@ -487,10 +487,9 @@ describe("EngineMonitorPanel", () => {
     const logTab = document.querySelector(
       '[role="tab"][aria-controls$="-log-panel"]',
     );
-    if (pvTab && logTab) {
-      fireEvent.click(logTab);
-      fireEvent.click(pvTab);
-    }
-    expect(pvTab ?? logTab).toBeTruthy();
+    expect(pvTab).not.toBeNull();
+    expect(logTab).not.toBeNull();
+    fireEvent.click(logTab!);
+    fireEvent.click(pvTab!);
   });
 });
