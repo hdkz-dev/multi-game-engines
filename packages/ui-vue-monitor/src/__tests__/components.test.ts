@@ -191,10 +191,13 @@ describe("SearchLog.vue", () => {
       props: { log },
       attachTo: document.body,
     });
-    await wrapper.vm.$nextTick();
-    // entry has depth=10; the table cell should contain "10"
-    expect(wrapper.text()).toContain("10");
-    wrapper.unmount();
+    try {
+      await wrapper.vm.$nextTick();
+      // entry has depth=10; the table cell should contain "10"
+      expect(wrapper.text()).toContain("10");
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it("should render empty state when log is empty", async () => {
@@ -202,10 +205,13 @@ describe("SearchLog.vue", () => {
       props: { log: [] },
       attachTo: document.body,
     });
-    await wrapper.vm.$nextTick();
-    // Template falls back to "Searching..." when strings.searching is undefined
-    expect(wrapper.text()).toContain("Searching...");
-    wrapper.unmount();
+    try {
+      await wrapper.vm.$nextTick();
+      // Template falls back to "Searching..." when strings.searching is undefined
+      expect(wrapper.text()).toContain("Searching...");
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it("should emit move-click when a move button is clicked", async () => {
@@ -228,12 +234,15 @@ describe("SearchLog.vue", () => {
       props: { log },
       attachTo: document.body,
     });
-    await wrapper.vm.$nextTick();
-    const region = wrapper.find('[role="region"]');
-    expect(region.exists()).toBe(true);
-    await region.trigger("scroll");
-    // scroll handler updates isNearBottom; component should remain mounted
-    expect(wrapper.find('[role="region"]').exists()).toBe(true);
-    wrapper.unmount();
+    try {
+      await wrapper.vm.$nextTick();
+      const region = wrapper.find('[role="region"]');
+      expect(region.exists()).toBe(true);
+      await region.trigger("scroll");
+      // scroll handler updates isNearBottom; component should remain mounted
+      expect(wrapper.find('[role="region"]').exists()).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
   });
 });

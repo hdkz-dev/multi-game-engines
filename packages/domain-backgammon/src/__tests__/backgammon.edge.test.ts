@@ -40,13 +40,14 @@ describe("createBackgammonBoard – edge cases", () => {
     expect(() => createBackgammonBoard(board)).not.toThrow();
   });
 
-  // TODO: createBackgammonBoard currently uses isFinite (not isInteger), so
-  // floating-point values pass. Consider tightening to Number.isInteger in a
-  // follow-up to match the real game constraint (pieces are always whole numbers).
-  it("currently accepts floating-point numbers (isFinite only — not isInteger)", () => {
+  it("throws for floating-point piece count (pieces must be whole integers)", () => {
     const board = new Array(26).fill(0);
     board[5] = 1.5;
-    expect(() => createBackgammonBoard(board)).not.toThrow();
+    expect(() => createBackgammonBoard(board)).toThrow(
+      expect.objectContaining({
+        i18nKey: "engine.errors.invalidBackgammonBoard",
+      }),
+    );
   });
 
   it("accepts negative-index-25 (black bar)", () => {
@@ -128,12 +129,20 @@ describe("createBackgammonMove – valid inputs", () => {
     expect(createBackgammonMove("6/OFF")).toBe("6/OFF");
   });
 
-  it("point '0/off' (valid per regex – no lower bound check)", () => {
-    expect(createBackgammonMove("0/off")).toBe("0/off");
+  it("throws for out-of-range point '0/off' (valid range is 1–24)", () => {
+    expect(() => createBackgammonMove("0/off")).toThrow(
+      expect.objectContaining({
+        i18nKey: "engine.errors.invalidBackgammonMove",
+      }),
+    );
   });
 
-  it("large point numbers (no upper bound check in implementation)", () => {
-    expect(createBackgammonMove("100/off")).toBe("100/off");
+  it("throws for out-of-range point '100/off' (valid range is 1–24)", () => {
+    expect(() => createBackgammonMove("100/off")).toThrow(
+      expect.objectContaining({
+        i18nKey: "engine.errors.invalidBackgammonMove",
+      }),
+    );
   });
 });
 
@@ -208,21 +217,30 @@ describe("createBackgammonMove – invalid inputs", () => {
 
   it("throws SECURITY_ERROR for tab injection", () => {
     expect(() => createBackgammonMove("24/18\tquit")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
+      expect.objectContaining({
+        code: EngineErrorCode.SECURITY_ERROR,
+        i18nKey: "engine.errors.injectionDetected",
+      }),
     );
   });
 
   it("throws SECURITY_ERROR for null byte injection", () => {
     expect(() => createBackgammonMove("24/18\0")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
+      expect.objectContaining({
+        code: EngineErrorCode.SECURITY_ERROR,
+        i18nKey: "engine.errors.injectionDetected",
+      }),
     );
   });
 
   it("throws SECURITY_ERROR for semicolon injection '24/18; stop'", () => {
-    // ';' is a command-concatenation character — treated as injection (SECURITY_ERROR)
-    // before the format regex runs, consistent with the Refuse by Exception policy.
+    // ';' is a command-concatenation character — rejected by ProtocolValidator
+    // (STRICT_REGEX) before the format regex runs.
     expect(() => createBackgammonMove("24/18; stop")).toThrow(
-      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
+      expect.objectContaining({
+        code: EngineErrorCode.SECURITY_ERROR,
+        i18nKey: "engine.errors.injectionDetected",
+      }),
     );
   });
 

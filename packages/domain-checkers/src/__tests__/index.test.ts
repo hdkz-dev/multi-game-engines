@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { ProtocolValidator } from "@multi-game-engines/core";
 import { createCheckersBoard, createCheckersMove } from "../index.js";
 
 describe("Checkers Domain", () => {
@@ -39,6 +40,20 @@ describe("Checkers Domain", () => {
 
     it("should throw on injection attack in board string", () => {
       expect(() => createCheckersBoard("BWBW\nstop")).toThrow(
+        expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+      );
+    });
+
+    it("should throw on nested injection payloads via ProtocolValidator recursive traversal", () => {
+      // createCheckersBoard rejects non-strings before injection check,
+      // so recursive traversal is tested directly via ProtocolValidator.assertNoInjection.
+      expect(() =>
+        ProtocolValidator.assertNoInjection(
+          { board: ["BWBW\nstop"] },
+          "CheckersBoard",
+          true,
+        ),
+      ).toThrow(
         expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
       );
     });
