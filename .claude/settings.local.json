@@ -55,7 +55,7 @@
       "Bash(pnpm --filter \"@multi-game-engines/adapter-gtp\" --filter \"@multi-game-engines/adapter-mortal\" --filter \"@multi-game-engines/adapter-janggi\" exec vitest run)",
       "Bash(pnpm --filter \"@multi-game-engines/adapter-xiangqi\" --filter \"@multi-game-engines/adapter-gnubg\" --filter \"@multi-game-engines/adapter-edax\" --filter \"@multi-game-engines/adapter-kingsrow\" exec vitest run)",
       "Bash(pnpm --filter \"@multi-game-engines/adapter-*\" --filter \"@multi-game-engines/domain-*\" exec vitest run --coverage)",
-      "Bash(pnpm --filter @multi-game-engines/__TRACKED_VAR__ exec vitest run --coverage)",
+      "Bash(pnpm --filter \"@multi-game-engines/*\" exec vitest run --coverage)",
       "Bash(pnpm --filter \"@multi-game-engines/adapter-gtp\" exec vitest run --coverage)",
       "Bash(pnpm --filter \"@multi-game-engines/adapter-mortal\" exec vitest run --coverage)",
       "Bash(grep -v \"^$\")",
@@ -91,7 +91,7 @@
       "Bash(pnpm --filter @multi-game-engines/core test --run)",
       "Bash(npx vitest *)",
       "Bash(pnpm --filter \"@multi-game-engines/i18n-core\" --filter \"@multi-game-engines/ui-react-core\" --filter \"@multi-game-engines/registry\" --filter \"@multi-game-engines/ui-shogi-elements\" --filter \"@multi-game-engines/ui-vue-monitor\" --filter \"@multi-game-engines/ui-core\" --filter \"@multi-game-engines/ui-elements\" --filter \"@multi-game-engines/ui-react-monitor\" run test --coverage --run)",
-      "Bash(pnpm --filter @multi-game-engines/__TRACKED_VAR__ test --coverage --run)",
+      "Bash(pnpm --filter \"@multi-game-engines/*\" test --coverage --run)",
       "Bash(pnpm --filter \"@multi-game-engines/i18n-core\" test --coverage --run)",
       "Bash(pnpm --filter \"@multi-game-engines/ui-react-core\" test --coverage --run)",
       "Bash(git checkout *)",
@@ -103,7 +103,12 @@
       "Bash(npx turbo *)",
       "Bash(pnpm --filter @multi-game-engines/registry test)",
       "Bash(git push *)",
-      "Bash(gh pr create --title 'test: comprehensive coverage uplift across 9 packages \\(63–100%\\)' --body ' *)"
+      "Bash(gh pr create --title 'test: comprehensive coverage uplift across 9 packages \\(63–100%\\)' --body ' *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(python3 -c ' *)",
+      "Bash(find /Users/todahide/dev-wk/oss/multi-game-engines/packages/ui-react* -name \"*.ts\" -path \"*/src/*\")",
+      "Bash(node -e \"console.log\\(Number.isFinite\\(1.5\\), Number.isInteger\\(1.5\\)\\)\")"
     ]
   }
 }

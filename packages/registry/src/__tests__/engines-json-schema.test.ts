@@ -190,28 +190,36 @@ describe("engines.json schema validation", () => {
     expect(warnSpy).toHaveBeenCalled();
   });
 
-  it("should reject URL with invalid characters (CRLF injection) via superRefine", () => {
-    new StaticRegistry({
-      version: "1.0.0",
-      engines: {
-        bad: {
-          name: "bad",
-          adapter: "mock",
-          latest: "1.0",
-          versions: {
-            "1.0": {
-              assets: {
-                main: {
-                  url: "http://example.com/\npath",
-                  type: "worker-js",
-                  sri: "sha384-bCh+jjHqO5/k1PVx7yJktl7cuplMcT1TDIfN7BbAjNTZHu9wDlApzTehK3HzbfR8",
+  it.each([
+    ["LF", "http://example.com/\npath"],
+    ["CR", "http://example.com/\rpath"],
+    ["CRLF", "http://example.com/\r\npath"],
+  ])(
+    "should reject URL with invalid characters (%s injection) via superRefine",
+    (_label, url) => {
+      warnSpy.mockClear();
+      new StaticRegistry({
+        version: "1.0.0",
+        engines: {
+          bad: {
+            name: "bad",
+            adapter: "mock",
+            latest: "1.0",
+            versions: {
+              "1.0": {
+                assets: {
+                  main: {
+                    url,
+                    type: "worker-js",
+                    sri: "sha384-bCh+jjHqO5/k1PVx7yJktl7cuplMcT1TDIfN7BbAjNTZHu9wDlApzTehK3HzbfR8",
+                  },
                 },
               },
             },
           },
         },
-      },
-    });
-    expect(warnSpy).toHaveBeenCalled();
-  });
+      });
+      expect(warnSpy).toHaveBeenCalled();
+    },
+  );
 });

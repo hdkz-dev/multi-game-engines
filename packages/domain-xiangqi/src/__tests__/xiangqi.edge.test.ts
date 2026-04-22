@@ -112,7 +112,9 @@ describe("createXiangqiMove – invalid inputs", () => {
   });
 
   it("throws VALIDATION_ERROR for non-string (null)", () => {
-    expect(() => createXiangqiMove(null as unknown as string)).toThrow();
+    expect(() => createXiangqiMove(null as unknown as string)).toThrow(
+      expect.objectContaining({ code: EngineErrorCode.VALIDATION_ERROR }),
+    );
   });
 });
 

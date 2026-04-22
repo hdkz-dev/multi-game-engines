@@ -69,7 +69,8 @@ export function createGomokuMove(move: string): GomokuMove {
     });
   }
   // 制御文字インジェクションを早期拒否 (Refuse by Exception)
-  if (/[\r\n\t\f\v\0]/.test(move)) {
+  // eslint-disable-next-line no-control-regex
+  if (/[\r\n\0\x01-\x1f\x7f]/.test(move)) {
     const i18nKey = createI18nKey("engine.errors.injectionDetected");
     const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({

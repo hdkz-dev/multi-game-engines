@@ -190,9 +190,8 @@ describe("createFEN – invalid inputs", () => {
     );
   });
 
-  it("throws VALIDATION_ERROR for en passant on invalid rank 'e4' (only rank 3 or 6 allowed)", () => {
-    // 'e4' passes char check but fails /^(?:-|[a-h][36])$/ en passant validation
-    expect(() => createFEN("8/8/8/8/8/8/8/8 w - e4 0 1")).toThrow(
+  it("throws VALIDATION_ERROR for en passant on rank 5 'e5' (only rank 3 or 6 allowed)", () => {
+    expect(() => createFEN("8/8/8/8/8/8/8/8 w - e5 0 1")).toThrow(
       expect.objectContaining({ code: EngineErrorCode.VALIDATION_ERROR }),
     );
   });

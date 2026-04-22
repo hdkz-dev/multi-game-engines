@@ -119,7 +119,21 @@ describe("USIAdapter", () => {
     const controller = new AbortController();
     class AbortingMockWorker extends MockWorker {
       postMessage = vi.fn((msg: unknown) => {
-        if (msg === "usi") controller.abort();
+        // MG_INJECT_RESOURCES handshake は完了させてから abort する
+        if (
+          msg !== null &&
+          typeof msg === "object" &&
+          "type" in msg &&
+          (msg as Record<string, unknown>).type === "MG_INJECT_RESOURCES"
+        ) {
+          setTimeout(() => {
+            if (typeof this.onmessage === "function") {
+              this.onmessage({ data: { type: "MG_RESOURCES_READY" } });
+            }
+          }, 0);
+        } else if (msg === "usi") {
+          controller.abort();
+        }
       });
     }
     vi.stubGlobal("Worker", AbortingMockWorker);

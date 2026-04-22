@@ -170,7 +170,7 @@ describe("SearchLog.vue", () => {
       nps: 50000,
       time: 200,
       multipv: 1,
-      timestamp: Date.now(),
+      timestamp: 0,
       pv: ["e2e4", "e7e5"].map(createMove),
     },
   ];
