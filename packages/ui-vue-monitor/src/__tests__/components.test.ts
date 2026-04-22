@@ -1,14 +1,21 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { mount } from "@vue/test-utils";
-import { ref } from "vue";
-import { createUIStrings } from "@multi-game-engines/ui-core";
 
-// Provide useEngineUI context for all component tests
-vi.mock("@multi-game-engines/ui-vue-core", () => ({
-  useEngineUI: () => ({
-    strings: ref(createUIStrings({})),
-  }),
-}));
+// Provide useEngineUI context for all component tests.
+// The factory must be async with await import() because vi.mock is hoisted
+// above all import statements — top-level imported variables (ref, createUIStrings)
+// are undefined at factory execution time.
+vi.mock("@multi-game-engines/ui-vue-core", async () => {
+  const [{ ref }, { createUIStrings }] = await Promise.all([
+    import("vue"),
+    import("@multi-game-engines/ui-core"),
+  ]);
+  return {
+    useEngineUI: () => ({
+      strings: ref(createUIStrings({})),
+    }),
+  };
+});
 
 import ScoreBadge from "../components/ScoreBadge.vue";
 import EngineStats from "../components/EngineStats.vue";
@@ -90,14 +97,15 @@ describe("EngineStats.vue", () => {
   it("should render visits when stats.visits is set", () => {
     const visitStats: SearchStatistics = { ...stats, visits: 5000 };
     const wrapper = mount(EngineStats, { props: { stats: visitStats } });
-    expect(wrapper.html()).toBeTruthy();
+    // formatNumber(5000) = "5.0k"
+    expect(wrapper.text()).toContain("5.0k");
   });
 
-  it("should accept className prop", () => {
+  it("should apply className prop to root element", () => {
     const wrapper = mount(EngineStats, {
       props: { stats, className: "custom-class" },
     });
-    expect(wrapper.html()).toBeTruthy();
+    expect(wrapper.classes()).toContain("custom-class");
   });
 });
 
@@ -144,19 +152,22 @@ describe("EvaluationGraph.vue", () => {
 
   it("should render SVG when entries are provided", () => {
     const wrapper = mount(EvaluationGraph, { props: { entries } });
-    expect(wrapper.html()).toBeTruthy();
+    expect(wrapper.find("svg").exists()).toBe(true);
+    expect(wrapper.find("[role='img']").exists()).toBe(true);
   });
 
   it("should render with empty entries", () => {
     const wrapper = mount(EvaluationGraph, { props: { entries: [] } });
-    expect(wrapper.html()).toBeTruthy();
+    expect(wrapper.find("svg").exists()).toBe(true);
   });
 
-  it("should accept custom height prop", () => {
+  it("should apply custom height as inline style", () => {
     const wrapper = mount(EvaluationGraph, {
       props: { entries, height: 100 },
     });
-    expect(wrapper.html()).toBeTruthy();
+    expect(wrapper.find("[role='img']").attributes("style")).toContain(
+      "height: 100px",
+    );
   });
 });
 
@@ -181,7 +192,8 @@ describe("SearchLog.vue", () => {
       attachTo: document.body,
     });
     await wrapper.vm.$nextTick();
-    expect(wrapper.html()).toBeTruthy();
+    // entry has depth=10; the table cell should contain "10"
+    expect(wrapper.text()).toContain("10");
     wrapper.unmount();
   });
 
@@ -191,7 +203,8 @@ describe("SearchLog.vue", () => {
       attachTo: document.body,
     });
     await wrapper.vm.$nextTick();
-    expect(wrapper.html()).toBeTruthy();
+    // Template falls back to "Searching..." when strings.searching is undefined
+    expect(wrapper.text()).toContain("Searching...");
     wrapper.unmount();
   });
 
@@ -207,7 +220,7 @@ describe("SearchLog.vue", () => {
     const wrapper = mount(SearchLog, {
       props: { log, autoScroll: false },
     });
-    expect(wrapper.html()).toBeTruthy();
+    expect(wrapper.find('[role="region"]').exists()).toBe(true);
   });
 
   it("should handle scroll event on container", async () => {
@@ -217,8 +230,10 @@ describe("SearchLog.vue", () => {
     });
     await wrapper.vm.$nextTick();
     const region = wrapper.find('[role="region"]');
+    expect(region.exists()).toBe(true);
     await region.trigger("scroll");
-    expect(wrapper.html()).toBeTruthy();
+    // scroll handler updates isNearBottom; component should remain mounted
+    expect(wrapper.find('[role="region"]').exists()).toBe(true);
     wrapper.unmount();
   });
 });
