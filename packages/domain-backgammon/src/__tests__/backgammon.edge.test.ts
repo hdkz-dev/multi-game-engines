@@ -218,14 +218,11 @@ describe("createBackgammonMove – invalid inputs", () => {
     );
   });
 
-  // Semicolons are not in the control-character injection list ([\r\n\t\f\v\0]),
-  // so they are rejected by the format regex with VALIDATION_ERROR rather than
-  // SECURITY_ERROR. The input is still safely rejected before reaching any engine.
-  it("throws VALIDATION_ERROR for semicolon in move '24/18; stop' (format rejection)", () => {
+  it("throws SECURITY_ERROR for semicolon injection '24/18; stop'", () => {
+    // ';' is a command-concatenation character — treated as injection (SECURITY_ERROR)
+    // before the format regex runs, consistent with the Refuse by Exception policy.
     expect(() => createBackgammonMove("24/18; stop")).toThrow(
-      expect.objectContaining({
-        i18nKey: "engine.errors.invalidBackgammonMove",
-      }),
+      expect.objectContaining({ code: EngineErrorCode.SECURITY_ERROR }),
     );
   });
 

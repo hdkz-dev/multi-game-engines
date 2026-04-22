@@ -55,7 +55,7 @@ describe("Checkers Domain", () => {
       expect(move).toBe("(none)");
     });
 
-    it("should accept multi-capture moves", () => {
+    it("should accept moves with one- and two-digit square numbers", () => {
       expect(createCheckersMove("1-10")).toBe("1-10");
       expect(createCheckersMove("22-31")).toBe("22-31");
     });

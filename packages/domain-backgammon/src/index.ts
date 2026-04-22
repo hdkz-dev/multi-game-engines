@@ -3,7 +3,8 @@
  */
 
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import { Brand,
+import {
+  Brand,
   Move,
   createMove,
   EngineError,
@@ -12,7 +13,8 @@ import { Brand,
   IBaseSearchInfo,
   IBaseSearchResult,
   truncateLog,
-  createI18nKey } from "@multi-game-engines/core";
+  createI18nKey,
+} from "@multi-game-engines/core";
 
 /**
  * バックギャモンの盤面表現。
@@ -60,8 +62,11 @@ export function createBackgammonMove(move: string): BackgammonMove {
       i18nKey,
     });
   }
-  // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
-  if (/[\r\n\t\f\v\0]/.test(move)) {
+  // 2026 Best Practice: 制御文字およびコマンド連結文字（インジェクション試行）を早期に拒否。
+  // ProtocolValidator.LOOSE_REGEX と同等の範囲に加え、シェルおよびプロトコル上の
+  // コマンド連結子である `;` も拒否する（バックギャモン記法には出現しない）。
+  // eslint-disable-next-line no-control-regex
+  if (/[\r\n\0\x01-\x1f\x7f;]/.test(move)) {
     const i18nKey = createI18nKey("engine.errors.injectionDetected");
     const i18nParams = { context: "Move", input: truncateLog(move) };
     throw new EngineError({
