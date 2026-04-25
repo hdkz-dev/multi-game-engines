@@ -54,3 +54,6 @@ mcp_config.json
 playwright-report/
 test-results/
 blob-report/
+
+# Claude Code — personal/local overrides (use .claude/settings.json for shared settings)
+.claude/settings.local.json
