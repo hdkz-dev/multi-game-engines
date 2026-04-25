@@ -129,11 +129,28 @@ describe("SearchMonitor (Throttling)", () => {
   });
 
   it("should use requestAnimationFrame when available and cancel on stop", async () => {
-    const cancelRAF = vi.fn();
+    // Track scheduled RAF timeouts by ID so cancelAnimationFrame can actually
+    // clear the underlying setTimeout — validating real cancellation behaviour.
+    const rafTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
+    let rafIdCounter = 0;
+    const cancelRAF = vi.fn((id: number) => {
+      const t = rafTimeouts.get(id);
+      if (t !== undefined) {
+        clearTimeout(t);
+        rafTimeouts.delete(id);
+      }
+    });
     vi.stubGlobal("cancelAnimationFrame", cancelRAF);
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-      setTimeout(() => cb(performance.now()), 16);
-      return 42;
+      const id = ++rafIdCounter;
+      rafTimeouts.set(
+        id,
+        setTimeout(() => {
+          cb(performance.now());
+          rafTimeouts.delete(id);
+        }, 16),
+      );
+      return id;
     });
 
     const transformer = (state: MockState) => state;
@@ -146,10 +163,12 @@ describe("SearchMonitor (Throttling)", () => {
 
     monitor.startMonitoring();
     infoCallback(createMockInfo("msg1"));
+    // Stop before the scheduled frame fires — must cancel the pending RAF
     monitor.stopMonitoring();
 
     await vi.runAllTimersAsync();
-    expect(cancelRAF).toHaveBeenCalledWith(42);
+    // cancelAnimationFrame must have been called with the ID returned by RAF
+    expect(cancelRAF).toHaveBeenCalledWith(rafIdCounter);
   });
 
   it("should handle empty pendingUpdates in processUpdates (timer fires after stop)", async () => {
