@@ -25,6 +25,9 @@ class MockEngine implements Partial<
   name = "Mock Engine";
   status: EngineStatus = "ready";
   private _statusListeners: ((s: EngineStatus) => void)[] = [];
+  get statusListenerCount() {
+    return this._statusListeners.length;
+  }
   onStatusChange = (fn: (s: EngineStatus) => void) => {
     this._statusListeners.push(fn);
     return () => {
@@ -74,7 +77,8 @@ describe("EngineMonitorElement", () => {
   });
 
   it("should initialize monitor when engine is set", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -86,11 +90,13 @@ describe("EngineMonitorElement", () => {
     await el.updateComplete;
     const shadow = el.shadowRoot;
     expect(shadow).not.toBeNull();
-    expect(shadow?.textContent).toBeTruthy();
+    // After engine is set, the "Initializing..." placeholder should be gone
+    expect(shadow?.textContent).not.toContain("Initializing...");
   });
 
   it("should render full UI when engine and state are available", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -101,11 +107,13 @@ describe("EngineMonitorElement", () => {
     el.panelTitle = "Test Panel";
     document.body.appendChild(el);
     await el.updateComplete;
-    expect(el.shadowRoot?.innerHTML).toBeTruthy();
+    // panelTitle should appear in the rendered shadow DOM
+    expect(el.shadowRoot?.textContent).toContain("Test Panel");
   });
 
   it("should handle start button click", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -118,9 +126,11 @@ describe("EngineMonitorElement", () => {
     const startBtn = el.shadowRoot?.querySelector(
       ".btn-start",
     ) as HTMLButtonElement | null;
-    startBtn?.click();
+    expect(startBtn).not.toBeNull();
+    startBtn!.click();
     await el.updateComplete;
-    expect(el.shadowRoot).toBeTruthy();
+    // search should have been dispatched
+    expect(rawEngine.search).toHaveBeenCalled();
   });
 
   it("should handle stop button click when engine is busy", async () => {
@@ -145,7 +155,8 @@ describe("EngineMonitorElement", () => {
     const startBtn = el.shadowRoot?.querySelector(
       ".btn-start",
     ) as HTMLButtonElement | null;
-    startBtn?.click();
+    expect(startBtn).not.toBeNull();
+    startBtn!.click();
     await el.updateComplete;
 
     const stopBtn = el.shadowRoot?.querySelector(
@@ -154,13 +165,14 @@ describe("EngineMonitorElement", () => {
     if (stopBtn) {
       stopBtn.click();
       await el.updateComplete;
+      expect(rawEngine.stop).toHaveBeenCalled();
     }
     resolveSearch?.({} as IBaseSearchResult);
-    expect(el.shadowRoot).toBeTruthy();
   });
 
   it("should switch to log tab on click", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -173,13 +185,15 @@ describe("EngineMonitorElement", () => {
     const logTab = el.shadowRoot?.querySelector(
       "#tab-log",
     ) as HTMLButtonElement | null;
-    logTab?.click();
+    expect(logTab).not.toBeNull();
+    logTab!.click();
     await el.updateComplete;
-    expect(el.shadowRoot).toBeTruthy();
+    expect(logTab!.getAttribute("aria-selected")).toBe("true");
   });
 
   it("should switch tabs via keyboard (ArrowRight/ArrowLeft)", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -190,29 +204,33 @@ describe("EngineMonitorElement", () => {
     await el.updateComplete;
 
     const tablist = el.shadowRoot?.querySelector('[role="tablist"]');
-    if (tablist) {
-      tablist.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }),
-      );
-      await el.updateComplete;
-      tablist.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }),
-      );
-      await el.updateComplete;
-      tablist.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "End", bubbles: true }),
-      );
-      await el.updateComplete;
-      tablist.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Home", bubbles: true }),
-      );
-      await el.updateComplete;
-    }
-    expect(el.shadowRoot).toBeTruthy();
+    expect(tablist).not.toBeNull();
+    tablist!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }),
+    );
+    await el.updateComplete;
+    tablist!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }),
+    );
+    await el.updateComplete;
+    tablist!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "End", bubbles: true }),
+    );
+    await el.updateComplete;
+    tablist!.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Home", bubbles: true }),
+    );
+    await el.updateComplete;
+    // After keyboard nav, the active tab's aria-selected should still be set
+    const pvTab = el.shadowRoot?.querySelector(
+      "#tab-pv",
+    ) as HTMLButtonElement | null;
+    expect(pvTab?.getAttribute("aria-selected")).toBe("true");
   });
 
   it("should clean up on disconnection", async () => {
-    const engine = new MockEngine() as unknown as IEngine<
+    const rawEngine = new MockEngine();
+    const engine = rawEngine as unknown as IEngine<
       IBaseSearchOptions,
       IBaseSearchInfo,
       IBaseSearchResult
@@ -221,7 +239,11 @@ describe("EngineMonitorElement", () => {
     el.engine = engine;
     document.body.appendChild(el);
     await el.updateComplete;
+
     document.body.removeChild(el);
-    expect(el.shadowRoot).toBeTruthy();
+    // Element should no longer be part of the DOM
+    expect(document.body.contains(el)).toBe(false);
+    // No status listeners should remain after disconnect
+    expect(rawEngine.statusListenerCount).toBe(0);
   });
 });

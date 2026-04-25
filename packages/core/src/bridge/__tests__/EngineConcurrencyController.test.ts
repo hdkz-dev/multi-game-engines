@@ -45,9 +45,19 @@ describe("EngineConcurrencyController", () => {
   it("should remove from active on ready or error status", async () => {
     const controller = new EngineConcurrencyController(2);
     await controller.requestActive("e1");
+
+    // After "ready", e1 should be removed from active — verify indirectly:
+    // with max=2 and e1 gone, adding e2+e3 should NOT suspend e1.
     controller.updateStatus("e1", "ready");
-    controller.updateStatus("e1", "error");
-    // Should not throw
-    expect(controller).toBeDefined();
+    const onSuspend = vi.fn();
+    await controller.requestActive("e2", onSuspend);
+    await controller.requestActive("e3", onSuspend);
+    expect(onSuspend).not.toHaveBeenCalledWith("e1");
+
+    // After "error", e2 should also be removed — e4 can be added without suspending e2.
+    controller.updateStatus("e2", "error");
+    const onSuspend2 = vi.fn();
+    await controller.requestActive("e4", onSuspend2);
+    expect(onSuspend2).not.toHaveBeenCalledWith("e2");
   });
 });

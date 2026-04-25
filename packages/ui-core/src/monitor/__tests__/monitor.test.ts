@@ -132,7 +132,7 @@ describe("SearchMonitor (Throttling)", () => {
     const cancelRAF = vi.fn();
     vi.stubGlobal("cancelAnimationFrame", cancelRAF);
     vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
-      setTimeout(cb, 16);
+      setTimeout(() => cb(performance.now()), 16);
       return 42;
     });
 

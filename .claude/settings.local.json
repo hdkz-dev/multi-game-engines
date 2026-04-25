@@ -108,7 +108,17 @@
       "Bash(gh api *)",
       "Bash(python3 -c ' *)",
       "Bash(find /Users/todahide/dev-wk/oss/multi-game-engines/packages/ui-react* -name \"*.ts\" -path \"*/src/*\")",
-      "Bash(node -e \"console.log\\(Number.isFinite\\(1.5\\), Number.isInteger\\(1.5\\)\\)\")"
+      "Bash(node -e \"console.log\\(Number.isFinite\\(1.5\\), Number.isInteger\\(1.5\\)\\)\")",
+      "Bash(pnpm --filter \"@multi-game-engines/ui-vue-monitor\" exec vitest run --reporter=verbose)",
+      "Bash(python3)",
+      "Bash(pnpm --filter \"@multi-game-engines/domain-backgammon\" exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter \"@multi-game-engines/domain-checkers\" exec vitest run --reporter=verbose)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('State:', d['state']\\); print\\('Decision:', d['reviewDecision']\\); [print\\(f\\\\\"  {c['context'] or c.get\\('name','?'\\)}: {c['state'] or c.get\\('conclusion','?'\\)}\\\\\"\\) for c in d['statusCheckRollup']]\")",
+      "Bash(python3 -c \" import json,sys try: d=json.load\\(sys.stdin\\) rr = d.get\\('required_pull_request_reviews', {}\\) print\\('Required approving reviews:', rr.get\\('required_approving_review_count', 'N/A'\\)\\) print\\('Dismiss stale reviews:', rr.get\\('dismiss_stale_reviews', False\\)\\) print\\('Required status checks:', [c['context'] for c in d.get\\('required_status_checks', {}\\).get\\('contexts', []\\)]\\) except Exception as e: print\\('Error:', e\\) \")",
+      "Bash(pnpm --filter \"@multi-game-engines/core\" exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter \"@multi-game-engines/ui-core\" exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter \"@multi-game-engines/ui-elements\" exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter \"@multi-game-engines/ui-react-monitor\" exec vitest run --reporter=verbose)"
     ]
   }
 }

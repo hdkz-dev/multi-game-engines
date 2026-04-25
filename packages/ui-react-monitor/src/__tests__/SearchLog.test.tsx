@@ -8,6 +8,8 @@ import { SearchLog } from "../components/SearchLog.js";
 // Match the pattern used by PVList.test.tsx
 vi.mock("@multi-game-engines/ui-react-core", () => ({
   useEngineUI: () => ({
+    formatNumber: (value: number) => String(value),
+    formatTime: (value: number) => String(value),
     strings: {
       searchLog: "Search Log",
       depth: "D",
