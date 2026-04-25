@@ -16,14 +16,28 @@ import {
   IBaseSearchResult,
   EngineStatus,
   IBaseSearchInfo,
+  IEngineError,
+  IEngineConfig,
+  IMiddleware,
+  IBookAsset,
+  EngineTelemetry,
 } from "@multi-game-engines/core";
 
-class MockEngine implements Partial<
-  IEngine<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+/** Concrete, fully-typed mock that satisfies the complete IEngine contract. */
+class MockEngine implements IEngine<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
 > {
-  id = "mock-engine";
-  name = "Mock Engine";
+  // --- IEngine required fields ---
+  readonly id = "mock-engine";
+  readonly name = "Mock Engine";
+  readonly version = "0.0.0";
   status: EngineStatus = "ready";
+  readonly lastError: IEngineError | null = null;
+  readonly config: IEngineConfig | undefined = undefined;
+
+  // --- status listener tracking ---
   private _statusListeners: ((s: EngineStatus) => void)[] = [];
   get statusListenerCount() {
     return this._statusListeners.length;
@@ -38,13 +52,35 @@ class MockEngine implements Partial<
     this.status = s;
     this._statusListeners.forEach((fn) => fn(s));
   }
+
+  // --- IEngine lifecycle ---
+  load = vi.fn().mockResolvedValue(undefined);
+  consent = vi.fn();
+  setBook = vi.fn().mockResolvedValue(undefined) as (
+    asset: IBookAsset,
+    options?: { signal?: AbortSignal },
+  ) => Promise<void>;
+  dispose = vi.fn().mockResolvedValue(undefined);
+  use = vi.fn().mockReturnThis() as (
+    m: IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>,
+  ) => this;
+  unuse = vi.fn().mockReturnThis() as (
+    m:
+      | IMiddleware<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult>
+      | string,
+  ) => this;
+
+  // --- search ---
+  search = vi.fn().mockResolvedValue({
+    bestMove: null,
+  } as IBaseSearchResult);
+  stop = vi.fn().mockResolvedValue(undefined);
+
+  // --- event callbacks ---
   onInfo = vi.fn(() => () => {});
   onSearchResult = vi.fn(() => () => {});
   onTelemetry = vi.fn(() => () => {});
-  emitTelemetry = vi.fn();
-  search = vi.fn().mockResolvedValue({} as IBaseSearchResult);
-  stop = vi.fn().mockResolvedValue(undefined);
-  use = vi.fn().mockReturnThis();
+  emitTelemetry = vi.fn() as (t: EngineTelemetry) => void;
 }
 
 describe("EngineMonitorElement", () => {
@@ -77,12 +113,7 @@ describe("EngineMonitorElement", () => {
   });
 
   it("should initialize monitor when engine is set", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     el.locale = "en";
@@ -94,13 +125,8 @@ describe("EngineMonitorElement", () => {
     expect(shadow?.textContent).not.toContain("Initializing...");
   });
 
-  it("should render full UI when engine and state are available", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+  it("should render full UI when engine and panelTitle are set", async () => {
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     el.locale = "ja";
@@ -111,13 +137,8 @@ describe("EngineMonitorElement", () => {
     expect(el.shadowRoot?.textContent).toContain("Test Panel");
   });
 
-  it("should handle start button click", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+  it("should handle start button click and call search", async () => {
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     document.body.appendChild(el);
@@ -129,24 +150,18 @@ describe("EngineMonitorElement", () => {
     expect(startBtn).not.toBeNull();
     startBtn!.click();
     await el.updateComplete;
-    // search should have been dispatched
-    expect(rawEngine.search).toHaveBeenCalled();
+    expect(engine.search).toHaveBeenCalled();
   });
 
-  it("should handle stop button click when engine is busy", async () => {
-    const rawEngine = new MockEngine();
+  it("should handle stop button click and call stop", async () => {
+    const engine = new MockEngine();
     let resolveSearch!: (v: IBaseSearchResult) => void;
-    rawEngine.search = vi.fn(
+    engine.search = vi.fn(
       () =>
         new Promise<IBaseSearchResult>((resolve) => {
           resolveSearch = resolve;
         }),
     );
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     document.body.appendChild(el);
@@ -165,18 +180,13 @@ describe("EngineMonitorElement", () => {
     if (stopBtn) {
       stopBtn.click();
       await el.updateComplete;
-      expect(rawEngine.stop).toHaveBeenCalled();
+      expect(engine.stop).toHaveBeenCalled();
     }
-    resolveSearch?.({} as IBaseSearchResult);
+    resolveSearch?.({ bestMove: null });
   });
 
-  it("should switch to log tab on click", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+  it("should switch to log tab on click and set aria-selected", async () => {
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     document.body.appendChild(el);
@@ -191,13 +201,8 @@ describe("EngineMonitorElement", () => {
     expect(logTab!.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("should switch tabs via keyboard (ArrowRight/ArrowLeft)", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+  it("should switch tabs via keyboard (ArrowRight/ArrowLeft/End/Home)", async () => {
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     document.body.appendChild(el);
@@ -221,7 +226,7 @@ describe("EngineMonitorElement", () => {
       new KeyboardEvent("keydown", { key: "Home", bubbles: true }),
     );
     await el.updateComplete;
-    // After keyboard nav, the active tab's aria-selected should still be set
+    // After round-trip keyboard nav, the pv tab should be selected again
     const pvTab = el.shadowRoot?.querySelector(
       "#tab-pv",
     ) as HTMLButtonElement | null;
@@ -229,12 +234,7 @@ describe("EngineMonitorElement", () => {
   });
 
   it("should clean up on disconnection", async () => {
-    const rawEngine = new MockEngine();
-    const engine = rawEngine as unknown as IEngine<
-      IBaseSearchOptions,
-      IBaseSearchInfo,
-      IBaseSearchResult
-    >;
+    const engine = new MockEngine();
     const el = document.createElement("engine-monitor") as EngineMonitorElement;
     el.engine = engine;
     document.body.appendChild(el);
@@ -244,6 +244,6 @@ describe("EngineMonitorElement", () => {
     // Element should no longer be part of the DOM
     expect(document.body.contains(el)).toBe(false);
     // No status listeners should remain after disconnect
-    expect(rawEngine.statusListenerCount).toBe(0);
+    expect(engine.statusListenerCount).toBe(0);
   });
 });

@@ -14,8 +14,6 @@
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); deps={**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}; print\\([k for k in deps if 'coverage' in k]\\)\")",
       "Bash(pnpm list *)",
       "Bash(pnpm ls *)",
-      "Bash(xargs python3 *)",
-      "Bash(node -e ' *)",
       "Bash(pnpm --filter @multi-game-engines/domain-checkers test)",
       "Bash(pnpm --filter @multi-game-engines/domain-backgammon test)",
       "Bash(pnpm --filter @multi-game-engines/adapter-janggi test)",
@@ -106,11 +104,9 @@
       "Bash(gh pr create --title 'test: comprehensive coverage uplift across 9 packages \\(63–100%\\)' --body ' *)",
       "Bash(gh pr *)",
       "Bash(gh api *)",
-      "Bash(python3 -c ' *)",
       "Bash(find /Users/todahide/dev-wk/oss/multi-game-engines/packages/ui-react* -name \"*.ts\" -path \"*/src/*\")",
       "Bash(node -e \"console.log\\(Number.isFinite\\(1.5\\), Number.isInteger\\(1.5\\)\\)\")",
       "Bash(pnpm --filter \"@multi-game-engines/ui-vue-monitor\" exec vitest run --reporter=verbose)",
-      "Bash(python3)",
       "Bash(pnpm --filter \"@multi-game-engines/domain-backgammon\" exec vitest run --reporter=verbose)",
       "Bash(pnpm --filter \"@multi-game-engines/domain-checkers\" exec vitest run --reporter=verbose)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('State:', d['state']\\); print\\('Decision:', d['reviewDecision']\\); [print\\(f\\\\\"  {c['context'] or c.get\\('name','?'\\)}: {c['state'] or c.get\\('conclusion','?'\\)}\\\\\"\\) for c in d['statusCheckRollup']]\")",
@@ -118,7 +114,9 @@
       "Bash(pnpm --filter \"@multi-game-engines/core\" exec vitest run --reporter=verbose)",
       "Bash(pnpm --filter \"@multi-game-engines/ui-core\" exec vitest run --reporter=verbose)",
       "Bash(pnpm --filter \"@multi-game-engines/ui-elements\" exec vitest run --reporter=verbose)",
-      "Bash(pnpm --filter \"@multi-game-engines/ui-react-monitor\" exec vitest run --reporter=verbose)"
+      "Bash(pnpm --filter \"@multi-game-engines/ui-react-monitor\" exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter \"@examples/zenith-dashboard-react\" build)",
+      "Bash(git stash *)"
     ]
   }
 }
