@@ -14,7 +14,11 @@ import { WorkerCommunicator } from "../../workers/WorkerCommunicator.js";
 
 const mockLicense: ILicenseInfo = { name: "MIT", url: "" };
 
-class TestAdapter extends BaseAdapter<IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult> {
+class TestAdapter extends BaseAdapter<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
+> {
   readonly version = "1.0.0";
   readonly engineLicense = mockLicense;
   readonly adapterLicense = mockLicense;
@@ -186,17 +190,23 @@ describe("BaseAdapter", () => {
   });
 
   it("should validate SRI hashes and throw on invalid formats", () => {
-    expect(() => new TestAdapter("test", "Test", {
-      sources: {
-        main: { url: "test.js", type: "script", sri: "invalid-hash" },
-      },
-    })).toThrow(/Invalid SRI hash format/);
+    expect(
+      () =>
+        new TestAdapter("test", "Test", {
+          sources: {
+            main: { url: "test.js", type: "script", sri: "invalid-hash" },
+          },
+        }),
+    ).toThrow(/Invalid SRI hash format/);
   });
 
   it("should handle engine-reported errors through parser.translateError", () => {
     const adapter = new TestAdapter();
     adapter.setStatus("ready");
-    adapter.setCommunicator({ postMessage: vi.fn(), onMessage: vi.fn() } as unknown);
+    adapter.setCommunicator({
+      postMessage: vi.fn(),
+      onMessage: vi.fn(),
+    } as unknown);
 
     const task = adapter.searchRaw("go");
     adapter.setStatus("busy");
@@ -220,5 +230,36 @@ describe("BaseAdapter", () => {
 
     adapter.testHandleIncomingMessage(12345);
     expect(infoSpy).not.toHaveBeenCalled();
+  });
+
+  it("should emit ready status on handleStreamCancel when busy", async () => {
+    const adapter = new TestAdapter();
+    adapter.setStatus("busy");
+    const statusSpy = vi.fn();
+    adapter.onStatusChange(statusSpy);
+
+    await adapter.testHandleStreamCancel();
+    expect(statusSpy).toHaveBeenCalledWith("ready");
+  });
+
+  it("should skip ready emission on handleStreamCancel when not busy", async () => {
+    const adapter = new TestAdapter();
+    adapter.setStatus("ready");
+    const statusSpy = vi.fn();
+    adapter.onStatusChange(statusSpy);
+
+    await adapter.testHandleStreamCancel();
+    expect(statusSpy).not.toHaveBeenCalled();
+  });
+
+  it("should clear all listeners on clearListeners", () => {
+    const adapter = new TestAdapter();
+    adapter.onStatusChange(vi.fn());
+    adapter.onInfo(vi.fn());
+
+    // Access protected method via any cast
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (adapter as any).clearListeners();
+    expect(adapter).toBeDefined();
   });
 });

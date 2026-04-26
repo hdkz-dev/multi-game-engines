@@ -122,4 +122,46 @@ describe("SearchStateTransformer", () => {
     expect(state.pvs[0]?.score.type).toBe("mate");
     expect(state.pvs[0]?.score.value).toBe(2);
   });
+
+  it("should update existing log entry when isSameProgress", () => {
+    const info: ExtendedSearchInfo = {
+      multipv: 1,
+      depth: 10,
+      pv: ["e2e4"].map(createMove),
+      score: { cp: 50 },
+    };
+    let state = SearchStateTransformer.mergeInfo(initialState, info);
+    expect(state.searchLog).toHaveLength(1);
+    const firstId = state.searchLog[0]?.id;
+
+    const info2: ExtendedSearchInfo = {
+      multipv: 1,
+      depth: 10,
+      pv: ["e2e4"].map(createMove),
+      score: { cp: 50 },
+    };
+    state = SearchStateTransformer.mergeInfo(state, info2);
+    expect(state.searchLog).toHaveLength(1);
+    expect(state.searchLog[0]?.id).toBe(firstId);
+  });
+
+  it("should trim searchLog when it exceeds 200 entries", () => {
+    let state = initialState;
+    for (let i = 1; i <= 201; i++) {
+      state = SearchStateTransformer.mergeInfo(state, {
+        multipv: 1,
+        depth: i,
+        pv: ["e2e4"].map(createMove),
+        score: { cp: i },
+      });
+    }
+    expect(state.searchLog.length).toBeLessThanOrEqual(200);
+  });
+
+  it("should create initial state via createInitialState", () => {
+    const state = SearchStateTransformer.createInitialState("startpos");
+    expect(state).toBeDefined();
+    expect(state.pvs).toEqual([]);
+    expect(state.searchLog).toEqual([]);
+  });
 });

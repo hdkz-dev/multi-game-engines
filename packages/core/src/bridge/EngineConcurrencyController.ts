@@ -50,9 +50,8 @@ export class EngineConcurrencyController {
     if (status === "busy") {
       this.activeEngines.add(engineId);
     } else if (status === "ready" || status === "error") {
-      // 停止した場合は管理から外す（サスペンドの余地を作る）
-      // ただし、即座に消すとリクエスト時の優先順位がわからなくなるため、
-      // 実際には LRU キュー等で管理するのが望ましい。
+      // 停止したエンジンをアクティブ管理から外す（サスペンドの余地を作る）
+      this.activeEngines.delete(engineId);
     }
   }
 }

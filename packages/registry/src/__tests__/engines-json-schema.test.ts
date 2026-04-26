@@ -24,11 +24,11 @@ describe("engines.json schema validation", () => {
   it("should pass EngineManifestSchema validation via StaticRegistry constructor", () => {
     // StaticRegistry は constructor 内で Zod バリデーションを実施する。
     // 不正なスキーマの場合は console.warn が発行され、フォールバックになる。
-    
+
     const registry = new StaticRegistry(enginesData);
     // warn が呼ばれていない → スキーマ検証成功
     expect(warnSpy).not.toHaveBeenCalled();
-    
+
     // 基本的な統合チェック
     expect(registry.getSupportedEngines().length).toBeGreaterThan(0);
   });
@@ -144,23 +144,18 @@ describe("engines.json schema validation", () => {
   });
 
   it("should reject invalid manifest data", () => {
-    
     // 不正なデータを渡す
     new StaticRegistry({ invalid: true });
     // バリデーション失敗で warn が呼ばれる
     expect(warnSpy).toHaveBeenCalled();
-    
   });
 
   it("should reject manifest with missing version field", () => {
-    
     new StaticRegistry({ engines: {} });
     expect(warnSpy).toHaveBeenCalled();
-    
   });
 
   it("should reject manifest with invalid engine structure", () => {
-    
     new StaticRegistry({
       version: "1.0.0",
       engines: {
@@ -168,7 +163,6 @@ describe("engines.json schema validation", () => {
       },
     });
     expect(warnSpy).toHaveBeenCalled();
-    
   });
 
   it("should recursively validate deep nested properties like assets", () => {
@@ -182,13 +176,50 @@ describe("engines.json schema validation", () => {
           versions: {
             "1.0.0": {
               assets: {
-                main: { url: "http://example.com/main.js", type: "invalid-type", sri: "invalid-sri" }
-              }
-            }
-          }
-        }
-      }
+                main: {
+                  url: "http://example.com/main.js",
+                  type: "invalid-type",
+                  sri: "invalid-sri",
+                },
+              },
+            },
+          },
+        },
+      },
     });
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  it.each([
+    ["LF", "http://example.com/\npath"],
+    ["CR", "http://example.com/\rpath"],
+    ["CRLF", "http://example.com/\r\npath"],
+  ])(
+    "should reject URL with invalid characters (%s injection) via superRefine",
+    (_label, url) => {
+      warnSpy.mockClear();
+      new StaticRegistry({
+        version: "1.0.0",
+        engines: {
+          bad: {
+            name: "bad",
+            adapter: "mock",
+            latest: "1.0",
+            versions: {
+              "1.0": {
+                assets: {
+                  main: {
+                    url,
+                    type: "worker-js",
+                    sri: "sha384-bCh+jjHqO5/k1PVx7yJktl7cuplMcT1TDIfN7BbAjNTZHu9wDlApzTehK3HzbfR8",
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      expect(warnSpy).toHaveBeenCalled();
+    },
+  );
 });

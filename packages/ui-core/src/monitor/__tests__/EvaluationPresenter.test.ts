@@ -101,6 +101,51 @@ describe("EvaluationPresenter", () => {
       const score: EvaluationScore = { type: "cp", value: 0, relativeValue: 0 };
       expect(EvaluationPresenter.getDisplayLabel(score)).toBe("+0.00");
     });
+
+    it("should format winrate score correctly", () => {
+      const score: EvaluationScore = {
+        type: "winrate",
+        value: 0.65,
+        relativeValue: 0.65,
+      };
+      expect(EvaluationPresenter.getDisplayLabel(score)).toBe("65.0%");
+    });
+
+    it("should format positive points score correctly", () => {
+      const score: EvaluationScore = {
+        type: "points",
+        value: 3.5,
+        relativeValue: 3.5,
+      };
+      expect(EvaluationPresenter.getDisplayLabel(score)).toBe("+3.5");
+    });
+
+    it("should format negative points score correctly", () => {
+      const score: EvaluationScore = {
+        type: "points",
+        value: -2.1,
+        relativeValue: -2.1,
+      };
+      expect(EvaluationPresenter.getDisplayLabel(score)).toBe("-2.1");
+    });
+  });
+
+  describe("getAdvantageSide", () => {
+    it("should return plus for positive value", () => {
+      expect(EvaluationPresenter.getAdvantageSide(100)).toBe("plus");
+    });
+
+    it("should return minus for negative value", () => {
+      expect(EvaluationPresenter.getAdvantageSide(-100)).toBe("minus");
+    });
+
+    it("should return neutral for zero value", () => {
+      expect(EvaluationPresenter.getAdvantageSide(0)).toBe("neutral");
+    });
+
+    it("should invert sign when inverted is true", () => {
+      expect(EvaluationPresenter.getAdvantageSide(100, true)).toBe("minus");
+    });
   });
 
   describe("getGraphPoints", () => {

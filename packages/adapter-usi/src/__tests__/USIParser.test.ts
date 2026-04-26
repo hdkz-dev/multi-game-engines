@@ -37,6 +37,14 @@ describe("USIParser", () => {
       const info = parser.parseInfo("info depth 10 pv 7g7f 3c3d 8h2b+");
       expect(info?.pv).toEqual(["7g7f", "3c3d", "8h2b+"]);
     });
+
+    it("should skip invalid PV moves that make createShogiMove throw (catch block)", () => {
+      const info = parser.parseInfo(
+        "info depth 10 score cp 30 pv 7g7f AAAA 3c3d",
+      );
+      expect(info?.pv).not.toContain("AAAA");
+      expect(info?.pv).toContain("7g7f");
+    });
   });
 
   describe("parseResult", () => {
@@ -156,6 +164,16 @@ describe("USIParser", () => {
       const commands = parser.createSearchCommand({ ponder: true });
       expect(commands).toEqual(["position startpos", "go ponder"]);
     });
+
+    it("should include movetime when movetime option is set", () => {
+      const commands = parser.createSearchCommand({ movetime: 3000 });
+      expect(commands[1]).toContain("movetime 3000");
+    });
+
+    it("should include nodes when nodes option is set", () => {
+      const commands = parser.createSearchCommand({ nodes: 1000000 });
+      expect(commands[1]).toContain("nodes 1000000");
+    });
   });
 
   describe("createOptionCommand", () => {
@@ -176,6 +194,84 @@ describe("USIParser", () => {
       expect(() => parser.createOptionCommand("Hash", "128\nquit")).toThrow(
         /Potential command injection/,
       );
+    });
+  });
+
+  describe("parseInfo – currmove and additional cases", () => {
+    it("should parse currmove token for valid shogi move", () => {
+      const info = parser.parseInfo("info depth 5 currmove 7g7f score cp 30");
+      expect(info?.currMove).toBe("7g7f");
+    });
+
+    it("should skip invalid currmove token and continue parsing", () => {
+      const info = parser.parseInfo(
+        "info depth 5 currmove INVALID_MOVE score cp 30",
+      );
+      expect(info?.currMove).toBeUndefined();
+      expect(info?.depth).toBe(5);
+    });
+
+    it("should return null for non-string input", () => {
+      expect(parser.parseInfo({ type: "info" })).toBeNull();
+    });
+
+    it("should parse mate - score", () => {
+      const info = parser.parseInfo("info score mate -");
+      expect(info?.score?.normalized).toBe(-0.99);
+    });
+
+    it("should parse all numeric tokens together", () => {
+      const info = parser.parseInfo(
+        "info depth 12 seldepth 15 time 250 nodes 50000 nps 200000 hashfull 5 multipv 1 score cp 30",
+      );
+      expect(info?.depth).toBe(12);
+      expect(info?.seldepth).toBe(15);
+      expect(info?.time).toBe(250);
+      expect(info?.nodes).toBe(50000);
+      expect(info?.nps).toBe(200000);
+      expect(info?.hashfull).toBe(5);
+      expect(info?.multipv).toBe(1);
+    });
+  });
+
+  describe("parseResult – additional cases", () => {
+    it("should throw EngineError for 'bestmove' with no move token", () => {
+      expect(() => parser.parseResult("bestmove")).toThrow();
+    });
+
+    it("should set ponder to null when ponder injection is detected", () => {
+      const result = parser.parseResult("bestmove 7g7f ponder bad\0move");
+      expect(result?.bestMove).toBe("7g7f");
+      expect(result?.ponder).toBeNull();
+    });
+
+    it("should set ponder to null when ponder token is 'none'", () => {
+      const result = parser.parseResult("bestmove 7g7f ponder none");
+      expect(result?.bestMove).toBe("7g7f");
+      expect(result?.ponder).toBeNull();
+    });
+
+    it("should set ponder to null when ponder token is '(none)'", () => {
+      const result = parser.parseResult("bestmove 7g7f ponder (none)");
+      expect(result?.bestMove).toBe("7g7f");
+      expect(result?.ponder).toBeNull();
+    });
+  });
+
+  describe("createStopCommand", () => {
+    it("should return 'stop'", () => {
+      expect(parser.createStopCommand()).toBe("stop");
+    });
+  });
+
+  describe("translateError – additional cases", () => {
+    it("should translate English NNUE not found", () => {
+      const key = parser.translateError("Error: NNUE file not found");
+      expect(key).toBe("engine.errors.missingSources");
+    });
+
+    it("should return null for unknown error", () => {
+      expect(parser.translateError("Generic engine error")).toBeNull();
     });
   });
 });

@@ -1,6 +1,8 @@
-import React from "react";
-import { EvaluationScore,
-  EvaluationPresenter, } from "@multi-game-engines/ui-core";
+import React, { memo } from "react";
+import {
+  EvaluationScore,
+  EvaluationPresenter,
+} from "@multi-game-engines/ui-core";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 
 interface ScoreBadgeProps {
@@ -13,7 +15,7 @@ interface ScoreBadgeProps {
 /**
  * 評価値（cp/mate）を色分けして表示するバッジコンポーネント。
  */
-export const ScoreBadge: React.FC<ScoreBadgeProps> = React.memo(
+export const ScoreBadge: React.FC<ScoreBadgeProps> = memo(
   ({ score, inverted = false, className = "" }) => {
     const { strings } = useEngineUI();
     const { type, value } = score;

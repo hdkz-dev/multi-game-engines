@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { PrincipalVariation } from "@multi-game-engines/ui-core";
 import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
@@ -15,7 +15,7 @@ interface PVListProps {
 /**
  * エンジンの読み筋（Principal Variations）を一覧表示するコンポーネント。
  */
-export const PVList: React.FC<PVListProps> = React.memo(
+export const PVList: React.FC<PVListProps> = memo(
   ({ pvs, onMoveClick, className }) => {
     const { strings } = useEngineUI();
 
@@ -38,7 +38,7 @@ export const PVList: React.FC<PVListProps> = React.memo(
             <div className="flex flex-wrap gap-1 font-mono text-sm leading-relaxed">
               {pv.moves.map((move, idx) => (
                 <button
-                  key={`${pv.multipv}-${idx}-${move}`}
+                  key={`${pv.multipv}-${move}`}
                   onClick={() => onMoveClick?.(move.toString(), idx, pv)}
                   className={cn(
                     "px-1 rounded hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500",

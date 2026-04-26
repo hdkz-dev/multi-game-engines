@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineStore } from "../store.js";
-import { IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 
 describe("EngineStore", () => {
   const mockEngine = { status: "ready" } as unknown as IEngine<
@@ -73,5 +78,25 @@ describe("EngineStore", () => {
 
     expect(listener).toHaveBeenCalledTimes(1);
     expect(store.getState()).toEqual({ count: 3 });
+  });
+
+  it("should clear throttle timer on dispose", () => {
+    const store = new EngineStore(
+      mockEngine,
+      { count: 0 },
+      { throttleMs: 100 },
+    );
+    const listener = vi.fn();
+    store.subscribe(listener);
+    store.setState((_) => ({ count: 1 }));
+    store.dispose();
+    vi.advanceTimersByTime(200);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("should expose getEngine and getStatus", () => {
+    const store = new EngineStore(mockEngine, { count: 0 });
+    expect(store.getEngine()).toBe(mockEngine);
+    expect(store.getStatus()).toBe("ready");
   });
 });

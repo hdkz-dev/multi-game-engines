@@ -1,7 +1,9 @@
-import React, { useRef, useEffect } from "react";
-import { SearchLogEntry,
+import React, { useRef, useEffect, memo } from "react";
+import {
+  SearchLogEntry,
   formatNumber,
-  formatTime, } from "@multi-game-engines/ui-core";
+  formatTime,
+} from "@multi-game-engines/ui-core";
 import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import { cn } from "../utils/cn.js";
@@ -17,7 +19,7 @@ interface SearchLogProps {
  * エンジンの探索ログ（履歴）をネイティブ HTML テーブル形式で表示するコンポーネント。
  * 2026 Best Practice: ネイティブ要素による堅牢なアクセシビリティ。
  */
-export const SearchLog: React.FC<SearchLogProps> = React.memo(
+export const SearchLog: React.FC<SearchLogProps> = memo(
   ({ log, onMoveClick, className, autoScroll = true }) => {
     const { strings } = useEngineUI();
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -150,7 +152,7 @@ export const SearchLog: React.FC<SearchLogProps> = React.memo(
                     <div className="flex flex-wrap gap-x-1 gap-y-0.5 leading-tight">
                       {entry.pv.map((move, idx) => (
                         <button
-                          key={`${entry.id}-${idx}-${move}`}
+                          key={`${entry.id}-${move}`}
                           onClick={() => onMoveClick?.(move.toString())}
                           className={cn(
                             "hover:text-blue-600 hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-0.5 transition-colors",

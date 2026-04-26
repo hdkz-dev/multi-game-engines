@@ -96,4 +96,84 @@ describe("shogi-board Web Component", () => {
       expect(span?.textContent).toContain("歩兵2");
     });
   });
+
+  it("should highlight last move squares when lastMove is set", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    el.sfen = createSFEN(
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    );
+    el.lastMove = "7g7f";
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    const highlighted = el.shadowRoot?.querySelectorAll(".highlight");
+    expect(highlighted?.length).toBeGreaterThan(0);
+  });
+
+  it("should handle drop move in lastMove (P*7g)", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    el.sfen = createSFEN("9/9/9/9/9/9/9/9/9 b P 1");
+    el.lastMove = "P*7g";
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    const board = el.shadowRoot?.querySelector(".board");
+    expect(board).not.toBeNull();
+  });
+
+  it("should handle out-of-bounds square in lastMove gracefully", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    el.sfen = createSFEN(
+      "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+    );
+    el.lastMove = "0z9z";
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    const board = el.shadowRoot?.querySelector(".board");
+    expect(board).not.toBeNull();
+  });
+
+  it("should reset sfen to default when set to null or empty string", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    document.body.appendChild(el);
+    el.sfen = createSFEN("9/9/9/9/9/9/9/9/9 b - 1");
+    await el.updateComplete;
+    (el as unknown as { sfen: unknown }).sfen = null;
+    await el.updateComplete;
+    expect(el.shadowRoot?.querySelector(".board")).not.toBeNull();
+  });
+
+  it("should warn on invalid SFEN and keep previous", async () => {
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    document.body.appendChild(el);
+    (el as unknown as { sfen: unknown }).sfen = "TOTALLY_INVALID_SFEN_STRING";
+    await el.updateComplete;
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it("should reset lastMove to empty when set to null", async () => {
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    document.body.appendChild(el);
+    el.lastMove = "7g7f";
+    await el.updateComplete;
+    (el as unknown as { lastMove: unknown }).lastMove = null;
+    await el.updateComplete;
+    expect(el.lastMove).toBe("");
+  });
+
+  it("should warn on invalid lastMove and reset to empty", async () => {
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    const el = document.createElement("shogi-board") as ShogiBoard;
+    document.body.appendChild(el);
+    el.lastMove = "INVALID_MOVE_XYZ";
+    await el.updateComplete;
+    expect(warnSpy).toHaveBeenCalled();
+    expect(el.lastMove).toBe("");
+  });
 });

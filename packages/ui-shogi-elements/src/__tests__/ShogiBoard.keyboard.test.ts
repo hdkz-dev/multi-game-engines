@@ -136,4 +136,10 @@ describe("shogi-board keyboard navigation", () => {
     await el.updateComplete;
     expect(getSquare(0).tabIndex).toBe(0);
   });
+
+  it("should ignore unrecognized keys", async () => {
+    pressKey("Tab");
+    await el.updateComplete;
+    expect(getSquare(0).tabIndex).toBe(0);
+  });
 });

@@ -100,3 +100,56 @@ describe("GNUBGParser", () => {
     );
   });
 });
+
+describe("GNUBGParser – uncovered branches", () => {
+  const parser = new GNUBGParser();
+
+  it("should return null for object input with type != 'info' in parseInfo", () => {
+    expect(parser.parseInfo({ type: "result", equity: 0.5 })).toBeNull();
+  });
+
+  it("should return null for string input in parseInfo", () => {
+    expect(parser.parseInfo("info text")).toBeNull();
+  });
+
+  it("should return null for object input with type != 'bestmove' in parseResult", () => {
+    expect(parser.parseResult({ type: "info", move: "24/18" })).toBeNull();
+  });
+
+  it("should return null for string input in parseResult", () => {
+    expect(parser.parseResult("bestmove 24/18")).toBeNull();
+  });
+
+  it("should parse info with missing optional probability fields defaulting to 0", () => {
+    const info = parser.parseInfo({ type: "info", equity: 0.1 });
+    expect(info?.winProbability).toBe(0);
+    expect(info?.winGammonProbability).toBe(0);
+    expect(info?.winBackgammonProbability).toBe(0);
+  });
+
+  it("should parse result with non-number equity defaulting to 0", () => {
+    const result = parser.parseResult({
+      type: "bestmove",
+      move: "24/18",
+      equity: "high",
+    });
+    expect(result?.equity).toBe(0);
+  });
+
+  it("should create search command with only board (no dice)", () => {
+    const board = createBackgammonBoard(new Array(26).fill(0));
+    const commands = parser.createSearchCommand({ board } as Parameters<
+      typeof parser.createSearchCommand
+    >[0]);
+    expect(commands).toContain("analyze");
+    expect(commands.some((c) => c.startsWith("set board"))).toBe(true);
+  });
+
+  it("should create search command with only dice (no board)", () => {
+    const commands = parser.createSearchCommand({ dice: [3, 4] } as Parameters<
+      typeof parser.createSearchCommand
+    >[0]);
+    expect(commands).toContain("set dice 3 4");
+    expect(commands).toContain("analyze");
+  });
+});

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 import { MockEngine } from "../mocks/MockEngine.js";
@@ -7,7 +7,7 @@ import { MockEngine } from "../mocks/MockEngine.js";
 const EngineMonitorView = () => {
   const engine = useMemo(() => new MockEngine(), []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       engine.dispose().catch((err) => {
         console.error("[SearchMonitor.stories] Failed to dispose engine:", err);

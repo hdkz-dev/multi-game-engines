@@ -3,7 +3,8 @@
  */
 
 import { tCommon as translate } from "@multi-game-engines/i18n-common";
-import { Brand,
+import {
+  Brand,
   Move,
   createMove,
   EngineError,
@@ -11,8 +12,10 @@ import { Brand,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
+  ProtocolValidator,
   truncateLog,
-  createI18nKey } from "@multi-game-engines/core";
+  createI18nKey,
+} from "@multi-game-engines/core";
 
 /**
  * バックギャモンの盤面表現。
@@ -32,7 +35,7 @@ export function createBackgammonBoard(board: unknown): BackgammonBoard {
       i18nKey,
     });
   }
-  if (!board.every((v) => typeof v === "number" && Number.isFinite(v))) {
+  if (!board.every((v) => typeof v === "number" && Number.isInteger(v))) {
     const i18nKey = createI18nKey("engine.errors.invalidBackgammonBoard");
     throw new EngineError({
       code: EngineErrorCode.VALIDATION_ERROR,
@@ -60,21 +63,16 @@ export function createBackgammonMove(move: string): BackgammonMove {
       i18nKey,
     });
   }
-  // 2026 Best Practice: 制御文字（インジェクション試行）を早期に拒否
-  if (/[\r\n\t\f\v\0]/.test(move)) {
-    const i18nKey = createI18nKey("engine.errors.injectionDetected");
-    const i18nParams = { context: "Move", input: truncateLog(move) };
-    throw new EngineError({
-      code: EngineErrorCode.SECURITY_ERROR,
-      message: translate(i18nKey, i18nParams),
-      i18nKey,
-      i18nParams,
-    });
-  }
+  // 2026 Best Practice: ProtocolValidator で制御文字・セミコロン注入を一元拒否
+  // (STRICT_REGEX: [\r\n\0;\x01-\x1f\x7f] — allowSemicolon=false がデフォルト)
+  ProtocolValidator.assertNoInjection(move, "BackgammonMove");
 
   // 2026 Best Practice: バックギャモン記法のバリデーション
-  // bar/24, 6/off, 24/18 などをサポート。厳密なスペース分離。
-  const bgRegex = /^((?:bar|\d+)\/(?:off|\d+))( (?:bar|\d+)\/(?:off|\d+))*$/i;
+  // 有効なポイント範囲: 1–24。bar（バー）と off（ベアリングオフ）は特別トークン。
+  // 例: "24/18", "bar/24", "6/off", "24/18 18/13", "6/1 6/1 6/1 6/1"
+  const pt = "(?:bar|[1-9]|1[0-9]|2[0-4])";
+  const dest = "(?:off|[1-9]|1[0-9]|2[0-4])";
+  const bgRegex = new RegExp(`^(${pt}\\/${dest})( ${pt}\\/${dest})*$`, "i");
   if (!bgRegex.test(move)) {
     const i18nKey = createI18nKey("engine.errors.invalidBackgammonMove");
     const i18nParams = { move: truncateLog(move) };

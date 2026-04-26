@@ -133,6 +133,43 @@ describe("EngineBatchAnalyzer", () => {
     await expect(analyzer.analyzeAll()).rejects.toThrow("Fatal error");
   });
 
+  it("should rethrow CANCELLED error when neither aborted nor paused", async () => {
+    analyzer.add({ fen: "pos1" } as IBaseSearchOptions);
+    mockEngine.search.mockRejectedValueOnce(
+      new EngineError({
+        code: EngineErrorCode.CANCELLED,
+        message: "Cancelled",
+      }),
+    );
+
+    // Neither abort nor pause, so the CANCELLED error should propagate
+    await expect(analyzer.analyzeAll()).rejects.toThrow();
+  });
+
+  it("should rethrow non-CANCELLED error in analyzePriority when currentTask fails", async () => {
+    analyzer.add({ fen: "pos1" } as IBaseSearchOptions);
+
+    const fatalError = new Error("Fatal task error");
+    let resolveSearch!: () => void;
+    const searchPending = new Promise<never>((_, rej) => {
+      resolveSearch = () => rej(fatalError);
+    });
+    mockEngine.search.mockReturnValueOnce(searchPending);
+
+    // Start background analysis
+    const allPromise = analyzer.analyzeAll();
+
+    // Wait a tick for search to start
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Resolve with a non-CANCELLED error while analyzePriority waits
+    resolveSearch();
+    await expect(
+      analyzer.analyzePriority({ fen: "p" } as IBaseSearchOptions),
+    ).rejects.toThrow("Fatal task error");
+    await allPromise.catch(() => {});
+  });
+
   it("should continue to next item if search is cancelled but not aborted (e.g. pause simulation)", async () => {
     analyzer.add({ fen: "pos1" } as IBaseSearchOptions);
 

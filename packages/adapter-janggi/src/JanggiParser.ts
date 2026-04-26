@@ -1,8 +1,16 @@
-import { IProtocolParser, ScoreNormalizer, PositionId, MiddlewareCommand, ProtocolValidator } from "@multi-game-engines/core";
-import { IJanggiSearchOptions,
+import {
+  IProtocolParser,
+  ScoreNormalizer,
+  PositionId,
+  MiddlewareCommand,
+  ProtocolValidator,
+} from "@multi-game-engines/core";
+import {
+  IJanggiSearchOptions,
   IJanggiSearchInfo,
   IJanggiSearchResult,
-  createJanggiMove, } from "@multi-game-engines/domain-janggi";
+  createJanggiMove,
+} from "@multi-game-engines/domain-janggi";
 
 export class JanggiParser implements IProtocolParser<
   IJanggiSearchOptions,
@@ -10,7 +18,7 @@ export class JanggiParser implements IProtocolParser<
   IJanggiSearchResult
 > {
   createSearchCommand(options: IJanggiSearchOptions): MiddlewareCommand {
-    ProtocolValidator.assertNoInjection(options, "JanggiSearchOptions");
+    ProtocolValidator.assertNoInjection(options, "JanggiSearchOptions", true);
     const commands: string[] = [];
     if (options.position) {
       commands.push(`position ${options.position}`);
@@ -24,7 +32,7 @@ export class JanggiParser implements IProtocolParser<
   }
 
   createOptionCommand(name: string, value: unknown): MiddlewareCommand {
-    ProtocolValidator.assertNoInjection({ name, value }, "JanggiOption");
+    ProtocolValidator.assertNoInjection({ name, value }, "JanggiOption", true);
     return `setoption name ${name} value ${value}`;
   }
 

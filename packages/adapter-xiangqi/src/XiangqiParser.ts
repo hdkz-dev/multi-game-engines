@@ -1,8 +1,16 @@
-import { IProtocolParser, ScoreNormalizer, PositionId, MiddlewareCommand, ProtocolValidator } from "@multi-game-engines/core";
-import { IXiangqiSearchOptions,
+import {
+  IProtocolParser,
+  ScoreNormalizer,
+  PositionId,
+  MiddlewareCommand,
+  ProtocolValidator,
+} from "@multi-game-engines/core";
+import {
+  IXiangqiSearchOptions,
   IXiangqiSearchInfo,
   IXiangqiSearchResult,
-  createXiangqiMove, } from "@multi-game-engines/domain-xiangqi";
+  createXiangqiMove,
+} from "@multi-game-engines/domain-xiangqi";
 
 export class XiangqiParser implements IProtocolParser<
   IXiangqiSearchOptions,
@@ -10,7 +18,7 @@ export class XiangqiParser implements IProtocolParser<
   IXiangqiSearchResult
 > {
   createSearchCommand(options: IXiangqiSearchOptions): MiddlewareCommand {
-    ProtocolValidator.assertNoInjection(options, "XiangqiSearchOptions");
+    ProtocolValidator.assertNoInjection(options, "XiangqiSearchOptions", true);
     const commands: string[] = [];
     if (options.xfen) {
       commands.push(`position fen ${options.xfen}`);
@@ -24,7 +32,7 @@ export class XiangqiParser implements IProtocolParser<
   }
 
   createOptionCommand(name: string, value: unknown): MiddlewareCommand {
-    ProtocolValidator.assertNoInjection({ name, value }, "XiangqiOption");
+    ProtocolValidator.assertNoInjection({ name, value }, "XiangqiOption", true);
     return `setoption name ${name} value ${value}`;
   }
 
