@@ -56,6 +56,7 @@ describe("SearchMonitor (Throttling)", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
 
@@ -129,6 +130,9 @@ describe("SearchMonitor (Throttling)", () => {
   });
 
   it("should use requestAnimationFrame when available and cancel on stop", async () => {
+    // Mock performance.now() to a fixed value for deterministic behaviour.
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
     // Track scheduled RAF timeouts by ID so cancelAnimationFrame can actually
     // clear the underlying setTimeout — validating real cancellation behaviour.
     const rafTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
