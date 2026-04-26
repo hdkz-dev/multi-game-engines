@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import "../elements";
+import "../elements.js";
 import { Move } from "@multi-game-engines/core";
 import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
