@@ -489,7 +489,15 @@ describe("EngineMonitorPanel", () => {
     );
     expect(pvTab).not.toBeNull();
     expect(logTab).not.toBeNull();
+
+    // Click log tab and verify it becomes selected
     fireEvent.click(logTab!);
+    expect(logTab!.getAttribute("aria-selected")).toBe("true");
+    expect(pvTab!.getAttribute("aria-selected")).toBe("false");
+
+    // Click PV tab and verify it becomes selected again
     fireEvent.click(pvTab!);
+    expect(pvTab!.getAttribute("aria-selected")).toBe("true");
+    expect(logTab!.getAttribute("aria-selected")).toBe("false");
   });
 });

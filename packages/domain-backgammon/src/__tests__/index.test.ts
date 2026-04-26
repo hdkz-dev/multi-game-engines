@@ -151,6 +151,8 @@ describe("createBackgammonMove", () => {
   });
 
   it("should throw for semicolon injection", () => {
-    expect(() => createBackgammonMove("24/18; stop")).toThrow();
+    expect(() => createBackgammonMove("24/18; stop")).toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.injectionDetected" }),
+    );
   });
 });
