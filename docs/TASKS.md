@@ -112,6 +112,29 @@
   - [x] Phase 3: アダプターのリファクタリング (ハードコードの排除)
   - [x] Phase 4: 検証と自動化 (SRI計算ツール)
 
+### 2026-04-27 計画: npm 初回リリース Phase A
+
+> 詳細: `docs/implementation_plans/20260427_release_roadmap.md`
+> ⚠️ **ライセンス分離 (ADR-014) が全作業の絶対制約**: npm パッケージに GPL バイナリを含めないこと
+
+- [ ] **[A1] Stockfish SIMD/ST variant SRI 算出**
+  - [ ] `scripts/compute-sri.mjs` 作成（fetch → SHA-384 → base64）
+  - [ ] `stockfish-nnue-16-simd-mt.wasm` / `stockfish-nnue-16-st.wasm` のハッシュ算出
+  - [ ] `engines.json` の該当エントリを `__unsafeNoSRI: true` → 実 SHA384 に置換
+  - [ ] `pnpm sri:refresh` に統合
+- [ ] **[A2] Changesets リリース自動化**
+  - [ ] `.changeset/config.json` の `access: "public"` 確認・修正
+  - [ ] `release.yml` の MIT パッケージのみ公開であることを確認
+  - [ ] v0.1.0 changeset エントリ作成
+  - [ ] `NPM_TOKEN` GitHub Actions シークレット設定
+- [ ] **[A3] TypeDoc API リファレンス**
+  - [ ] `typedoc.json` ルート設定（`entryPointStrategy: "packages"`）
+  - [ ] GitHub Pages デプロイ GitHub Actions ワークフロー追加
+  - [ ] CI に TypeDoc 警告ゼロチェック追加
+- [ ] **[A4] E2E テスト基盤整備**
+  - [ ] `ui-react-monitor` / `ui-vue-monitor` に Playwright テスト追加
+  - [ ] MockAdapter 使用 E2E CI ジョブ追加（GPL バイナリ不使用）
+
 ### 🟡 Medium（品質・保守性）
 
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
