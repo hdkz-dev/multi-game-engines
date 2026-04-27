@@ -1,0 +1,4 @@
+# Playwright CT build cache and reports
+playwright/.cache/
+playwright-report/
+test-results/
