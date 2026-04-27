@@ -30,7 +30,7 @@ Leveraging 2026 Web standards to deliver industry-leading game analysis performa
   - **WebGPU Compute**: Offloading MCTS and parallel search to the GPU.
 - [ ] **Swarm (Ensemble) Architecture**:
   - **Meta-Adapters**: Multi-engine consensus and expertise-based weighting.
-- [ ] **Release Automation**: Full CI/CD with automatic CHANGELOG generation via Changesets.
+- [x] **Release Automation**: Changesets pipeline with `release.yml` wired to npm publish. Awaiting `NPM_TOKEN` secret registration to go live.
 - [x] **Quality Gate Stabilization**: PR #60 reached green status for `lint`, `typecheck`, `build`, `test`, `CodeQL`, and `CodeRabbit`.
 
 ---
@@ -41,5 +41,5 @@ Leveraging 2026 Web standards to deliver industry-leading game analysis performa
 
 - [x] **Empirical Hardening**: Verified resilience against network failures and packet splitting.
 - [x] **A11y Audit**: WCAG 2.2 Level AA compliance for all board components.
-- [ ] **Self-Healing Docs**: Code-synchronized API references generated via TypeDoc.
+- [x] **Self-Healing Docs**: TypeDoc API reference auto-generated from all 47 packages. Deploys to GitHub Pages on every push to main via `docs.yml`.
 - [ ] **Continuous Benchmarking**: NPS regression tracking on every PR.

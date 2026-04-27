@@ -4,6 +4,31 @@
 
 ## ✅ 直近完了タスク (2026年4月)
 
+### npm 初回リリース準備 Phase A — 全完了 ✅
+
+**目的**: `@multi-game-engines/*` v0.1.0 の npm 公開に向けた自動化基盤の整備。
+
+- **[A1] Stockfish SRI 算出** (commit `5f74f679`):
+  - `engines.json` 内の全 Stockfish アセット（6件）の `__unsafeNoSRI` を実 SHA-384 ハッシュへ置換。
+  - `scripts/refresh-engine-sris.mjs` に `tryUpgradeSRI()` を追加し、`pnpm sri:refresh` で自動更新可能に。
+
+- **[A2] Changesets リリース自動化** (commit `aabf8c4e`):
+  - 旧 changeset（削除済みパッケージ参照）を削除し、全 47 公開パッケージ `patch` bump (`0.1.0 → 0.1.1`) の `initial-public-release.md` を作成。
+  - `release.yml` に push-to-main トリガー・npm auth ステップ・`createGithubReleases: true` を追加。
+  - ⚠️ **要手動設定**: `NPM_TOKEN` GitHub Actions シークレット登録が npm publish の前提条件。
+
+- **[A3] TypeDoc API リファレンス** (commit `d91974d3`):
+  - ルート `typedoc.json` を作成（`entryPointStrategy: "packages"`, 全 47 パッケージ, `skipErrorChecking: true`）。
+  - `.github/workflows/docs.yml` で GitHub Pages へ自動デプロイ（push-to-main でトリガー）。
+  - ⚠️ **要手動設定**: リポジトリ Settings → Pages で Source を "GitHub Actions" に変更が必要。
+
+- **[A4] E2E テスト基盤整備** (commit `6ed55131`):
+  - `ui-react-monitor` に Playwright CT 基盤を構築（Chromium 専用、ADR-014 準拠: GPL バイナリ不使用）。
+  - `ScoreBadge` コンポーネント 6 件の実ブラウザ CT テストを追加。
+  - `.github/workflows/e2e.yml` で Chromium CT を CI に組み込み。
+
+---
+
 ### モダン ESLint スイートの統合と品質強化 (ADR-059) — 完了
 
 - [x] ESLint 10.2.1 (Flat Config) への完全移行とプラグイン・スイートの導入
@@ -18,29 +43,25 @@
 
 以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
 
-### 🔴 BLOCKER — リリース前必須
+### 🔴 BLOCKER — リリース前必須（手動作業）
 
-- [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は GitHub Pages への実バイナリデプロイ後に `sha384` ハッシュを算出し `__unsafeNoSRI: true` を置換する（バイナリビルド・デプロイが前提）
-  > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断される設計済みの開発フラグ。ハッシュチェックロジック自体の緩和は不要。
-- [ ] **Stockfish SIMD/ST variant の SRI 算出**: jsDelivr URL は確定済みのためハッシュ計算のみで対応可能（バイナリデプロイ不要）
+- [ ] **NPM_TOKEN シークレット登録**: `https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions` に npm Automation トークンを `NPM_TOKEN` として登録（A2 完了の前提条件）
+- [ ] **GitHub Pages 有効化**: リポジトリ Settings → Pages → Source を "GitHub Actions" に設定（A3 TypeDoc デプロイの前提条件）
+- [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
+  > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
 
-### 🟠 High Priority
+### 🟠 High Priority — Phase B（バイナリ配信インフラ）
 
-- [ ] **WASM Integration**: 各エンジンの実バイナリ統合と SRI ハッシュ最終確定
-  - [ ] Stockfish (Chess)
-  - [ ] やねうら王 (Shogi)
-  - [ ] KataGo (Go)
-  - [ ] Edax (Reversi)
-  - [ ] Mortal (Mahjong)
-- [ ] **API リファレンス**: TypeDoc + TSDoc による全パッケージ技術ドキュメントの自動生成
-- [ ] **Release Automation**: Changesets と連携した `CHANGELOG.md` の自動生成とリリース自動化
+- [ ] **Phase B1**: Cloudflare R2 / GitHub Pages（`multi-game-engines-assets` リポジトリ）の配信設定
+- [ ] **Phase B2**: やねうら王 WASM ビルドパイプライン (Emscripten)
+- [ ] **Phase B3**: KataGo / Edax / gnubg / KingsRow / Mortal WASM ビルド
+- [ ] **Phase B4**: SRI 自動再計算 CI（バイナリデプロイ → `pnpm sri:refresh` → PR 自動作成）
 
 ### 🟡 Medium Priority
 
-- [ ] **Playwright E2E 拡充**: UI Monitor 等の各パッケージに対する網羅的 E2E テスト追加
+- [ ] **Playwright E2E 拡充**: `ui-vue-monitor` への CT テスト追加（`ui-react-monitor` に続く第2弾）
 - [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替
-- [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給
-- [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md`, `ROADMAP.md` 等) の整備
+- [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md` 等) の整備
 - [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討
 
 ### 🔵 Future / Research

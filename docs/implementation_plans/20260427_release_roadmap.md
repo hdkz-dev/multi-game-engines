@@ -1,7 +1,7 @@
 # [実装計画書] npm 初回リリースへの道筋 (v0.1.0)
 
 > 作成日: 2026-04-27
-> ステータス: 計画中
+> ステータス: **Phase A 完了** / Phase B 計画中
 
 ---
 
@@ -223,3 +223,9 @@ gnubg (GPL-2.0)、KingsRow (各種)、Mortal (各種) に適用する。
 ## 8. 対応履歴
 
 - 2026-04-27: 計画書作成（現状分析・フェーズ設計・ライセンス制約整理）
+- 2026-04-27: **Phase A 全完了** (A1–A4)
+  - A1: Stockfish 全 6 アセット SRI 確定 (commit `5f74f679`)
+  - A2: Changesets 自動化・`release.yml` 整備 (commit `aabf8c4e`)
+  - A3: TypeDoc + GitHub Pages ワークフロー追加 (commit `d91974d3`)
+  - A4: `ui-react-monitor` Playwright CT 基盤 + E2E CI (commit `6ed55131`)
+  - ⚠️ 手動作業残: `NPM_TOKEN` シークレット登録・GitHub Pages 有効化
