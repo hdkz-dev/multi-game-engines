@@ -2,17 +2,51 @@
 
 ## 📅 更新日: 2026年4月27日 (実装担当: Zenith Quality Engineer)
 
-## 📈 稼働中のタスク
+## ✅ 直近完了タスク (2026年4月)
 
-### 1. モダン ESLint スイートの統合と品質強化 (ADR-059)
+### モダン ESLint スイートの統合と品質強化 (ADR-059) — 完了
 
 - [x] ESLint 10.2.1 (Flat Config) への完全移行とプラグイン・スイートの導入
 - [x] `eslint-plugin-import-x` による ESM 解決の近代化
 - [x] `eslint-plugin-unicorn`, `eslint-plugin-promise`, `eslint-plugin-jsx-a11y` の統合
 - [x] `eslint-plugin-vitest`, `eslint-plugin-tsdoc`, `eslint-plugin-no-only-tests` による開発プロセスのガード
 - [x] `eslint-plugin-lit`, `eslint-plugin-wc` による Web Components 実装の品質担保
-- [x] 全 51 パッケージでの `pnpm lint` パス確認 (51 パッケージ)
+- [x] 全 51 パッケージでの `pnpm lint` パス確認
 - [x] 直近の品質ゲートでの残警告解消（`adapter-uci`, `adapter-gnubg`, `adapter-gtp`, `adapter-usi`, `adapter-katago`, `adapter-yaneuraou`, `ui-react-core`, `zenith-dashboard-react`）
+
+## 📈 次のマイルストーン (Next Steps)
+
+以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
+
+### 🔴 BLOCKER — リリース前必須
+
+- [ ] **SRI プレースホルダー置換**: 全アダプターの `sha384-*Placeholder` を本番バイナリの実ハッシュ値へ置換（Binary Release が前提）
+
+### 🟠 High Priority
+
+- [ ] **WASM Integration**: 各エンジンの実バイナリ統合と SRI ハッシュ最終確定
+  - [ ] Stockfish (Chess)
+  - [ ] やねうら王 (Shogi)
+  - [ ] KataGo (Go)
+  - [ ] Edax (Reversi)
+  - [ ] Mortal (Mahjong)
+- [ ] **API リファレンス**: TypeDoc + TSDoc による全パッケージ技術ドキュメントの自動生成
+- [ ] **Release Automation**: Changesets と連携した `CHANGELOG.md` の自動生成とリリース自動化
+
+### 🟡 Medium Priority
+
+- [ ] **Playwright E2E 拡充**: UI Monitor 等の各パッケージに対する網羅的 E2E テスト追加
+- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替
+- [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給
+- [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md`, `ROADMAP.md` 等) の整備
+- [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討
+
+### 🔵 Future / Research
+
+- [ ] **Hardware Acceleration**: WebNN (NPU/GPU 活用 NNUE 推論) / WebGPU Compute の統合
+- [ ] **Swarm — Expert Mapping**: アンサンブルアダプターへの序盤・終盤特化エキスパートマッピング追加
+- [ ] **Observability**: OpenTelemetry 統合による実行時パフォーマンス可視化
+- [ ] **Incomplete Information Games**: `adapter-poker`, `adapter-bridge` の抽象化設計
 
 ## 🏆 到達ハイライト (2026-04-27 依存関係メジャーアップデート & TS2882 対応)
 
