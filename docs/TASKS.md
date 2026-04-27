@@ -117,16 +117,19 @@
 > 詳細: `docs/implementation_plans/20260427_release_roadmap.md`
 > ⚠️ **ライセンス分離 (ADR-014) が全作業の絶対制約**: npm パッケージに GPL バイナリを含めないこと
 
-- [ ] **[A1] Stockfish SIMD/ST variant SRI 算出**
-  - [ ] `scripts/compute-sri.mjs` 作成（fetch → SHA-384 → base64）
-  - [ ] `stockfish-nnue-16-simd-mt.wasm` / `stockfish-nnue-16-st.wasm` のハッシュ算出
-  - [ ] `engines.json` の該当エントリを `__unsafeNoSRI: true` → 実 SHA384 に置換
-  - [ ] `pnpm sri:refresh` に統合
-- [ ] **[A2] Changesets リリース自動化**
-  - [ ] `.changeset/config.json` の `access: "public"` 確認・修正
-  - [ ] `release.yml` の MIT パッケージのみ公開であることを確認
-  - [ ] v0.1.0 changeset エントリ作成
-  - [ ] `NPM_TOKEN` GitHub Actions シークレット設定
+- [x] **[A1] Stockfish no-simd/single variant SRI 算出** ✅ 2026-04-27
+  - [x] Stockfish@16.0.0 の実ファイル名確認（`no-simd`, `single` — 誤記 `simd-mt`/`st` を修正）
+  - [x] `scripts/refresh-engine-sris.mjs` に `tryUpgradeSRI()` 追加（`__unsafeNoSRI` → 実 SHA384 昇格）
+  - [x] `engines.json` 全 Stockfish アセット（6件）の `__unsafeNoSRI` → 実 SHA384 置換
+  - [x] `pnpm sri:refresh` で動作確認（PR #97 / commit `5f74f679`）
+- [x] **[A2] Changesets リリース自動化** ✅ 2026-04-27
+  - [x] `.changeset/config.json` の `access: "public"`, `baseBranch: "main"` 確認 ✓
+  - [x] 旧 changeset `shy-sails-sneeze.md`（削除済みパッケージ参照）を削除
+  - [x] `initial-public-release.md` 作成（全 47 公開パッケージ `patch` bump → 0.1.1）
+  - [x] `release.yml` に push to main トリガー追加・npm auth ステップ追加
+  - [ ] **⚠️ 要手動設定**: `NPM_TOKEN` GitHub Actions シークレット未設定 → npm publish 前に必要
+    - 設定方法: `https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions`
+    - npm アクセストークン（Automation タイプ）を取得し `NPM_TOKEN` として登録
 - [ ] **[A3] TypeDoc API リファレンス**
   - [ ] `typedoc.json` ルート設定（`entryPointStrategy: "packages"`）
   - [ ] GitHub Pages デプロイ GitHub Actions ワークフロー追加

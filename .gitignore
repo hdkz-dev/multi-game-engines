@@ -8,6 +8,9 @@ out/
 build/
 .next/
 next-env.d.ts
+
+# Generated API docs (deployed to GitHub Pages by CI)
+docs/api/
 .wrangler/
 .docusaurus/
 
