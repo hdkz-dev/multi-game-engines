@@ -61,12 +61,13 @@
 - [x] **Universal Storage & Flow Control**: Node.js/Bun CLI 環境への対応、`AbortSignal` 標準化、およびレジューム機能付きロード。
 - [x] **Binary Variant Selection**: SIMD/Threads に応じた最適な WASM バイナリの自動ディスパッチ。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
-- [ ] **Release Automation**: `release-please` による完全自動リリースと CHANGELOG 生成。
+- [ ] **Release Automation**: Changesets による完全自動リリースと CHANGELOG 生成。
 - [x] **Quality Gate Stabilization**: PR #60 で `lint`, `typecheck`, `build`, `test`, `CodeQL`, `CodeRabbit` を全て green に収束。
 - [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
-  - [ ] **[BLOCKER]** 全アダプターの SRI プレースホルダーハッシュ (`sha384-*Placeholder`) を本番用ハッシュ値へ置換 (Binary Release Required)。
+  - [ ] **[BLOCKER-A]** Stockfish SIMD/ST variant の SRI 算出（jsDelivr URL 確定済み・即着手可能）。
+  - [ ] **[BLOCKER-B]** 自社ホスト済みバイナリ（やねうら王・KataGo 等）の実 SHA384 確定（WASM ビルド・CDN デプロイが前提）。`__unsafeNoSRI` は本番で `SECURITY_ERROR` により自動遮断済みのため、ロジック変更不要。バイナリは MIT リポジトリとは物理分離して管理（ADR-014）。
   - [x] 20パッケージへの README.md 追加。
   - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
 - [x] **Extended Adapters**:
