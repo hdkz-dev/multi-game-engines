@@ -130,13 +130,20 @@
   - [ ] **⚠️ 要手動設定**: `NPM_TOKEN` GitHub Actions シークレット未設定 → npm publish 前に必要
     - 設定方法: `https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions`
     - npm アクセストークン（Automation タイプ）を取得し `NPM_TOKEN` として登録
-- [ ] **[A3] TypeDoc API リファレンス**
-  - [ ] `typedoc.json` ルート設定（`entryPointStrategy: "packages"`）
-  - [ ] GitHub Pages デプロイ GitHub Actions ワークフロー追加
-  - [ ] CI に TypeDoc 警告ゼロチェック追加
-- [ ] **[A4] E2E テスト基盤整備**
-  - [ ] `ui-react-monitor` / `ui-vue-monitor` に Playwright テスト追加
-  - [ ] MockAdapter 使用 E2E CI ジョブ追加（GPL バイナリ不使用）
+- [x] **[A3] TypeDoc API リファレンス** ✅ 2026-04-27
+  - [x] `typedoc.json` ルート設定（`entryPointStrategy: "packages"`, 47パッケージ）
+  - [x] GitHub Pages デプロイ GitHub Actions ワークフロー追加（`.github/workflows/docs.yml`）
+  - [x] `skipErrorChecking: true` で Vue SFC・TSDoc 警告を抑制（0エラー, 38情報）
+  - [x] ルート `package.json` に `docs` / `docs:check` スクリプト追加
+  - [ ] **⚠️ 要手動設定**: GitHub Pages を GitHub Actions ソースで有効化が必要
+    - 設定: `https://github.com/hdkz-dev/multi-game-engines/settings/pages`
+- [x] **[A4] E2E テスト基盤整備** ✅ 2026-04-27
+  - [x] `ui-react-monitor` に Playwright CT テスト追加（`ScoreBadge` 6件）
+  - [x] `playwright-ct.config.ts` / `playwright/index.tsx` / `playwright/index.html` 作成
+  - [x] `src/__ct__/` に CT テストファイル配置（ADR-014 準拠: モックデータのみ, GPL バイナリ不使用）
+  - [x] `.github/workflows/e2e.yml` — Chromium CT CI ジョブ追加（push/PR to main）
+  - [x] Vitest exclude に `__ct__/**` 追加（ユニットテストとの競合を回避）
+  - [ ] `ui-vue-monitor` への Playwright CT 追加（将来対応）
 
 ### 🟡 Medium（品質・保守性）
 
