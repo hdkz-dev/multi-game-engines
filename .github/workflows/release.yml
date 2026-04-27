@@ -1,6 +1,9 @@
 name: Release
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +29,11 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
+      - name: Configure npm registry auth
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -48,8 +56,10 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          # Runs `pnpm build && changeset publish` — only MIT packages, no GPL binaries (ADR-014)
           publish: pnpm run release
+          createGithubReleases: true
+          setupGitUser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
