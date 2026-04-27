@@ -19,18 +19,28 @@
               "type": "wasm"
             },
             "variants": {
-              "simd-mt": {
+              "no-simd": {
+                "main": {
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-no-simd.js",
+                  "type": "worker-js",
+                  "sri": "sha384-IXK3i8uzcBmrjhKzrv3zEbjaqiZTbSV9h5DsQXF/ncto23jhJo1gOd9mKBJUdRE2"
+                },
                 "wasm": {
-                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-simd-mt.wasm",
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-no-simd.wasm",
                   "type": "wasm",
-                  "__unsafeNoSRI": true
+                  "sri": "sha384-qOlhavZ5a9TwQPMamqTVBfdoAc6Pr1yraCVFQRERV+wBY2AbUvg8KUHyXJ/wtF6T"
                 }
               },
-              "st": {
+              "single": {
+                "main": {
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-single.js",
+                  "type": "worker-js",
+                  "sri": "sha384-cUdJ8huicvFKw7TyN6VbMf4krwyEZekn0/XfOXHvvLs2LWYv1ymvUwfYlps1V2b1"
+                },
                 "wasm": {
-                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-st.wasm",
+                  "url": "https://cdn.jsdelivr.net/npm/stockfish@16.0.0/src/stockfish-nnue-16-single.wasm",
                   "type": "wasm",
-                  "__unsafeNoSRI": true
+                  "sri": "sha384-P9TxAsdfY4LwRdDac4IqQa/6SKthYTDnT3ilCt4pPuTEyQToU8DfXJTRvy4ZiVgy"
                 }
               }
             }

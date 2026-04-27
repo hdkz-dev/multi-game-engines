@@ -26,6 +26,28 @@ async function calculateSRI(url) {
   }
 }
 
+/**
+ * SRI を持たないアセット (sri なし、または __unsafeNoSRI: true) を更新する。
+ * __unsafeNoSRI のアセットはフェッチ成功時のみ sri に昇格させる。
+ * フェッチ失敗（未デプロイ等）の場合は __unsafeNoSRI をそのまま保持する。
+ *
+ * ライセンス注意: engines.json はバイナリを含まない URL/メタデータのみ。
+ * GPL バイナリの URL を記録することは MIT ライセンス違反に当たらない (ADR-014)。
+ */
+async function tryUpgradeSRI(assetConfig, label) {
+  if (!assetConfig.url) return false;
+  // すでに有効な SRI がある → スキップ
+  if (assetConfig.sri) return false;
+
+  const sri = await calculateSRI(assetConfig.url);
+  if (!sri) return false; // フェッチ失敗 → __unsafeNoSRI を維持
+
+  console.log(`    ✅ SRI 昇格: ${label}`);
+  assetConfig.sri = sri;
+  delete assetConfig.__unsafeNoSRI;
+  return true;
+}
+
 async function refresh() {
   let updated = false;
   console.log(`Refreshing SRI hashes in ${registryPath}...`);
@@ -36,12 +58,12 @@ async function refresh() {
 
   for (const [engineId, engineData] of Object.entries(registry.engines)) {
     console.log(`Processing engine: ${engineId}`);
-    
+
     if (!engineData.versions) continue;
 
     for (const [version, versionData] of Object.entries(engineData.versions)) {
       console.log(`  Version: ${version}`);
-      
+
       const assets = versionData.assets;
       if (!assets) continue;
 
@@ -49,13 +71,18 @@ async function refresh() {
       for (const [assetKey, assetConfig] of Object.entries(assets)) {
         if (assetKey === "variants") continue; // Handle separately
 
+        const label = `${engineId}@${version} / ${assetKey}`;
         if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
+          // 既存 SRI の更新チェック
           const sri = await calculateSRI(assetConfig.url);
           if (sri && assetConfig.sri !== sri) {
             console.log(`    ✅ Updated SRI for ${assetKey} in ${engineId}@${version}`);
             assetConfig.sri = sri;
             updated = true;
           }
+        } else if (assetConfig.__unsafeNoSRI) {
+          // __unsafeNoSRI → フェッチ成功なら sri に昇格
+          if (await tryUpgradeSRI(assetConfig, label)) updated = true;
         }
       }
 
@@ -63,6 +90,7 @@ async function refresh() {
       if (assets.variants) {
         for (const [variantId, variantData] of Object.entries(assets.variants)) {
           for (const [assetKey, assetConfig] of Object.entries(variantData)) {
+            const label = `${engineId}@${version} / variants.${variantId}.${assetKey}`;
             if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
               const sri = await calculateSRI(assetConfig.url);
               if (sri && assetConfig.sri !== sri) {
@@ -70,6 +98,8 @@ async function refresh() {
                 assetConfig.sri = sri;
                 updated = true;
               }
+            } else if (assetConfig.__unsafeNoSRI) {
+              if (await tryUpgradeSRI(assetConfig, label)) updated = true;
             }
           }
         }
