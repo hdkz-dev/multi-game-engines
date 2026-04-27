@@ -1,6 +1,6 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年4月5日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年4月27日 (実装担当: Zenith Quality Engineer)
 
 ## 📈 稼働中のタスク
 
@@ -13,6 +13,29 @@
 - [x] `eslint-plugin-lit`, `eslint-plugin-wc` による Web Components 実装の品質担保
 - [x] 全 51 パッケージでの `pnpm lint` パス確認 (51 パッケージ)
 - [x] 直近の品質ゲートでの残警告解消（`adapter-uci`, `adapter-gnubg`, `adapter-gtp`, `adapter-usi`, `adapter-katago`, `adapter-yaneuraou`, `ui-react-core`, `zenith-dashboard-react`）
+
+## 🏆 到達ハイライト (2026-04-27 依存関係メジャーアップデート & TS2882 対応)
+
+- **28 パッケージ一括アップデート (PR #96)**:
+  - TypeScript `6.0.2 → 6.0.3`、ESLint `10.2.0 → 10.2.1`、Vue `3.5.32 → 3.5.33`、Vite `8.0.8 → 8.0.10`、Vitest `4.1.4 → 4.1.5`、`@types/node` `24.x → 25.6.0`、Tailwind CSS `4.2.2 → 4.2.4`、Next.js `16.2.3 → 16.2.4`、Wrangler `4.81.1 → 4.85.0` 等 28 パッケージの最新バージョンへ更新。
+  - TypeScript 6.0.3 の新規エラー **TS2882**（ESM モジュールにおける拡張子なし副作用 import の禁止）に対応するため、`packages/ui-shogi/src/components/ShogiBoard.vue` および `packages/ui-chess/src/components/ChessBoard.vue` の `import "../elements"` を `import "../elements.js"` へ修正。
+  - `pnpm/action-setup` を v5 から v6 へ更新 (PR #88)、全 CI ワークフロー (`ci.yml`, `refresh-sri.yml`, `release.yml`) に適用。
+- **テストカバレッジの大幅引き上げ (PR #92)**:
+  - 9 パッケージで合計カバレッジを 63–100% へ引き上げ (`ui-core`, `ui-elements`, `ui-react-monitor`, `ui-react-core`, `i18n-core`, `registry`, `ui-shogi-elements`, `ui-vue-monitor`, `ui-chess`)。
+  - `SearchMonitor` の RAF スタブを `Map` + 実 `clearTimeout` + `performance.now()` モック構成に刷新し、决定论的かつ副作用のない RAF キャンセル検証を実現。
+  - `EngineMonitorPanel` のタブ切り替えテストに `aria-selected` 状態の前後検証を追加。
+  - `createBackgammonMove` のセミコロン・インジェクションテストを `i18nKey` アサーション付きに強化。
+
+## 🏆 到達ハイライト (2026-04-05 Quality Gate Finalization)
+
+- **最新の CI 収束**:
+  - `build-and-test`, `CodeQL`, `CodeRabbit` を含む PR #60 の全チェックをグリーンに到達させました。
+  - `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test` のローカル品質ゲートを再実行し、再現性を確認しました。
+- **警告ゼロ運用の前進**:
+  - `adapter-*` 群と `ui-react-core`、`zenith-dashboard-react` の未使用 import / TSDoc 警告を解消しました。
+  - React 19 互換の `use` / Provider 形式へ UI プロバイダーを更新し、将来の互換性警告を減らしました。
+- **依存関係と監査の安定化**:
+  - lockfile と package manifest の不整合を解消し、`pnpm audit --prod` の脆弱性を解決しました。
 
 ## 🏆 到達ハイライト (2026-03-05 Monorepo Re-Build & Test Stability)
 

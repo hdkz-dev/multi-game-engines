@@ -161,6 +161,20 @@
   - [x] **Standardization**: Web Components 用プラグイン (`lit`, `wc`) の導入と設定の共通化。
 - [x] **Quality**: 全 73 パッケージでの `pnpm lint` パス確認。
 
+### 2026-04-27 更新 (実装担当: Zenith Quality Engineer)
+
+- [x] **テストカバレッジ大規模引き上げ (PR #92)**
+  - [x] `ui-core` (`SearchMonitor`): RAF スタブを `Map` + 実 `clearTimeout` + `performance.now()` モックで刷新し、决定论的な RAF キャンセル検証を達成
+  - [x] `ui-react-monitor` (`EngineMonitorPanel`): タブ切り替え `aria-selected` 検証、エラーステート i18nKey パス、STOP ボタン動作テストを拡充
+  - [x] `domain-backgammon`: セミコロン・インジェクションテストを `i18nKey` アサーション付きに強化
+  - [x] `ui-elements`, `ui-react-core`, `i18n-core`, `registry`, `ui-shogi-elements`, `ui-vue-monitor`, `ui-chess` の 6 パッケージでカバレッジ 63 → 100% 達成
+  - [x] CodeRabbit/Gemini/Codex の全 36 件レビューコメントへ対応・クローズ
+- [x] **依存関係メジャーアップデート (PR #96)**
+  - [x] TypeScript 6.0.3 / ESLint 10.2.1 / Vue 3.5.33 / Vite 8.0.10 など 28 パッケージを最新化
+  - [x] TS2882 対応: `ShogiBoard.vue` / `ChessBoard.vue` の副作用 import に `.js` 拡張子を付与
+  - [x] doc-sync チェック: `PROGRESS.md` の ESLint バージョン参照を 10.2.1 へ同期
+  - [x] CI ワークフロー `pnpm/action-setup` v5 → v6 へ更新 (PR #88)
+
 ### 2026-03-05 更新 (実装担当: Zenith Quality Engineer)
 
 - [x] **Monorepo Build & Test Persistence**
