@@ -20,7 +20,9 @@
 
 ### 🔴 BLOCKER — リリース前必須
 
-- [ ] **SRI プレースホルダー置換**: 全アダプターの `sha384-*Placeholder` を本番バイナリの実ハッシュ値へ置換（Binary Release が前提）
+- [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は GitHub Pages への実バイナリデプロイ後に `sha384` ハッシュを算出し `__unsafeNoSRI: true` を置換する（バイナリビルド・デプロイが前提）
+  > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断される設計済みの開発フラグ。ハッシュチェックロジック自体の緩和は不要。
+- [ ] **Stockfish SIMD/ST variant の SRI 算出**: jsDelivr URL は確定済みのためハッシュ計算のみで対応可能（バイナリデプロイ不要）
 
 ### 🟠 High Priority
 
