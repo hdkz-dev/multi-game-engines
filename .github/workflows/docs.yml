@@ -39,7 +39,9 @@ jobs:
         run: pnpm build
 
       - name: Generate TypeDoc
-        run: pnpm docs
+        # `pnpm docs` conflicts with npm's built-in `docs` command (opens browser).
+        # Use npx typedoc directly to avoid the ambiguity.
+        run: npx typedoc
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

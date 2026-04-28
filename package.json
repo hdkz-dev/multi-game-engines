@@ -39,8 +39,8 @@
     "ai:release": "changeset",
     "npm:setup-oidc": "node scripts/setup-trusted-publishers.mjs",
     "npm:initial-publish": "node scripts/initial-publish.mjs",
-    "docs": "typedoc",
-    "docs:check": "typedoc --treatWarningsAsErrors"
+    "docs": "npx typedoc",
+    "docs:check": "npx typedoc --treatWarningsAsErrors"
   },
   "engines": {
     "node": ">=24.0.0",
