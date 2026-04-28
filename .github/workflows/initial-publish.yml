@@ -1,0 +1,48 @@
+name: Initial npm Publish (One-time)
+
+# 初回 publish 専用ワークフロー。
+# publish 完了後はこのファイルを削除し、以降は release.yml (OIDC) を使用する。
+#
+# 使い方:
+#   1. GitHub Secrets に NPM_TOKEN (Granular Token, Bypass 2FA 有効) を設定
+#      https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions
+#   2. Actions タブ → "Initial npm Publish (One-time)" → "Run workflow"
+#   3. 全パッケージ publish 完了後:
+#      a. ローカルで: npm login && pnpm npm:setup-oidc
+#      b. このワークフローファイルを削除
+#      c. NPM_TOKEN シークレットを削除
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish to npm (sequential)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js 24.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Publish to npm (sequential, 60s delay to avoid E429)
+        run: node scripts/sequential-publish.mjs
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
