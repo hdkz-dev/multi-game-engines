@@ -22,10 +22,13 @@
   - `.github/workflows/docs.yml` で GitHub Pages へ自動デプロイ（push-to-main でトリガー）。
   - ⚠️ **要手動設定**: リポジトリ Settings → Pages で Source を "GitHub Actions" に変更が必要。
 
-- **[A4] E2E テスト基盤整備** (commit `6ed55131`):
+- **[A4] E2E テスト基盤整備** (commits `6ed55131`, `0379db4d`):
   - `ui-react-monitor` に Playwright CT 基盤を構築（Chromium 専用、ADR-014 準拠: GPL バイナリ不使用）。
-  - `ScoreBadge` コンポーネント 6 件の実ブラウザ CT テストを追加。
-  - `.github/workflows/e2e.yml` で Chromium CT を CI に組み込み。
+  - `ui-vue-monitor` にも Playwright CT 基盤を構築（`@playwright/experimental-ct-vue`）。
+  - 両パッケージで `ScoreBadge` コンポーネント 6 件の実ブラウザ CT テストを追加。
+  - `.github/workflows/e2e.yml` で Chromium CT を CI に組み込み（React・Vue 両ジョブ）。
+  - `useEngineUI()` のリターン型を `reactive` ゲッターで修正し vue-tsc 3.2.7 + TS6 の TS2339 誤検知を解消。
+  - `@vue/*` コアパッケージを pnpm overrides で 3.5.33 に統一し、バージョン不整合を修正。
 
 ---
 
