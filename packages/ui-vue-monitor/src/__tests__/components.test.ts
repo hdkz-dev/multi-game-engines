@@ -6,13 +6,12 @@ import { mount } from "@vue/test-utils";
 // above all import statements — top-level imported variables (ref, createUIStrings)
 // are undefined at factory execution time.
 vi.mock("@multi-game-engines/ui-vue-core", async () => {
-  const [{ ref }, { createUIStrings }] = await Promise.all([
-    import("vue"),
-    import("@multi-game-engines/ui-core"),
-  ]);
+  const { createUIStrings } = await import("@multi-game-engines/ui-core");
+  // useEngineUI() now returns { strings: EngineUIStrings } (not Ref<EngineUIStrings>),
+  // so the mock must return a plain object to match the real API shape.
   return {
     useEngineUI: () => ({
-      strings: ref(createUIStrings({})),
+      strings: createUIStrings({}),
     }),
   };
 });

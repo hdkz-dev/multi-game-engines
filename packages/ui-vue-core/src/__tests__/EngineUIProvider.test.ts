@@ -49,7 +49,7 @@ describe("useEngineUI", () => {
     mount(TestComponent);
     expect(context).toBeDefined();
     expect(context!.strings).toBeDefined();
-    expect(typeof context!.strings.value).toBe("object");
+    expect(typeof context!.strings).toBe("object");
   });
 
   it("should return provided strings when provider is present", () => {
@@ -72,6 +72,6 @@ describe("useEngineUI", () => {
 
     mount(Parent);
     expect(context).toBeDefined();
-    expect(context!.strings.value).toBeDefined();
+    expect(context!.strings).toBeDefined();
   });
 });

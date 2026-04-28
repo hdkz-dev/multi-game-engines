@@ -7,5 +7,7 @@ export default defineConfig({
     testTimeout: 10000,
     environment: "happy-dom",
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    // Exclude Playwright CT tests — they run via playwright-ct.config.ts, not Vitest
+    exclude: ["**/node_modules/**", "**/dist/**", "**/__ct__/**"],
   },
 });

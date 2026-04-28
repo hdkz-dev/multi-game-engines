@@ -99,12 +99,12 @@ const { state, status, search, stop } = useEngineMonitor<
 });
 
 const bestPV = computed(() => state.value.pvs[0]);
-const displayTitle = computed(() => props.title ?? strings.value.title);
+const displayTitle = computed(() => props.title ?? strings.title);
 
 const announcement = computed(() => {
-  if (status.value === "error") return strings.value.errorTitle;
+  if (status.value === "error") return strings.errorTitle;
   if (bestPV.value?.score.type === "mate")
-    return strings.value.mateIn(bestPV.value.score.value);
+    return strings.mateIn(bestPV.value.score.value);
   return "";
 });
 
@@ -126,12 +126,12 @@ const handleMoveClick = (move: string) => {
 
 const errorMessage = computed(() => {
   const err = props.engine.lastError;
-  if (!err) return strings.value.errorDefaultRemediation;
+  if (!err) return strings.errorDefaultRemediation;
 
   if (err.i18nKey) {
     const parts = err.i18nKey.split(".");
     const key = parts[parts.length - 1];
-    const errors = strings.value.errors as Record<string, string> | undefined;
+    const errors = strings.errors as Record<string, string> | undefined;
     if (key && errors?.[key]) {
       let msg = errors[key]!;
       if (err.i18nParams) {
@@ -143,7 +143,7 @@ const errorMessage = computed(() => {
     }
   }
 
-  return err.remediation || strings.value.errorDefaultRemediation;
+  return err.remediation || strings.errorDefaultRemediation;
 });
 </script>
 

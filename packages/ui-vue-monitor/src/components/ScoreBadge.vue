@@ -26,7 +26,7 @@ const label = computed(() => {
     return EvaluationPresenter.getDisplayLabel(
       props.score,
       props.inverted,
-      strings.value.mateShort || "M",
+      strings.mateShort || "M",
     );
   }
   return EvaluationPresenter.getDisplayLabel(props.score, props.inverted);
@@ -35,9 +35,9 @@ const label = computed(() => {
 const ariaLabel = computed(() => {
   const displayValue = props.inverted ? -props.score.value : props.score.value;
   if (props.score.type === "mate") {
-    return strings.value.mateIn(Math.abs(displayValue));
+    return strings.mateIn(Math.abs(displayValue));
   }
-  return strings.value.advantage(
+  return strings.advantage(
     EvaluationPresenter.getAdvantageSide(props.score.value, props.inverted),
     Math.abs(displayValue),
   );

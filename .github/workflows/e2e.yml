@@ -45,3 +45,39 @@ jobs:
           name: playwright-report-react-monitor
           path: packages/ui-react-monitor/playwright-report/
           retention-days: 7
+
+  e2e-vue-monitor:
+    name: E2E — ui-vue-monitor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js 24.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm exec turbo build
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @multi-game-engines/ui-vue-monitor test:e2e:install
+
+      - name: Run E2E Component Tests
+        run: pnpm --filter @multi-game-engines/ui-vue-monitor test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-vue-monitor
+          path: packages/ui-vue-monitor/playwright-report/
+          retention-days: 7
