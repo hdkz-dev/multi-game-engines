@@ -1,6 +1,6 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年4月27日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年4月28日 (実装担当: Zenith Quality Engineer)
 
 ## ✅ 直近完了タスク (2026年4月)
 
@@ -15,7 +15,7 @@
 - **[A2] Changesets リリース自動化** (commit `aabf8c4e`):
   - 旧 changeset（削除済みパッケージ参照）を削除し、全 47 公開パッケージ `patch` bump (`0.1.0 → 0.1.1`) の `initial-public-release.md` を作成。
   - `release.yml` に push-to-main トリガー・npm auth ステップ・`createGithubReleases: true` を追加。
-  - ⚠️ **要手動設定**: `NPM_TOKEN` GitHub Actions シークレット登録が npm publish の前提条件。
+  - ⚠️ **要手動設定**: `NPM_TOKEN` GitHub Actions シークレット登録が npm publish の前提条件。（→ 後日 OIDC 方式に移行済み、下記参照）
 
 - **[A3] TypeDoc API リファレンス** (commit `d91974d3`):
   - ルート `typedoc.json` を作成（`entryPointStrategy: "packages"`, 全 47 パッケージ, `skipErrorChecking: true`）。
@@ -46,9 +46,15 @@
 
 以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
 
+### ✅ npm publish 認証: OIDC Trusted Publishing 対応済み（2026年4月28日）
+
+- `release.yml` を OIDC Trusted Publishing 方式に更新（`NPM_TOKEN` 不要・トークン管理ゼロ）
+- `scripts/setup-trusted-publishers.mjs` を追加（全 48 パッケージへの Trusted Publisher 一括設定ツール）
+- `pnpm npm:setup-oidc` コマンドで実行可能
+
 ### 🔴 BLOCKER — リリース前必須（手動作業）
 
-- [ ] **NPM_TOKEN シークレット登録**: `https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions` に npm Automation トークンを `NPM_TOKEN` として登録（A2 完了の前提条件）
+- [ ] **npmjs.com Trusted Publisher 設定**: `npm login` 後に `pnpm npm:setup-oidc` を実行（全 48 パッケージに一括設定）
 - [ ] **GitHub Pages 有効化**: リポジトリ Settings → Pages → Source を "GitHub Actions" に設定（A3 TypeDoc デプロイの前提条件）
 - [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
   > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
