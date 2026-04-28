@@ -54,7 +54,12 @@
 
 ### 🔴 BLOCKER — リリース前必須（手動作業）
 
-- [ ] **npmjs.com Trusted Publisher 設定**: `npm login` 後に `pnpm npm:setup-oidc` を実行（全 48 パッケージに一括設定）
+> **初回 publish のみ Granular Token が必要**。publish 後は OIDC に完全移行できます。
+
+- [ ] **[手順1] npmjs.com で Granular Access Token を発行**: [https://www.npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → Generate New Token → Granular Access Token → "Bypass 2FA" を有効化・スコープ `@multi-game-engines` の全パッケージに read/write 権限・有効期限90日
+- [ ] **[手順2] 初回 publish の実行**: `NPM_TOKEN=<token> pnpm run release`（全 47 パッケージが npm に登録される）
+- [ ] **[手順3] Trusted Publisher を一括設定**: `npm login && pnpm npm:setup-oidc`（パッケージ登録後に実行 → 以降 OIDC で自動認証、トークン不要）
+- [ ] **[手順4] Granular Token を失効**: npmjs.com でトークンを削除（OIDC 移行後は不要）
 - [ ] **GitHub Pages 有効化**: リポジトリ Settings → Pages → Source を "GitHub Actions" に設定（A3 TypeDoc デプロイの前提条件）
 - [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
   > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。

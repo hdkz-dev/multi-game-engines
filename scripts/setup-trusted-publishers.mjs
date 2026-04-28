@@ -80,15 +80,17 @@ function getPublicPackages() {
 function getNpmToken() {
   if (process.env.NPM_TOKEN) return process.env.NPM_TOKEN;
 
+  // `npm config get //registry.npmjs.org/:_authToken` はセキュリティ制限で
+  // 取得不可のため、~/.npmrc を直接パースする
   try {
-    // npm login 済みの場合 ~/.npmrc から取得
-    const npmrc = execSync("npm config get //registry.npmjs.org/:_authToken", {
-      encoding: "utf8",
-    }).trim();
-    if (npmrc && npmrc !== "undefined" && npmrc !== "null") return npmrc;
+    const home = process.env.HOME || process.env.USERPROFILE || "";
+    const content = readFileSync(join(home, ".npmrc"), "utf8");
+    const match = content.match(/\/\/registry\.npmjs\.org\/:_authToken=(.+)/);
+    if (match?.[1]) return match[1].trim();
   } catch {
-    // 取得失敗
+    // ~/.npmrc が存在しないか読めない
   }
+
   return null;
 }
 
@@ -122,6 +124,12 @@ async function setTrustedPublisher(packageName, token) {
   if (res.ok) return { ok: true };
 
   const text = await res.text().catch(() => res.statusText);
+
+  // 404 = パッケージがまだ npm に存在しない（初回 publish 前）
+  if (res.status === 404) {
+    return { ok: false, status: 404, error: "未 publish（初回 publish 後に再実行してください）" };
+  }
+
   return { ok: false, status: res.status, error: text };
 }
 
