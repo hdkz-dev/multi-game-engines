@@ -38,6 +38,7 @@
     "ai:check": "pnpm sri:refresh && pnpm lint && pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e",
     "ai:release": "changeset",
     "npm:setup-oidc": "node scripts/setup-trusted-publishers.mjs",
+    "npm:initial-publish": "node scripts/initial-publish.mjs",
     "docs": "typedoc",
     "docs:check": "typedoc --treatWarningsAsErrors"
   },

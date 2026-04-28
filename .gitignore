@@ -2,6 +2,9 @@
 node_modules/
 .npm/
 
+# npm credentials (created temporarily by scripts/initial-publish.mjs)
+.npmrc
+
 # Build outputs
 dist/
 out/
