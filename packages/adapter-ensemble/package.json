@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/adapter-ensemble",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Multi-engine ensemble (swarm-style) coordination adapter for multi-game-engines ecosystem",
   "type": "module",
   "license": "MIT",

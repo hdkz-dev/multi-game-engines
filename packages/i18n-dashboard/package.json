@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/i18n-dashboard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dashboard-specific localized strings for multi-game engines",
   "type": "module",
   "types": "./dist/index.d.ts",
