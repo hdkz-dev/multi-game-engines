@@ -11,7 +11,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
-  id-token: write # npm provenance 署名用（認証は NPM_TOKEN で行う）
+  id-token: write # npm Trusted Publishing (OIDC) — トークン不要で publish
 
 jobs:
   release:
@@ -59,4 +59,5 @@ jobs:
           setupGitUser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # NODE_AUTH_TOKEN は不要 — npm Trusted Publishing (OIDC) で認証
+          # npm CLI 11.5.1+ が id-token: write 権限の OIDC トークンを自動取得
