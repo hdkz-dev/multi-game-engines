@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/adapter-yaneuraou",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "YaneuraOu shogi engine adapter for multi-game-engines ecosystem",
   "type": "module",
   "license": "MIT",
