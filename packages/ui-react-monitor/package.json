@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/ui-react-monitor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Engine monitoring and management components for React",
   "type": "module",
   "types": "./dist/index.d.ts",
