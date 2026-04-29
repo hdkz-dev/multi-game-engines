@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/domain-checkers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Domain-specific Checkers logic, types, and validation",
   "type": "module",
   "license": "MIT",

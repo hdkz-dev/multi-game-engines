@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/registry",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Centralized engine metadata registry for multi-game-engines",
   "type": "module",
   "types": "./dist/index.d.ts",

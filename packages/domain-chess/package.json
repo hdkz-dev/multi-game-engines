@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/domain-chess",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Domain-specific Chess logic, types, and parsing",
   "type": "module",
   "license": "MIT",
