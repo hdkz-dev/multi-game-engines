@@ -30,13 +30,26 @@ const REPO = "hdkz-dev/multi-game-engines";
 const WORKFLOW_FILE = "release.yml";
 const DRY_RUN = process.argv.includes("--dry-run");
 
-// ── トークン確認 ──────────────────────────────────────────
-const token = process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN;
-if (!token) {
-  console.error("❌ NPM_TOKEN または NODE_AUTH_TOKEN 環境変数を設定してください。");
-  console.error("   例: NPM_TOKEN=npm_xxx node scripts/setup-trusted-publishers.mjs");
+// ── 認証確認 ──────────────────────────────────────────────
+// npm trust は Granular Token では E403 になるため npm login セッションが必要。
+// NPM_TOKEN / NODE_AUTH_TOKEN が設定されている場合は試みるが、
+// 未設定の場合は既存の npm セッション (npm whoami) を使う。
+const token = process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN ?? null;
+
+// npm whoami で認証状態を確認
+const whoami = spawnSync("npm", ["whoami"], { encoding: "utf8", stdio: "pipe",
+  env: token ? { ...process.env, NODE_AUTH_TOKEN: token } : process.env,
+});
+if (whoami.status !== 0) {
+  console.error("❌ npm に認証されていません。以下のいずれかを実行してください:");
+  console.error("");
+  console.error("  (A) ローカル認証: npm login  →  node scripts/setup-trusted-publishers.mjs");
+  console.error("  (B) トークン指定: NPM_TOKEN=npm_xxx node scripts/setup-trusted-publishers.mjs");
+  console.error("");
+  console.error("⚠️  Granular Token では E403 になります。npm login (OTP 認証) が必要です。");
   process.exit(1);
 }
+console.log(`👤 npm ユーザー: ${whoami.stdout.trim()}`);
 
 // ── npm バージョン確認 ─────────────────────────────────────
 const npmVersionResult = spawnSync("npm", ["--version"], { encoding: "utf8" });
@@ -49,11 +62,11 @@ if (major < 11 || (major === 11 && minor < 10)) {
 }
 console.log(`✅ npm ${npmVersion} — npm trust コマンドを使用します。\n`);
 
-// ── 一時 .npmrc を設定（認証用）──────────────────────────
+// ── 一時 .npmrc を設定（token が明示指定された場合のみ）────
 const localNpmrc = join(root, ".npmrc");
 const hadLocalNpmrc = existsSync(localNpmrc);
 const originalContent = hadLocalNpmrc ? readFileSync(localNpmrc, "utf8") : null;
-const needsNpmrc = !hadLocalNpmrc || !originalContent?.includes("_authToken");
+const needsNpmrc = token && (!hadLocalNpmrc || !originalContent?.includes("_authToken"));
 
 if (needsNpmrc) {
   writeFileSync(localNpmrc, `//registry.npmjs.org/:_authToken=${token}\n`, "utf8");
@@ -99,11 +112,15 @@ function trustPackage(packageName) {
     return true;
   }
 
+  const env = token
+    ? { ...process.env, NODE_AUTH_TOKEN: token }
+    : process.env;
+
   const result = spawnSync("npm", args, {
     encoding: "utf8",
     stdio: "pipe",
     cwd: root,
-    env: { ...process.env, NODE_AUTH_TOKEN: token },
+    env,
   });
 
   if (result.status === 0) {
@@ -135,11 +152,15 @@ try {
     process.stdout.write(`[${String(i + 1).padStart(2)}/${packages.length}] ${pkg} ... `);
 
     // 既存の設定を確認
+    const listEnv = token
+      ? { ...process.env, NODE_AUTH_TOKEN: token }
+      : process.env;
+
     const listResult = spawnSync("npm", ["trust", "list", pkg, "--json"], {
       encoding: "utf8",
       stdio: "pipe",
       cwd: root,
-      env: { ...process.env, NODE_AUTH_TOKEN: token },
+      env: listEnv,
     });
 
     if (listResult.status === 0) {
