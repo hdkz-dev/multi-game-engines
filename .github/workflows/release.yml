@@ -11,7 +11,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 permissions:
   contents: write
   pull-requests: write
-  id-token: write # OIDC Trusted Publishing — npm token 不要 (ADR-014)
+  id-token: write # npm provenance 署名用（認証は NPM_TOKEN で行う）
 
 jobs:
   release:
@@ -29,7 +29,7 @@ jobs:
         with:
           node-version: "24"
           cache: "pnpm"
-          registry-url: "https://registry.npmjs.org" # Trusted Publishing に必須
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -59,4 +59,4 @@ jobs:
           setupGitUser: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # NPM_TOKEN 不要 — OIDC Trusted Publishing により npm が自動認証
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
