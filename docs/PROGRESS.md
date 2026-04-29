@@ -1,8 +1,8 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年4月28日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年4月29日 (実装担当: Zenith Quality Engineer)
 
-## ✅ 直近完了タスク (2026年4月)
+## ✅ 直近完了タスク (2026年4月29日)
 
 ### npm 初回リリース準備 Phase A — 全完了 ✅
 
@@ -46,15 +46,17 @@
 
 以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
 
-### ✅ 全 47 パッケージ npm 初回 publish 完了（2026年4月29日）
+### ✅ 全 47 パッケージ npm 初回 publish 完了 + v0.1.1 リリース（2026年4月29日）
 
-- **公開状況**: `@multi-game-engines/*` 全 47 パッケージ v0.1.0 が npmjs.com に公開済み
-- **publish 経緯**: ローカル E429 レートリミット（24時間）を GitHub Actions 経由で回避
+- **v0.1.0 公開状況**: `@multi-game-engines/*` 全 47 パッケージ v0.1.0 が npmjs.com に公開済み
   - 25件: 2026-04-28 `changeset publish` で公開
   - 1件: 2026-04-29 ローカルでレートリミット解除確認後に公開
-  - 21件: 2026-04-29 `initial-publish.yml` GitHub Actions ワークフロー経由で公開
+  - 21件: 2026-04-29 `initial-publish.yml` GitHub Actions ワークフロー経由で公開（E429 回避）
+- **v0.1.1 リリース**: Dependabot PR #100-103 のマージ後、Release ワークフローが自動 publish を実行
+  - PR #106 (Version Packages) のマージにより全 47 パッケージ v0.1.1 が npm publish 完了
 - **認証方式**: GitHub Secrets の `NPM_TOKEN`（Granular Token、Bypass 2FA 有効）
 - **release.yml**: `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` で認証済み（main push 時に自動 publish）
+- **ESLint ワークフロー**: PR #105 で追加、pnpm + ESLint v10 (Flat Config) 対応済み（SARIF → GitHub Security upload）
 - **重要な学び**: npm には PyPI の「Trusted Publishers API」は存在しない。OIDC は provenance 署名用のみ。
 
 ### ✅ GitHub Pages 有効化済み
