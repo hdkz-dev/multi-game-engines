@@ -46,21 +46,27 @@
 
 以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
 
-### ✅ npm publish 認証: OIDC Trusted Publishing 対応済み（2026年4月28日）
+### ✅ 全 47 パッケージ npm 初回 publish 完了（2026年4月29日）
 
-- `release.yml` を OIDC Trusted Publishing 方式に更新（`NPM_TOKEN` 不要・トークン管理ゼロ）
-- `scripts/setup-trusted-publishers.mjs` を追加（全 48 パッケージへの Trusted Publisher 一括設定ツール）
-- `pnpm npm:setup-oidc` コマンドで実行可能
+- **公開状況**: `@multi-game-engines/*` 全 47 パッケージ v0.1.0 が npmjs.com に公開済み
+- **publish 経緯**: ローカル E429 レートリミット（24時間）を GitHub Actions 経由で回避
+  - 25件: 2026-04-28 `changeset publish` で公開
+  - 1件: 2026-04-29 ローカルでレートリミット解除確認後に公開
+  - 21件: 2026-04-29 `initial-publish.yml` GitHub Actions ワークフロー経由で公開
+- **認証方式**: GitHub Secrets の `NPM_TOKEN`（Granular Token、Bypass 2FA 有効）
+- **release.yml**: `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` で認証済み（main push 時に自動 publish）
+- **重要な学び**: npm には PyPI の「Trusted Publishers API」は存在しない。OIDC は provenance 署名用のみ。
 
-### 🔴 BLOCKER — リリース前必須（手動作業）
+### ✅ GitHub Pages 有効化済み
 
-> **初回 publish のみ Granular Token が必要**。publish 後は OIDC に完全移行できます。
+- リポジトリ Settings → Pages → Source を "GitHub Actions" に設定済み
+- main push 時に TypeDoc が自動デプロイされる
 
-- [ ] **[手順1] npmjs.com で Granular Access Token を発行**: [https://www.npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → Generate New Token → Granular Access Token → "Bypass 2FA" を有効化・スコープ `@multi-game-engines` の全パッケージに read/write 権限・有効期限90日
-- [ ] **[手順2] 初回 publish の実行**: `NPM_TOKEN=<token> pnpm npm:initial-publish`（全 47 パッケージが npm に登録される）
-- [ ] **[手順3] Trusted Publisher を一括設定**: `npm login && pnpm npm:setup-oidc`（パッケージ登録後に実行 → 以降 OIDC で自動認証、トークン不要）
-- [ ] **[手順4] Granular Token を失効**: npmjs.com でトークンを削除（OIDC 移行後は不要）
-- [ ] **GitHub Pages 有効化**: リポジトリ Settings → Pages → Source を "GitHub Actions" に設定（A3 TypeDoc デプロイの前提条件）
+### 🔴 要対応 — NPM_TOKEN の期限管理
+
+- [ ] **NPM_TOKEN の期限更新**: 現在のトークンは **2026年5月5日** に期限切れ。期限前に更新すること
+  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → Granular Access Token → Bypass 2FA 有効・有効期限90日
+  2. `echo "npm_NEW_TOKEN" | gh secret set NPM_TOKEN`（GitHub Secrets を更新）
 - [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
   > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
 
