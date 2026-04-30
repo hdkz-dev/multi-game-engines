@@ -1,0 +1,53 @@
+{
+  "_comment": "WASM/binary asset download manifest for GitHub Pages deployment. GPL binaries are NOT committed to source (ADR-014). This manifest drives the deploy-assets step in docs.yml.",
+  "version": "1.0",
+  "engines": {
+    "yaneuraou": {
+      "version": "7.5",
+      "sourceVersion": "7.5.0-alpha.4",
+      "license": "GPL-3.0-or-later",
+      "licenseUrl": "https://github.com/yaneurao/YaneuraOu/blob/master/LICENSE",
+      "sourceRepo": "mizar/YaneuraOu.wasm",
+      "archiveUrl": "https://github.com/mizar/YaneuraOu.wasm/releases/download/v7.5.0-alpha.4/YaneuraOu.wasm-v7.5.0-alpha.4-wasm.zip",
+      "destDir": "assets/yaneuraou/7.5",
+      "_note": "material variant: built-in piece-count eval (self-contained, no external .nnue file needed). Requires SharedArrayBuffer (COOP+COEP on consumer app).",
+      "files": [
+        {
+          "zipPath": "wasm/material/lib/yaneuraou.material.js",
+          "dest": "yaneuraou.js",
+          "type": "worker-js"
+        },
+        {
+          "zipPath": "wasm/material/lib/yaneuraou.material.wasm",
+          "dest": "yaneuraou.wasm",
+          "type": "wasm"
+        }
+      ]
+    },
+    "edax": {
+      "version": "4.4",
+      "_status": "TODO",
+      "_note": "No pre-built WASM available from okuhara/edax-reversi-AVX. Requires Emscripten build pipeline (Phase B2). Current release (v4.5.5) ships native binaries only."
+    },
+    "katago": {
+      "version": "1.14",
+      "_status": "TODO",
+      "_note": "KataGo WASM port exists via TensorFlow.js (browser-based), but requires custom build for v1.14. See https://forums.online-go.com/t/web-katrain-browser-based-katrain-clone-with-in-browser-katago-analysis-webgpu-wasm/59096"
+    },
+    "gnubg": {
+      "version": "1.06",
+      "_status": "TODO",
+      "_note": "GNU Backgammon WASM build requires Emscripten compilation. No pre-built WASM available."
+    },
+    "kingsrow": {
+      "version": "1.61",
+      "_status": "TODO",
+      "_note": "KingsRow WASM build requires Emscripten compilation. No pre-built WASM available."
+    },
+    "mortal": {
+      "version": "1.0",
+      "_status": "TODO",
+      "_note": "Mortal is PyTorch-based; WASM port not feasible without significant re-architecture. Consider ONNX Runtime Web or a lighter alternative."
+    }
+  }
+}

@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build-docs:
-    name: Build TypeDoc
+    name: Build TypeDoc + WASM Assets
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -43,10 +43,64 @@ jobs:
         # Use npx typedoc directly to avoid the ambiguity.
         run: npx typedoc
 
+      # ── WASM Assets (ADR-014: GPL binaries not committed to source) ──────
+      - name: Cache WASM download archives
+        uses: actions/cache@v4
+        id: cache-wasm
+        with:
+          path: /tmp/wasm-archives
+          key: wasm-yaneuraou-v7.5.0-alpha.4
+
+      - name: Download WASM archives (if not cached)
+        if: steps.cache-wasm.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/wasm-archives
+          echo "Downloading YaneuraOu.wasm v7.5.0-alpha.4 (GPL-3.0)..."
+          curl -fsSL \
+            "https://github.com/mizar/YaneuraOu.wasm/releases/download/v7.5.0-alpha.4/YaneuraOu.wasm-v7.5.0-alpha.4-wasm.zip" \
+            -o /tmp/wasm-archives/yaneuraou-v7.5.0-alpha.4-wasm.zip
+          echo "Download complete."
+
+      - name: Extract WASM assets
+        run: |
+          # やねうら王 7.5 — material variant (self-contained piece-count eval)
+          DEST=assets-staging/assets/yaneuraou/7.5
+          mkdir -p "$DEST"
+          unzip -p /tmp/wasm-archives/yaneuraou-v7.5.0-alpha.4-wasm.zip \
+            "wasm/material/lib/yaneuraou.material.js"   > "$DEST/yaneuraou.js"
+          unzip -p /tmp/wasm-archives/yaneuraou-v7.5.0-alpha.4-wasm.zip \
+            "wasm/material/lib/yaneuraou.material.wasm" > "$DEST/yaneuraou.wasm"
+
+          # License notice (GPL-3.0 — ADR-014)
+          cat > assets-staging/assets/yaneuraou/LICENSE <<'EOF'
+          Source: mizar/YaneuraOu.wasm v7.5.0-alpha.4 (material variant)
+          Origin: yaneurao/YaneuraOu (the World's Strongest Shogi engine)
+          License: GPL-3.0-or-later
+          https://github.com/yaneurao/YaneuraOu/blob/master/LICENSE
+
+          This directory contains a pre-compiled WebAssembly build of YaneuraOu.
+          Redistribution and use are subject to the GNU General Public License v3.
+          The multi-game-engines core library (MIT) does NOT include these binaries.
+          EOF
+
+          echo "WASM assets extracted:"
+          find assets-staging/assets -type f | sort
+
+      # ── Combine TypeDoc + Assets → single Pages artifact ────────────────
+      - name: Assemble GitHub Pages output
+        run: |
+          mkdir -p gh-pages-output
+          # TypeDoc at root
+          cp -r docs/api/. gh-pages-output/
+          # WASM assets under /assets/
+          cp -r assets-staging/assets gh-pages-output/
+          echo "GitHub Pages output:"
+          find gh-pages-output/assets -type f | sort
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: docs/api
+          path: gh-pages-output
 
   deploy-docs:
     name: Deploy to GitHub Pages

@@ -58,21 +58,15 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js",
               "type": "worker-js",
-              "__unsafeNoSRI": true
+              "__unsafeNoSRI": true,
+              "size": 51312,
+              "_note": "mizar/YaneuraOu.wasm v7.5.0-alpha.4 material variant (piece-count eval). Requires SharedArrayBuffer (consumer app must set COOP+COEP headers)."
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
               "type": "wasm",
-              "__unsafeNoSRI": true
-            },
-            "variants": {
-              "simd": {
-                "wasm": {
-                  "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou-simd.wasm",
-                  "type": "wasm",
-                  "__unsafeNoSRI": true
-                }
-              }
+              "__unsafeNoSRI": true,
+              "size": 572743
             }
           }
         }
