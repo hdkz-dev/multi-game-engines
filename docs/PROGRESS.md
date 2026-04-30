@@ -1,6 +1,26 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年4月29日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年4月30日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年4月30日)
+
+### Dependabot PR #107 マージ & CI 確認 — 完了 ✅
+
+- **PR #107 マージ**: `chore(deps): bump the dependencies group with 18 updates`
+  - 主な更新: `typescript`, `vitest`, `vite`, `eslint` 等 18 パッケージ
+  - マージ後の Release ワークフローは `No unpublished projects to publish`（v0.1.1 既公開）のため新 publish なし
+  - 全 CI チェック（CI / E2E / ESLint / Deploy API Docs）グリーン ✅
+
+### ⚠️ NPM_TOKEN ローテーション — 要対応
+
+- **旧トークン**: 2026-05-05 期限切れ → 既に新しい Granular Token に更新済み
+- **現在のトークン有効期限**: 2026-07-29 頃（90日）
+- **⚠️ セキュリティ注意**: チャット上にトークン値が表示されたため、**即時ローテーションを強く推奨**
+  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → 該当トークンを「Revoke」
+  2. 新しい Granular Access Token を作成（90日 / Bypass 2FA / `@multi-game-engines/*` Read+Write）
+  3. `gh secret set NPM_TOKEN`
+
+---
 
 ## ✅ 直近完了タスク (2026年4月29日)
 
@@ -66,9 +86,11 @@
 
 ### 🔴 要対応 — NPM_TOKEN の期限管理
 
-- [ ] **NPM_TOKEN の期限更新**: 現在のトークンは **2026年5月5日** に期限切れ。期限前に更新すること
-  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → Granular Access Token → Bypass 2FA 有効・有効期限90日
-  2. `echo "npm_NEW_TOKEN" | gh secret set NPM_TOKEN`（GitHub Secrets を更新）
+- [ ] **NPM_TOKEN の即時ローテーション**: チャット上にトークン値が露出 → **今すぐ Revoke して再発行すること**
+  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → 該当トークンを「Revoke」
+  2. 新しい Granular Access Token を作成（90日 / Bypass 2FA 有効 / `@multi-game-engines/*` Read+Write）
+  3. `gh secret set NPM_TOKEN`（プロンプトに新トークンを貼り付け）
+- [ ] **次回 NPM_TOKEN 期限更新**: 現トークン有効期限は **2026年7月29日** 頃。事前にカレンダーリマインダーを設定すること
 - [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
   > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
 
