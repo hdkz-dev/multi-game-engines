@@ -26,7 +26,7 @@
   "dependencies": {
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n-common": "workspace:*",
-    "zod": "^4.3.6"
+    "zod": "^4.4.1"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",
