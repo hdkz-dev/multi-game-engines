@@ -10,18 +10,21 @@
  * 前提条件:
  *   - npm CLI 11.10.0 以上 (Node 22.14.0+ に同梱)
  *   - 全パッケージが npm に publish 済み
- *   - NPM_TOKEN または NODE_AUTH_TOKEN 環境変数が設定済み
+ *   - npm login 済み (npm whoami が成功すること)
+ *   - 2FA (auth-and-writes) が有効な場合は --otp <code> が必要
  *
  * 使い方:
- *   NPM_TOKEN=npm_xxx node scripts/setup-trusted-publishers.mjs
- *   NPM_TOKEN=npm_xxx node scripts/setup-trusted-publishers.mjs --dry-run
+ *   node scripts/setup-trusted-publishers.mjs --otp <TOTP-code>
+ *   node scripts/setup-trusted-publishers.mjs --dry-run
  */
 
-import { readFileSync, existsSync, writeFileSync, unlinkSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readdir } from "node:fs/promises";
+import * as readline from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -30,26 +33,9 @@ const REPO = "hdkz-dev/multi-game-engines";
 const WORKFLOW_FILE = "release.yml";
 const DRY_RUN = process.argv.includes("--dry-run");
 
-// ── 認証確認 ──────────────────────────────────────────────
-// npm trust は Granular Token では E403 になるため npm login セッションが必要。
-// NPM_TOKEN / NODE_AUTH_TOKEN が設定されている場合は試みるが、
-// 未設定の場合は既存の npm セッション (npm whoami) を使う。
-const token = process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN ?? null;
-
-// npm whoami で認証状態を確認
-const whoami = spawnSync("npm", ["whoami"], { encoding: "utf8", stdio: "pipe",
-  env: token ? { ...process.env, NODE_AUTH_TOKEN: token } : process.env,
-});
-if (whoami.status !== 0) {
-  console.error("❌ npm に認証されていません。以下のいずれかを実行してください:");
-  console.error("");
-  console.error("  (A) ローカル認証: npm login  →  node scripts/setup-trusted-publishers.mjs");
-  console.error("  (B) トークン指定: NPM_TOKEN=npm_xxx node scripts/setup-trusted-publishers.mjs");
-  console.error("");
-  console.error("⚠️  Granular Token では E403 になります。npm login (OTP 認証) が必要です。");
-  process.exit(1);
-}
-console.log(`👤 npm ユーザー: ${whoami.stdout.trim()}`);
+// --otp <code> 引数を取得
+const otpIdx = process.argv.indexOf("--otp");
+let currentOtp = otpIdx !== -1 ? process.argv[otpIdx + 1] : null;
 
 // ── npm バージョン確認 ─────────────────────────────────────
 const npmVersionResult = spawnSync("npm", ["--version"], { encoding: "utf8" });
@@ -57,28 +43,26 @@ const npmVersion = npmVersionResult.stdout.trim();
 const [major, minor] = npmVersion.split(".").map(Number);
 if (major < 11 || (major === 11 && minor < 10)) {
   console.error(`❌ npm ${npmVersion} は非対応です。npm 11.10.0 以上が必要です。`);
-  console.error("   Node 22.14.0 以上をインストールしてください。");
   process.exit(1);
 }
-console.log(`✅ npm ${npmVersion} — npm trust コマンドを使用します。\n`);
+console.log(`✅ npm ${npmVersion}\n`);
 
-// ── 一時 .npmrc を設定（token が明示指定された場合のみ）────
-const localNpmrc = join(root, ".npmrc");
-const hadLocalNpmrc = existsSync(localNpmrc);
-const originalContent = hadLocalNpmrc ? readFileSync(localNpmrc, "utf8") : null;
-const needsNpmrc = token && (!hadLocalNpmrc || !originalContent?.includes("_authToken"));
-
-if (needsNpmrc) {
-  writeFileSync(localNpmrc, `//registry.npmjs.org/:_authToken=${token}\n`, "utf8");
+// ── npm whoami で認証確認 ──────────────────────────────────
+const whoami = spawnSync("npm", ["whoami"], { encoding: "utf8", stdio: "pipe" });
+if (whoami.status !== 0) {
+  console.error("❌ npm に認証されていません。先に npm login を実行してください。");
+  process.exit(1);
 }
+console.log(`👤 npm ユーザー: ${whoami.stdout.trim()}\n`);
 
-function cleanup() {
-  if (!needsNpmrc) return;
-  if (hadLocalNpmrc && originalContent !== null) {
-    writeFileSync(localNpmrc, originalContent, "utf8");
-  } else if (!hadLocalNpmrc && existsSync(localNpmrc)) {
-    unlinkSync(localNpmrc);
-  }
+// ── OTP 入力プロンプト ─────────────────────────────────────
+const rl = readline.createInterface({ input, output });
+
+async function promptOtp(reason = "") {
+  if (DRY_RUN) return "000000";
+  if (reason) console.log(`\n⏰ ${reason}`);
+  const code = await rl.question("🔑 認証アプリの OTP コードを入力してください: ");
+  return code.trim();
 }
 
 // ── 公開パッケージ一覧を取得 ─────────────────────────────
@@ -86,7 +70,6 @@ async function getPublicPackages() {
   const packagesDir = join(root, "packages");
   const dirs = await readdir(packagesDir);
   const packages = [];
-
   for (const dir of dirs) {
     const pkgJsonPath = join(packagesDir, dir, "package.json");
     if (!existsSync(pkgJsonPath)) continue;
@@ -98,49 +81,68 @@ async function getPublicPackages() {
   return packages.sort();
 }
 
-// ── npm trust github を実行 ───────────────────────────────
-function trustPackage(packageName) {
+// ── npm trust github を実行（OTP ローテーション対応）────────
+function runTrust(packageName, otp) {
   const args = [
     "trust", "github", packageName,
     "--repo", REPO,
     "--file", WORKFLOW_FILE,
     "--yes",
   ];
+  if (otp) args.push("--otp", otp);
 
   if (DRY_RUN) {
-    console.log(`  [dry-run] npm ${args.join(" ")}`);
-    return true;
+    console.log(`  [dry-run] npm ${args.filter((a) => a !== otp).join(" ")} --otp ***`);
+    return { ok: true, needOtp: false };
   }
-
-  const env = token
-    ? { ...process.env, NODE_AUTH_TOKEN: token }
-    : process.env;
 
   const result = spawnSync("npm", args, {
     encoding: "utf8",
     stdio: "pipe",
     cwd: root,
-    env,
   });
 
   if (result.status === 0) {
-    return true;
-  } else {
-    const stderr = result.stderr?.trim();
-    const stdout = result.stdout?.trim();
-    console.error(`  ❌ 失敗: ${stderr || stdout || `exit code ${result.status}`}`);
+    return { ok: true, needOtp: false };
+  }
+
+  const stderr = result.stderr ?? "";
+  const isOtpError = stderr.includes("EOTP") || stderr.includes("one-time password");
+  return { ok: false, needOtp: isOtpError, error: stderr.trim().split("\n")[0] };
+}
+
+function checkAlreadyConfigured(packageName) {
+  const args = ["trust", "list", packageName, "--json"];
+  if (currentOtp) args.push("--otp", currentOtp);
+
+  const result = spawnSync("npm", args, {
+    encoding: "utf8", stdio: "pipe", cwd: root,
+  });
+  if (result.status !== 0) return false; // 確認できない場合はスキップしない
+
+  try {
+    const list = JSON.parse(result.stdout);
+    return Array.isArray(list) && list.some(
+      (e) => e.type === "github" &&
+               e.repository === REPO &&
+               e.workflow === WORKFLOW_FILE,
+    );
+  } catch {
     return false;
   }
 }
 
 // ── メイン ───────────────────────────────────────────────
 try {
-  if (DRY_RUN) {
-    console.log("🧪 ドライランモード（実際の変更はありません）\n");
+  if (DRY_RUN) console.log("🧪 ドライランモード（実際の変更はありません）\n");
+
+  // OTP が未指定かつ 2FA 有効の場合は最初に取得
+  if (!currentOtp && !DRY_RUN) {
+    currentOtp = await promptOtp("2FA が有効なため OTP が必要です。");
   }
 
   const packages = await getPublicPackages();
-  console.log(`📦 対象パッケージ: ${packages.length} 件`);
+  console.log(`\n📦 対象パッケージ: ${packages.length} 件`);
   console.log(`🔗 リポジトリ: ${REPO}`);
   console.log(`⚙️  ワークフロー: ${WORKFLOW_FILE}\n`);
 
@@ -151,71 +153,60 @@ try {
     const pkg = packages[i];
     process.stdout.write(`[${String(i + 1).padStart(2)}/${packages.length}] ${pkg} ... `);
 
-    // 既存の設定を確認
-    const listEnv = token
-      ? { ...process.env, NODE_AUTH_TOKEN: token }
-      : process.env;
+    // 既存設定確認（失敗しても続行）
+    if (!DRY_RUN && checkAlreadyConfigured(pkg)) {
+      console.log("⏭  already configured");
+      skipped.push(pkg);
+      continue;
+    }
 
-    const listResult = spawnSync("npm", ["trust", "list", pkg, "--json"], {
-      encoding: "utf8",
-      stdio: "pipe",
-      cwd: root,
-      env: listEnv,
-    });
-
-    if (listResult.status === 0) {
-      try {
-        const existing = JSON.parse(listResult.stdout);
-        const alreadySet = Array.isArray(existing) && existing.some(
-          (e) => e.type === "github" &&
-                 e.repository === REPO &&
-                 e.workflow === WORKFLOW_FILE,
-        );
-        if (alreadySet && !DRY_RUN) {
-          console.log("⏭  already configured");
-          skipped.push(pkg);
-          continue;
-        }
-      } catch {
-        // JSON parse 失敗は無視して続行
+    // 最大2回リトライ（OTP 更新のため）
+    let attempt = 0;
+    let done = false;
+    while (attempt < 2 && !done) {
+      const { ok, needOtp, error } = runTrust(pkg, currentOtp);
+      if (ok) {
+        console.log("✅ done");
+        done = true;
+      } else if (needOtp) {
+        // OTP 切れ → 新しいコードを取得して1回リトライ
+        console.log("⏰ OTP 切れ");
+        currentOtp = await promptOtp("OTP の有効期限が切れました。新しいコードを入力してください。");
+        attempt++;
+      } else {
+        console.log(`❌ ${error}`);
+        failed.push(pkg);
+        done = true;
       }
     }
 
-    const ok = trustPackage(pkg);
-    if (ok) {
-      console.log("✅ done");
-    } else {
+    if (!done) {
+      console.log("❌ OTP リトライ上限に達しました");
       failed.push(pkg);
     }
   }
 
-  cleanup();
-
+  rl.close();
   console.log("\n────────────────────────────────────────");
   const configured = packages.length - failed.length - skipped.length;
-  if (skipped.length > 0) console.log(`⏭  既設定: ${skipped.length} 件`);
-  if (configured > 0)  console.log(`✅ 設定完了: ${configured} 件`);
+  if (skipped.length > 0)  console.log(`⏭  既設定: ${skipped.length} 件`);
+  if (configured > 0)      console.log(`✅ 設定完了: ${configured} 件`);
   if (failed.length > 0) {
     console.log(`❌ 失敗: ${failed.length} 件`);
     for (const p of failed) console.log(`   - ${p}`);
-    console.log("\n失敗したパッケージは以下を確認してください:");
-    console.log("  1. npmjs.com でパッケージが公開済みか確認");
-    console.log("  2. NPM_TOKEN に十分な権限があるか確認");
     process.exit(1);
   }
 
-  if (!DRY_RUN) {
+  if (!DRY_RUN && failed.length === 0) {
     console.log("\n🎉 全パッケージへの Trusted Publisher 設定が完了しました！");
     console.log("\n📋 次のステップ:");
-    console.log("   1. release.yml の変更を確認して main にマージ");
-    console.log("   2. Release ワークフローが OIDC で正常に publish できることを確認");
-    console.log("   3. 確認後: GitHub Secrets から NPM_TOKEN を削除");
-    console.log("      gh secret delete NPM_TOKEN");
-    console.log("   4. npmjs.com の各パッケージ設定で");
+    console.log("   1. Dependabot PR をマージして Release ワークフローが OIDC で publish できることを確認");
+    console.log("   2. 確認後: gh secret delete NPM_TOKEN");
+    console.log("   3. npmjs.com 各パッケージ設定で");
     console.log('      "Require 2FA and disallow tokens" を有効化（任意・推奨）');
   }
 } catch (err) {
-  console.error("❌ 予期しないエラー:", err.message);
-  cleanup();
+  rl.close();
+  console.error("\n❌ 予期しないエラー:", err.message);
   process.exit(1);
 }
