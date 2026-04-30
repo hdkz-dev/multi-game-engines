@@ -58,15 +58,15 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js",
               "type": "worker-js",
-              "__unsafeNoSRI": true,
               "size": 51312,
-              "_note": "mizar/YaneuraOu.wasm v7.5.0-alpha.4 material variant (piece-count eval). Requires SharedArrayBuffer (consumer app must set COOP+COEP headers)."
+              "_note": "mizar/YaneuraOu.wasm v7.5.0-alpha.4 material variant (piece-count eval). Requires SharedArrayBuffer (consumer app must set COOP+COEP headers).",
+              "sri": "sha384-Ro6PSaC4A8DBkK5JVJHojAZ6SpVbpl7yDUCgX4PaQIT5xXpwhKwR9ukSStU5U1qY"
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm",
               "type": "wasm",
-              "__unsafeNoSRI": true,
-              "size": 572743
+              "size": 572743,
+              "sri": "sha384-gzp7K0Ee4gec5MvOYHVb8UGbpo1dPibuFoIWqhJ2BqJeVgVVZS8fNk8z9BvSfFXX"
             }
           }
         }
