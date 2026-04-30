@@ -49,8 +49,8 @@
   "devDependencies": {
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
-    "@storybook/vue3": "10.3.5",
-    "@storybook/vue3-vite": "10.3.5",
+    "@storybook/vue3": "10.3.6",
+    "@storybook/vue3-vite": "10.3.6",
     "@tailwindcss/vite": "^4.2.4",
     "@types/node": "^25.6.0",
     "@vitejs/plugin-vue": "^6.0.6",
