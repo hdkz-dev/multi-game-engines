@@ -4,6 +4,37 @@
 
 ## ✅ 直近完了タスク (2026年4月30日)
 
+### Phase B1: WASM アセット配信インフラ — 完了 ✅ (PR #108, #109)
+
+**目的**: `__unsafeNoSRI` エンジンのバイナリを CDN 配信し、SRI ハッシュで本番利用可能化。
+
+- **[B1-1] GitHub Pages アセット配信基盤** (PR #108):
+  - `docs.yml` 拡張: TypeDoc デプロイと同一 Pages アーティファクトに WASM バイナリを同梱
+  - GPL バイナリはソースに commit せず CI でダウンロード（ADR-014 準拠）
+  - `actions/cache` でアーカイブをキャッシュ（キー: `wasm-yaneuraou-v7.5.0-alpha.4`）
+  - **やねうら王 7.5 WASM ライブ配信開始**:
+    - `https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.js` (51 KB)
+    - `https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/yaneuraou.wasm` (559 KB)
+    - CORS ヘッダー (`Access-Control-Allow-Origin: *`) 付きで配信確認済み
+  - `scripts/assets-manifest.json` 新規作成（ダウンロード設定の source-of-truth）
+
+- **[B1-2] やねうら王 SRI ハッシュ確定** (PR #109):
+  - `pnpm sri:refresh` を実行し実 SHA-384 を取得・`engines.json` に記録
+  - `__unsafeNoSRI: true` フラグを除去 → **本番環境でやねうら王が初めて利用可能に**
+  - `EngineLoader` が SRI を強制検証 → バイナリ改ざん・CDN ハイジャックをブロック
+
+**エンジンバイナリ使用元**: `mizar/YaneuraOu.wasm v7.5.0-alpha.4` (material variant, GPL-3.0)
+
+- material variant = 駒得評価（外部 .nnue ファイル不要、自己完結型）
+- マルチスレッド（pthreads）対応: コンシューマーアプリ側で COOP+COEP ヘッダー必要
+
+**残 TODO (Phase B2)**:
+
+- Edax 4.4, KataGo 1.14, gnubg 1.06, KingsRow 1.61: Emscripten ビルドパイプライン
+- Mortal 1.0: PyTorch ベースのため WASM 化困難 → ONNX Runtime Web 調査
+
+---
+
 ### Dependabot PR #107 マージ & CI 確認 — 完了 ✅
 
 - **PR #107 マージ**: `chore(deps): bump the dependencies group with 18 updates`
@@ -83,6 +114,21 @@
 
 - リポジトリ Settings → Pages → Source を "GitHub Actions" に設定済み
 - main push 時に TypeDoc が自動デプロイされる
+
+### ✅ やねうら王 7.5 本番利用可能 (2026-04-30)
+
+- SRI ハッシュ確定済み（PR #108/#109 マージ）
+- 配信 URL: `https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/`
+- 利用条件: アプリ側で `COOP+COEP` ヘッダーが必要（SharedArrayBuffer 要件）
+
+### 🟠 Phase B2 — 残エンジンの WASM ビルドパイプライン
+
+- [ ] **Edax 4.4** (リバーシ): Emscripten ビルドセットアップ
+  - okuhara/edax-reversi-AVX は native binary のみ → 自前 Emscripten ビルド必要
+- [ ] **KataGo 1.14** (囲碁): TensorFlow.js ベースの WASM ポートを調査
+- [ ] **gnubg 1.06** (バックギャモン): Emscripten ビルド必要
+- [ ] **KingsRow 1.61** (チェッカーズ): Emscripten ビルド必要
+- [ ] **Mortal 1.0** (麻雀): PyTorch ベース → ONNX Runtime Web 変換を調査
 
 ### 🔴 要対応 — NPM_TOKEN の期限管理
 
