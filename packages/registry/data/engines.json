@@ -104,7 +104,7 @@
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
               "type": "worker-js",
               "_note": "Worker entry point (scripts/edax-worker.js). Loads edax.module.js via importScripts; Emscripten ASYNCIFY build auto-fetches edax.wasm + edax.module.data (eval.dat, ~14MB) from same directory. Run pnpm sri:refresh after first Pages deploy.",
-              "__unsafeNoSRI": true
+              "sri": "sha384-31h7F4nhhlpCVqDsO2Rn0//aILszVJWM3fQI5Ab+GPhfB2JaxPtJ9m6vLBNqyjpW"
             }
           }
         }
