@@ -18,12 +18,14 @@
 # =============================================================================
 set -euo pipefail
 
-EDAX_VERSION="4.4.0"
+EDAX_VERSION="4.4"
 EDAX_REPO="https://github.com/abulmo/edax-reversi"
+# abulmo/edax-reversi uses plain "v4.4" tags (not "v4.4.0")
 EDAX_TAG="v${EDAX_VERSION}"
 
 SRC_DIR="/tmp/edax-src"
 OUT_DIR="${EDAX_BUILD_OUT:-/tmp/edax-build}"
+DATA_DIR="/tmp/edax-data"
 
 echo "=== Edax WASM Build ==="
 echo "  Version : ${EDAX_VERSION}"
@@ -43,27 +45,79 @@ else
 fi
 
 echo ""
-echo "Source tree (src/):"
-ls "$SRC_DIR/src/" | head -20
+echo "Repo root:"
+ls "$SRC_DIR/"
+echo ""
+echo "Source files (src/ or root):"
+ls "$SRC_DIR/src/" 2>/dev/null | head -20 || ls "$SRC_DIR/" | grep -E "\.c$" | head -20
+
+# ── 1b. Detect where C source files live ─────────────────────────────────────
+# Some edax versions put .c files in src/, others in the repo root.
+if [[ -f "$SRC_DIR/src/all.c" ]]; then
+  C_SRC_DIR="$SRC_DIR/src"
+elif [[ -f "$SRC_DIR/all.c" ]]; then
+  C_SRC_DIR="$SRC_DIR"
+else
+  echo "ERROR: cannot find all.c in $SRC_DIR/src/ or $SRC_DIR/"
+  exit 1
+fi
+echo "C source directory: $C_SRC_DIR"
+
+# ── 1c. Obtain eval.dat (not always in git, bundled with release binaries) ───
+# The eval.dat (evaluation pattern weights) is required at runtime.
+# Download it from the latest GitHub release if not present in the repo.
+REPO_DATA_DIR=""
+for candidate in "$SRC_DIR/data" "$SRC_DIR/eval"; do
+  if [[ -f "$candidate/eval.dat" ]]; then
+    REPO_DATA_DIR="$candidate"
+    break
+  fi
+done
+
+if [[ -n "$REPO_DATA_DIR" ]]; then
+  echo "Using eval.dat from repo: $REPO_DATA_DIR"
+  DATA_DIR="$REPO_DATA_DIR"
+else
+  echo "eval.dat not found in repo — downloading from GitHub release..."
+  mkdir -p "$DATA_DIR"
+  # Download the Linux release package and extract eval.dat
+  RELEASE_URL="https://github.com/abulmo/edax-reversi/releases/download/${EDAX_TAG}/edax-${EDAX_VERSION}-linux-x64.zip"
+  FALLBACK_URL="https://github.com/abulmo/edax-reversi/releases/download/${EDAX_TAG}/edax-${EDAX_VERSION}.zip"
+  curl -fsSL "$RELEASE_URL" -o /tmp/edax-release.zip \
+    || curl -fsSL "$FALLBACK_URL" -o /tmp/edax-release.zip \
+    || { echo "ERROR: could not download edax release from GitHub. Aborting."; exit 1; }
+  unzip -o /tmp/edax-release.zip "*/eval.dat" "eval.dat" -d /tmp/edax-release-extract/ 2>/dev/null || true
+  FOUND_EVAL=$(find /tmp/edax-release-extract -name "eval.dat" | head -1)
+  if [[ -z "$FOUND_EVAL" ]]; then
+    echo "ERROR: eval.dat not found in release archive."
+    echo "Archive contents:"
+    unzip -l /tmp/edax-release.zip | head -20
+    exit 1
+  fi
+  cp "$FOUND_EVAL" "$DATA_DIR/eval.dat"
+  echo "eval.dat obtained: $(wc -c < "$DATA_DIR/eval.dat") bytes"
+fi
 
 # ── 2. Compile with Emscripten ───────────────────────────────────────────────
 echo ""
 echo "Compiling with emcc $(emcc --version | head -1)..."
 
-# Use all.c — Edax's unity build entry point. It includes the other .c files
-# internally and uses ifdefs to select the right platform variant. Compiling
-# *.c directly would include AVX/BMI/SSE files that use x86-only intrinsics
-# and will fail under Emscripten.
-SRC_ENTRY="$SRC_DIR/src/all.c"
-if [[ ! -f "$SRC_ENTRY" ]]; then
-  echo "ERROR: $SRC_ENTRY not found. Source clone may be incomplete."
-  ls "$SRC_DIR/src/"
-  exit 1
-fi
+# ── 2. Compile with Emscripten ───────────────────────────────────────────────
+echo ""
+echo "Compiling with emcc $(emcc --version | head -1)..."
+
+# Use all.c — the unity build entry point that handles platform selection
+# via ifdefs. Compiling *.c directly would pick up AVX/BMI/SSE files that
+# use x86-only intrinsics incompatible with Emscripten.
+SRC_ENTRY="$C_SRC_DIR/all.c"
 echo "Using unity build entry: $SRC_ENTRY"
 
+# Preload eval.dat into the WASM virtual filesystem
+PRELOAD_ARG="${DATA_DIR}@/data"
+echo "Preloading data: $PRELOAD_ARG"
+
 emcc "$SRC_ENTRY" \
-  -I "$SRC_DIR/src" \
+  -I "$C_SRC_DIR" \
   -O2 \
   -DHAS_CPU_64=1 \
   -DUSE_PTHREADS=0 \
@@ -79,7 +133,7 @@ emcc "$SRC_ENTRY" \
   -sMAXIMUM_MEMORY=536870912 \
   -sENVIRONMENT=worker \
   -sEXIT_RUNTIME=0 \
-  --preload-file "$SRC_DIR/data"@/data \
+  --preload-file "$PRELOAD_ARG" \
   -o "$OUT_DIR/edax.module.js" \
   2>&1
 

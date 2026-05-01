@@ -100,7 +100,7 @@ jobs:
         continue-on-error: true
         uses: dawidd6/action-download-artifact@v9
         with:
-          name: edax-wasm-v4.4.0
+          name: edax-wasm-v4.4
           workflow: build-wasm.yml
           branch: main
           if_no_artifact_found: warn
