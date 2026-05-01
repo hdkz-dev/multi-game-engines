@@ -78,23 +78,25 @@ if [[ -n "$REPO_DATA_DIR" ]]; then
   echo "Using eval.dat from repo: $REPO_DATA_DIR"
   DATA_DIR="$REPO_DATA_DIR"
 else
-  echo "eval.dat not found in repo — downloading from GitHub release..."
+  echo "eval.dat not found in repo — downloading eval.7z from GitHub release..."
   mkdir -p "$DATA_DIR"
-  # Download the Linux release package and extract eval.dat
-  RELEASE_URL="https://github.com/abulmo/edax-reversi/releases/download/${EDAX_TAG}/edax-${EDAX_VERSION}-linux-x64.zip"
-  FALLBACK_URL="https://github.com/abulmo/edax-reversi/releases/download/${EDAX_TAG}/edax-${EDAX_VERSION}.zip"
-  curl -fsSL "$RELEASE_URL" -o /tmp/edax-release.zip \
-    || curl -fsSL "$FALLBACK_URL" -o /tmp/edax-release.zip \
-    || { echo "ERROR: could not download edax release from GitHub. Aborting."; exit 1; }
-  unzip -o /tmp/edax-release.zip "*/eval.dat" "eval.dat" -d /tmp/edax-release-extract/ 2>/dev/null || true
-  FOUND_EVAL=$(find /tmp/edax-release-extract -name "eval.dat" | head -1)
-  if [[ -z "$FOUND_EVAL" ]]; then
-    echo "ERROR: eval.dat not found in release archive."
-    echo "Archive contents:"
-    unzip -l /tmp/edax-release.zip | head -20
+  # abulmo/edax-reversi releases publish eval.dat as a separate eval.7z asset
+  # https://github.com/abulmo/edax-reversi/releases/download/v4.4/eval.7z
+  EVAL_URL="https://github.com/abulmo/edax-reversi/releases/download/${EDAX_TAG}/eval.7z"
+  curl -fsSL "$EVAL_URL" -o /tmp/edax-eval.7z \
+    || { echo "ERROR: could not download eval.7z from $EVAL_URL"; exit 1; }
+
+  # Extract eval.dat from the 7z archive (requires p7zip-full on the runner)
+  if ! command -v 7z &>/dev/null; then
+    echo "Installing p7zip-full..."
+    apt-get install -y p7zip-full -qq
+  fi
+  7z e /tmp/edax-eval.7z -o"$DATA_DIR" eval.dat -y
+  if [[ ! -f "$DATA_DIR/eval.dat" ]]; then
+    echo "ERROR: eval.dat not found after extraction."
+    7z l /tmp/edax-eval.7z
     exit 1
   fi
-  cp "$FOUND_EVAL" "$DATA_DIR/eval.dat"
   echo "eval.dat obtained: $(wc -c < "$DATA_DIR/eval.dat") bytes"
 fi
 
