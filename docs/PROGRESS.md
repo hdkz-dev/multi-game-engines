@@ -4,13 +4,44 @@
 
 ## ✅ 直近完了タスク (2026年5月1日)
 
-### v0.1.4 npm リリース ✅
+### v0.1.5 npm リリース ✅
 
 **公開パッケージ** (13 packages, 2026-05-01):
 
-- `@multi-game-engines/registry@0.1.4` — Edax 4.4 SRI ハッシュ確定、`__unsafeNoSRI` 除去
-- 全アダプター (`adapter-edax`, `adapter-gnubg`, `adapter-gtp`, `adapter-katago`, `adapter-kingsrow`, `adapter-mortal`, `adapter-stockfish`, `adapter-uci`, `adapter-usi`, `adapter-yaneuraou`) @0.1.4
-- `@examples/zenith-dashboard-react@0.1.4`, `@examples/zenith-dashboard-vue@0.1.4`
+- `@multi-game-engines/registry@0.1.5` — gnubg 1.05 SRI ハッシュ確定、`__unsafeNoSRI` 除去
+- 全アダプター (`adapter-edax`, `adapter-gnubg`, `adapter-gtp`, `adapter-katago`, `adapter-kingsrow`, `adapter-mortal`, `adapter-stockfish`, `adapter-uci`, `adapter-usi`, `adapter-yaneuraou`) @0.1.5
+- `@examples/zenith-dashboard-react@0.1.5`, `@examples/zenith-dashboard-vue@0.1.5`
+
+(v0.1.4 も同日公開: Edax 4.4 SRI ハッシュ確定)
+
+---
+
+### Phase B2: gnubg WASM ビルドパイプライン ✅ (完了)
+
+**目的**: GNU Backgammon (gnubg) を Emscripten でコンパイルし、GitHub Pages 経由で配信。
+
+**実装内容**:
+
+- **`scripts/build-gnubg-wasm.sh`** — Emscripten ビルドスクリプト:
+  - `hwatheod/gnubg-web` レシピ使用 (gnubg v1.05.000 + glib 2.62.0)
+  - Edax と異なり ASYNCIFY 不要 — `_run_command()` を直接エクスポート
+  - `--preload-file packaged_files@/`: neural net weights + bearoff DBs (~2MB) を WASM に埋め込み
+  - Post-build `getpwuid` stub パッチ (Emscripten issue #13219)
+  - 出力: `gnubg.module.js` (78KB) + `gnubg.module.wasm` (920KB) + `gnubg.module.data` (2MB)
+
+- **`scripts/gnubg-worker.js`** — Web Worker エントリポイント:
+  - `Module._run_command(buf)` を直接呼び出し (同期処理)
+  - 複数の `print()` 呼び出しをバッファリングしてまとめて `postMessage`
+  - Edax より遥かにシンプルなアーキテクチャ
+
+- **CI ワークフロー**: `build-gnubg` ジョブを `build-wasm.yml` に追加
+  - 初回ビルド 60 秒で成功 (Edax の ~2分より高速)
+  - artifact `gnubg-wasm-v1.05` → `docs.yml` が自動ダウンロード・Pages 配信
+
+**SRI ハッシュ** (engines.json v0.1.5):
+
+- `gnubg.js`: `sha384-WRBJSfKm7j+l4tL4rdf/g1M4GCdj65F3I6yv7GQltFv7C/jL2bsDzQ7IPJ0ksiAv`
+- `gnubg.wasm`: `sha384-sI5LANu1QAohgAlTomZv2CxFmpYIUPgEVxcveCRQrxZ/IAXbQOgNY3dBz2Gh6Bk3`
 
 ---
 
@@ -24,7 +55,7 @@
 | ----------------- | ------------------ | --------------------------------------------------------------- | ------------------------------- |
 | **Edax 4.4**      | ❌ 事前ビルド無し  | Emscripten ASYNCIFY ビルド (abulmo/edax-reversi)                | ✅ 完了 (v0.1.4)                |
 | **KataGo 1.14**   | ❌ 独立 .wasm 無し | ONNX Runtime Web (kaya-go/katago-onnx) — アーキテクチャ変更必要 | 🔬 調査中                       |
-| **gnubg 1.06**    | ❌ 事前ビルド無し  | Emscripten ビルド (hwatheod/gnubg-web レシピあり)               | 📋 計画済み                     |
+| **gnubg 1.05**    | ❌ 事前ビルド無し  | Emscripten ビルド (hwatheod/gnubg-web レシピ使用)               | ✅ 完了 (v0.1.5 pending)        |
 | **KingsRow 1.61** | 🚫 不可            | **BLOCKED** — プロプライエタリ DLL のみ、ソース非公開           | 🚫 代替案: rapid-draughts (MIT) |
 | **Mortal 1.0**    | 🚫 不可            | **BLOCKED** — PyTorch ベース、直接 WASM 化不可                  | 🚫 ONNX 変換調査中              |
 
@@ -66,11 +97,12 @@
 - `__unsafeNoSRI: true` 除去 → 本番環境で Edax 利用可能
 - v0.1.4 として npm 公開完了
 
+**完了** (v0.1.4, v0.1.5 で両エンジン公開済み)
+
 **次のアクション**:
 
-1. gnubg の Emscripten ビルドパイプライン構築 (hwatheod/gnubg-web レシピ参考)
-2. KataGo — ONNX Runtime Web 統合 (アーキテクチャ検討)
-3. KingsRow → rapid-draughts (MIT) 置き換え検討
+1. KataGo — ONNX Runtime Web 統合 (アーキテクチャ検討)
+2. KingsRow → rapid-draughts (MIT) 置き換え検討
 
 ---
 
