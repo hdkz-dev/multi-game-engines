@@ -1,5 +1,22 @@
 # @examples/zenith-dashboard-vue
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [3fbbd7f]
+  - @multi-game-engines/registry@0.1.3
+  - @multi-game-engines/adapter-edax@0.1.3
+  - @multi-game-engines/adapter-gnubg@0.1.3
+  - @multi-game-engines/adapter-gtp@0.1.3
+  - @multi-game-engines/adapter-katago@0.1.3
+  - @multi-game-engines/adapter-kingsrow@0.1.3
+  - @multi-game-engines/adapter-mortal@0.1.3
+  - @multi-game-engines/adapter-stockfish@0.1.3
+  - @multi-game-engines/adapter-uci@0.1.3
+  - @multi-game-engines/adapter-usi@0.1.3
+  - @multi-game-engines/adapter-yaneuraou@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
