@@ -89,7 +89,7 @@ jobs:
       - name: Upload Edax WASM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: edax-wasm-v4.4.0
+          name: edax-wasm-v4.4
           path: /tmp/edax-build/
           retention-days: 7
           if-no-files-found: error

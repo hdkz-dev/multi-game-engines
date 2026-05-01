@@ -103,19 +103,7 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
               "type": "worker-js",
-              "_note": "Phase B2 placeholder — Emscripten build pending (abulmo/edax-reversi GPL-2.0-or-later)",
-              "__unsafeNoSRI": true
-            },
-            "wasm": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.wasm",
-              "type": "wasm",
-              "_note": "Phase B2 placeholder — Emscripten build pending",
-              "__unsafeNoSRI": true
-            },
-            "evalData": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/eval.dat",
-              "type": "eval-data",
-              "_note": "Phase B2 placeholder — Edax neural network evaluation weights (bundled via Emscripten --preload-file)",
+              "_note": "Worker entry point (scripts/edax-worker.js). Loads edax.module.js via importScripts; Emscripten ASYNCIFY build auto-fetches edax.wasm + edax.module.data (eval.dat, ~14MB) from same directory. Run pnpm sri:refresh after first Pages deploy.",
               "__unsafeNoSRI": true
             }
           }
