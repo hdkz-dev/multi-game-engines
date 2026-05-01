@@ -45,7 +45,7 @@
     "@storybook/web-components-vite": "10.3.6",
     "@swc/core": "^1.15.32",
     "@vueless/storybook-dark-mode": "^10.0.7",
-    "jsdom": "^29.1.0",
+    "jsdom": "^29.1.1",
     "storybook": "10.3.6",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
