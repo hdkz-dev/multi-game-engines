@@ -1,6 +1,6 @@
 {
-  "_comment": "WASM/binary asset download manifest for GitHub Pages deployment. GPL binaries are NOT committed to source (ADR-014). This manifest drives the deploy-assets step in docs.yml.",
-  "version": "1.0",
+  "_comment": "WASM/binary asset manifest for GitHub Pages deployment. GPL binaries are NOT committed to source (ADR-014). See docs/PROGRESS.md for Phase B2 status.",
+  "version": "1.1",
   "engines": {
     "yaneuraou": {
       "version": "7.5",
@@ -10,7 +10,8 @@
       "sourceRepo": "mizar/YaneuraOu.wasm",
       "archiveUrl": "https://github.com/mizar/YaneuraOu.wasm/releases/download/v7.5.0-alpha.4/YaneuraOu.wasm-v7.5.0-alpha.4-wasm.zip",
       "destDir": "assets/yaneuraou/7.5",
-      "_note": "material variant: built-in piece-count eval (self-contained, no external .nnue file needed). Requires SharedArrayBuffer (COOP+COEP on consumer app).",
+      "_status": "live",
+      "_note": "material variant: built-in piece-count eval (self-contained, no external .nnue file needed). Requires SharedArrayBuffer (COOP+COEP on consumer app). SRI hashes committed to engines.json.",
       "files": [
         {
           "zipPath": "wasm/material/lib/yaneuraou.material.js",
@@ -26,28 +27,81 @@
     },
     "edax": {
       "version": "4.4",
-      "_status": "TODO",
-      "_note": "No pre-built WASM available from okuhara/edax-reversi-AVX. Requires Emscripten build pipeline (Phase B2). Current release (v4.5.5) ships native binaries only."
+      "sourceVersion": "4.4.0",
+      "license": "GPL-2.0-or-later",
+      "licenseUrl": "https://github.com/abulmo/edax-reversi/blob/master/COPYING",
+      "sourceRepo": "abulmo/edax-reversi",
+      "buildScript": "scripts/build-edax-wasm.sh",
+      "ciWorkflow": ".github/workflows/build-wasm.yml",
+      "workerWrapper": "scripts/edax-worker.js",
+      "destDir": "assets/edax/4.4",
+      "_status": "phase-b2-in-progress",
+      "_phase": "B2",
+      "_note": "Emscripten ASYNCIFY build from abulmo/edax-reversi v4.4.0. Output artifact 'edax-wasm-v4.4.0' is downloaded by docs.yml and deployed to GitHub Pages. Data files (eval.dat) bundled via --preload-file. No SharedArrayBuffer required (single-threaded ASYNCIFY).",
+      "files": [
+        {
+          "buildOutput": "edax.js",
+          "dest": "edax.js",
+          "type": "worker-js",
+          "_note": "Worker wrapper (scripts/edax-worker.js) — bridges postMessage <-> Emscripten stdin/stdout"
+        },
+        {
+          "buildOutput": "edax.module.js",
+          "dest": "edax.module.js",
+          "type": "worker-js",
+          "_note": "Emscripten ASYNCIFY module (loaded by edax.js via importScripts)"
+        },
+        {
+          "buildOutput": "edax.module.wasm",
+          "dest": "edax.wasm",
+          "type": "wasm",
+          "_note": "Main WASM binary (includes eval.dat preloaded via Emscripten FS)"
+        }
+      ]
     },
     "katago": {
       "version": "1.14",
-      "_status": "TODO",
-      "_note": "KataGo WASM port exists via TensorFlow.js (browser-based), but requires custom build for v1.14. See https://forums.online-go.com/t/web-katrain-browser-based-katrain-clone-with-in-browser-katago-analysis-webgpu-wasm/59096"
+      "_status": "phase-b2-research",
+      "_phase": "B2",
+      "_note": "No standalone WASM binary available. Best path: kaya-go/katago-onnx converts official KataGo checkpoints to fp32 ONNX format, runnable in browser via onnxruntime-web. Requires architecture change (not a stdin/stdout worker but an ONNX inference engine). Deferred.",
+      "_research": {
+        "onnxPath": "https://huggingface.co/kaya-go/kaya — fp32 ONNX model weights",
+        "tfJsPath": "Sir-Teo/web-katrain — browser KaTrain clone (WebGPU primary, WASM fallback)",
+        "blocker": "No drop-in WASM worker compatible with GTPAdapter stdin/stdout protocol"
+      }
     },
     "gnubg": {
       "version": "1.06",
-      "_status": "TODO",
-      "_note": "GNU Backgammon WASM build requires Emscripten compilation. No pre-built WASM available."
+      "_status": "phase-b2-planned",
+      "_phase": "B2",
+      "_note": "Emscripten build feasible via hwatheod/gnubg-web build scripts. Community build live at http://xenon.stanford.edu/~hwatheod/gnubg_web/ but not packaged for download. Requires glib + neural-net weights (gnubg.wd) + bearoff database (gnubg_os0.bd). High CI build time (~10 min).",
+      "_research": {
+        "buildRecipe": "https://github.com/hwatheod/gnubg-web",
+        "liveDemo": "http://xenon.stanford.edu/~hwatheod/gnubg_web/gnubg_web.html",
+        "license": "GPL-3.0"
+      }
     },
     "kingsrow": {
       "version": "1.61",
-      "_status": "TODO",
-      "_note": "KingsRow WASM build requires Emscripten compilation. No pre-built WASM available."
+      "_status": "blocked",
+      "_phase": "blocked",
+      "_note": "BLOCKED: KingsRow is proprietary freeware (Windows DLL only). No source code available for WASM compilation. Recommended alternative: rapid-draughts@1.0.6 (MIT, npm, TypeScript, no build required).",
+      "_research": {
+        "officialPage": "http://edgilbert.org/Checkers/KingsRow.htm",
+        "license": "proprietary-freeware",
+        "alternative": "npm:rapid-draughts@1.0.6 (MIT)"
+      }
     },
     "mortal": {
       "version": "1.0",
-      "_status": "TODO",
-      "_note": "Mortal is PyTorch-based; WASM port not feasible without significant re-architecture. Consider ONNX Runtime Web or a lighter alternative."
+      "_status": "blocked",
+      "_phase": "blocked",
+      "_note": "BLOCKED: Mortal is PyTorch-based (deep learning Mahjong AI). Direct WASM compilation not feasible. Options: (1) convert to ONNX and run via onnxruntime-web, (2) use a lighter rule-based Mahjong engine, (3) server-side inference with WebSocket bridge.",
+      "_research": {
+        "sourceRepo": "https://github.com/Equim-chan/Mortal",
+        "license": "AGPL-3.0",
+        "blocker": "PyTorch dependency; model size 100+ MB likely too large for browser"
+      }
     }
   }
 }

@@ -1,6 +1,62 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年4月30日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月1日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年5月1日)
+
+### Phase B2: Edax WASM Emscripten ビルドパイプライン 🚧 (in-progress)
+
+**目的**: Edax (Othello/Reversi) を Emscripten ASYNCIFY でコンパイルし、GitHub Pages 経由で配信。
+
+#### 調査結果サマリー (Phase B2 研究)
+
+| エンジン          | WASM 入手可否      | 方針                                                            | ステータス                      |
+| ----------------- | ------------------ | --------------------------------------------------------------- | ------------------------------- |
+| **Edax 4.4**      | ❌ 事前ビルド無し  | Emscripten ASYNCIFY ビルド (abulmo/edax-reversi)                | 🚧 ビルドパイプライン構築中     |
+| **KataGo 1.14**   | ❌ 独立 .wasm 無し | ONNX Runtime Web (kaya-go/katago-onnx) — アーキテクチャ変更必要 | 🔬 調査中                       |
+| **gnubg 1.06**    | ❌ 事前ビルド無し  | Emscripten ビルド (hwatheod/gnubg-web レシピあり)               | 📋 計画済み                     |
+| **KingsRow 1.61** | 🚫 不可            | **BLOCKED** — プロプライエタリ DLL のみ、ソース非公開           | 🚫 代替案: rapid-draughts (MIT) |
+| **Mortal 1.0**    | 🚫 不可            | **BLOCKED** — PyTorch ベース、直接 WASM 化不可                  | 🚫 ONNX 変換調査中              |
+
+#### 実装内容
+
+- **`scripts/build-edax-wasm.sh`** — Emscripten ASYNCIFY ビルドスクリプト:
+  - `abulmo/edax-reversi v4.4.0` (GPL-2.0-or-later) をコンパイル
+  - `-sASYNCIFY=1`: C の fgets() ブロッキング読み込みを WASM で機能させる
+  - `--preload-file data@/data`: `eval.dat` (評価関数) を WASM バイナリに埋め込み
+  - 出力: `edax.module.js` + `edax.module.wasm`
+
+- **`scripts/edax-worker.js`** — Web Worker エントリポイント (ソースコミット済み):
+  - `postMessage` ↔ Edax stdin/stdout ブリッジ
+  - `Asyncify.handleSleep()` によるブロッキング stdin の実装
+  - EdaxAdapter が期待するテキストプロトコルを中継
+
+- **`.github/workflows/build-wasm.yml`** — Emscripten CI ビルドワークフロー:
+  - `mymindstorm/setup-emscripten@v14` (Emscripten 4.0.10) を使用
+  - ビルド成果物は `edax-wasm-v4.4.0` artifact としてアップロード
+  - バージョン付きキャッシュキーでコンパイル結果を再利用
+
+- **`docs.yml` 更新**:
+  - `workflow_run` トリガー追加: `build-wasm.yml` 完了後に自動 Pages 再デプロイ
+  - `dawidd6/action-download-artifact@v9` で Edax WASM artifact をダウンロード
+  - `assets/edax/4.4/` へステージング → GitHub Pages に配信
+
+- **`engines.json` メタデータ整備**:
+  - 全 Phase B2 エンジンに `_phase`, `_wasm_path`, `_note` フィールド追加
+  - KingsRow: `_phase: blocked` (プロプライエタリ)
+  - Mortal: `_phase: blocked` (PyTorch ベース)
+
+- **`scripts/assets-manifest.json` v1.1**:
+  - Phase B2 研究結果を全エンジンに記録
+
+**次のアクション**:
+
+1. `build-wasm.yml` を main push で実行し、Edax WASM のコンパイルを確認
+2. `pnpm sri:refresh` を実行して Edax SRI ハッシュを `engines.json` に記録
+3. `__unsafeNoSRI: true` を除去 → Edax が本番環境で利用可能に
+4. gnubg の Emscripten ビルドパイプライン構築 (hwatheod/gnubg-web レシピ参考)
+
+---
 
 ## ✅ 直近完了タスク (2026年4月30日)
 
@@ -28,10 +84,7 @@
 - material variant = 駒得評価（外部 .nnue ファイル不要、自己完結型）
 - マルチスレッド（pthreads）対応: コンシューマーアプリ側で COOP+COEP ヘッダー必要
 
-**残 TODO (Phase B2)**:
-
-- Edax 4.4, KataGo 1.14, gnubg 1.06, KingsRow 1.61: Emscripten ビルドパイプライン
-- Mortal 1.0: PyTorch ベースのため WASM 化困難 → ONNX Runtime Web 調査
+**Phase B2 状況**: → 上記 2026年5月1日 セクション参照
 
 ---
 

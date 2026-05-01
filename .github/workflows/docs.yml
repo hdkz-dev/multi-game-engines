@@ -5,6 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+  # Re-deploy Pages whenever the Emscripten build produces new WASM binaries.
+  workflow_run:
+    workflows: ["Build WASM Engines"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -85,6 +90,45 @@ jobs:
 
           echo "WASM assets extracted:"
           find assets-staging/assets -type f | sort
+
+      # ── Edax WASM (Phase B2: Emscripten build from build-wasm.yml) ─────────
+      # Download the artifact produced by the "Build WASM Engines" workflow.
+      # If no successful run exists yet (e.g. first deploy), this step is
+      # skipped gracefully and the Edax placeholder URL remains inactive.
+      - name: Download Edax WASM artifact (if available)
+        id: dl-edax
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: edax-wasm-v4.4.0
+          workflow: build-wasm.yml
+          branch: main
+          if_no_artifact_found: warn
+          path: /tmp/edax-wasm
+
+      - name: Stage Edax WASM assets
+        if: steps.dl-edax.outcome == 'success'
+        run: |
+          DEST=assets-staging/assets/edax/4.4
+          mkdir -p "$DEST"
+          cp /tmp/edax-wasm/edax.js        "$DEST/edax.js"
+          cp /tmp/edax-wasm/edax.module.js "$DEST/edax.module.js"
+          cp /tmp/edax-wasm/edax.module.wasm "$DEST/edax.wasm"
+
+          # License notice (GPL-2.0-or-later — ADR-014)
+          cat > assets-staging/assets/edax/LICENSE <<'EOF'
+          Source: abulmo/edax-reversi v4.4.0 (Emscripten/ASYNCIFY build)
+          Origin: https://github.com/abulmo/edax-reversi
+          License: GPL-2.0-or-later
+          https://github.com/abulmo/edax-reversi/blob/master/COPYING
+
+          This directory contains a WebAssembly build of Edax (Othello/Reversi engine).
+          Redistribution and use are subject to the GNU General Public License v2.
+          The multi-game-engines core library (MIT) does NOT include these binaries.
+          EOF
+
+          echo "Edax WASM assets staged:"
+          find assets-staging/assets/edax -type f | sort
 
       # ── Combine TypeDoc + Assets → single Pages artifact ────────────────
       - name: Assemble GitHub Pages output

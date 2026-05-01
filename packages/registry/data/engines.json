@@ -76,17 +76,15 @@
       "name": "KataGo",
       "adapter": "gtp",
       "latest": "1.14",
+      "_phase": "B2",
+      "_wasm_path": "ONNX Runtime Web — convert KataGo checkpoint to fp32 ONNX via kaya-go/katago-onnx; no standalone .wasm available",
       "versions": {
         "1.14": {
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.js",
               "type": "worker-js",
-              "__unsafeNoSRI": true
-            },
-            "wasm": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.wasm",
-              "type": "wasm",
+              "_note": "Phase B2 placeholder — ONNX Runtime Web integration pending (see assets-manifest.json)",
               "__unsafeNoSRI": true
             }
           }
@@ -97,12 +95,27 @@
       "name": "Edax",
       "adapter": "edax",
       "latest": "4.4",
+      "_phase": "B2",
+      "_wasm_path": "Emscripten build from abulmo/edax-reversi v4.4 — CI pipeline in .github/workflows/build-wasm.yml",
       "versions": {
         "4.4": {
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
               "type": "worker-js",
+              "_note": "Phase B2 placeholder — Emscripten build pending (abulmo/edax-reversi GPL-2.0-or-later)",
+              "__unsafeNoSRI": true
+            },
+            "wasm": {
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.wasm",
+              "type": "wasm",
+              "_note": "Phase B2 placeholder — Emscripten build pending",
+              "__unsafeNoSRI": true
+            },
+            "evalData": {
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/eval.dat",
+              "type": "eval-data",
+              "_note": "Phase B2 placeholder — Edax neural network evaluation weights (bundled via Emscripten --preload-file)",
               "__unsafeNoSRI": true
             }
           }
@@ -113,12 +126,21 @@
       "name": "GNU Backgammon",
       "adapter": "gnubg",
       "latest": "1.06",
+      "_phase": "B2",
+      "_wasm_path": "Emscripten build from hwatheod/gnubg-web scripts — community build exists at Stanford",
       "versions": {
         "1.06": {
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.06/gnubg.js",
               "type": "worker-js",
+              "_note": "Phase B2 placeholder — Emscripten build pending (gnubg GPL-3.0, hwatheod/gnubg-web build recipe available)",
+              "__unsafeNoSRI": true
+            },
+            "wasm": {
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.06/gnubg.wasm",
+              "type": "wasm",
+              "_note": "Phase B2 placeholder — Emscripten build pending",
               "__unsafeNoSRI": true
             }
           }
@@ -129,12 +151,15 @@
       "name": "KingsRow",
       "adapter": "kingsrow",
       "latest": "1.61",
+      "_phase": "blocked",
+      "_wasm_path": "BLOCKED — KingsRow is proprietary freeware (Windows DLL only); no source available for WASM compilation. Consider rapid-draughts (MIT, npm) as replacement.",
       "versions": {
         "1.61": {
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/kingsrow/1.61/kingsrow.js",
               "type": "worker-js",
+              "_note": "BLOCKED — KingsRow is proprietary freeware with no WASM compilation path. Placeholder only.",
               "__unsafeNoSRI": true
             }
           }
@@ -145,12 +170,15 @@
       "name": "Mortal",
       "adapter": "mortal",
       "latest": "1.0",
+      "_phase": "blocked",
+      "_wasm_path": "BLOCKED — Mortal is PyTorch-based; direct WASM compilation not feasible. Consider ONNX Runtime Web with converted checkpoint or a lighter Mahjong engine.",
       "versions": {
         "1.0": {
           "assets": {
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
               "type": "worker-js",
+              "_note": "BLOCKED — Mortal requires PyTorch; no direct WASM path. ONNX Runtime Web approach under investigation.",
               "__unsafeNoSRI": true
             }
           }
