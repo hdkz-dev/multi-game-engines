@@ -1,59 +1,18 @@
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-} from "vitest";
-import { KingsRowAdapter, createKingsRowAdapter } from "../KingsRowAdapter.js";
-import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
+  KingsRowAdapter,
+  createKingsRowAdapter,
+  RapidDraughtsAdapter,
+} from "../KingsRowAdapter.js";
+import type { IEngineConfig } from "@multi-game-engines/core";
 
-class MockWorker {
-  postMessage = vi.fn((msg: unknown) => {
-    if (
-      msg !== null &&
-      typeof msg === "object" &&
-      "type" in msg &&
-      (msg as Record<string, unknown>).type === "MG_INJECT_RESOURCES"
-    ) {
-      setTimeout(() => {
-        if (typeof this.onmessage === "function") {
-          this.onmessage({
-            data: { type: "MG_RESOURCES_READY" },
-          } as MessageEvent);
-        }
-      }, 0);
-    }
-  });
-  terminate = vi.fn();
-  onmessage: ((ev: MessageEvent) => void) | null = null;
-  onerror: unknown = null;
-}
+// rapid-draughts is a real npm dep — no mocking needed for unit tests.
+// We do not need a Worker or a loader because rapid-draughts is bundled.
 
-describe("KingsRowAdapter", () => {
-  const mockConfig: IEngineConfig = {
+describe("KingsRowAdapter (rapid-draughts backend)", () => {
+  const minimalConfig: IEngineConfig = {
     id: "kingsrow",
     adapter: "kingsrow",
-    sources: {
-      main: {
-        url: "http://localhost/kingsrow.js",
-        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        type: "worker-js",
-      },
-    },
-  };
-
-  const mockLoader: IEngineLoader = {
-    loadResource: vi.fn().mockResolvedValue("blob:http://localhost/main"),
-    loadResources: vi
-      .fn()
-      .mockResolvedValue({ main: "blob:http://localhost/main" }),
-    revoke: vi.fn(),
-    revokeAll: vi.fn(),
-    revokeByEngineId: vi.fn(),
   };
 
   beforeAll(() => {
@@ -62,124 +21,107 @@ describe("KingsRowAdapter", () => {
 
   afterAll(() => {
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
   });
 
-  beforeEach(() => {
-    vi.stubGlobal("Worker", MockWorker);
-    (mockLoader.loadResource as ReturnType<typeof vi.fn>).mockClear();
-    (mockLoader.loadResources as ReturnType<typeof vi.fn>).mockClear();
-    (mockLoader.revoke as ReturnType<typeof vi.fn>).mockClear();
-    (mockLoader.revokeAll as ReturnType<typeof vi.fn>).mockClear();
-    (mockLoader.revokeByEngineId as ReturnType<typeof vi.fn>).mockClear();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it("should load successfully when source has mountPath (injectResources path)", async () => {
-    const configWithMount: IEngineConfig = {
-      ...mockConfig,
-      sources: {
-        ...mockConfig.sources,
-        book: {
-          url: "book.bin",
-          sri: "sha384-ValidBookSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-          type: "binary",
-          mountPath: "/book.bin",
-        },
-      } as IEngineConfig["sources"],
-    };
-    const loaderWithBook = {
-      ...mockLoader,
-      loadResources: vi.fn().mockResolvedValue({
-        main: "blob:http://localhost/main",
-        book: "blob:book",
-      }),
-    };
-    const adapter = new KingsRowAdapter(configWithMount);
-    await adapter.load(loaderWithBook);
-    expect(adapter.status).toBe("ready");
-  });
-
-  it("should be instantiated", () => {
-    const adapter = new KingsRowAdapter(mockConfig);
+  it("should be instantiated without a source URL", () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
     expect(adapter).toBeDefined();
     expect(adapter.id).toBe("kingsrow");
+    expect(adapter.status).toBe("uninitialized");
   });
 
-  it("should change status to ready on load", async () => {
-    const adapter = new KingsRowAdapter(mockConfig);
-    await adapter.load(mockLoader);
+  it("createKingsRowAdapter factory returns a KingsRowAdapter", () => {
+    const adapter = createKingsRowAdapter(minimalConfig);
+    expect(adapter).toBeInstanceOf(KingsRowAdapter);
+    expect(adapter.id).toBe("kingsrow");
+  });
+
+  it("RapidDraughtsAdapter is an alias for KingsRowAdapter", () => {
+    expect(RapidDraughtsAdapter).toBe(KingsRowAdapter);
+  });
+
+  it("load() sets status to ready (no Worker/loader needed)", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
     expect(adapter.status).toBe("ready");
   });
 
-  it("should throw loaderRequired and set error status when no loader", async () => {
-    const adapter = new KingsRowAdapter(mockConfig);
-    await expect(adapter.load()).rejects.toThrow(
-      expect.objectContaining({ i18nKey: "engine.errors.loaderRequired" }),
-    );
-    expect(adapter.status).toBe("error");
+  it("load() can be called without any arguments", async () => {
+    const adapter = new KingsRowAdapter();
+    await adapter.load();
+    expect(adapter.status).toBe("ready");
   });
 
-  it("should throw missingMainEntryPoint when main resource is missing", async () => {
-    const noMainLoader: IEngineLoader = {
-      ...mockLoader,
-      loadResources: vi.fn().mockResolvedValue({}),
-    };
-    const adapter = new KingsRowAdapter(mockConfig);
-    await expect(adapter.load(noMainLoader)).rejects.toThrow(
-      expect.objectContaining({
-        i18nKey: "engine.errors.missingMainEntryPoint",
-      }),
-    );
-    expect(adapter.status).toBe("error");
-  });
-
-  it("should set error status when loader rejects", async () => {
-    const failLoader: IEngineLoader = {
-      ...mockLoader,
-      loadResources: vi.fn().mockRejectedValue(new Error("network error")),
-    };
-    const adapter = new KingsRowAdapter(mockConfig);
-    await expect(adapter.load(failLoader)).rejects.toThrow();
-    expect(adapter.status).toBe("error");
-  });
-
-  it("should cleanup communicator when ready status listener throws", async () => {
-    const adapter = new KingsRowAdapter(mockConfig);
-    adapter.onStatusChange((status) => {
-      if (status === "ready") throw new Error("listener error");
+  it("search() returns a bestMove in standard notation from starting position", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    const result = await adapter.search({
+      board: "startpos" as Parameters<typeof adapter.search>[0]["board"],
     });
-    await expect(adapter.load(mockLoader)).rejects.toThrow();
-    expect(adapter.status).toBe("error");
-  });
-
-  it("should call setOption BookFile via onBookLoaded after successful load", async () => {
-    let workerInstance: InstanceType<typeof MockWorker> | null = null;
-    class CaptureMockWorker extends MockWorker {
-      constructor(...args: ConstructorParameters<typeof MockWorker>) {
-        super(...args);
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        workerInstance = this;
-      }
+    expect(result).toBeDefined();
+    // bestMove is either null (game over) or a "11-15" style string
+    if (result.bestMove !== null) {
+      expect(result.bestMove).toMatch(/^\d+-\d+$/);
     }
-    vi.stubGlobal("Worker", CaptureMockWorker);
-    const adapter = new KingsRowAdapter(mockConfig);
-    await adapter.load(mockLoader);
-    await (
-      adapter as unknown as { onBookLoaded(url: string): Promise<void> }
-    ).onBookLoaded("blob:book");
-    expect(workerInstance).not.toBeNull();
-    expect(workerInstance!.postMessage).toHaveBeenCalledWith(
-      expect.stringContaining("BookFile"),
-    );
+  }, 15_000 /* alpha-beta may take a few seconds at default depth */);
+
+  it("search() with depth=1 is fast", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    const result = await adapter.search({
+      board: "startpos" as Parameters<typeof adapter.search>[0]["board"],
+      depth: 1,
+    });
+    expect(result).toBeDefined();
   });
 
-  it("createKingsRowAdapter factory returns a KingsRowAdapter instance", () => {
-    const adapter = createKingsRowAdapter(mockConfig);
-    expect(adapter).toBeInstanceOf(KingsRowAdapter);
-    expect(adapter.id).toBe("kingsrow");
+  it("stop() does not throw when not busy", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    await expect(adapter.stop()).resolves.toBeUndefined();
+  });
+
+  it("dispose() sets status to terminated", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    await adapter.dispose();
+    expect(adapter.status).toBe("terminated");
+  });
+
+  it("onStatusChange() emits loading → ready during load", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    const statuses: string[] = [];
+    adapter.onStatusChange((s) => statuses.push(s));
+    await adapter.load();
+    expect(statuses).toContain("loading");
+    expect(statuses).toContain("ready");
+  });
+
+  it("onSearchResult() listener is called after search", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    const results: unknown[] = [];
+    adapter.onSearchResult((r) => results.push(r));
+    await adapter.search({
+      board: "startpos" as Parameters<typeof adapter.search>[0]["board"],
+      depth: 1,
+    });
+    expect(results).toHaveLength(1);
+  });
+
+  it("applyMove() does not throw for a legal move string", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await adapter.load();
+    // Opening position has moves like 11-15, 11-16, etc.
+    expect(() => adapter.applyMove("11-15")).not.toThrow();
+  });
+
+  it("search() throws NOT_READY when called before load", async () => {
+    const adapter = new KingsRowAdapter(minimalConfig);
+    await expect(
+      adapter.search({
+        board: "startpos" as Parameters<typeof adapter.search>[0]["board"],
+      }),
+    ).rejects.toMatchObject({ code: "NOT_READY" });
   });
 });

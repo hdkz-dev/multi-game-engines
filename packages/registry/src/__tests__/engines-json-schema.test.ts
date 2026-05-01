@@ -68,13 +68,16 @@ describe("engines.json schema validation", () => {
     );
 
     it.each(engineEntries)(
-      "'%s' should have a 'main' asset in its latest version",
+      "'%s' should have a 'main' asset in its latest version (unless bundled)",
       (_id, engine) => {
         const versions = engine.versions as Record<
           string,
-          { assets: Record<string, unknown> }
+          { bundled?: boolean; assets: Record<string, unknown> }
         >;
         const latestVersion = versions[engine.latest];
+        // Bundled engines (e.g. rapid-draughts) ship as an npm dep — no CDN
+        // asset URL is required.  All other engines must declare a 'main' asset.
+        if (latestVersion?.bundled) return;
         expect(latestVersion?.assets?.main).toBeDefined();
       },
     );

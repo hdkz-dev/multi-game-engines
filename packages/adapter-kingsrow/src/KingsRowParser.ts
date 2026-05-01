@@ -1,13 +1,21 @@
 import { IProtocolParser, ProtocolValidator } from "@multi-game-engines/core";
-import { ICheckersSearchOptions,
+import {
+  ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult,
-  createCheckersMove, } from "@multi-game-engines/domain-checkers";
+  createCheckersMove,
+} from "@multi-game-engines/domain-checkers";
 
 /**
- * 2026 Zenith Tier: KingsRow チェッカープロトコルパーサー。
+ * Minimal protocol parser for the rapid-draughts adapter.
+ *
+ * rapid-draughts produces structured move objects (not text lines), so most
+ * of the parse methods are unused in normal flow. They are retained so that
+ * the BaseAdapter contract is satisfied and middleware that inspects the
+ * parser (e.g. for option commands) continues to work. The text-protocol
+ * format mirrors the original KingsRow protocol for backward compatibility.
  */
-export class KingsRowParser implements IProtocolParser<
+export class RapidDraughtsParser implements IProtocolParser<
   ICheckersSearchOptions,
   ICheckersSearchInfo,
   ICheckersSearchResult
@@ -16,8 +24,7 @@ export class KingsRowParser implements IProtocolParser<
     data: string | Record<string, unknown>,
   ): ICheckersSearchInfo | null {
     if (typeof data === "string") {
-      // KingsRow のテキスト出力を解析
-      // 例: "eval: 0.12, depth: 10, pv: 11-15 22-18"
+      // Format: "eval: 0.12, depth: 10, pv: 11-15 22-18"
       const match = data.match(/eval: ([-.\d]+), depth: (\d+)/);
       if (match) {
         return {
@@ -35,17 +42,12 @@ export class KingsRowParser implements IProtocolParser<
   ): ICheckersSearchResult | null {
     if (typeof data !== "string") return null;
 
-    // 2026 Best Practice: 多様な bestmove 形式に対応
-    // 形式1: "bestmove: 11-15 (eval: 0.12)"
-    // 形式2: "bestmove: 11-15"
-    // 形式3: "bestmove: (none)"
+    // Format: "bestmove: (none)" or "bestmove: none"
     if (data.includes("bestmove: (none)") || data.includes("bestmove: none")) {
-      return {
-        bestMove: null,
-        raw: data,
-      };
+      return { bestMove: null, raw: data };
     }
 
+    // Format: "bestmove: 11-15 (eval: 0.12)" or "bestmove: 11-15"
     const match = data.match(/bestmove: ([\d-]+)(?: \(eval: ([-.\d]+)\))?/);
     if (match) {
       try {
@@ -57,23 +59,21 @@ export class KingsRowParser implements IProtocolParser<
           raw: data,
         };
       } catch {
-        return {
-          bestMove: null,
-          raw: data,
-        };
+        return { bestMove: null, raw: data };
       }
     }
     return null;
   }
 
   createSearchCommand(options: ICheckersSearchOptions): string[] {
-    // 2026 Best Practice: 探索オプション全体を再帰的にインジェクションチェック
     ProtocolValidator.assertNoInjection(options, "search options", true);
-
     const commands: string[] = [];
     if (options.board) {
-      ProtocolValidator.assertNoInjection(options.board, "board data");
-      commands.push(`set board ${options.board}`);
+      ProtocolValidator.assertNoInjection(
+        options.board as string,
+        "board data",
+      );
+      commands.push(`set board ${options.board as string}`);
     }
     commands.push("go");
     return commands;
@@ -89,3 +89,6 @@ export class KingsRowParser implements IProtocolParser<
     return `set ${name} ${value}`;
   }
 }
+
+/** @deprecated Use RapidDraughtsParser */
+export { RapidDraughtsParser as KingsRowParser };

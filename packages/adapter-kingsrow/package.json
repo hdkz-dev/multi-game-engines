@@ -1,7 +1,7 @@
 {
   "name": "@multi-game-engines/adapter-kingsrow",
   "version": "0.1.5",
-  "description": "KingsRow Checkers engine adapter for multi-game-engines ecosystem",
+  "description": "Checkers (English Draughts) adapter powered by rapid-draughts (replaces proprietary KingsRow)",
   "type": "module",
   "license": "MIT",
   "author": "hdkz-dev",
@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@multi-game-engines/i18n-common": "workspace:*",
-    "@multi-game-engines/registry": "workspace:*"
+    "rapid-draughts": "^1.0.6"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "workspace:*"

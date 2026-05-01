@@ -135,21 +135,15 @@
       }
     },
     "kingsrow": {
-      "name": "KingsRow",
+      "name": "rapid-draughts (English Draughts)",
       "adapter": "kingsrow",
-      "latest": "1.61",
-      "_phase": "blocked",
-      "_wasm_path": "BLOCKED — KingsRow is proprietary freeware (Windows DLL only); no source available for WASM compilation. Consider rapid-draughts (MIT, npm) as replacement.",
+      "latest": "1.0",
+      "_note": "KingsRow (proprietary) replaced by rapid-draughts@1.0.6 (MIT). No Worker or WASM needed — rapid-draughts is a pure TypeScript npm dependency bundled in @multi-game-engines/adapter-kingsrow.",
       "versions": {
-        "1.61": {
-          "assets": {
-            "main": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/kingsrow/1.61/kingsrow.js",
-              "type": "worker-js",
-              "_note": "BLOCKED — KingsRow is proprietary freeware with no WASM compilation path. Placeholder only.",
-              "__unsafeNoSRI": true
-            }
-          }
+        "1.0": {
+          "_note": "rapid-draughts@1.0.6: EnglishDraughtsComputerFactory.alphaBeta() — no source URL, no CDN, no Worker. Create adapter directly: createKingsRowAdapter().",
+          "bundled": true,
+          "assets": {}
         }
       }
     },
