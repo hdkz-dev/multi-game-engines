@@ -111,9 +111,14 @@ jobs:
         run: |
           DEST=assets-staging/assets/edax/4.4
           mkdir -p "$DEST"
-          cp /tmp/edax-wasm/edax.js        "$DEST/edax.js"
-          cp /tmp/edax-wasm/edax.module.js "$DEST/edax.module.js"
-          cp /tmp/edax-wasm/edax.module.wasm "$DEST/edax.wasm"
+          # edax.js        — Worker entry point (wraps Emscripten module)
+          # edax.module.js — Emscripten glue JS (loaded by edax.js via importScripts)
+          # edax.wasm      — WASM binary (Emscripten loads automatically)
+          # edax.module.data — Preloaded eval.dat (~14MB, Emscripten FS)
+          cp /tmp/edax-wasm/edax.js             "$DEST/edax.js"
+          cp /tmp/edax-wasm/edax.module.js      "$DEST/edax.module.js"
+          cp /tmp/edax-wasm/edax.module.wasm    "$DEST/edax.wasm"
+          cp /tmp/edax-wasm/edax.module.data    "$DEST/edax.module.data"
 
           # License notice (GPL-2.0-or-later — ADR-014)
           cat > assets-staging/assets/edax/LICENSE <<'EOF'
