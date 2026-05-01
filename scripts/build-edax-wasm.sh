@@ -91,11 +91,16 @@ else
     echo "Installing p7zip-full..."
     apt-get install -y p7zip-full -qq
   fi
-  7z e /tmp/edax-eval.7z -o"$DATA_DIR" eval.dat -y
+  # The archive stores eval.dat under a data/ subdirectory: data/eval.dat
+  7z e /tmp/edax-eval.7z -o"$DATA_DIR" "data/eval.dat" -y
   if [[ ! -f "$DATA_DIR/eval.dat" ]]; then
-    echo "ERROR: eval.dat not found after extraction."
+    echo "7z path 'data/eval.dat' failed, listing archive to diagnose:"
     7z l /tmp/edax-eval.7z
-    exit 1
+    # Try extracting all to find it
+    7z x /tmp/edax-eval.7z -o/tmp/edax-eval-extract -y
+    FOUND_EVAL=$(find /tmp/edax-eval-extract -name "eval.dat" | head -1)
+    [[ -n "$FOUND_EVAL" ]] && cp "$FOUND_EVAL" "$DATA_DIR/eval.dat" \
+      || { echo "ERROR: eval.dat not found in archive."; exit 1; }
   fi
   echo "eval.dat obtained: $(wc -c < "$DATA_DIR/eval.dat") bytes"
 fi
