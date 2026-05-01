@@ -104,13 +104,13 @@
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.js",
               "type": "worker-js",
               "_note": "Phase B2 placeholder — Emscripten build pending (abulmo/edax-reversi GPL-2.0-or-later)",
-              "__unsafeNoSRI": true
+              "sri": "sha384-31h7F4nhhlpCVqDsO2Rn0//aILszVJWM3fQI5Ab+GPhfB2JaxPtJ9m6vLBNqyjpW"
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/edax.wasm",
               "type": "wasm",
               "_note": "Phase B2 placeholder — Emscripten build pending",
-              "__unsafeNoSRI": true
+              "sri": "sha384-VjgsAajY3awLQdP62Hn79y9vR0kRG7gFgh9N3AbpV8wJJ/OOlRExfGNF78mN6wB4"
             },
             "evalData": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/edax/4.4/eval.dat",
