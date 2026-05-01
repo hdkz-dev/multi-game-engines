@@ -1,5 +1,13 @@
 # @multi-game-engines/adapter-yaneuraou
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [de4e000]
+  - @multi-game-engines/registry@0.1.4
+  - @multi-game-engines/adapter-usi@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
