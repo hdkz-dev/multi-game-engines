@@ -1,5 +1,13 @@
 # @multi-game-engines/adapter-katago
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies [de4e000]
+  - @multi-game-engines/registry@0.1.4
+  - @multi-game-engines/adapter-gtp@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
