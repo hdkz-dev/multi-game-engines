@@ -122,14 +122,13 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.05/gnubg.js",
               "type": "worker-js",
-              "_note": "Worker entry point (scripts/gnubg-worker.js). Loads gnubg.module.js via importScripts; uses direct _run_command() export (no ASYNCIFY). gnubg.module.data bundles neural net weights + bearoff DBs (~2MB). Run pnpm sri:refresh after first Pages deploy.",
-              "__unsafeNoSRI": true
+              "_note": "Worker entry point (scripts/gnubg-worker.js). Loads gnubg.module.js via importScripts; uses direct _run_command() export (no ASYNCIFY). gnubg.module.data bundles neural net weights + bearoff DBs (~2MB).",
+              "sri": "sha384-WRBJSfKm7j+l4tL4rdf/g1M4GCdj65F3I6yv7GQltFv7C/jL2bsDzQ7IPJ0ksiAv"
             },
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.05/gnubg.wasm",
               "type": "wasm",
-              "_note": "Emscripten build of gnubg v1.05.000 (hwatheod/gnubg-web). SRI TBD — run pnpm sri:refresh after first Pages deploy.",
-              "__unsafeNoSRI": true
+              "sri": "sha384-sI5LANu1QAohgAlTomZv2CxFmpYIUPgEVxcveCRQrxZ/IAXbQOgNY3dBz2Gh6Bk3"
             }
           }
         }
