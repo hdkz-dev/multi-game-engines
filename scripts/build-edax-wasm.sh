@@ -50,18 +50,27 @@ ls "$SRC_DIR/src/" | head -20
 echo ""
 echo "Compiling with emcc $(emcc --version | head -1)..."
 
-# Gather C source files (exclude main-test files if any, keep all engine C files)
-SRC_FILES=$(find "$SRC_DIR/src" -name "*.c" -not -name "*test*" | sort | tr '\n' ' ')
+# Use all.c — Edax's unity build entry point. It includes the other .c files
+# internally and uses ifdefs to select the right platform variant. Compiling
+# *.c directly would include AVX/BMI/SSE files that use x86-only intrinsics
+# and will fail under Emscripten.
+SRC_ENTRY="$SRC_DIR/src/all.c"
+if [[ ! -f "$SRC_ENTRY" ]]; then
+  echo "ERROR: $SRC_ENTRY not found. Source clone may be incomplete."
+  ls "$SRC_DIR/src/"
+  exit 1
+fi
+echo "Using unity build entry: $SRC_ENTRY"
 
-# shellcheck disable=SC2086
-emcc $SRC_FILES \
+emcc "$SRC_ENTRY" \
   -I "$SRC_DIR/src" \
   -O2 \
   -DHAS_CPU_64=1 \
   -DUSE_PTHREADS=0 \
+  -DLASTFLIP_PLAIN \
   -sWASM=1 \
   -sASYNCIFY=1 \
-  -sASYNCIFY_STACK_SIZE=32768 \
+  -sASYNCIFY_STACK_SIZE=65536 \
   -sMODULARIZE=1 \
   -sEXPORT_NAME=createEdaxModule \
   -sEXPORTED_RUNTIME_METHODS=FS,callMain \
