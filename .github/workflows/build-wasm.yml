@@ -1,7 +1,7 @@
 name: Build WASM Engines
 
 # Triggered whenever the build scripts change, or manually.
-# Produces a "wasm-engines" artifact that docs.yml downloads to include
+# Produces per-engine artifacts that docs.yml downloads to include
 # the compiled binaries in GitHub Pages.
 
 on:
@@ -11,6 +11,8 @@ on:
     paths:
       - "scripts/build-edax-wasm.sh"
       - "scripts/edax-worker.js"
+      - "scripts/build-gnubg-wasm.sh"
+      - "scripts/gnubg-worker.js"
       - ".github/workflows/build-wasm.yml"
   workflow_dispatch:
 
@@ -91,5 +93,69 @@ jobs:
         with:
           name: edax-wasm-v4.4
           path: /tmp/edax-build/
+          retention-days: 7
+          if-no-files-found: error
+
+  build-gnubg:
+    name: Build gnubg WASM (Emscripten)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      # ── Cache: compiled WASM output ─────────────────────────────────────────
+      - name: Cache gnubg WASM build
+        id: cache-gnubg-wasm
+        uses: actions/cache@v5
+        with:
+          path: /tmp/gnubg-build
+          key: gnubg-wasm-v1.05-emcc4.0.10
+
+      # ── Cache: gnubg-web source clone ────────────────────────────────────────
+      - name: Cache gnubg source
+        if: steps.cache-gnubg-wasm.outputs.cache-hit != 'true'
+        uses: actions/cache@v5
+        id: cache-gnubg-src
+        with:
+          path: /tmp/gnubg-src
+          key: gnubg-src-hwatheod-v1.05
+
+      - name: Clone gnubg-web source (if not cached)
+        if: >
+          steps.cache-gnubg-wasm.outputs.cache-hit != 'true' &&
+          steps.cache-gnubg-src.outputs.cache-hit != 'true'
+        run: |
+          git clone --depth=1 \
+            https://github.com/hwatheod/gnubg-web /tmp/gnubg-src
+          echo "Source cloned — repo root:"
+          ls /tmp/gnubg-src/
+
+      # ── Setup Emscripten ─────────────────────────────────────────────────────
+      - name: Setup Emscripten SDK
+        if: steps.cache-gnubg-wasm.outputs.cache-hit != 'true'
+        uses: mymindstorm/setup-emscripten@v14
+        with:
+          version: "4.0.10"
+
+      # ── Compile ──────────────────────────────────────────────────────────────
+      - name: Build gnubg WASM
+        if: steps.cache-gnubg-wasm.outputs.cache-hit != 'true'
+        env:
+          GNUBG_BUILD_OUT: /tmp/gnubg-build
+        run: |
+          bash scripts/build-gnubg-wasm.sh
+
+      - name: Verify output
+        run: |
+          echo "gnubg WASM build output:"
+          ls -lh /tmp/gnubg-build/
+
+      # ── Upload artifact for docs.yml ─────────────────────────────────────────
+      - name: Upload gnubg WASM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gnubg-wasm-v1.05
+          path: /tmp/gnubg-build/
           retention-days: 7
           if-no-files-found: error

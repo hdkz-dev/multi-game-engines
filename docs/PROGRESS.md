@@ -4,7 +4,17 @@
 
 ## ✅ 直近完了タスク (2026年5月1日)
 
-### Phase B2: Edax WASM Emscripten ビルドパイプライン 🚧 (in-progress)
+### v0.1.4 npm リリース ✅
+
+**公開パッケージ** (13 packages, 2026-05-01):
+
+- `@multi-game-engines/registry@0.1.4` — Edax 4.4 SRI ハッシュ確定、`__unsafeNoSRI` 除去
+- 全アダプター (`adapter-edax`, `adapter-gnubg`, `adapter-gtp`, `adapter-katago`, `adapter-kingsrow`, `adapter-mortal`, `adapter-stockfish`, `adapter-uci`, `adapter-usi`, `adapter-yaneuraou`) @0.1.4
+- `@examples/zenith-dashboard-react@0.1.4`, `@examples/zenith-dashboard-vue@0.1.4`
+
+---
+
+### Phase B2: Edax WASM Emscripten ビルドパイプライン ✅ (完了)
 
 **目的**: Edax (Othello/Reversi) を Emscripten ASYNCIFY でコンパイルし、GitHub Pages 経由で配信。
 
@@ -12,7 +22,7 @@
 
 | エンジン          | WASM 入手可否      | 方針                                                            | ステータス                      |
 | ----------------- | ------------------ | --------------------------------------------------------------- | ------------------------------- |
-| **Edax 4.4**      | ❌ 事前ビルド無し  | Emscripten ASYNCIFY ビルド (abulmo/edax-reversi)                | 🚧 ビルドパイプライン構築中     |
+| **Edax 4.4**      | ❌ 事前ビルド無し  | Emscripten ASYNCIFY ビルド (abulmo/edax-reversi)                | ✅ 完了 (v0.1.4)                |
 | **KataGo 1.14**   | ❌ 独立 .wasm 無し | ONNX Runtime Web (kaya-go/katago-onnx) — アーキテクチャ変更必要 | 🔬 調査中                       |
 | **gnubg 1.06**    | ❌ 事前ビルド無し  | Emscripten ビルド (hwatheod/gnubg-web レシピあり)               | 📋 計画済み                     |
 | **KingsRow 1.61** | 🚫 不可            | **BLOCKED** — プロプライエタリ DLL のみ、ソース非公開           | 🚫 代替案: rapid-draughts (MIT) |
@@ -49,12 +59,18 @@
 - **`scripts/assets-manifest.json` v1.1**:
   - Phase B2 研究結果を全エンジンに記録
 
+**完了内容**:
+
+- Edax WASM CI パイプライン構築・動作確認
+- SRI ハッシュ `sha384-31h7F4nhhlpCVqDsO2Rn0//aILszVJWM3fQI5Ab+GPhfB2JaxPtJ9m6vLBNqyjpW` を `engines.json` に記録
+- `__unsafeNoSRI: true` 除去 → 本番環境で Edax 利用可能
+- v0.1.4 として npm 公開完了
+
 **次のアクション**:
 
-1. `build-wasm.yml` を main push で実行し、Edax WASM のコンパイルを確認
-2. `pnpm sri:refresh` を実行して Edax SRI ハッシュを `engines.json` に記録
-3. `__unsafeNoSRI: true` を除去 → Edax が本番環境で利用可能に
-4. gnubg の Emscripten ビルドパイプライン構築 (hwatheod/gnubg-web レシピ参考)
+1. gnubg の Emscripten ビルドパイプライン構築 (hwatheod/gnubg-web レシピ参考)
+2. KataGo — ONNX Runtime Web 統合 (アーキテクチャ検討)
+3. KingsRow → rapid-draughts (MIT) 置き換え検討
 
 ---
 

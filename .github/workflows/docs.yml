@@ -135,6 +135,48 @@ jobs:
           echo "Edax WASM assets staged:"
           find assets-staging/assets/edax -type f | sort
 
+      # ── gnubg WASM (Phase B2: Emscripten build from build-wasm.yml) ────────
+      - name: Download gnubg WASM artifact (if available)
+        id: dl-gnubg
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: gnubg-wasm-v1.05
+          workflow: build-wasm.yml
+          branch: main
+          if_no_artifact_found: warn
+          path: /tmp/gnubg-wasm
+
+      - name: Stage gnubg WASM assets
+        if: steps.dl-gnubg.outcome == 'success'
+        run: |
+          DEST=assets-staging/assets/gnubg/1.05
+          mkdir -p "$DEST"
+          # gnubg.js        — Worker entry point (wraps Emscripten module)
+          # gnubg.module.js — Emscripten glue JS (loaded by gnubg.js via importScripts)
+          # gnubg.wasm      — WASM binary (Emscripten loads automatically)
+          # gnubg.module.data — Preloaded data bundle (neural nets + bearoff DBs, ~2MB)
+          cp /tmp/gnubg-wasm/gnubg.js          "$DEST/gnubg.js"
+          cp /tmp/gnubg-wasm/gnubg.module.js   "$DEST/gnubg.module.js"
+          cp /tmp/gnubg-wasm/gnubg.module.wasm "$DEST/gnubg.wasm"
+          cp /tmp/gnubg-wasm/gnubg.module.data "$DEST/gnubg.module.data"
+
+          # License notice (GPL-3.0 — ADR-014)
+          cat > assets-staging/assets/gnubg/LICENSE <<'EOF'
+          Source: hwatheod/gnubg-web (gnubg v1.05.000, Emscripten build)
+          Origin: https://github.com/hwatheod/gnubg-web
+          Upstream: https://www.gnu.org/software/gnubg/
+          License: GPL-3.0-or-later
+          https://www.gnu.org/software/gnubg/
+
+          This directory contains a WebAssembly build of GNU Backgammon.
+          Redistribution and use are subject to the GNU General Public License v3.
+          The multi-game-engines core library (MIT) does NOT include these binaries.
+          EOF
+
+          echo "gnubg WASM assets staged:"
+          find assets-staging/assets/gnubg -type f | sort
+
       # ── Combine TypeDoc + Assets → single Pages artifact ────────────────
       - name: Assemble GitHub Pages output
         run: |

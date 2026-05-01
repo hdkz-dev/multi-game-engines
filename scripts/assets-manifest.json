@@ -35,9 +35,9 @@
       "ciWorkflow": ".github/workflows/build-wasm.yml",
       "workerWrapper": "scripts/edax-worker.js",
       "destDir": "assets/edax/4.4",
-      "_status": "phase-b2-in-progress",
-      "_phase": "B2",
-      "_note": "Emscripten ASYNCIFY build from abulmo/edax-reversi v4.4.0. Output artifact 'edax-wasm-v4.4.0' is downloaded by docs.yml and deployed to GitHub Pages. Data files (eval.dat) bundled via --preload-file. No SharedArrayBuffer required (single-threaded ASYNCIFY).",
+      "_status": "live",
+      "_phase": "B2-complete",
+      "_note": "Emscripten ASYNCIFY build from abulmo/edax-reversi v4.4. SRI hash committed to engines.json (v0.1.4). Deployed to GitHub Pages. Data files (eval.dat ~14MB) bundled via --preload-file. No SharedArrayBuffer required (single-threaded ASYNCIFY).",
       "files": [
         {
           "buildOutput": "edax.js",
@@ -71,15 +71,51 @@
       }
     },
     "gnubg": {
-      "version": "1.06",
-      "_status": "phase-b2-planned",
+      "version": "1.05",
+      "sourceVersion": "1.05.000",
+      "license": "GPL-3.0-or-later",
+      "licenseUrl": "https://www.gnu.org/software/gnubg/",
+      "sourceRepo": "hwatheod/gnubg-web",
+      "buildScript": "scripts/build-gnubg-wasm.sh",
+      "ciWorkflow": ".github/workflows/build-wasm.yml",
+      "workerWrapper": "scripts/gnubg-worker.js",
+      "destDir": "assets/gnubg/1.05",
+      "_status": "phase-b2-in-progress",
       "_phase": "B2",
-      "_note": "Emscripten build feasible via hwatheod/gnubg-web build scripts. Community build live at http://xenon.stanford.edu/~hwatheod/gnubg_web/ but not packaged for download. Requires glib + neural-net weights (gnubg.wd) + bearoff database (gnubg_os0.bd). High CI build time (~10 min).",
+      "_note": "Emscripten build from hwatheod/gnubg-web (gnubg 1.05.000 + glib 2.62.0). Uses direct _run_command() export (no ASYNCIFY — synchronous C function calls). Data bundle (~2MB): gnubg.wd neural net + gnubg_os0.bd bearoff DB + match equity tables. Output artifact 'gnubg-wasm-v1.05' deployed to GitHub Pages.",
+      "_architecture": "Direct C function exports — Worker calls Module._run_command(buf) synchronously; no blocking stdin, no ASYNCIFY needed.",
       "_research": {
         "buildRecipe": "https://github.com/hwatheod/gnubg-web",
         "liveDemo": "http://xenon.stanford.edu/~hwatheod/gnubg_web/gnubg_web.html",
-        "license": "GPL-3.0"
-      }
+        "license": "GPL-3.0",
+        "emscriptenVersion": "4.0.10",
+        "dataFiles": ["gnubg.wd", "gnubg_os0.bd", "met/*.met", ".gnubg/gnubgrc"]
+      },
+      "files": [
+        {
+          "buildOutput": "gnubg.js",
+          "dest": "gnubg.js",
+          "type": "worker-js",
+          "_note": "Worker wrapper (scripts/gnubg-worker.js) — bridges postMessage <-> Module._run_command()"
+        },
+        {
+          "buildOutput": "gnubg.module.js",
+          "dest": "gnubg.module.js",
+          "type": "worker-js",
+          "_note": "Emscripten glue JS (loaded by gnubg.js via importScripts)"
+        },
+        {
+          "buildOutput": "gnubg.module.wasm",
+          "dest": "gnubg.wasm",
+          "type": "wasm"
+        },
+        {
+          "buildOutput": "gnubg.module.data",
+          "dest": "gnubg.module.data",
+          "type": "data",
+          "_note": "Preloaded data bundle: gnubg.wd + bearoff DBs + METs (~2MB)"
+        }
+      ]
     },
     "kingsrow": {
       "version": "1.61",

@@ -113,22 +113,22 @@
     "gnubg": {
       "name": "GNU Backgammon",
       "adapter": "gnubg",
-      "latest": "1.06",
+      "latest": "1.05",
       "_phase": "B2",
-      "_wasm_path": "Emscripten build from hwatheod/gnubg-web scripts — community build exists at Stanford",
+      "_wasm_path": "Emscripten build from hwatheod/gnubg-web (gnubg v1.05.000 + glib 2.62.0) — CI pipeline in .github/workflows/build-wasm.yml",
       "versions": {
-        "1.06": {
+        "1.05": {
           "assets": {
             "main": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.06/gnubg.js",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.05/gnubg.js",
               "type": "worker-js",
-              "_note": "Phase B2 placeholder — Emscripten build pending (gnubg GPL-3.0, hwatheod/gnubg-web build recipe available)",
+              "_note": "Worker entry point (scripts/gnubg-worker.js). Loads gnubg.module.js via importScripts; uses direct _run_command() export (no ASYNCIFY). gnubg.module.data bundles neural net weights + bearoff DBs (~2MB). Run pnpm sri:refresh after first Pages deploy.",
               "__unsafeNoSRI": true
             },
             "wasm": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.06/gnubg.wasm",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.05/gnubg.wasm",
               "type": "wasm",
-              "_note": "Phase B2 placeholder — Emscripten build pending",
+              "_note": "Emscripten build of gnubg v1.05.000 (hwatheod/gnubg-web). SRI TBD — run pnpm sri:refresh after first Pages deploy.",
               "__unsafeNoSRI": true
             }
           }
