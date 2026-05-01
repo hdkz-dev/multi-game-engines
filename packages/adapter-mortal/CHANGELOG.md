@@ -1,5 +1,12 @@
 # @multi-game-engines/adapter-mortal
 
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [6d81e23]
+  - @multi-game-engines/registry@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
