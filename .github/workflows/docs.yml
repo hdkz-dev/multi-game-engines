@@ -192,11 +192,16 @@ jobs:
       - name: Stage KataGo ONNX model asset
         if: steps.dl-katago.outcome == 'success'
         run: |
+          MODEL=/tmp/katago-onnx/katago-b6c96.onnx
+          if [[ ! -f "$MODEL" ]]; then
+            echo "No KataGo ONNX model in artifact — skipping stage step."
+            exit 0
+          fi
           DEST=assets-staging/assets/katago/1.14
           mkdir -p "$DEST"
-          cp /tmp/katago-onnx/katago-b6c96.onnx "$DEST/katago-b6c96.onnx"
+          cp "$MODEL" "$DEST/katago-b6c96.onnx"
 
-          # License notice (MIT — model weights: Apache 2.0)
+          # License notice (model weights: Apache 2.0)
           cat > assets-staging/assets/katago/LICENSE <<'EOF'
           Source: KataGo v1.14 b6c96 network (fp32 ONNX)
           Origin: https://github.com/lightvector/KataGo
