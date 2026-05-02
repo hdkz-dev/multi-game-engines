@@ -130,11 +130,12 @@ export function decodePolicy(
   }
   for (let i = 0; i <= cells; i++) probs[i] = (probs[i] ?? 0) / sumExp;
 
+  // probs[] is already normalised (divided by sumExp above).
   const result: Array<{ index: number; prob: number; gtp: string }> = [];
   for (let i = 0; i <= cells; i++) {
     result.push({
       index: i,
-      prob: (probs[i] ?? 0) / sumExp,
+      prob: probs[i] ?? 0,
       gtp: i === cells ? "pass" : KataGoBoard.indexToGtp(i, boardSize),
     });
   }
