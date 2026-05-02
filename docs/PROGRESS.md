@@ -1,6 +1,31 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月1日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月2日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年5月2日)
+
+### 依存関係アップデート (PR #117) — 予定
+
+- ESLint `10.2.1 → 10.3.0`、turbo `2.9.6 → 2.9.7`、zod `4.4.1 → 4.4.2`
+- `@eslint-react/eslint-plugin 5.6.2 → 5.7.0`、`vite-plugin-dts 4.5.4 → 5.0.0`
+- jsdom `29.1.0 → 29.1.1`、`@vue/test-utils 2.4.9 → 2.4.10`
+- postcss `8.5.12 → 8.5.13`、wrangler `4.86.0 → 4.87.0`
+- `@cloudflare/workers-types 4.20260430.1 → 4.20260502.1`
+
+### Phase B2: KataGo ONNX アダプター ✅ (完了)
+
+- `KataGoONNXAdapter`: onnxruntime-web 使用、Worker・バイナリ不要
+- `KataGoBoard` + `KataGoEncoder`: 19×19 盤面管理と 22 プレーン特徴量エンコード
+- CI: `build-wasm.yml` に `build-katago` ジョブ追加
+- 変更セット: `katago-onnx-adapter.md` → `adapter-katago@0.2.0` リリース予定
+
+### Phase B2: rapid-draughts チェッカー ✅ (完了)
+
+- `KingsRowAdapter` を rapid-draughts@1.0.6 (純粋 TypeScript) で置き換え
+- Worker・バイナリ・CDN URL 不要。`bundled: true` マーカーをレジストリに追加
+- 変更セット: `rapid-draughts-replace-kingsrow.md` → `adapter-kingsrow@0.2.0` リリース予定
+
+---
 
 ## ✅ 直近完了タスク (2026年5月1日)
 
