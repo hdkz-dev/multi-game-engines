@@ -1,5 +1,23 @@
 # @examples/zenith-dashboard-react
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [dd9159c]
+- Updated dependencies [14726e0]
+  - @multi-game-engines/adapter-katago@0.2.0
+  - @multi-game-engines/registry@0.1.6
+  - @multi-game-engines/adapter-kingsrow@0.2.0
+  - @multi-game-engines/adapter-edax@0.1.6
+  - @multi-game-engines/adapter-gnubg@0.1.6
+  - @multi-game-engines/adapter-gtp@0.1.6
+  - @multi-game-engines/adapter-mortal@0.1.6
+  - @multi-game-engines/adapter-stockfish@0.1.6
+  - @multi-game-engines/adapter-uci@0.1.6
+  - @multi-game-engines/adapter-usi@0.1.6
+  - @multi-game-engines/adapter-yaneuraou@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes

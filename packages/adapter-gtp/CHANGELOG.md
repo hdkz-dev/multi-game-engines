@@ -1,5 +1,13 @@
 # @multi-game-engines/adapter-gtp
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [dd9159c]
+- Updated dependencies [14726e0]
+  - @multi-game-engines/registry@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes
