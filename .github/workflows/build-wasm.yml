@@ -13,6 +13,7 @@ on:
       - "scripts/edax-worker.js"
       - "scripts/build-gnubg-wasm.sh"
       - "scripts/gnubg-worker.js"
+      - "scripts/download-katago-onnx.sh"
       - ".github/workflows/build-wasm.yml"
   workflow_dispatch:
 
@@ -159,3 +160,31 @@ jobs:
           path: /tmp/gnubg-build/
           retention-days: 7
           if-no-files-found: error
+
+  # ── KataGo ONNX model download ───────────────────────────────────────────────
+  build-katago:
+    name: Download KataGo ONNX Model
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Download KataGo ONNX model
+        env:
+          # Set KATAGO_ONNX_URL as a repository secret to download a private or
+          # large model file. Leave unset to skip (adapter uses the hosted URL).
+          KATAGO_ONNX_URL: ${{ secrets.KATAGO_ONNX_URL }}
+        run: |
+          mkdir -p /tmp/katago-onnx
+          bash scripts/download-katago-onnx.sh /tmp/katago-onnx
+          echo "KataGo ONNX output:"
+          ls -lh /tmp/katago-onnx/ 2>/dev/null || echo "(no model file — skipping artifact upload)"
+
+      - name: Upload KataGo ONNX artifact
+        if: ${{ hashFiles('/tmp/katago-onnx/katago-b6c96.onnx') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: katago-onnx-v1.14
+          path: /tmp/katago-onnx/
+          retention-days: 30
+          if-no-files-found: warn

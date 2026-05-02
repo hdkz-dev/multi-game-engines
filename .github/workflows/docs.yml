@@ -177,6 +177,39 @@ jobs:
           echo "gnubg WASM assets staged:"
           find assets-staging/assets/gnubg -type f | sort
 
+      # ── KataGo ONNX model (Phase B2) ─────────────────────────────────────
+      - name: Download KataGo ONNX model (if available)
+        id: dl-katago
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          name: katago-onnx-v1.14
+          workflow: build-wasm.yml
+          branch: main
+          if_no_artifact_found: warn
+          path: /tmp/katago-onnx
+
+      - name: Stage KataGo ONNX model asset
+        if: steps.dl-katago.outcome == 'success'
+        run: |
+          DEST=assets-staging/assets/katago/1.14
+          mkdir -p "$DEST"
+          cp /tmp/katago-onnx/katago-b6c96.onnx "$DEST/katago-b6c96.onnx"
+
+          # License notice (MIT — model weights: Apache 2.0)
+          cat > assets-staging/assets/katago/LICENSE <<'EOF'
+          Source: KataGo v1.14 b6c96 network (fp32 ONNX)
+          Origin: https://github.com/lightvector/KataGo
+          License: Apache-2.0 (model weights)
+          https://github.com/lightvector/KataGo/blob/master/LICENSE
+
+          This directory contains a pre-trained KataGo neural network
+          converted to ONNX format for use with onnxruntime-web.
+          EOF
+
+          echo "KataGo ONNX assets staged:"
+          find assets-staging/assets/katago -type f | sort
+
       # ── Combine TypeDoc + Assets → single Pages artifact ────────────────
       - name: Assemble GitHub Pages output
         run: |

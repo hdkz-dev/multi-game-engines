@@ -34,14 +34,15 @@
     "multi-game-engines"
   ],
   "peerDependencies": {
-    "@multi-game-engines/core": "workspace:*"
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*"
   },
   "dependencies": {
-    "@multi-game-engines/adapter-gtp": "workspace:*",
-    "@multi-game-engines/registry": "workspace:*"
+    "onnxruntime-web": "^1.21.0"
   },
   "devDependencies": {
     "@multi-game-engines/domain-go": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*",
     "eslint": "^10.2.1",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",

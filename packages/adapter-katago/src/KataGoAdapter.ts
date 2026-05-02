@@ -1,19 +1,7 @@
-import { IEngineConfig, deepMerge } from "@multi-game-engines/core";
-import { GTPAdapter } from "@multi-game-engines/adapter-gtp";
-
 /**
- * 2026 Zenith Tier: KataGo 専用アダプター。
- * 汎用的な GTPAdapter を拡張し、デフォルト設定を提供します。
+ * @deprecated Use KataGoONNXAdapter from "./KataGoONNXAdapter.js"
+ *
+ * Kept for backward-compat module resolution only.
+ * Re-exports KataGoONNXAdapter under the legacy name.
  */
-export class KataGoAdapter extends GTPAdapter {
-  constructor(config?: Partial<IEngineConfig>) {
-    const defaultConfig: IEngineConfig = {
-      id: "katago",
-      adapter: "gtp",
-      name: "KataGo",
-      version: "1.15.0",
-    };
-    const finalConfig = deepMerge(defaultConfig, config);
-    super(finalConfig);
-  }
-}
+export { KataGoONNXAdapter as KataGoAdapter } from "./KataGoONNXAdapter.js";

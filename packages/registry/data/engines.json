@@ -74,17 +74,17 @@
     },
     "katago": {
       "name": "KataGo",
-      "adapter": "gtp",
+      "adapter": "katago",
       "latest": "1.14",
-      "_phase": "B2",
-      "_wasm_path": "ONNX Runtime Web — convert KataGo checkpoint to fp32 ONNX via kaya-go/katago-onnx; no standalone .wasm available",
+      "_note": "ONNX Runtime Web adapter. Model (katago-b6c96.onnx) served from GitHub Pages; runtime (onnxruntime-web) is a bundled npm dependency of @multi-game-engines/adapter-katago.",
       "versions": {
         "1.14": {
+          "_note": "KataGo b6c96-s175395328 network converted to fp32 ONNX. Supply model URL via config.sources.main.url or use the hosted default.",
           "assets": {
             "main": {
-              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago.js",
-              "type": "worker-js",
-              "_note": "Phase B2 placeholder — ONNX Runtime Web integration pending (see assets-manifest.json)",
+              "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago-b6c96.onnx",
+              "type": "asset",
+              "_note": "ONNX model file. SRI computed by CI after first upload — set __unsafeNoSRI=true until then.",
               "__unsafeNoSRI": true
             }
           }

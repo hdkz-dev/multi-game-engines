@@ -1,32 +1,28 @@
+/**
+ * Unit tests for createKataGoEngine factory.
+ *
+ * onnxruntime-web is mocked so no real model is loaded.
+ */
 import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { createKataGoEngine } from "../index.js";
 
-vi.mock("@multi-game-engines/registry", () => ({
-  OfficialRegistry: {
-    resolve: vi.fn().mockReturnValue({
-      main: {
-        url: "katago.js",
-        type: "worker-js",
-        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      },
-    }),
+const mockSession = {
+  run: vi.fn().mockResolvedValue({
+    policy: { data: new Float32Array(19 * 19 + 1).fill(0.1) },
+  }),
+  release: vi.fn().mockResolvedValue(undefined),
+};
+
+vi.mock("onnxruntime-web", () => ({
+  InferenceSession: { create: vi.fn().mockResolvedValue(mockSession) },
+  Tensor: class {
+    constructor(
+      _t: string,
+      public data: Float32Array,
+      _s: number[],
+    ) {}
   },
 }));
-
-vi.mock("@multi-game-engines/core", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@multi-game-engines/core")>();
-  return {
-    ...actual,
-    normalizeAndValidateSources: vi.fn().mockReturnValue({
-      main: {
-        url: "katago.js",
-        type: "worker-js",
-        sri: "sha384-ValidSRIHashForTest64CharsLongAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-      },
-    }),
-  };
-});
 
 describe("createKataGoEngine", () => {
   beforeAll(() => {
@@ -51,20 +47,27 @@ describe("createKataGoEngine", () => {
   });
 
   it("should accept a custom config and return an engine", () => {
-    const engine = createKataGoEngine({ version: "1.15.0" });
+    const engine = createKataGoEngine({ version: "1.14" });
     expect(engine).toBeDefined();
     expect(engine.id).toBe("katago");
   });
 
-  it("should call OfficialRegistry.resolve with the engine id", async () => {
-    const { OfficialRegistry } = await import("@multi-game-engines/registry");
-    createKataGoEngine();
-    expect(OfficialRegistry.resolve).toHaveBeenCalledWith("katago", undefined);
+  it("should not require OfficialRegistry — no registry dependency", () => {
+    // createKataGoEngine() must not throw even without registry configured.
+    expect(() => createKataGoEngine()).not.toThrow();
   });
 
-  it("should pass config.version to OfficialRegistry.resolve", async () => {
-    const { OfficialRegistry } = await import("@multi-game-engines/registry");
-    createKataGoEngine({ version: "1.14.0" });
-    expect(OfficialRegistry.resolve).toHaveBeenCalledWith("katago", "1.14.0");
+  it("should pass custom model URL to adapter via config.sources", async () => {
+    const { InferenceSession } = await import("onnxruntime-web");
+    const engine = createKataGoEngine({
+      sources: {
+        main: { url: "https://example.com/custom.onnx" } as never,
+      },
+    });
+    await engine.load();
+    expect(InferenceSession.create).toHaveBeenCalledWith(
+      "https://example.com/custom.onnx",
+      expect.any(Object),
+    );
   });
 });
