@@ -4,6 +4,17 @@
 
 ## ✅ 直近完了タスク (2026年5月3日)
 
+### Playwright CT テスト大幅拡充 ✅
+
+- `ui-react-monitor`: 6テスト → **31テスト** (EvaluationGraph×8, PVList×7, SearchLog×10 追加)
+- `ui-vue-monitor`: 6テスト → **31テスト** (EvaluationGraph×8, PVList×7, SearchLog×10 追加)
+- 合計: 12テスト → **62テスト** (両フレームワークで対称カバレッジ実現)
+
+### `refresh-sri.yml` 改善 ✅
+
+- `workflow_run` トリガー追加: "Deploy API Docs" 完了後に SRI ハッシュ自動再計算
+- WASM デプロイ → SRI 更新の完全自動化
+
 ### 依存関係アップデート (PR #119, #120) ✅ マージ済み
 
 - PR #119: ESLint 10.3.0、turbo 2.9.7、zod 4.4.2、@eslint-react/eslint-plugin 5.7.0、vite-plugin-dts 5.0.0、jsdom 29.1.1、@vue/test-utils 2.4.10、postcss 8.5.13、wrangler 4.87.0、@cloudflare/workers-types 4.20260502.1
@@ -248,14 +259,13 @@
 - 配信 URL: `https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/`
 - 利用条件: アプリ側で `COOP+COEP` ヘッダーが必要（SharedArrayBuffer 要件）
 
-### 🟠 Phase B2 — 残エンジンの WASM ビルドパイプライン
+### ✅ Phase B2 — 残エンジンの WASM ビルドパイプライン (完了)
 
-- [ ] **Edax 4.4** (リバーシ): Emscripten ビルドセットアップ
-  - okuhara/edax-reversi-AVX は native binary のみ → 自前 Emscripten ビルド必要
-- [ ] **KataGo 1.14** (囲碁): TensorFlow.js ベースの WASM ポートを調査
-- [ ] **gnubg 1.06** (バックギャモン): Emscripten ビルド必要
-- [ ] **KingsRow 1.61** (チェッカーズ): Emscripten ビルド必要
-- [ ] **Mortal 1.0** (麻雀): PyTorch ベース → ONNX Runtime Web 変換を調査
+- ✅ **Edax 4.4** (リバーシ): Emscripten ASYNCIFY ビルド完了、SRI確定済み
+- ✅ **KataGo 1.14** (囲碁): onnxruntime-web ONNX アダプター実装 (adapter-katago@0.2.0)
+- ✅ **gnubg 1.05** (バックギャモン): Emscripten ビルド完了、SRI確定済み
+- ✅ **KingsRow** (チェッカーズ): rapid-draughts@1.0.6 (純粋TS) で置き換え (adapter-kingsrow@0.2.0)
+- ⛔ **Mortal 1.0** (麻雀): PyTorch ベース — 純粋 JS/TS 代替なし、DEFERRED
 
 ### 🔴 要対応 — NPM_TOKEN の期限管理
 
@@ -267,16 +277,16 @@
 - [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
   > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
 
-### 🟠 High Priority — Phase B（バイナリ配信インフラ）
+### ✅ High Priority — Phase B（バイナリ配信インフラ）
 
-- [ ] **Phase B1**: Cloudflare R2 / GitHub Pages（`multi-game-engines-assets` リポジトリ）の配信設定
-- [ ] **Phase B2**: やねうら王 WASM ビルドパイプライン (Emscripten)
-- [ ] **Phase B3**: KataGo / Edax / gnubg / KingsRow / Mortal WASM ビルド
-- [ ] **Phase B4**: SRI 自動再計算 CI（バイナリデプロイ → `pnpm sri:refresh` → PR 自動作成）
+- ✅ **Phase B1**: GitHub Pages 配信設定完了
+- ✅ **Phase B2**: やねうら王 WASM ビルドパイプライン (Emscripten) 完了
+- ✅ **Phase B3**: Edax / gnubg / KataGo(ONNX) / KingsRow(rapid-draughts) 完了
+- ✅ **Phase B4**: SRI 自動再計算 CI (`refresh-sri.yml` — docs デプロイ後に自動トリガー)
 
 ### 🟡 Medium Priority
 
-- [ ] **Playwright E2E 拡充**: `ui-vue-monitor` への CT テスト追加（`ui-react-monitor` に続く第2弾）
+- ✅ **Playwright E2E 拡充**: 両 monitor パッケージで 6 → 62 テストに拡充完了
 - [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替
 - [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md` 等) の整備
 - [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討
