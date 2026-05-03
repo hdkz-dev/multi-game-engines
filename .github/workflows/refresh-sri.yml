@@ -8,6 +8,12 @@ on:
   schedule:
     - cron: "0 0 * * 0" # 毎週日曜日に定期チェック
   workflow_dispatch: # 手動実行も許可
+  # Auto-refresh after WASM assets are deployed to GitHub Pages.
+  # When docs.yml publishes new binaries, SRI hashes may be stale.
+  workflow_run:
+    workflows: ["Deploy API Docs"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   refresh-sri:
