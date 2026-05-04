@@ -19,6 +19,7 @@ import {
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
+import type { ICommunicator } from "../workers/ICommunicator.js";
 
 /**
  * 2026 Zenith Tier: 全てのアダプターの基底クラス。
@@ -30,7 +31,14 @@ export abstract class BaseAdapter<
   T_RESULT extends IBaseSearchResult = IBaseSearchResult,
 > implements IEngineAdapter<T_OPTIONS, T_INFO, T_RESULT> {
   protected _status: EngineStatus = "uninitialized";
-  protected communicator: WorkerCommunicator | null = null;
+  /**
+   * The active communicator instance.
+   *
+   * Typed as {@link ICommunicator} (not the concrete `WorkerCommunicator`) so
+   * that subclasses can inject a {@link NativeCommunicator} for the
+   * Multi-Runtime Bridge without needing to change any base-class logic.
+   */
+  protected communicator: ICommunicator | null = null;
   protected activeLoader: {
     loadResource: (
       engineId: string,

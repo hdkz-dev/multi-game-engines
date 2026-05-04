@@ -1,6 +1,23 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月3日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月4日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年5月4日)
+
+### Multi-Runtime Bridge ✅ (`core@0.2.0` — changeset作成済み)
+
+- `ICommunicator` インターフェース追加 (`packages/core/src/workers/ICommunicator.ts`)
+- `WorkerCommunicator` / `NativeCommunicator` が `ICommunicator` を実装
+- `BaseAdapter.communicator` を `ICommunicator | null` に変更 (両コミュニケーター対応)
+- `resolveRuntime(config)`: 実行環境を自動検出して適切なコミュニケーターを返す
+  - Node.js 環境 → `NativeCommunicator(config.binaryPath)` (config.binaryPath 必須)
+  - ブラウザ環境 → `WorkerCommunicator(config.workerUrl)` (config.workerUrl 必須)
+- `isNodeEnvironment()`: `process.versions.node` の有無で Node.js/ブラウザを判定
+- `RuntimeConfig` 型: `{ workerUrl?: string; binaryPath?: string }`
+- 全シンボルを `core/index.ts` からエクスポート
+- テスト: `resolveRuntime.test.ts` — 10テスト全パス (class-based mocks + instanceof assertions)
+
+---
 
 ## ✅ 直近完了タスク (2026年5月3日)
 
@@ -287,7 +304,7 @@
 ### 🟡 Medium Priority
 
 - ✅ **Playwright E2E 拡充**: 両 monitor パッケージで 6 → 62 テストに拡充完了
-- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替
+- ✅ **Multi-Runtime Bridge**: `resolveRuntime()` + `ICommunicator` — WASM と OS Native バイナリを自動切替 (`core@0.2.0`)
 - [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md` 等) の整備
 - [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討
 

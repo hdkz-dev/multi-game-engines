@@ -15,6 +15,10 @@ export {
 
 // アダプター開発者向け基盤
 export { BaseAdapter } from "./adapters/index.js";
+// ICommunicator is a type-only export — safe for all runtimes.
+// NativeCommunicator, resolveRuntime and RuntimeConfig are Node.js-only:
+// import them from "@multi-game-engines/core/node" instead.
+export type { ICommunicator } from "./workers/index.js";
 export { WorkerCommunicator } from "./workers/index.js";
 
 // 能力検出とリソース管理

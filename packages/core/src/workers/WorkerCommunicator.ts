@@ -1,10 +1,14 @@
 import { EngineError } from "../errors/EngineError.js";
 import { EngineErrorCode } from "../types.js";
+import type { ICommunicator } from "./ICommunicator.js";
 
 /**
  * 2026 Zenith Tier: Worker との物理的な通信を管理。
+ *
+ * Implements {@link ICommunicator} so it can be used interchangeably with
+ * {@link NativeCommunicator} in adapters that support the Multi-Runtime Bridge.
  */
-export class WorkerCommunicator {
+export class WorkerCommunicator implements ICommunicator {
   private worker: Worker;
   private pendingExpectations = new Map<
     string,
