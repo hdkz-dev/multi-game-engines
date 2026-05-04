@@ -346,8 +346,8 @@ importers:
   infrastructure/cdn/cloudflare:
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20260503.1
-        version: 4.20260503.1
+        specifier: ^4.20260504.1
+        version: 4.20260504.1
       '@multi-game-engines/core':
         specifier: workspace:*
         version: link:../../../packages/core
@@ -356,7 +356,7 @@ importers:
         version: 6.0.3
       wrangler:
         specifier: ^4.87.0
-        version: 4.87.0(@cloudflare/workers-types@4.20260503.1)
+        version: 4.87.0(@cloudflare/workers-types@4.20260504.1)
 
   packages/adapter-edax:
     dependencies:
@@ -2235,8 +2235,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20260503.1':
-    resolution: {integrity: sha512-8VKtafR4fNMtddutOnam3yq3AQvrl9bzuMio3B3AEAfrdx7xaaDV0Oyxz54P07lODwX0jydukGLC1rpDdYXAAA==}
+  '@cloudflare/workers-types@4.20260504.1':
+    resolution: {integrity: sha512-x/7BzBXSGBQS0wHdaY0/1bcaRszkkhCjTc5maQvNSHu/pTVdBF2f/L41W8pRSJJSbLL80ynW7O923O7v3PaLtg==}
 
   '@colordx/core@5.4.3':
     resolution: {integrity: sha512-kIxYSfA5T8HXjav55UaaH/o/cKivF6jCCGIb8eqtcsfI46wsvlSiT8jMDyrl779qLec3c2c2oHBZo4oAhvbjrQ==}
@@ -10886,7 +10886,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20260430.1':
     optional: true
 
-  '@cloudflare/workers-types@4.20260503.1': {}
+  '@cloudflare/workers-types@4.20260504.1': {}
 
   '@colordx/core@5.4.3': {}
 
@@ -19391,7 +19391,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260430.1
       '@cloudflare/workerd-windows-64': 1.20260430.1
 
-  wrangler@4.87.0(@cloudflare/workers-types@4.20260503.1):
+  wrangler@4.87.0(@cloudflare/workers-types@4.20260504.1):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260430.1)
@@ -19402,7 +19402,7 @@ snapshots:
       unenv: 2.0.0-rc.24
       workerd: 1.20260430.1
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20260503.1
+      '@cloudflare/workers-types': 4.20260504.1
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
