@@ -101,3 +101,4 @@ Please refer to [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
 
 - **Core**: MIT License
 - **Adapters**: 各エンジンのライセンスに準拠（例: Stockfish は GPL-3.0-only）
+
