@@ -2,6 +2,17 @@
 
 ## 📅 更新日: 2026年5月4日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月4日) — アクセシビリティ修正
+
+### ChessBoard 盤面反転時のキーボードナビゲーション修正 ✅ (`ui-chess-elements`)
+
+- **問題**: `orientation="black"` 時に `_handleKeyDown` が方向キーを反転しておらず、ArrowUp が視覚的に下方向に移動する（WCAG 2.4.3 違反）
+- **修正**: `flipped` フラグを導入し、全キー（↑↓←→/Home/End/PageUp/PageDown/Ctrl+組み合わせ）を視覚座標基準に切り替え ([`packages/ui-chess-elements/src/index.ts`](../packages/ui-chess-elements/src/index.ts))
+- **テスト**: 反転表示専用テストスイート `chess-board keyboard navigation — orientation=black` を新設（14件追加、合計28件全パス）([`packages/ui-chess-elements/src/__tests__/ChessBoard.keyboard.test.ts`](../packages/ui-chess-elements/src/__tests__/ChessBoard.keyboard.test.ts))
+- ARIA ラベルはすでに論理座標（代数表記）から生成されており、反転時も正しく読み上げられることを検証済み
+
+---
+
 ## ✅ 直近完了タスク (2026年5月4日)
 
 ### Multi-Runtime Bridge ✅ (`core@0.2.0` — changeset作成済み)

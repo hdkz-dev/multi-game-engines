@@ -146,31 +146,68 @@ export class ChessBoard extends LitElement {
     let newIndex = this._focusedIndex;
     const row = Math.floor(this._focusedIndex / 8);
     const col = this._focusedIndex % 8;
+    const flipped = this.orientation === "black";
 
     switch (e.key) {
       case "ArrowUp":
-        newIndex = row > 0 ? this._focusedIndex - 8 : this._focusedIndex;
+        newIndex = flipped
+          ? row < 7
+            ? this._focusedIndex + 8
+            : this._focusedIndex
+          : row > 0
+            ? this._focusedIndex - 8
+            : this._focusedIndex;
         break;
       case "ArrowDown":
-        newIndex = row < 7 ? this._focusedIndex + 8 : this._focusedIndex;
+        newIndex = flipped
+          ? row > 0
+            ? this._focusedIndex - 8
+            : this._focusedIndex
+          : row < 7
+            ? this._focusedIndex + 8
+            : this._focusedIndex;
         break;
       case "ArrowLeft":
-        newIndex = col > 0 ? this._focusedIndex - 1 : this._focusedIndex;
+        newIndex = flipped
+          ? col < 7
+            ? this._focusedIndex + 1
+            : this._focusedIndex
+          : col > 0
+            ? this._focusedIndex - 1
+            : this._focusedIndex;
         break;
       case "ArrowRight":
-        newIndex = col < 7 ? this._focusedIndex + 1 : this._focusedIndex;
+        newIndex = flipped
+          ? col > 0
+            ? this._focusedIndex - 1
+            : this._focusedIndex
+          : col < 7
+            ? this._focusedIndex + 1
+            : this._focusedIndex;
         break;
       case "Home":
-        newIndex = e.ctrlKey ? 0 : row * 8;
+        newIndex = flipped
+          ? e.ctrlKey
+            ? 63
+            : row * 8 + 7
+          : e.ctrlKey
+            ? 0
+            : row * 8;
         break;
       case "End":
-        newIndex = e.ctrlKey ? 63 : row * 8 + 7;
+        newIndex = flipped
+          ? e.ctrlKey
+            ? 0
+            : row * 8
+          : e.ctrlKey
+            ? 63
+            : row * 8 + 7;
         break;
       case "PageUp":
-        newIndex = col;
+        newIndex = flipped ? 56 + col : col;
         break;
       case "PageDown":
-        newIndex = 56 + col;
+        newIndex = flipped ? col : 56 + col;
         break;
       default:
         return;
