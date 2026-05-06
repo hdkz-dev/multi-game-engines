@@ -1,6 +1,21 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月4日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月6日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年5月6日) — Multi-Runtime Bridge アダプター統合
+
+### UCI / USI / GTP アダプターへの Native Path 統合 ✅
+
+- `IEngineConfig` に `binaryPath?: string` フィールドを追加 (`packages/core/src/types.ts`)
+- `isNodeEnvironment()` を `@multi-game-engines/core` の main entry からエクスポート
+- `UCIAdapter` / `USIAdapter` / `GTPAdapter` に native path を統合:
+  - `isNodeEnvironment() && config.binaryPath` が真の場合、`EngineLoader` 不要で `NativeCommunicator` を動的インポートしてネイティブバイナリを起動
+  - ブラウザ/WASM パスは既存の `WorkerCommunicator` + `EngineLoader` フローを維持
+- テスト: 各アダプターに `describe("... native mode")` ブロックを追加（3テスト×3アダプター = 9テスト全パス）
+  - `vi.hoisted` + `vi.mock` パターンで動的インポートのモックを実現
+- changeset: `multi-runtime-bridge.md` を更新し `adapter-uci/usi/gtp@minor` を追加
+
+---
 
 ## ✅ 直近完了タスク (2026年5月4日) — アクセシビリティ修正
 

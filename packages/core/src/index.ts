@@ -20,6 +20,8 @@ export { BaseAdapter } from "./adapters/index.js";
 // import them from "@multi-game-engines/core/node" instead.
 export type { ICommunicator } from "./workers/index.js";
 export { WorkerCommunicator } from "./workers/index.js";
+// isNodeEnvironment contains no Node.js API calls and is safe for browsers.
+export { isNodeEnvironment } from "./workers/resolveRuntime.js";
 
 // 能力検出とリソース管理
 export {

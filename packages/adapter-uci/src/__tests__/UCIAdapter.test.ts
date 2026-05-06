@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { UCIAdapter } from "../UCIAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
+const { NativeCommunicatorMock } = vi.hoisted(() => ({
+  NativeCommunicatorMock: vi.fn(),
+}));
+
+vi.mock("@multi-game-engines/core/node", () => ({
+  NativeCommunicator: NativeCommunicatorMock,
+}));
+
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
     if (
@@ -159,5 +167,59 @@ describe("UCIAdapter", () => {
     adapter.onStatusChange((s) => statuses.push(s));
     await adapter.load(mockLoader as unknown as IEngineLoader);
     expect(statuses).toEqual(["loading", "ready"]);
+  });
+});
+
+describe("UCIAdapter — native mode (Node.js + binaryPath)", () => {
+  const nativeConfig: IEngineConfig = {
+    id: "stockfish-native",
+    adapter: "uci",
+    binaryPath: "/mock/stockfish",
+  };
+
+  beforeEach(() => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockResolvedValue(undefined),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn().mockResolvedValue("uciok"),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+  });
+
+  afterEach(() => {
+    NativeCommunicatorMock.mockReset();
+  });
+
+  it("should reach ready status without a loader when binaryPath is set", async () => {
+    const adapter = new UCIAdapter(nativeConfig);
+    await adapter.load();
+    expect(adapter.status).toBe("ready");
+  });
+
+  it("should emit loading → ready status sequence in native mode", async () => {
+    const adapter = new UCIAdapter(nativeConfig);
+    const statuses: string[] = [];
+    adapter.onStatusChange((s) => statuses.push(s));
+    await adapter.load();
+    expect(statuses).toEqual(["loading", "ready"]);
+  });
+
+  it("should set status to error when NativeCommunicator.spawn rejects", async () => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockRejectedValue(new Error("binary not found")),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn(),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+
+    const adapter = new UCIAdapter(nativeConfig);
+    await expect(adapter.load()).rejects.toThrow("binary not found");
+    expect(adapter.status).toBe("error");
   });
 });

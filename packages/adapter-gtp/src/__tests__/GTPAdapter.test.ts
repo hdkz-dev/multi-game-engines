@@ -11,6 +11,14 @@ import {
 import { GTPAdapter, createGTPAdapter } from "../GTPAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
+const { NativeCommunicatorMock } = vi.hoisted(() => ({
+  NativeCommunicatorMock: vi.fn(),
+}));
+
+vi.mock("@multi-game-engines/core/node", () => ({
+  NativeCommunicator: NativeCommunicatorMock,
+}));
+
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
     if (
@@ -185,5 +193,59 @@ describe("GTPAdapter", () => {
     const adapter = createGTPAdapter(config);
     expect(adapter).toBeInstanceOf(GTPAdapter);
     expect(adapter.id).toBe("test-gtp");
+  });
+});
+
+describe("GTPAdapter — native mode (Node.js + binaryPath)", () => {
+  const nativeConfig = {
+    id: "katago-native",
+    adapter: "gtp",
+    binaryPath: "/mock/katago",
+  };
+
+  beforeEach(() => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockResolvedValue(undefined),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn().mockResolvedValue("= 1.0"),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+  });
+
+  afterEach(() => {
+    NativeCommunicatorMock.mockReset();
+  });
+
+  it("should reach ready status without a loader when binaryPath is set", async () => {
+    const adapter = new GTPAdapter(nativeConfig);
+    await adapter.load();
+    expect(adapter.status).toBe("ready");
+  });
+
+  it("should emit loading → ready status sequence in native mode", async () => {
+    const adapter = new GTPAdapter(nativeConfig);
+    const statuses: string[] = [];
+    adapter.onStatusChange((s) => statuses.push(s));
+    await adapter.load();
+    expect(statuses).toEqual(["loading", "ready"]);
+  });
+
+  it("should set status to error when NativeCommunicator.spawn rejects", async () => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockRejectedValue(new Error("binary not found")),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn(),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+
+    const adapter = new GTPAdapter(nativeConfig);
+    await expect(adapter.load()).rejects.toThrow("binary not found");
+    expect(adapter.status).toBe("error");
   });
 });

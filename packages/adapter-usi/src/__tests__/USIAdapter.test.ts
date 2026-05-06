@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { USIAdapter } from "../USIAdapter.js";
 import { IEngineConfig, IEngineLoader } from "@multi-game-engines/core";
 
+const { NativeCommunicatorMock } = vi.hoisted(() => ({
+  NativeCommunicatorMock: vi.fn(),
+}));
+
+vi.mock("@multi-game-engines/core/node", () => ({
+  NativeCommunicator: NativeCommunicatorMock,
+}));
+
 class MockWorker {
   postMessage = vi.fn((msg: unknown) => {
     if (
@@ -163,5 +171,59 @@ describe("USIAdapter", () => {
     expect(workerInstance!.postMessage).toHaveBeenCalledWith(
       expect.stringContaining("BookFile"),
     );
+  });
+});
+
+describe("USIAdapter — native mode (Node.js + binaryPath)", () => {
+  const nativeConfig = {
+    id: "yaneuraou-native",
+    adapter: "usi",
+    binaryPath: "/mock/yaneuraou",
+  };
+
+  beforeEach(() => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockResolvedValue(undefined),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn().mockResolvedValue("usiok"),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+  });
+
+  afterEach(() => {
+    NativeCommunicatorMock.mockReset();
+  });
+
+  it("should reach ready status without a loader when binaryPath is set", async () => {
+    const adapter = new USIAdapter(nativeConfig);
+    await adapter.load();
+    expect(adapter.status).toBe("ready");
+  });
+
+  it("should emit loading → ready status sequence in native mode", async () => {
+    const adapter = new USIAdapter(nativeConfig);
+    const statuses: string[] = [];
+    adapter.onStatusChange((s) => statuses.push(s));
+    await adapter.load();
+    expect(statuses).toEqual(["loading", "ready"]);
+  });
+
+  it("should set status to error when NativeCommunicator.spawn rejects", async () => {
+    NativeCommunicatorMock.mockImplementation(function () {
+      return {
+        spawn: vi.fn().mockRejectedValue(new Error("binary not found")),
+        postMessage: vi.fn(),
+        onMessage: vi.fn().mockReturnValue(() => {}),
+        expectMessage: vi.fn(),
+        terminate: vi.fn().mockResolvedValue(undefined),
+      };
+    });
+
+    const adapter = new USIAdapter(nativeConfig);
+    await expect(adapter.load()).rejects.toThrow("binary not found");
+    expect(adapter.status).toBe("error");
   });
 });

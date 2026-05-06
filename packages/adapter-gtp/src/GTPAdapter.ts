@@ -2,6 +2,7 @@ import {
   BaseAdapter,
   IEngineLoader,
   WorkerCommunicator,
+  isNodeEnvironment,
   EngineError,
   EngineErrorCode,
   IEngineConfig,
@@ -37,73 +38,104 @@ export class GTPAdapter extends BaseAdapter<
 
   /**
    * エンジンのリソースをロードします。
-   * @param loader - エンジンローダー。
+   *
+   * Node.js 環境で `config.binaryPath` が設定されている場合は
+   * NativeCommunicator を使い、EngineLoader は不要です。
+   *
+   * @param loader - ブラウザ/WASM モードで使用するエンジンローダー。
    * @param signal - 中断用シグナル。
    */
   async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      this.validateSources();
+      if (isNodeEnvironment() && this.config.binaryPath) {
+        // Node.js ネイティブバイナリモード
+        const { NativeCommunicator } = await import(
+          /* webpackIgnore: true */ /* @vite-ignore */ "@multi-game-engines/core/node"
+        );
+        const native = new NativeCommunicator(this.config.binaryPath);
+        await native.spawn();
+        this.communicator = native;
+      } else {
+        // ブラウザ/WASM モード
+        this.validateSources();
 
-      if (!loader) {
-        const i18nKey = createI18nKey("engine.errors.loaderRequired");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-      this.activeLoader = loader;
-
-      const sources = this.config.sources;
-      if (!sources) {
-        const i18nKey = createI18nKey("engine.errors.missingSources");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-
-      const validSources: Record<string, IEngineSourceConfig> = {};
-      for (const [key, value] of Object.entries(sources)) {
-        if (value && typeof value === "object" && "url" in value) {
-          validSources[key] = value as IEngineSourceConfig;
+        if (!loader) {
+          const i18nKey = createI18nKey("engine.errors.loaderRequired");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
         }
+        this.activeLoader = loader;
+
+        const sources = this.config.sources;
+        if (!sources) {
+          const i18nKey = createI18nKey("engine.errors.missingSources");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
+        }
+
+        const validSources: Record<string, IEngineSourceConfig> = {};
+        for (const [key, value] of Object.entries(sources)) {
+          if (value && typeof value === "object" && "url" in value) {
+            validSources[key] = value as IEngineSourceConfig;
+          }
+        }
+
+        const resources = await this.loadWithProgress(
+          loader,
+          validSources,
+          signal,
+        );
+        const mainUrl = resources["main"];
+
+        if (!mainUrl) {
+          const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
+        }
+
+        this.communicator = new WorkerCommunicator(mainUrl);
+
+        this.messageUnsubscriber = this.communicator.onMessage((data) =>
+          this.handleIncomingMessage(data),
+        );
+
+        // 2026 Zenith Tier: リソースインジェクション (Worker モードのみ)
+        await this.injectResources(resources);
+
+        const versionPromise = this.communicator.expectMessage(
+          (line) => String(line).startsWith("="),
+          { timeoutMs: 5000, signal },
+        );
+        void this.communicator.postMessage("version");
+        await versionPromise;
+
+        this.emitStatusChange("ready");
+        return;
       }
 
-      const resources = await this.loadWithProgress(
-        loader,
-        validSources,
-        signal,
-      );
-      const mainUrl = resources["main"];
-
-      if (!mainUrl) {
-        const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-
-      this.communicator = new WorkerCommunicator(mainUrl);
+      // ネイティブモード: メッセージリスナーとハンドシェイク
       this.messageUnsubscriber = this.communicator.onMessage((data) =>
         this.handleIncomingMessage(data),
       );
-
-      // 2026 Zenith Tier: リソースインジェクションとハンドシェイク
-      await this.injectResources(resources);
 
       const versionPromise = this.communicator.expectMessage(
         (line) => String(line).startsWith("="),
         { timeoutMs: 5000, signal },
       );
-      void this.communicator?.postMessage("version");
+      void this.communicator.postMessage("version");
       await versionPromise;
 
       this.emitStatusChange("ready");

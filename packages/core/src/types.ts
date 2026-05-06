@@ -568,6 +568,14 @@ export interface IEngineConfig {
   options?: Record<string, unknown> | undefined;
   /** 必須とされる環境能力 */
   requiredCapabilities?: Partial<ICapabilities> | undefined;
+  /**
+   * Node.js ネイティブバイナリの絶対パス (Multi-Runtime Bridge)。
+   *
+   * Node.js 環境でこの値が設定されている場合、EngineLoader を使わず
+   * NativeCommunicator でバイナリを直接起動します。
+   * ブラウザ環境では無視されます。
+   */
+  binaryPath?: string | undefined;
 }
 
 /**

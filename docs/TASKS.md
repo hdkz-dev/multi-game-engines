@@ -87,8 +87,10 @@
   - [x] `@multi-game-engines/domain-janggi` 新設。
   - [x] `@multi-game-engines/adapter-xiangqi` 実装・ハードニング完了。
   - [x] `@multi-game-engines/adapter-janggi` 実装・ハードニング完了。
-- [ ] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
+- [x] **Multi-Runtime Bridge**: 同一アダプターで WASM と OS Native バイナリを自動切替。
   - [x] `NativeCommunicator` (Node.js/child_process) の基盤実装。
+  - [x] `IEngineConfig.binaryPath` 追加、`isNodeEnvironment()` を core main entry からエクスポート。
+  - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
 - [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
 - [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。

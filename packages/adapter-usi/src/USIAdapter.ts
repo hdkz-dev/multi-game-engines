@@ -2,6 +2,7 @@ import {
   BaseAdapter,
   IEngineLoader,
   WorkerCommunicator,
+  isNodeEnvironment,
   EngineError,
   EngineErrorCode,
   ResourceMap,
@@ -37,69 +38,84 @@ export class USIAdapter extends BaseAdapter<
 
   /**
    * エンジンのリソースをロードします。
-   * @param loader - エンジンローダー。
+   *
+   * Node.js 環境で `config.binaryPath` が設定されている場合は
+   * NativeCommunicator を使い、EngineLoader は不要です。
+   *
+   * @param loader - ブラウザ/WASM モードで使用するエンジンローダー。
    * @param signal - 中断用シグナル。
    */
   async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
-      this.validateSources();
+      if (isNodeEnvironment() && this.config.binaryPath) {
+        // Node.js ネイティブバイナリモード
+        const { NativeCommunicator } = await import(
+          /* webpackIgnore: true */ /* @vite-ignore */ "@multi-game-engines/core/node"
+        );
+        const native = new NativeCommunicator(this.config.binaryPath);
+        await native.spawn();
+        this.communicator = native;
+      } else {
+        // ブラウザ/WASM モード
+        this.validateSources();
 
-      if (!loader) {
-        const i18nKey = createI18nKey("engine.errors.loaderRequired");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-      this.activeLoader = loader;
-
-      const sources = this.config.sources;
-      if (!sources) {
-        const i18nKey = createI18nKey("engine.errors.missingSources");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-
-      const validSources: Record<string, IEngineSourceConfig> = {};
-      for (const [key, value] of Object.entries(sources)) {
-        if (value && typeof value === "object" && "url" in value) {
-          validSources[key] = value as IEngineSourceConfig;
+        if (!loader) {
+          const i18nKey = createI18nKey("engine.errors.loaderRequired");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
         }
-      }
+        this.activeLoader = loader;
 
-      const resources = await this.loadWithProgress(
-        loader,
-        validSources,
-        signal,
-      );
-
-      if (!resources["main"]) {
-        const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
-        throw new EngineError({
-          code: EngineErrorCode.VALIDATION_ERROR,
-          message: translate(i18nKey),
-          engineId: this.id,
-          i18nKey,
-        });
-      }
-
-      this.communicator = new WorkerCommunicator(resources["main"]);
-      const resourceMap: ResourceMap = {};
-      for (const [key, sourceVal] of Object.entries(sources)) {
-        const source = sourceVal as IEngineSourceConfig | undefined;
-        if (source?.mountPath && resources[key]) {
-          resourceMap[source.mountPath] = resources[key]!;
+        const sources = this.config.sources;
+        if (!sources) {
+          const i18nKey = createI18nKey("engine.errors.missingSources");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
         }
+
+        const validSources: Record<string, IEngineSourceConfig> = {};
+        for (const [key, value] of Object.entries(sources)) {
+          if (value && typeof value === "object" && "url" in value) {
+            validSources[key] = value as IEngineSourceConfig;
+          }
+        }
+
+        const resources = await this.loadWithProgress(
+          loader,
+          validSources,
+          signal,
+        );
+
+        if (!resources["main"]) {
+          const i18nKey = createI18nKey("engine.errors.missingMainEntryPoint");
+          throw new EngineError({
+            code: EngineErrorCode.VALIDATION_ERROR,
+            message: translate(i18nKey),
+            engineId: this.id,
+            i18nKey,
+          });
+        }
+
+        this.communicator = new WorkerCommunicator(resources["main"]);
+        const resourceMap: ResourceMap = {};
+        for (const [key, sourceVal] of Object.entries(sources)) {
+          const source = sourceVal as IEngineSourceConfig | undefined;
+          if (source?.mountPath && resources[key]) {
+            resourceMap[source.mountPath] = resources[key]!;
+          }
+        }
+        if (Object.keys(resourceMap).length > 0)
+          await this.injectResources(resourceMap);
       }
-      if (Object.keys(resourceMap).length > 0)
-        await this.injectResources(resourceMap);
 
       this.messageUnsubscriber = this.communicator.onMessage((data) =>
         this.handleIncomingMessage(data),
@@ -109,7 +125,7 @@ export class USIAdapter extends BaseAdapter<
         (line) => line === "usiok",
         { timeoutMs: 10000, signal },
       );
-      void this.communicator?.postMessage("usi");
+      void this.communicator.postMessage("usi");
       await usiOk;
       this.emitStatusChange("ready");
     } catch (e) {
