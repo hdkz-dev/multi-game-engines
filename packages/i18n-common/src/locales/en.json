@@ -62,6 +62,11 @@
       "invalidBackgammonMove": "Invalid Backgammon move format: \"{move}\".",
       "invalidCheckersBoard": "Invalid Checkers board state.",
       "invalidCheckersMove": "Invalid Checkers move: \"{move}\".",
+      "invalidPokerCard": "Invalid Poker card: \"{card}\". Expected format: rank (2-9,T,J,Q,K,A) + suit (h,d,c,s).",
+      "invalidPokerAction": "Invalid Poker action: \"{action}\". Expected: fold, check, call, allin, or raise:<amount>.",
+      "invalidBridgeCard": "Invalid Bridge card: \"{card}\". Expected format: rank (2-9,T,J,Q,K,A) + suit (S,H,D,C).",
+      "invalidBridgeBid": "Invalid Bridge bid: \"{bid}\". Expected: 1-7 + suit (C/D/H/S/NT), Pass, Dbl, or Rdbl.",
+      "invalidBridgePlay": "Invalid Bridge card play: \"{card}\". Expected format: rank (2-9,T,J,Q,K,A) + suit (S,H,D,C).",
       "validationError": "A validation error occurred.",
       "alreadyInitialized": "Engine is already initialized.",
       "disposedDuringSearch": "Engine was disposed during search."

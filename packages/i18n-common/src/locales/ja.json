@@ -62,6 +62,11 @@
       "invalidBackgammonMove": "バックギャモンの着手形式が不正です: \"{move}\"。",
       "invalidCheckersBoard": "不正なチェッカーの盤面状態です。",
       "invalidCheckersMove": "チェッカーの着手が不正です: \"{move}\"。",
+      "invalidPokerCard": "ポーカーのカードが不正です: \"{card}\"。ランク(2-9,T,J,Q,K,A)+スート(h,d,c,s)の形式が必要です。",
+      "invalidPokerAction": "ポーカーのアクションが不正です: \"{action}\"。fold, check, call, allin, または raise:<額> の形式が必要です。",
+      "invalidBridgeCard": "ブリッジのカードが不正です: \"{card}\"。ランク(2-9,T,J,Q,K,A)+スート(S,H,D,C)の形式が必要です。",
+      "invalidBridgeBid": "ブリッジのビッドが不正です: \"{bid}\"。1-7+スート(C/D/H/S/NT)、Pass、Dbl、または Rdbl の形式が必要です。",
+      "invalidBridgePlay": "ブリッジのカードプレイが不正です: \"{card}\"。ランク(2-9,T,J,Q,K,A)+スート(S,H,D,C)の形式が必要です。",
       "validationError": "バリデーションエラーが発生しました。",
       "alreadyInitialized": "エンジンは既に初期化されています。",
       "disposedDuringSearch": "探索中にエンジンが破棄されました。"

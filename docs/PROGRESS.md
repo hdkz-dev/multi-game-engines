@@ -2,6 +2,20 @@
 
 ## 📅 更新日: 2026年5月6日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月6日) — Incomplete Information ゲームアダプター実装
+
+### domain-poker / domain-bridge / adapter-poker / adapter-bridge ✅
+
+- **domain-poker**: `PokerCard`, `PokerAction` ブランド型、`IPokerSearchOptions/Info/Result` インターフェース、`createPokerCard/Action`, `parsePokerAction`, `pokerActionAsMove` ユーティリティ (13テスト全パス)
+- **domain-bridge**: `BridgeCard`, `BridgeBid`, `BridgePlay` ブランド型、`IBridgeSearchOptions/Info/Result` インターフェース、`createBridgeCard/Bid/Play`, `bridgeChoiceAsMove` ユーティリティ (14テスト全パス)
+- **adapter-poker**: `PokerAdapter` + `PokerJSONParser` — JSON プロトコル対応 GTO ソルバーアダプター。ブラウザ (WASM Worker) + ネイティブバイナリ両対応 (9テスト全パス)
+- **adapter-bridge**: `BridgeAdapter` + `BridgeJSONParser` — GIB 互換エンジンアダプター。オークション/プレイ両フェーズ対応 (9テスト全パス)
+- **i18n-common**: エンジンエラー i18n キー 5件追加 (`loaderRequired`, `missingSources`, `missingMainEntryPoint`, `nativeBinaryRequired`, `loadFailed`)
+- **typedoc.json**: 4パッケージをドキュメント生成対象に追加
+- changeset: `incomplete-information-adapters.md` を新規作成 (domain/adapter 各 `minor`, i18n-common `patch`)
+
+---
+
 ## ✅ 直近完了タスク (2026年5月6日) — Multi-Runtime Bridge アダプター統合
 
 ### UCI / USI / GTP アダプターへの Native Path 統合 ✅

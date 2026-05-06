@@ -62,6 +62,11 @@ export type CommonKey =
   | "engine.errors.invalidBackgammonMove"
   | "engine.errors.invalidCheckersBoard"
   | "engine.errors.invalidCheckersMove"
+  | "engine.errors.invalidPokerCard"
+  | "engine.errors.invalidPokerAction"
+  | "engine.errors.invalidBridgeCard"
+  | "engine.errors.invalidBridgeBid"
+  | "engine.errors.invalidBridgePlay"
   | "parsers.generic.invalidOptionValue"
   | "parsers.generic.parseError";
 

@@ -1,0 +1,57 @@
+{
+  "name": "@multi-game-engines/domain-bridge",
+  "version": "0.1.0",
+  "description": "Contract Bridge domain types and validation for multi-game-engines ecosystem",
+  "type": "module",
+  "license": "MIT",
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/domain-bridge"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "bridge",
+    "contract-bridge",
+    "incomplete-information",
+    "engine",
+    "multi-game-engines"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@multi-game-engines/core": "workspace:*",
+    "@multi-game-engines/i18n-common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsup": "^8.5.1",
+    "typescript": "6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
+}

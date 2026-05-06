@@ -93,7 +93,12 @@
   - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
 - [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
-- [ ] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計。
+- [x] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計と実装。
+  - [x] `@multi-game-engines/domain-poker`: ホールカード/コミュニティカード/アクション型 + バリデーター
+  - [x] `@multi-game-engines/domain-bridge`: カード/ビッド/プレイ型 + バリデーター (オークション+プレイ両フェーズ)
+  - [x] `@multi-game-engines/adapter-poker`: JSON-RPC プロトコル, Worker/Native 両モード対応
+  - [x] `@multi-game-engines/adapter-bridge`: JSON プロトコル (GIB ライク), Worker/Native 両モード対応
+  - [x] i18n-common にエラーキー追加 (en/ja)
 
 ---
 
