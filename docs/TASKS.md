@@ -85,7 +85,9 @@
   - [x] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
     - [x] `@changesets/changelog-github` 導入 — PR リンク・Author 情報付き changelog 自動生成
     - [x] `version` スクリプト追加、`release.yml` に `version: pnpm run version` と `fetch-depth: 0` 設定
-  - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
+  - [x] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
+    - [x] `refresh-engine-sris.mjs`: `sri-hashes/*.txt` ローカルファイル読み込み機能追加 — CI ビルドジョブが書き込んだハッシュを自動適用
+    - ⚠️ KataGo ONNX / Mortal.js は GitHub Pages に未デプロイのため `__unsafeNoSRI` 継続 (外部依存)
   - [x] PR #60 の品質ゲート完走と `pnpm audit --prod` 修正完了。
 - [x] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` の実装。
   - [x] `@multi-game-engines/domain-xiangqi` 新設。
