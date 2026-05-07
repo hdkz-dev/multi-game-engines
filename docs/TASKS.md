@@ -100,6 +100,17 @@
   - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
 - [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
+- [x] **Continuous Benchmarking**: vitest bench によるコアホットパスの性能計測と CI 回帰検知。
+  - [x] `packages/core/src/__benchmarks__/ScoreNormalizer.bench.ts` — cp/mate/winrate/reversi/go 全パス + 1000件バルク
+  - [x] `packages/core/src/__benchmarks__/ProtocolValidator.bench.ts` — 文字列/オブジェクト/GTP/バルク
+  - [x] `vitest.config.ts` に bench 設定追加 (`reporters: ["default", "json"]`, `outputFile: bench-results.json`)
+  - [x] `.github/workflows/bench.yml` — push/PR トリガー + アーティファクト保存 + PR コメント自動投稿
+- [x] **Observability (OpenTelemetry)**: テレメトリイベントを OTel スパンにブリッジするアダプター実装。
+  - [x] `OtelBridge` クラス (`packages/core/src/middlewares/OtelBridge.ts`) — `IOtelTracer`/`IOtelSpan` 最小インターフェース定義
+  - [x] `OtelBridge.fromGlobal()` — `@opentelemetry/api` が存在する場合のみ動的インポートで初期化 (optional peer dep)
+  - [x] `OtelBridge.record()` / `OtelBridge.asCallback()` — `ITelemetryEvent` → OTel スパン変換
+  - [x] `peerDependencies` に `@opentelemetry/api >=1.9.0` を optional として追加
+  - [x] 7テスト追加 (247テスト全通過)
 - [x] **Incomplete Information**: `adapter-poker`, `adapter-bridge` の抽象化設計と実装。
   - [x] `@multi-game-engines/domain-poker`: ホールカード/コミュニティカード/アクション型 + バリデーター
   - [x] `@multi-game-engines/domain-bridge`: カード/ビッド/プレイ型 + バリデーター (オークション+プレイ両フェーズ)

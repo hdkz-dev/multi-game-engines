@@ -1,6 +1,31 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月6日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月7日 (実装担当: Zenith Quality Engineer)
+
+## ✅ 直近完了タスク (2026年5月7日) — Continuous Benchmarking & Observability (OTel) 実装
+
+### vitest bench — コアホットパス継続的性能計測 ✅
+
+- **`ScoreNormalizer.bench.ts`**: cp/mate/winrate/reversi/go 各ドメイン × 4段階評価値 + 1000件バルクスループット計測
+  - 実測: `ScoreNormalizer.normalize` (cp, chess) = **7.5M ops/s**、バルク 1000件 = **13.4k ops/s**
+- **`ProtocolValidator.bench.ts`**: 短文字列/長文字列/FEN/オブジェクト/GTP許容/バルク 500件
+  - 実測: `assertNoInjection("e2e4")` = **11.9M ops/s**、オブジェクト再帰 = **535k ops/s**
+- **`vitest.config.ts`**: `bench` セクション追加 (`include: ["src/__benchmarks__/**/*.bench.ts"]`, `outputFile: bench-results.json`)
+- **`package.json`**: `bench: "vitest bench"` スクリプト追加
+- **`.github/workflows/bench.yml`**: push/PR to main トリガー → ベンチマーク実行 → artifact 保存 (90日) → PR にサマリーコメント自動投稿 (upsert)
+
+### OtelBridge — OpenTelemetry ブリッジアダプター ✅
+
+- **`OtelBridge`** クラス (`packages/core/src/middlewares/OtelBridge.ts`):
+  - `IOtelTracer` / `IOtelSpan` 最小インターフェース定義 (`@opentelemetry/api` 非インストール環境でも型安全)
+  - `OtelBridge.fromGlobal()` — `@opentelemetry/api` が存在する場合のみ `Function('return import(...)')()` で動的ロード、存在しない場合は `null` を返す
+  - `OtelBridge.record(event)` — `ITelemetryEvent` を OTel スパンに変換 (performance→`engine.search`, lifecycle→`engine.lifecycle`, search→`engine.info`)
+  - `OtelBridge.asCallback()` — `engine.onTelemetry()` に直接渡せるコールバックを返す
+- **`peerDependencies`**: `@opentelemetry/api: >=1.9.0` を optional として追加
+- **`middlewares/index.ts`**: `OtelBridge` を公開エクスポートに追加
+- **テスト**: 7テスト追加 (247テスト全通過、38ファイル)
+
+---
 
 ## ✅ 直近完了タスク (2026年5月7日) — API リファレンス TypeDoc 警告ゼロ達成
 
