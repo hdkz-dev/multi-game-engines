@@ -153,7 +153,7 @@
   - [x] `src/__ct__/` に CT テストファイル配置（ADR-014 準拠: モックデータのみ, GPL バイナリ不使用）
   - [x] `.github/workflows/e2e.yml` — Chromium CT CI ジョブ追加（push/PR to main）
   - [x] Vitest exclude に `__ct__/**` 追加（ユニットテストとの競合を回避）
-  - [ ] `ui-vue-monitor` への Playwright CT 追加（将来対応）
+  - [x] `ui-vue-monitor` への Playwright CT 追加 — EngineMonitorPanel (8テスト) 追加で 47テスト全通過
 
 ### 🟡 Medium（品質・保守性）
 
