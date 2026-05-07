@@ -82,7 +82,9 @@
     - [x] `ui-react-monitor`: EngineStats (8テスト), StatCard (7テスト), EngineMonitorPanel (8テスト) 追加 → 54テスト全通過
     - [x] `ui-vue-monitor`: EngineStats (8テスト) 追加 → 39テスト全通過
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
-  - [ ] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
+  - [x] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
+    - [x] `@changesets/changelog-github` 導入 — PR リンク・Author 情報付き changelog 自動生成
+    - [x] `version` スクリプト追加、`release.yml` に `version: pnpm run version` と `fetch-depth: 0` 設定
   - [ ] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
   - [x] PR #60 の品質ゲート完走と `pnpm audit --prod` 修正完了。
 - [x] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` の実装。

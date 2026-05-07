@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # full history for changelog-github PR attribution
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -53,6 +55,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
+          # changeset version: bumps packages and writes per-package CHANGELOGs with PR links (changelog-github)
+          version: pnpm run version
           # Runs `pnpm build && changeset publish` — only MIT packages, no GPL binaries (ADR-014)
           publish: pnpm run release
           createGithubReleases: true
