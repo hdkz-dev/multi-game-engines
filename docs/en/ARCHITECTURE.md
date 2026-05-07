@@ -53,6 +53,24 @@ Following 2026 Zenith Tier standards, the system automatically selects the best 
 - **Priority Order**: `simd-mt` > `simd` > `mt` > `st` (Single-thread).
 - **Dynamic Fallback**: Automatically switches to single-threaded versions in environments lacking COOP/COEP headers to prevent crashes.
 
+## Multi-Runtime Hybrid Infrastructure
+
+The library natively supports execution not only in web browsers but also in Node.js, Bun, and Desktop (Electron) environments.
+
+1. **Environment-Adaptive Bridge**: Auto-detects the runtime environment and transparently selects WASM (browser) or a native binary (Node.js / Desktop).
+2. **Unified Interface**: Regardless of the binary form (WASM vs. Native), consumers always use the same `IEngine` interface.
+3. **Maximum Performance**: In native environments, bypasses WASM overhead and selects a binary that fully exploits OS-level CPU features.
+
+`resolveRuntime(config)` is the entry point: it returns a `WorkerCommunicator` in browser contexts and a `NativeCommunicator` in Node.js contexts. Setting `IEngineConfig.binaryPath` enables UCI/USI/GTP adapters to spawn a native child process without any loader — useful for server-side analysis pipelines.
+
+## Universal Flow Control
+
+Consistent control primitives for browser, CLI, and server-side environments.
+
+- **AbortSignal First**: All asynchronous operations (load, search, batch analysis) accept `AbortSignal`. UI navigation and CLI `Ctrl+C` are handled immediately with full resource reclamation.
+- **Environment-Agnostic Progress**: Byte-level `onProgress` callbacks enable progress bars in UI and spinners in CLI with no additional integration code.
+- **Resumable Loading**: When a large NNUE file download fails, the library attempts to resume from the interruption point using HTTP Range with exponential backoff.
+
 ## Huge Asset Management
 
 Dedicated layer for handling >100MB NNUE files and opening books.
@@ -93,8 +111,13 @@ Native support for **UCI**, **USI**, **GTP**, **UCCI** (Xiangqi), **UJCI** (Jang
 1.  **Persistent Listeners**: Event registrations remain valid across search tasks.
 2.  **Clean Disposal**: `bridge.dispose()` completely releases all worker memory and resources.
 3.  **Auto-Revocation**: `EngineLoader` automatically revokes old Blob URLs to prevent memory leaks during reloads.
-4.  **Refuse by Exception**: Strict structural validation prevents command injection by rejecting (throwing on) illegal input rather than just sanitizing it.
-5.  **Privacy-First Logging**: `truncateLog` automatically redacts sensitive position data from error logs (ADR-038).
+4.  **SRI & Integrity**: All external binaries require SRI hash verification. Tampered resources are blocked before execution. W3C multi-hash format is supported.
+5.  **Refuse by Exception**: Strict structural validation prevents command injection by rejecting (throwing on) illegal input rather than just sanitizing it.
+6.  **Privacy-First Logging**: `truncateLog` automatically redacts sensitive position data (FEN/SFEN) from error logs, structurally preventing secondary leakage of personally identifiable data embedded in position strings (ADR-038).
+7.  **Modern Error Handling (Error Cause API)**: Low-level exceptions (network, pipe failures) are wrapped in `EngineError` using the `Error Cause API`, preserving the original cause while providing `remediation` and `i18nKey` fields for user-facing, localised recovery guidance.
+8.  **WASM & Binary Resource Strategy**:
+    - **Blob URL Constraint**: Worker-relative resource fetches (.wasm, .nnue) are prohibited because Blob URL origins are opaque.
+    - **Dependency Injection**: All WASM and NNUE binaries must be loaded via `EngineLoader` and injected as Blob URLs into Worker initialisation parameters. Only URLs injected through `EngineLoader` are permitted load paths.
 
 ## UI & Presentation Layer
 

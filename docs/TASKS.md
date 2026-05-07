@@ -163,7 +163,12 @@
 
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
-- [ ] **英語版ドキュメント不足**: `docs/en/` の拡充 (`DECISION_LOG.md`, `ROADMAP.md` 等)。
+- [x] **英語版ドキュメント拡充**: `docs/en/` を日本語版と同期
+  - [x] ROADMAP.md — Phase 2〜5 + Multi-Runtime Bridge, Incomplete Information, CT テスト数追加
+  - [x] DECISION_LOG.md — ADR-018〜026, 040〜059 全セクション追加 (38 → 40+ エントリ)
+  - [x] ARCHITECTURE.md — Multi-Runtime Hybrid, Universal Flow Control, WASM/SRI Strategy 追加
+  - [x] ZENITH_STANDARD.md — 全6セクション完全書き直し (85 → 140行)
+  - [x] TECHNICAL_SPECS.md — IEngineBridgeOptions, Domain Types, Hardware Acceleration, Telemetry セクション追加
 - [x] **Dashboard E2E デバッグ & 修復**: Dashboard (React/Vue) の E2E テストにおける SRI ミスマッチと初期化タイムアウトの解消。(2026-02-21)
 - [x] **PR #38 Absolute Zenith Audit & 整合性同期**: (2026-02-23)
   - [x] **Reliability**: `EngineLoader` の ID 衝突防止 (セパレータ復帰) と `IndexedDB` ハング防止。

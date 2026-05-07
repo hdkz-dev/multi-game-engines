@@ -12,34 +12,93 @@ Leveraging 2026 Web standards to deliver industry-leading game analysis performa
 - [x] **Zero-Any Policy**: 100% elimination of `any`, domain protection via Branded Types.
 - [x] **Facade Pattern**: Clean separation between user-facing `IEngine` and internal `IEngineAdapter`.
 - [x] **Legal Isolation**: MIT-licensed adapters with dynamic loading of copyleft binaries.
-- [x] **Capability Detection**: Auto-diagnostics for OPFS, WebNN, and WASM SIMD/Threads.
+- [x] **EngineBridge & BaseAdapter Implementation**: Core logic complete.
+- [x] **CapabilityDetector**: Auto-diagnostics for OPFS, WebNN, and WASM SIMD/Threads.
 
 ---
 
-## 🔥 Phase 2: Power & Resilience (Ongoing)
+## 🎨 UI Architecture (2026 Standard)
 
-**Goal**: Maximize performance and stability via hardware acceleration and empirical hardening.
+The UI layer uses a two-tier architecture that minimises framework coupling while maximising performance.
 
-- [x] **Federated i18n Architecture**: Physically isolated language modules with recursive type safety.
-- [x] **Standardized Core (task_0001)**: Score normalization, `positionId` conflict control, and structured PV.
-- [x] **Universal Storage & Flow Control**: CLI/Node.js support (`NodeFSStorage`), `AbortSignal` standardization, and resumable loading.
-- [x] **Binary Variant Selection**: Auto-dispatching optimal binaries based on SIMD/Threads support.
-- [x] **Extreme Robustness**: 98.41% line coverage. Middleware isolation, circular reference protection, and stream buffering.
-- [ ] **Hardware Acceleration**:
+- **Reactive Core (`ui-core`)**: Framework-agnostic business logic. Handles state management, NPS scaling, position analysis, and render optimisation via `requestAnimationFrame`.
+- **Framework Adapters**: `ui-react`, `ui-vue`, and `ui-elements` (Lit). Modularised into base (core), monitoring (monitor), and game UI (game) sub-packages — import only what you need.
+- **Contract-driven UI**: Engine output is validated at runtime with Zod schemas, structurally preventing UI crashes.
+
+---
+
+## 🏁 Phase 2: Early Release Strategy (Stage 1 – UI Foundation) (Completed)
+
+**Goal**: Complete integration of major engines and UI foundations; establish a usable analysis tool base.
+
+- [x] **Chess/Shogi Integration**: Public CDN loader for Stockfish and Yaneuraou.
+- [x] **Security Audit**: "Refuse by Exception" policy established and recursively verified.
+- [x] **Core-UI Bridge**: UI foundation for React / Next.js / Vue.
+- [x] **Thinking Log**: Persistent log storage and performance optimisation.
+- [x] **Board UI**: Framework-agnostic Chess and Shogi board components.
+- [x] **IP Safety**: Project-wide rename to Reversi; trademark risk eliminated.
+
+---
+
+## 🔥 Phase 3: Power & Resilience (Stage 2) (Ongoing)
+
+**Goal**: Surpass browser performance limits with a custom build pipeline and AI-assisted operations.
+
+- [ ] **Build Pipeline**: Automated Emscripten / Rust optimised builds (SIMD128, Multithreading).
+- [x] **Turborepo Integration**: Fast build pipeline with parallel execution and caching.
+- [ ] **Hardware Acceleration (Zenith Standard)**:
   - **WebNN**: NPU/GPU-accelerated NNUE inference (W3C 2026 CR).
-  - **WebGPU Compute**: Offloading MCTS and parallel search to the GPU.
+  - **WebGPU Compute**: Offloading parallel search algorithms to the GPU.
 - [ ] **Swarm (Ensemble) Architecture**:
-  - **Meta-Adapters**: Multi-engine consensus and expertise-based weighting.
-- [x] **Release Automation**: Changesets pipeline with `release.yml` wired to npm publish. Awaiting `NPM_TOKEN` secret registration to go live.
-- [x] **Quality Gate Stabilization**: PR #60 reached green status for `lint`, `typecheck`, `build`, `test`, `CodeQL`, and `CodeRabbit`.
+  - **Ensemble Adapters**: Multi-engine consensus system.
+  - **Expert Mapping**: Dynamic move selection weighted by engine specialisation (opening / endgame).
+- [ ] **Mobile & Hybrid Bridge (Native Power)**:
+  - **Hybrid Bridge**: Transparent WASM / native binary switching per environment (Browser / Node / Desktop).
+  - **Mobile Native Bridge**: Maximum-performance engine execution in mobile OS native environments via Capacitor / Cordova plugins.
+- [x] **Modular Split**: Physical separation of UI packages (core / monitor / game) — "Pay-as-you-go" architecture.
+- [x] **Federated i18n Architecture**: Physically isolated language modules with Zero-Any type safety.
+- [x] **Standardized Core (task_0001)**: Cross-game score normalisation, `positionId` conflict control, structured PV.
+- [x] **Universal Storage & Flow Control**: Node.js / Bun CLI support, `AbortSignal` standardisation, resumable loading.
+- [x] **Binary Variant Selection**: Auto-dispatching optimal WASM binary based on SIMD / Threads capability.
+- [ ] **Custom Distribution**: Binary supply via private CDN (Cloudflare R2 / Workers).
+- [x] **Release Automation**: Changesets pipeline with `release.yml` wired to npm publish. `@changesets/changelog-github` generates PR-attributed changelogs automatically.
+- [x] **Quality Gate Stabilisation**: `lint`, `typecheck`, `build`, `test`, `CodeQL`, and `CodeRabbit` all green.
+- [ ] **Observability**: OpenTelemetry (OTel) integration for runtime performance visibility.
+- [x] **Extended Adapters**:
+  - **Board Games**: Backgammon (gnubg), Checkers (KingsRow), Reversi (Edax).
+  - **Asian Variants**: Chinese Chess / Xiangqi, Korean Chess / Janggi.
+  - **Incomplete Information**: Poker (Texas Hold'em), Contract Bridge.
+- [x] **Multi-Runtime Bridge**: `resolveRuntime()` auto-selects `NativeCommunicator` (Node.js native binary) or `WorkerCommunicator` (browser Web Worker) transparently.
+- [ ] **Multi-Engine Ensemble**: UI / Logic for simultaneous multi-engine analysis of the same position.
 
 ---
 
-## 💎 Phase 3: The Zenith Tier
+## 📱 Phase 4: Platform Expansion (Stage 3)
+
+**Goal**: Native-level performance on mobile and desktop.
+
+- [ ] **Hybrid Bridge**: Native plugin adapters for React Native / Capacitor.
+- [ ] **Native Build**: Integration of Android NDK / iOS C++ native binaries.
+
+---
+
+## 💎 Phase 5: The Zenith Tier
 
 **Goal**: 100% autonomous quality maintenance and world-class reliability.
 
-- [x] **Empirical Hardening**: Verified resilience against network failures and packet splitting.
-- [x] **A11y Audit**: WCAG 2.2 Level AA compliance for all board components.
-- [x] **Self-Healing Docs**: TypeDoc API reference auto-generated from all 47 packages. Deploys to GitHub Pages on every push to main via `docs.yml`.
-- [ ] **Continuous Benchmarking**: NPS regression tracking on every PR.
+- [x] **Turborepo & CI Optimisation**: 100% reproducible fast execution on CI.
+- [x] **Zenith Tier Audit**: Thorough A11y / logic audit across all packages.
+- [x] **Extreme Robustness**: 98.41% line coverage. Middleware isolation, circular reference protection, and stream buffering.
+- [x] **API Reference**: TypeDoc auto-generated from all 51 packages; deploys to GitHub Pages on every push to `main`. Zero warnings achieved.
+- [x] **Browser Matrix Verification**: WASM behaviour verified in real browsers via Playwright CT (React 54 tests / Vue 47 tests).
+- [x] **Contract-driven Safety**: Zod runtime validation at Worker communication boundaries.
+- [x] **Zero-Any Policy**: Complete elimination of `any` in production code.
+- [ ] **Continuous Benchmarking**: Per-PR NPS regression detection (e.g. CodSpeed).
+
+---
+
+## 🔮 Future Vision
+
+- **WebNN Acceleration**: Next-generation NNUE engines with hardware acceleration.
+- **P2P Engine Sharing**: Opening book generation network via distributed computing.
+- **Multi-Agent Analysis**: Simultaneous analysis and ensemble inference across multiple engines.

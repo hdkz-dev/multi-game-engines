@@ -361,6 +361,7 @@
 - ✅ **Playwright E2E 拡充**: 両 monitor パッケージで CT テスト拡充完了 — React 54テスト / Vue 47テスト (合計 101)
 - ✅ **Release Automation**: `@changesets/changelog-github` 導入で per-package CHANGELOG に PR リンク・Author 情報を自動付与。`version` スクリプト追加、`release.yml` に `fetch-depth: 0` 設定
 - ✅ **Security & SRI Integration**: `refresh-engine-sris.mjs` に `sri-hashes/*.txt` 読み込み機能追加 — CI ビルド後の SRI ハッシュをローカルファイル経由で自動適用できるよう完全自動化
+- ✅ **英語版ドキュメント拡充**: `docs/en/` 全 5 ファイルを日本語版と同期 — ROADMAP / DECISION_LOG / ARCHITECTURE / ZENITH_STANDARD / TECHNICAL_SPECS に Multi-Runtime Bridge・Incomplete Info・Hardware Acceleration・CT テスト数等を追記
 - ✅ **Multi-Runtime Bridge**: `resolveRuntime()` + `ICommunicator` — WASM と OS Native バイナリを自動切替 (`core@0.2.0`)
 - [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md` 等) の整備
 - [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討

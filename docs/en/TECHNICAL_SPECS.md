@@ -13,8 +13,6 @@ The `core` package provides abstract definitions independent of specific games.
 
 ### 1-2. Search Info (IBaseSearchInfo)
 
-Recent CI cleanup kept the TSDoc/doc-sync gate stable across the adapter and UI packages by removing stale import warnings and standardizing block tags.
-
 Highly standardized structure for engine candidate data.
 
 - **`positionId`**: Unique identifier for the board position, used for stale message filtering.
@@ -41,6 +39,25 @@ Highly standardized structure for engine candidate data.
 - **`NodeFSStorage`**: Node.js/Bun local file system.
 - **`MemoryStorage`**: Ephemeral in-memory storage.
 - **Custom Injection**: Users can inject custom `IFileStorage` via `IEngineBridgeOptions`.
+
+### 1-5. Bridge Configuration (IEngineBridgeOptions)
+
+- **`storage?: IFileStorage`**: Override auto-detected storage with a custom implementation.
+- **`capabilities?: Partial<ICapabilities>`**: Force or disable specific environment capabilities.
+
+### 1-6. Domain-Specific Types (Domain Types)
+
+Game-specific types (`FEN`, `SFEN`, `GOMove`, etc.) are provided by their respective domain packages (`@multi-game-engines/domain-*`) to avoid circular dependencies and ensure consistency across UI and adapter layers.
+
+- **`Move<T>` (Hierarchical Branding)**: Base move type defined in `core`. Each domain extends it as `Move<"ShogiMove">`, preventing cross-domain confusion at the compiler level while retaining base `Move` compatibility.
+- **FEN / SFEN**: Position notation strings (Branded). Inherits from `PositionString<T>` with strict validation of character set, field count, side-to-move, etc.
+- **`create*Move` / `create*Board`**: Domain packages provide validator-factory functions that eliminate unsafe `as` casts and throw `EngineError` immediately for invalid input (Refuse by Exception).
+
+### 1-3. Loading Strategy
+
+- `manual`: Resources are not fetched until `load()` is explicitly called.
+- `on-demand` _(default)_: If `search()` is called before loading, the load starts automatically and is awaited.
+- `eager`: Load starts immediately on engine instance creation (`getEngine`).
 
 ## 2. Engine Facade (IEngine)
 
@@ -80,8 +97,6 @@ Manages huge book assets independently.
 
 ### 4-2. Protocol Validation (Structural Defense)
 
-The current implementation follows a strict refuse-by-exception policy and passes the latest CI runs after TSDoc cleanup in UCI/USI/GTP-related parsers.
-
 Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 
 - **Target**: `createSearchCommand` (positions), `createOptionCommand` (names/values).
@@ -95,21 +110,49 @@ Parsers call `ProtocolValidator.assertNoInjection` before command generation.
 - **Interface Consistency**: `WebWorkerAdapter` and `NativeCommunicator` share the same `IEngineAdapter` interface.
 - **Stream Buffering**: `NativeCommunicator` implements internal buffering to reassemble messages split across OS pipe packets (e.g., extremely long PV strings).
 
-## 5. UI & Presentation Layer
+## 5. Hardware Acceleration & AI Inference (Zenith Tier)
 
-### 5-1. Reactive Engine Store (`ui-core`)
+### 5-1. WebNN (Neural Network API)
+
+- **Target**: Hardware-accelerated NNUE inference using NPU / GPU (W3C 2026 CR).
+- **Diagnostic**: `HardwareAccelerator.diagnose()` reports available backends (`cpu`, `gpu`, `npu`) and their performance tiers.
+- **Fallback**: Automatically falls back to WASM if WebNN is unavailable.
+
+### 5-2. WebGPU Compute
+
+- **Target**: Offload MCTS and parallel search algorithms to the GPU.
+- **Implementation**: `WorkletAdapter` binds a WASM module to a `GPUDevice`; compute shaders execute parallel position evaluation.
+
+### 5-3. Zenith Loader (Large-Scale Asset Delivery)
+
+- **Segmented Download**: Splits >100MB files into 10MB chunks with HTTP Range requests.
+- **Incremental SRI**: `SegmentedVerifier` validates each chunk's SHA-384 hash before assembly, enabling early corruption detection without waiting for the full download.
+- **Resume on Failure**: Any interrupted chunk resumes from its last byte on retry.
+
+## 6. Telemetry & Observability
+
+The `DefaultTelemetryMiddleware` collects structured performance data without coupling business logic to monitoring.
+
+- **`onInfo` sampling**: Records per-move NPS and depth distributions.
+- **`onProgress` tracking**: Captures load latency and byte-level throughput.
+- **Memory sampling**: Periodic `performance.measureUserAgentSpecificMemory()` snapshots (where available).
+- **Export**: Telemetry events flow to `emitTelemetry()` on the engine facade; consumers can forward to OpenTelemetry collectors or custom dashboards.
+
+## 7. UI & Presentation Layer
+
+### 7-1. Reactive Engine Store (`ui-core`)
 
 - **Throttling**: Synchronizes with `requestAnimationFrame` (60/120fps) to prevent UI thread saturation from high-frequency engine data.
 - **Deterministic Snapshots**: Full compatibility with React `useSyncExternalStore` to prevent rendering "tearing".
 - **Zod Validation**: Validates all incoming engine messages at the UI boundary.
 
-### 5-2. Federated i18n Architecture
+### 7-2. Federated i18n Architecture
 
 - **Physical Isolation**: `i18n-chess`, `i18n-shogi`, etc., are separate packages.
 - **Zero-Any Safety**: Recursive `DeepRecord` types ensure 100% type safety when accessing nested translation keys.
 - **Pay-as-you-go**: Minimum bundle size by only including required language modules.
 
-### 5-3. Web Accessibility (A11y) Standards
+### 7-3. Web Accessibility (A11y) Standards
 
 All UI components must strictly adhere to the following accessibility standards:
 
@@ -129,17 +172,17 @@ All UI components must strictly adhere to the following accessibility standards:
   - Supports 400% zoom without horizontal scrolling (Reflow).
 - **Automated Validation**: Mandatory `axe-core` scanning in CI/CD via Playwright.
 
-## 6. Testing Philosophy
+## 8. Testing Philosophy
 
 - **Empirical 98% Coverage**: Targets 98.41%+ line coverage in `core`, physically demonstrating resilience against network failures, storage locks, and timeout conditions using mocks.
 - **Deterministic Telemetry**: Mocks `performance.now()` for environment-independent verification.
 - **Zero-Any Policy**: 100% elimination of `any` in production and test code.
 
-## 7. AI Agent Skills (Modular Capabilities)
+## 9. AI Agent Skills (Modular Capabilities)
 
 Standardized framework for extending AI agent capabilities across the monorepo.
 
-### 7-1. Skill Structure (SKILL.md)
+### 9-1. Skill Structure (SKILL.md)
 
 Each skill is a self-contained directory in `skills/` containing:
 
@@ -147,7 +190,7 @@ Each skill is a self-contained directory in `skills/` containing:
 - **`README.md`** (Optional): User-facing documentation.
 - **`tools/`** (Optional): Scripts or local MCP tools associated with the skill.
 
-### 7-2. Core Skills
+### 9-2. Core Skills
 
 - **`zenith-audit`**: Automated Grep-based auditing for Zero-Any and Branded Type compliance.
 - **`doc-sync`**: Maintenance of Japanese/English documentation parity.
