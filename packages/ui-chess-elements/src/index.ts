@@ -21,6 +21,7 @@ interface ChessBoardStrings {
  * チェス盤を表示するカスタム要素。
  */
 export class ChessBoard extends LitElement {
+  /** @internal */
   static override styles = css`
     :host {
       display: block;

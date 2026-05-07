@@ -28,6 +28,7 @@ import "./search-log.js";
  */
 @customElement("engine-monitor")
 export class EngineMonitorElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: flex;
@@ -461,5 +462,3 @@ export class EngineMonitorElement extends LitElement {
     `;
   }
 }
-
-

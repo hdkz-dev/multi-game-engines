@@ -12,6 +12,7 @@ import type {
 } from "@multi-game-engines/domain-mahjong";
 
 export { MortalAdapter };
+export { MahjongJSONParser } from "./MahjongJSONParser.js";
 
 /**
  * Mortal エンジンのインスタンスを生成します。

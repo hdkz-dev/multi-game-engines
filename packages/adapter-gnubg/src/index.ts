@@ -12,6 +12,7 @@ import type {
 } from "@multi-game-engines/domain-backgammon";
 
 export { GNUBGAdapter };
+export { GNUBGParser } from "./GNUBGParser.js";
 
 /**
  * GNU Backgammon エンジンのインスタンスを生成します。

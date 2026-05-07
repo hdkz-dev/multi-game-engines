@@ -34,8 +34,8 @@ export abstract class BaseAdapter<
   /**
    * The active communicator instance.
    *
-   * Typed as {@link ICommunicator} (not the concrete `WorkerCommunicator`) so
-   * that subclasses can inject a {@link NativeCommunicator} for the
+   * Typed as `ICommunicator` (not the concrete `WorkerCommunicator`) so
+   * that subclasses can inject a `NativeCommunicator` for the
    * Multi-Runtime Bridge without needing to change any base-class logic.
    */
   protected communicator: ICommunicator | null = null;

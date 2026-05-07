@@ -9,7 +9,9 @@ import type {
 
 export { KataGoONNXAdapter };
 export { KataGoBoard } from "./KataGoBoard.js";
+export type { Color } from "./KataGoBoard.js";
 export { encodePosition, decodePolicy } from "./KataGoEncoder.js";
+export type { KataGoTensors } from "./KataGoEncoder.js";
 
 /**
  * @deprecated Use KataGoONNXAdapter — kept for backward compat.

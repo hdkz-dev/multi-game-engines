@@ -12,6 +12,7 @@ import type {
 } from "@multi-game-engines/domain-reversi";
 
 export { EdaxAdapter };
+export { EdaxParser } from "./EdaxParser.js";
 
 /**
  * Edax エンジンのインスタンスを生成します。

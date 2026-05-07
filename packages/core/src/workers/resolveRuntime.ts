@@ -43,7 +43,7 @@ export function isNodeEnvironment(): boolean {
 }
 
 /**
- * Select and instantiate the appropriate {@link ICommunicator} for the
+ * Select and instantiate the appropriate `ICommunicator` for the
  * current runtime.
  *
  * | Environment | Config requirement       | Communicator selected     |

@@ -8,7 +8,7 @@ import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import { cn } from "../utils/cn.js";
 
-interface SearchLogProps {
+export interface SearchLogProps {
   log: SearchLogEntry[];
   onMoveClick?: ((move: string) => void) | undefined;
   className?: string | undefined;

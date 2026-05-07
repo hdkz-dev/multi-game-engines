@@ -9,7 +9,7 @@ import { Gauge, Cpu, Layers, Timer } from "lucide-react";
 import { cn } from "../utils/cn.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 
-interface EngineStatsProps {
+export interface EngineStatsProps {
   stats: SearchStatistics;
   className?: string;
   strings?: EngineUIStrings;

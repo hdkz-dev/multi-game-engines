@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { EvaluationPresenter,
-  IEvaluationHistoryEntry, } from "@multi-game-engines/ui-core";
+import {
+  EvaluationPresenter,
+  IEvaluationHistoryEntry,
+} from "@multi-game-engines/ui-core";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 
-interface EvaluationGraphProps {
+export interface EvaluationGraphProps {
   entries: IEvaluationHistoryEntry[];
   width?: number | string;
   height?: number;

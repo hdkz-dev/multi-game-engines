@@ -12,6 +12,7 @@ export {
   EngineFacade,
   EngineBatchAnalyzer,
 } from "./bridge/index.js";
+export type { AdapterFactory } from "./bridge/index.js";
 
 // アダプター開発者向け基盤
 export { BaseAdapter } from "./adapters/index.js";

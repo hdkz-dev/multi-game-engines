@@ -11,6 +11,7 @@ import "./score-badge.js";
 
 @customElement("search-log")
 export class SearchLogElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: block;
@@ -307,5 +308,3 @@ export class SearchLogElement extends LitElement {
     `;
   }
 }
-
-

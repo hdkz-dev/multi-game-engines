@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { cn } from "../utils/cn.js";
 
-interface EngineMonitorPanelProps<
+export interface EngineMonitorPanelProps<
   T_OPTIONS extends IBaseSearchOptions,
   T_INFO extends IBaseSearchInfo,
   T_RESULT extends IBaseSearchResult,

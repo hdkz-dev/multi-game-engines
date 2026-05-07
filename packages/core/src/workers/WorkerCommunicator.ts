@@ -5,8 +5,8 @@ import type { ICommunicator } from "./ICommunicator.js";
 /**
  * 2026 Zenith Tier: Worker との物理的な通信を管理。
  *
- * Implements {@link ICommunicator} so it can be used interchangeably with
- * {@link NativeCommunicator} in adapters that support the Multi-Runtime Bridge.
+ * Implements `ICommunicator` so it can be used interchangeably with
+ * `NativeCommunicator` in adapters that support the Multi-Runtime Bridge.
  */
 export class WorkerCommunicator implements ICommunicator {
   private worker: Worker;

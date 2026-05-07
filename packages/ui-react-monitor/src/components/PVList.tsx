@@ -4,7 +4,7 @@ import { ScoreBadge } from "./ScoreBadge.js";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 import { cn } from "../utils/cn.js";
 
-interface PVListProps {
+export interface PVListProps {
   pvs: PrincipalVariation[];
   onMoveClick?:
     | ((move: string, index: number, pv: PrincipalVariation) => void)

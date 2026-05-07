@@ -33,6 +33,7 @@ function isGotePiece(piece: string): boolean {
  * 将棋盤を表示するカスタム要素。
  */
 export class ShogiBoard extends LitElement {
+  /** @internal */
   static override styles = css`
     :host {
       display: block;

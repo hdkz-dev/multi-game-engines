@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "../utils/cn.js";
 
-interface StatCardProps {
+export interface StatCardProps {
   icon: React.ReactNode;
   label: string;
   value: string;

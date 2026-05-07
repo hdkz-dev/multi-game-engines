@@ -9,6 +9,7 @@ import "./score-badge.js";
 
 @customElement("pv-list")
 export class PVListElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: flex;
@@ -119,5 +120,3 @@ export class PVListElement extends LitElement {
     `;
   }
 }
-
-

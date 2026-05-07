@@ -12,6 +12,7 @@ import { commonLocales } from "@multi-game-engines/i18n-common";
  */
 @customElement("score-badge")
 export class ScoreBadgeElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: inline-flex;
@@ -94,5 +95,3 @@ export class ScoreBadgeElement extends LitElement {
     `;
   }
 }
-
-

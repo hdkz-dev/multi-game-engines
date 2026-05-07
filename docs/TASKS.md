@@ -66,8 +66,9 @@
 - [x] **Segmented SRI (Zenith Loader)**: 100MB 超の巨大ファイルの分割ダウンロードとインクリメンタルハッシュ検証。
   - [x] `SegmentedVerifier` による分割ハッシュ検証ロジックの実装。
   - [x] `EngineLoader` への統合（全量取得後の分割検証）。
-- [ ] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
+- [x] **API リファレンス**: TypeDoc と TSDoc による、全パッケージの技術ドキュメント自動生成。
   - [x] 主要な TSDoc 警告の解消と、CI の doc-sync / lint 収束。
+  - [x] 全パッケージ対象に TypeDoc を実行し、警告ゼロを達成 (0 errors / 0 warnings)。
 - [x] **Generic Adapters**: `adapter-uci`, `adapter-usi`, `adapter-gtp` パッケージの作成。
 - [x] **Extended Adapters (Prototypes)**: `adapter-edax`, `adapter-mortal`, `adapter-gnubg`, `adapter-kingsrow` のプロトタイプ実装。
 - [x] **Ensemble Adapter (Swarm)**: `@multi-game-engines/adapter-ensemble` の高度化。

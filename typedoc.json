@@ -65,6 +65,8 @@
   },
   "packageOptions": {
     "includeVersion": true,
+    "excludeInternal": true,
+    "excludePrivate": true,
     "exclude": [
       "**/__tests__/**",
       "**/*.test.ts",
@@ -95,10 +97,31 @@
     "**/.storybook/**"
   ],
   "externalPattern": ["**/node_modules/**"],
+  "externalSymbolLinkMappings": {
+    "@lit/reactive-element": {
+      "PropertyDeclaration": "#"
+    },
+    "lit": {
+      "css": "#"
+    },
+    "@multi-game-engines/core": {
+      "ICommunicator": "#"
+    }
+  },
   "validation": {
     "notExported": false,
     "invalidLink": true,
     "notDocumented": false
   },
+  "highlightLanguages": [
+    "bash",
+    "css",
+    "html",
+    "javascript",
+    "json",
+    "typescript",
+    "tsx",
+    "vue"
+  ],
   "skipErrorChecking": true
 }

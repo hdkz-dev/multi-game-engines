@@ -10,6 +10,7 @@ import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("engine-stats")
 export class EngineStatsElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: grid;
@@ -83,5 +84,3 @@ export class EngineStatsElement extends LitElement {
     `;
   }
 }
-
-

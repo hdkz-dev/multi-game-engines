@@ -2,6 +2,21 @@
 
 ## 📅 更新日: 2026年5月6日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月7日) — API リファレンス TypeDoc 警告ゼロ達成
+
+### TypeDoc 全パッケージドキュメント生成 ✅
+
+- **Props 型エクスポート**: `ui-react-monitor` の 7 コンポーネント Props インターフェースを `export interface` に変更、`export *` でパブリック API に昇格
+- **パーサークラスエクスポート**: `adapter-edax/EdaxParser`, `adapter-gnubg/GNUBGParser`, `adapter-mortal/MahjongJSONParser` を公開
+- **KataGo 型エクスポート**: `KataGoTensors`, `Color` 型を `adapter-katago` から公開
+- **AdapterFactory エクスポート**: `core` の bridge/index.ts → index.ts へ連鎖エクスポート追加
+- **TSDoc リンク修正**: `BaseAdapter`, `WorkerCommunicator`, `NativeCommunicator`, `resolveRuntime` の `{@link}` をプレーンテキストに変更し「Failed to resolve」エラーを解消
+- **Lit `styles` 除外**: 全 Lit コンポーネントの `static styles` に `/** @internal */` を付与し TypeDoc の CSS タグリンク警告を除去
+- **typedoc.json 改善**: `externalSymbolLinkMappings` 追加 (`@lit/reactive-element/PropertyDeclaration`, `lit/css`, `@multi-game-engines/core/ICommunicator`), `highlightLanguages` に `tsx`/`vue` 追加, `packageOptions.excludeInternal: true` 追加
+- **結果**: `npx typedoc --treatWarningsAsErrors` で **0 errors / 0 warnings** 達成、`docs/api/` 生成完了
+
+---
+
 ## ✅ 直近完了タスク (2026年5月6日) — Incomplete Information ゲームアダプター実装
 
 ### domain-poker / domain-bridge / adapter-poker / adapter-bridge ✅

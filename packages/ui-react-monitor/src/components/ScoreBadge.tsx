@@ -5,7 +5,7 @@ import {
 } from "@multi-game-engines/ui-core";
 import { useEngineUI } from "@multi-game-engines/ui-react-core";
 
-interface ScoreBadgeProps {
+export interface ScoreBadgeProps {
   score: EvaluationScore;
   /** 表示を反転させるか（後手視点など） */
   inverted?: boolean;

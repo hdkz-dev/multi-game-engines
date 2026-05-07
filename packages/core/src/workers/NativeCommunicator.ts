@@ -7,13 +7,13 @@ import type { ICommunicator } from "./ICommunicator.js";
  * 2026 Zenith Tier: OS ネイティブバイナリと通信するためのコミュニケーター。
  * Node.js/Bun 環境でのみ動作し、child_process を使用します。
  *
- * Implements {@link ICommunicator} so it can be used interchangeably with
- * {@link WorkerCommunicator} in adapters that support the Multi-Runtime Bridge.
+ * Implements `ICommunicator` so it can be used interchangeably with
+ * `WorkerCommunicator` in adapters that support the Multi-Runtime Bridge.
  *
- * Note: {@link postMessage} converts the value to a string before writing to
+ * Note: `postMessage` converts the value to a string before writing to
  * stdin, so callers should pass string commands for cross-runtime compatibility.
  *
- * `node:child_process` is imported dynamically inside {@link spawn} so that
+ * `node:child_process` is imported dynamically inside `spawn` so that
  * browser bundlers (Webpack, Turbopack, Vite) do not encounter a static
  * reference to a Node.js built-in and can safely tree-shake this class away.
  */

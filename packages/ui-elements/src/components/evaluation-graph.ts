@@ -9,6 +9,7 @@ import { commonLocales } from "@multi-game-engines/i18n-common";
 
 @customElement("evaluation-graph")
 export class EvaluationGraphElement extends LitElement {
+  /** @internal */
   static styles = css`
     :host {
       display: block;
@@ -86,5 +87,3 @@ export class EvaluationGraphElement extends LitElement {
     `;
   }
 }
-
-
