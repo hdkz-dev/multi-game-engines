@@ -2,6 +2,28 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月8日) — Zenith Loader 実装完了 & push
+
+### ChunkedDownloader (Zenith Loader) ✅
+
+| 項目                 | 内容                                                                          |
+| -------------------- | ----------------------------------------------------------------------------- |
+| 新規ファイル         | `packages/core/src/storage/ChunkedDownloader.ts`                              |
+| テストファイル       | `packages/core/src/storage/__tests__/ChunkedDownloader.test.ts` (11件 全通過) |
+| 閾値                 | `config.size >= 32 MiB` 時に EngineLoader から自動委譲                        |
+| チャンクサイズ       | デフォルト 4 MiB (`ChunkedDownloader.DEFAULT_CHUNK_SIZE`)                     |
+| SRI 検証             | sha256/384/512 全体 + セグメント単位 (`ISegmentedSRI`)                        |
+| ストレージキャッシュ | OPFS / IndexedDB / NodeFS 統合 (`IFileStorage`)                               |
+| 進捗レポート         | `ProgressCallback` (connecting/downloading/completed)                         |
+| 中断サポート         | `AbortSignal` (5分タイムアウト デフォルト)                                    |
+| フォールバック       | Range 非対応サーバーは単一 `fetch` にフォールバック                           |
+| 既存テストへの影響   | `config.size` 未指定リソースは従来パス維持 → 258テスト全通過                  |
+| changeset            | `.changeset/zenith-loader.md` (core: minor)                                   |
+
+**コミット**: `665899e8 feat(core): add ChunkedDownloader for HTTP Range-based large file download (Zenith Loader)`
+
+---
+
 ## ✅ 直近完了タスク (2026年5月8日) — git push & CI 全通過 / Release PR 生成
 
 ### push & CI 結果

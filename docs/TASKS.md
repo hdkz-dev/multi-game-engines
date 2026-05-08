@@ -100,7 +100,14 @@
   - [x] `IEngineConfig.binaryPath` 追加、`isNodeEnvironment()` を core main entry からエクスポート。
   - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
 - [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
-- [ ] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
+- [x] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
+  - [x] `ChunkedDownloader` — HTTP Range リクエストで 4 MiB チャンク分割ダウンロード (≥ 32 MiB 閾値)
+  - [x] Range 非対応サーバーへの単一 `fetch` フォールバック
+  - [x] SHA-256/384/512 全体 SRI 検証 + `ISegmentedSRI` セグメント単位検証
+  - [x] `IFileStorage` (OPFS/IndexedDB/NodeFS) キャッシュ統合
+  - [x] `ProgressCallback` 進捗レポート + `AbortSignal` 中断サポート
+  - [x] `EngineLoader.loadResource` から `config.size >= 32 MiB` 時に自動委譲
+  - [x] ユニットテスト 11件 全通過 (`ChunkedDownloader.test.ts`)
 - [x] **Continuous Benchmarking**: vitest bench によるコアホットパスの性能計測と CI 回帰検知。
   - [x] `packages/core/src/__benchmarks__/ScoreNormalizer.bench.ts` — cp/mate/winrate/reversi/go 全パス + 1000件バルク
   - [x] `packages/core/src/__benchmarks__/ProtocolValidator.bench.ts` — 文字列/オブジェクト/GTP/バルク
