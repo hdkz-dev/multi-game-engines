@@ -55,6 +55,12 @@ export {
   MemoryStorage,
   OPFSStorage,
   IndexedDBStorage,
+  ChunkedDownloader,
+  ChunkedDownloadError,
+} from "./storage/index.js";
+export type {
+  ChunkedDownloadOptions,
+  ChunkedDownloadResult,
 } from "./storage/index.js";
 
 // 標準ミドルウェア

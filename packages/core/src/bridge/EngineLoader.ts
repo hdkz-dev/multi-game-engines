@@ -3,26 +3,43 @@ import {
   IEngineSourceConfig,
   EngineErrorCode,
   IFileStorage,
+  ProgressCallback,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
 import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 import { createI18nKey } from "../protocol/ProtocolValidator.js";
+import { ChunkedDownloader } from "../storage/ChunkedDownloader.js";
+
+/** チャンクダウンロードを使用するファイルサイズの閾値 (32 MiB) */
+const CHUNKED_DOWNLOAD_THRESHOLD = 32 * 1024 * 1024;
 
 /**
  * 2026 Zenith Tier: エンジンリソース（WASM, JS, Assets）の物理的ロードと SRI 検証を管理。
+ *
+ * - 32 MiB 以上のリソースは {@link ChunkedDownloader} による HTTP Range リクエストを使用します。
+ * - `options.onProgress` で進捗コールバックを受け取れます。
+ * - `options.signal` で AbortSignal による中断をサポートします。
  */
 export class EngineLoader implements IEngineLoader {
   private activeBlobs = new Map<string, string>();
   private inflight = new Map<string, Promise<string>>();
+  private readonly chunkedDownloader: ChunkedDownloader;
 
-  constructor(private readonly storage?: IFileStorage) {}
+  constructor(private readonly storage?: IFileStorage) {
+    this.chunkedDownloader = new ChunkedDownloader();
+  }
 
   /**
    * 単一のリソースをロードします。
+   *
+   * `options.signal` で AbortSignal による中断をサポートします。
+   * `options.onProgress` で進捗コールバックを受け取れます。
+   * 32 MiB 以上のリソースは HTTP Range チャンクダウンロードを使用します。
    */
   async loadResource(
     engineId: string,
     config: IEngineSourceConfig,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<string> {
     this.validateResourceUrl(config, engineId);
 
@@ -42,6 +59,13 @@ export class EngineLoader implements IEngineLoader {
         if (this.storage) {
           const cached = await this.storage.get(cacheKey);
           if (cached) {
+            options?.onProgress?.({
+              status: "completed",
+              loadedBytes: cached.byteLength,
+              totalBytes: cached.byteLength,
+              percentage: 100,
+              resource: config.url,
+            });
             const url = URL.createObjectURL(
               new Blob([cached], {
                 type: this.getMimeType(config.type || "worker-js"),
@@ -52,26 +76,53 @@ export class EngineLoader implements IEngineLoader {
           }
         }
 
-        const fetchOptions = SecurityAdvisor.getSafeFetchOptions(config.sri);
+        // config.size が明示されており 32 MiB 超の場合は ChunkedDownloader を使用
+        const useChunked =
+          config.sri !== undefined &&
+          config.size !== undefined &&
+          config.size >= CHUNKED_DOWNLOAD_THRESHOLD;
 
-        // Protocol safety (HTTPS enforcement) is handled inside SecurityAdvisor.safeFetch().
-        const response = await SecurityAdvisor.safeFetch(config.url, {
-          ...fetchOptions,
-          signal: AbortSignal.timeout(30000),
-        });
+        let buffer: ArrayBuffer;
 
-        if (!response.ok) {
-          this.inflight.delete(cacheKey);
-          throw new EngineError({
-            code: EngineErrorCode.NETWORK_ERROR,
-            message: `Failed to download engine resource: ${config.url} (${response.status})`,
-            engineId,
+        if (useChunked && config.sri) {
+          const result = await this.chunkedDownloader.download(config.url, {
+            sri: config.sri,
+            segmentedSri: config.segmentedSri,
+            onProgress: options?.onProgress,
+            signal: options?.signal ?? AbortSignal.timeout(300_000),
+            storage: this.storage,
           });
-        }
+          buffer = result.buffer;
+        } else {
+          const fetchOptions = SecurityAdvisor.getSafeFetchOptions(
+            "sri" in config ? config.sri : undefined,
+          );
+          const response = await SecurityAdvisor.safeFetch(config.url, {
+            ...fetchOptions,
+            signal: options?.signal ?? AbortSignal.timeout(30_000),
+          });
 
-        const buffer = await response.arrayBuffer();
-        if (this.storage) {
-          void this.storage.set(cacheKey, buffer);
+          if (!response.ok) {
+            this.inflight.delete(cacheKey);
+            throw new EngineError({
+              code: EngineErrorCode.NETWORK_ERROR,
+              message: `Failed to download engine resource: ${config.url} (${response.status})`,
+              engineId,
+            });
+          }
+
+          buffer = await response.arrayBuffer();
+          if (this.storage) {
+            void this.storage.set(cacheKey, buffer);
+          }
+
+          options?.onProgress?.({
+            status: "completed",
+            loadedBytes: buffer.byteLength,
+            totalBytes: buffer.byteLength,
+            percentage: 100,
+            resource: config.url,
+          });
         }
 
         const url = URL.createObjectURL(
@@ -88,7 +139,6 @@ export class EngineLoader implements IEngineLoader {
           code: EngineErrorCode.NETWORK_ERROR,
           message: `Failed to fetch engine resource: ${config.url}`,
           engineId,
-          // originalError は IEngineError に定義されていないため message に含めるかキャスト
         });
       } finally {
         this.inflight.delete(cacheKey);
@@ -104,18 +154,21 @@ export class EngineLoader implements IEngineLoader {
   }
 
   /**
-   * 複数のリソースをロードします。
+   * 複数のリソースをロードします（アトミック性保証）。
+   *
+   * いずれかのリソースの取得に失敗した場合、既にロード済みのリソースを全て解放します。
    */
   async loadResources(
     engineId: string,
     sources: Record<string, IEngineSourceConfig>,
+    options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<Record<string, string>> {
     const results: Record<string, string> = {};
     const localNewUrls = new Set<string>();
 
     try {
       for (const [key, config] of Object.entries(sources)) {
-        const url = await this.loadResource(engineId, config);
+        const url = await this.loadResource(engineId, config, options);
         results[key] = url;
         localNewUrls.add(url);
       }

@@ -34,3 +34,11 @@ export function createFileStorage(capabilities: ICapabilities): IFileStorage {
 }
 
 export { OPFSStorage, IndexedDBStorage, NodeFSStorage, MemoryStorage };
+export {
+  ChunkedDownloader,
+  ChunkedDownloadError,
+} from "./ChunkedDownloader.js";
+export type {
+  ChunkedDownloadOptions,
+  ChunkedDownloadResult,
+} from "./ChunkedDownloader.js";
