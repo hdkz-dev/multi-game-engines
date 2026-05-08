@@ -37,6 +37,7 @@ function makeStubEngine(
     version: "1.0.0",
     status: "ready" as EngineStatus,
     lastError: null,
+    // eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix
     use: () => ({}) as StubEngine,
     unuse: () => ({}) as StubEngine,
     load: async () => {},

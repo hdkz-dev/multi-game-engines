@@ -7,6 +7,6 @@ export default [
   // Playwright CT setup files are compiled by Playwright's own Vite build,
   // not included in the main tsconfig. Exclude from ESLint project service.
   {
-    ignores: ["playwright/index.tsx", "playwright/index.html"],
+    ignores: ["playwright/index.tsx", "playwright/index.html", "playwright/.cache/**"],
   },
 ];
