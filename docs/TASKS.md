@@ -99,7 +99,10 @@
   - [x] `NativeCommunicator` (Node.js/child_process) の基盤実装。
   - [x] `IEngineConfig.binaryPath` 追加、`isNodeEnvironment()` を core main entry からエクスポート。
   - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
-- [ ] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+- [x] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+  - [x] `HardwareAccelerator` — `checkWebGPU()` / `checkWebNN()` / `getBestAcceleration()` 実装 (packages/core/src/capabilities/HardwareAccelerator.ts)
+  - [x] `capabilities/index.ts` + `core/index.ts` からエクスポート済み
+  - [x] ユニットテスト 4件 全通過 (`HardwareAccelerator.test.ts`)
 - [x] **Zenith Loader**: 数百 MB 超の評価関数ファイルを分割ダウンロード・OPFS キャッシュ管理。
   - [x] `ChunkedDownloader` — HTTP Range リクエストで 4 MiB チャンク分割ダウンロード (≥ 32 MiB 閾値)
   - [x] Range 非対応サーバーへの単一 `fetch` フォールバック

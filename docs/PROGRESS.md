@@ -2,6 +2,30 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
+## 📊 現在の状態スナップショット (2026年5月8日 最終確認)
+
+### CI / ブランチ / npm
+
+| 項目                                 | 状態                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `8659949f`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
+| オープン PR                          | **0件**                                                                               |
+| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
+| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
+
+### 未着手・外部依存残課題
+
+| 項目                                              | 状態            | 理由                                 |
+| ------------------------------------------------- | --------------- | ------------------------------------ |
+| BLOCKER-B: やねうら王/KataGo/Edax/Mortal WASM SRI | 🔴 外部依存待ち | WASM ビルド・CDN デプロイが前提      |
+| Custom Distribution (cdn-worker)                  | 🔵 将来機能     | Cloudflare R2/Workers インフラ未構築 |
+| WebNN/WebGPU 本格統合                             | 🔵 将来機能     | HardwareAccelerator 診断層は実装済み |
+| UI Logic Worker オフロード                        | 🔵 将来機能     | アーキテクチャ検討段階               |
+| Mobile/Hybrid Bridge                              | 🔵 将来機能     | Phase 4 スコープ                     |
+
+---
+
 ## ✅ 直近完了タスク (2026年5月8日) — ブランチ全マージ & npm 0.2.0 publish 完了
 
 ### PR マージ・ブランチ整理 ✅
