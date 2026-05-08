@@ -56,11 +56,11 @@
   - [x] **Async Integration**: `EngineBridge` の非同期アダプター生成対応。
 - [x] **Opening Book Provider**: 定跡書 (`.bin`, `.db`) の独立ロードと IndexedDB 共有管理層の実装。
 - [ ] **WASM Integration & SRI Sync**: 各エンジンの実バイナリ統合と SRI ハッシュの最終確定。
-  - [ ] Stockfish (Chess)
-  - [ ] やねうら王 (Shogi)
-  - [ ] KataGo (Go)
-  - [ ] Edax (Reversi)
-  - [ ] Mortal (Mahjong)
+  - [x] Stockfish (Chess) — jsDelivr CDN + SHA-384 全バリアント確定済み (`pnpm sri:refresh` 反映)
+  - [ ] やねうら王 (Shogi) — WASM ビルド・CDN デプロイ待ち (外部依存)
+  - [ ] KataGo (Go) — WASM ビルド・CDN デプロイ待ち (外部依存)
+  - [ ] Edax (Reversi) — WASM ビルド・CDN デプロイ待ち (外部依存)
+  - [ ] Mortal (Mahjong) — WASM ビルド・CDN デプロイ待ち (外部依存)
 - [x] **WebNN / WebGPU Generalization**: NNUE や CNN モデルのハードウェア加速レイヤーの汎用実装。
   - [x] `HardwareAccelerator` 診断ユーティリティの実装。
 - [x] **Segmented SRI (Zenith Loader)**: 100MB 超の巨大ファイルの分割ダウンロードとインクリメンタルハッシュ検証。
@@ -79,8 +79,9 @@
   - `zenith-audit`, `doc-sync` スキルの新規実装。
   - `AI_WORKFLOW.md` へのスキル・アクティベーション層の追加。
   - [x] **Playwright E2E 拡充**: 各パッケージ（UI Monitor等）に対する網羅的な E2E テストの追加と自動化。
+    - [x] `ui-react-monitor`: EvaluationGraph (8テスト), PVList (7テスト), SearchLog (10テスト) 追加 → 31テスト
     - [x] `ui-react-monitor`: EngineStats (8テスト), StatCard (7テスト), EngineMonitorPanel (8テスト) 追加 → 54テスト (その後 MultiEnginePanel +10 で **64テスト全通過**)
-    - [x] `ui-vue-monitor`: EngineStats (8テスト) 追加 → 39テスト全通過
+    - [x] `ui-vue-monitor`: EngineStats (8テスト) 追加 → 39テスト (その後 EvaluationGraph/PVList/SearchLog +8, EngineMonitorPanel +8, MultiEnginePanel +10 で **57テスト全通過**)
   - [ ] **Jules / Subagent ワークフロー**: Jules による大規模タスク委託とエージェント間レビュープロセスの確立。
   - [x] **Release Automation**: Changesets と連携した詳細な `CHANGELOG.md` の自動生成とリリースの自動化。
     - [x] `@changesets/changelog-github` 導入 — PR リンク・Author 情報付き changelog 自動生成
