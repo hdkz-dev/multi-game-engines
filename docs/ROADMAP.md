@@ -49,7 +49,7 @@
 - [ ] **Hardware Acceleration (Zenith Standard)**:
   - **WebNN**: NPU/GPU を活用した NNUE 高速推論の統合 (W3C 2026 CR 準拠)。
   - **WebGPU Compute**: 並列探索アルゴリズムの GPU へのオフロード。
-- [ ] **Swarm (Ensemble) Architecture**:
+- [x] **Swarm (Ensemble) Architecture**:
   - **アンサンブル・アダプター**: 複数エンジンによる合議システムの実装。
   - **エキスパート・マッピング**: 各エンジンの特性（序盤・終盤等）に応じた動的な重み付け指し手選定。
 - [ ] **Mobile & Hybrid Bridge (Native Power)**:
@@ -94,8 +94,8 @@
 - [x] **Turborepo & CI Optimization**: CI 上での 100% 再現可能な高速実行環境。
 - [x] **超深層監査 (Zenith Tier Audit)**: 全 14 パッケージにわたる徹底的な A11y / ロジック監査。
 - [x] **Extreme Robustness**: 98.41% のラインカバレッジ達成。ミドルウェア絶縁、循環参照保護、パケット分割耐性を完備。
-- [ ] **Continuous Benchmarking**: `CodSpeed` 等による、PR 単位での性能劣化（NPS 低下）検知。
-- [ ] **Self-Healing Docs**: `TypeDoc` による、コード変更に 1 秒も遅れない API リファレンス生成。
+- [x] **Continuous Benchmarking**: `vitest bench` によるコアホットパス継続計測 + `.github/workflows/bench.yml` で PR 単位の性能回帰検知。
+- [x] **Self-Healing Docs**: `TypeDoc` 0 warnings 達成 + `docs.yml` による GitHub Pages 自動デプロイ。
 - [x] **Browser Matrix Verification**: `Playwright` による、実ブラウザ上での WASM 動作保証。
 - [x] **Contract-driven Safety**: `Zod` による、Worker 通信境界でのランタイム検証。
 - [x] **Zero-Any Policy**: プロダクションコードにおける any 型の完全排除。
