@@ -6,3 +6,4 @@ export * from "./components/EngineStats.js";
 export * from "./components/EvaluationGraph.js";
 export * from "./components/EngineMonitorPanel.js";
 export * from "./components/StatCard.js";
+export * from "./components/MultiEnginePanel.js";

@@ -63,7 +63,7 @@
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [x] **Release Automation**: Changesets 自動化 + `release.yml` 整備（npm publish パイプライン構築済み。`NPM_TOKEN` 登録で本番稼働）。
 - [x] **Quality Gate Stabilization**: PR #60 で `lint`, `typecheck`, `build`, `test`, `CodeQL`, `CodeRabbit` を全て green に収束。
-- [ ] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
+- [x] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
   - [x] **[BLOCKER-A]** Stockfish 全バリアント SRI 算出完了（`pnpm sri:refresh` で実 SHA-384 を `engines.json` へ反映済み）。
@@ -74,7 +74,7 @@
   - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), リバーシ (Edax)。
   - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。
   - **Incomplete Information**: ポーカー (DeepStack), ブリッジ, 花札。
-- [ ] **Multi-Engine Ensemble**: 同一局面を複数エンジンで同時解析する UI/Logic の提供。
+- [x] **Multi-Engine Ensemble**: 同一局面を複数エンジンで同時解析する UI/Logic の提供。
 
 ---
 

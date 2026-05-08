@@ -2,6 +2,24 @@
 
 ## 📅 更新日: 2026年5月7日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月8日) — Multi-Engine Ensemble UI 実装
+
+### MultiEnginePanel — React & Vue ✅
+
+- **`MultiEnginePanel.tsx`** (`ui-react-monitor`):
+  - `EngineEntry[]` を受け取り、上部にスコア比較バー・下部に EngineMonitorPanel の Grid を表示
+  - エンジン数に応じてレスポンシブグリッド切替: 1→`grid-cols-1`, 2→`md:grid-cols-2`, 3+→`xl:grid-cols-3`
+  - `onMoveClick(move, engineId)` コールバックで各パネルのクリックを識別
+  - `EngineScoreSummary` 内部コンポーネント: `useEngineMonitor` で各エンジンのリアルタイムスコア・ステータスドットを表示
+- **`MultiEnginePanel.vue`** + **`EngineSummaryItem.vue`** (`ui-vue-monitor`):
+  - Vue SFC 2ファイル構成 (generic SFC + 内部 Summary)
+  - `@moveClick(move, engineId)` イベントエミット対応
+- **CT テスト**: React 10テスト + Vue 10テスト (計 **20テスト新規追加、全通過**)
+  - 空配列→非表示、score comparison bar ARIA、engine list ARIA、grid クラス (1/2/3エンジン)、カスタムラベル、name fallback、初期スコア "—"、セパレーター divider 数
+- **エクスポート追加**: `ui-react-monitor/src/index.ts`, `ui-vue-monitor/src/index.ts` に公開
+
+---
+
 ## ✅ 直近完了タスク (2026年5月7日) — Continuous Benchmarking & Observability (OTel) 実装
 
 ### vitest bench — コアホットパス継続的性能計測 ✅

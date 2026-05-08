@@ -105,6 +105,10 @@
   - [x] `packages/core/src/__benchmarks__/ProtocolValidator.bench.ts` — 文字列/オブジェクト/GTP/バルク
   - [x] `vitest.config.ts` に bench 設定追加 (`reporters: ["default", "json"]`, `outputFile: bench-results.json`)
   - [x] `.github/workflows/bench.yml` — push/PR トリガー + アーティファクト保存 + PR コメント自動投稿
+- [x] **Multi-Engine Ensemble UI**: 同一局面を複数エンジンで同時解析する React/Vue UI コンポーネント。
+  - [x] `MultiEnginePanel` (React): `EngineEntry[]` 受け取りスコア比較バー + 個別 EngineMonitorPanel を Grid 配置。`onMoveClick` で `(move, engineId)` コールバック。
+  - [x] `MultiEnginePanel.vue` + `EngineSummaryItem.vue` (Vue): 同等の Vue コンポーネント (SFC 分離構成)。
+  - [x] CT テスト: React 10テスト + Vue 10テスト (全 20テスト通過)。エンジン数による Grid クラス切替・ARIA ロール・ラベル fallback 検証。
 - [x] **Observability (OpenTelemetry)**: テレメトリイベントを OTel スパンにブリッジするアダプター実装。
   - [x] `OtelBridge` クラス (`packages/core/src/middlewares/OtelBridge.ts`) — `IOtelTracer`/`IOtelSpan` 最小インターフェース定義
   - [x] `OtelBridge.fromGlobal()` — `@opentelemetry/api` が存在する場合のみ動的インポートで初期化 (optional peer dep)
