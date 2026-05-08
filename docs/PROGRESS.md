@@ -1,21 +1,21 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月9日 (実装担当: Zenith Quality Engineer)
 
-## 📊 現在の状態スナップショット (2026年5月8日 BLOCKER-B 解決確認)
+## 📊 現在の状態スナップショット (2026年5月9日)
 
 ### CI / ブランチ / npm
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `cdeae850`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `06c87d63`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
 
-### WASM バイナリ配信状況 (深層監査 2026-05-08)
+### WASM バイナリ配信状況 (2026-05-09 確認)
 
 | エンジン           | engines.json SRI          | GitHub Pages HTTP | ビルドジョブ                            | 本番利用可否   |
 | ------------------ | ------------------------- | ----------------- | --------------------------------------- | -------------- |
