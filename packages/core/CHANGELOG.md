@@ -1,5 +1,34 @@
 # @multi-game-engines/core
 
+## 0.2.0
+
+### Minor Changes
+
+- [`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add Multi-Runtime Bridge: `resolveRuntime()`, `isNodeEnvironment()`, `ICommunicator` interface, and `RuntimeConfig` type.
+
+  `resolveRuntime(config)` automatically selects `NativeCommunicator` (Node.js, native binary via stdin/stdout) or `WorkerCommunicator` (browser, Web Worker) based on the detected runtime. `BaseAdapter.communicator` is now typed as `ICommunicator | null` to support both communicator kinds.
+
+  `IEngineConfig` gains an optional `binaryPath` field. When set in a Node.js environment, the UCI/USI/GTP adapters bypass the `EngineLoader` and spawn a native binary process directly — no browser-specific loader required.
+
+- [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add `OtelBridge` — optional OpenTelemetry integration adapter
+
+  Bridges `ITelemetryEvent` from `engine.onTelemetry()` to OpenTelemetry spans
+  without requiring `@opentelemetry/api` as a hard dependency:
+  - `OtelBridge.fromGlobal()` — dynamically imports `@opentelemetry/api` only if installed; returns `null` otherwise (zero-install-cost for users who don't use OTel)
+  - `OtelBridge.record(event)` — maps performance / lifecycle / search events to named OTel spans with engine-scoped attributes
+  - `OtelBridge.asCallback()` — returns a callback ready to pass to `engine.onTelemetry()`
+  - `IOtelTracer` / `IOtelSpan` minimal interfaces for structural compatibility without the full OTel SDK
+  - `@opentelemetry/api >=1.9.0` added as optional `peerDependency`
+
+- [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add `ChunkedDownloader` — HTTP Range request based chunked download for large WASM/eval files (Zenith Loader).
+  - Splits downloads ≥ 32 MiB into 4 MiB chunks via `Range: bytes=X-Y`
+  - Falls back to single `fetch` when server does not support Range requests
+  - SRI verification (sha256/sha384/sha512) for full buffer and per-segment (`ISegmentedSRI`)
+  - Integrates with `IFileStorage` for OPFS/IndexedDB caching
+  - Progress reporting via `ProgressCallback` throughout download lifecycle
+  - AbortSignal support for cancellation
+  - `EngineLoader.loadResource` routes to `ChunkedDownloader` when `config.size >= 32 MiB`
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,5 +1,26 @@
 # @multi-game-engines/ui-vue-monitor
 
+## 0.2.0
+
+### Minor Changes
+
+- [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add `MultiEnginePanel` for simultaneous multi-engine analysis
+
+  A new top-level component that renders multiple engines side-by-side:
+  - **Score comparison bar** (`role="group"`) shows live evaluation and status dot for each engine
+  - **Responsive grid** layout: `grid-cols-1` → `md:grid-cols-2` → `xl:grid-cols-3` based on engine count
+  - **`EngineEntry[]` prop**: `{ engine, label?, searchOptions }` — `label` falls back to `engine.name`
+  - **`onMoveClick(move, engineId)`** callback for React; `@moveClick(move, engineId)` event for Vue
+  - Full ARIA roles (`list` / `listitem` / `group`) and 10 Playwright CT tests per framework
+
+### Patch Changes
+
+- Updated dependencies [[`9643217`](https://github.com/hdkz-dev/multi-game-engines/commit/9643217e368b1ba38ab70202f925ef0244ff7125), [`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db)]:
+  - @multi-game-engines/i18n-common@0.1.2
+  - @multi-game-engines/core@0.2.0
+  - @multi-game-engines/ui-core@0.1.2
+  - @multi-game-engines/ui-vue-core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

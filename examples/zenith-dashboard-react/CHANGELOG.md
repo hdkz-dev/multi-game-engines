@@ -1,5 +1,32 @@
 # @examples/zenith-dashboard-react
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [[`9643217`](https://github.com/hdkz-dev/multi-game-engines/commit/9643217e368b1ba38ab70202f925ef0244ff7125), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db)]:
+  - @multi-game-engines/i18n-common@0.1.2
+  - @multi-game-engines/ui-react-monitor@0.2.0
+  - @multi-game-engines/core@0.2.0
+  - @multi-game-engines/adapter-uci@1.0.0
+  - @multi-game-engines/adapter-usi@1.0.0
+  - @multi-game-engines/adapter-gtp@1.0.0
+  - @multi-game-engines/ui-chess-react@0.1.2
+  - @multi-game-engines/adapter-edax@1.0.0
+  - @multi-game-engines/adapter-gnubg@1.0.0
+  - @multi-game-engines/adapter-katago@1.0.0
+  - @multi-game-engines/adapter-kingsrow@1.0.0
+  - @multi-game-engines/adapter-mortal@1.0.0
+  - @multi-game-engines/domain-shogi@0.1.2
+  - @multi-game-engines/ui-core@0.1.2
+  - @multi-game-engines/ui-react@0.1.2
+  - @multi-game-engines/adapter-stockfish@1.0.0
+  - @multi-game-engines/adapter-yaneuraou@1.0.0
+  - @multi-game-engines/domain-chess@0.1.2
+  - @multi-game-engines/i18n-dashboard@0.1.1
+  - @multi-game-engines/registry@1.0.0
+  - @multi-game-engines/ui-shogi-react@0.1.2
+
 ## 0.1.6
 
 ### Patch Changes
