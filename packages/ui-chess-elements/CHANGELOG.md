@@ -1,5 +1,23 @@
 # @multi-game-engines/ui-chess-elements
 
+## 0.1.2
+
+### Patch Changes
+
+- [`a81ad3d`](https://github.com/hdkz-dev/multi-game-engines/commit/a81ad3d635931c484a8264ddd08ae3999a485d4b) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Fix keyboard navigation when `orientation="black"` (flipped board).
+
+  Arrow keys, Home/End, and PageUp/PageDown now move focus in visual coordinates
+  rather than logical coordinates, so a screen reader user pressing ArrowUp always
+  moves to the visually higher square regardless of board orientation.
+
+  ARIA labels were already generated from logical (algebraic) coordinates and
+  remain correct in both orientations.
+
+- Updated dependencies [[`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db)]:
+  - @multi-game-engines/core@0.2.0
+  - @multi-game-engines/domain-chess@0.1.2
+  - @multi-game-engines/i18n-chess@0.1.1
+
 ## 0.1.1
 
 ### Patch Changes

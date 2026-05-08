@@ -1,5 +1,19 @@
 # @multi-game-engines/i18n-common
 
+## 0.1.2
+
+### Patch Changes
+
+- [`9643217`](https://github.com/hdkz-dev/multi-game-engines/commit/9643217e368b1ba38ab70202f925ef0244ff7125) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add Incomplete Information game support: Texas Hold'em Poker and Contract Bridge
+  - **domain-poker**: `PokerCard`, `PokerAction`, `PokerStreet`, `IPokerSearchOptions/Info/Result` branded types, factory/parser helpers (`createPokerCard`, `createPokerAction`, `parsePokerAction`, `pokerActionAsMove`)
+  - **domain-bridge**: `BridgeCard`, `BridgeBid`, `BridgePlay`, `BridgePhase`, `BridgeSeat`, `IBridgeSearchOptions/Info/Result` branded types, factory helpers (`createBridgeCard`, `createBridgeBid`, `createBridgePlay`, `bridgeChoiceAsMove`)
+  - **adapter-poker**: `PokerAdapter` + `PokerJSONParser` — JSON protocol for GTO solvers, supports browser (WASM Worker) and native binary modes (Multi-Runtime Bridge)
+  - **adapter-bridge**: `BridgeAdapter` + `BridgeJSONParser` — JSON protocol for GIB-compatible engines, handles both auction and play phases
+  - **i18n-common**: New engine error i18n keys (`loaderRequired`, `missingSources`, `missingMainEntryPoint`, `nativeBinaryRequired`, `loadFailed`)
+
+- Updated dependencies []:
+  - @multi-game-engines/i18n-core@0.1.1
+
 ## 0.1.1
 
 ### Patch Changes

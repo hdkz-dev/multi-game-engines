@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/ui-chess-vue",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Domain-specific Chess UI components for Vue",
   "type": "module",
   "license": "MIT",

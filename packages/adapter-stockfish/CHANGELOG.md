@@ -1,5 +1,14 @@
 # @multi-game-engines/adapter-stockfish
 
+## 1.0.0
+
+### Patch Changes
+
+- Updated dependencies [[`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db)]:
+  - @multi-game-engines/core@0.2.0
+  - @multi-game-engines/adapter-uci@1.0.0
+  - @multi-game-engines/registry@1.0.0
+
 ## 0.1.6
 
 ### Patch Changes
