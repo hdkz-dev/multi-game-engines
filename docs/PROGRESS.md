@@ -2,6 +2,33 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
+## ⚠️ 要対応 (2026年5月8日) — 未プッシュコミットあり
+
+### git push が必要な状態
+
+origin/main より **15コミット先行**。以下のコミットが未プッシュ:
+
+| #     | コミット   | 内容                                                   |
+| ----- | ---------- | ------------------------------------------------------ |
+| 1     | `7ce04b86` | docs: TASKS.md 不整合修正 (Stockfish SRI, CT テスト数) |
+| 2     | `96054874` | docs: NPM_TOKEN / GitHub Pages 完了マーク              |
+| 3     | `e66b38c3` | docs: ROADMAP/TASKS/PROGRESS 全面同期                  |
+| 4     | `2fe229d9` | feat: MultiEnginePanel (React + Vue CT 20テスト)       |
+| 5     | `db525231` | feat: Continuous Benchmarking + OtelBridge             |
+| 6〜15 | …          | docs/security/release/e2e/typedoc 各改善               |
+
+**push すると**: CI (ci/e2e/docs/release/bench) が全て自動実行。changeset が消費され npm 0.2.0 バンプ予定。
+
+### 追加した changeset
+
+- `.changeset/multi-engine-panel.md` — ui-react-monitor/ui-vue-monitor: **minor**
+- `.changeset/otel-bridge.md` — core: **minor** (OtelBridge)
+- (既存) `multi-runtime-bridge.md` — core/adapter-uci/usi/gtp: **minor**
+- (既存) `incomplete-information-adapters.md` — domain-poker/bridge, adapter-poker/bridge: **minor**
+- (既存) `chess-board-flipped-keyboard.md` — ui-chess-elements: **patch**
+
+---
+
 ## ✅ 直近完了タスク (2026年5月8日) — ドキュメント全面最新化
 
 ### ROADMAP.md / TASKS.md / PROGRESS.md 同期 ✅
