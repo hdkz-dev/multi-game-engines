@@ -98,7 +98,7 @@ jobs:
       - name: Download Edax WASM artifact (if available)
         id: dl-edax
         continue-on-error: true
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v21
         with:
           name: edax-wasm-v4.4
           workflow: build-wasm.yml
@@ -139,7 +139,7 @@ jobs:
       - name: Download gnubg WASM artifact (if available)
         id: dl-gnubg
         continue-on-error: true
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v21
         with:
           name: gnubg-wasm-v1.05
           workflow: build-wasm.yml
@@ -181,7 +181,7 @@ jobs:
       - name: Download KataGo ONNX model (if available)
         id: dl-katago
         continue-on-error: true
-        uses: dawidd6/action-download-artifact@v9
+        uses: dawidd6/action-download-artifact@v21
         with:
           name: katago-onnx-v1.14
           workflow: build-wasm.yml
