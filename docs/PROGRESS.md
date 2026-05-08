@@ -2,30 +2,37 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
-## ⚠️ 要対応 (2026年5月8日) — 未プッシュコミットあり
+## ✅ 直近完了タスク (2026年5月8日) — git push & CI 全通過 / Release PR 生成
 
-### git push が必要な状態
+### push & CI 結果
 
-origin/main より **15コミット先行**。以下のコミットが未プッシュ:
+| ワークフロー                    | 結果                              |
+| ------------------------------- | --------------------------------- |
+| CI (lint/typecheck/build/test)  | ✅ success                        |
+| E2E Tests (Playwright CT)       | ✅ success                        |
+| ESLint                          | ✅ success                        |
+| Deploy API Docs                 | ✅ success                        |
+| Benchmarks (bench.yml 初回実行) | ✅ success                        |
+| Release                         | ✅ success — Release PR #122 更新 |
+| CodeQL                          | ✅ success                        |
 
-| #     | コミット   | 内容                                                   |
-| ----- | ---------- | ------------------------------------------------------ |
-| 1     | `7ce04b86` | docs: TASKS.md 不整合修正 (Stockfish SRI, CT テスト数) |
-| 2     | `96054874` | docs: NPM_TOKEN / GitHub Pages 完了マーク              |
-| 3     | `e66b38c3` | docs: ROADMAP/TASKS/PROGRESS 全面同期                  |
-| 4     | `2fe229d9` | feat: MultiEnginePanel (React + Vue CT 20テスト)       |
-| 5     | `db525231` | feat: Continuous Benchmarking + OtelBridge             |
-| 6〜15 | …          | docs/security/release/e2e/typedoc 各改善               |
+**修正**: `@opentelemetry/api` peerDependency 追加後 `pnpm-lock.yaml` 未更新で `ERR_PNPM_OUTDATED_LOCKFILE` が発生 → `pnpm install` + `fix(ci)` コミットで解消
 
-**push すると**: CI (ci/e2e/docs/release/bench) が全て自動実行。changeset が消費され npm 0.2.0 バンプ予定。
+### Release PR #122 に含まれるバンプ
 
-### 追加した changeset
+| パッケージ            | 変更前 | 変更後     | 理由                                         |
+| --------------------- | ------ | ---------- | -------------------------------------------- |
+| `core`                | 0.1.1  | **0.2.0**  | OtelBridge + Multi-Runtime Bridge (minor ×2) |
+| `adapter-uci/usi/gtp` | 0.1.1  | **0.2.0**  | Multi-Runtime Bridge minor                   |
+| `adapter-bridge`      | 0.1.0  | **1.0.0**  | Incomplete Information minor                 |
+| `adapter-poker`       | 0.1.0  | **1.0.0**  | Incomplete Information minor                 |
+| `domain-bridge/poker` | 0.1.0  | **0.2.0**  | Incomplete Information minor                 |
+| `ui-react-monitor`    | 0.1.1  | **0.2.0**  | MultiEnginePanel minor                       |
+| `ui-vue-monitor`      | 0.1.1  | **0.2.0**  | MultiEnginePanel minor                       |
+| `ui-chess-elements`   | 0.1.1  | 0.1.2      | keyboard fix patch                           |
+| 全依存パッケージ      | —      | patch bump | core 0.2.0 cascade                           |
 
-- `.changeset/multi-engine-panel.md` — ui-react-monitor/ui-vue-monitor: **minor**
-- `.changeset/otel-bridge.md` — core: **minor** (OtelBridge)
-- (既存) `multi-runtime-bridge.md` — core/adapter-uci/usi/gtp: **minor**
-- (既存) `incomplete-information-adapters.md` — domain-poker/bridge, adapter-poker/bridge: **minor**
-- (既存) `chess-board-flipped-keyboard.md` — ui-chess-elements: **patch**
+→ **PR #122 をマージすると全パッケージが npm publish される**
 
 ---
 
