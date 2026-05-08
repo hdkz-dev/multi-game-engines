@@ -64,12 +64,13 @@
 - [x] **Release Automation**: Changesets 自動化 + `release.yml` 整備（npm publish パイプライン構築済み。`NPM_TOKEN` 登録で本番稼働）。
 - [x] **Quality Gate Stabilization**: PR #60 で `lint`, `typecheck`, `build`, `test`, `CodeQL`, `CodeRabbit` を全て green に収束。
 - [x] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
-- [ ] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。
+- [x] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。✅ **2026-05-08 npm publish 完了 (46パッケージ)**
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
   - [x] **[BLOCKER-A]** Stockfish 全バリアント SRI 算出完了（`pnpm sri:refresh` で実 SHA-384 を `engines.json` へ反映済み）。
   - [ ] **[BLOCKER-B]** 自社ホスト済みバイナリ（やねうら王・KataGo 等）の実 SHA384 確定（WASM ビルド・CDN デプロイが前提）。`__unsafeNoSRI` は本番で `SECURITY_ERROR` により自動遮断済みのため、ロジック変更不要。バイナリは MIT リポジトリとは物理分離して管理（ADR-014）。
   - [x] 20パッケージへの README.md 追加。
   - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
+  - [x] **npm publish 達成** — core@0.2.0, adapter-bridge/poker/uci/usi/gtp@1.0.0, ui-react/vue-monitor@0.2.0 ほか 46パッケージ (2026-05-08)
 - [x] **Extended Adapters**:
   - **Board Games**: バックギャモン (gnubg), チェッカー (KingsRow), リバーシ (Edax)。
   - **Asian Variants**: 中国将棋 (Xiangqi), チャンギ (Janggi)。

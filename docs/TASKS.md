@@ -149,6 +149,15 @@
   - [x] Phase 3: アダプターのリファクタリング (ハードコードの排除)
   - [x] Phase 4: 検証と自動化 (SRI計算ツール)
 
+### 2026-05-08 完了: npm 0.2.0 publish (46パッケージ) ✅
+
+- [x] **Dependabot PR 一括マージ** — github-actions 5本 (#125/#127/#128/#129) + npm deps (#126/#132) 全通過・マージ
+- [x] **Release PR #122 マージ** → RELEASING commit (1653cacd) で全 changeset 消費・バージョン bump
+- [x] **Release ワークフロー手動トリガー** → `changeset publish` → npm publish 成功
+- [x] **npm publish 完了** — 46パッケージ (core@0.2.0, adapter@1.0.0 × 6, ui-monitor@0.2.0 × 2 ほか)
+- [x] **Git タグ 46本** 自動作成 (`@multi-game-engines/core@0.2.0` 等)
+- [x] **ブランチ整理** — stale ローカル 4本 + リモート 2本 削除。残存: `origin/main` + `origin/changeset-release/main` のみ
+
 ### 2026-04-27 計画: npm 初回リリース Phase A
 
 > 詳細: `docs/implementation_plans/20260427_release_roadmap.md`

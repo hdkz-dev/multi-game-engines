@@ -2,6 +2,46 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
+## ✅ 直近完了タスク (2026年5月8日) — ブランチ全マージ & npm 0.2.0 publish 完了
+
+### PR マージ・ブランチ整理 ✅
+
+| PR   | 内容                                    | 結果                                        |
+| ---- | --------------------------------------- | ------------------------------------------- |
+| #122 | Version Packages (Release PR)           | ✅ マージ → npm publish トリガー            |
+| #125 | `github/codeql-action` 3→4              | ✅ マージ                                   |
+| #127 | `dawidd6/action-download-artifact` 9→21 | ✅ マージ                                   |
+| #129 | `mymindstorm/setup-emscripten` 14→16    | ✅ マージ                                   |
+| #132 | npm deps group (20パッケージ)           | ✅ マージ                                   |
+| #126 | `actions/setup-node` 4→6                | ✅ rebase → CI通過 → マージ                 |
+| #128 | `actions/checkout` 4→6                  | ✅ rebase → CI通過 → マージ                 |
+| #133 | Version Packages (stale)                | ✅ Close (RELEASING commit で publish 済み) |
+
+**削除したブランチ**: ローカル 4本 (`hdkz-dev-patch-1`, `pr88-fix`, `pr95-fix`, `pr96-fix`) + リモート 2本 (`hdkz-dev-patch-1`, stale npm-deps)
+
+残存リモートブランチ: `origin/main`, `origin/changeset-release/main` のみ
+
+### npm publish — 46パッケージ ✅
+
+| パッケージ                             | バージョン | 主な変更内容                                                          |
+| -------------------------------------- | ---------- | --------------------------------------------------------------------- |
+| `@multi-game-engines/core`             | **0.2.0**  | OtelBridge + Multi-Runtime Bridge + Zenith Loader (ChunkedDownloader) |
+| `@multi-game-engines/adapter-bridge`   | **1.0.0**  | Incomplete Information (Bridge ゲーム)                                |
+| `@multi-game-engines/adapter-poker`    | **1.0.0**  | Incomplete Information (ポーカー)                                     |
+| `@multi-game-engines/adapter-uci`      | **1.0.0**  | Multi-Runtime Bridge 統合                                             |
+| `@multi-game-engines/adapter-usi`      | **1.0.0**  | Multi-Runtime Bridge 統合                                             |
+| `@multi-game-engines/adapter-gtp`      | **1.0.0**  | Multi-Runtime Bridge 統合                                             |
+| `@multi-game-engines/registry`         | **1.0.0**  | —                                                                     |
+| `@multi-game-engines/ui-react-monitor` | **0.2.0**  | MultiEnginePanel                                                      |
+| `@multi-game-engines/ui-vue-monitor`   | **0.2.0**  | MultiEnginePanel                                                      |
+| その他 37 パッケージ                   | **0.1.2**  | core@0.2.0 依存 cascade patch                                         |
+
+**Git タグ**: 46タグ作成済み (`@multi-game-engines/core@0.2.0` 等)
+
+**トリガー**: Release ワークフロー手動トリガー → changeset files 全削除確認 → `changeset publish` 実行 → npm publish 成功
+
+---
+
 ## ✅ 直近完了タスク (2026年5月8日) — Zenith Loader 実装完了 & push
 
 ### ChunkedDownloader (Zenith Loader) ✅
