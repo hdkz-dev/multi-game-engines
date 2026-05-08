@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `d72b5ee8`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `547baa1d`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
@@ -522,75 +522,43 @@
 - [x] 全 51 パッケージでの `pnpm lint` パス確認
 - [x] 直近の品質ゲートでの残警告解消（`adapter-uci`, `adapter-gnubg`, `adapter-gtp`, `adapter-usi`, `adapter-katago`, `adapter-yaneuraou`, `ui-react-core`, `zenith-dashboard-react`）
 
-## 📈 次のマイルストーン (Next Steps)
+## 📈 現在の残課題 (Next Steps — 2026年5月8日更新)
 
-以下が現時点での未着手・進行中タスクです。優先度の高い順に示します。
+### 🔴 BLOCKER-B — 解決待ち (2件)
 
-### ✅ 全 47 パッケージ npm 初回 publish 完了 + v0.1.1 リリース（2026年4月29日）
+| エンジン          | 根本原因                                                                                       | 必要な作業                                                           |
+| ----------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **KataGo (囲碁)** | `download-katago-onnx.sh` の ONNX URL がプレースホルダー、`KATAGO_ONNX_URL` シークレット未設定 | 実 ONNX URL 確定 → シークレット設定 → CI ビルド → `pnpm sri:refresh` |
+| **Mortal (麻雀)** | `build-wasm.yml` にビルドジョブ自体なし、PyTorch ベースで直接 WASM 化不可                      | ONNX 変換 + ビルドジョブ新設 (大規模作業)                            |
 
-- **v0.1.0 公開状況**: `@multi-game-engines/*` 全 47 パッケージ v0.1.0 が npmjs.com に公開済み
-  - 25件: 2026-04-28 `changeset publish` で公開
-  - 1件: 2026-04-29 ローカルでレートリミット解除確認後に公開
-  - 21件: 2026-04-29 `initial-publish.yml` GitHub Actions ワークフロー経由で公開（E429 回避）
-- **v0.1.1 リリース**: Dependabot PR #100-103 のマージ後、Release ワークフローが自動 publish を実行
-  - PR #106 (Version Packages) のマージにより全 47 パッケージ v0.1.1 が npm publish 完了
-- **認証方式**: GitHub Secrets の `NPM_TOKEN`（Granular Token、Bypass 2FA 有効）
-- **release.yml**: `NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}` で認証済み（main push 時に自動 publish）
-- **ESLint ワークフロー**: PR #105 で追加、pnpm + ESLint v10 (Flat Config) 対応済み（SARIF → GitHub Security upload）
-- **重要な学び**: npm には PyPI の「Trusted Publishers API」は存在しない。OIDC は provenance 署名用のみ。
+> `__unsafeNoSRI` は本番で `SECURITY_ERROR` 自動遮断済み。ロジック変更不要。
 
-### ✅ GitHub Pages 有効化済み
+### ⚠️ NPM_TOKEN 期限管理
 
-- リポジトリ Settings → Pages → Source を "GitHub Actions" に設定済み
-- main push 時に TypeDoc が自動デプロイされる
+- [ ] **次回 NPM_TOKEN 期限更新**: 現トークン有効期限 **2026年7月29日** 頃。カレンダーリマインダー設定推奨
+  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → Revoke → 新 Granular Access Token 発行
+  2. `gh secret set NPM_TOKEN`
 
-### ✅ やねうら王 7.5 本番利用可能 (2026-04-30)
+### 🔵 将来機能 / Research
 
-- SRI ハッシュ確定済み（PR #108/#109 マージ）
-- 配信 URL: `https://hdkz-dev.github.io/multi-game-engines/assets/yaneuraou/7.5/`
-- 利用条件: アプリ側で `COOP+COEP` ヘッダーが必要（SharedArrayBuffer 要件）
-
-### ✅ Phase B2 — 残エンジンの WASM ビルドパイプライン (完了)
-
-- ✅ **Edax 4.4** (リバーシ): Emscripten ASYNCIFY ビルド完了、SRI確定済み
-- ✅ **KataGo 1.14** (囲碁): onnxruntime-web ONNX アダプター実装 (adapter-katago@0.2.0)
-- ✅ **gnubg 1.05** (バックギャモン): Emscripten ビルド完了、SRI確定済み
-- ✅ **KingsRow** (チェッカーズ): rapid-draughts@1.0.6 (純粋TS) で置き換え (adapter-kingsrow@0.2.0)
-- ⛔ **Mortal 1.0** (麻雀): PyTorch ベース — 純粋 JS/TS 代替なし、DEFERRED
-
-### 🔴 要対応 — NPM_TOKEN の期限管理
-
-- [ ] **NPM_TOKEN の即時ローテーション**: チャット上にトークン値が露出 → **今すぐ Revoke して再発行すること**
-  1. [npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens) → 該当トークンを「Revoke」
-  2. 新しい Granular Access Token を作成（90日 / Bypass 2FA 有効 / `@multi-game-engines/*` Read+Write）
-  3. `gh secret set NPM_TOKEN`（プロンプトに新トークンを貼り付け）
-- [ ] **次回 NPM_TOKEN 期限更新**: 現トークン有効期限は **2026年7月29日** 頃。事前にカレンダーリマインダーを設定すること
-- [ ] **自社ホスティング済みバイナリの SRI 確定**: やねうら王・KataGo・Edax・gnubg・KingsRow・Mortal は実バイナリをデプロイし SHA-384 を算出して `engines.json` の `__unsafeNoSRI` を置換する（別リポジトリ `multi-game-engines-assets` にて作業）
-  > **備考**: `__unsafeNoSRI` は本番 (`NODE_ENV=production`) では `SECURITY_ERROR` で自動遮断済みの開発フラグ。
-
-### ✅ High Priority — Phase B（バイナリ配信インフラ）
-
-- ✅ **Phase B1**: GitHub Pages 配信設定完了
-- ✅ **Phase B2**: やねうら王 WASM ビルドパイプライン (Emscripten) 完了
-- ✅ **Phase B3**: Edax / gnubg / KataGo(ONNX) / KingsRow(rapid-draughts) 完了
-- ✅ **Phase B4**: SRI 自動再計算 CI (`refresh-sri.yml` — docs デプロイ後に自動トリガー)
-
-### 🟡 Medium Priority
-
-- ✅ **Playwright E2E 拡充**: 両 monitor パッケージで CT テスト拡充完了 — React 54テスト / Vue 47テスト (合計 101)
-- ✅ **Release Automation**: `@changesets/changelog-github` 導入で per-package CHANGELOG に PR リンク・Author 情報を自動付与。`version` スクリプト追加、`release.yml` に `fetch-depth: 0` 設定
-- ✅ **Security & SRI Integration**: `refresh-engine-sris.mjs` に `sri-hashes/*.txt` 読み込み機能追加 — CI ビルド後の SRI ハッシュをローカルファイル経由で自動適用できるよう完全自動化
-- ✅ **英語版ドキュメント拡充**: `docs/en/` 全 5 ファイルを日本語版と同期 — ROADMAP / DECISION_LOG / ARCHITECTURE / ZENITH_STANDARD / TECHNICAL_SPECS に Multi-Runtime Bridge・Incomplete Info・Hardware Acceleration・CT テスト数等を追記
-- ✅ **Multi-Runtime Bridge**: `resolveRuntime()` + `ICommunicator` — WASM と OS Native バイナリを自動切替 (`core@0.2.0`)
-- [ ] **英語版ドキュメント拡充**: `docs/en/` 配下 (`DECISION_LOG.md` 等) の整備
-- [ ] **UI Logic オフロード**: 超高頻度 `info` 出力時のメインスレッド保護のため `ui-core` を UI Worker へ委譲するアーキテクチャ検討
-
-### 🔵 Future / Research
-
-- [ ] **Hardware Acceleration**: WebNN (NPU/GPU 活用 NNUE 推論) / WebGPU Compute の統合
+- [ ] **Custom Distribution (cdn-worker)**: `infrastructure/cdn/cloudflare/worker.ts` 実装済み・未デプロイ。Cloudflare アカウント/R2 バケット設定 + `wrangler deploy` が必要
+- [ ] **Hardware Acceleration**: WebNN (NPU/GPU 活用 NNUE 推論) / WebGPU Compute の本格統合 (`HardwareAccelerator` 診断層は実装済み)
 - [ ] **Swarm — Expert Mapping**: アンサンブルアダプターへの序盤・終盤特化エキスパートマッピング追加
-- [ ] **Observability**: OpenTelemetry 統合による実行時パフォーマンス可視化
-- [ ] **Incomplete Information Games**: `adapter-poker`, `adapter-bridge` の抽象化設計
+- [ ] **UI Logic Worker オフロード**: 超高頻度 `info` 出力時のメインスレッド保護アーキテクチャ検討
+- [ ] **Mobile/Hybrid Bridge**: React Native / Capacitor ネイティブプラグインアダプター (Phase 4 スコープ)
+
+### ✅ 完了済み (参照用)
+
+- ✅ **npm 46パッケージ publish** — core@0.2.0 / adapter@1.0.0 系 / ui-monitor@0.2.0 (2026-05-08)
+- ✅ **Phase B: バイナリ配信** — やねうら王・Edax・gnubg HTTP 200、SRI 確定 (2026-04-30〜05-01)
+- ✅ **Zenith Loader** — `ChunkedDownloader` HTTP Range / OPFS / SRI 検証 (core@0.2.0)
+- ✅ **OtelBridge** — OpenTelemetry 統合 (core@0.2.0)
+- ✅ **Multi-Runtime Bridge** — WASM/Native 自動切替 (`resolveRuntime()`)
+- ✅ **Incomplete Information** — `adapter-poker`, `adapter-bridge` (各 1.0.0)
+- ✅ **Playwright E2E** — React 64テスト / Vue 57テスト 全通過
+- ✅ **TypeDoc 0 warnings** — GitHub Pages 自動デプロイ稼働中
+- ✅ **Continuous Benchmarking** — `vitest bench` + `bench.yml` 回帰検知
+- ✅ **Release Automation** — `changeset publish` → npm 自動 publish パイプライン
 
 ## 🏆 到達ハイライト (2026-04-27 依存関係メジャーアップデート & TS2882 対応)
 
