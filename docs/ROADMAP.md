@@ -67,7 +67,7 @@
 - [x] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。✅ **2026-05-08 npm publish 完了 (46パッケージ)**
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
   - [x] **[BLOCKER-A]** Stockfish 全バリアント SRI 算出完了（`pnpm sri:refresh` で実 SHA-384 を `engines.json` へ反映済み）。
-  - [ ] **[BLOCKER-B]** 自社ホスト済みバイナリ（やねうら王・KataGo 等）の実 SHA384 確定（WASM ビルド・CDN デプロイが前提）。`__unsafeNoSRI` は本番で `SECURITY_ERROR` により自動遮断済みのため、ロジック変更不要。バイナリは MIT リポジトリとは物理分離して管理（ADR-014）。
+  - [ ] **[BLOCKER-B]** 自社ホスト済みバイナリの SRI 確定 — やねうら王・Edax は GitHub Pages 配信済み・SHA-384 確定 ✅。**KataGo**: ONNX URL プレースホルダー・`KATAGO_ONNX_URL` シークレット未設定・HTTP 404 継続 ❌。**Mortal**: ビルドジョブ未存在・HTTP 404 継続 ❌。`__unsafeNoSRI` は本番で `SECURITY_ERROR` により自動遮断済みのため、ロジック変更不要。バイナリは MIT リポジトリとは物理分離して管理（ADR-014）。
   - [x] 20パッケージへの README.md 追加。
   - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
   - [x] **npm publish 達成** — core@0.2.0, adapter-bridge/poker/uci/usi/gtp@1.0.0, ui-react/vue-monitor@0.2.0 ほか 46パッケージ (2026-05-08)

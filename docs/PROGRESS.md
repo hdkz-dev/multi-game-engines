@@ -2,27 +2,69 @@
 
 ## 📅 更新日: 2026年5月8日 (実装担当: Zenith Quality Engineer)
 
-## 📊 現在の状態スナップショット (2026年5月8日 最終確認)
+## 📊 現在の状態スナップショット (2026年5月8日 深層監査確認)
 
 ### CI / ブランチ / npm
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `8659949f`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `d72b5ee8`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
+| オープン Issue                       | **0件**                                                                               |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
 
-### 未着手・外部依存残課題
+### WASM バイナリ配信状況 (深層監査 2026-05-08)
 
-| 項目                                              | 状態            | 理由                                 |
-| ------------------------------------------------- | --------------- | ------------------------------------ |
-| BLOCKER-B: やねうら王/KataGo/Edax/Mortal WASM SRI | 🔴 外部依存待ち | WASM ビルド・CDN デプロイが前提      |
-| Custom Distribution (cdn-worker)                  | 🔵 将来機能     | Cloudflare R2/Workers インフラ未構築 |
-| WebNN/WebGPU 本格統合                             | 🔵 将来機能     | HardwareAccelerator 診断層は実装済み |
-| UI Logic Worker オフロード                        | 🔵 将来機能     | アーキテクチャ検討段階               |
-| Mobile/Hybrid Bridge                              | 🔵 将来機能     | Phase 4 スコープ                     |
+| エンジン           | engines.json SRI          | GitHub Pages HTTP | ビルドジョブ                      | 本番利用可否 |
+| ------------------ | ------------------------- | ----------------- | --------------------------------- | ------------ |
+| Stockfish (Chess)  | ✅ SHA-384 全6件確定      | jsDelivr CDN      | 不要                              | ✅ 可        |
+| やねうら王 (Shogi) | ✅ SHA-384 確定           | ✅ HTTP 200       | `build-wasm.yml` なし (外部取得)  | ✅ 可        |
+| Edax (Reversi)     | ✅ SHA-384 確定           | ✅ HTTP 200       | ✅ `build-edax` ジョブ            | ✅ 可        |
+| gnubg (Backgammon) | ✅ SHA-384 確定           | ✅ HTTP 200       | ✅ `build-gnubg` ジョブ           | ✅ 可        |
+| KataGo (Go)        | ❌ `__unsafeNoSRI`        | ❌ HTTP 404       | ⚠️ ONNX DL のみ (placeholder URL) | ❌ 不可      |
+| Mortal (Mahjong)   | ❌ `__unsafeNoSRI`        | ❌ HTTP 404       | ❌ ジョブ自体なし                 | ❌ 不可      |
+| KingsRow           | N/A (rapid-draughts 代替) | N/A               | N/A                               | ✅ 可 (TS)   |
+
+### 残課題詳細 — BLOCKER-B
+
+#### KataGo (囲碁エンジン) ❌
+
+- **根本原因**: `scripts/download-katago-onnx.sh` の `ONNX_URL` が明示的に "placeholder URL" とコメントされている
+- **CI 状態**: `build-wasm.yml:build-katago` ジョブは `KATAGO_ONNX_URL` シークレット未設定のため artifact 未アップロード
+- **GitHub Pages**: `katago.js` / `katago.wasm` ともに HTTP 404
+- **engines.json**: `__unsafeNoSRI: true` → 本番環境で `SECURITY_ERROR` 自動遮断
+- **解決に必要な作業**:
+  1. 実際の KataGo ONNX モデルファイルの入手先 URL 確定
+  2. `KATAGO_ONNX_URL` GitHub Actions シークレット設定
+  3. `download-katago-onnx.sh` のプレースホルダー URL を実際の URL に更新
+  4. ONNX → WASM ラッパー (`katago.js`) の整備
+  5. CI ビルド後に `pnpm sri:refresh` で SHA-384 算出 → `engines.json` 更新
+
+#### Mortal (麻雀エンジン) ❌
+
+- **根本原因**: PyTorch ベースのモデルであり、直接 WASM 化は不可 (ONNX 変換が前提)
+- **CI 状態**: `build-wasm.yml` に Mortal ビルドジョブ自体が存在しない
+- **GitHub Pages**: `mortal.js` / `mortal.wasm` ともに HTTP 404
+- **engines.json**: `__unsafeNoSRI: true` → 本番環境で `SECURITY_ERROR` 自動遮断
+- **解決に必要な作業** (大規模):
+  1. PyTorch モデル → ONNX エクスポートスクリプト作成
+  2. ONNX → onnxruntime-web 対応 JS ラッパー作成
+  3. `build-wasm.yml` に `build-mortal` ジョブ追加
+  4. `docs.yml` に Mortal artifact ダウンロード追加
+  5. SHA-384 算出 → `engines.json` 更新
+
+### その他の残課題
+
+| 項目                       | 状態        | 詳細                                                                   |
+| -------------------------- | ----------- | ---------------------------------------------------------------------- |
+| Custom Distribution        | 🔵 将来機能 | `infrastructure/cdn/cloudflare/worker.ts` 実装済みだが未デプロイ       |
+| (cdn-worker)               |             | Cloudflare アカウント/R2 バケット未設定、`wrangler deploy` 未実行      |
+| WebNN/WebGPU 本格統合      | 🔵 将来機能 | `HardwareAccelerator` 診断層は実装済み・テスト通過、実推論統合は未着手 |
+| UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
+| Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
+| NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
 
 ---
 

@@ -57,10 +57,17 @@
 - [x] **Opening Book Provider**: 定跡書 (`.bin`, `.db`) の独立ロードと IndexedDB 共有管理層の実装。
 - [ ] **WASM Integration & SRI Sync**: 各エンジンの実バイナリ統合と SRI ハッシュの最終確定。
   - [x] Stockfish (Chess) — jsDelivr CDN + SHA-384 全バリアント確定済み (`pnpm sri:refresh` 反映)
-  - [ ] やねうら王 (Shogi) — WASM ビルド・CDN デプロイ待ち (外部依存)
-  - [ ] KataGo (Go) — WASM ビルド・CDN デプロイ待ち (外部依存)
-  - [ ] Edax (Reversi) — WASM ビルド・CDN デプロイ待ち (外部依存)
-  - [ ] Mortal (Mahjong) — WASM ビルド・CDN デプロイ待ち (外部依存)
+  - [x] やねうら王 (Shogi) — GitHub Pages 配信 HTTP 200 ✅、SHA-384 確定済み (`engines.json` 反映)
+  - [x] Edax (Reversi) — GitHub Pages 配信 HTTP 200 ✅、SHA-384 確定済み (`engines.json` 反映)
+  - [ ] KataGo (Go) — **BLOCKER-B** ❌ `__unsafeNoSRI` 継続、HTTP 404
+    - `build-wasm.yml:build-katago` ジョブ: ONNX ダウンロードのみ (実際の ONNX URL はプレースホルダー)
+    - `KATAGO_ONNX_URL` シークレット未設定 → artifact 未アップロード → GitHub Pages 404
+    - `scripts/download-katago-onnx.sh` コメント: "placeholder URL. Replace with actual ONNX download URL"
+    - 解決策: 実際の KataGo ONNX モデル URL を確定し `KATAGO_ONNX_URL` シークレット設定が必要
+  - [ ] Mortal (Mahjong) — **BLOCKER-B** ❌ `__unsafeNoSRI` 継続、HTTP 404
+    - `build-wasm.yml` に Mortal ビルドジョブ自体が存在しない
+    - PyTorch ベースのため直接 WASM 化不可 (ONNX 変換が前提)
+    - 解決策: ONNX 変換パイプライン + ビルドジョブ新設が必要 (大規模作業)
 - [x] **WebNN / WebGPU Generalization**: NNUE や CNN モデルのハードウェア加速レイヤーの汎用実装。
   - [x] `HardwareAccelerator` 診断ユーティリティの実装。
 - [x] **Segmented SRI (Zenith Loader)**: 100MB 超の巨大ファイルの分割ダウンロードとインクリメンタルハッシュ検証。
