@@ -13,7 +13,8 @@ on:
       - "scripts/edax-worker.js"
       - "scripts/build-gnubg-wasm.sh"
       - "scripts/gnubg-worker.js"
-      - "scripts/download-katago-onnx.sh"
+      - "scripts/create-katago-stub-onnx.py"
+      - "scripts/mortal-stub-worker.js"
       - ".github/workflows/build-wasm.yml"
   workflow_dispatch:
 
@@ -161,30 +162,125 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  # ── KataGo ONNX model download ───────────────────────────────────────────────
+  # ── KataGo ONNX stub model generation ───────────────────────────────────────
+  #
+  # Creates a valid ONNX model with KataGo's exact input/output tensor names
+  # and shapes (bin_input_global_ncplane + global_input → policy).
+  # Weights are deterministic random (seed=42) — NOT a real AI, but the
+  # adapter pipeline can be exercised end-to-end and SRI can be computed.
+  #
+  # If KATAGO_ONNX_URL secret is set, download a real model instead of
+  # using the stub.
   build-katago:
-    name: Download KataGo ONNX Model
+    name: Build KataGo ONNX Model
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Download KataGo ONNX model
+      # ── Cache: generated ONNX output ────────────────────────────────────────
+      - name: Cache KataGo ONNX output
+        id: cache-katago-onnx
+        uses: actions/cache@v5
+        with:
+          path: /tmp/katago-onnx
+          key: katago-onnx-stub-v1-${{ hashFiles('scripts/create-katago-stub-onnx.py') }}
+
+      # ── Real model: download from KATAGO_ONNX_URL if set ────────────────────
+      - name: Download real KataGo ONNX model (if KATAGO_ONNX_URL is set)
+        if: steps.cache-katago-onnx.outputs.cache-hit != 'true'
         env:
-          # Set KATAGO_ONNX_URL as a repository secret to download a private or
-          # large model file. Leave unset to skip (adapter uses the hosted URL).
           KATAGO_ONNX_URL: ${{ secrets.KATAGO_ONNX_URL }}
         run: |
           mkdir -p /tmp/katago-onnx
-          bash scripts/download-katago-onnx.sh /tmp/katago-onnx
-          echo "KataGo ONNX output:"
-          ls -lh /tmp/katago-onnx/ 2>/dev/null || echo "(no model file — skipping artifact upload)"
+          if [[ -n "${KATAGO_ONNX_URL:-}" ]]; then
+            echo "📥  Downloading real KataGo ONNX model from secret URL..."
+            curl -fsSL --retry 3 --retry-delay 5 \
+              -o /tmp/katago-onnx/katago-b6c96.onnx \
+              "${KATAGO_ONNX_URL}"
+            echo "✅  Real model downloaded: $(du -sh /tmp/katago-onnx/katago-b6c96.onnx | cut -f1)"
+            echo "USED_REAL_MODEL=true" >> "$GITHUB_ENV"
+          else
+            echo "ℹ️  KATAGO_ONNX_URL not set — will generate stub model."
+            echo "USED_REAL_MODEL=false" >> "$GITHUB_ENV"
+          fi
 
+      # ── Stub model: generate with Python when no real model ─────────────────
+      - name: Install Python ONNX dependencies
+        if: >
+          steps.cache-katago-onnx.outputs.cache-hit != 'true' &&
+          env.USED_REAL_MODEL != 'true'
+        run: pip install --quiet onnx numpy
+
+      - name: Generate KataGo ONNX stub model
+        if: >
+          steps.cache-katago-onnx.outputs.cache-hit != 'true' &&
+          env.USED_REAL_MODEL != 'true'
+        run: |
+          mkdir -p /tmp/katago-onnx
+          python3 scripts/create-katago-stub-onnx.py /tmp/katago-onnx/katago-b6c96.onnx
+
+      # ── SRI hash computation ─────────────────────────────────────────────────
+      - name: Compute SHA-384 SRI hash
+        run: |
+          MODEL=/tmp/katago-onnx/katago-b6c96.onnx
+          if [[ ! -f "$MODEL" ]]; then
+            echo "❌  No ONNX model found at $MODEL"
+            exit 1
+          fi
+          SRI_HASH="sha384-$(openssl dgst -sha384 -binary "$MODEL" | base64 | tr -d '\n')"
+          echo "🔐  SRI: ${SRI_HASH}"
+          mkdir -p packages/registry/data/sri-hashes
+          echo "${SRI_HASH}" > packages/registry/data/sri-hashes/katago-1.14.txt
+          echo "✅  Written to packages/registry/data/sri-hashes/katago-1.14.txt"
+
+      - name: Verify output
+        run: |
+          echo "KataGo ONNX output:"
+          ls -lh /tmp/katago-onnx/
+
+      # ── Upload artifact for docs.yml ─────────────────────────────────────────
       - name: Upload KataGo ONNX artifact
-        if: ${{ hashFiles('/tmp/katago-onnx/katago-b6c96.onnx') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: katago-onnx-v1.14
           path: /tmp/katago-onnx/
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error
+
+  # ── Mortal stub Worker packaging ─────────────────────────────────────────────
+  #
+  # Mortal (PyTorch-based mahjong AI) cannot be compiled to WASM directly.
+  # This job packages a rule-based stub Worker that speaks the MahjongJSON
+  # protocol so the adapter pipeline can be exercised end-to-end.
+  # Replace with a real ONNX Runtime Web-based worker once a converted model
+  # is available.
+  build-mortal:
+    name: Package Mortal Stub Worker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Package Mortal stub worker
+        run: |
+          mkdir -p /tmp/mortal-build
+          cp scripts/mortal-stub-worker.js /tmp/mortal-build/mortal.js
+          echo "Mortal stub worker:"
+          ls -lh /tmp/mortal-build/
+
+      - name: Compute SHA-384 SRI hash
+        run: |
+          SRI_HASH="sha384-$(openssl dgst -sha384 -binary /tmp/mortal-build/mortal.js | base64 | tr -d '\n')"
+          echo "🔐  SRI: ${SRI_HASH}"
+          mkdir -p packages/registry/data/sri-hashes
+          echo "${SRI_HASH}" > packages/registry/data/sri-hashes/mortal-1.0.txt
+          echo "✅  Written to packages/registry/data/sri-hashes/mortal-1.0.txt"
+
+      - name: Upload Mortal stub artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mortal-stub-v1.0
+          path: /tmp/mortal-build/
+          retention-days: 30
+          if-no-files-found: error

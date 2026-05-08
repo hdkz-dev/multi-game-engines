@@ -215,6 +215,37 @@ jobs:
           echo "KataGo ONNX assets staged:"
           find assets-staging/assets/katago -type f | sort
 
+      # ── Mortal stub Worker (Phase B: stub until real ONNX is ready) ─────
+      - name: Download Mortal stub artifact (if available)
+        id: dl-mortal
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v21
+        with:
+          name: mortal-stub-v1.0
+          workflow: build-wasm.yml
+          branch: main
+          if_no_artifact_found: warn
+          path: /tmp/mortal-stub
+
+      - name: Stage Mortal stub worker asset
+        if: steps.dl-mortal.outcome == 'success'
+        run: |
+          DEST=assets-staging/assets/mortal/1.0
+          mkdir -p "$DEST"
+          cp /tmp/mortal-stub/mortal.js "$DEST/mortal.js"
+
+          cat > assets-staging/assets/mortal/LICENSE <<'EOF'
+          Source: multi-game-engines mortal-stub-worker.js (development stub)
+          License: MIT
+
+          This is a rule-based stub Worker for the Mortal mahjong engine adapter.
+          It speaks the MahjongJSON protocol but does NOT use Mortal's real AI.
+          For production use, replace with a real ONNX Runtime Web-based worker.
+          EOF
+
+          echo "Mortal stub assets staged:"
+          find assets-staging/assets/mortal -type f | sort
+
       # ── Combine TypeDoc + Assets → single Pages artifact ────────────────
       - name: Assemble GitHub Pages output
         run: |
