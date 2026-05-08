@@ -156,16 +156,13 @@
   - [x] 旧 changeset `shy-sails-sneeze.md`（削除済みパッケージ参照）を削除
   - [x] `initial-public-release.md` 作成（全 47 公開パッケージ `patch` bump → 0.1.1）
   - [x] `release.yml` に push to main トリガー追加・npm auth ステップ追加
-  - [ ] **⚠️ 要手動設定**: `NPM_TOKEN` GitHub Actions シークレット未設定 → npm publish 前に必要
-    - 設定方法: `https://github.com/hdkz-dev/multi-game-engines/settings/secrets/actions`
-    - npm アクセストークン（Automation タイプ）を取得し `NPM_TOKEN` として登録
+  - [x] **`NPM_TOKEN` 登録済み** (2026-04-30) — `release.yml` が main push ごとに success で稼働中
 - [x] **[A3] TypeDoc API リファレンス** ✅ 2026-04-27
   - [x] `typedoc.json` ルート設定（`entryPointStrategy: "packages"`, 47パッケージ）
   - [x] GitHub Pages デプロイ GitHub Actions ワークフロー追加（`.github/workflows/docs.yml`）
   - [x] `skipErrorChecking: true` で Vue SFC・TSDoc 警告を抑制（0エラー, 38情報）
   - [x] ルート `package.json` に `docs` / `docs:check` スクリプト追加
-  - [ ] **⚠️ 要手動設定**: GitHub Pages を GitHub Actions ソースで有効化が必要
-    - 設定: `https://github.com/hdkz-dev/multi-game-engines/settings/pages`
+  - [x] **GitHub Pages 有効化済み** — `docs.yml` が main push ごとに success でデプロイ稼働中
 - [x] **[A4] E2E テスト基盤整備** ✅ 2026-04-27
   - [x] `ui-react-monitor` に Playwright CT テスト追加（`ScoreBadge` 6件）
   - [x] `playwright-ct.config.ts` / `playwright/index.tsx` / `playwright/index.html` 作成
