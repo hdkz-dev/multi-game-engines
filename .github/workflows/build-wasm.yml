@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ── Cache: compiled WASM output ─────────────────────────────────────────
       # Key includes the Emscripten version + Edax tag so any update busts
@@ -103,7 +103,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ── Cache: compiled WASM output ─────────────────────────────────────────
       - name: Cache gnubg WASM build
