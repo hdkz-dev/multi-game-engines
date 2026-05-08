@@ -85,7 +85,7 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/katago/1.14/katago-b6c96.onnx",
               "type": "asset",
-              "__unsafeNoSRI": true
+              "sri": "sha384-bsFD8WHBZJ8aMfeVuPy/oWfp/k882tl+updv5A3hB5Siki7WzaFmlrA16U0TFXow"
             }
           }
         }
@@ -160,7 +160,7 @@
             "main": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/mortal/1.0/mortal.js",
               "type": "worker-js",
-              "__unsafeNoSRI": true
+              "sri": "sha384-FGhtqqhjem3XK3fVHsy4+6jlEF8vSoyw3lIJa1u86fW9J+QErZ2UydMHhMok8UEg"
             }
           }
         }
