@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/domain-poker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Texas Hold'em Poker domain types and validation for multi-game-engines ecosystem",
   "type": "module",
   "license": "MIT",

@@ -1,5 +1,24 @@
 # @multi-game-engines/adapter-usi
 
+## 1.0.0
+
+### Minor Changes
+
+- [`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Add Multi-Runtime Bridge: `resolveRuntime()`, `isNodeEnvironment()`, `ICommunicator` interface, and `RuntimeConfig` type.
+
+  `resolveRuntime(config)` automatically selects `NativeCommunicator` (Node.js, native binary via stdin/stdout) or `WorkerCommunicator` (browser, Web Worker) based on the detected runtime. `BaseAdapter.communicator` is now typed as `ICommunicator | null` to support both communicator kinds.
+
+  `IEngineConfig` gains an optional `binaryPath` field. When set in a Node.js environment, the UCI/USI/GTP adapters bypass the `EngineLoader` and spawn a native binary process directly — no browser-specific loader required.
+
+### Patch Changes
+
+- Updated dependencies [[`9643217`](https://github.com/hdkz-dev/multi-game-engines/commit/9643217e368b1ba38ab70202f925ef0244ff7125), [`d0b16c4`](https://github.com/hdkz-dev/multi-game-engines/commit/d0b16c4178ba32f485810ea3312126efb66c5c8d), [`c70ee30`](https://github.com/hdkz-dev/multi-game-engines/commit/c70ee30b229ef39fc860385014e709b86a4e56fd), [`665899e`](https://github.com/hdkz-dev/multi-game-engines/commit/665899e8cc68aa7674df19a2c9a7947f87f5b0db)]:
+  - @multi-game-engines/i18n-common@0.1.2
+  - @multi-game-engines/core@0.2.0
+  - @multi-game-engines/domain-shogi@0.1.2
+  - @multi-game-engines/i18n-shogi@0.1.1
+  - @multi-game-engines/registry@1.0.0
+
 ## 0.1.6
 
 ### Patch Changes

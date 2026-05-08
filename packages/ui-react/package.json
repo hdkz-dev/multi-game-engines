@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/ui-react",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "React components for multi-game engines (Hub Package)",
   "type": "module",
   "types": "./dist/index.d.ts",
