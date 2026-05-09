@@ -116,7 +116,7 @@
 ### 6.1. Empirical 98% Line Coverage
 
 - **基準**: `core` パッケージにおけるラインカバレッジを 98.4% 以上に保つ。
-- **現状 (2026-05-09 計測)**: lines 84.6% / statements 82.87% / branches 70.39% / functions 79.5%。PR #49 で達成した 98.41% から低下しており、主因は `NativeCommunicator` (47%)、`IndexedDBStorage` (77%)、`ProtocolValidator` (70%) のテスト不足。復元タスクは TASKS.md に登録。
+- **現状 (2026-05-10 計測, PR #140〜#147 マージ後)**: lines **95.72%** / statements **94.79%** / branches **83.95%** / functions **91.61%**。2026-05-09 に 84.6% へ低下したが、`NativeCommunicator` / `WorkerCommunicator` / `ProtocolValidator` / `IndexedDBStorage` / `EngineBridge` / `SecurityAdvisor` / `EnvironmentDiagnostics` / `BaseAdapter` / `EngineFacade` / `OPFSStorage` の追加テストで 11 ポイント超を取り戻し済み。残 ~2.7 pt は `IndexedDBStorage` (versionchange リトライ)、`ResourceInjector` (代替 transport)、`ChunkedDownloader` (Range/SRI 失敗系)、`EngineLoader` (concurrent inflight) 等で TASKS.md に登録。
 - **実装**: 正常系だけでなく、ネットワーク切断、ストレージ競合、不完全なデータ、タイムアウト、スレッド生成失敗などの異常系を物理的にモック・実証するテストスイートを完備する。
 
 ### 6.2. Fault-Tolerant Middleware (Isolation)

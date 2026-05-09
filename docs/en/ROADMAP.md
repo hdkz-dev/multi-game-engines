@@ -88,7 +88,7 @@ The UI layer uses a two-tier architecture that minimises framework coupling whil
 
 - [x] **Turborepo & CI Optimisation**: 100% reproducible fast execution on CI.
 - [x] **Zenith Tier Audit**: Thorough A11y / logic audit across all packages.
-- [~] **Extreme Robustness**: Target ≥98.4% line coverage (98.41% reached at PR #49 → currently **84.6%** as of 2026-05-09). Middleware isolation, circular reference protection, and stream buffering are implemented. Coverage restoration is tracked in TASKS.md.
+- [~] **Extreme Robustness**: Target ≥98.4% line coverage (98.41% reached at PR #49 → regressed to 84.6% on 2026-05-09 → restored to **95.72% (2026-05-10)** by PR #140–#147). Middleware isolation, circular reference protection, and stream buffering are implemented. The remaining ~2.7 pts are tracked in TASKS.md.
 - [x] **API Reference**: TypeDoc auto-generated from all 51 packages; deploys to GitHub Pages on every push to `main`. Zero warnings achieved.
 - [x] **Browser Matrix Verification**: WASM behaviour verified in real browsers via Playwright CT (React 54 tests / Vue 47 tests).
 - [x] **Contract-driven Safety**: Zod runtime validation at Worker communication boundaries.
