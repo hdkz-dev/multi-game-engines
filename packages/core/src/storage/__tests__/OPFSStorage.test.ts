@@ -122,4 +122,27 @@ describe("OPFSStorage", () => {
       recursive: true,
     });
   });
+
+  it("has() should return false when getFileHandle throws", async () => {
+    mockDirHandle.getFileHandle.mockRejectedValue(new Error("not found"));
+    expect(await storage.has("missing")).toBe(false);
+  });
+
+  it("clear() should throw when the directory handle has no keys() iterator", async () => {
+    // Simulate environments where the non-standard keys() iterator is missing.
+    // Supply a fresh mock without `keys`.
+    vi.stubGlobal("navigator", {
+      storage: {
+        getDirectory: vi.fn().mockResolvedValue({
+          getFileHandle: vi.fn(),
+          removeEntry: vi.fn(),
+          // intentionally no keys
+        }),
+      },
+    });
+    const fresh = new OPFSStorage();
+    await expect(fresh.clear()).rejects.toThrow(
+      /Directory iteration \(keys\(\)\) is not supported/,
+    );
+  });
 });
