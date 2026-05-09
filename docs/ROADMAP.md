@@ -94,7 +94,7 @@
 
 - [x] **Turborepo & CI Optimization**: CI 上での 100% 再現可能な高速実行環境。
 - [x] **超深層監査 (Zenith Tier Audit)**: 全 14 パッケージにわたる徹底的な A11y / ロジック監査。
-- [x] **Extreme Robustness**: 98.41% のラインカバレッジ達成。ミドルウェア絶縁、循環参照保護、パケット分割耐性を完備。
+- [~] **Extreme Robustness**: ラインカバレッジ目標 ≥98.4% (PR #49 時点 98.41% 達成 → 2026-05-09 計測 **84.6%** に低下)。ミドルウェア絶縁、循環参照保護、パケット分割耐性は実装済み。カバレッジ復元は TASKS.md にて追跡中。
 - [x] **Continuous Benchmarking**: `vitest bench` によるコアホットパス継続計測 + `.github/workflows/bench.yml` で PR 単位の性能回帰検知。
 - [x] **Self-Healing Docs**: `TypeDoc` 0 warnings 達成 + `docs.yml` による GitHub Pages 自動デプロイ。
 - [x] **Browser Matrix Verification**: `Playwright` による、実ブラウザ上での WASM 動作保証。

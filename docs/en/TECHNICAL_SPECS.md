@@ -174,7 +174,7 @@ All UI components must strictly adhere to the following accessibility standards:
 
 ## 8. Testing Philosophy
 
-- **Empirical 98% Coverage**: Targets 98.41%+ line coverage in `core`, physically demonstrating resilience against network failures, storage locks, and timeout conditions using mocks.
+- **Empirical 98% Coverage**: Targets ≥98.4% line coverage in `core`. PR #49 reached 98.41%; current measurement (2026-05-09) is 84.6% lines, with `NativeCommunicator` / `IndexedDBStorage` / `ProtocolValidator` undercovered. Mock-based proofs against network failures, storage locks, and timeouts remain in place; restoration is tracked in TASKS.md.
 - **Deterministic Telemetry**: Mocks `performance.now()` for environment-independent verification.
 - **Zero-Any Policy**: 100% elimination of `any` in production and test code.
 

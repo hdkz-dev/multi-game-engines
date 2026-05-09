@@ -116,6 +116,7 @@ This document defines the peak design, implementation, and operational standards
 ### 6.1. Empirical 98% Line Coverage
 
 - **Requirement**: Maintain ≥ 98.4% line coverage in the `core` package.
+- **Current (measured 2026-05-09)**: lines 84.6% / statements 82.87% / branches 70.39% / functions 79.5%. Down from 98.41% at PR #49; the gap is concentrated in `NativeCommunicator` (47%), `IndexedDBStorage` (77%), and `ProtocolValidator` (70%). Restoration is tracked in TASKS.md.
 - **Implementation**: The test suite must physically demonstrate resilience against network failures, storage conflicts, incomplete data, timeouts, and thread creation failures via mocks.
 
 ### 6.2. Fault-Tolerant Middleware (Isolation)
