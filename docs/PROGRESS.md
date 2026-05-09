@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `a5eabd83`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `a1f98c1d`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
@@ -57,6 +57,24 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月9日) — README サポート行の正確性修正
+
+`README.md` のエンジンサポート表で 2 行が実装と不整合だった点を修正:
+
+| 項目             | Before                    | After                                                                               |
+| ---------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| Go (KataGo)      | `(GTP) - Ready`           | `(ONNX Runtime Web) - Ready (stub model; set KATAGO_ONNX_URL for production)`       |
+| Mahjong (Mortal) | `(JSON Protocol) - Ready` | `(MahjongJSON Protocol) - Ready (stub Worker; PyTorch→ONNX 移行で実モデル統合予定)` |
+
+- `packages/adapter-katago/src/index.ts` がエクスポートする本体は `KataGoONNXAdapter` (旧 `KataGoAdapter` は backward-compat エイリアス)。GTP は座標表記 (e.g. `Q16`) でしか使われていない。
+- `packages/adapter-mortal/src/MortalAdapter.ts` は `MahjongJSONParser` を Web Worker 経由で利用。プロトコル名を明示し、汎用 JSON-RPC との混同を避けた。
+- 両エンジンとも 2026-05-08 BLOCKER-B 解決時点でスタブ配信中であることを README にも反映 (利用者がアダプタ採用判断を誤らないため)。
+
+**コミット**: `a1f98c1d docs(readme): correct KataGo/Mortal protocol descriptions (#138)`
+**PR**: [#138](https://github.com/hdkz-dev/multi-game-engines/pull/138) — 全 11 CI チェック pass → admin squash-merge
 
 ---
 
