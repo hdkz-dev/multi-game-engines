@@ -34,12 +34,12 @@
 
 - **Chess**: Stockfish 16.1 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
-- **Go**: KataGo (GTP) - **Ready**
+- **Go**: KataGo (ONNX Runtime Web) - **Ready** (stub model; set `KATAGO_ONNX_URL` for production)
 - **Xiangqi**: Universal Chinese Chess Interface (UCCI) - **Ready**
 - **Janggi**: Universal Janggi Chess Interface (UJCI) - **Ready**
 - **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
 - **Gomoku**: Renju Solvers (Custom Protocol) - **Ready**
-- **Mahjong**: Mortal (JSON Protocol) - **Ready**
+- **Mahjong**: Mortal (MahjongJSON Protocol) - **Ready** (stub Worker; PyTorch→ONNX 移行で実モデル統合予定)
 
 ## 🚀 クイックスタート / Quick Start
 
