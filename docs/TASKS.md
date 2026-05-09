@@ -48,8 +48,8 @@
   - [x] **Advanced Features**: `EngineBatchAnalyzer` (Priority/Control), `BinaryVariantSelection` 実装。
   - [x] **Gomoku Domain**: `@multi-game-engines/domain-gomoku` 新設、Branded Types。
   - [x] **Reversi Precision**: `adapter-edax` 固有スコアパースと正規化。
-- [x] **Zenith Robustness & 100% Coverage**: (Critical)
-  - [x] **Extreme Coverage**: `core` パッケージで 98.4% 超のラインカバレッジを達成。
+- [~] **Zenith Robustness & 100% Coverage**: (Critical)
+  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成したが、2026-05-09 計測で **84.6%** に低下。復元タスクとして下記の Coverage Restoration を新設。
   - [x] **Middleware Isolation**: 故障したミドルウェアがエンジン本体を道連れにしない「絶縁」を実装。
   - [x] **Circular Protection**: `ProtocolValidator` に循環参照検知を追加し、スタックオーバーフローを防止。
   - [x] **Native Resilience**: `NativeCommunicator` にパケット分割対応のバッファリングを導入。
@@ -204,6 +204,12 @@
 
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
+- [ ] **Coverage Restoration (`core`)** _(2026-05-09 新規)_: ラインカバレッジを 98.4% 以上に復元する。2026-05-09 時点の実測は lines 84.6% / branches 70.39%。優先順位:
+  - [ ] `src/workers/NativeCommunicator.ts` (現在 47% lines) — Node/Native ブリッジの送受信・パケット分割・終了処理の異常系テスト追加。
+  - [ ] `src/storage/IndexedDBStorage.ts` (77%) — `versionchange` / blocked / quota exceeded / トランザクション中断の網羅。
+  - [ ] `src/protocol/ProtocolValidator.ts` (70%) — 不正スキーマ・型不一致・パスエラーの実証。
+  - [ ] `src/utils/diagnostics.ts` (branches 61%) — フォールバックパスの網羅。
+  - 完了条件: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上。CI に coverage レポーティング & threshold チェックを統合 (回帰防止)。
 - [x] **英語版ドキュメント拡充**: `docs/en/` を日本語版と同期
   - [x] ROADMAP.md — Phase 2〜5 + Multi-Runtime Bridge, Incomplete Information, CT テスト数追加
   - [x] DECISION_LOG.md — ADR-018〜026, 040〜059 全セクション追加 (38 → 40+ エントリ)

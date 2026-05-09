@@ -116,6 +116,7 @@
 ### 6.1. Empirical 98% Line Coverage
 
 - **基準**: `core` パッケージにおけるラインカバレッジを 98.4% 以上に保つ。
+- **現状 (2026-05-09 計測)**: lines 84.6% / statements 82.87% / branches 70.39% / functions 79.5%。PR #49 で達成した 98.41% から低下しており、主因は `NativeCommunicator` (47%)、`IndexedDBStorage` (77%)、`ProtocolValidator` (70%) のテスト不足。復元タスクは TASKS.md に登録。
 - **実装**: 正常系だけでなく、ネットワーク切断、ストレージ競合、不完全なデータ、タイムアウト、スレッド生成失敗などの異常系を物理的にモック・実証するテストスイートを完備する。
 
 ### 6.2. Fault-Tolerant Middleware (Isolation)

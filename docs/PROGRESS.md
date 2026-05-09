@@ -16,6 +16,7 @@
 | `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                              |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
+| `core` カバレッジ (2026-05-09 計測)  | lines 84.6% / branches 70.39% (目標 ≥98.4% / PR #49 時点 98.41%) ⚠️ 復元タスク登録済  |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
