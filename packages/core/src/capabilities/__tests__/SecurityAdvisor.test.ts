@@ -130,4 +130,94 @@ describe("SecurityAdvisor", () => {
       ).rejects.toThrow(/Insecure protocol/);
     });
   });
+
+  describe("assertSRI", () => {
+    it("should resolve when the hash matches", async () => {
+      await expect(
+        SecurityAdvisor.assertSRI(testData, validSha256),
+      ).resolves.toBeUndefined();
+    });
+
+    it("should throw EngineError with SRI_MISMATCH when the hash does not match", async () => {
+      await expect(
+        SecurityAdvisor.assertSRI(testData, invalidSha256),
+      ).rejects.toThrow(/SRI hash verification failed/);
+    });
+  });
+
+  describe("getStatus (header diagnostics)", () => {
+    it("should add missingHeaders entries when COOP/COEP are not on the response", async () => {
+      vi.stubGlobal("window", { location: { href: "https://example.test/" } });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          headers: { get: () => null },
+        } as unknown as Response),
+      );
+      vi.stubGlobal("crossOriginIsolated", false);
+
+      const status = await SecurityAdvisor.getStatus();
+      expect(status.missingHeaders).toEqual([
+        "cross-origin-opener-policy",
+        "cross-origin-embedder-policy",
+      ]);
+    });
+
+    it("should leave missingHeaders undefined when both headers are present", async () => {
+      vi.stubGlobal("window", { location: { href: "https://example.test/" } });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          headers: {
+            get: (name: string) =>
+              name === "cross-origin-opener-policy"
+                ? "same-origin"
+                : "require-corp",
+          },
+        } as unknown as Response),
+      );
+
+      const status = await SecurityAdvisor.getStatus();
+      expect(status.missingHeaders).toBeUndefined();
+    });
+
+    it("should swallow fetch failures and still return a status", async () => {
+      vi.stubGlobal("window", { location: { href: "https://example.test/" } });
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockRejectedValue(new Error("network down")),
+      );
+
+      const status = await SecurityAdvisor.getStatus();
+      expect(status).toBeDefined();
+      expect(status.sriSupported).toBe(true);
+    });
+
+    it("should skip the HEAD request entirely outside browser context", async () => {
+      vi.stubGlobal("window", undefined);
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+
+      await SecurityAdvisor.getStatus();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it("should report sriSupported false when crypto.subtle is unavailable", async () => {
+      vi.stubGlobal("crypto", undefined);
+      const status = await SecurityAdvisor.getStatus();
+      expect(status.sriSupported).toBe(false);
+      expect(status.sriEnabled).toBe(false);
+    });
+  });
+
+  describe("getRemediationAdvice", () => {
+    it("should include COOP and COEP guidance with platform examples", () => {
+      const advice = SecurityAdvisor.getRemediationAdvice();
+      expect(advice).toMatch(/Cross-Origin-Opener-Policy/);
+      expect(advice).toMatch(/Cross-Origin-Embedder-Policy/);
+      expect(advice).toMatch(/Vercel/);
+      expect(advice).toMatch(/Cloudflare/);
+      expect(advice).toMatch(/Netlify/);
+    });
+  });
 });
