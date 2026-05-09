@@ -149,4 +149,19 @@ describe("OtelBridge", () => {
     // テスト環境では @opentelemetry/api は devDep にないため null を返す
     expect(result).toBeNull();
   });
+
+  it("uses engine.{type} span name as a fallback for unknown event types", () => {
+    const event = {
+      type: "custom-bench" as unknown as ITelemetryEvent["type"],
+      timestamp: 7000,
+      metadata: { engineId: "x" },
+    } as ITelemetryEvent;
+
+    const startSpy = vi.spyOn(tracer, "startSpan");
+    bridge.record(event);
+    expect(startSpy).toHaveBeenCalledWith(
+      "engine.custom-bench",
+      expect.any(Object),
+    );
+  });
 });
