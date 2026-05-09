@@ -29,7 +29,7 @@
 8. **環境・リソース制御 (EnvironmentDetector & ResourceGovernor)**: `SharedArrayBuffer` の可用性、RAM、CPU コア数を動的に検知し、実行環境に最適な `Threads` や `Hash` 設定を自動的に算出・適用します。
 9. **環境適応型ストレージ (Environment-Agnostic Storage)**: ブラウザの OPFS/IndexedDB に加え、Node.js/Bun 環境での OS ファイルシステムを利用した `NodeFSStorage` を備え、UI と CLI の両方で効率的なキャッシュ管理を可能にします。また、プラグイン可能なアーキテクチャにより、Cordova や Capacitor 等のネイティブファイル領域への保存ロジックも外部から注入可能です。
 10. **フロー制御と中断 (Flow Control & AbortSignal)**: すべての非同期 I/O および探索プロセスで `AbortSignal` を標準採用。CLI での `Ctrl+C` や UI での画面遷移に即座に反応し、リソースを即座に解放します。
-11. **Zenith Quality (Zero-Any Architecture)**: プロダクションコードにおける `any` の 100% 排除と、`exactOptionalPropertyTypes` 等の極めて厳格な TypeScript 設定により、実行時の予期せぬエラーを構造的に防止します。`core` パッケージのラインカバレッジは目標 **≥98.4%** (PR #49 時点 98.41% 達成)、現在 **84.6% (2026-05-09 計測)** — ネイティブ通信層 (`NativeCommunicator`) 追加に伴うテスト追従が遅れており、復元タスクが [TASKS.md](TASKS.md) で進行中。異常系（ネットワーク切断、ストレージ競合、循環参照等）の実証パターンは確立済み。
+11. **Zenith Quality (Zero-Any Architecture)**: プロダクションコードにおける `any` の 100% 排除と、`exactOptionalPropertyTypes` 等の極めて厳格な TypeScript 設定により、実行時の予期せぬエラーを構造的に防止します。`core` パッケージのラインカバレッジは目標 **≥98.4%** (PR #49 時点 98.41% 達成)、2026-05-09 に 84.6% まで低下したのち PR #140〜#147 で復元中、現在 **95.72% (2026-05-10 計測)**。残 ~2.7 pt は `IndexedDBStorage` / `ResourceInjector` / `ChunkedDownloader` / `EngineLoader` が中心で [TASKS.md](TASKS.md) にて追跡。異常系（ネットワーク切断、ストレージ競合、循環参照等）の実証パターンは確立済み。
 
 ## エンジンのロード戦略 (Loading Strategy)
 
