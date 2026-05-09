@@ -8,11 +8,12 @@
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `41086779`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `a5eabd83`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
 | オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                          |
+| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                              |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
 
@@ -56,6 +57,46 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月9日) — dev-only transitive 脆弱性 6件 一括解消
+
+### 経緯
+
+PR #136 マージ後、念のため `pnpm audit` を実行したところ dev 専用 (`pnpm audit --prod` は元から clean) で 6 件の advisory が残存していた。
+
+| 対象        | Severity | Advisory                                       | Before  | After   |
+| ----------- | -------- | ---------------------------------------------- | ------- | ------- |
+| `minimatch` | high ×3  | ReDoS (wildcards / matchOne / nested extglobs) | 10.1.2  | 10.2.5  |
+| `ajv`       | moderate | ReDoS via `$data` option                       | 8.13.0  | dropped |
+| `lodash`    | high     | Code injection via `_.template`                | 4.17.23 | dropped |
+| `lodash`    | moderate | Prototype pollution via array path bypass      | 4.17.23 | dropped |
+
+すべて `@microsoft/api-extractor` / `@rushstack/node-core-library` 経由の transitive で、ビルド成果物 (npm 公開パッケージ) には到達しない。
+
+### 解決策: 範囲スコープ付き `pnpm.overrides`
+
+**コミット**: `a5eabd83 chore(deps): override vulnerable transitive dev dependencies (#137)`
+**PR**: [#137](https://github.com/hdkz-dev/multi-game-engines/pull/137) — 全 11 CI チェック pass → admin squash-merge
+
+```json
+"fast-uri": ">=3.1.2",
+"minimatch@>=10.0.0 <10.2.3": ">=10.2.3",
+"ajv@>=7.0.0-alpha.0 <8.18.0": ">=8.18.0",
+"lodash@<=4.17.23": ">=4.18.0"
+```
+
+範囲スコープにすることで、advisory に該当しない `minimatch@3.1.5` (eslint-plugin-import) や `ajv@6.15.0` (eslint) など旧メジャーは触らずに残せる。
+
+### 検証結果
+
+| 項目                | 結果                             |
+| ------------------- | -------------------------------- |
+| `pnpm audit`        | 6件 → **0件** ✅                 |
+| `pnpm audit --prod` | 元から clean (公開 package 無事) |
+| `core` テスト       | 39ファイル / 258テスト 全通過 ✅ |
+| CI                  | 全 11 ワークフロー pass ✅       |
 
 ---
 
