@@ -8,10 +8,11 @@
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `06c87d63`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `41086779`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
+| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                          |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
 
@@ -55,6 +56,32 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月9日) — fast-uri 脆弱性 (CVE-2026-6322) 解消
+
+### 経緯
+
+- 2026-05-09 01:41 UTC、Dependabot security update (`fast-uri 3.1.0 → 3.1.x`) が `security_update_not_possible` で失敗 (run `25588070606`)
+- 原因: `fast-uri` は `eslint-plugin-tsdoc → @microsoft/tsdoc-config@0.18.1 → ajv@8.18.0` の **transitive dependency** で、`pnpm update` ではトランジティブ解決を書き換えられない
+- Dependabot 報告: `latest-resolvable: 3.1.0` / `lowest-non-vulnerable: 3.1.2` (conflict なし)
+
+### 解決策: `pnpm.overrides` で固定
+
+**コミット**: `41086779 chore(deps): override fast-uri to >=3.1.2 to fix CVE-2026-6322 (#136)`
+**PR**: [#136](https://github.com/hdkz-dev/multi-game-engines/pull/136) — 全 11 CI チェック pass → admin squash-merge
+
+**変更内容**: `package.json` の `pnpm.overrides` に `"fast-uri": ">=3.1.2"` 追加 → lockfile が `3.1.0` → `3.1.2` に固定
+
+**解決された脆弱性**:
+
+| Alert | GHSA / CVE                          | 内容                                                   | Severity |
+| ----- | ----------------------------------- | ------------------------------------------------------ | -------- |
+| #63   | fast-uri path traversal             | percent-encoded dot segments で経路偽装                | high     |
+| #64   | GHSA-v39h-62p7-jpjc / CVE-2026-6322 | percent-encoded authority delimiters で host confusion | high     |
+
+両アラートはマージ後に自動クローズ → **オープン Dependabot alerts: 2 → 0**
 
 ---
 
