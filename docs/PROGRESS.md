@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                  |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `a1f98c1d`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
+| CI 全ワークフロー (HEAD: `e401affa`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
 | オープン PR                          | **0件**                                                                               |
 | オープン Issue                       | **0件**                                                                               |
@@ -58,6 +58,57 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月9日) — Coverage 主張の真実性同期 + 復元タスク登録
+
+### 経緯
+
+PR #138 マージ後、念のため `vitest run --coverage` を実行したところ、ドキュメント 16 箇所で公称している **98.41%** ラインカバレッジから乖離していた:
+
+| 指標       | 実測 (2026-05-09)     |
+| ---------- | --------------------- |
+| Lines      | **84.6%** (1149/1358) |
+| Statements | 82.87% (1210/1460)    |
+| Branches   | **70.39%** (566/804)  |
+| Functions  | 79.5% (256/322)       |
+
+98.41% は **PR #49 (2026-03-04)** 時点の達成値。それ以降に追加された主要コード (`NativeCommunicator` 47% lines / `IndexedDBStorage` 77% / `ProtocolValidator` 70%) のテスト追従が遅れたため低下。
+
+### 解決策: 真実の同期 + 復元タスク登録
+
+**コミット**: `e401affa docs(coverage): align coverage claims with measured reality + register restoration task (#139)`
+**PR**: [#139](https://github.com/hdkz-dev/multi-game-engines/pull/139) — 全 11 CI チェック pass → admin squash-merge
+
+#### 同期した公開資料 (16 箇所)
+
+- `README.md` / `docs/ARCHITECTURE.md` (jp/en) / `docs/ROADMAP.md` (jp/en): 目標 ≥98.4% と現状値・計測日を併記。ROADMAP は `[x]` → `[~]` (in flight) に変更。
+- `docs/ZENITH_STANDARD.md` (jp/en): 6.1 の基準は維持し、「現状」行を追加。
+- `docs/en/TECHNICAL_SPECS.md`: Targets 98.41% → ≥98.4% + 現状補記。
+- `docs/TASKS.md`: 「Extreme Coverage」を `[~]` に変更。
+- `docs/PROGRESS.md`: 現在状態スナップショットに `core` カバレッジ行を追加。
+
+#### 新規バックログ: **Coverage Restoration (`core`)**
+
+`docs/TASKS.md` に登録。優先順位 (lines% 基準):
+
+1. `src/workers/NativeCommunicator.ts` (47%) — Node/Native ブリッジの送受信・パケット分割・終了処理の異常系
+2. `src/storage/IndexedDBStorage.ts` (77%) — `versionchange` / blocked / quota exceeded / トランザクション中断
+3. `src/protocol/ProtocolValidator.ts` (70%) — 不正スキーマ・型不一致・パスエラー
+4. `src/utils/diagnostics.ts` (branches 61%) — フォールバックパス
+
+完了条件: `pnpm exec vitest run --coverage` の Lines が 98.4% 以上 + CI に coverage threshold チェック統合 (回帰防止)。
+
+#### 不変 (理由)
+
+- `AI_INSTRUCTIONS.md` / `CONFIGURATION_GUIDELINES.md` / ADR-054: ポリシー宣言 (目標) であり計測値ではない。
+- 旧 PROGRESS.md の PR #49 関連記述: 当時の事実として保存。
+- `docs/api/*` (TypeDoc 生成物): 次回 docs build で自動更新。
+
+### 副次変更
+
+- `.gitignore` に `.claude/scheduled_tasks.lock` 追加 — Claude Code セッションランタイムが生成するロックファイルがブランチ初回コミットで誤って混入したため、untrack + 将来の再混入防止。
 
 ---
 
