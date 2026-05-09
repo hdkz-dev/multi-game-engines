@@ -6,17 +6,17 @@
 
 ### CI / ブランチ / npm
 
-| 項目                                  | 状態                                                                                              |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `89536da4`)  | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)             |
-| リモートブランチ                      | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                             |
-| オープン PR                           | **0件**                                                                                           |
-| オープン Issue                        | **0件**                                                                                           |
-| オープン Dependabot alerts            | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                      |
-| `pnpm audit` (dev 含む)               | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                          |
-| npm publish                           | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                         |
-| テスト                                | `core`: 39ファイル / 258テスト 全通過                                                             |
-| `core` カバレッジ (2026-05-09 進行中) | lines **89.24%** / branches **75.24%** (目標 ≥98.4%) — 復元タスク進行中 (PR #140/#141 マージ済み) |
+| 項目                                 | 状態                                                                                               |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `9d08509c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
+| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                              |
+| オープン PR                          | **0件**                                                                                            |
+| オープン Issue                       | **0件**                                                                                            |
+| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                       |
+| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                           |
+| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                          |
+| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                              |
+| `core` カバレッジ (2026-05-10 計測)  | lines **95.72%** / branches **83.95%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#147 マージ済み) |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -58,6 +58,44 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月10日) — Coverage Restoration: ステップ 3〜8 (89.24% → 95.72% lines)
+
+PR #140/#141 に続いて、`packages/core` ラインカバレッジを **89.24% → 95.72%**、ブランチを **75.24% → 83.95%** に引き上げた。目標 (≥98.4% lines) までの差は約 2.7 ポイント。残りは IndexedDBStorage / ResourceInjector / ChunkedDownloader / EngineLoader の長尾。
+
+| PR                                                              | 対象                                               | Before → After                                   |
+| --------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| [#142](https://github.com/hdkz-dev/multi-game-engines/pull/142) | `IndexedDBStorage.ts`                              | 77.01% → 85.05% lines (20% → 64% branches)       |
+| [#143](https://github.com/hdkz-dev/multi-game-engines/pull/143) | `EngineBridge.ts`                                  | 69.09% → 98.18% lines (59.45% → 94.59% branches) |
+| [#144](https://github.com/hdkz-dev/multi-game-engines/pull/144) | `SecurityAdvisor.ts` + `EnvironmentDiagnostics.ts` | 78.84% → 100% lines / 61.11% → 88.88% branches   |
+| [#145](https://github.com/hdkz-dev/multi-game-engines/pull/145) | `BaseAdapter.ts`                                   | 76.87% → 94.55% lines (64.63% → 87.8% branches)  |
+| [#146](https://github.com/hdkz-dev/multi-game-engines/pull/146) | `EngineFacade.ts` + `OtelBridge.ts`                | 79.35% → 95.48% lines / 87.5% → 94% lines        |
+| [#147](https://github.com/hdkz-dev/multi-game-engines/pull/147) | `OPFSStorage.ts`                                   | 93.33% → 100% lines (50% → 100% branches)        |
+
+### 主な追加テストの方針
+
+- **共通**: 異常系（タイムアウト・AbortSignal・エラーイベント・終了処理）を物理的に実証
+- **`IndexedDBStorage`**: `ensureDb` の keep-alive 検査と本来の操作で同じ `db.transaction` を呼ぶため、最初の呼び出しのみ実装に通し、2 回目以降を破壊するヘルパー (`installTransactionSpy`) を導入
+- **`ProtocolValidator`**: 4 つのファクトリ関数 (`createMove` / `createPositionString` / `createPositionId` / `createI18nKey`) を全テスト
+- **`EngineFacade` / `BaseAdapter`**: ライフサイクル全段 (load / search / stop / setOption / setBook / dispose) と `dispose` 後の dispatch 抑止を検証
+- **`EnvironmentDiagnostics`**: ブラウザグローバル (`navigator` / `crossOriginIsolated` / `SharedArrayBuffer` / `document` / `performance`) の不在ケースを完全網羅
+
+### 残ギャップ (≥98.4% 達成までの優先順位)
+
+| ファイル                                  | 残未カバー lines | 推定難度                              |
+| ----------------------------------------- | ---------------- | ------------------------------------- |
+| `src/storage/IndexedDBStorage.ts`         | 13               | 中 (versionchange リトライ系)         |
+| `src/workers/ResourceInjector.ts`         | 8                | 中 (代替 transport)                   |
+| `src/storage/ChunkedDownloader.ts`        | 5                | 高 (Range 失敗 / セグメント SRI 失敗) |
+| `src/bridge/EngineLoader.ts`              | 5                | 中 (concurrent inflight / useChunked) |
+| `src/adapters/BaseAdapter.ts`             | ~6               | 低〜中 (long tail)                    |
+| `src/bridge/EngineFacade.ts`              | ~6               | 低〜中 (long tail)                    |
+| `src/storage/index.ts`                    | 1                | 低                                    |
+| `src/capabilities/HardwareAccelerator.ts` | 1                | 低                                    |
+
+合計 ~45 行未カバー。98.4% 達成にはこのうち ~36 行を埋める必要があり、続セッションで継続実装。完了条件は変わらず: `pnpm exec vitest run --coverage` の Lines が 98.4% 以上 + CI に coverage threshold チェック統合 (回帰防止)。
 
 ---
 
