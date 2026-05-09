@@ -6,17 +6,17 @@
 
 ### CI / ブランチ / npm
 
-| 項目                                 | 状態                                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `e401affa`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI) |
-| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                 |
-| オープン PR                          | **0件**                                                                               |
-| オープン Issue                       | **0件**                                                                               |
-| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                          |
-| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                              |
-| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等             |
-| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                 |
-| `core` カバレッジ (2026-05-09 計測)  | lines 84.6% / branches 70.39% (目標 ≥98.4% / PR #49 時点 98.41%) ⚠️ 復元タスク登録済  |
+| 項目                                  | 状態                                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `89536da4`)  | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)             |
+| リモートブランチ                      | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                             |
+| オープン PR                           | **0件**                                                                                           |
+| オープン Issue                        | **0件**                                                                                           |
+| オープン Dependabot alerts            | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                      |
+| `pnpm audit` (dev 含む)               | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                          |
+| npm publish                           | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                         |
+| テスト                                | `core`: 39ファイル / 258テスト 全通過                                                             |
+| `core` カバレッジ (2026-05-09 進行中) | lines **89.24%** / branches **75.24%** (目標 ≥98.4%) — 復元タスク進行中 (PR #140/#141 マージ済み) |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -58,6 +58,46 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月9日) — Coverage Restoration: ステップ 1 + 2 (84.6% → 89.24% lines)
+
+PR #139 で登録した「Coverage Restoration」バックログを 2 PR で着手。`packages/core` のラインカバレッジを **84.6% → 89.24%**、ブランチを **70.39% → 75.24%** に引き上げた。目標 (≥98.4% lines) までの差は約 9 ポイント。
+
+### PR [#140](https://github.com/hdkz-dev/multi-game-engines/pull/140) — `src/workers/`
+
+**コミット**: `6715850c test(core): cover NativeCommunicator + WorkerCommunicator (84.6% → 88.29% lines) (#140)`
+
+| ファイル                            | Lines (Before → After) | Branches (Before → After) |
+| ----------------------------------- | ---------------------- | ------------------------- |
+| `src/workers/NativeCommunicator.ts` | 47.05% → **95.58%**    | 35% → **90.32%**          |
+| `src/workers/WorkerCommunicator.ts` | 63.04% → **100%**      | 20% → **80%**             |
+| `src/workers/` フォルダ             | 86.69% → **95.07%**    | 70.89% → **77.61%**       |
+
+`expectMessage` の resolve / timeout / AbortSignal / numeric back-compat / 並行 waiter / 再エントランス時のタイマー後始末を全網羅。`terminate()` の SIGTERM → SIGKILL エスカレーションも実証。`WorkerCommunicator` は `worker.onerror` の rejection 経路も追加。
+
+### PR [#141](https://github.com/hdkz-dev/multi-game-engines/pull/141) — `src/protocol/ProtocolValidator.ts`
+
+**コミット**: `89536da4 test(core): cover ProtocolValidator factory functions (70% → ~98% lines) (#141)`
+
+| ファイル                            | Lines (Before → After) | Branches (Before → After) |
+| ----------------------------------- | ---------------------- | ------------------------- |
+| `src/protocol/ProtocolValidator.ts` | 70.45% → **~98%**      | 72.72% → **~98%**         |
+| `src/protocol/` フォルダ            | 78.87% → **97.18%**    | 78.33% → **98.33%**       |
+
+旧テストは `assertNoInjection` のみ。本 PR で 4 つのファクトリ関数 (`createMove` / `createPositionString` / `createPositionId` / `createI18nKey`) と `assertNoInjection` の追加ブランチ (`null`/`undefined` 通過、プリミティブスキップ、DEL/制御文字、LOOSE モードでの非セミコロン制御文字、`remediation` 文字列の差異) を全実証。
+
+### 残り (≥98.4% 達成までの優先順位)
+
+1. `EngineBridge` (69%)
+2. `BaseAdapter` (77%)
+3. `IndexedDBStorage` (77% lines / **20% branches** ← branches 最悪)
+4. `EngineFacade` (79%)
+5. `CapabilityAdvisor` (79%)
+6. `diagnostics` (lines 100% / branches 61%)
+
+達成条件: `pnpm exec vitest run --coverage` の Lines が 98.4% 以上 + CI に coverage threshold チェックを統合 (回帰防止)。
 
 ---
 
