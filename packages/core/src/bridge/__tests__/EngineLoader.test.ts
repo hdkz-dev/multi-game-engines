@@ -224,6 +224,27 @@ describe("EngineLoader", () => {
     expect(vi.mocked(fetch).mock.calls.length).toBe(1);
   });
 
+  it("should delegate to ChunkedDownloader when config.size >= 32 MiB", async () => {
+    // Spy on the loader's internal chunkedDownloader.download
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const downloader = (loader as any).chunkedDownloader as {
+      download: (...args: unknown[]) => Promise<{ buffer: ArrayBuffer }>;
+    };
+    const downloadSpy = vi
+      .spyOn(downloader, "download")
+      .mockResolvedValue({ buffer: new TextEncoder().encode("xxx").buffer });
+
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/big.wasm",
+      type: "wasm",
+      sri: dummySRI,
+      size: 64 * 1024 * 1024, // 64 MiB → above the 32 MiB threshold
+    };
+
+    await loader.loadResource("test-chunked", config);
+    expect(downloadSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("should return the same in-flight promise for concurrent loads of the same resource", async () => {
     const config: IEngineSourceConfig = {
       url: "https://test.com/inflight.js",
