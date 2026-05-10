@@ -8,7 +8,7 @@
 
 - **Facade & Adapter Pattern**: エンジンごとの通信詳細を隠蔽し、統一された API でチェスや将棋の AI を操作可能。
 - **Unified Score Normalization**: 異種ゲームの評価値を `-1.0 〜 1.0` に統合。UI での汎用表示を実現。
-- **Zenith Robustness & High Coverage**: `core` パッケージのラインカバレッジは目標 **≥98.4%** (PR #49 時点 98.41%)。2026-05-09 計測の 84.6% から復元中で、現在 **97.64% (2026-05-10 計測, PR #140〜#152 マージ後)**。残ギャップ約 0.76 pt は `ResourceInjector` worker-scope 検出 / `EngineFacade` dispose-during-search の race パスで、[TASKS.md](docs/TASKS.md) で追跡中。ミドルウェア絶縁、循環参照保護、パケット分割耐性は実装済み。
+- **Zenith Robustness & High Coverage**: `core` パッケージのラインカバレッジは目標 **≥98.4%** (PR #49 時点 98.41%)。2026-05-09 計測の 84.6% から復元中で、現在 **98.01% (2026-05-10 計測, PR #140〜#155 マージ後)** ✅ 98% 突破。残ギャップ約 0.39 pt は `EngineFacade` dispose-timing 微小 / `ResourceInjector` worker-scope 検出で、[TASKS.md](docs/TASKS.md) で追跡中。ミドルウェア絶縁、循環参照保護、パケット分割耐性は実装済み。
 - **Universal Storage & Flow Control**: Web (OPFS) / Node.js (Local FS) の自動切替と AbortSignal 制御。
 - **AI Ensemble 開発**: Gemini, CodeRabbit, DeepSource, Snyk 等の AI ツールが相互に監査を行う自律的品質保証。
 - **Modern Security**: SRI 必須化、分割検証 (Segmented SRI)、および「Refuse by Exception」ポリシー。
