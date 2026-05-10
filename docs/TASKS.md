@@ -232,6 +232,8 @@
     - [ ] `src/storage/index.ts` (1 行) — IndexedDBStorage コンストラクタ throw → MemoryStorage フォールバック
     - 各種 long tail (BaseAdapter / NativeCommunicator / SegmentedVerifier 等)
   - **完了条件**: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上。CI に coverage レポーティング & threshold チェックを統合 (回帰防止)。
+    - [x] CI threshold 統合 — `packages/core/vitest.config.ts` の `coverage.thresholds` (lines: 98 / branches: 87 / statements: 97 / functions: 93) + `.github/workflows/ci.yml` の `Coverage threshold (core)` ステップ (PR #158)
+    - [ ] Lines を 98.4% 以上へ — 残 ~6 行は実 Worker scope / dispose-timing micro が必要
 - [x] **英語版ドキュメント拡充**: `docs/en/` を日本語版と同期
   - [x] ROADMAP.md — Phase 2〜5 + Multi-Runtime Bridge, Incomplete Information, CT テスト数追加
   - [x] DECISION_LOG.md — ADR-018〜026, 040〜059 全セクション追加 (38 → 40+ エントリ)
