@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                               |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `9d08509c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
+| CI 全ワークフロー (HEAD: `35ea1577`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                              |
 | オープン PR                          | **0件**                                                                                            |
 | オープン Issue                       | **0件**                                                                                            |
@@ -16,7 +16,7 @@
 | `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                           |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                          |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                              |
-| `core` カバレッジ (2026-05-10 計測)  | lines **95.72%** / branches **83.95%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#147 マージ済み) |
+| `core` カバレッジ (2026-05-10 計測)  | lines **97.34%** / branches **85.57%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#150 マージ済み) |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -58,6 +58,29 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月10日, 続) — Coverage Restoration: ステップ 9〜11 (95.72% → 97.34% lines)
+
+PR #140〜#147 に続き、PR #148 (公開資料 8 箇所同期)、PR #149 (IDB 強化 + HW + Bun)、PR #150 (Loader/NodeFS/Adapter) で 1.62 ポイント追加で取り戻し。**14 pt のうち 12.74 pt (91%) 解消**、残り **約 1.06 pt**。
+
+| PR                                                              | 対象                                                                         | Before → After                                                                   |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [#148](https://github.com/hdkz-dev/multi-game-engines/pull/148) | (Docs only)                                                                  | README + 7 docs を 84.6% → 95.72% へ同期                                         |
+| [#149](https://github.com/hdkz-dev/multi-game-engines/pull/149) | `IndexedDBStorage.ts` (2 段目) + `HardwareAccelerator.ts` + `StorageFactory` | IDB 85% → 98.85% lines / 64% → 96% branches、HW 93% → 100%、Bun runtime 検出追加 |
+| [#150](https://github.com/hdkz-dev/multi-game-engines/pull/150) | `EngineLoader.ts` + `NodeFSStorage.ts` + `BaseAdapter.ts`                    | Loader 94% → 97.75% / NodeFS 95.91% → 100% / Adapter 94.55% → 97.27%             |
+
+### 最終残ギャップ (≥98.4% 達成までの優先順位)
+
+| ファイル                           | 残未カバー lines | 推定難度                                                                        |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------- |
+| `src/bridge/EngineFacade.ts`       | ~13              | 中〜高 (middleware error 系 / dispose-during-search / loadingStrategy "manual") |
+| `src/workers/ResourceInjector.ts`  | 8                | 中 (worker-scope 検出 / 代替 transport / fallback)                              |
+| `src/storage/ChunkedDownloader.ts` | 5                | 高 (HEAD/Range/SRI 失敗系)                                                      |
+| `src/storage/index.ts`             | 1                | 低 (IDB ctor throw → MemoryStorage フォールバック)                              |
+
+98.4% 達成にはあと **~14 行** カバーが必要。完了条件は変わらず: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上 + CI に coverage threshold チェック統合 (回帰防止)。
 
 ---
 
