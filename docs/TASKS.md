@@ -49,7 +49,7 @@
   - [x] **Gomoku Domain**: `@multi-game-engines/domain-gomoku` 新設、Branded Types。
   - [x] **Reversi Precision**: `adapter-edax` 固有スコアパースと正規化。
 - [~] **Zenith Robustness & 100% Coverage**: (Critical)
-  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#150 で **97.34% (2026-05-10)** まで復元。残 ~1.06 pt は下記 Coverage Restoration 残項目で追跡。
+  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#152 で **97.64% (2026-05-10)** まで復元。残 ~0.76 pt は下記 Coverage Restoration 残項目で追跡。
   - [x] **Middleware Isolation**: 故障したミドルウェアがエンジン本体を道連れにしない「絶縁」を実装。
   - [x] **Circular Protection**: `ProtocolValidator` に循環参照検知を追加し、スタックオーバーフローを防止。
   - [x] **Native Resilience**: `NativeCommunicator` にパケット分割対応のバッファリングを導入。
@@ -205,7 +205,7 @@
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [~] **Coverage Restoration (`core`)** _(2026-05-09 新規, 2026-05-10 進行中)_: ラインカバレッジを 98.4% 以上に復元する。
-  - **進捗**: lines 84.6% (2026-05-09) → **97.34%** (2026-05-10, PR #140〜#150 マージ後) / branches 70.39% → **85.57%**。14 pt のうち約 **12.74 pt (91%)** 解消。
+  - **進捗**: lines 84.6% (2026-05-09) → **97.64%** (2026-05-10, PR #140〜#152 マージ後) / branches 70.39% → **86.81%**。14 pt のうち約 **13.04 pt (93%)** 解消。
   - **完了済み**:
     - [x] `src/workers/NativeCommunicator.ts` — 47% → 95.58% lines (PR #140)
     - [x] `src/workers/WorkerCommunicator.ts` — 63% → 100% lines (PR #140)
@@ -221,12 +221,14 @@
     - [x] `src/storage/OPFSStorage.ts` — 93.3% → 100% lines (PR #147)
     - [x] `src/storage/NodeFSStorage.ts` — 95.91% → 100% lines (PR #150)
     - [x] `src/bridge/EngineLoader.ts` — 94.38% → 97.75% lines (PR #150)
-  - **残項目** (合計 ~36 行未カバー、98.4% 達成にあと ~14 行):
-    - [ ] `src/bridge/EngineFacade.ts` (~13 行) — middleware error 系 / dispose-during-search / loadingStrategy "manual" path
-    - [ ] `src/workers/ResourceInjector.ts` (残 8 行) — worker-scope 検出 / 代替 transport / fallback パス
-    - [ ] `src/storage/ChunkedDownloader.ts` (残 5 行) — HEAD 失敗、Range 失敗、セグメント SRI 失敗、SRI フォーマットエラー
+    - [x] `src/bridge/EngineFacade.ts` — 95.48% → 96.77% lines, listener/load 系拡充 (PR #152)
+    - [x] `src/storage/ChunkedDownloader.ts` — 93.75% → 96.87% lines, storage reject / 不正 SRI / HEAD 失敗 (PR #152)
+  - **残項目** (合計 ~32 行未カバー、98.4% 達成にあと ~10 行):
+    - [ ] `src/workers/ResourceInjector.ts` (残 8 行) — worker-scope 検出 / postMessage handler / fallback パス
+    - [ ] `src/bridge/EngineFacade.ts` (残 ~10 行) — dispose-during-search の race パス、search 内 onResult middleware、`stop()`/`dispose()` の `currentSearchTask` 連動
+    - [ ] `src/storage/ChunkedDownloader.ts` (残 2 行) — chunked Range fetch の HTTP error throw、segment SRI 検証
     - [ ] `src/storage/index.ts` (1 行) — IndexedDBStorage コンストラクタ throw → MemoryStorage フォールバック
-    - 各種 long tail
+    - 各種 long tail (BaseAdapter / NativeCommunicator / SegmentedVerifier 等)
   - **完了条件**: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上。CI に coverage レポーティング & threshold チェックを統合 (回帰防止)。
 - [x] **英語版ドキュメント拡充**: `docs/en/` を日本語版と同期
   - [x] ROADMAP.md — Phase 2〜5 + Multi-Runtime Bridge, Incomplete Information, CT テスト数追加

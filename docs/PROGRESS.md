@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                               |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `35ea1577`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
+| CI 全ワークフロー (HEAD: `4b078ecd`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                              |
 | オープン PR                          | **0件**                                                                                            |
 | オープン Issue                       | **0件**                                                                                            |
@@ -16,7 +16,7 @@
 | `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                           |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                          |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                              |
-| `core` カバレッジ (2026-05-10 計測)  | lines **97.34%** / branches **85.57%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#150 マージ済み) |
+| `core` カバレッジ (2026-05-10 計測)  | lines **97.64%** / branches **86.81%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#152 マージ済み) |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -58,6 +58,27 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月10日, 終盤) — Coverage Restoration: ステップ 12 (97.34% → 97.64% lines)
+
+PR #152 で `EngineFacade` (95.48% → 96.77%) と `ChunkedDownloader` (93.75% → 96.87%) を強化、package を **97.64% lines / 86.81% branches** へ。**14 pt のうち 13.04 pt (93%) 解消**、残り **約 0.76 pt**。
+
+| PR                                                              | 対象                                       | Before → After                                                                                               |
+| --------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| [#152](https://github.com/hdkz-dev/multi-game-engines/pull/152) | `EngineFacade.ts` + `ChunkedDownloader.ts` | Facade dispose-listener 早期 return / load() guard / ChunkedDownloader storage reject / 不正 SRI / HEAD 失敗 |
+
+### 最終残ギャップ (≥98.4% 達成までの優先順位)
+
+| ファイル                           | 残未カバー lines | 推定難度                                                           |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------ |
+| `src/workers/ResourceInjector.ts`  | 8                | 中〜高 (worker scope detection / postMessage handler)              |
+| `src/bridge/EngineFacade.ts`       | ~10              | 中 (dispose-during-search の race / search 内 onResult middleware) |
+| `src/storage/ChunkedDownloader.ts` | 残 2             | 高 (chunked Range fetch HTTP error / segment SRI)                  |
+| `src/storage/index.ts`             | 1                | 低 (IDB ctor throw → MemoryStorage)                                |
+
+98.4% 達成にはあと **~10 行** カバーが必要。完了条件は変わらず: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上 + CI に coverage threshold チェック統合 (回帰防止)。
 
 ---
 

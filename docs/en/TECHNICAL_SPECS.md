@@ -174,7 +174,7 @@ All UI components must strictly adhere to the following accessibility standards:
 
 ## 8. Testing Philosophy
 
-- **Empirical 98% Coverage**: Targets ≥98.4% line coverage in `core`. PR #49 reached 98.41%; regressed to 84.6% on 2026-05-09; recovered to **97.34% (2026-05-10)** by PR #140–#150. Mock-based proofs against network failures, storage locks, and timeouts remain in place; the remaining ~1.06 pts (`EngineFacade` middleware-error paths, `ResourceInjector` worker-scope branches, `ChunkedDownloader` Range/SRI failure) are tracked in TASKS.md.
+- **Empirical 98% Coverage**: Targets ≥98.4% line coverage in `core`. PR #49 reached 98.41%; regressed to 84.6% on 2026-05-09; recovered to **97.64% (2026-05-10)** by PR #140–#152. Mock-based proofs against network failures, storage locks, and timeouts remain in place; the remaining ~0.76 pts (`ResourceInjector` worker-scope detection, `EngineFacade` dispose-during-search race paths) are tracked in TASKS.md.
 - **Deterministic Telemetry**: Mocks `performance.now()` for environment-independent verification.
 - **Zero-Any Policy**: 100% elimination of `any` in production and test code.
 
