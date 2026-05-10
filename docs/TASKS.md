@@ -49,7 +49,7 @@
   - [x] **Gomoku Domain**: `@multi-game-engines/domain-gomoku` 新設、Branded Types。
   - [x] **Reversi Precision**: `adapter-edax` 固有スコアパースと正規化。
 - [~] **Zenith Robustness & 100% Coverage**: (Critical)
-  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#152 で **97.64% (2026-05-10)** まで復元。残 ~0.76 pt は下記 Coverage Restoration 残項目で追跡。
+  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#155 で **98.01% (2026-05-10)** まで復元 ✅ 98% 突破。残 ~0.39 pt は下記 Coverage Restoration 残項目で追跡。
   - [x] **Middleware Isolation**: 故障したミドルウェアがエンジン本体を道連れにしない「絶縁」を実装。
   - [x] **Circular Protection**: `ProtocolValidator` に循環参照検知を追加し、スタックオーバーフローを防止。
   - [x] **Native Resilience**: `NativeCommunicator` にパケット分割対応のバッファリングを導入。
@@ -205,7 +205,7 @@
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
 - [~] **Coverage Restoration (`core`)** _(2026-05-09 新規, 2026-05-10 進行中)_: ラインカバレッジを 98.4% 以上に復元する。
-  - **進捗**: lines 84.6% (2026-05-09) → **97.64%** (2026-05-10, PR #140〜#152 マージ後) / branches 70.39% → **86.81%**。14 pt のうち約 **13.04 pt (93%)** 解消。
+  - **進捗**: lines 84.6% (2026-05-09) → **98.01%** (2026-05-10, PR #140〜#155 マージ後) / branches 70.39% → **88.05%** ✅ 98% 突破。14 pt のうち約 **13.41 pt (96%)** 解消。
   - **完了済み**:
     - [x] `src/workers/NativeCommunicator.ts` — 47% → 95.58% lines (PR #140)
     - [x] `src/workers/WorkerCommunicator.ts` — 63% → 100% lines (PR #140)
@@ -221,11 +221,13 @@
     - [x] `src/storage/OPFSStorage.ts` — 93.3% → 100% lines (PR #147)
     - [x] `src/storage/NodeFSStorage.ts` — 95.91% → 100% lines (PR #150)
     - [x] `src/bridge/EngineLoader.ts` — 94.38% → 97.75% lines (PR #150)
-    - [x] `src/bridge/EngineFacade.ts` — 95.48% → 96.77% lines, listener/load 系拡充 (PR #152)
+    - [x] `src/bridge/EngineFacade.ts` — 95.48% → 98.06% lines, listener/load + dispose race + 内 onResult mw 拡充 (PR #152, #155)
     - [x] `src/storage/ChunkedDownloader.ts` — 93.75% → 96.87% lines, storage reject / 不正 SRI / HEAD 失敗 (PR #152)
-  - **残項目** (合計 ~32 行未カバー、98.4% 達成にあと ~10 行):
-    - [ ] `src/workers/ResourceInjector.ts` (残 8 行) — worker-scope 検出 / postMessage handler / fallback パス
-    - [ ] `src/bridge/EngineFacade.ts` (残 ~10 行) — dispose-during-search の race パス、search 内 onResult middleware、`stop()`/`dispose()` の `currentSearchTask` 連動
+    - [x] `src/workers/ResourceInjector.ts` — 91.35% → 92.59% lines, listen() handler + mountToVFS EEXIST/EACCES (PR #154)
+    - [x] `src/bridge/EngineLoader.ts` — 97.75% → 100% lines, chunked download path (PR #154)
+  - **残項目** (合計 ~26 行未カバー、98.4% 達成にあと ~6 行):
+    - [ ] `src/bridge/EngineFacade.ts` (残 3 行) — dispose-during-search の最初の disposed check (line 265) と `if (this.currentSearchTask)` 連動 (line 338) — タイミング微小
+    - [ ] `src/workers/ResourceInjector.ts` (残 6 行) — `self.postMessage` 通知 / Worker-scope 専用 onmessage 経路 — 実 Worker scope が必要
     - [ ] `src/storage/ChunkedDownloader.ts` (残 2 行) — chunked Range fetch の HTTP error throw、segment SRI 検証
     - [ ] `src/storage/index.ts` (1 行) — IndexedDBStorage コンストラクタ throw → MemoryStorage フォールバック
     - 各種 long tail (BaseAdapter / NativeCommunicator / SegmentedVerifier 等)

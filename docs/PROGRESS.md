@@ -8,7 +8,7 @@
 
 | 項目                                 | 状態                                                                                               |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `4b078ecd`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
+| CI 全ワークフロー (HEAD: `f726413c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
 | リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                              |
 | オープン PR                          | **0件**                                                                                            |
 | オープン Issue                       | **0件**                                                                                            |
@@ -16,7 +16,7 @@
 | `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                           |
 | npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                          |
 | テスト                               | `core`: 39ファイル / 258テスト 全通過                                                              |
-| `core` カバレッジ (2026-05-10 計測)  | lines **97.64%** / branches **86.81%** (目標 ≥98.4%) — 復元タスク継続中 (PR #140〜#152 マージ済み) |
+| `core` カバレッジ (2026-05-10 計測)  | lines **98.01%** / branches **88.05%** (目標 ≥98.4%) — ✅ 98% 突破、PR #140〜#155 で 13.41 pt 復元 |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -58,6 +58,33 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+
+---
+
+## ✅ 直近完了タスク (2026年5月10日, 大詰め) — Coverage Restoration: ステップ 13〜14 (97.64% → 98.01% lines, ✅ 98% 突破)
+
+PR #154 で `ResourceInjector` worker handler + `EngineLoader` chunked path、PR #155 で `EngineFacade` dispose race を強化、package を **98.01% lines / 88.05% branches** へ。**14 pt のうち 13.41 pt (96%) 解消**、残り **約 0.39 pt**。
+
+| PR                                                              | 対象                                      | Before → After                                  |
+| --------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------- |
+| [#154](https://github.com/hdkz-dev/multi-game-engines/pull/154) | `ResourceInjector.ts` + `EngineLoader.ts` | Injector 91.35% → 92.59% / Loader 97.75% → 100% |
+| [#155](https://github.com/hdkz-dev/multi-game-engines/pull/155) | `EngineFacade.ts` (dispose race)          | 96.77% → **98.06%** lines                       |
+
+### 達成の節目: **Lines 98% 突破** (2026-05-10)
+
+- 開始時 14 pt ギャップを 13.41 pt 解消 (96%)
+- **100% カバレッジ達成: 6 ファイル** — WorkerCommunicator / SecurityAdvisor / OPFSStorage / NodeFSStorage / HardwareAccelerator / **EngineLoader (PR #154 で追加)**
+
+### 最終残ギャップ (≥98.4% 達成までの優先順位)
+
+| ファイル                           | 残未カバー lines | 推定難度                                                                           |
+| ---------------------------------- | ---------------- | ---------------------------------------------------------------------------------- |
+| `src/workers/ResourceInjector.ts`  | 6                | 高 (Worker scope 専用 `self.postMessage` / `self.onmessage`、実 Worker 環境が必要) |
+| `src/bridge/EngineFacade.ts`       | 3                | 中〜高 (line 265 / 278 / 338 の dispose-timing micro-edge)                         |
+| `src/storage/ChunkedDownloader.ts` | 残 2             | 高 (chunked Range fetch HTTP error / segment SRI)                                  |
+| `src/storage/index.ts`             | 1                | 低 (IDB ctor throw → MemoryStorage)                                                |
+
+98.4% 達成にはあと **~6 行** カバーが必要。完了条件は変わらず: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上 + CI に coverage threshold チェック統合 (回帰防止)。
 
 ---
 
