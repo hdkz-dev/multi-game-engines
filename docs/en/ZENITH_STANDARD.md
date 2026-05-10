@@ -116,7 +116,7 @@ This document defines the peak design, implementation, and operational standards
 ### 6.1. Empirical 98% Line Coverage
 
 - **Requirement**: Maintain ≥ 98.4% line coverage in the `core` package.
-- **Current (measured 2026-05-10, after PR #140–#150)**: lines **97.34%** / statements **96.3%** / branches **85.57%** / functions **94.09%**. Down from 98.41% at PR #49 to 84.6% on 2026-05-09; PR #140–#150 (11 PRs) recovered 12.74 points. The remaining ~1.06 pts are concentrated in `EngineFacade` (middleware-error paths), `ResourceInjector` (worker-scope branches), and `ChunkedDownloader` (Range/SRI failure paths); tracked in TASKS.md.
+- **Current (measured 2026-05-10, after PR #140–#152)**: lines **97.64%** / statements **97.12%** / branches **86.81%** / functions **94.4%**. Down from 98.41% at PR #49 to 84.6% on 2026-05-09; PR #140–#152 (12 PRs) recovered 13.04 points. The remaining ~0.76 pts are concentrated in `ResourceInjector` (worker-scope detection) and `EngineFacade` (dispose-during-search race paths); tracked in TASKS.md.
 - **Implementation**: The test suite must physically demonstrate resilience against network failures, storage conflicts, incomplete data, timeouts, and thread creation failures via mocks.
 
 ### 6.2. Fault-Tolerant Middleware (Isolation)

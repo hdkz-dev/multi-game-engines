@@ -116,7 +116,7 @@
 ### 6.1. Empirical 98% Line Coverage
 
 - **基準**: `core` パッケージにおけるラインカバレッジを 98.4% 以上に保つ。
-- **現状 (2026-05-10 計測, PR #140〜#150 マージ後)**: lines **97.34%** / statements **96.3%** / branches **85.57%** / functions **94.09%**。2026-05-09 に 84.6% へ低下したが、PR #140〜#150 (11 PR) で 12.74 pt 取り戻し済み。残 ~1.06 pt は `EngineFacade` (middleware error 系) / `ResourceInjector` (worker-scope) / `ChunkedDownloader` (Range/SRI 失敗系) で TASKS.md に登録。
+- **現状 (2026-05-10 計測, PR #140〜#152 マージ後)**: lines **97.64%** / statements **97.12%** / branches **86.81%** / functions **94.4%**。2026-05-09 に 84.6% へ低下したが、PR #140〜#152 (12 PR) で 13.04 pt 取り戻し済み。残 ~0.76 pt は `ResourceInjector` (worker-scope 検出) / `EngineFacade` (dispose-during-search race) で TASKS.md に登録。
 - **実装**: 正常系だけでなく、ネットワーク切断、ストレージ競合、不完全なデータ、タイムアウト、スレッド生成失敗などの異常系を物理的にモック・実証するテストスイートを完備する。
 
 ### 6.2. Fault-Tolerant Middleware (Isolation)
