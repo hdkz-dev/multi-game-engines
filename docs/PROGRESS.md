@@ -50,14 +50,16 @@
 
 ### その他の残課題
 
-| 項目                       | 状態        | 詳細                                                                   |
-| -------------------------- | ----------- | ---------------------------------------------------------------------- |
-| Custom Distribution        | 🔵 将来機能 | `infrastructure/cdn/cloudflare/worker.ts` 実装済みだが未デプロイ       |
-| (cdn-worker)               |             | Cloudflare アカウント/R2 バケット未設定、`wrangler deploy` 未実行      |
-| WebNN/WebGPU 本格統合      | 🔵 将来機能 | `HardwareAccelerator` 診断層は実装済み・テスト通過、実推論統合は未着手 |
-| UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階         |
-| Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)       |
-| NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨       |
+| 項目                       | 状態        | 詳細                                                                                                                    |
+| -------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Custom Distribution        | 🔵 将来機能 | `infrastructure/cdn/cloudflare/worker.ts` 実装済 / `wrangler deploy --dry-run` 検証済 (3.94 KiB)                        |
+| (cdn-worker)               |             | アカウント認証 + R2 バケット作成 + デプロイは [runbooks/cdn-worker-deploy.md](runbooks/cdn-worker-deploy.md) 参照       |
+| KataGo 実モデル統合        | 🔵 将来機能 | スタブで稼働中 / 切替手順は [runbooks/katago-real-model.md](runbooks/katago-real-model.md)                              |
+| Mortal ONNX 化             | 🔵 将来機能 | スタブ Worker で稼働中 / 法務確認 + 変換手順は [runbooks/mortal-onnx-conversion.md](runbooks/mortal-onnx-conversion.md) |
+| WebNN/WebGPU 本格統合      | 🔵 将来機能 | `HardwareAccelerator` 診断層は実装済み・テスト通過、実推論統合は未着手                                                  |
+| UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階                                                          |
+| Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)                                                        |
+| NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨                                                        |
 
 ---
 
