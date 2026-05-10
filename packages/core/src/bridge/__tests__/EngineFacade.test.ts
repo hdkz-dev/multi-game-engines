@@ -453,4 +453,63 @@ describe("EngineFacade", () => {
       expect(result).toBe(mockLoader);
     });
   });
+
+  describe("search dispose races", () => {
+    it("should throw CANCELLED when dispose fires after the adapter result resolves", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      await adapter.load();
+
+      // Stub searchRaw so we control when result resolves
+      let resolveResult: (r: unknown) => void = () => {};
+      const slowResult = new Promise((resolve) => {
+        resolveResult = resolve;
+      });
+      vi.spyOn(adapter, "searchRaw").mockReturnValue({
+        info: {
+          [Symbol.asyncIterator]: async function* () {},
+        },
+        result: slowResult,
+        stop: () => {},
+      } as never);
+
+      const facade = new EngineFacade(adapter, [], async () => mockLoader);
+      const searchPromise = facade.search({});
+
+      // Dispose while the adapter result is still pending
+      await facade.dispose();
+      // Now resolve the result; the post-await disposed check should fire
+      resolveResult({ raw: "late" });
+
+      await expect(searchPromise).rejects.toThrow(
+        /Search cancelled due to dispose/,
+      );
+    });
+
+    it("should pipe results through search-flow onResult middleware (search() return path)", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      await adapter.load();
+      vi.spyOn(adapter, "searchRaw").mockReturnValue({
+        info: {
+          [Symbol.asyncIterator]: async function* () {},
+        },
+        result: Promise.resolve({ raw: "orig", score: 1 }),
+        stop: () => {},
+      } as never);
+
+      const onResultSpy = vi.fn(async (result: { score: number }) => ({
+        ...result,
+        score: result.score * 10,
+      }));
+
+      const facade = new EngineFacade(
+        adapter,
+        [{ onResult: onResultSpy } as never],
+        async () => mockLoader,
+      );
+
+      const result = (await facade.search({})) as unknown as { score: number };
+      expect(onResultSpy).toHaveBeenCalled();
+      expect(result.score).toBe(10);
+    });
+  });
 });
