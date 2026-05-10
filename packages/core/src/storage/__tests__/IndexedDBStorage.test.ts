@@ -271,27 +271,69 @@ describe("IndexedDBStorage", () => {
     },
   );
 
-  it("should reject when transaction.onabort fires", async () => {
-    await storage.set("seed", new Uint8Array([0]).buffer);
-    const db = await (
-      storage as unknown as { getDB(): Promise<IDBDatabase> }
-    ).getDB();
+  it.each(["get", "set", "delete", "has", "clear"] as const)(
+    "should reject %s when transaction.onabort fires",
+    async (op) => {
+      await storage.set("seed", new Uint8Array([0]).buffer);
+      const db = await (
+        storage as unknown as { getDB(): Promise<IDBDatabase> }
+      ).getDB();
 
-    const { realTxnForKeepAlive } = installTransactionSpy(db, (...args) => {
-      const txn = realTxnForKeepAlive(...args);
-      queueMicrotask(() => {
-        const cb = txn.onabort;
-        if (typeof cb === "function") {
-          (cb as (ev: Event) => void)(new Event("abort"));
-        }
+      const { realTxnForKeepAlive } = installTransactionSpy(db, (...args) => {
+        const txn = realTxnForKeepAlive(...args);
+        queueMicrotask(() => {
+          const cb = txn.onabort;
+          if (typeof cb === "function") {
+            (cb as (ev: Event) => void)(new Event("abort"));
+          }
+        });
+        return txn;
       });
-      return txn;
-    });
 
-    await expect(storage.has("anything")).rejects.toThrow(
-      /Transaction aborted/,
-    );
-  });
+      const invocation =
+        op === "get"
+          ? storage.get("k")
+          : op === "set"
+            ? storage.set("k", new Uint8Array([1]).buffer)
+            : op === "delete"
+              ? storage.delete("k")
+              : op === "has"
+                ? storage.has("k")
+                : storage.clear();
+
+      await expect(invocation).rejects.toThrow(/Transaction aborted/);
+    },
+  );
+
+  it.each(["get", "set", "delete", "has", "clear"] as const)(
+    "should reject %s when the transaction throws synchronously (catch block)",
+    async (op) => {
+      await storage.set("seed", new Uint8Array([0]).buffer);
+      const db = await (
+        storage as unknown as { getDB(): Promise<IDBDatabase> }
+      ).getDB();
+
+      const err = Object.assign(new Error(`${op}-throw`), {
+        name: "ConstraintError",
+      });
+      installTransactionSpy(db, () => {
+        throw err;
+      });
+
+      const invocation =
+        op === "get"
+          ? storage.get("k")
+          : op === "set"
+            ? storage.set("k", new Uint8Array([1]).buffer)
+            : op === "delete"
+              ? storage.delete("k")
+              : op === "has"
+                ? storage.has("k")
+                : storage.clear();
+
+      await expect(invocation).rejects.toThrow(new RegExp(`${op}-throw`));
+    },
+  );
 
   it("handleDbError should reset db on TransactionInactiveError", async () => {
     await storage.set("k", new Uint8Array([1]).buffer);

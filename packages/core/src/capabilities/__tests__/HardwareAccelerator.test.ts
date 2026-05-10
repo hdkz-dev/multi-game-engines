@@ -54,4 +54,13 @@ describe("HardwareAccelerator", () => {
     });
     expect(await HardwareAccelerator.checkWebGPU()).toBe(false);
   });
+
+  it("should handle WebNN createContext error gracefully", async () => {
+    vi.stubGlobal("navigator", {
+      ml: {
+        createContext: vi.fn().mockRejectedValue(new Error("ml error")),
+      },
+    });
+    expect(await HardwareAccelerator.checkWebNN()).toBe(false);
+  });
 });
