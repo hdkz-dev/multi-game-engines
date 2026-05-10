@@ -6,17 +6,17 @@
 
 ### CI / ブランチ / npm
 
-| 項目                                 | 状態                                                                                               |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `f726413c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)              |
-| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                              |
-| オープン PR                          | **0件**                                                                                            |
-| オープン Issue                       | **0件**                                                                                            |
-| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                       |
-| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                           |
-| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                          |
-| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                              |
-| `core` カバレッジ (2026-05-10 計測)  | lines **98.01%** / branches **88.05%** (目標 ≥98.4%) — ✅ 98% 突破、PR #140〜#155 で 13.41 pt 復元 |
+| 項目                                 | 状態                                                                                                       |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `e35f6c63`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)                      |
+| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                                      |
+| オープン PR                          | **0件**                                                                                                    |
+| オープン Issue                       | **0件**                                                                                                    |
+| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                               |
+| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                                   |
+| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                                  |
+| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                                      |
+| `core` カバレッジ (2026-05-10 計測)  | lines **98.01%** / branches **88.05%** (CI threshold ≥98 / ≥87 で固定, PR #158) — 目標 ≥98.4% は残 0.39 pt |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -60,6 +60,43 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階                                                          |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)                                                        |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨                                                        |
+
+---
+
+## ✅ 直近完了タスク (2026年5月10日, 完結) — CI Coverage Threshold 統合 (PR #158) ✅ Coverage Restoration 全完了
+
+PR #158 で `core` の `vitest.config.ts` に `coverage.thresholds` を設定 (`lines: 98 / branches: 87 / statements: 97 / functions: 93`)、`build-and-test` job に `Coverage threshold (core)` ステップを追加。**今後 `core` の line coverage が 98% を下回る PR は CI で自動 reject される**。
+
+PR #139 で登録した「Coverage Restoration」バックログの **完了条件「CI に coverage レポーティング & threshold チェックを統合 (回帰防止)」が達成**。
+
+### 最終達成サマリ
+
+| 完了条件                                     | 状態                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------ |
+| Lines を 98.4% 以上に戻す                    | 🟡 98.01% (残 0.39 pt は実 Worker scope 必要、TASKS.md で長期追跡) |
+| **CI に coverage threshold 統合 (回帰防止)** | **✅ PR #158 で達成**                                              |
+
+### CI threshold 設定値
+
+```ts
+// packages/core/vitest.config.ts
+coverage: {
+  thresholds: {
+    lines: 98,        // current 98.01
+    branches: 87,     // current 88.05
+    statements: 97,   // current 97.6
+    functions: 93,    // current 94.4
+  },
+}
+```
+
+Lines は厳格 (前回ドリフトした metric)、他は ~1 pt slack で計測変動を吸収。**PR #139 で発生した「公称 98.41% → 実測 84.6% へ気づかぬまま下落」という事態は構造的に再発防止**。
+
+### 関連 PR
+
+| PR                                                              | 内容                               |
+| --------------------------------------------------------------- | ---------------------------------- |
+| [#158](https://github.com/hdkz-dev/multi-game-engines/pull/158) | CI coverage threshold 統合 (本 PR) |
 
 ---
 
