@@ -274,4 +274,65 @@ describe("ChunkedDownloader", () => {
     expect(key1).toBe(key2);
     expect(key1).toContain("chunked:");
   });
+
+  // ---- error paths ----
+
+  it("treats storage.get rejection as a cache miss and proceeds with fetch", async () => {
+    const fetchMock = makeFetchMock({ singleBuffer: makeBuffer(8) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const failingStorage: IFileStorage = {
+      get: vi.fn().mockRejectedValue(new Error("storage offline")),
+      set: vi.fn().mockResolvedValue(undefined),
+      has: vi.fn(),
+      delete: vi.fn(),
+      clear: vi.fn(),
+    };
+
+    const result = await downloader.download(
+      "https://cdn.example.com/engine.wasm",
+      {
+        sri: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        storage: failingStorage,
+      },
+    );
+
+    expect(result.fromCache).toBe(false);
+    expect(failingStorage.get).toHaveBeenCalled();
+  });
+
+  it("rejects with ChunkedDownloadError on malformed SRI format", async () => {
+    const fetchMock = makeFetchMock({ singleBuffer: makeBuffer(8) });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      downloader.download("https://cdn.example.com/engine.wasm", {
+        sri: "md5-not-a-valid-sri-prefix",
+      }),
+    ).rejects.toThrow(/Invalid SRI format/);
+  });
+
+  it("falls back to single fetch when HEAD request fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async (_url: string, init?: RequestInit) => {
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (method === "HEAD") {
+          throw new Error("HEAD blocked by CORS");
+        }
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          arrayBuffer: async () => makeBuffer(8),
+        };
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await downloader.download(
+      "https://cdn.example.com/engine.wasm",
+      { sri: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" },
+    );
+    expect(result.transferredBytes).toBeGreaterThan(0);
+  });
 });
