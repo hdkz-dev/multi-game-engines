@@ -52,4 +52,14 @@ describe("NodeFSStorage", () => {
     const physicalPath = await storage.getPhysicalPath("path-test");
     expect(physicalPath).toContain(testDir);
   });
+
+  it("should return null when get() reads a missing file", async () => {
+    expect(await storage.get("does-not-exist")).toBeNull();
+  });
+
+  it("should report a safe default quota", async () => {
+    const { usage, quota } = await storage.getQuota();
+    expect(usage).toBe(0);
+    expect(quota).toBeGreaterThan(0);
+  });
 });
