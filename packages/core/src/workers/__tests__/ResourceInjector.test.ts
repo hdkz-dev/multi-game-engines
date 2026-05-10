@@ -328,5 +328,136 @@ describe("ResourceInjector", () => {
         ResourceInjector.mountToVFS(mockModule, "/error.file", "error.file"),
       ).rejects.toThrow("Failed to fetch resource: Not Found");
     });
+
+    it("should swallow EEXIST when mkdir hits an already-existing intermediate directory", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = { "deep.bin": "blob:deep" };
+      const mockFS = {
+        mkdir: vi.fn().mockImplementation(() => {
+          throw Object.assign(new Error("exists"), { code: "EEXIST" });
+        }),
+        writeFile: vi.fn(),
+      };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new Uint8Array([1, 2]).buffer),
+      });
+
+      await expect(
+        ResourceInjector.mountToVFS(
+          { FS: mockFS },
+          "/a/b/c/deep.bin",
+          "deep.bin",
+        ),
+      ).resolves.toBeUndefined();
+
+      expect(mockFS.writeFile).toHaveBeenCalledWith(
+        "/a/b/c/deep.bin",
+        expect.any(Uint8Array),
+      );
+    });
+
+    it("should propagate non-EEXIST mkdir errors", async () => {
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = { "deep.bin": "blob:deep" };
+      const mockFS = {
+        mkdir: vi.fn().mockImplementation(() => {
+          throw Object.assign(new Error("permission"), { code: "EACCES" });
+        }),
+        writeFile: vi.fn(),
+      };
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new Uint8Array([1, 2]).buffer),
+      });
+
+      await expect(
+        ResourceInjector.mountToVFS(
+          { FS: mockFS },
+          "/a/b/c/deep.bin",
+          "deep.bin",
+        ),
+      ).rejects.toThrow();
+    });
+  });
+
+  describe("listen() (worker context)", () => {
+    type MsgHandler = (ev: MessageEvent) => void;
+    let capturedHandler: MsgHandler | null = null;
+
+    const installGlobalAddListener = (): void => {
+      capturedHandler = null;
+      // Add addEventListener to globalThis at runtime; the source uses
+      // `typeof globalThis.addEventListener === "function"` which is normally
+      // false in Node, so this branch was unexercised.
+      (globalThis as unknown as Record<string, unknown>).addEventListener = (
+        _evt: string,
+        h: MsgHandler,
+      ) => {
+        capturedHandler = h;
+      };
+    };
+
+    afterEach(() => {
+      delete (globalThis as unknown as Record<string, unknown>)
+        .addEventListener;
+    });
+
+    it("should register a global message handler when addEventListener is available", () => {
+      installGlobalAddListener();
+      ResourceInjector.listen();
+      expect(capturedHandler).toBeTypeOf("function");
+    });
+
+    it("should ignore messages whose data is not an object", () => {
+      installGlobalAddListener();
+      ResourceInjector.listen();
+      capturedHandler?.({ data: null } as MessageEvent);
+      capturedHandler?.({ data: "scalar" } as MessageEvent);
+      expect(capturedHandler).toBeDefined();
+    });
+
+    it("should reject MG_INJECT_RESOURCES with a non-object resources field", () => {
+      installGlobalAddListener();
+      ResourceInjector.listen();
+      expect(() =>
+        capturedHandler?.({
+          data: { type: "MG_INJECT_RESOURCES", resources: null },
+        } as MessageEvent),
+      ).toThrow(/Invalid or missing resources/);
+    });
+
+    it("should run readyCallbacks and absorb new resources on MG_INJECT_RESOURCES", async () => {
+      installGlobalAddListener();
+      // Reset shared state
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.isReady = false;
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.readyCallbacks = [];
+      // @ts-expect-error accessing private static for testing
+      ResourceInjector.resources = {};
+
+      ResourceInjector.listen();
+      const readyPromise = ResourceInjector.waitForReady();
+
+      capturedHandler?.({
+        data: {
+          type: "MG_INJECT_RESOURCES",
+          resources: { "x.bin": "blob:x" },
+        },
+      } as MessageEvent);
+
+      await expect(readyPromise).resolves.toBeUndefined();
+      expect(ResourceInjector.resolve("x.bin")).toBe("blob:x");
+    });
+
+    it("should forward unrelated messages to the optional onMessage callback", () => {
+      installGlobalAddListener();
+      const onMessage = vi.fn();
+      ResourceInjector.listen(onMessage);
+      const ev = { data: { type: "OTHER", payload: 1 } } as MessageEvent;
+      capturedHandler?.(ev);
+      expect(onMessage).toHaveBeenCalledWith(ev);
+    });
   });
 });
