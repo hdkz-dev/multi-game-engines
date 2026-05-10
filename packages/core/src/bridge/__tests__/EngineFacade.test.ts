@@ -316,4 +316,141 @@ describe("EngineFacade", () => {
     // verify the call is a no-op (no throw).
     expect(stopSpy).toBeDefined();
   });
+
+  describe("listener early-returns after dispose", () => {
+    it("onTelemetry middleware should NOT fire after dispose", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const onTelemetrySpy = vi.fn();
+      const facade = new EngineFacade(
+        adapter,
+        [{ onTelemetry: onTelemetrySpy } as never],
+        async () => mockLoader,
+      );
+      await facade.dispose();
+      adapter.emitTelemetry({
+        type: "lifecycle",
+        timestamp: 0,
+        metadata: {},
+      });
+      expect(onTelemetrySpy).not.toHaveBeenCalled();
+    });
+
+    it("onInfo middleware should NOT fire after dispose", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const onInfoSpy = vi.fn();
+      const facade = new EngineFacade(
+        adapter,
+        [{ onInfo: onInfoSpy } as never],
+        async () => mockLoader,
+      );
+      await facade.dispose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const listeners = (adapter as any).infoListeners as Set<
+        (i: unknown) => void
+      >;
+      for (const l of listeners) l({ depth: 1 });
+      await Promise.resolve();
+      expect(onInfoSpy).not.toHaveBeenCalled();
+    });
+
+    it("onResult middleware should NOT fire after dispose", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const onResultSpy = vi.fn();
+      const facade = new EngineFacade(
+        adapter,
+        [{ onResult: onResultSpy } as never],
+        async () => mockLoader,
+      );
+      await facade.dispose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const listeners = (adapter as any).resultListeners as Set<
+        (r: unknown) => void
+      >;
+      for (const l of listeners) l({ raw: "x" });
+      await Promise.resolve();
+      expect(onResultSpy).not.toHaveBeenCalled();
+    });
+
+    it("onInfo middleware should skip events whose positionId does not match the current search", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const onInfoSpy = vi.fn(async (info: unknown) => info);
+      const facade = new EngineFacade(
+        adapter,
+        [{ onInfo: onInfoSpy } as never],
+        async () => mockLoader,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (facade as any).currentPositionId = "expected-pos";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const listeners = (adapter as any).infoListeners as Set<
+        (i: unknown) => void
+      >;
+      // info with mismatched positionId should be filtered out before mw runs
+      for (const l of listeners) l({ depth: 1, positionId: "stale-pos" });
+      await Promise.resolve();
+      expect(onInfoSpy).not.toHaveBeenCalled();
+    });
+
+    it("onResult middleware can transform results returned to the listener", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const onResultSpy = vi.fn(async (result: { raw: string }) => ({
+        ...result,
+        transformed: true,
+      }));
+      new EngineFacade(
+        adapter,
+        [{ onResult: onResultSpy } as never],
+        async () => mockLoader,
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const listeners = (adapter as any).resultListeners as Set<
+        (r: unknown) => void
+      >;
+      for (const l of listeners) l({ raw: "y" });
+      await Promise.resolve();
+      expect(onResultSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("load() guards", () => {
+    it("load() should be a no-op when status is already ready", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      await adapter.load(); // sets status=ready
+      const loadSpy = vi.spyOn(adapter, "load");
+      loadSpy.mockClear();
+      const facade = new EngineFacade(adapter, [], async () => mockLoader);
+      await facade.load();
+      expect(loadSpy).not.toHaveBeenCalled();
+    });
+
+    it("load() should throw after dispose", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const facade = new EngineFacade(adapter, [], async () => mockLoader);
+      await facade.dispose();
+      await expect(facade.load()).rejects.toThrow(/Object disposed/);
+    });
+
+    it("load() should reuse an in-flight load promise (adapter.load called once)", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      const adapterLoadSpy = vi
+        .spyOn(adapter, "load")
+        .mockImplementation(() => new Promise((r) => setTimeout(r, 30)));
+      const facade = new EngineFacade(adapter, [], async () => mockLoader);
+      const a = facade.load();
+      const b = facade.load();
+      await Promise.all([a, b]);
+      expect(adapterLoadSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("default loaderProvider re-uses the resolved loader on subsequent calls", async () => {
+      const adapter = new MockAdapter({ id: "x" });
+      // No explicit loaderProvider — exercises the default lambda
+      const facade = new EngineFacade(adapter, []);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const internal = facade as any;
+      internal.resolvedLoader = mockLoader;
+      const result = await internal.loaderProvider();
+      expect(result).toBe(mockLoader);
+    });
+  });
 });
