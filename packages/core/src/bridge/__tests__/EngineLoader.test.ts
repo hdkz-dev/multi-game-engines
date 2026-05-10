@@ -193,6 +193,62 @@ describe("EngineLoader", () => {
     );
   });
 
+  it("should reject malformed HTTP URLs that fail to parse", async () => {
+    const config: IEngineSourceConfig = {
+      url: "http://[invalid url",
+      type: "script",
+      sri: dummySRI,
+    };
+
+    await expect(loader.loadResource("test", config)).rejects.toThrow(
+      expect.objectContaining({ i18nKey: "engine.errors.insecureConnection" }),
+    );
+  });
+
+  it("should return cached blob URL when the same resource is requested twice", async () => {
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/engine.js",
+      type: "script",
+      sri: dummySRI,
+    };
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      headers: { get: () => null } as unknown as Headers,
+      arrayBuffer: () => Promise.resolve(new TextEncoder().encode("x").buffer),
+    } as unknown as Response);
+
+    const a = await loader.loadResource("test-cache", config);
+    const b = await loader.loadResource("test-cache", config);
+    expect(a).toBe(b);
+    // Second call should NOT have triggered another fetch (activeBlobs cache hit)
+    expect(vi.mocked(fetch).mock.calls.length).toBe(1);
+  });
+
+  it("should return the same in-flight promise for concurrent loads of the same resource", async () => {
+    const config: IEngineSourceConfig = {
+      url: "https://test.com/inflight.js",
+      type: "script",
+      sri: dummySRI,
+    };
+    let resolveBuf: (b: ArrayBuffer) => void = () => {};
+    const slowBuf = new Promise<ArrayBuffer>((resolve) => {
+      resolveBuf = resolve;
+    });
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      headers: { get: () => null } as unknown as Headers,
+      arrayBuffer: () => slowBuf,
+    } as unknown as Response);
+
+    const p1 = loader.loadResource("test-inflight", config);
+    const p2 = loader.loadResource("test-inflight", config);
+    resolveBuf(new TextEncoder().encode("y").buffer);
+
+    const [a, b] = await Promise.all([p1, p2]);
+    expect(a).toBe(b);
+    expect(vi.mocked(fetch).mock.calls.length).toBe(1);
+  });
+
   it("should reject invalid engine ids", async () => {
     const config: IEngineSourceConfig = {
       url: "https://test.com/engine.js",
