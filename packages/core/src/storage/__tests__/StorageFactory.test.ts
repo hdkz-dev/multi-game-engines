@@ -25,7 +25,10 @@ describe("createFileStorage factory", () => {
 
   it("should return OPFSStorage when OPFS is available in browser", () => {
     // Mock browser environment by removing process.versions
-    Object.defineProperty(global, "process", { value: { versions: {} }, writable: true });
+    Object.defineProperty(global, "process", {
+      value: { versions: {} },
+      writable: true,
+    });
     const caps: ICapabilities = {
       opfs: true,
       wasmThreads: false,
@@ -39,7 +42,10 @@ describe("createFileStorage factory", () => {
   });
 
   it("should return IndexedDBStorage when OPFS is not available in browser", () => {
-    Object.defineProperty(global, "process", { value: { versions: {} }, writable: true });
+    Object.defineProperty(global, "process", {
+      value: { versions: {} },
+      writable: true,
+    });
     const caps: ICapabilities = {
       opfs: false,
       wasmThreads: false,
@@ -50,5 +56,14 @@ describe("createFileStorage factory", () => {
     };
     const storage = createFileStorage(caps);
     expect(storage).toBeInstanceOf(IndexedDBStorage);
+  });
+
+  it("should fall back to NodeFSStorage when Bun is detected", () => {
+    Object.defineProperty(global, "process", {
+      value: { versions: { bun: "1.0.0" } },
+      writable: true,
+    });
+    const storage = createFileStorage({ opfs: false } as ICapabilities);
+    expect(storage).toBeInstanceOf(NodeFSStorage);
   });
 });
