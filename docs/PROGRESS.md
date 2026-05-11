@@ -1,22 +1,22 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月9日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年5月11日 (実装担当: Zenith Quality Engineer)
 
-## 📊 現在の状態スナップショット (2026年5月9日)
+## 📊 現在の状態スナップショット (2026年5月11日)
 
 ### CI / ブランチ / npm
 
-| 項目                                 | 状態                                                                                                       |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `e35f6c63`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)                      |
-| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                                      |
-| オープン PR                          | **0件**                                                                                                    |
-| オープン Issue                       | **0件**                                                                                                    |
-| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                               |
-| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                                   |
-| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                                  |
-| テスト                               | `core`: 39ファイル / 258テスト 全通過                                                                      |
-| `core` カバレッジ (2026-05-10 計測)  | lines **98.01%** / branches **88.05%** (CI threshold ≥98 / ≥87 で固定, PR #158) — 目標 ≥98.4% は残 0.39 pt |
+| 項目                                 | 状態                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `245a839c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)                                                 |
+| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                                                                 |
+| オープン PR                          | **0件**                                                                                                                               |
+| オープン Issue                       | **0件**                                                                                                                               |
+| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                                                          |
+| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                                                              |
+| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                                                             |
+| テスト                               | `core`: 41ファイル / 431テスト 全通過                                                                                                 |
+| `core` カバレッジ (2026-05-11 計測)  | lines **98.45%** / branches **89.05%** (CI threshold ≥98.4 / ≥88 で固定, PR #161) — **目標 ≥98.4% 達成** ✅ Coverage Restoration 完結 |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -60,6 +60,59 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階                                                          |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)                                                        |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨                                                        |
+
+---
+
+## ✅ 直近完了タスク (2026年5月11日, 完全終結) — Coverage Restoration 目標 98.4% 達成 (PR #161) ✅ バックログ完全クローズ
+
+PR #161 で残 ~0.39 pt の gap を 3 経路同時に閉じ、`core` の line coverage を **98.01% → 98.45%** へ。当初 PR #158 完結時点で 🟡 残課題として TASKS.md 行きとなっていた「Lines を 98.4% 以上に戻す」を、**実 Worker scope を導入することなく** 達成。
+
+### 達成内容
+
+| 指標       | Before | After      | Δ        |
+| ---------- | ------ | ---------- | -------- |
+| Lines      | 98.01% | **98.45%** | +0.44 pt |
+| Branches   | 88.05% | **89.05%** | +1.00 pt |
+| Statements | 97.60% | **98.01%** | +0.41 pt |
+| Tests      | 425 件 | **431 件** | +6 件    |
+| Test files | 39     | **41**     | +2       |
+
+### 追加した 6 テスト (3 ファイル) — 実 Worker 不要の代替策
+
+| 対象未カバー行                          | 戦略                                                                                                                                           |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EngineFacade.ts` lines 265 / 278 / 338 | controllable Promise + `vi.spyOn(adapter, "searchRaw")` で dispose vs middleware-loop / searchRaw().result / in-flight task の race を直接駆動 |
+| `ChunkedDownloader.ts` lines 171 / 182  | カスタム fetch mock で Range chunk HTTP 503、segmentedSri 設定で per-chunk verify 経路を発火                                                   |
+| `storage/index.ts` line 32              | `vi.mock("../IndexedDBStorage.js")` で構築時に throw → MemoryStorage フォールバック分岐                                                        |
+
+100% lines に到達したファイル (新規追加): **EngineFacade**, **ChunkedDownloader**
+
+### CI threshold 更新値
+
+```ts
+// packages/core/vitest.config.ts
+coverage: {
+  thresholds: {
+    lines: 98.4,      // current 98.45 (元 Coverage Restoration 目標)
+    branches: 88,     // current 89.05
+    statements: 97.5, // current 98.01
+    functions: 93,    // current 94.4
+  },
+}
+```
+
+**`lines: 98 → 98.4` への引き上げで、PR #139 起点で開始した Coverage Restoration バックログの両完了条件をクローズ**:
+
+| 完了条件                                 | 状態                           |
+| ---------------------------------------- | ------------------------------ |
+| Lines を 98.4% 以上に戻す                | **✅ 98.45% — PR #161 で達成** |
+| CI に coverage threshold 統合 (回帰防止) | ✅ PR #158 で達成              |
+
+### 関連 PR
+
+| PR                                                              | 内容                                |
+| --------------------------------------------------------------- | ----------------------------------- |
+| [#161](https://github.com/hdkz-dev/multi-game-engines/pull/161) | 98.4% 目標達成 + threshold 引き上げ |
 
 ---
 
