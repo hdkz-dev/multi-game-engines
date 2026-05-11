@@ -100,10 +100,10 @@
     "eslint-plugin-vitest": "^0.5.4",
     "eslint-plugin-wc": "^3.1.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.2",
+    "lint-staged": "^17.0.4",
     "portless": "^0.13.0",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.10",
+    "turbo": "^2.9.12",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.2"

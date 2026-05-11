@@ -35,7 +35,7 @@
     "@multi-game-engines/ui-vue-core": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^1.0.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@playwright/experimental-ct-vue": "^1.59.1",
