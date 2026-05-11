@@ -93,6 +93,7 @@ The UI layer uses a two-tier architecture that minimises framework coupling whil
 - [x] **Browser Matrix Verification**: WASM behaviour verified in real browsers via Playwright CT (React 54 tests / Vue 47 tests).
 - [x] **Contract-driven Safety**: Zod runtime validation at Worker communication boundaries.
 - [x] **Zero-Any Policy**: Complete elimination of `any` in production code.
+- [x] **Merge Policy (NO SQUASH)**: To preserve the in-branch iteration trail on `main`, squash merge is **forbidden at three layers — agent memory, policy docs, and the GitHub repo setting** (PR #163). `allow_squash_merge: false` makes it physically impossible; `gh pr merge --merge` is the only sanctioned path.
 - [ ] **Continuous Benchmarking**: Per-PR NPS regression detection (e.g. CodSpeed).
 
 ---

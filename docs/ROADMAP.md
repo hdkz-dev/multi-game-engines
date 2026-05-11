@@ -100,6 +100,7 @@
 - [x] **Browser Matrix Verification**: `Playwright` による、実ブラウザ上での WASM 動作保証。
 - [x] **Contract-driven Safety**: `Zod` による、Worker 通信境界でのランタイム検証。
 - [x] **Zero-Any Policy**: プロダクションコードにおける any 型の完全排除。
+- [x] **Merge Policy (NO SQUASH)**: ブランチ内の修正遍歴を `main` から辿れるよう、squash merge を **メモリ / ポリシー文書 / GitHub repo 設定の三層で禁止** (PR #163)。`allow_squash_merge: false` で物理的に不可能化、`gh pr merge --merge` が唯一の正式手段。
 
 ---
 
