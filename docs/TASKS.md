@@ -48,8 +48,8 @@
   - [x] **Advanced Features**: `EngineBatchAnalyzer` (Priority/Control), `BinaryVariantSelection` 実装。
   - [x] **Gomoku Domain**: `@multi-game-engines/domain-gomoku` 新設、Branded Types。
   - [x] **Reversi Precision**: `adapter-edax` 固有スコアパースと正規化。
-- [~] **Zenith Robustness & 100% Coverage**: (Critical)
-  - [~] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#155 で **98.01% (2026-05-10)** まで復元 ✅ 98% 突破。残 ~0.39 pt は下記 Coverage Restoration 残項目で追跡。
+- [x] **Zenith Robustness & 100% Coverage**: (Critical)
+  - [x] **Extreme Coverage**: `core` パッケージのラインカバレッジを 98.4% 超に保つ。PR #49 で 98.41% を達成 → 2026-05-09 で 84.6% に低下 → PR #140〜#161 で **98.45% (2026-05-11)** まで復元 ✅ **目標達成**。CI は `lines ≥98.4 / branches ≥88` でしきい値固定 (PR #161)。下記 Coverage Restoration バックログは完全クローズ。
   - [x] **Middleware Isolation**: 故障したミドルウェアがエンジン本体を道連れにしない「絶縁」を実装。
   - [x] **Circular Protection**: `ProtocolValidator` に循環参照検知を追加し、スタックオーバーフローを防止。
   - [x] **Native Resilience**: `NativeCommunicator` にパケット分割対応のバッファリングを導入。
@@ -204,8 +204,8 @@
 
 - [x] **OPFSStorage 本実装**: `navigator.storage.getDirectory()` を用いた OPFS アクセスの本番実装。
 - [ ] **UI Logic オフロード (Future)**: 超高頻度 `info` 出力時のメインスレッド保護のため、`ui-core` のロジックを UI Worker へ委譲するアーキテクチャの検討。
-- [~] **Coverage Restoration (`core`)** _(2026-05-09 新規, 2026-05-10 進行中)_: ラインカバレッジを 98.4% 以上に復元する。
-  - **進捗**: lines 84.6% (2026-05-09) → **98.01%** (2026-05-10, PR #140〜#155 マージ後) / branches 70.39% → **88.05%** ✅ 98% 突破。14 pt のうち約 **13.41 pt (96%)** 解消。
+- [x] **Coverage Restoration (`core`)** _(2026-05-09 新規, 2026-05-11 完結)_: ラインカバレッジを 98.4% 以上に復元する。 ✅ **完結**
+  - **最終結果**: lines 84.6% (2026-05-09) → **98.45%** (2026-05-11, PR #140〜#161 マージ後) / branches 70.39% → **89.05%** ✅ **目標達成**。14 pt のうち **13.85 pt (99%)** 解消、当初目標 98.4% を +0.05 pt 上回って完了。
   - **完了済み**:
     - [x] `src/workers/NativeCommunicator.ts` — 47% → 95.58% lines (PR #140)
     - [x] `src/workers/WorkerCommunicator.ts` — 63% → 100% lines (PR #140)
@@ -225,15 +225,13 @@
     - [x] `src/storage/ChunkedDownloader.ts` — 93.75% → 96.87% lines, storage reject / 不正 SRI / HEAD 失敗 (PR #152)
     - [x] `src/workers/ResourceInjector.ts` — 91.35% → 92.59% lines, listen() handler + mountToVFS EEXIST/EACCES (PR #154)
     - [x] `src/bridge/EngineLoader.ts` — 97.75% → 100% lines, chunked download path (PR #154)
-  - **残項目** (合計 ~26 行未カバー、98.4% 達成にあと ~6 行):
-    - [ ] `src/bridge/EngineFacade.ts` (残 3 行) — dispose-during-search の最初の disposed check (line 265) と `if (this.currentSearchTask)` 連動 (line 338) — タイミング微小
-    - [ ] `src/workers/ResourceInjector.ts` (残 6 行) — `self.postMessage` 通知 / Worker-scope 専用 onmessage 経路 — 実 Worker scope が必要
-    - [ ] `src/storage/ChunkedDownloader.ts` (残 2 行) — chunked Range fetch の HTTP error throw、segment SRI 検証
-    - [ ] `src/storage/index.ts` (1 行) — IndexedDBStorage コンストラクタ throw → MemoryStorage フォールバック
-    - 各種 long tail (BaseAdapter / NativeCommunicator / SegmentedVerifier 等)
+    - [x] `src/bridge/EngineFacade.ts` — 98.06% → **100% lines** (dispose race: middleware-loop / searchRaw().result / in-flight task) (PR #161)
+    - [x] `src/storage/ChunkedDownloader.ts` — 96.87% → **100% lines** (Range chunk HTTP error + segmentedSri per-chunk verify) (PR #161)
+    - [x] `src/storage/index.ts` — IndexedDBStorage ctor throw → MemoryStorage フォールバック (vi.mock 戦略) (PR #161)
   - **完了条件**: `pnpm exec vitest run --coverage` の `Lines` が 98.4% 以上。CI に coverage レポーティング & threshold チェックを統合 (回帰防止)。
     - [x] CI threshold 統合 — `packages/core/vitest.config.ts` の `coverage.thresholds` (lines: 98 / branches: 87 / statements: 97 / functions: 93) + `.github/workflows/ci.yml` の `Coverage threshold (core)` ステップ (PR #158)
-    - [ ] Lines を 98.4% 以上へ — 残 ~6 行は実 Worker scope / dispose-timing micro が必要
+    - [x] Lines を 98.4% 以上へ — 98.45% で達成 (PR #161)、threshold は `lines: 98.4 / branches: 88 / statements: 97.5` に引き上げ
+  - **残った `ResourceInjector` の Worker-scope 専用経路** (合計 ~8 行) は将来作業として下記の独立項目で追跡: 実 Worker scope が必要。
 - [x] **英語版ドキュメント拡充**: `docs/en/` を日本語版と同期
   - [x] ROADMAP.md — Phase 2〜5 + Multi-Runtime Bridge, Incomplete Information, CT テスト数追加
   - [x] DECISION_LOG.md — ADR-018〜026, 040〜059 全セクション追加 (38 → 40+ エントリ)
