@@ -335,4 +335,70 @@ describe("ChunkedDownloader", () => {
     );
     expect(result.transferredBytes).toBeGreaterThan(0);
   });
+
+  it("throws ChunkedDownloadError when a Range chunk returns HTTP error", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async (_url: string, init?: RequestInit) => {
+        const method = (init?.method ?? "GET").toUpperCase();
+        if (method === "HEAD") {
+          const headers = new Map<string, string>([
+            ["accept-ranges", "bytes"],
+            ["content-length", "8"],
+          ]);
+          return {
+            ok: true,
+            status: 200,
+            headers: {
+              get: (k: string) => headers.get(k.toLowerCase()) ?? null,
+            },
+          };
+        }
+        // First Range request fails mid-stream
+        return {
+          ok: false,
+          status: 503,
+          headers: { get: () => null },
+          arrayBuffer: async () => makeBuffer(0),
+        };
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      downloader.download("https://cdn.example.com/big.wasm", { chunkSize: 4 }),
+    ).rejects.toBeInstanceOf(ChunkedDownloadError);
+  });
+
+  it("verifies each chunk against segmentedSri hashes during chunked download", async () => {
+    const chunk1 = makeBuffer(4);
+    const chunk2 = makeBuffer(4);
+    const fetchMock = makeFetchMock({
+      headAcceptRanges: true,
+      contentLength: 8,
+      chunks: [chunk1, chunk2],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    // crypto.subtle.digest is stubbed to 32 bytes of zeros → base64 "AAAA..."
+    const segmentHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
+    const digestSpy = vi.mocked(
+      (
+        globalThis as unknown as {
+          crypto: { subtle: { digest: ReturnType<typeof vi.fn> } };
+        }
+      ).crypto.subtle.digest,
+    );
+
+    const result = await downloader.download(
+      "https://cdn.example.com/big.wasm",
+      {
+        chunkSize: 4,
+        segmentedSri: { segmentSize: 4, hashes: [segmentHash, segmentHash] },
+      },
+    );
+
+    expect(result.buffer.byteLength).toBe(8);
+    // 2 chunks => 2 verify calls (per-segment)
+    expect(digestSpy).toHaveBeenCalledTimes(2);
+  });
 });

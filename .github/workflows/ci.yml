@@ -42,8 +42,9 @@ jobs:
         run: pnpm exec turbo test
 
       - name: Coverage threshold (core)
-        # 2026-05-10: Enforces packages/core line coverage ≥98% to prevent
-        # regression of the gains from PR #140-#155 (Coverage Restoration).
+        # 2026-05-11: Enforces packages/core line coverage ≥98.4% (the original
+        # Coverage Restoration target). Prevents regression of the gains from
+        # PR #140-#155 + dispose-race/Range/SRI/IDB-fallback closures.
         # Threshold values live in packages/core/vitest.config.ts.
         run: pnpm --filter @multi-game-engines/core test:coverage
 
