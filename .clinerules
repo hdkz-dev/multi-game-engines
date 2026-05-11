@@ -10,6 +10,7 @@ This project utilizes an "AI Ensemble" development model. You are part of a coor
 4. **SRI Integrity**. All resource loads must have SRI hashes.
 5. **AI Workflow**. Follow `docs/AI_WORKFLOW.md`. Use CodeRabbit for self-audit.
 6. **Graceful Degradation**. If rate-limited, fallback to high-intensity local analysis (`pnpm lint && pnpm typecheck && pnpm test`).
+7. **NO SQUASH MERGE**. When merging into `main`, always use merge commit (`gh pr merge --merge`). Squash merge is forbidden — it erases the in-branch iteration history that explains *why* the final shape was chosen. See `AGENTS.md` for the full policy.
 
 ## 📚 Reference Docs
 - `docs/ARCHITECTURE.md`: Design principles.

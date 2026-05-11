@@ -15,5 +15,6 @@ reviews:
         3. **セキュリティ**: CSP (Content Security Policy) の設定漏れや、`https:` ワイルドカードの使用を指摘すること。
         4. **i18n**: ユーザー向け文字列のハードコードを禁止し、`locales/` 配下の多言語対応ファイルの使用を求めること。
         5. **TDD**: ロジックの変更に対し、適切なテストコード (`*.test.ts`) の追加または更新が伴っているか確認すること。
+        6. **マージ手法**: PR の summary や description で squash merge を推奨・前提とした記述があれば必ず指摘すること。本プロジェクトでは squash merge は禁止であり、`gh pr merge --merge` (merge commit) のみが許容される (AGENTS.md 参照)。
 chat:
   auto_reply: true

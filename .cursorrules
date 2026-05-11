@@ -16,6 +16,12 @@ Always adhere to the "Zenith Tier" best practices defined in this project.
 - **Audit Loop**: Use CodeRabbit (`coderabbit review --prompt-only -t uncommitted`) to validate your changes before committing.
 - **Graceful Degradation**: If an AI tool is rate-limited, fallback to specialized internal skills or high-intensity local testing as per `docs/AI_WORKFLOW.md`.
 
+## 🔀 Merge Method: NO SQUASH (mandatory)
+- When merging PRs into `main`, **always use merge commit** (`gh pr merge --merge` or GitHub UI "Create a merge commit"). **Squash merge is forbidden.**
+- Reason: squash erases in-branch commit history, losing the trail of iterations, failed attempts, and design decisions that explain *why* the final shape was chosen.
+- Do not pass `--squash` to `gh pr merge`. Do not suggest squash in summaries, examples, or default options.
+- This rule applies even when a branch has only one commit. See `AGENTS.md` for the full policy.
+
 ## 📜 Documentation Sync
 - Keep `docs/PROGRESS.md`, `docs/TASKS.md`, and `docs/TECHNICAL_SPECS.md` updated with every significant change.
 - Generate architecture diagrams using Mermaid.js if design changes.
