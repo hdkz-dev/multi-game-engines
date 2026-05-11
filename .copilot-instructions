@@ -15,3 +15,6 @@
 - Use the AI Ensemble workflow defined in `docs/AI_WORKFLOW.md`.
 - Prefer `vitest` for unit testing.
 - Ensure all new features have corresponding tests in `src/__tests__`.
+
+## Merge Method
+- **NO SQUASH MERGE**: When merging PRs into `main`, always use a merge commit (`gh pr merge --merge` or "Create a merge commit" in the UI). Squash merge is forbidden because it erases the in-branch iteration history. See `AGENTS.md` for the full policy.

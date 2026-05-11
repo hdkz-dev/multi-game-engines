@@ -26,6 +26,12 @@
 
 - **Rebase-first Policy**: 履歴を線形に保つため、共有前のブランチではマージではなく `rebase` を優先してください。
 
+- **Merge Method: NO SQUASH** _(必須・例外なし)_: PR を `main` にマージする際は必ず **merge commit (`gh pr merge --merge` / GitHub UI の "Create a merge commit")** を使用してください。**squash merge は禁止**です。理由: squash はブランチ内の全コミットを 1 つに潰し、ブランチ内での修正遍歴 (失敗した試行、中間修正、hook 失敗からの復帰、なぜその対応に至ったかの設計判断) を `main` から辿れなくします。`(#NNN)` だけの一行履歴はレビュー時に十分でも、後日デバッグや設計判断の検証時には load-bearing です。
+  - 推奨: `gh pr merge <N> --merge --delete-branch` (ブランチ保護で必要なら `--admin` を user の許可付きで)
+  - 1 コミットしかないブランチでも `--merge` を使用してください (情報損失はゼロですが、ポリシーの一貫性のため)
+  - **`--squash` フラグを `gh pr merge` に渡してはいけません**。提案・例示・デフォルト選択肢としても出さないでください。
+  - 例外を希望する場合は user に明示的に確認 (例: 単発の merge-noise 削減目的で squash したい等)。デフォルトでは絶対に squash しない。
+
 - **ドキュメント同期**: コードの変更に合わせて `ARCHITECTURE.md`, `TECHNICAL_SPECS.md`, `ROADMAP.md` を必ず最新に保ってください。
 - **意思決定記録**: 重要な設計判断は `docs/adr/` に ADR として記録してください。
 - **Quality Gate**: コミット前には必ず以下のチェックをパスする必要があります：

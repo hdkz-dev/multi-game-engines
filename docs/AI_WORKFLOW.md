@@ -86,6 +86,41 @@ gemini "docs/xxx.md を読み込み、以下の観点から厳しくレビュー
   - 大規模な変更時、Gemini が最新コードから **Mermaid 形式の図解** を生成。
   - `ARCHITECTURE.md` の図を更新し、視覚的な整合性を担保する。
 
+### 🔀 マージ手法ポリシー: NO SQUASH (全 AI ツール必須遵守)
+
+PR を `main` にマージする際は、以下を **例外なく厳守** してください。これは Claude Code, Cursor, Cline, Copilot, Jules, CodeRabbit, Codex 等、本プロジェクトで稼働する全ての AI ツールに適用される **プロジェクト憲法レベルの規約** です。
+
+**規約**:
+
+- **必ず merge commit を使用**: `gh pr merge <N> --merge --delete-branch` または GitHub UI の **"Create a merge commit"** を選択。
+- **`--squash` フラグの使用は禁止**: `gh pr merge --squash` を実行してはならない。提案・例示・選択肢としても提示禁止。
+- **ブランチ保護で `--admin` が必要な場合**: user の明示的な許可を得てから `--admin` を付与。
+- **1 コミットのみのブランチ**: 情報損失はゼロだが、ポリシーの一貫性のため `--merge` を使用。
+- **GitHub UI 経由のマージ**: "Squash and merge" ボタンを押下しない。"Rebase and merge" は将来的に許容するか別途検討するが、現時点では `--merge` のみが正式手法。
+
+**理由**:
+
+squash merge はブランチ内の全コミットを 1 つに潰し、以下を `main` の履歴から永久に失わせます:
+
+- 失敗した試行とその修正経緯
+- pre-commit hook 失敗からの復帰履歴
+- なぜその対応に至ったかの設計判断の足跡
+- レビュー指摘への対応 commit
+
+`main` の commit log に `(#NNN)` だけの一行が並ぶ見た目は綺麗ですが、後日の **デバッグ / 設計判断の検証 / 回帰調査** において、ブランチ内の修正遍歴は load-bearing です。Coverage Restoration バックログ (PR #139〜#161) のような長期 narrative では、各 PR 内のステップ刻みが追跡資産となります。
+
+**違反時の対応**:
+
+- AI ツールが誤って `--squash` を実行した場合 → 即座に user に報告し、memory / config に追記して再発防止
+- `main` への force-push による履歴復元は **行わない** (共有ブランチへの破壊的操作はリスクが上回るため)
+- 違反は AGENTS.md の修正と各 `.{tool}rules` への明文化で恒久対応
+
+**関連ファイル**:
+
+- `AGENTS.md` §3 — primary policy
+- `.cursorrules` / `.clinerules` / `.copilot-instructions` — per-tool 明文化
+- `.coderabbit.yaml` — CodeRabbit が PR 内の squash 言及を自動指摘
+
 ---
 
 ## 📈 Layer 4: 戦略的分析フェーズ (Strategic Analysis)
