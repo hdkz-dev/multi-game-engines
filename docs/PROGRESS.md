@@ -6,17 +6,19 @@
 
 ### CI / ブランチ / npm
 
-| 項目                                 | 状態                                                                                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| CI 全ワークフロー (HEAD: `245a839c`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)                                                 |
-| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                                                                 |
-| オープン PR                          | **0件**                                                                                                                               |
-| オープン Issue                       | **0件**                                                                                                                               |
-| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                                                          |
-| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                                                              |
-| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                                                             |
-| テスト                               | `core`: 41ファイル / 431テスト 全通過                                                                                                 |
-| `core` カバレッジ (2026-05-11 計測)  | lines **98.45%** / branches **89.05%** (CI threshold ≥98.4 / ≥88 で固定, PR #161) — **目標 ≥98.4% 達成** ✅ Coverage Restoration 完結 |
+| 項目                                 | 状態                                                                                                                                     |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `d50f1f8e`) | ✅ 全通過 (CI / E2E / ESLint / Benchmarks / Deploy API Docs / Release / CodeQL / SRI)                                                    |
+| リモートブランチ                     | `origin/main` + `origin/changeset-release/main` のみ (全 PR クローズ)                                                                    |
+| オープン PR                          | **0件**                                                                                                                                  |
+| オープン Issue                       | **0件**                                                                                                                                  |
+| オープン Dependabot alerts           | **0件** ✅ (CVE-2026-6322 を PR #136 で解決)                                                                                             |
+| `pnpm audit` (dev 含む)              | **0 vulnerabilities** ✅ (PR #137 で transitive 6件解消)                                                                                 |
+| npm publish                          | **46パッケージ 完了** — core@0.2.0, adapter@1.0.0 系, ui-monitor@0.2.0 等                                                                |
+| テスト                               | `core`: 41ファイル / 431テスト 全通過                                                                                                    |
+| `core` カバレッジ (2026-05-11 計測)  | lines **98.45%** / branches **89.05%** (CI threshold ≥98.4 / ≥88 で固定, PR #161) — **目標 ≥98.4% 達成** ✅ Coverage Restoration 完結    |
+| マージ方針                           | **squash merge 禁止** ✅ — AGENTS.md + 5 設定ファイル + GitHub repo 設定 (`allow_squash_merge: false`) の三重防衛 (PR #163)              |
+| 依存関係                             | **2026-05-11 計測時点で最新** — Dependabot 11 件パッチ/マイナー更新 (`onnxruntime-web 1.26`, `tailwindcss 4.3` 等) を PR #160 で取り込み |
 
 ### WASM バイナリ配信状況 (2026-05-09 確認)
 
@@ -60,6 +62,57 @@
 | UI Logic Worker オフロード | 🔵 将来機能 | 超高頻度 info 出力時のメインスレッド保護アーキテクチャ検討段階                                                          |
 | Mobile/Hybrid Bridge       | 🔵 将来機能 | Phase 4 スコープ (React Native / Capacitor ネイティブプラグイン)                                                        |
 | NPM_TOKEN ローテーション   | ⚠️ 要注意   | 現トークン有効期限 2026-07-29 頃。期限前に手動ローテーション推奨                                                        |
+
+---
+
+## ✅ 直近完了タスク (2026年5月11日, 後追い) — Dependabot 11 件依存更新を取り込み (PR #160)
+
+PR #160 で `lint-staged 17.0.4` / `turbo 2.9.12` / `onnxruntime-web 1.26.0` / `tailwindcss 4.3.0` / `tailwind-merge 3.6.0` / `@vue/compiler-dom 3.5.34` / `nuxt 4.4.5` / `@cloudflare/workers-types 4.20260511.1` / `@eslint-react/eslint-plugin 5.7.5` を一括取り込み。
+
+- すべて patch / minor (major bump なし)
+- CI 全 11 件 SUCCESS (CodeQL のみ NEUTRAL: deps-only PR で通常)
+- 影響範囲: ルート + 9 `package.json` + `pnpm-lock.yaml`、ローカル `pnpm install --frozen-lockfile` で同期確認済
+- `pnpm audit --prod` 引き続き **0 vulnerabilities**
+
+### 関連 PR
+
+| PR                                                              | 内容                               |
+| --------------------------------------------------------------- | ---------------------------------- |
+| [#160](https://github.com/hdkz-dev/multi-game-engines/pull/160) | Dependabot 11 件依存更新の取り込み |
+
+---
+
+## ✅ 直近完了タスク (2026年5月11日, ガバナンス) — squash merge 禁止ポリシーの三重防衛確立 (PR #163)
+
+PR #161 が誤って **squash merge で取り込まれ、ブランチ内コミット履歴 (テスト戦略決定の足跡) を `main` から辿れなくなった** インシデントを受けて、本ポリシーを全層に明文化・物理強制。
+
+> ブランチ内での修正遍歴がなくなるためどのような経緯でその対応になったかがわからなくなります — user
+
+### 三重防衛アーキテクチャ
+
+| 層                     | 実装                                                                                                                          | 効果                                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **メモリ層**           | `~/.claude/projects/.../memory/feedback_no_squash_merge.md`                                                                   | Claude Code セッションをまたいで再発防止                                            |
+| **ポリシー層**         | `AGENTS.md` / `.cursorrules` / `.clinerules` / `.copilot-instructions` / `.coderabbit.yaml` / `docs/AI_WORKFLOW.md` (PR #163) | 全 AI ツール (Jules, Cursor, Cline, Copilot, CodeRabbit, Codex 等) が読み込んで遵守 |
+| **プラットフォーム層** | `gh api repos/... -X PATCH -F allow_squash_merge=false`                                                                       | GitHub UI / API / `gh` CLI 一切から squash が**物理的に不可能**                     |
+
+### マージ手法の正式手順
+
+- `gh pr merge <N> --merge --delete-branch` (ブランチ保護で必要なら `--admin` を user 許可付き)
+- 1 コミットのみのブランチでも `--merge` を使用 (情報損失ゼロだがポリシー一貫性のため)
+- `--squash` は **絶対に渡さない**、提案・例示・選択肢としても出さない
+- 違反時の `main` への force-push 復元は **行わない** (共有ブランチ破壊リスクが上回るため、config + memory での恒久対応のみ)
+
+### 検証
+
+- PR #162 / #163 / #160 はすべて merge commit で正しく統合され、ブランチ内コミット (`d510d969`, `a385e0e2`, `92ee24bf`) が独立して履歴に残存
+- GitHub repo 設定 `allow_squash_merge: false` 確認済
+
+### 関連 PR
+
+| PR                                                              | 内容                                        |
+| --------------------------------------------------------------- | ------------------------------------------- |
+| [#163](https://github.com/hdkz-dev/multi-game-engines/pull/163) | squash 禁止ポリシーを全 AI ツール設定に展開 |
 
 ---
 
