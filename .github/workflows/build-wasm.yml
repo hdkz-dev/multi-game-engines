@@ -91,7 +91,7 @@ jobs:
 
       # ── Upload artifact for docs.yml ─────────────────────────────────────────
       - name: Upload Edax WASM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: edax-wasm-v4.4
           path: /tmp/edax-build/
@@ -155,7 +155,7 @@ jobs:
 
       # ── Upload artifact for docs.yml ─────────────────────────────────────────
       - name: Upload gnubg WASM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: gnubg-wasm-v1.05
           path: /tmp/gnubg-build/
@@ -241,7 +241,7 @@ jobs:
 
       # ── Upload artifact for docs.yml ─────────────────────────────────────────
       - name: Upload KataGo ONNX artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: katago-onnx-v1.14
           path: /tmp/katago-onnx/
@@ -278,7 +278,7 @@ jobs:
           echo "✅  Written to packages/registry/data/sri-hashes/mortal-1.0.txt"
 
       - name: Upload Mortal stub artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mortal-stub-v1.0
           path: /tmp/mortal-build/
