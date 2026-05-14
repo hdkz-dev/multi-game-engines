@@ -38,21 +38,21 @@
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@playwright/experimental-ct-vue": "^1.59.1",
-    "@playwright/test": "^1.59.1",
+    "@playwright/experimental-ct-vue": "^1.60.0",
+    "@playwright/test": "^1.60.0",
     "@storybook/vue3": "10.3.6",
     "@storybook/vue3-vite": "10.3.6",
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.7.0",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/compiler-dom": "^3.5.34",
     "@vue/test-utils": "^2.4.10",
     "happy-dom": "^20.9.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.11",
+    "vite": "^8.0.12",
     "vite-plugin-dts": "^5.0.0",
-    "vitest": "^4.1.5",
+    "vitest": "^4.1.6",
     "vue": "3.5.34",
-    "vue-tsc": "^3.2.8"
+    "vue-tsc": "^3.2.9"
   },
   "author": "hdkz-dev",
   "repository": {
