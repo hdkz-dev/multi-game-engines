@@ -35,21 +35,21 @@
     "@multi-game-engines/ui-chess-elements": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-shogi-elements": "workspace:*",
-    "lit": "^3.3.2"
+    "lit": "^3.3.3"
   },
   "devDependencies": {
-    "@storybook/addon-a11y": "10.3.6",
-    "@storybook/addon-docs": "10.3.6",
-    "@storybook/addon-links": "10.3.6",
-    "@storybook/web-components": "10.3.6",
-    "@storybook/web-components-vite": "10.3.6",
+    "@storybook/addon-a11y": "10.4.0",
+    "@storybook/addon-docs": "10.4.0",
+    "@storybook/addon-links": "10.4.0",
+    "@storybook/web-components": "10.4.0",
+    "@storybook/web-components-vite": "10.4.0",
     "@swc/core": "^1.15.33",
     "@vueless/storybook-dark-mode": "^10.0.8",
     "jsdom": "^29.1.1",
-    "storybook": "10.3.6",
+    "storybook": "10.4.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.6"
   },
   "author": "hdkz-dev",
   "repository": {
