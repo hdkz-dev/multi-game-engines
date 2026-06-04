@@ -1,0 +1,62 @@
+{
+  "name": "@multi-game-engines/adapter-fairy-stockfish",
+  "version": "1.0.0",
+  "description": "Fairy-Stockfish chess engine adapter for multi-game-engines ecosystem",
+  "type": "module",
+  "license": "MIT",
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/adapter-fairy-stockfish"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "chess",
+    "fairy-stockfish",
+    "stockfish",
+    "uci",
+    "wasm",
+    "multi-game-engines"
+  ],
+  "peerDependencies": {
+    "@multi-game-engines/core": "workspace:*"
+  },
+  "dependencies": {
+    "@multi-game-engines/adapter-uci": "workspace:*",
+    "@multi-game-engines/registry": "workspace:*"
+  },
+  "devDependencies": {
+    "@multi-game-engines/domain-chess": "workspace:*",
+    "eslint": "^10.4.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme"
+}
