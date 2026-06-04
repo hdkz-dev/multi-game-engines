@@ -181,6 +181,78 @@
           }
         }
       }
+    },
+    "fairy-stockfish": {
+      "name": "Fairy-Stockfish",
+      "adapter": "uci",
+      "latest": "1.1.11",
+      "_note": "Fairy-Stockfish NNUE WASM package. Uses UCI for chess. App-level integration should gate unsupported variants before invoking the engine.",
+      "versions": {
+        "1.1.11": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.js",
+              "type": "worker-js",
+              "size": 64273,
+              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd"
+            },
+            "wasm": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.wasm",
+              "type": "wasm",
+              "size": 1636483,
+              "sri": "sha384-Yody5fTfCh7eVp96M/G7We/Pbab1ISnWEBhxtofmYs+3bnojRQNleMst8vPliAuc"
+            },
+            "worker": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.worker.js",
+              "type": "worker-js",
+              "size": 3321,
+              "sri": "sha384-0w8w5hC+9s42raS53DUYKFBSW908xSG3b8Re89U5xKQpkdwMoNTbLwhiHlpt60Wi"
+            },
+            "uci": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/uci.js",
+              "type": "worker-js",
+              "size": 1117,
+              "sri": "sha384-EvWTGqsQGqLXjzlHqDznjSN7O0sfg+HKjKU4+Y3RqO2WjhPGAAbpMZYyAl+T4yrh"
+            }
+          }
+        }
+      }
+    },
+    "fairy-stockfish-shogi": {
+      "name": "Fairy-Stockfish Shogi",
+      "adapter": "usi",
+      "latest": "1.1.11",
+      "_note": "Fairy-Stockfish NNUE WASM package. Uses USI for shogi. App-level integration should gate try-rule and impasse variants before invoking the engine.",
+      "versions": {
+        "1.1.11": {
+          "assets": {
+            "main": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.js",
+              "type": "worker-js",
+              "size": 64273,
+              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd"
+            },
+            "wasm": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.wasm",
+              "type": "wasm",
+              "size": 1636483,
+              "sri": "sha384-Yody5fTfCh7eVp96M/G7We/Pbab1ISnWEBhxtofmYs+3bnojRQNleMst8vPliAuc"
+            },
+            "worker": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.worker.js",
+              "type": "worker-js",
+              "size": 3321,
+              "sri": "sha384-0w8w5hC+9s42raS53DUYKFBSW908xSG3b8Re89U5xKQpkdwMoNTbLwhiHlpt60Wi"
+            },
+            "uci": {
+              "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/uci.js",
+              "type": "worker-js",
+              "size": 1117,
+              "sri": "sha384-EvWTGqsQGqLXjzlHqDznjSN7O0sfg+HKjKU4+Y3RqO2WjhPGAAbpMZYyAl+T4yrh"
+            }
+          }
+        }
+      }
     }
   }
 }
