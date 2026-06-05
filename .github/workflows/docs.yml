@@ -109,6 +109,10 @@ jobs:
       - name: Stage Edax WASM assets
         if: steps.dl-edax.outcome == 'success'
         run: |
+          if [ ! -f /tmp/edax-wasm/edax.js ]; then
+            echo "Edax WASM artifact did not contain expected files; skipping Edax asset staging."
+            exit 0
+          fi
           DEST=assets-staging/assets/edax/4.4
           mkdir -p "$DEST"
           # edax.js        — Worker entry point (wraps Emscripten module)
@@ -150,6 +154,10 @@ jobs:
       - name: Stage gnubg WASM assets
         if: steps.dl-gnubg.outcome == 'success'
         run: |
+          if [ ! -f /tmp/gnubg-wasm/gnubg.js ]; then
+            echo "gnubg WASM artifact did not contain expected files; skipping gnubg asset staging."
+            exit 0
+          fi
           DEST=assets-staging/assets/gnubg/1.05
           mkdir -p "$DEST"
           # gnubg.js        — Worker entry point (wraps Emscripten module)
