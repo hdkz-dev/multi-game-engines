@@ -450,13 +450,13 @@ importers:
   packages/adapter-fairy-stockfish:
     dependencies:
       '@multi-game-engines/adapter-uci':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../adapter-uci
       '@multi-game-engines/core':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
       '@multi-game-engines/registry':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../registry
     devDependencies:
       '@multi-game-engines/domain-chess':
@@ -478,13 +478,13 @@ importers:
   packages/adapter-fairy-stockfish-shogi:
     dependencies:
       '@multi-game-engines/adapter-usi':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../adapter-usi
       '@multi-game-engines/core':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
       '@multi-game-engines/registry':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../registry
     devDependencies:
       '@multi-game-engines/domain-shogi':

@@ -35,11 +35,11 @@
     "multi-game-engines"
   ],
   "peerDependencies": {
-    "@multi-game-engines/core": "workspace:*"
+    "@multi-game-engines/core": "workspace:^"
   },
   "dependencies": {
-    "@multi-game-engines/adapter-uci": "workspace:*",
-    "@multi-game-engines/registry": "workspace:*"
+    "@multi-game-engines/adapter-uci": "workspace:^",
+    "@multi-game-engines/registry": "workspace:^"
   },
   "devDependencies": {
     "@multi-game-engines/domain-chess": "workspace:*",
