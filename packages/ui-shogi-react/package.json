@@ -30,13 +30,13 @@
   "devDependencies": {
     "@multi-game-engines/eslint-config-react": "workspace:*",
     "@testing-library/react": "^16.3.2",
-    "@types/react": "^19.2.15",
+    "@types/react": "^19.2.17",
     "eslint-plugin-react-hooks": "7.1.1",
     "jsdom": "^29.1.1",
-    "react": "^19.2.6",
+    "react": "^19.2.7",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   },
   "author": "hdkz-dev",
   "repository": {
