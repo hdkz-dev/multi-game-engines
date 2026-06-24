@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # ── Cache: compiled WASM output ─────────────────────────────────────────
       # Key includes the Emscripten version + Edax tag so any update busts
@@ -104,7 +104,7 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # ── Cache: compiled WASM output ─────────────────────────────────────────
       - name: Cache gnubg WASM build
@@ -176,7 +176,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # ── Cache: generated ONNX output ────────────────────────────────────────
       - name: Cache KataGo ONNX output
@@ -260,7 +260,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Package Mortal stub worker
         run: |
