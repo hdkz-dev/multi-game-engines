@@ -35,7 +35,7 @@ jobs:
       # the cache and triggers a fresh compile.
       - name: Cache Edax WASM build
         id: cache-edax-wasm
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/edax-build
           key: edax-wasm-v4.4-emcc4.0.10
@@ -43,7 +43,7 @@ jobs:
       # ── Cache: Edax source clone ─────────────────────────────────────────────
       - name: Cache Edax source
         if: steps.cache-edax-wasm.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-edax-src
         with:
           path: /tmp/edax-src
@@ -52,7 +52,7 @@ jobs:
       # ── Cache: eval.dat (separate release asset, ~10MB) ──────────────────────
       - name: Cache Edax eval.dat
         if: steps.cache-edax-wasm.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/edax-data
           key: edax-eval-v4.4
@@ -109,7 +109,7 @@ jobs:
       # ── Cache: compiled WASM output ─────────────────────────────────────────
       - name: Cache gnubg WASM build
         id: cache-gnubg-wasm
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/gnubg-build
           key: gnubg-wasm-v1.05-emcc4.0.10
@@ -117,7 +117,7 @@ jobs:
       # ── Cache: gnubg-web source clone ────────────────────────────────────────
       - name: Cache gnubg source
         if: steps.cache-gnubg-wasm.outputs.cache-hit != 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-gnubg-src
         with:
           path: /tmp/gnubg-src
@@ -181,7 +181,7 @@ jobs:
       # ── Cache: generated ONNX output ────────────────────────────────────────
       - name: Cache KataGo ONNX output
         id: cache-katago-onnx
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: /tmp/katago-onnx
           key: katago-onnx-stub-v1-${{ hashFiles('scripts/create-katago-stub-onnx.py') }}
