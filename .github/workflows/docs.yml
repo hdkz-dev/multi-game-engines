@@ -50,7 +50,7 @@ jobs:
 
       # ── WASM Assets (ADR-014: GPL binaries not committed to source) ──────
       - name: Cache WASM download archives
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-wasm
         with:
           path: /tmp/wasm-archives
