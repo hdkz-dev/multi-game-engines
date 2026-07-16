@@ -52,4 +52,4 @@ jobs:
         run: pnpm run doc-sync
 
       - name: Audit
-        run: pnpm audit --prod
+        uses: google/osv-scanner-action/osv-scanner-action@8dc09193bb540e09b23da07ad7e30bd33bf87018 # v2.3.8
