@@ -265,6 +265,41 @@ jobs:
           echo "GitHub Pages output:"
           find gh-pages-output/assets -type f | sort
 
+      # ── Guard: never deploy with missing engine assets ───────────────────
+      # The engine artifacts above are downloaded with if_no_artifact_found:
+      # warn, so an expired artifact would otherwise silently drop assets from
+      # the deployed site (each deploy replaces the whole Pages content).
+      # Failing here keeps the last good deployment live; re-run build-wasm.yml
+      # (workflow_dispatch) to regenerate the artifacts, which re-triggers
+      # this workflow via workflow_run.
+      - name: Verify required WASM assets
+        run: |
+          missing=0
+          for f in \
+            assets/yaneuraou/7.5/yaneuraou.js \
+            assets/yaneuraou/7.5/yaneuraou.wasm \
+            assets/edax/4.4/edax.js \
+            assets/edax/4.4/edax.module.js \
+            assets/edax/4.4/edax.wasm \
+            assets/edax/4.4/edax.module.data \
+            assets/gnubg/1.05/gnubg.js \
+            assets/gnubg/1.05/gnubg.module.js \
+            assets/gnubg/1.05/gnubg.wasm \
+            assets/gnubg/1.05/gnubg.module.data \
+            assets/katago/1.14/katago-b6c96.onnx \
+            assets/mortal/1.0/mortal.js
+          do
+            if [[ ! -s "gh-pages-output/$f" ]]; then
+              echo "::error::Missing required Pages asset: $f"
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            echo "❌  Aborting deploy — run build-wasm.yml to regenerate expired artifacts."
+            exit 1
+          fi
+          echo "✅  All required WASM assets present."
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
