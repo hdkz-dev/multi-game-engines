@@ -21,40 +21,53 @@ const strictMode = process.env.SRI_STRICT === "1" || process.env.SRI_STRICT === 
 // expected there and keeps __unsafeNoSRI as-is.
 const fetchFailures = [];
 
-// refresh-sri.yml runs right after docs.yml deploys, when GitHub Pages can
-// still be swapping content and briefly answers 5xx. Retrying those keeps a
-// transient blip from being reported as a missing production asset.
-// 4xx is NOT retried: a 404 means the asset is genuinely gone, which is
-// exactly what strict mode exists to catch.
-const FETCH_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 5000;
+const MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 2000;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// 5xx / 429 は Pages 側の一時的な不調 (デプロイ直後など) で発生する。
+// 404 のような恒久的な欠落と区別し、リトライ対象とする。
+const isTransientStatus = status => status >= 500 || status === 429;
+
+/**
+ * アセットを取得して SHA-384 SRI を計算する。
+ * 一時エラー (5xx/429/ネットワーク断) は指数バックオフでリトライし、
+ * 全試行が失敗した場合のみ null を返す。404 等は即座に null を返す。
+ */
 async function calculateSRI(url) {
-  for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
-    const isLastAttempt = attempt === FETCH_ATTEMPTS;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const retriesLeft = attempt < MAX_ATTEMPTS;
     try {
       const response = await fetch(url);
-      if (response.ok) {
-        const buffer = await response.arrayBuffer();
-        // 2026 standard: sha384 is preferred for public assets
-        const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
-        return `sha384-${hash}`;
-      }
-      if (response.status < 500 || isLastAttempt) {
+      if (!response.ok) {
+        if (isTransientStatus(response.status) && retriesLeft) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          console.warn(
+            `  ⏳ Transient HTTP ${response.status} for ${url} — retrying in ${delay}ms (attempt ${attempt}/${MAX_ATTEMPTS}).`,
+          );
+          await sleep(delay);
+          continue;
+        }
         console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
         return null;
       }
-      console.warn(`  ⏳ Transient HTTP ${response.status} for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`);
+      const buffer = await response.arrayBuffer();
+      // 2026 standard: sha384 is preferred for public assets
+      const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
+      return `sha384-${hash}`;
     } catch (err) {
-      if (isLastAttempt) {
-        console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
-        return null;
+      if (retriesLeft) {
+        const delay = RETRY_BASE_DELAY_MS * attempt;
+        console.warn(
+          `  ⏳ Network error fetching ${url} — retrying in ${delay}ms (attempt ${attempt}/${MAX_ATTEMPTS}).`,
+        );
+        await sleep(delay);
+        continue;
       }
-      console.warn(`  ⏳ Network error for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`);
+      console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
+      return null;
     }
-    await sleep(RETRY_DELAY_MS);
   }
   return null;
 }
