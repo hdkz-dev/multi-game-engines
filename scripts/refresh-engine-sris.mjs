@@ -25,11 +25,15 @@ const fetchFailures = [];
 // still be swapping content and briefly answers 5xx. Retrying those keeps a
 // transient blip from being reported as a missing production asset.
 // 4xx is NOT retried: a 404 means the asset is genuinely gone, which is
-// exactly what strict mode exists to catch.
+// exactly what strict mode exists to catch. 429 is the one exception —
+// rate limiting is transient, and this script fetches every asset back to
+// back, so it is the 4xx we are most likely to hit.
 const FETCH_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 5000;
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const isTransientStatus = status => status >= 500 || status === 429;
 
 async function calculateSRI(url) {
   for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
@@ -42,7 +46,7 @@ async function calculateSRI(url) {
         const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
         return `sha384-${hash}`;
       }
-      if (response.status < 500 || isLastAttempt) {
+      if (!isTransientStatus(response.status) || isLastAttempt) {
         console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
         return null;
       }
