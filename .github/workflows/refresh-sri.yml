@@ -62,7 +62,11 @@ jobs:
               --body "$BODY" --label "registry,security"
           fi
 
+      # 一部アセットが 404 でも、他アセットの正当な SRI 更新は PR にする。
+      # 条件なしだと前ステップ失敗時にスキップされ、更新分が失われるため。
+      # ジョブ自体は失敗のままなので 404 の通知は従来どおり行われる。
       - name: Create Pull Request if updated
+        if: ${{ !cancelled() }}
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
