@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **Fairy-Stockfish Adapters (2026-05-30, PR #188)**: Added `@multi-game-engines/adapter-fairy-stockfish` (chess variants via jsDelivr-hosted Fairy-Stockfish 1.1.11 WASM) and `@multi-game-engines/adapter-fairy-stockfish-shogi` (shogi). Both published at 1.0.1 (PR #192, #193).
 - **Comprehensive Test Coverage Uplift (2026-04-21)**: Systematically improved unit test coverage across 9 core packages, adding new test files and extending existing test suites to cover edge cases, error paths, and async lifecycle behaviours:
   - `core`: 76.26% → 84.23% — Added coverage for `BaseAdapter` stream-cancel lifecycle, `EngineFacade` concurrent search/dispose, `EngineBatchAnalyzer` cancel/pause/priority paths, `EngineConcurrencyController` status transitions, `EngineLoader` JSON/text MIME types and invalid URL rejection, `ResourceInjector` VFS mounting and Emscripten module adaptation, `DefaultTelemetryMiddleware` `onInfo`/`onProgress` paths and memory sampling, `MockAdapter` stop-mid-search and listener override paths.
   - `ui-react-monitor`: 63.76% → 97.7% — Added `SearchLog.test.tsx` (new), extended `EngineMonitorPanel.test.tsx` (keyboard navigation, error states, mate score), `useEngineMonitor.test.tsx` (status propagation, cleanup on unmount), `MockEngine.test.ts` (load lifecycle, failOnSearch, middleware, telemetry).

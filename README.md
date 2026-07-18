@@ -32,14 +32,19 @@
 
 ## 📦 サポート状況 / Support Status
 
-- **Chess**: Stockfish 16.1 (WASM) - **Ready**
-- **Shogi**: やねうら王 7.5.0 (WASM) - **Ready**
+- **Chess**: Stockfish 16 (WASM) - **Ready**
+- **Chess Variants**: Fairy-Stockfish 1.1.11 (WASM) - **Ready**
+- **Shogi**: やねうら王 7.5.0 (WASM) / Fairy-Stockfish Shogi (WASM) - **Ready**
 - **Go**: KataGo (ONNX Runtime Web) - **Ready** (stub model; set `KATAGO_ONNX_URL` for production)
 - **Xiangqi**: Universal Chinese Chess Interface (UCCI) - **Ready**
 - **Janggi**: Universal Janggi Chess Interface (UJCI) - **Ready**
 - **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
 - **Gomoku**: Renju Solvers (Custom Protocol) - **Ready**
 - **Mahjong**: Mortal (MahjongJSON Protocol) - **Ready** (stub Worker; PyTorch→ONNX 移行で実モデル統合予定)
+- **Backgammon**: GNU Backgammon 1.05 (WASM) - **Ready**
+- **Checkers**: rapid-draughts (Pure TypeScript, English Draughts) - **Ready**
+- **Poker**: Texas Hold'em (JSON-RPC Protocol) - **Ready** (エンジン持ち込み式 / bring your own engine)
+- **Bridge**: Contract Bridge (GIB/JSON Protocol) - **Ready** (エンジン持ち込み式 / bring your own engine)
 
 ## 🚀 クイックスタート / Quick Start
 
