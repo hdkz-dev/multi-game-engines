@@ -1,8 +1,52 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年5月11日 (実装担当: Zenith Quality Engineer)
+## 📅 更新日: 2026年7月18日 (実装担当: Zenith Quality Engineer)
 
-## 📊 現在の状態スナップショット (2026年5月11日)
+## 📊 現在の状態スナップショット (2026年7月18日)
+
+### CI / ブランチ / npm
+
+| 項目                                 | 状態                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| CI 全ワークフロー (HEAD: `448f8fe6`) | ✅ 全通過 (Release / E2E / Benchmarks / ESLint / SRI Refresh, 2026-07-17)                                                 |
+| オープン PR / Issue                  | **0件 / 0件**                                                                                                             |
+| オープン Dependabot alerts           | **0件** ✅                                                                                                                |
+| `pnpm audit --prod`                  | **0 vulnerabilities** ✅ (2026-07-18 確認)                                                                                |
+| npm publish                          | **53 公開パッケージ すべて公開済み・ローカルと同バージョン** (2026-07-18 全数確認。private は `eslint-config-react` のみ) |
+| テスト                               | `core`: 41ファイル / 431テスト 全通過 (2026-07-18 ローカル実測)                                                           |
+| `core` カバレッジ (2026-07-18 実測)  | lines **98.45%** / branches **89.05%** — CI threshold (≥98.4 / ≥88) 維持 ✅                                               |
+| 新規アダプター                       | Fairy-Stockfish (Chess Variants) / Fairy-Stockfish Shogi を PR #188 で追加、1.0.1 公開済み (PR #192, #193)                |
+
+### WASM バイナリ配信状況 (2026-07-18 確認)
+
+| エンジン            | 配信元       | HTTP 状態 | 備考                                                |
+| ------------------- | ------------ | --------- | --------------------------------------------------- |
+| Stockfish (Chess)   | jsDelivr CDN | ✅ 200    | 全6バリアント確認                                   |
+| Fairy-Stockfish     | jsDelivr CDN | ✅ 200    | 全4アセット確認                                     |
+| やねうら王 (Shogi)  | GitHub Pages | ✅ 200    | docs.yml が毎回上流から取得                         |
+| KataGo (Go)         | GitHub Pages | ✅ 200    | スタブ ONNX (artifact retention 30日)               |
+| Mortal (Mahjong)    | GitHub Pages | ✅ 200    | スタブ Worker (artifact retention 30日)             |
+| Edax (Reversi)      | GitHub Pages | ✅ 200    | 一時 404 → 同日復旧 (下記インシデント参照)          |
+| gnubg (Backgammon)  | GitHub Pages | ✅ 200    | 一時 404 → 同日復旧 (下記インシデント参照)          |
+| KingsRow (Checkers) | N/A          | N/A       | rapid-draughts (Pure TS) 代替のためバイナリ配信不要 |
+
+### 🟡 インシデント: Edax / gnubg アセット消失 (2026-07-18 発見 → 同日復旧確認、再発防止対応中)
+
+- **事象**: `engines.json` 記載の `assets/edax/4.4/*` と `assets/gnubg/1.05/*` が GitHub Pages で 404 (推定発生: 2026-07-01 頃〜)。
+- **根本原因**: `build-wasm.yml` の edax/gnubg artifact は `retention-days: 7`。最終実行 2026-06-24 の artifact が 7/1 頃に期限切れとなり、以降の `docs.yml` デプロイ (Pages 全体置換) で `if_no_artifact_found: warn` により黙ってスキップ → アセット欠落のまま上書き。
+- **検知遅延の原因**: `scripts/refresh-engine-sris.mjs` が fetch 失敗を警告のみで握りつぶし `exit 0` するため、週次 SRI チェック (2026-07-17 実行) が success になっていた (silent failure)。
+- **復旧**: `build-wasm.yml` 再実行 → `docs.yml` 再デプロイにより、2026-07-18 に全アセット HTTP 200 復帰を確認。再ビルドで gnubg.wasm のバイナリが変わったため `engines.json` の SRI 更新が発生 (実測ハッシュ一致を確認済み)。
+- **再発防止 (進行中)**: ①artifact retention 延長 + `build-wasm.yml` への定期実行 (schedule) 追加、②SRI スクリプトの fetch 失敗時 fail 化 — いずれも別セッションで対応中。
+
+### ⚠️ 要対応 (期限あり)
+
+| 項目                     | 期限           | 状態                                                                                                    |
+| ------------------------ | -------------- | ------------------------------------------------------------------------------------------------------- |
+| NPM_TOKEN ローテーション | **2026-07-29** | ⏸️ **保留 (2026-07-18 決定)** — 期限切れ後に再発行 + secret 更新で対応する方針。次回 publish 前に要確認 |
+
+---
+
+## 📊 過去の状態スナップショット (2026年5月11日)
 
 ### CI / ブランチ / npm
 
