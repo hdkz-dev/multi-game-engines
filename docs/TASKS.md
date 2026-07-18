@@ -146,6 +146,20 @@
 
 ## 🛠️ 技術的負債・個別課題 (Pending Issues)
 
+### 2026-07-18 完了: 配信インシデント対応 + ドキュメント実態同期 ✅
+
+- [x] **Edax / gnubg アセット消失の復旧 (PR #205)** — `build-wasm.yml` の artifact が `retention-days: 7` で失効し、`docs.yml` の Pages 全置換デプロイで欠落。再ビルド + retention 見直しで HTTP 200 復帰を確認。
+- [x] **SRI 更新スクリプトの silent failure 解消 (PR #207)** — `refresh-engine-sris.mjs` が本番アセットの fetch 失敗を握りつぶし `exit 0` していた問題を修正。以後は配信断を CI で検知可能。
+- [x] **ドキュメント実態同期 (PR #208)** — README のサポート状況に Backgammon / Checkers / Poker / Bridge / Fairy-Stockfish を追加、PROGRESS.md に 2026-07-18 スナップショット (実測カバレッジ 98.45%、npm 53 パッケージ全数確認) とインシデント記録を追加。
+- [x] **Serena 設定のテンプレート追随 (PR #209)** — `.serena/project.yml` を上流の最新テンプレートへ移行 (実効設定の変更なし)。
+- [x] **陳腐化 stash の整理** — 2026-03-04 の `integration/all-updates` WIP を精査。ESLint 10.0.2 整合はすでに 10.4.x へ前進、ループバック HTTP 例外は ADR-060 としてより堅牢な形で実装済みのため破棄 (復旧用 SHA: `5ca424cc`)。
+- [ ] **NPM_TOKEN ローテーション** — 期限 2026-07-29。⏸️ 期限切れまで保留する方針 (2026-07-18 決定)。次回 publish 前に要対応。
+
+### 2026-05-30 完了: Fairy-Stockfish アダプター追加 ✅
+
+- [x] **`adapter-fairy-stockfish` / `adapter-fairy-stockfish-shogi` の新設 (PR #188)** — チェス変則ルールと将棋に対応。jsDelivr 配信の Fairy-Stockfish 1.1.11 WASM を利用。
+- [x] **公開時の workspace protocol 修正 (PR #192)** — `workspace:*` を `workspace:^` に置換し、npm 公開時の依存解決を正常化。1.0.1 として公開 (PR #193)。
+
 ### 2026-02-26 更新 (実装担当: Federated i18n Architecture)
 
 - [x] Federated i18n Architecture の実装
