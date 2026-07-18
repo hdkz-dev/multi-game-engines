@@ -9,8 +9,11 @@
 #      → シークレット URL から実際の KataGo ONNX モデルをダウンロード
 #   2. シークレットが設定されていない場合:
 #      → scripts/create-katago-stub-onnx.py で開発/テスト用スタブを生成
-#   3. SHA-384 を計算して packages/registry/data/sri-hashes/katago-1.14.txt に書き込み
-#   4. artifact を docs.yml がダウンロードして GitHub Pages に配置
+#   3. artifact を docs.yml がダウンロードして GitHub Pages に配置
+#   4. refresh-sri.yml が公開 URL から SHA-384 を取得して engines.json に反映
+#
+# (このスクリプトをローカル実行した場合のみ、まだ未デプロイのモデルを
+#  先行して pin できるよう sri-hashes/katago-1.14.txt に書き出す)
 #
 # 本番用の実 ONNX モデルを使用する場合:
 #   gh secret set KATAGO_ONNX_URL  # リポジトリシークレットとして ONNX モデルの URL を設定

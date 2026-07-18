@@ -72,9 +72,8 @@ gh workflow run build-wasm.yml
 
 完了後 (約 5 分):
 
-- `build-katago` ジョブが実モデルをダウンロード
-- SHA-384 を `sri-hashes/katago-1.14.txt` へ書込
-- `docs.yml` が GitHub Pages にステージング
+- `build-katago` ジョブが実モデルをダウンロードし artifact をアップロード
+- `docs.yml` が artifact を GitHub Pages にステージング
 - `refresh-sri.yml` が `pnpm sri:refresh` → `engines.json` 更新 → 自動 PR 作成
 
 ### 5. 検証
