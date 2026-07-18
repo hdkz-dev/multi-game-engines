@@ -21,21 +21,55 @@ const strictMode = process.env.SRI_STRICT === "1" || process.env.SRI_STRICT === 
 // expected there and keeps __unsafeNoSRI as-is.
 const fetchFailures = [];
 
+const MAX_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 2000;
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// 5xx / 429 は Pages 側の一時的な不調 (デプロイ直後など) で発生する。
+// 404 のような恒久的な欠落と区別し、リトライ対象とする。
+const isTransientStatus = status => status >= 500 || status === 429;
+
+/**
+ * アセットを取得して SHA-384 SRI を計算する。
+ * 一時エラー (5xx/429/ネットワーク断) は指数バックオフでリトライし、
+ * 全試行が失敗した場合のみ null を返す。404 等は即座に null を返す。
+ */
 async function calculateSRI(url) {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const retriesLeft = attempt < MAX_ATTEMPTS;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (isTransientStatus(response.status) && retriesLeft) {
+          const delay = RETRY_BASE_DELAY_MS * attempt;
+          console.warn(
+            `  ⏳ Transient HTTP ${response.status} for ${url} — retrying in ${delay}ms (attempt ${attempt}/${MAX_ATTEMPTS}).`,
+          );
+          await sleep(delay);
+          continue;
+        }
+        console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
+        return null;
+      }
+      const buffer = await response.arrayBuffer();
+      // 2026 standard: sha384 is preferred for public assets
+      const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
+      return `sha384-${hash}`;
+    } catch (err) {
+      if (retriesLeft) {
+        const delay = RETRY_BASE_DELAY_MS * attempt;
+        console.warn(
+          `  ⏳ Network error fetching ${url} — retrying in ${delay}ms (attempt ${attempt}/${MAX_ATTEMPTS}).`,
+        );
+        await sleep(delay);
+        continue;
+      }
+      console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
       return null;
     }
-    const buffer = await response.arrayBuffer();
-    // 2026 standard: sha384 is preferred for public assets
-    const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
-    return `sha384-${hash}`;
-  } catch (err) {
-    console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
-    return null;
   }
+  return null;
 }
 
 /**
