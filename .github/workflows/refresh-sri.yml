@@ -21,6 +21,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
 
     steps:
       - uses: actions/checkout@v7
@@ -39,6 +40,27 @@ jobs:
 
       - name: Run SRI Refresh Script
         run: node scripts/refresh-engine-sris.mjs
+        env:
+          # 既存 SRI を持つアセットの取得失敗 (404 等) をエラーにして
+          # ワークフローを失敗させる (本番アセット消失の検知)
+          SRI_STRICT: "1"
+
+      - name: Open issue on asset fetch failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          TITLE="SRI refresh failed: production asset fetch error"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"$TITLE\"" --json number --jq '.[0].number')
+          BODY="The scheduled SRI refresh failed — one or more assets with an existing SRI could not be fetched (possible 404 on GitHub Pages). See run: $RUN_URL"
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" \
+              --body "$BODY" --label "registry,security"
+          fi
 
       - name: Create Pull Request if updated
         uses: peter-evans/create-pull-request@v8

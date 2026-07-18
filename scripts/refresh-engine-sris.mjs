@@ -10,6 +10,17 @@ const registryPath = path.resolve(__dirname, "../packages/registry/data/engines.
 const sriHashesDir = path.resolve(__dirname, "../packages/registry/data/sri-hashes");
 const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
 
+// Strict mode (SRI_STRICT=1): fetch failures for assets that already have an
+// SRI are treated as errors (non-zero exit). Used by refresh-sri.yml so that
+// missing production assets (404) fail the workflow instead of passing
+// silently. Local `pnpm build` stays lenient to allow offline builds.
+const strictMode = process.env.SRI_STRICT === "1" || process.env.SRI_STRICT === "true";
+
+// Assets with an existing SRI whose fetch failed: { label, url }.
+// __unsafeNoSRI assets (not yet deployed) are excluded — a failed fetch is
+// expected there and keeps __unsafeNoSRI as-is.
+const fetchFailures = [];
+
 async function calculateSRI(url) {
   try {
     const response = await fetch(url);
@@ -135,7 +146,9 @@ async function refresh() {
         if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
           // 既存 SRI の更新チェック
           const sri = await calculateSRI(assetConfig.url);
-          if (sri && assetConfig.sri !== sri) {
+          if (!sri) {
+            fetchFailures.push({ label, url: assetConfig.url });
+          } else if (assetConfig.sri !== sri) {
             console.log(`    ✅ Updated SRI for ${assetKey} in ${engineId}@${version}`);
             assetConfig.sri = sri;
             updated = true;
@@ -153,7 +166,9 @@ async function refresh() {
             const label = `${engineId}@${version} / variants.${variantId}.${assetKey}`;
             if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
               const sri = await calculateSRI(assetConfig.url);
-              if (sri && assetConfig.sri !== sri) {
+              if (!sri) {
+                fetchFailures.push({ label, url: assetConfig.url });
+              } else if (assetConfig.sri !== sri) {
                 console.log(`    ✅ Updated SRI for variant ${variantId} asset ${assetKey} in ${engineId}@${version}`);
                 assetConfig.sri = sri;
                 updated = true;
@@ -173,10 +188,23 @@ async function refresh() {
   } else {
     console.log("No SRI updates required.");
   }
+
+  if (fetchFailures.length > 0) {
+    console.error(`\n❌ Failed to fetch ${fetchFailures.length} asset(s) with existing SRI:`);
+    for (const { label, url } of fetchFailures) {
+      console.error(`  - ${label}: ${url}`);
+    }
+    if (strictMode) {
+      process.exitCode = 1;
+    } else {
+      console.warn("SRI_STRICT is not set — treating fetch failures as warnings.");
+    }
+  }
 }
 
-// Trap errors to continue build process if SRI refresh fails (e.g. offline)
+// Lenient mode (default, e.g. `pnpm build` offline): errors are logged but the
+// process exits 0 so the build can continue. Strict mode (CI): exit non-zero.
 refresh().catch(err => {
-  console.error("SRI Refresh failed but continuing build:", err);
-  process.exit(0); 
+  console.error("SRI Refresh failed:", err);
+  process.exit(strictMode ? 1 : 0);
 });

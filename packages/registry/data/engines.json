@@ -128,7 +128,7 @@
             "wasm": {
               "url": "https://hdkz-dev.github.io/multi-game-engines/assets/gnubg/1.05/gnubg.wasm",
               "type": "wasm",
-              "sri": "sha384-nrLStFCjh7sc0D2OwlpxQ5EbNrZKpAI7B7hf0KOcCRn9/qJ0Yh/TwhSgHmjd0Vqf"
+              "sri": "sha384-2Pz6ToxrHjvwODVmVzRNJ5z1nkookgZq7rffCZNnckFMYWs3990H5+WB9IJn1Pna"
             }
           }
         }
