@@ -1,8 +1,12 @@
 name: Build WASM Engines
 
-# Triggered whenever the build scripts change, or manually.
-# Produces per-engine artifacts that docs.yml downloads to include
+# Triggered whenever the build scripts change, on a weekly schedule, or
+# manually. Produces per-engine artifacts that docs.yml downloads to include
 # the compiled binaries in GitHub Pages.
+#
+# The weekly schedule keeps artifacts within their retention window: docs.yml
+# re-deploys Pages on every push and downloads the latest artifacts, so if
+# they all expire the deployed site silently loses the WASM assets.
 
 on:
   push:
@@ -16,6 +20,10 @@ on:
       - "scripts/create-katago-stub-onnx.py"
       - "scripts/mortal-stub-worker.js"
       - ".github/workflows/build-wasm.yml"
+  schedule:
+    # Weekly refresh (Mondays 03:00 UTC) — well within the 90-day artifact
+    # retention, and keeps the actions/cache entries warm (7-day eviction).
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -95,7 +103,7 @@ jobs:
         with:
           name: edax-wasm-v4.4
           path: /tmp/edax-build/
-          retention-days: 7
+          retention-days: 90
           if-no-files-found: error
 
   build-gnubg:
@@ -159,7 +167,7 @@ jobs:
         with:
           name: gnubg-wasm-v1.05
           path: /tmp/gnubg-build/
-          retention-days: 7
+          retention-days: 90
           if-no-files-found: error
 
   # ── KataGo ONNX stub model generation ───────────────────────────────────────
@@ -245,7 +253,7 @@ jobs:
         with:
           name: katago-onnx-v1.14
           path: /tmp/katago-onnx/
-          retention-days: 30
+          retention-days: 90
           if-no-files-found: error
 
   # ── Mortal stub Worker packaging ─────────────────────────────────────────────
@@ -282,5 +290,5 @@ jobs:
         with:
           name: mortal-stub-v1.0
           path: /tmp/mortal-build/
-          retention-days: 30
+          retention-days: 90
           if-no-files-found: error
