@@ -62,9 +62,11 @@ async function tryUpgradeSRI(assetConfig, label) {
 
 /**
  * Read SRI hashes from the sri-hashes/ directory.
- * CI jobs (e.g. build-wasm.yml, download-katago-onnx.sh) write hashes here
- * after computing them from locally-built assets, before the assets are
- * uploaded to GitHub Pages. File naming convention:
+ * Local helper scripts (e.g. download-katago-onnx.sh) write hashes here after
+ * computing them from locally-obtained assets, so they can be applied before
+ * the assets are reachable on GitHub Pages. CI does not write here — once the
+ * assets are deployed, the URL fetch below is the source of truth.
+ * File naming convention:
  *   {engineId}-{version}.txt          → applies to the "main" asset
  *   {engineId}-{version}-{assetKey}.txt → applies to a specific asset key
  */
@@ -102,7 +104,7 @@ async function refresh() {
   console.log(`Refreshing SRI hashes in ${registryPath}...`);
 
   // Apply any locally-computed SRI hashes from the sri-hashes/ directory.
-  // These are written by CI build jobs before assets are deployed to GitHub Pages.
+  // These come from local helper scripts run before assets reach GitHub Pages.
   const localHashes = loadLocalSRIHashes();
   const localHashCount = Object.keys(localHashes).length;
   if (localHashCount > 0) {

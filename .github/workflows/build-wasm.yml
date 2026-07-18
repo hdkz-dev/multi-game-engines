@@ -228,22 +228,15 @@ jobs:
           mkdir -p /tmp/katago-onnx
           python3 scripts/create-katago-stub-onnx.py /tmp/katago-onnx/katago-b6c96.onnx
 
-      # ── SRI hash computation ─────────────────────────────────────────────────
-      - name: Compute SHA-384 SRI hash
+      # SRI hashes are not computed here: refresh-sri.yml recalculates them
+      # from the deployed Pages URLs after docs.yml publishes the assets.
+      - name: Verify output
         run: |
           MODEL=/tmp/katago-onnx/katago-b6c96.onnx
           if [[ ! -f "$MODEL" ]]; then
             echo "❌  No ONNX model found at $MODEL"
             exit 1
           fi
-          SRI_HASH="sha384-$(openssl dgst -sha384 -binary "$MODEL" | base64 | tr -d '\n')"
-          echo "🔐  SRI: ${SRI_HASH}"
-          mkdir -p packages/registry/data/sri-hashes
-          echo "${SRI_HASH}" > packages/registry/data/sri-hashes/katago-1.14.txt
-          echo "✅  Written to packages/registry/data/sri-hashes/katago-1.14.txt"
-
-      - name: Verify output
-        run: |
           echo "KataGo ONNX output:"
           ls -lh /tmp/katago-onnx/
 
@@ -277,14 +270,8 @@ jobs:
           echo "Mortal stub worker:"
           ls -lh /tmp/mortal-build/
 
-      - name: Compute SHA-384 SRI hash
-        run: |
-          SRI_HASH="sha384-$(openssl dgst -sha384 -binary /tmp/mortal-build/mortal.js | base64 | tr -d '\n')"
-          echo "🔐  SRI: ${SRI_HASH}"
-          mkdir -p packages/registry/data/sri-hashes
-          echo "${SRI_HASH}" > packages/registry/data/sri-hashes/mortal-1.0.txt
-          echo "✅  Written to packages/registry/data/sri-hashes/mortal-1.0.txt"
-
+      # SRI hashes are not computed here: refresh-sri.yml recalculates them
+      # from the deployed Pages URLs after docs.yml publishes the assets.
       - name: Upload Mortal stub artifact
         uses: actions/upload-artifact@v7
         with:
