@@ -96,7 +96,7 @@
     - [x] `@changesets/changelog-github` 導入 — PR リンク・Author 情報付き changelog 自動生成
     - [x] `version` スクリプト追加、`release.yml` に `version: pnpm run version` と `fetch-depth: 0` 設定
   - [x] **Security & SRI Integration**: ビルドプロセスにおける SRI 自動再計算とレジストリ同期の完全自動化。
-    - [x] `refresh-engine-sris.mjs`: `sri-hashes/*.txt` ローカルファイル読み込み機能追加 — CI ビルドジョブが書き込んだハッシュを自動適用
+    - [x] `refresh-engine-sris.mjs`: `sri-hashes/*.txt` ローカルファイル読み込み機能追加 — 未デプロイのアセットを先行 pin するローカル用の逃げ道 (CI は書き込まない。CI では `refresh-sri.yml` が公開 URL から取得する)
     - ✅ KataGo ONNX / Mortal.js ともに GitHub Pages 配信済み、SRI ハッシュ確定 (PR #134, 2026-05-08)
   - [x] PR #60 の品質ゲート完走と `pnpm audit --prod` 修正完了。
 - [x] **Asian Variants**: `adapter-xiangqi`, `adapter-janggi` の実装。

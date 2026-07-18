@@ -147,10 +147,8 @@ build-mortal:
           echo "ℹ️  MORTAL_PTH_URL not set — falling back to stub worker"
           cp scripts/mortal-stub-worker.js /tmp/mortal.js
         fi
-    - name: Compute SRI
-      run: |
-        SRI=$(openssl dgst -sha384 -binary /tmp/mortal.onnx | openssl base64 -A)
-        echo "sha384-${SRI}" > sri-hashes/mortal-1.0.txt
+    # SRI はここで計算しない。docs.yml が Pages へデプロイした後、
+    # refresh-sri.yml が公開 URL から取得して engines.json に反映する。
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
