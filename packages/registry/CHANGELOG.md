@@ -1,5 +1,24 @@
 # @multi-game-engines/registry
 
+## 1.1.0
+
+### Minor Changes
+
+- [#219](https://github.com/hdkz-dev/multi-game-engines/pull/219) [`1e16dd8`](https://github.com/hdkz-dev/multi-game-engines/commit/1e16dd8bfb808bd1c0eef08343a25b30476c9bed) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Sync the bundled engine registry with the deployed assets.
+
+  The published `data/engines.json` had drifted from what is actually served,
+  which broke consumers in two ways:
+  - **Fairy-Stockfish engines were missing.** `adapter-fairy-stockfish` and
+    `adapter-fairy-stockfish-shogi` are published, but the registry shipped no
+    `fairy-stockfish` / `fairy-stockfish-shogi` entries, so those adapters could
+    not resolve their assets through the official registry.
+  - **The gnubg SRI hash was stale.** The GNU Backgammon WASM binary was rebuilt
+    and redeployed, so the pinned hash no longer matched the served file and SRI
+    validation rejected the download, making the Backgammon engine unloadable.
+
+  Also pins confirmed SHA-384 hashes for the KataGo ONNX model and the Mortal
+  worker, replacing notes that described them as pending CI computation.
+
 ## 1.0.0
 
 ### Patch Changes

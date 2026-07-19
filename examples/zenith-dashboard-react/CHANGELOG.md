@@ -1,5 +1,20 @@
 # @examples/zenith-dashboard-react
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [[`1e16dd8`](https://github.com/hdkz-dev/multi-game-engines/commit/1e16dd8bfb808bd1c0eef08343a25b30476c9bed)]:
+  - @multi-game-engines/registry@1.1.0
+  - @multi-game-engines/adapter-edax@1.0.1
+  - @multi-game-engines/adapter-gnubg@1.0.1
+  - @multi-game-engines/adapter-gtp@1.0.1
+  - @multi-game-engines/adapter-mortal@1.0.1
+  - @multi-game-engines/adapter-stockfish@1.0.1
+  - @multi-game-engines/adapter-uci@1.0.1
+  - @multi-game-engines/adapter-usi@1.0.1
+  - @multi-game-engines/adapter-yaneuraou@1.0.1
+
 ## 0.1.7
 
 ### Patch Changes
