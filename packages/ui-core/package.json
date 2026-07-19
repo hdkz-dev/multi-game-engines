@@ -1,6 +1,12 @@
 {
   "name": "@multi-game-engines/ui-core",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "src/styles/theme.css",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Framework-agnostic UI logic for game engines",
   "type": "module",
   "types": "./dist/index.d.ts",

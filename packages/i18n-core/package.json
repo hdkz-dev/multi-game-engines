@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/i18n-core",
   "version": "0.1.1",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Core translation logic for multi-game engines",
   "type": "module",
   "types": "./dist/index.d.ts",

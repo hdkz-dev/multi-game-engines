@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/ui-elements",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Framework-agnostic Web Components for multi-game engines",
   "type": "module",
   "types": "./dist/index.d.ts",

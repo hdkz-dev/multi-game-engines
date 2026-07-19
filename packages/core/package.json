@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/core",
   "version": "0.2.0",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Core bridge library for multi-game engines",
   "type": "module",
   "repository": {

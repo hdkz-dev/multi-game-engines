@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/ui-vue-core",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Core Vue 3 primitives and context for multi-game engines",
   "type": "module",
   "types": "./dist/index.d.ts",
