@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/domain-backgammon",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Domain-specific types and logic for Backgammon",
   "type": "module",
   "license": "MIT",

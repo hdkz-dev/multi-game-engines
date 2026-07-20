@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/i18n-common",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Common localized strings for multi-game engines",
   "type": "module",
   "types": "./dist/index.d.ts",

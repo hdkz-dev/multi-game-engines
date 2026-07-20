@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/ui-vue-monitor",
   "version": "0.2.0",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Engine monitoring and management components for Vue 3",
   "type": "module",
   "types": "./dist/index.d.ts",

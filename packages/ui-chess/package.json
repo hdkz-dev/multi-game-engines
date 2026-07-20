@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/ui-chess",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Domain-specific Chess UI components for all frameworks",
   "type": "module",
   "license": "MIT",

@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/ui-shogi-elements",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "Domain-specific Shogi Web Components (Lit)",
   "type": "module",
   "license": "MIT",

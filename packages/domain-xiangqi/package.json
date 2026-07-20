@@ -13,7 +13,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",

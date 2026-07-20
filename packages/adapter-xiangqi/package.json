@@ -1,6 +1,11 @@
 {
   "name": "@multi-game-engines/adapter-xiangqi",
   "version": "0.1.2",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "description": "UCCI (Universal Chinese Chess Interface) adapter for multi-game-engines ecosystem",
   "type": "module",
   "license": "MIT",
