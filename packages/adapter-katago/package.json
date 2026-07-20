@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/adapter-katago",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "KataGo (WASM/WebGPU) adapter for Multi-Game Engines bridge.",
   "type": "module",
   "license": "MIT",
