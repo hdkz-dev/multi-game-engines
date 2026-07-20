@@ -1,5 +1,25 @@
 # @multi-game-engines/core
 
+## 0.2.1
+
+### Patch Changes
+
+- [#222](https://github.com/hdkz-dev/multi-game-engines/pull/222) [`ad3f836`](https://github.com/hdkz-dev/multi-game-engines/commit/ad3f83668b8e1bf8219e72351220557cdaa44e06) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Rebuild with the current toolchain so the published bundle picks up two fixes
+  that were already in the source tree but never shipped.
+  - **Module-init errors are no longer swallowed.** The bundler's lazy-ESM helper
+    used to return `undefined` on every access after an initialization failure,
+    hiding the original error. It now caches the failure and rethrows it, so a
+    module that throws while initializing reports the real cause on each access.
+  - **The TypeScript build cache no longer ships.** `tsconfig.tsbuildinfo` was
+    being included in the published tarball; the current build no longer emits it
+    into `dist`.
+
+- [#221](https://github.com/hdkz-dev/multi-game-engines/pull/221) [`31525da`](https://github.com/hdkz-dev/multi-game-engines/commit/31525da38b3ea8f2b581edc784731d97076ce60a) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - 公開 tarball から不要ファイルを除外しました。
+
+  全公開パッケージの package.json に `files` フィールドを設定し、`dist` と `README.md` / `LICENSE` のみを同梱するよう統一しています(`@multi-game-engines/registry` は `data`、`@multi-game-engines/ui-core` は `src/styles/theme.css` を追加で同梱)。
+
+  これまで `files` 未設定だった 31 パッケージでは、CI のビルドログ (`.turbo/*.log`)、`tsconfig.tsbuildinfo`、`src/` とテストファイル、各種ビルド設定ファイルが tarball に混入していました。ランタイムの公開 API に変更はありません。ソースマップには `sourcesContent` が埋め込まれているため、`src/` を除外してもソースマップ経由のデバッグは引き続き可能です。
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,32 @@
 # @examples/zenith-dashboard-react
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`ad3f836`](https://github.com/hdkz-dev/multi-game-engines/commit/ad3f83668b8e1bf8219e72351220557cdaa44e06), [`31525da`](https://github.com/hdkz-dev/multi-game-engines/commit/31525da38b3ea8f2b581edc784731d97076ce60a)]:
+  - @multi-game-engines/core@0.2.1
+  - @multi-game-engines/adapter-edax@1.0.2
+  - @multi-game-engines/adapter-gnubg@1.0.2
+  - @multi-game-engines/adapter-gtp@1.0.2
+  - @multi-game-engines/adapter-katago@1.0.1
+  - @multi-game-engines/adapter-kingsrow@1.0.1
+  - @multi-game-engines/adapter-mortal@1.0.2
+  - @multi-game-engines/adapter-stockfish@1.0.2
+  - @multi-game-engines/adapter-uci@1.0.2
+  - @multi-game-engines/adapter-usi@1.0.2
+  - @multi-game-engines/adapter-yaneuraou@1.0.2
+  - @multi-game-engines/domain-chess@0.1.3
+  - @multi-game-engines/domain-shogi@0.1.3
+  - @multi-game-engines/i18n-common@0.1.3
+  - @multi-game-engines/i18n-dashboard@0.1.2
+  - @multi-game-engines/registry@1.1.1
+  - @multi-game-engines/ui-chess-react@0.1.3
+  - @multi-game-engines/ui-core@0.1.3
+  - @multi-game-engines/ui-react@0.1.3
+  - @multi-game-engines/ui-react-monitor@0.2.1
+  - @multi-game-engines/ui-shogi-react@0.1.3
+
 ## 0.1.8
 
 ### Patch Changes
