@@ -1,5 +1,13 @@
 # @multi-game-engines/ui-chess-vue
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @multi-game-engines/domain-chess@0.1.4
+  - @multi-game-engines/ui-chess-elements@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

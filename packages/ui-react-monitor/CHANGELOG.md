@@ -1,5 +1,14 @@
 # @multi-game-engines/ui-react-monitor
 
+## 0.2.2
+
+### Patch Changes
+
+- Updated dependencies [[`f7fa5e1`](https://github.com/hdkz-dev/multi-game-engines/commit/f7fa5e1ee20b8d7fb99cccd81816c4d8795f4ce2)]:
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/ui-core@0.1.4
+  - @multi-game-engines/ui-react-core@0.1.4
+
 ## 0.2.1
 
 ### Patch Changes

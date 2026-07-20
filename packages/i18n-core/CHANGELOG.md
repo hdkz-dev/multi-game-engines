@@ -1,5 +1,19 @@
 # @multi-game-engines/i18n-core
 
+## 0.1.3
+
+### Patch Changes
+
+- [#224](https://github.com/hdkz-dev/multi-game-engines/pull/224) [`f7fa5e1`](https://github.com/hdkz-dev/multi-game-engines/commit/f7fa5e1ee20b8d7fb99cccd81816c4d8795f4ce2) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Ship the MIT license text with these packages.
+
+  All 53 published packages declare `"license": "MIT"` and list `LICENSE` in
+  their `files`, but 13 of them had no `LICENSE` file to include, so the
+  published tarballs carried the declaration without the license text itself.
+  The file is now present and byte-identical to the repository root license
+  across every published package.
+
+  No code or runtime behaviour changes.
+
 ## 0.1.2
 
 ### Patch Changes

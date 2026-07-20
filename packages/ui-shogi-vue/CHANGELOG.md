@@ -1,5 +1,13 @@
 # @multi-game-engines/ui-shogi-vue
 
+## 0.1.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @multi-game-engines/domain-shogi@0.1.4
+  - @multi-game-engines/ui-shogi-elements@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes
