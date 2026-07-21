@@ -17,7 +17,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && vue-tsc --emitDeclarationOnly --declaration --outDir dist --composite false",
+    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist --composite false",
     "dev": "vite build --watch",
     "lint": "eslint .",
     "test": "vitest run",

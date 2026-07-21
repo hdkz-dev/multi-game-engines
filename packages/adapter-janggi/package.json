@@ -18,7 +18,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly --composite false --declaration --outDir dist",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ."
