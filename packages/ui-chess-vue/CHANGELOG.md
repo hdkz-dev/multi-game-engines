@@ -1,5 +1,12 @@
 # @multi-game-engines/ui-chess-vue
 
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [[`c4107b4`](https://github.com/hdkz-dev/multi-game-engines/commit/c4107b46d050ecdc85287d2bde4e4a48716c4366)]:
+  - @multi-game-engines/ui-chess-elements@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

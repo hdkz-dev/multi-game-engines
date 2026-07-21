@@ -1,5 +1,21 @@
 # @multi-game-engines/ui-shogi-elements
 
+## 0.1.5
+
+### Patch Changes
+
+- [#226](https://github.com/hdkz-dev/multi-game-engines/pull/226) [`c4107b4`](https://github.com/hdkz-dev/multi-game-engines/commit/c4107b46d050ecdc85287d2bde4e4a48716c4366) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Stop publishing the TypeScript incremental build cache.
+
+  These nine packages shipped `dist/tsconfig.tsbuildinfo` in their tarballs.
+  `tsconfig.base.json` sets `composite: true`, so when `tsBuildInfoFile` is not
+  specified TypeScript writes the cache into `outDir` — which is `dist`, the one
+  directory `files` publishes. The `files` allow-list added in [#221](https://github.com/hdkz-dev/multi-game-engines/issues/221) could not
+  catch it because the file is inside `dist` rather than beside it.
+
+  Each package now points `tsBuildInfoFile` at `node_modules/.cache/`, keeping the
+  cache out of the published output. No runtime or type-resolution change: the
+  cache is a build artifact only.
+
 ## 0.1.4
 
 ### Patch Changes
