@@ -22,7 +22,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && vue-tsc --emitDeclarationOnly --declaration --composite false",
+    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --composite false",
     "dev": "vite build --watch",
     "lint": "eslint .",
     "test": "vitest run",

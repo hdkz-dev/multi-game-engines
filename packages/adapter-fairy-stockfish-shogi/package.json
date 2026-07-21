@@ -49,7 +49,7 @@
     "vitest": "^4.1.7"
   },
   "scripts": {
-    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc --emitDeclarationOnly --composite false --declaration --outDir dist",
+    "build": "tsup src/index.ts --external @multi-game-engines/* --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly --composite false --declaration --outDir dist",
     "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
