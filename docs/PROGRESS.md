@@ -77,9 +77,13 @@
 | `pnpm test`             | 全通過 (`core` 41ファイル/431件) ✅ |
 | `pnpm lint`             | 97 tasks 全通過 ✅                  |
 
-### 残課題
+### overrides 全体への展開
 
-`js-cookie` / `qs` / `postcss` / `fast-uri` / `ws` / `tar` / `launch-editor` など**他の override も下限固定のまま**で同じ潜在リスクがある。今回はレビュー範囲を絞るため alert 対象 4 件に限定した。
+alert 対象 4 件と同じ潜在リスクが残っていた **11 件にも上限を付与**し、方針を統一した。
+
+`js-cookie <4` / `qs <7` / `postcss <9` / `fast-uri <4` / `minimatch <11` / `ajv <9` / `lodash <5` / `ws <9` / `tar <8` / `launch-editor <3` / `esbuild <0.29`
+
+完全固定 (`@vue/*` / `picomatch` / `flatted` / `@babel/core` / `@microsoft/api-extractor` 等) は**意図的なバージョン統制**のため対象外とした。解決されるバージョンは全件で変化がなく、挙動は不変。
 
 ---
 
