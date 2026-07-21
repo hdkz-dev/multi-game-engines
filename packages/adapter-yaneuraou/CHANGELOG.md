@@ -1,5 +1,13 @@
 # @multi-game-engines/adapter-yaneuraou
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [[`f7fa5e1`](https://github.com/hdkz-dev/multi-game-engines/commit/f7fa5e1ee20b8d7fb99cccd81816c4d8795f4ce2)]:
+  - @multi-game-engines/registry@1.1.2
+  - @multi-game-engines/adapter-usi@1.0.3
+
 ## 1.0.2
 
 ### Patch Changes
