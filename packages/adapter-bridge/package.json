@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/adapter-bridge",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Contract Bridge engine adapter (GIB/JSON protocol) for multi-game-engines ecosystem",
   "type": "module",
   "license": "MIT",

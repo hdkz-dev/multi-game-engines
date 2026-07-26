@@ -1,5 +1,15 @@
 # @multi-game-engines/adapter-katago
 
+## 1.0.3
+
+### Patch Changes
+
+- [#230](https://github.com/hdkz-dev/multi-game-engines/pull/230) [`2fc85cd`](https://github.com/hdkz-dev/multi-game-engines/commit/2fc85cdbd09a2f909131d0a823f535d17f6f05c5) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - 公開 tarball からテストの型定義を除外しました。
+
+  ビルド時の宣言出力専用に `tsconfig.build.json` を用意し、`__tests__` / `__ct__` およびテスト・スペックファイルを除外しています。これまで `dist/__tests__/*.test.d.ts` とそのソースマップが公開物に含まれていました。
+
+  型検査の対象は変わりません。`tsconfig.json` は従来どおりテストを含むため、`tsc --noEmit` によるカバレッジは維持されます。ランタイムの公開 API にも変更はありません。
+
 ## 1.0.2
 
 ### Patch Changes

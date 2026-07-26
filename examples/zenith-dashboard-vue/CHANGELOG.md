@@ -1,5 +1,25 @@
 # @examples/zenith-dashboard-vue
 
+## 0.1.12
+
+### Patch Changes
+
+- Updated dependencies [[`2fc85cd`](https://github.com/hdkz-dev/multi-game-engines/commit/2fc85cdbd09a2f909131d0a823f535d17f6f05c5)]:
+  - @multi-game-engines/adapter-edax@1.0.4
+  - @multi-game-engines/adapter-gnubg@1.0.4
+  - @multi-game-engines/adapter-gtp@1.0.4
+  - @multi-game-engines/adapter-katago@1.0.3
+  - @multi-game-engines/adapter-kingsrow@1.0.3
+  - @multi-game-engines/adapter-mortal@1.0.4
+  - @multi-game-engines/adapter-stockfish@1.0.4
+  - @multi-game-engines/adapter-uci@1.0.4
+  - @multi-game-engines/adapter-usi@1.0.4
+  - @multi-game-engines/adapter-yaneuraou@1.0.4
+  - @multi-game-engines/ui-chess-vue@0.1.6
+  - @multi-game-engines/ui-shogi-vue@0.1.6
+  - @multi-game-engines/ui-vue-monitor@0.2.3
+  - @multi-game-engines/ui-vue@0.1.6
+
 ## 0.1.11
 
 ### Patch Changes

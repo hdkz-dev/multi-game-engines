@@ -1,5 +1,12 @@
 # @multi-game-engines/ui-react
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [[`2fc85cd`](https://github.com/hdkz-dev/multi-game-engines/commit/2fc85cdbd09a2f909131d0a823f535d17f6f05c5)]:
+  - @multi-game-engines/ui-elements@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes
