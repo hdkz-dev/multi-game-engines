@@ -22,7 +22,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --external @multi-game-engines/* src/hooks.ts --format cjs,esm --dts --sourcemap",
+    "build": "tsup --clean src/index.ts --external @multi-game-engines/* src/hooks.ts --format cjs,esm --dts --sourcemap",
     "dev": "tsup src/index.ts --external @multi-game-engines/* --format cjs,esm --watch --dts",
     "lint": "eslint .",
     "test": "vitest run",
