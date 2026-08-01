@@ -9,7 +9,6 @@
   "description": "Domain-specific Shogi UI components for all frameworks",
   "type": "module",
   "license": "MIT",
-  "types": "./dist/index.d.ts",
   "exports": {
     "./elements": {
       "types": "./dist/elements.d.ts",
