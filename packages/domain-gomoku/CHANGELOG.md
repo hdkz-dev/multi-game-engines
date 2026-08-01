@@ -1,5 +1,13 @@
 # @multi-game-engines/domain-gomoku
 
+## 0.1.6
+
+### Patch Changes
+
+- [#239](https://github.com/hdkz-dev/multi-game-engines/pull/239) [`722eca4`](https://github.com/hdkz-dev/multi-game-engines/commit/722eca4f331702b23f655e05408ae0950e8b031c) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - ビルド設定を整理しました(公開物の内容に実質変更はありません)。
+  - **dist のクリーンビルド**: tsup を CLI 直接呼び出ししている 24 パッケージに `--clean` を追加しました。これまではリネームや削除したファイルの成果物がローカルの `dist` に残り続けていました(CI はクリーンチェックアウトのため公開物には影響していません)。
+  - **壊れた `types` フィールドの削除**: `@multi-game-engines/ui-chess` と `@multi-game-engines/ui-shogi` の `types: "./dist/index.d.ts"` は存在しないファイルを指していました。これらのパッケージはサブパス export(`./elements` / `./react` / `./vue`)のみを公開しており、ルートエントリは JS も export も持たないため、当該フィールドを削除しました。各サブパスの型解決は従来どおりです。
+
 ## 0.1.5
 
 ### Patch Changes
