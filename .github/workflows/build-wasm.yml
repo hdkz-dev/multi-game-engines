@@ -1,12 +1,33 @@
 name: Build WASM Engines
 
-# Triggered whenever the build scripts change, on a weekly schedule, or
-# manually. Produces per-engine artifacts that docs.yml downloads to include
-# the compiled binaries in GitHub Pages.
+# Triggered whenever the build scripts change, on a schedule, or manually.
+# Produces per-engine artifacts that docs.yml downloads to include the
+# compiled binaries in GitHub Pages.
 #
-# The weekly schedule keeps artifacts within their retention window: docs.yml
-# re-deploys Pages on every push and downloads the latest artifacts, so if
-# they all expire the deployed site silently loses the WASM assets.
+# The schedule serves two purposes:
+#
+# 1. Artifacts stay inside their retention window. docs.yml re-deploys Pages
+#    on every push and downloads the latest artifacts, so if they all expire
+#    the deployed site silently loses the WASM assets.
+#
+# 2. The actions/cache entries stay warm — and this is why the interval is
+#    SHORTER than it looks like it needs to be. Caches are evicted after
+#    7 days without a read. On a cache miss the engines are recompiled, and
+#    Emscripten does not reproduce byte-identical output even from identical
+#    sources (upstream gnubg-web has been frozen since 2021 and emcc is
+#    pinned), so the rebuilt binary lands on Pages with a different hash.
+#    That invalidates the SRI already published in @multi-game-engines/
+#    registry and makes the affected engine unloadable until a re-release.
+#    gnubg drifted this way 10 times; the 2026-07-27 rebuild broke Backgammon
+#    for ~5 days.
+#
+#    Running every 3 days keeps every read well inside the 7-day eviction
+#    window, so the cached binaries are reused indefinitely and the hashes
+#    never move. Do NOT stretch this back out to weekly or longer to "save
+#    CI time": a weekly cron sits exactly on the eviction boundary, which is
+#    what caused the drift. Cache hits skip the build entirely (~0 min), and
+#    Actions minutes are free on this public repo, so the extra runs cost
+#    nothing.
 
 on:
   push:
@@ -21,9 +42,11 @@ on:
       - "scripts/mortal-stub-worker.js"
       - ".github/workflows/build-wasm.yml"
   schedule:
-    # Weekly refresh (Mondays 03:00 UTC) — well within the 90-day artifact
-    # retention, and keeps the actions/cache entries warm (7-day eviction).
-    - cron: "0 3 * * 1"
+    # Every 3 days at 03:00 UTC. Chosen to stay clear of the 7-day cache
+    # eviction window, not for artifact retention (which is 90 days and would
+    # tolerate a far longer gap). See the note at the top of this file before
+    # changing this interval.
+    - cron: "0 3 */3 * *"
   workflow_dispatch:
 
 permissions:
