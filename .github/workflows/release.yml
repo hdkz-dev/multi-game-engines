@@ -56,11 +56,10 @@ jobs:
         uses: changesets/action@v2
         with:
           # changeset version: bumps packages and writes per-package CHANGELOGs with PR links (changelog-github)
-          version: pnpm run version
+          version-script: pnpm run version
           # Runs `pnpm build && changeset publish` — only MIT packages, no GPL binaries (ADR-014)
-          publish: pnpm run release
-          createGithubReleases: true
-          setupGitUser: true
+          publish-script: pnpm run release
+          create-github-releases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
