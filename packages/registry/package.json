@@ -26,17 +26,17 @@
   "license": "MIT",
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "stockfish": "18.0.7",
+    "stockfish": "18.0.8",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "workspace:*"
   },
   "dependencies": {
     "@multi-game-engines/i18n-engines": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.2"
   },
   "engines": {
     "node": ">=24.0.0"

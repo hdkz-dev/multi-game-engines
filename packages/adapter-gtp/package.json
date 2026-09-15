@@ -41,10 +41,10 @@
     "@multi-game-engines/core": "workspace:*"
   },
   "devDependencies": {
-    "eslint": "^10.4.0",
+    "eslint": "^10.10.0",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "build": "tsup --clean src/index.ts --external @multi-game-engines/* --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly --composite false --declaration --outDir dist",
