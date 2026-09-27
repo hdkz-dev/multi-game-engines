@@ -51,7 +51,7 @@ export function isNodeEnvironment(): boolean {
  * | Browser     | `workerUrl` required     | `WorkerCommunicator`      |
  * | Node.js     | `binaryPath` required    | `NativeCommunicator`      |
  *
- * @throws {Error} If the required config key is missing for the detected
+ * @throws Error - If the required config key is missing for the detected
  *   runtime.
  *
  * @example

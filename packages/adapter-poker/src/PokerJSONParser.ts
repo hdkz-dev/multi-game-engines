@@ -15,7 +15,6 @@ import {
   type IPokerSearchResult,
   type PokerAction,
 } from "@multi-game-engines/domain-poker";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * ポーカーエンジンからの JSON レスポンスをパースします。

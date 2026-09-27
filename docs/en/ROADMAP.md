@@ -103,3 +103,13 @@ The UI layer uses a two-tier architecture that minimises framework coupling whil
 - **WebNN Acceleration**: Next-generation NNUE engines with hardware acceleration.
 - **P2P Engine Sharing**: Opening book generation network via distributed computing.
 - **Multi-Agent Analysis**: Simultaneous analysis and ensemble inference across multiple engines.
+
+## Dependency updates and validation (2026-09-17)
+
+Dependency updates target stable npm releases while preserving public APIs and verifying supported tooling combinations. Direct dependencies use compatible version ranges. Transitive overrides are limited to audited security floors and documented compatibility fixes.
+
+ESLint and Oxlint accessibility checks jointly enforce the lint gate, including warnings. TypeScript declaration checking remains enabled; deprecated compiler options are corrected instead of suppressed. See [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) for migration decisions and compatibility constraints.
+
+2026-09-18: Nitro ZIP output now uses Archiver 8, removing deprecated transitive dependencies. React/Vue E2E checks include browser warnings and unhandled exceptions. Initial positions, optional Vue props, search cancellation, and UI error reporting were corrected; ADR 061 records the details and validation results.
+
+2026-09-27: Integration review hardened command error handling so failures from a previous engine or an older operation cannot overwrite the current UI. ADR 061 records the additional dependency updates and validation results.

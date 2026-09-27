@@ -16,7 +16,6 @@ import {
   type BridgeBid,
   type BridgePlay,
 } from "@multi-game-engines/domain-bridge";
-import { tCommon as translate } from "@multi-game-engines/i18n-common";
 
 /**
  * ブリッジエンジンからの JSON レスポンスをパースします。

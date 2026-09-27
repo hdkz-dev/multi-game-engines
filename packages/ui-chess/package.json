@@ -25,7 +25,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
@@ -46,25 +46,25 @@
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/i18n-chess": "workspace:*",
-    "@multi-game-engines/ui-core": "workspace:*",
-    "@multi-game-engines/ui-chess-elements": "workspace:*"
+    "@multi-game-engines/ui-chess-elements": "workspace:*",
+    "@multi-game-engines/ui-core": "workspace:*"
   },
   "devDependencies": {
     "@multi-game-engines/eslint-config-react": "workspace:*",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.2",
-    "@vitejs/plugin-vue": "^6.0.7",
-    "eslint-plugin-react-hooks": "7.1.1",
+    "@types/node": "^25.9.7",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "lit": "^3.3.3",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16",
-    "vite-plugin-dts": "^5.0.1",
-    "vitest": "^4.1.7",
-    "vue": "3.5.35"
+    "vite": "^8.3.0",
+    "vite-plugin-dts": "^5.1.1",
+    "vitest": "^5.0.2",
+    "vue": "^3.5.43"
   },
   "author": "hdkz-dev",
   "repository": {

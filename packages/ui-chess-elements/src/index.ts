@@ -7,7 +7,7 @@ import {
   createFEN,
 } from "@multi-game-engines/domain-chess";
 import { Move, createMove } from "@multi-game-engines/core";
-import { chessLocales, DeepRecord } from "@multi-game-engines/i18n-chess";
+import { chessLocales } from "@multi-game-engines/i18n-chess";
 
 interface ChessBoardStrings {
   boardLabel: string;
@@ -282,11 +282,17 @@ export class ChessBoard extends LitElement {
           ? strings.squarePieceLabel(displayFile, displayRank, pieceLabel)
           : strings.squareLabel(displayFile, displayRank);
 
+        const pieceContent = html`
+          <span class="piece" role="img" aria-hidden="true"
+            >${pieceSymbol}</span
+          >
+        `;
+
         squares.push(html`
           <div
-            class="square ${isWhiteSquare ? "white" : "black"} ${isHighlighted
-              ? "highlight"
-              : ""}"
+            class="square ${isWhiteSquare ? "white" : "black"} ${
+              isHighlighted ? "highlight" : ""
+            }"
             data-square="${displayFile}${displayRank}"
             data-index="${squareIdx}"
             role="gridcell"
@@ -294,13 +300,7 @@ export class ChessBoard extends LitElement {
             tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
-            ${piece
-              ? html`
-                <span class="piece" role="img" aria-hidden="true"
-                  >${pieceSymbol}</span
-                >
-              `
-              : ""}
+            ${piece ? pieceContent : ""}
           </div>
         `);
       }

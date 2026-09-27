@@ -7,6 +7,11 @@ import prettier from "eslint-config-prettier";
 export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
+  },
   ...vue.configs["flat/recommended"],
   prettier,
   {

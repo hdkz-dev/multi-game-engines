@@ -11,10 +11,7 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   vite: {
-    // Cast needed: @tailwindcss/vite returns Plugin[][] but Nuxt expects PluginOption[]
-    // Both Plugin types come from different vite version resolutions in the monorepo
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    plugins: tailwindcss() as any,
+    plugins: tailwindcss(),
   },
 
   // Monorepo パッケージをトランスパイル対象に含める

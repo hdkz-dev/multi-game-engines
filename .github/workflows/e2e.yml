@@ -81,3 +81,40 @@ jobs:
           name: playwright-report-vue-monitor
           path: packages/ui-vue-monitor/playwright-report/
           retention-days: 7
+
+  e2e-dashboard:
+    name: E2E — ${{ matrix.dashboard }} dashboard
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dashboard: [react, vue]
+    env:
+      PORTLESS_PORT: "1355"
+      PORTLESS_HTTPS: "0"
+      PORTLESS_SYNC_HOSTS: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+      - name: Setup Node.js 24.x
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build dashboard dependencies
+        run: pnpm exec turbo build --filter='@examples/zenith-dashboard-${{ matrix.dashboard }}^...'
+      - name: Install Playwright browsers
+        run: pnpm --filter @examples/zenith-dashboard-${{ matrix.dashboard }} exec playwright install chromium --with-deps
+      - name: Run dashboard E2E tests
+        run: pnpm --filter @examples/zenith-dashboard-${{ matrix.dashboard }} test:e2e
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report-dashboard-${{ matrix.dashboard }}
+          path: examples/zenith-dashboard-${{ matrix.dashboard }}/playwright-report/
+          retention-days: 7

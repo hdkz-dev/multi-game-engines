@@ -1,0 +1,178 @@
+diff --git a/dist/bitwise/long.d.ts b/dist/bitwise/long.d.ts
+index 0e1aeb4e6488447edd25515c4753cdcf9989a866..87c428a053ee0d43059e5015eff86020358f51d7 100644
+--- a/dist/bitwise/long.d.ts
++++ b/dist/bitwise/long.d.ts
+@@ -1,4 +1,4 @@
+-import { IBitwiseOps, Long } from './types';
++import { IBitwiseOps, Long } from './types.js';
+ export declare const BitwiseLongAlloc: IBitwiseOps<Long>;
+ export declare const BitwiseLong: IBitwiseOps<Long>;
+ export declare const LongUtils: {
+diff --git a/dist/bitwise/number.d.ts b/dist/bitwise/number.d.ts
+index 705e95a0553951f0c156fa4ebf1a5f563c4acff1..b29e6dd0c2c744d937efe67c8e236ac94b60121b 100644
+--- a/dist/bitwise/number.d.ts
++++ b/dist/bitwise/number.d.ts
+@@ -1,2 +1,2 @@
+-import { IBitwiseOps } from './types';
++import { IBitwiseOps } from './types.js';
+ export declare const BitwiseNumber: IBitwiseOps<number>;
+diff --git a/dist/computer/alpha-beta.d.ts b/dist/computer/alpha-beta.d.ts
+index 91dd7455e49a23f9419ff79c0f0ad13683efbf38..aa6efceea8c5cd95669f408ab34101bb3be4bb43 100644
+--- a/dist/computer/alpha-beta.d.ts
++++ b/dist/computer/alpha-beta.d.ts
+@@ -1,6 +1,6 @@
+-import { DraughtsComputerStrategyArgs, SearchEvaluationFunction } from './computer';
+-import { DraughtsEngineMove } from '../core/engine';
+-import { Bitboard } from '../bitwise/types';
++import { DraughtsComputerStrategyArgs, SearchEvaluationFunction } from './computer.js';
++import { DraughtsEngineMove } from '../core/engine.js';
++import { Bitboard } from '../bitwise/types.js';
+ export type AlphaBetaOptions<TBitboard extends Bitboard> = {
+     maxDepth: number;
+     evaluationFunction: SearchEvaluationFunction<TBitboard>;
+diff --git a/dist/computer/computer.d.ts b/dist/computer/computer.d.ts
+index 3102cd15134dbb4259019498ce6ec54a9e7ce3be..7bc4ca5d285a7c45dca9723eca34de48931575d3 100644
+--- a/dist/computer/computer.d.ts
++++ b/dist/computer/computer.d.ts
+@@ -1,6 +1,6 @@
+-import { Bitboard } from '../bitwise/types';
+-import { DraughtsEngine, DraughtsEngineMove } from '../core/engine';
+-import { DraughtsAdapter1D, DraughtsGame1D, DraughtsMove1D } from '../core/game';
++import { Bitboard } from '../bitwise/types.js';
++import { DraughtsEngine, DraughtsEngineMove } from '../core/engine.js';
++import { DraughtsAdapter1D, DraughtsGame1D, DraughtsMove1D } from '../core/game.js';
+ export type SearchEvaluationFunction<TBitboard extends Bitboard> = (engine: DraughtsEngine<TBitboard>) => number;
+ export type DraughtsComputerStrategyArgs<TBitboard extends Bitboard, TOptions> = {
+     options: TOptions;
+diff --git a/dist/computer/random.d.ts b/dist/computer/random.d.ts
+index d7e9da76497252b5a6645a06217547aa3c9730a0..dee1104932a217de94776ca1d2dbd4591e290356 100644
+--- a/dist/computer/random.d.ts
++++ b/dist/computer/random.d.ts
+@@ -1,4 +1,4 @@
+-import { Bitboard } from '../bitwise/types';
+-import { DraughtsEngineMove } from '../core/engine';
+-import { DraughtsComputerStrategyArgs } from './computer';
++import { Bitboard } from '../bitwise/types.js';
++import { DraughtsEngineMove } from '../core/engine.js';
++import { DraughtsComputerStrategyArgs } from './computer.js';
+ export declare function random<TBitboard extends Bitboard>({ engine, }: DraughtsComputerStrategyArgs<TBitboard, undefined>): Promise<DraughtsEngineMove<TBitboard>>;
+diff --git a/dist/core/engine.d.ts b/dist/core/engine.d.ts
+index 67b1cdf73820db1b94b5ea3a53fc59a2fc2b25ba..705b3b794af37c1d27c1a8b55035f2b7af6039dc 100644
+--- a/dist/core/engine.d.ts
++++ b/dist/core/engine.d.ts
+@@ -1,4 +1,4 @@
+-import { Bitboard } from '../bitwise/types';
++import { Bitboard } from '../bitwise/types.js';
+ export declare enum DraughtsStatus {
+     PLAYING = "playing",
+     DRAW = "draw",
+diff --git a/dist/core/game.d.ts b/dist/core/game.d.ts
+index 9d731cb3213ab70d90fcc1cf03100b6d0ad5f299..9db4ba065c9504396ee16b7d1bd1f433984ca8f6 100644
+--- a/dist/core/game.d.ts
++++ b/dist/core/game.d.ts
+@@ -1,5 +1,5 @@
+-import { Bitboard } from '../bitwise/types';
+-import { DraughtsPlayer, DraughtsEngine, DraughtsEngineBoard, DraughtsEngineMove, DraughtsStatus } from './engine';
++import { Bitboard } from '../bitwise/types.js';
++import { DraughtsPlayer, DraughtsEngine, DraughtsEngineBoard, DraughtsEngineMove, DraughtsStatus } from './engine.js';
+ export type DraughtsPiece1D = {
+     readonly king: boolean;
+     readonly player: DraughtsPlayer;
+diff --git a/dist/core/index.d.ts b/dist/core/index.d.ts
+index bfc54a0a8bdd10dce3787b3248ac760ad9d3e23a..bb8b0e6b930326893024906daf833bc79b0ca1f5 100644
+--- a/dist/core/index.d.ts
++++ b/dist/core/index.d.ts
+@@ -1,2 +1,2 @@
+-export { DraughtsStatus, DraughtsPlayer } from './engine';
+-export type { DraughtsMove1D, DraughtsBoard1D, DraughtsSquare1D } from './game';
++export { DraughtsStatus, DraughtsPlayer } from './engine.js';
++export type { DraughtsMove1D, DraughtsBoard1D, DraughtsSquare1D } from './game.js';
+diff --git a/dist/core/utils.d.ts b/dist/core/utils.d.ts
+index d5b999052727de8d45ef61f2c62fb082b9cdcb85..b0aa3b6bf9975901d753f31b5c0aded9f03e39fc 100644
+--- a/dist/core/utils.d.ts
++++ b/dist/core/utils.d.ts
+@@ -1,6 +1,6 @@
+-import { Bitboard } from '../bitwise/types';
+-import { DraughtsEngineMove } from './engine';
+-import { DraughtsBoard1D, DraughtsMove1D } from './game';
++import { Bitboard } from '../bitwise/types.js';
++import { DraughtsEngineMove } from './engine.js';
++import { DraughtsBoard1D, DraughtsMove1D } from './game.js';
+ export declare function compareMove(moveA: DraughtsEngineMove<Bitboard>, moveB: DraughtsEngineMove<Bitboard>): boolean;
+ export declare function compareCaptures1D(capturesA: number[], capturesB: number[]): boolean;
+ export declare function comparePartialMove1D(moveA: DraughtsMove1D, moveB: Partial<DraughtsMove1D>): boolean;
+diff --git a/dist/english/computer.d.ts b/dist/english/computer.d.ts
+index 7cc6ab78e3d1d32ecaa8e2f3b0bdd237eaceca2e..2895697ff814a33e7e759b17cbf91e0244a4a249 100644
+--- a/dist/english/computer.d.ts
++++ b/dist/english/computer.d.ts
+@@ -1,5 +1,5 @@
+-import { DraughtsComputer, SearchEvaluationFunction } from '../computer/computer';
+-import { AlphaBetaOptions } from '../computer/alpha-beta';
++import { DraughtsComputer, SearchEvaluationFunction } from '../computer/computer.js';
++import { AlphaBetaOptions } from '../computer/alpha-beta.js';
+ /**
+  * Evaluation function for the English Draughts game
+  *
+diff --git a/dist/english/engine.d.ts b/dist/english/engine.d.ts
+index 3cfadf0a92e6076a81b2c3b133bd05f7db0d9d98..4e0bef5bf6086f0f0427025817f6f006e0e961c7 100644
+--- a/dist/english/engine.d.ts
++++ b/dist/english/engine.d.ts
+@@ -1,4 +1,4 @@
+-import { DraughtsEngineData, DraughtsEngineStrategy, DraughtsEngine } from '../core/engine';
++import { DraughtsEngineData, DraughtsEngineStrategy, DraughtsEngine } from '../core/engine.js';
+ export type EnglishDraughtsEngineData = DraughtsEngineData<number>;
+ export type EnglishDraughtsEngine = DraughtsEngine<number>;
+ export declare const EnglishDraughtsEngineDefaultData: EnglishDraughtsEngineData;
+diff --git a/dist/english/game.d.ts b/dist/english/game.d.ts
+index 2bdbd3629506990febfaa22bb7f05175fbff5935..3b3b524e07185c84b74533ee0d7085f75d4ebf7d 100644
+--- a/dist/english/game.d.ts
++++ b/dist/english/game.d.ts
+@@ -1,5 +1,5 @@
+-import { DraughtsEngineData } from '../core/engine';
+-import { DraughtsAdapter1D, DraughtsGame1D, DraughtsGameHistory1D } from '../core/game';
++import { DraughtsEngineData } from '../core/engine.js';
++import { DraughtsAdapter1D, DraughtsGame1D, DraughtsGameHistory1D } from '../core/game.js';
+ export declare const EnglishDraughtsAdapter1D: DraughtsAdapter1D<number>;
+ export declare const EnglishDraughtsDefaultHistory1D: DraughtsGameHistory1D;
+ export type EnglishDraughtsGame = DraughtsGame1D<number>;
+diff --git a/dist/english/index.d.ts b/dist/english/index.d.ts
+index 059edaeb8aee7f29489f4c8d61fd3844162f3b71..80545f883913ab1cf04facf615b5d3c4cfd9415c 100644
+--- a/dist/english/index.d.ts
++++ b/dist/english/index.d.ts
+@@ -1,4 +1,4 @@
+-export { EnglishDraughts, type EnglishDraughtsGame } from './game';
+-export { EnglishDraughtsBitSquare } from './utils';
+-export { EnglishDraughtsComputerFactory, type EnglishDraughtsComputer, } from './computer';
+-export { EnglishDraughtsEngineFactory, type EnglishDraughtsEngine, type EnglishDraughtsEngineData, } from './engine';
++export { EnglishDraughts, type EnglishDraughtsGame } from './game.js';
++export { EnglishDraughtsBitSquare } from './utils.js';
++export { EnglishDraughtsComputerFactory, type EnglishDraughtsComputer, } from './computer.js';
++export { EnglishDraughtsEngineFactory, type EnglishDraughtsEngine, type EnglishDraughtsEngineData, } from './engine.js';
+diff --git a/dist/english/move-generation.d.ts b/dist/english/move-generation.d.ts
+index d4e02d974c70dc344500745cb38dcfb01536d58c..89f1f361a7c96249e94e0ecf02be12de91873506 100644
+--- a/dist/english/move-generation.d.ts
++++ b/dist/english/move-generation.d.ts
+@@ -1,5 +1,5 @@
+-import { DraughtsEngineMove } from '../core/engine';
+-import { EnglishDraughtsEngine } from './engine';
++import { DraughtsEngineMove } from '../core/engine.js';
++import { EnglishDraughtsEngine } from './engine.js';
+ export type EnglishDraughtsBoardIntermediates = {
+     forward: number;
+     backward: number;
+diff --git a/dist/english.d.ts b/dist/english.d.ts
+index 17838c00563f5f556b48593ba647c0f566c20928..93df713be9face3f37df188190229069487ad70b 100644
+--- a/dist/english.d.ts
++++ b/dist/english.d.ts
+@@ -1,2 +1,2 @@
+-export * from './english/index'
++export * from './english/index.js'
+ export {}
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 33fea3eb3a88dc239f47b01f2ae0cae9dc4f1016..d6238067cb004ad60912b90c3dfe3a17aa26b5f5 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1,2 +1,2 @@
+-export * from './core/index'
++export * from './core/index.js'
+ export {}

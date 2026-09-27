@@ -33,8 +33,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "lint": "eslint .",
-    "bench": "vitest bench",
+    "lint": "eslint . --max-warnings 0",
+    "bench": "vitest bench --run --reporter=default --reporter=json --outputFile=bench-results.json",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
@@ -42,7 +42,7 @@
   "license": "MIT",
   "sideEffects": false,
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "peerDependencies": {
     "@opentelemetry/api": ">=1.9.0"
@@ -53,12 +53,12 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^25.9.1",
-    "@vitest/coverage-v8": "4.1.7",
+    "@types/node": "^25.9.7",
+    "@vitest/coverage-v8": "^5.0.2",
     "fake-indexeddb": "^6.2.5",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.2"
   },
   "author": "hdkz-dev",
   "bugs": {

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ChessBoard as ChessBoardElement } from "@multi-game-engines/ui-chess-elements";
 
 import { Move } from "@multi-game-engines/core";

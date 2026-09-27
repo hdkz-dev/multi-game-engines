@@ -14,14 +14,14 @@
   ],
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm -r --if-present test && pnpm test:tooling",
     "test:e2e": "turbo test:e2e",
     "dev": "turbo dev",
     "dev:dashboard": "npx portless dashboard",
     "dev:vue-dashboard": "npx portless vue-dashboard",
     "dev:registry": "npx portless registry",
     "dev:all": "npx portless",
-    "lint": "turbo lint",
+    "lint": "turbo lint && pnpm lint:a11y && pnpm lint:tooling",
     "lint:fix": "turbo lint -- --fix",
     "typecheck": "turbo typecheck",
     "sri:refresh": "node scripts/refresh-engine-sris.mjs",
@@ -41,18 +41,16 @@
     "npm:setup-oidc": "node scripts/setup-trusted-publishers.mjs",
     "npm:initial-publish": "node scripts/initial-publish.mjs",
     "docs": "npx typedoc",
-    "docs:check": "npx typedoc --treatWarningsAsErrors"
+    "docs:check": "npx typedoc --treatWarningsAsErrors",
+    "lint:a11y": "oxlint --config .oxlintrc.json --deny-warnings packages examples",
+    "test:tooling": "node --test scripts/validation.test.mjs",
+    "lint:tooling": "eslint --no-ignore scripts/doc-sync.js scripts/refresh-engine-sris.mjs scripts/fix-vue-declaration-imports.mjs scripts/validation.test.mjs --max-warnings 0"
   },
   "engines": {
     "node": ">=24.0.0",
     "pnpm": ">=10.0.0"
   },
   "pnpm": {
-    "peerDependencyRules": {
-      "allowAny": [
-        "eslint"
-      ]
-    },
     "onlyBuiltDependencies": [
       "@parcel/watcher",
       "@swc/core",
@@ -60,77 +58,55 @@
       "sharp",
       "stockfish",
       "unrs-resolver",
-      "workerd"
+      "workerd",
+      "protobufjs"
     ],
     "overrides": {
-      "@rushstack/ts-command-line": "5.2.0",
-      "@microsoft/api-extractor": "7.56.3",
-      "brace-expansion": ">=5.0.9 <6",
-      "js-cookie": ">=3.0.7 <4",
-      "qs": ">=6.15.2 <7",
-      "flatted": "3.4.2",
-      "picomatch": "4.0.4",
-      "postcss": ">=8.5.18 <9",
-      "protobufjs": ">=8.6.6 <9",
-      "@babel/core": "7.29.7",
-      "@vue/runtime-core": "3.5.33",
-      "@vue/runtime-dom": "3.5.33",
-      "@vue/reactivity": "3.5.33",
-      "@vue/compiler-core": "3.5.33",
-      "@vue/compiler-dom": "3.5.33",
-      "@vue/shared": "3.5.33",
-      "fast-uri": ">=3.1.5 <4",
-      "nanoid@<3.3.18": ">=3.3.18 <4",
+      "eslint-plugin-tsdoc>@typescript-eslint/utils": "^8.70.0",
       "minimatch@>=10.0.0 <10.2.3": ">=10.2.3 <11",
       "ajv@>=7.0.0-alpha.0 <8.18.0": ">=8.18.0 <9",
       "lodash@<=4.17.23": ">=4.18.0 <5",
-      "ws": ">=8.21.0 <9",
-      "undici@>=7.0.0 <8": ">=7.29.0 <8",
-      "tar": ">=7.5.21 <8",
-      "linkify-it": ">=5.0.2 <6",
-      "svgo": ">=4.0.2 <5",
-      "sharp": ">=0.35.0 <1",
-      "launch-editor": ">=2.14.1 <3",
       "esbuild@>=0.27.3 <0.28.1": ">=0.28.1 <0.29",
-      "js-yaml@<3.15.1": "3.15.1",
-      "js-yaml@>=4.0.0 <4.3.1": ">=4.3.1 <5",
-      "shell-quote": ">=1.9.0 <2"
+      "nitropack>archiver": "^8.0.0"
+    },
+    "patchedDependencies": {
+      "tsup@8.5.1": "patches/tsup@8.5.1.patch",
+      "rapid-draughts@1.0.6": "patches/rapid-draughts@1.0.6.patch",
+      "@storybook/vue3@10.6.0": "patches/@storybook__vue3@10.6.0.patch",
+      "@storybook/react@10.6.0": "patches/@storybook__react@10.6.0.patch",
+      "@testing-library/jest-dom@7.0.1": "patches/@testing-library__jest-dom@7.0.1.patch",
+      "@storybook/react-vite@10.6.0": "patches/@storybook__react-vite@10.6.0.patch",
+      "storybook@10.6.0": "patches/storybook@10.6.0.patch",
+      "@storybook/web-components@10.6.0": "patches/@storybook__web-components@10.6.0.patch",
+      "nitropack@2.13.4": "patches/nitropack@2.13.4.patch"
     }
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^1.0.0",
-    "@changesets/cli": "^3.0.1",
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.1",
-    "@vitest/eslint-plugin": "^1.6.18",
-    "eslint": "^10.4.1",
-    "eslint-import-resolver-typescript": "^4.4.4",
-    "eslint-plugin-import-x": "^4.16.2",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "@types/node": "^25.9.7",
+    "@types/pug": "^2.0.10",
+    "@typescript-eslint/parser": "^8.70.0",
+    "@vitest/eslint-plugin": "^1.6.27",
+    "eslint": "^10.11.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-lit": "^2.3.1",
     "eslint-plugin-no-only-tests": "^3.4.0",
     "eslint-plugin-promise": "^7.3.0",
-    "eslint-plugin-storybook": "^10.4.1",
-    "eslint-plugin-tsdoc": "^0.5.2",
+    "eslint-plugin-storybook": "^10.6.0",
+    "eslint-plugin-tsdoc": "^0.5.3",
     "eslint-plugin-unicorn": "^64.0.0",
-    "eslint-plugin-vitest": "^0.5.4",
     "eslint-plugin-wc": "^3.1.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.0.6",
-    "portless": "^0.13.1",
-    "prettier": "^3.8.3",
-    "turbo": "^2.9.16",
-    "typedoc": "^0.28.19",
+    "lint-staged": "^17.5.1",
+    "oxlint": "^1.83.0",
+    "portless": "^0.15.6",
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.4",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "prettier --write",
-      "eslint --fix --no-warn-ignored"
-    ],
-    "*.{json,md,html}": [
-      "prettier --write"
-    ]
+    "typescript-eslint": "^8.70.0"
   }
 }

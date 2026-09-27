@@ -41,8 +41,8 @@ export class ChunkedDownloader {
   /**
    * 指定 URL からデータをダウンロードします。
    *
-   * @param url  ダウンロード対象の URL
-   * @param options  進捗・SRI・キャッシュ等のオプション
+   * @param url - ダウンロード対象の URL
+   * @param options - 進捗・SRI・キャッシュ等のオプション
    */
   async download(
     url: string,

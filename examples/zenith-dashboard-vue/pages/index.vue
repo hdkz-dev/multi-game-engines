@@ -9,15 +9,7 @@ import {
 import { useEngineMonitor } from "@multi-game-engines/ui-vue/hooks";
 import { commonLocales } from "@multi-game-engines/i18n-common";
 import { dashboardLocales } from "@multi-game-engines/i18n-dashboard";
-import {
-  LayoutGrid,
-  Sword,
-  Trophy,
-  Zap,
-  Globe,
-  Cpu,
-  Gauge,
-} from "lucide-vue-next";
+import { LayoutGrid, Sword, Trophy, Zap, Globe, Cpu, Gauge } from "@lucide/vue";
 import {
   createFEN,
   type IChessSearchOptions,
@@ -75,7 +67,14 @@ interface DashboardSection {
     shogiPieces?: Record<string, string>;
   };
   initializationFailed?: string;
-  [key: string]: string | number | boolean | DeepRecord | DashboardSection["stats"] | DashboardSection["gameBoard"] | undefined;
+  [key: string]:
+    | string
+    | number
+    | boolean
+    | DeepRecord
+    | DashboardSection["stats"]
+    | DashboardSection["gameBoard"]
+    | undefined;
 }
 
 interface DashboardLocale {
@@ -100,9 +99,14 @@ const locale = ref("ja");
 
 const localeData = computed((): DashboardLocale => {
   const base = locale.value === "ja" ? commonLocales.ja : commonLocales.en;
-  const extra = locale.value === "ja" ? dashboardLocales.ja : dashboardLocales.en;
-  const baseObj = (typeof base === "object" && base !== null ? base : {}) as Record<string, unknown>;
-  const extraObj = (typeof extra === "object" && extra !== null ? extra : {}) as Record<string, unknown>;
+  const extra =
+    locale.value === "ja" ? dashboardLocales.ja : dashboardLocales.en;
+  const baseObj = (
+    typeof base === "object" && base !== null ? base : {}
+  ) as Record<string, unknown>;
+  const extraObj = (
+    typeof extra === "object" && extra !== null ? extra : {}
+  ) as Record<string, unknown>;
 
   return {
     dashboard: {
@@ -195,20 +199,26 @@ const CHESS_MULTI_PV = 3;
 const SHOGI_MULTI_PV = 3;
 
 const chessOptions = computed(() => ({
-  fen: createFEN(
-    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-  ),
+  fen: createFEN("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"),
   multipv: CHESS_MULTI_PV,
   depth: 20,
 }));
 
-const { state: chessState, status: chessEngineStatus } = useEngineMonitor(chessEngine, {
-  autoMiddleware: true,
-});
+const { state: chessState, status: chessEngineStatus } = useEngineMonitor(
+  chessEngine,
+  {
+    initialPosition: chessOptions.value.fen,
+    autoMiddleware: true,
+  },
+);
 
-watch(chessEngineStatus, (s) => {
-  if (typeof window !== "undefined") window.__CHESS_STATUS__ = s;
-}, { immediate: true });
+watch(
+  chessEngineStatus,
+  (s) => {
+    if (typeof window !== "undefined") window.__CHESS_STATUS__ = s;
+  },
+  { immediate: true },
+);
 
 const shogiOptions = computed(() => ({
   sfen: createSFEN(
@@ -217,13 +227,21 @@ const shogiOptions = computed(() => ({
   multipv: SHOGI_MULTI_PV,
 }));
 
-const { state: shogiState, status: shogiEngineStatus } = useEngineMonitor(shogiEngine, {
-  autoMiddleware: true,
-});
+const { state: shogiState, status: shogiEngineStatus } = useEngineMonitor(
+  shogiEngine,
+  {
+    initialPosition: shogiOptions.value.sfen,
+    autoMiddleware: true,
+  },
+);
 
-watch(shogiEngineStatus, (s) => {
-  if (typeof window !== "undefined") window.__SHOGI_STATUS__ = s;
-}, { immediate: true });
+watch(
+  shogiEngineStatus,
+  (s) => {
+    if (typeof window !== "undefined") window.__SHOGI_STATUS__ = s;
+  },
+  { immediate: true },
+);
 
 const chessBestMove = computed(() =>
   chessState.value.pvs[0] ? chessState.value.pvs[0].moves[0] : null,
@@ -271,7 +289,9 @@ const toggleLocale = () => {
             <h2 class="text-2xl font-bold mb-2">
               {{ localeData.dashboard.initializationFailed }}
             </h2>
-            <p class="text-gray-400 mb-6">{{ initError || "Preparing Engines..." }}</p>
+            <p class="text-gray-400 mb-6">
+              {{ initError || "Preparing Engines..." }}
+            </p>
             <button
               class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl"
               @click="initEngines"
@@ -287,7 +307,9 @@ const toggleLocale = () => {
         class="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 font-sans"
       >
         <div class="max-w-7xl mx-auto space-y-8">
-          <header class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <header
+            class="flex flex-col md:flex-row md:items-center justify-between gap-6"
+          >
             <div class="flex items-center gap-4">
               <LayoutGrid class="w-12 h-12 text-blue-600" />
               <div>
@@ -301,46 +323,58 @@ const toggleLocale = () => {
             </div>
 
             <div class="flex items-center gap-2">
-                <button
-                  class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
-                  @click="toggleLocale"
-                >
-                  <Globe class="w-3.5 h-3.5 text-blue-400" />
-                  {{
-                    locale === "ja"
-                      ? localeData.dashboard.language?.en
-                      : localeData.dashboard.language?.ja
-                  }}
-                </button>
+              <button
+                class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
+                @click="toggleLocale"
+              >
+                <Globe class="w-3.5 h-3.5 text-blue-400" />
+                {{
+                  locale === "ja"
+                    ? localeData.dashboard.language?.en
+                    : localeData.dashboard.language?.ja
+                }}
+              </button>
 
               <button
                 class="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10 text-xs font-medium"
                 @click="toggleEngine"
               >
                 <Sword class="w-3.5 h-3.5 text-amber-400" />
-                {{ activeEngine === "chess" ? localeData.dashboard.shogiLabel : localeData.dashboard.chessLabel }}
+                {{
+                  activeEngine === "chess"
+                    ? localeData.dashboard.shogiLabel
+                    : localeData.dashboard.chessLabel
+                }}
               </button>
             </div>
           </header>
 
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-8">
-              <div v-if="chessEngine" v-show="activeEngine === 'chess'" class="h-full">
+              <div
+                v-if="chessEngine"
+                v-show="activeEngine === 'chess'"
+                class="h-full"
+              >
                 <EngineMonitorPanel
                   :engine="chessEngine"
                   :search-options="chessOptions"
                   :board-component="ChessBoard"
                   :board-props="chessBoardProps"
-                  :title="(localeData.engine.stockfishTitle as string)"
+                  :title="localeData.engine.stockfishTitle as string"
                 />
               </div>
-              <div v-if="shogiEngine" v-show="activeEngine === 'shogi'" class="h-full">
+              <div
+                v-if="shogiEngine"
+                v-show="activeEngine === 'shogi'"
+                class="h-full"
+              >
                 <EngineMonitorPanel
                   :engine="shogiEngine"
                   :search-options="shogiOptions"
                   :board-component="ShogiBoard"
                   :board-props="shogiBoardProps"
-                  :title="(localeData.engine.yaneuraouTitle as string)"
+                  :title="localeData.engine.yaneuraouTitle as string"
                 />
               </div>
             </div>
@@ -349,8 +383,12 @@ const toggleLocale = () => {
               <div class="grid grid-cols-2 gap-4">
                 <StatCard
                   :icon="Cpu"
-                  :label="localeData.dashboard.stats?.engineRuntime?.label ?? ''"
-                  :value="localeData.dashboard.stats?.engineRuntime?.value ?? ''"
+                  :label="
+                    localeData.dashboard.stats?.engineRuntime?.label ?? ''
+                  "
+                  :value="
+                    localeData.dashboard.stats?.engineRuntime?.value ?? ''
+                  "
                   :sub="localeData.dashboard.stats?.engineRuntime?.sub ?? ''"
                   color="blue"
                 />
@@ -364,14 +402,24 @@ const toggleLocale = () => {
                 <StatCard
                   :icon="Gauge"
                   :label="localeData.dashboard.stats?.performance?.label ?? ''"
-                  :value="formatNumber(activeEngine === 'chess' ? chessState.stats.nps : shogiState.stats.nps)"
+                  :value="
+                    formatNumber(
+                      activeEngine === 'chess'
+                        ? chessState.stats.nps
+                        : shogiState.stats.nps,
+                    )
+                  "
                   :sub="localeData.dashboard.stats?.performance?.sub ?? 'NPS'"
                   color="emerald"
                 />
                 <StatCard
                   :icon="Trophy"
-                  :label="localeData.dashboard.stats?.accessibility?.label ?? ''"
-                  :value="localeData.dashboard.stats?.accessibility?.value ?? ''"
+                  :label="
+                    localeData.dashboard.stats?.accessibility?.label ?? ''
+                  "
+                  :value="
+                    localeData.dashboard.stats?.accessibility?.value ?? ''
+                  "
                   :sub="localeData.dashboard.stats?.accessibility?.sub ?? ''"
                   color="purple"
                 />

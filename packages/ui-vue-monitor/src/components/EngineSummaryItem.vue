@@ -1,14 +1,26 @@
-<script setup lang="ts">
+<script
+  setup
+  lang="ts"
+  generic="
+    T_OPTIONS extends IBaseSearchOptions,
+    T_INFO extends ExtendedSearchInfo,
+    T_RESULT extends IBaseSearchResult
+  "
+>
 import { computed } from "vue";
-import type { IEngine, IBaseSearchOptions, IBaseSearchResult } from "@multi-game-engines/core";
-import { EvaluationPresenter, createInitialState } from "@multi-game-engines/ui-core";
+import type {
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
+import {
+  EvaluationPresenter,
+  type ExtendedSearchInfo,
+} from "@multi-game-engines/ui-core";
 import { useEngineMonitor } from "../useEngineMonitor.js";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyEngine = IEngine<IBaseSearchOptions, any, IBaseSearchResult>;
-
 const props = defineProps<{
-  engine: AnyEngine;
+  engine: IEngine<T_OPTIONS, T_INFO, T_RESULT>;
   label: string;
 }>();
 

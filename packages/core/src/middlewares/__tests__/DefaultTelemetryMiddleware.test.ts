@@ -117,7 +117,8 @@ describe("DefaultTelemetryMiddleware", () => {
   });
 
   it("should not throw from onInfo when emitTelemetry is missing", async () => {
-    const { emitTelemetry: _omit, ...contextNoEmit } = context;
+    const contextNoEmit = { ...context };
+    delete contextNoEmit.emitTelemetry;
     const info = { raw: "info" };
     const result = await middleware.onInfo(info, contextNoEmit);
     expect(result).toBe(info);
@@ -136,7 +137,8 @@ describe("DefaultTelemetryMiddleware", () => {
   });
 
   it("should not throw from onProgress when emitTelemetry is missing", async () => {
-    const { emitTelemetry: _omit2, ...contextNoEmit } = context;
+    const contextNoEmit = { ...context };
+    delete contextNoEmit.emitTelemetry;
     await middleware.onProgress(
       { status: "loading" as const, loadedBytes: 0, totalBytes: 100 },
       contextNoEmit,

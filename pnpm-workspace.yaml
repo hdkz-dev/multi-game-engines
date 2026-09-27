@@ -2,3 +2,5 @@ packages:
   - "packages/*"
   - "examples/*"
   - "infrastructure/cdn/cloudflare"
+
+strictPeerDependencies: true

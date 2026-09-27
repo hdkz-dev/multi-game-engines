@@ -1,16 +1,13 @@
 {
-  "projects": {
-    "dashboard": {
-      "dir": "examples/zenith-dashboard-react",
-      "command": "pnpm run dev"
+  "apps": {
+    "examples/zenith-dashboard-react": {
+      "name": "dashboard"
     },
-    "vue-dashboard": {
-      "dir": "examples/zenith-dashboard-vue",
-      "command": "pnpm run dev"
+    "examples/zenith-dashboard-vue": {
+      "name": "vue-dashboard"
     },
-    "registry": {
-      "dir": "packages/registry",
-      "command": "pnpm run dev"
+    "packages/registry": {
+      "name": "registry"
     }
   }
 }

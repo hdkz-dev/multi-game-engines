@@ -1,7 +1,16 @@
 "use client";
 
-import React, { useCallback, useId, useMemo, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import {
+  EngineError,
+  EngineErrorCode,
   IEngine,
   IBaseSearchOptions,
   IBaseSearchInfo,
@@ -54,6 +63,23 @@ export function EngineMonitorPanel<
 }: EngineMonitorPanelProps<T_OPTIONS, T_INFO, T_RESULT>) {
   const { strings } = useEngineUI();
   const { state, status, search, stop } = useEngineMonitor(engine);
+  const commandScope = useMemo(() => ({ engine }), [engine]);
+  const commandSequenceRef = useRef(0);
+  const activeCommandScopeRef = useRef<typeof commandScope | null>(
+    commandScope,
+  );
+  const [commandFailure, setCommandFailure] = useState<{
+    scope: typeof commandScope;
+    error: Error;
+  } | null>(null);
+  const commandError =
+    commandFailure?.scope === commandScope ? commandFailure.error : null;
+  useEffect(() => {
+    activeCommandScopeRef.current = commandScope;
+    return () => {
+      activeCommandScopeRef.current = null;
+    };
+  }, [commandScope]);
   const [activeTab, setActiveTab] = useState<"pv" | "log">("pv");
   const pvTabRef = useRef<HTMLButtonElement>(null);
   const logTabRef = useRef<HTMLButtonElement>(null);
@@ -99,25 +125,58 @@ export function EngineMonitorPanel<
     [engine],
   );
 
-  const handleStart = useCallback(() => {
-    emitUIInteraction("start_click");
-    void search(searchOptions);
-  }, [emitUIInteraction, search, searchOptions]);
+  const recordCommandError = useCallback(
+    (error: unknown, sequence: number) => {
+      if (
+        activeCommandScopeRef.current !== commandScope ||
+        sequence !== commandSequenceRef.current
+      )
+        return;
+      if (
+        error instanceof EngineError &&
+        error.code === EngineErrorCode.SEARCH_ABORTED
+      )
+        return;
+      setCommandFailure({
+        scope: commandScope,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    },
+    [commandScope],
+  );
 
-  const handleStop = useCallback(() => {
+  const handleStart = useCallback(async () => {
+    const sequence = ++commandSequenceRef.current;
+    emitUIInteraction("start_click");
+    setCommandFailure(null);
+    try {
+      await search(searchOptions);
+    } catch (error: unknown) {
+      recordCommandError(error, sequence);
+    }
+  }, [emitUIInteraction, search, searchOptions, recordCommandError]);
+
+  const handleStop = useCallback(async () => {
+    const sequence = ++commandSequenceRef.current;
     emitUIInteraction("stop_click");
-    void stop();
-  }, [emitUIInteraction, stop]);
+    setCommandFailure(null);
+    try {
+      await stop();
+    } catch (error: unknown) {
+      recordCommandError(error, sequence);
+    }
+  }, [emitUIInteraction, stop, recordCommandError]);
 
   // アクセシビリティ用：重要なステータス変更のアナウンス
   const announcement = useMemo(() => {
-    if (status === "error") return strings.errorTitle;
+    if (status === "error" || commandError) return strings.errorTitle;
     if (bestPV?.score.type === "mate")
       return strings.mateIn(bestPV.score.value);
     return "";
-  }, [status, bestPV, strings]);
+  }, [status, bestPV, strings, commandError]);
 
   const errorMessage = useMemo(() => {
+    if (commandError) return commandError.message;
     const err = engine.lastError;
     if (!err) return strings.errorDefaultRemediation;
 
@@ -138,7 +197,7 @@ export function EngineMonitorPanel<
     }
 
     return err.remediation || strings.errorDefaultRemediation;
-  }, [engine.lastError, strings]);
+  }, [engine.lastError, strings, commandError]);
 
   return (
     <section
@@ -214,7 +273,7 @@ export function EngineMonitorPanel<
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-0">
-        {status === "error" ? (
+        {status === "error" || commandError ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-red-500 bg-red-50/30">
             <AlertCircle className="w-12 h-12 mb-4 animate-bounce motion-reduce:animate-none" />
             <h3 className="font-bold mb-1">{strings.errorTitle}</h3>
@@ -262,6 +321,7 @@ export function EngineMonitorPanel<
                 <div
                   className="flex items-center gap-4"
                   role="tablist"
+                  tabIndex={-1}
                   aria-orientation="horizontal"
                   onKeyDown={handleTabKeyDown}
                 >

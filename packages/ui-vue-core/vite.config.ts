@@ -36,7 +36,7 @@ export default defineConfig({
         "@multi-game-engines/ui-shogi-elements",
         "@multi-game-engines/ui-core",
         "@multi-game-engines/i18n-common",
-        "lucide-vue-next",
+        "@lucide/vue",
       ],
       output: {
         globals: {
@@ -45,7 +45,7 @@ export default defineConfig({
           "@multi-game-engines/core": "MGE_Core",
           "@multi-game-engines/ui-core": "MGE_UICore",
           "@multi-game-engines/i18n-common": "MGE_I18n",
-          "lucide-vue-next": "LucideVue",
+          "@lucide/vue": "LucideVue",
         },
       },
     },

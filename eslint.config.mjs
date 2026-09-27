@@ -6,7 +6,6 @@ import wc from "eslint-plugin-wc";
 import importX from "eslint-plugin-import-x";
 import promise from "eslint-plugin-promise";
 import unicorn from "eslint-plugin-unicorn";
-import jsxA11y from "eslint-plugin-jsx-a11y";
 import tsdoc from "eslint-plugin-tsdoc";
 import noOnlyTests from "eslint-plugin-no-only-tests";
 import vitest from "@vitest/eslint-plugin";
@@ -15,9 +14,12 @@ export default [
   {
     ignores: [
       "**/dist/**",
+      "docs/api/**",
       "**/node_modules/**",
       "**/storybook-static/**",
       "**/.next/**",
+      "**/.nuxt/**",
+      "**/.output/**",
       "**/*.config.ts",
       "**/*.config.mjs",
       "**/*.config.js",
@@ -31,6 +33,11 @@ export default [
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    languageOptions: {
+      parserOptions: { tsconfigRootDir: import.meta.dirname },
+    },
+  },
   lit.configs["flat/recommended"],
   wc.configs["flat/recommended"],
   // Import-x Configuration
@@ -139,12 +146,6 @@ export default [
       "unicorn/no-array-sort": "off",
       "unicorn/no-this-assignment": "off",
       "unicorn/no-empty-file": "off",
-    },
-  },
-  jsxA11y.flatConfigs.recommended,
-  {
-    rules: {
-      "jsx-a11y/interactive-supports-focus": "off",
     },
   },
   {

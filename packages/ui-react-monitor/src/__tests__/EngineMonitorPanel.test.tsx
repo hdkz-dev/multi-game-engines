@@ -1,9 +1,17 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  act,
+} from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 // Import components
 import { EngineMonitorPanel } from "../components/EngineMonitorPanel.js";
 import {
+  EngineError,
+  EngineErrorCode,
   IEngine,
   IBaseSearchOptions,
   IBaseSearchInfo,
@@ -53,6 +61,38 @@ vi.mock("@radix-ui/react-scroll-area", () => ({
 vi.mock("@radix-ui/react-separator", () => ({
   Root: () => <hr />,
 }));
+
+function createTestEngine(): IEngine<
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult
+> {
+  const engine: IEngine<
+    IBaseSearchOptions,
+    IBaseSearchInfo,
+    IBaseSearchResult
+  > = {
+    id: "test-engine",
+    name: "Test Engine",
+    version: "1.0.0",
+    status: "ready",
+    lastError: null,
+    use: vi.fn(() => engine),
+    unuse: vi.fn(() => engine),
+    load: vi.fn().mockResolvedValue(undefined),
+    consent: vi.fn(),
+    setBook: vi.fn().mockResolvedValue(undefined),
+    search: vi.fn().mockResolvedValue({ bestMove: null }),
+    stop: vi.fn(),
+    dispose: vi.fn().mockResolvedValue(undefined),
+    onInfo: vi.fn(() => vi.fn()),
+    onSearchResult: vi.fn(() => vi.fn()),
+    onStatusChange: vi.fn(() => vi.fn()),
+    onTelemetry: vi.fn(() => vi.fn()),
+    emitTelemetry: vi.fn(),
+  };
+  return engine;
+}
 
 describe("EngineMonitorPanel", () => {
   const mockStrings = {
@@ -123,7 +163,134 @@ describe("EngineMonitorPanel", () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
+  });
+
+  it.each(["search", "stop"] as const)(
+    "displays an unexpected %s rejection",
+    async (command) => {
+      const { useEngineMonitor } = await import("../useEngineMonitor.js");
+      const error = new Error(`${command} transport failed`);
+      const base = useEngineMonitor(null);
+      vi.mocked(useEngineMonitor).mockReturnValue({
+        ...base,
+        status: command === "stop" ? "busy" : "ready",
+        [command]: vi.fn().mockRejectedValue(error),
+      });
+      const engine = createTestEngine();
+      render(<EngineMonitorPanel engine={engine} searchOptions={{}} />);
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: command === "stop" ? "STOP" : "START",
+        }),
+      );
+      expect(await screen.findByText(error.message)).toBeDefined();
+    },
+  );
+
+  it.each(["search", "stop"] as const)(
+    "isolates %s failures across engine replacements",
+    async (command) => {
+      const { useEngineMonitor } = await import("../useEngineMonitor.js");
+      const base = useEngineMonitor(null);
+      const oldEngine = createTestEngine();
+      const nextEngine = createTestEngine();
+      let rejectOld!: (reason: unknown) => void;
+      const oldPending = new Promise<never>((_resolve, reject) => {
+        rejectOld = reject;
+      });
+      const run = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Previous failure"))
+        .mockReturnValueOnce(oldPending)
+        .mockRejectedValueOnce(new Error("Current failure"));
+      vi.mocked(useEngineMonitor).mockReturnValue({
+        ...base,
+        status: command === "stop" ? "busy" : "ready",
+        [command]: run,
+      });
+      const { rerender } = render(
+        <EngineMonitorPanel engine={oldEngine} searchOptions={{}} />,
+      );
+      const click = () =>
+        fireEvent.click(
+          screen.getByRole("button", {
+            name: command === "stop" ? "STOP" : "START",
+          }),
+        );
+      click();
+      expect(await screen.findByText("Previous failure")).toBeDefined();
+      rerender(<EngineMonitorPanel engine={nextEngine} searchOptions={{}} />);
+      expect(screen.queryByText("Previous failure")).toBeNull();
+      click();
+      rerender(<EngineMonitorPanel engine={oldEngine} searchOptions={{}} />);
+      click();
+      expect(await screen.findByText("Current failure")).toBeDefined();
+      await act(async () => {
+        rejectOld(new Error("Stale failure"));
+      });
+      expect(screen.queryByText("Stale failure")).toBeNull();
+      expect(screen.getByText("Current failure")).toBeDefined();
+    },
+  );
+
+  it("ignores an earlier search failure after stopping", async () => {
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const base = useEngineMonitor(null);
+    let rejectSearch!: (reason: unknown) => void;
+    const pending = new Promise<never>((_resolve, reject) => {
+      rejectSearch = reject;
+    });
+    const engine = createTestEngine();
+    const search = vi.fn().mockReturnValue(pending);
+    const stop = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useEngineMonitor).mockReturnValue({ ...base, search, stop });
+    const { rerender } = render(
+      <EngineMonitorPanel engine={engine} searchOptions={{}} />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "START" }));
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      ...base,
+      status: "busy",
+      search,
+      stop,
+    });
+    rerender(<EngineMonitorPanel engine={engine} searchOptions={{}} />);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "STOP" }));
+    });
+    await act(async () => {
+      rejectSearch(new Error("Stale search failure"));
+    });
+    expect(stop).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Stale search failure")).toBeNull();
+  });
+
+  it("handles an intentional search cancellation without rendering an error", async () => {
+    const { useEngineMonitor } = await import("../useEngineMonitor.js");
+    const error = new EngineError({
+      code: EngineErrorCode.SEARCH_ABORTED,
+      message: "Stop requested",
+    });
+    let rejectSearch!: (reason: unknown) => void;
+    const pending = new Promise<IBaseSearchResult>((_resolve, reject) => {
+      rejectSearch = reject;
+    });
+    const search = vi.fn().mockReturnValue(pending);
+    vi.mocked(useEngineMonitor).mockReturnValue({
+      ...useEngineMonitor(null),
+      search,
+    });
+    const engine = createTestEngine();
+    render(<EngineMonitorPanel engine={engine} searchOptions={{}} />);
+    fireEvent.click(screen.getByRole("button", { name: "START" }));
+    expect(search).toHaveBeenCalledOnce();
+    await act(async () => {
+      rejectSearch(error);
+      await expect(pending).rejects.toBe(error);
+    });
+    expect(screen.queryByText(error.message)).toBeNull();
   });
 
   it("renders with initial state safely", () => {

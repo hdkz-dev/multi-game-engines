@@ -5,16 +5,11 @@ import {
 } from "../ChunkedDownloader.js";
 import { IFileStorage, ILoadProgress } from "../../types.js";
 
-// SHA-256 of 0x00 0x01 0x02 ... 0x0f (16 bytes)
-// computed: 3db92d3f5c7e1d9c4b5a6e8f2a1b0c3d (example — we mock crypto.subtle)
-const MOCK_BYTES_16 = new Uint8Array([
-  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-]);
 const VALID_SHA256_SRI = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; // will be mocked
 const INVALID_SRI = "sha256-INVALID_HASH_VALUE==============================";
 
 function makeBuffer(size: number): ArrayBuffer {
-  return new Uint8Array(size).fill(0xAB).buffer;
+  return new Uint8Array(size).fill(171).buffer;
 }
 
 function makeFetchMock(options: {

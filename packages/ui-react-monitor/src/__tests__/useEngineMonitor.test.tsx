@@ -93,7 +93,7 @@ describe("useEngineMonitor", () => {
     );
 
     await act(async () => {
-      result.current.stop();
+      await result.current.stop();
     });
 
     expect(mockEngine.stop).toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe("useEngineMonitor", () => {
     const { result } = renderHook(() => useEngineMonitor(null));
 
     await act(async () => {
-      result.current.stop();
+      await result.current.stop();
     });
 
     // When engine is null, status is "uninitialized" or "ready" (dummyState)

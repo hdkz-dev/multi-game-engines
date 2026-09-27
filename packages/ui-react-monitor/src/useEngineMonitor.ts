@@ -155,8 +155,8 @@ export function useEngineMonitor<
   );
 
   const stop = useCallback(() => {
-    if (!dispatcher) return;
-    void dispatcher.dispatchStop();
+    if (!dispatcher) return Promise.resolve();
+    return dispatcher.dispatchStop();
   }, [dispatcher]);
 
   return {

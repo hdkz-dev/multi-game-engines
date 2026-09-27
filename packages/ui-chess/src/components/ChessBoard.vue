@@ -4,15 +4,18 @@ import { Move } from "@multi-game-engines/core";
 import { FEN } from "@multi-game-engines/domain-chess";
 import { ChessPiece } from "@multi-game-engines/domain-chess";
 
-defineProps<{
-  fen: FEN;
-  lastMove?: Move | undefined;
-  orientation?: "white" | "black" | undefined;
-  boardLabel?: string | undefined;
-  errorMessage?: string | undefined;
-  pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
-  locale?: string | undefined;
-}>();
+withDefaults(
+  defineProps<{
+    fen: FEN;
+    lastMove?: Move | undefined;
+    orientation?: "white" | "black" | undefined;
+    boardLabel?: string | undefined;
+    errorMessage?: string | undefined;
+    pieceNames?: Partial<Record<ChessPiece, string>> | undefined;
+    locale?: string | undefined;
+  }>(),
+  { pieceNames: () => ({}) },
+);
 </script>
 
 <template>

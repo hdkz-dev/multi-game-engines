@@ -18,7 +18,6 @@ import {
   IProtocolParser,
 } from "../types.js";
 import { EngineError } from "../errors/EngineError.js";
-import { WorkerCommunicator } from "../workers/WorkerCommunicator.js";
 import type { ICommunicator } from "../workers/ICommunicator.js";
 
 /**

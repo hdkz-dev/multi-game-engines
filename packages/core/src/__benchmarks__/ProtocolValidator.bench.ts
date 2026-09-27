@@ -1,5 +1,9 @@
-import { bench, describe } from "vitest";
-import { ProtocolValidator } from "../protocol/ProtocolValidator.js";
+import { test, describe } from "vitest";
+import { BENCHMARK_OPTIONS } from "./options.js";
+import { ProtocolValidator as ImportedProtocolValidator } from "../protocol/ProtocolValidator.js";
+
+// Capture the module export outside the measured loop.
+const ProtocolValidator = ImportedProtocolValidator;
 
 const CLEAN_SHORT = "e2e4";
 const CLEAN_LONG =
@@ -7,16 +11,22 @@ const CLEAN_LONG =
 const CLEAN_FEN = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1";
 
 describe("ProtocolValidator.assertNoInjection — clean input", () => {
-  bench("short move string (e2e4)", () => {
-    ProtocolValidator.assertNoInjection(CLEAN_SHORT, "move");
+  test("short move string (e2e4)", async ({ bench }) => {
+    await bench("short move string (e2e4)", () => {
+      ProtocolValidator.assertNoInjection(CLEAN_SHORT, "move");
+    }).run(BENCHMARK_OPTIONS);
   });
 
-  bench("long position string (9 moves)", () => {
-    ProtocolValidator.assertNoInjection(CLEAN_LONG, "position");
+  test("long position string (9 moves)", async ({ bench }) => {
+    await bench("long position string (9 moves)", () => {
+      ProtocolValidator.assertNoInjection(CLEAN_LONG, "position");
+    }).run(BENCHMARK_OPTIONS);
   });
 
-  bench("FEN string", () => {
-    ProtocolValidator.assertNoInjection(CLEAN_FEN, "fen");
+  test("FEN string", async ({ bench }) => {
+    await bench("FEN string", () => {
+      ProtocolValidator.assertNoInjection(CLEAN_FEN, "fen");
+    }).run(BENCHMARK_OPTIONS);
   });
 });
 
@@ -28,12 +38,16 @@ describe("ProtocolValidator.assertNoInjection — object validation", () => {
     meta: { source: "user", validated: "true" },
   };
 
-  bench("flat option object", () => {
-    ProtocolValidator.assertNoInjection(optionObj, "option", true);
+  test("flat option object", async ({ bench }) => {
+    await bench("flat option object", () => {
+      ProtocolValidator.assertNoInjection(optionObj, "option", true);
+    }).run(BENCHMARK_OPTIONS);
   });
 
-  bench("nested option object (depth=2)", () => {
-    ProtocolValidator.assertNoInjection(deepOptionObj, "option", true);
+  test("nested option object (depth=2)", async ({ bench }) => {
+    await bench("nested option object (depth=2)", () => {
+      ProtocolValidator.assertNoInjection(deepOptionObj, "option", true);
+    }).run(BENCHMARK_OPTIONS);
   });
 });
 
@@ -41,17 +55,21 @@ describe("ProtocolValidator.assertNoInjection — allowSemicolon (GTP)", () => {
   const gtpMove = "B[qd]";
   const sgfSequence = "B[qd];W[dd];B[cp]";
 
-  bench("GTP move (semicolons allowed)", () => {
-    ProtocolValidator.assertNoInjection(gtpMove, "gtp-move", false, true);
+  test("GTP move (semicolons allowed)", async ({ bench }) => {
+    await bench("GTP move (semicolons allowed)", () => {
+      ProtocolValidator.assertNoInjection(gtpMove, "gtp-move", false, true);
+    }).run(BENCHMARK_OPTIONS);
   });
 
-  bench("SGF sequence (semicolons allowed)", () => {
-    ProtocolValidator.assertNoInjection(
-      sgfSequence,
-      "sgf-sequence",
-      false,
-      true,
-    );
+  test("SGF sequence (semicolons allowed)", async ({ bench }) => {
+    await bench("SGF sequence (semicolons allowed)", () => {
+      ProtocolValidator.assertNoInjection(
+        sgfSequence,
+        "sgf-sequence",
+        false,
+        true,
+      );
+    }).run(BENCHMARK_OPTIONS);
   });
 });
 
@@ -61,9 +79,11 @@ describe("ProtocolValidator.assertNoInjection — bulk throughput", () => {
     (_, i) => `e${(i % 8) + 1}e${((i + 1) % 8) + 1}`,
   );
 
-  bench("validate 500 move strings sequentially", () => {
-    for (const move of moves) {
-      ProtocolValidator.assertNoInjection(move, "move");
-    }
+  test("validate 500 move strings sequentially", async ({ bench }) => {
+    await bench("validate 500 move strings sequentially", () => {
+      for (const move of moves) {
+        ProtocolValidator.assertNoInjection(move, "move");
+      }
+    }).run(BENCHMARK_OPTIONS);
   });
 });
