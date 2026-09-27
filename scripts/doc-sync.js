@@ -61,7 +61,8 @@ function checkDocs() {
       }
     }
   } catch (e) {
-    console.warn("⚠️ Failed to check version sync:", e);
+    console.error("❌ Failed to check version sync:", e);
+    hasError = true;
   }
 
   if (hasError) {

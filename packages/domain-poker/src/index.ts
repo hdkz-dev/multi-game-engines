@@ -31,14 +31,7 @@ export type PokerStreet = "preflop" | "flop" | "turn" | "river";
 
 /** プレイヤーポジション (BTN = button, SB, BB, UTG など) */
 export type PokerPosition =
-  | "BTN"
-  | "SB"
-  | "BB"
-  | "UTG"
-  | "UTG1"
-  | "UTG2"
-  | "HJ"
-  | "CO";
+  "BTN" | "SB" | "BB" | "UTG" | "UTG1" | "UTG2" | "HJ" | "CO";
 
 /** アクションの種別 */
 export type PokerActionType = "fold" | "check" | "call" | "raise" | "allin";
@@ -146,7 +139,7 @@ export const POKER_CARD_REGEX = /^([2-9TJQKA][hdcs])$/;
 
 /**
  * ポーカーアクション表記の正規表現。
- * 形式: fold | check | call | allin | raise:<正の整数>
+ * 形式: `fold | check | call | allin | raise:<正の整数>`
  */
 export const POKER_ACTION_REGEX = /^(fold|check|call|allin|raise:[1-9][0-9]*)$/;
 

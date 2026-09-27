@@ -16,7 +16,7 @@ const EngineUIContext = createContext<EngineUIContextValue | undefined>(
 
 export interface EngineUIProviderProps {
   /**
-   * Raw locale data object (e.g. from @multi-game-engines/i18n-common).
+   * Raw locale data object (e.g. from `@multi-game-engines/i18n-common`).
    * Must be serializable (no functions) to pass from Server Components.
    */
   localeData?: unknown;

@@ -1,3 +1,7 @@
+import console from "node:console";
+import process from "node:process";
+import { Buffer } from "node:buffer";
+import { setTimeout } from "node:timers";
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
@@ -6,16 +10,17 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const registryPath = path.resolve(__dirname, "../packages/registry/data/engines.json");
-const sriHashesDir = path.resolve(__dirname, "../packages/registry/data/sri-hashes");
+const registryPath = path.resolve(
+  __dirname,
+  "../packages/registry/data/engines.json",
+);
+const sriHashesDir = path.resolve(
+  __dirname,
+  "../packages/registry/data/sri-hashes",
+);
 const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
 
-// Strict mode (SRI_STRICT=1): fetch failures for assets that already have an
-// SRI are treated as errors (non-zero exit). Used by refresh-sri.yml so that
-// missing production assets (404) fail the workflow instead of passing
-// silently. Local `pnpm build` stays lenient to allow offline builds.
-const strictMode = process.env.SRI_STRICT === "1" || process.env.SRI_STRICT === "true";
-
+// Fetch failures for published assets fail both local and CI builds.
 // Assets with an existing SRI whose fetch failed: { label, url }.
 // __unsafeNoSRI assets (not yet deployed) are excluded — a failed fetch is
 // expected there and keeps __unsafeNoSRI as-is.
@@ -31,32 +36,45 @@ const fetchFailures = [];
 const FETCH_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 5000;
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isTransientStatus = status => status >= 500 || status === 429;
+const isTransientStatus = (status) => status >= 500 || status === 429;
 
 async function calculateSRI(url) {
   for (let attempt = 1; attempt <= FETCH_ATTEMPTS; attempt++) {
     const isLastAttempt = attempt === FETCH_ATTEMPTS;
     try {
-      const response = await fetch(url);
+      const response = await globalThis.fetch(url);
       if (response.ok) {
         const buffer = await response.arrayBuffer();
         // 2026 standard: sha384 is preferred for public assets
-        const hash = crypto.createHash("sha384").update(Buffer.from(buffer)).digest("base64");
+        const hash = crypto
+          .createHash("sha384")
+          .update(Buffer.from(buffer))
+          .digest("base64");
         return `sha384-${hash}`;
       }
       if (!isTransientStatus(response.status) || isLastAttempt) {
-        console.warn(`  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`);
+        console.warn(
+          `  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`,
+        );
         return null;
       }
-      console.warn(`  ⏳ Transient HTTP ${response.status} for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`);
+      console.warn(
+        `  ⏳ Transient HTTP ${response.status} for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`,
+      );
     } catch (err) {
       if (isLastAttempt) {
-        console.warn(`  ⚠️ Warning: Network error fetching ${url}. Skipping update.`);
+        console.warn(
+          `  ⚠️ Warning: Network error fetching ${url}. Skipping update.`,
+          err,
+        );
         return null;
       }
-      console.warn(`  ⏳ Network error for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`);
+      console.warn(
+        `  ⏳ Network error for ${url} — retrying (${attempt}/${FETCH_ATTEMPTS - 1})...`,
+        err,
+      );
     }
     await sleep(RETRY_DELAY_MS);
   }
@@ -100,7 +118,9 @@ function loadLocalSRIHashes() {
   if (!fs.existsSync(sriHashesDir)) return hashes;
   for (const filename of fs.readdirSync(sriHashesDir)) {
     if (!filename.endsWith(".txt")) continue;
-    const content = fs.readFileSync(path.join(sriHashesDir, filename), "utf8").trim();
+    const content = fs
+      .readFileSync(path.join(sriHashesDir, filename), "utf8")
+      .trim();
     if (!content.startsWith("sha384-")) continue;
     // Parse: {engineId}-{version}.txt or {engineId}-{version}-{assetKey}.txt
     const base = filename.slice(0, -4); // remove .txt
@@ -133,11 +153,14 @@ async function refresh() {
   const localHashes = loadLocalSRIHashes();
   const localHashCount = Object.keys(localHashes).length;
   if (localHashCount > 0) {
-    console.log(`\nApplying ${localHashCount} local SRI hash(es) from ${sriHashesDir}...`);
+    console.log(
+      `\nApplying ${localHashCount} local SRI hash(es) from ${sriHashesDir}...`,
+    );
     for (const [key, sri] of Object.entries(localHashes)) {
       const [engineVersion, assetKey] = key.split("/");
       const [engineId, version] = engineVersion.split("@");
-      const asset = registry.engines?.[engineId]?.versions?.[version]?.assets?.[assetKey];
+      const asset =
+        registry.engines?.[engineId]?.versions?.[version]?.assets?.[assetKey];
       if (!asset) {
         console.warn(`  ⚠️ No asset found for ${key} — skipping.`);
         continue;
@@ -176,19 +199,24 @@ async function refresh() {
           if (!sri) {
             fetchFailures.push({ label, url: assetConfig.url });
           } else if (assetConfig.sri !== sri) {
-            console.log(`    ✅ Updated SRI for ${assetKey} in ${engineId}@${version}`);
+            console.log(
+              `    ✅ Updated SRI for ${assetKey} in ${engineId}@${version}`,
+            );
             assetConfig.sri = sri;
             updated = true;
           }
-        } else if (assetConfig.__unsafeNoSRI) {
-          // __unsafeNoSRI → フェッチ成功なら sri に昇格
-          if (await tryUpgradeSRI(assetConfig, label)) updated = true;
-        }
+        } else if (
+          assetConfig.__unsafeNoSRI && // __unsafeNoSRI → フェッチ成功なら sri に昇格
+          (await tryUpgradeSRI(assetConfig, label))
+        )
+          updated = true;
       }
 
       // Variants
       if (assets.variants) {
-        for (const [variantId, variantData] of Object.entries(assets.variants)) {
+        for (const [variantId, variantData] of Object.entries(
+          assets.variants,
+        )) {
           for (const [assetKey, assetConfig] of Object.entries(variantData)) {
             const label = `${engineId}@${version} / variants.${variantId}.${assetKey}`;
             if (assetConfig.url && !assetConfig.__unsafeNoSRI) {
@@ -196,13 +224,17 @@ async function refresh() {
               if (!sri) {
                 fetchFailures.push({ label, url: assetConfig.url });
               } else if (assetConfig.sri !== sri) {
-                console.log(`    ✅ Updated SRI for variant ${variantId} asset ${assetKey} in ${engineId}@${version}`);
+                console.log(
+                  `    ✅ Updated SRI for variant ${variantId} asset ${assetKey} in ${engineId}@${version}`,
+                );
                 assetConfig.sri = sri;
                 updated = true;
               }
-            } else if (assetConfig.__unsafeNoSRI) {
-              if (await tryUpgradeSRI(assetConfig, label)) updated = true;
-            }
+            } else if (
+              assetConfig.__unsafeNoSRI &&
+              (await tryUpgradeSRI(assetConfig, label))
+            )
+              updated = true;
           }
         }
       }
@@ -217,21 +249,18 @@ async function refresh() {
   }
 
   if (fetchFailures.length > 0) {
-    console.error(`\n❌ Failed to fetch ${fetchFailures.length} asset(s) with existing SRI:`);
+    console.error(
+      `\n❌ Failed to fetch ${fetchFailures.length} asset(s) with existing SRI:`,
+    );
     for (const { label, url } of fetchFailures) {
       console.error(`  - ${label}: ${url}`);
     }
-    if (strictMode) {
-      process.exitCode = 1;
-    } else {
-      console.warn("SRI_STRICT is not set — treating fetch failures as warnings.");
-    }
+    process.exitCode = 1;
   }
 }
 
-// Lenient mode (default, e.g. `pnpm build` offline): errors are logged but the
-// process exits 0 so the build can continue. Strict mode (CI): exit non-zero.
-refresh().catch(err => {
+// Unexpected refresh failures must also fail the invoking build.
+refresh().catch((err) => {
   console.error("SRI Refresh failed:", err);
-  process.exit(strictMode ? 1 : 0);
+  process.exitCode = 1;
 });

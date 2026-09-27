@@ -153,3 +153,23 @@ To scale complex engineering tasks, we utilize a standardized **Agent Skills** f
 - **Standardization**: Skills are modular instruction sets located in `skills/` (e.g., `skills/zenith-audit/SKILL.md`).
 - **Dynamic Activation**: Agents activate specific skills to augment their capabilities for auditing, document synchronization, and advanced refactoring.
 - **Consistency**: Centralized skills ensure that all AI tools operating on the codebase adhere to the same 2026 Zenith Tier quality gates.
+
+## Dependency updates and validation (2026-09-17)
+
+Dependency updates target stable npm releases while preserving public APIs and verifying supported tooling combinations. Direct dependencies use compatible version ranges. Transitive overrides are limited to audited security floors and documented compatibility fixes.
+
+ESLint and Oxlint accessibility checks jointly enforce the lint gate, including warnings. TypeScript declaration checking remains enabled; deprecated compiler options are corrected instead of suppressed. See [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) for migration decisions and compatibility constraints.
+
+2026-09-18: Nitro ZIP output now uses Archiver 8, removing deprecated transitive dependencies. React/Vue E2E checks include browser warnings and unhandled exceptions. Initial positions, optional Vue props, search cancellation, and UI error reporting were corrected; ADR 061 records the details and validation results.
+
+```mermaid
+flowchart LR
+  UI[Monitor panel] --> Dispatcher[CommandDispatcher]
+  Dispatcher --> Engine[SearchMonitor / IEngine]
+  Engine --> Result{Command outcome}
+  Result -->|success| Ready[Ready state]
+  Result -->|SEARCH_ABORTED| Cancel[Handled cancellation]
+  Result -->|other rejection| Error[Visible command error]
+```
+
+2026-09-27: Integration review hardened command error handling so failures from a previous engine or an older operation cannot overwrite the current UI. ADR 061 records the additional dependency updates and validation results.

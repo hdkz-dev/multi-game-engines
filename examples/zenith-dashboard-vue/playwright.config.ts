@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const proxyPort = process.env.PORTLESS_PORT;
+const baseURL = `http://vue-dashboard.localhost${proxyPort && proxyPort !== "80" ? `:${proxyPort}` : ""}`;
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 45000,
@@ -12,7 +15,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [["html", { open: "never" }]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -23,9 +26,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && npm run preview",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    env: { PORTLESS_HTTPS: "0" },
+    command: "pnpm exec portless vue-dashboard node .output/server/index.mjs",
+    url: baseURL,
+    reuseExistingServer: false,
+    gracefulShutdown: { signal: "SIGINT", timeout: 5000 },
     timeout: 120000,
   },
 });

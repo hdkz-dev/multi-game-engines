@@ -3,18 +3,21 @@ import "@multi-game-engines/ui-shogi-elements";
 import { Move } from "@multi-game-engines/core";
 import { SFEN, ShogiPiece } from "@multi-game-engines/domain-shogi";
 
-defineProps<{
-  sfen: SFEN;
-  lastMove?: Move | undefined;
-  boardLabel?: string | undefined;
-  errorMessage?: string | undefined;
-  handSenteLabel?: string | undefined;
-  handGoteLabel?: string | undefined;
-  handPieceCount?: string | undefined;
-  pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
-  pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
-  locale?: string | undefined;
-}>();
+withDefaults(
+  defineProps<{
+    sfen: SFEN;
+    lastMove?: Move | undefined;
+    boardLabel?: string | undefined;
+    errorMessage?: string | undefined;
+    handSenteLabel?: string | undefined;
+    handGoteLabel?: string | undefined;
+    handPieceCount?: string | undefined;
+    pieceNames?: Partial<Record<ShogiPiece, string>> | undefined;
+    pieceSymbols?: Partial<Record<ShogiPiece, string>> | undefined;
+    locale?: string | undefined;
+  }>(),
+  { pieceNames: () => ({}), pieceSymbols: () => ({}) },
+);
 </script>
 
 <template>

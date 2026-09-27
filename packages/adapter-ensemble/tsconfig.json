@@ -3,11 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "src",
-    "composite": false,
-    "paths": {
-      "@multi-game-engines/core": ["../core/src/index.ts"],
-      "@multi-game-engines/i18n-engines": ["../i18n-engines/src/index.ts"]
-    }
+    "composite": false
   },
   "include": ["src/**/*", ".storybook/**/*"],
   "exclude": ["node_modules", "dist"]

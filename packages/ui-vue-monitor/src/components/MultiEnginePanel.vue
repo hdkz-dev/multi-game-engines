@@ -57,16 +57,19 @@ const gridCols = computed(() => {
           class="w-px bg-gray-200 flex-shrink-0 self-stretch"
           aria-hidden="true"
         />
-        <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
         <EngineSummaryItem
-          :engine="(entry.engine as any)"
+          :engine="entry.engine"
           :label="entry.label ?? entry.engine.name"
         />
       </template>
     </div>
 
     <!-- Individual engine panels -->
-    <div :class="['grid gap-4', gridCols]" role="list" aria-label="Engine panels">
+    <div
+      :class="['grid gap-4', gridCols]"
+      role="list"
+      aria-label="Engine panels"
+    >
       <div v-for="entry in engines" :key="entry.engine.id" role="listitem">
         <EngineMonitorPanel
           :engine="entry.engine"

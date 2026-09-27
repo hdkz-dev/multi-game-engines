@@ -1,6 +1,24 @@
 import { test, expect } from "@playwright/test";
 
+test.afterEach(async ({ page }) => {
+  const messages = await page.consoleMessages();
+  expect(
+    messages
+      .filter((message) => ["warning", "error"].includes(message.type()))
+      .map((message) => message.text()),
+  ).toEqual([]);
+  expect(await page.pageErrors()).toEqual([]);
+});
+
 test.beforeEach(async ({ page }) => {
+  page.on("pageerror", (error) =>
+    console.error("[Browser exception]", error.stack),
+  );
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      console.error(`[HTTP ${response.status()}] ${response.url()}`);
+    }
+  });
   await page.addInitScript(() => {
     let now = 0;
     Object.defineProperty(performance, "now", {

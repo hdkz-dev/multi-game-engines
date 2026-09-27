@@ -1,4 +1,6 @@
 import {
+  EngineError,
+  EngineErrorCode,
   IBaseSearchOptions,
   IBaseSearchResult,
   EngineStatus,
@@ -27,11 +29,9 @@ export class CommandDispatcher<
    * @param updateStatus - UI 状態を更新するためのコールバック関数。
    */
   constructor(
-    private readonly monitor: SearchMonitor<
-      T_STATE,
-      T_OPTIONS,
-      T_INFO,
-      T_RESULT
+    private readonly monitor: Pick<
+      SearchMonitor<T_STATE, T_OPTIONS, T_INFO, T_RESULT>,
+      "getStatus" | "search" | "stop"
     >,
     private readonly updateStatus: (status: EngineStatus) => void,
   ) {}
@@ -58,6 +58,13 @@ export class CommandDispatcher<
       this.updateStatus("ready");
       return result;
     } catch (error: unknown) {
+      if (
+        error instanceof EngineError &&
+        error.code === EngineErrorCode.SEARCH_ABORTED
+      ) {
+        this.updateStatus(this.monitor.getStatus());
+        throw error;
+      }
       console.error("[CommandDispatcher] Search failed:", error);
       if (typeof window !== "undefined") {
         window.__LAST_ERROR__ =

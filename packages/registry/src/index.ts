@@ -1,14 +1,16 @@
 import {
   IEngineRegistry,
-  IEngineSourceConfig,
   IEngineConfig,
   EngineError,
   EngineErrorCode,
-  createI18nKey } from "@multi-game-engines/core";
+  createI18nKey,
+} from "@multi-game-engines/core";
 import enginesData from "../data/engines.json" with { type: "json" };
-import { EnginesKey } from "@multi-game-engines/i18n-engines";
+import {
+  EnginesKey,
+  tEngines as translate,
+} from "@multi-game-engines/i18n-engines";
 import { z } from "zod";
-import { tEngines as translate } from "@multi-game-engines/i18n-engines";
 
 /**
  * エンジンソース設定の Zod スキーマ。
@@ -66,7 +68,13 @@ const EngineManifestSchema = z.object({
       versions: z.record(
         z.string(),
         z.object({
-          assets: z.record(z.string(), z.union([EngineSourceSchema, z.record(z.string(), z.record(z.string(), EngineSourceSchema))])), // variants等も厳密に検証
+          assets: z.record(
+            z.string(),
+            z.union([
+              EngineSourceSchema,
+              z.record(z.string(), z.record(z.string(), EngineSourceSchema)),
+            ]),
+          ), // variants等も厳密に検証
         }),
       ),
     }),
@@ -104,10 +112,7 @@ export class StaticRegistry implements IEngineRegistry {
     }
   }
 
-  resolve(
-    id: string,
-    version?: string,
-  ): IEngineConfig["sources"] | null {
+  resolve(id: string, version?: string): IEngineConfig["sources"] | null {
     const engineEntry = this.data.engines[id];
     if (!engineEntry) return null;
 

@@ -9,7 +9,7 @@
  *     Note: 8z-9z are invalid in Japanese Mahjong but the regex [1-9][z]
  *     allows them — this test documents implementation behavior.
  *
- * validateMahjongBoard recursion depth limit = 10 (throws at depth > 10).
+ * validateMahjongBoard recursion depth limit = 10 (throws at `depth > 10`).
  */
 import { describe, it, expect } from "vitest";
 import {
@@ -150,9 +150,9 @@ describe("MAHJONG_MOVE_REGEX – spot checks", () => {
 // validateMahjongBoard – depth and structure
 // ---------------------------------------------------------------------------
 describe("validateMahjongBoard – recursion depth", () => {
-  it("accepts structure where leaf strings reach depth 10 (depth > 10 throws)", () => {
+  it("accepts structure where leaf strings reach depth 10 (`depth > 10` throws)", () => {
     // buildNested(n) builds n wrappers; the leaf string is reached at depth n+1.
-    // MAX_DEPTH=10: depth > 10 throws. So leaf at depth 10 is fine (9 wrappers).
+    // MAX_DEPTH=10: `depth > 10` throws. So leaf at depth 10 is fine (9 wrappers).
     const buildNested = (depth: number): Record<string, unknown> => {
       if (depth === 0) return { tile: "1m" };
       return { child: buildNested(depth - 1) };

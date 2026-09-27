@@ -36,16 +36,24 @@ jobs:
       - name: Install SARIF formatter
         run: pnpm add -D @microsoft/eslint-formatter-sarif --ignore-workspace-root-check
 
+      - name: Check accessibility
+        run: pnpm lint:a11y
+
+      - name: Build workspace exports
+        run: pnpm build
+
       - name: Run ESLint (SARIF output)
         env:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
+          NODE_OPTIONS: --max-old-space-size=4096
         run: |
           pnpm exec eslint . \
+            --max-warnings 0 \
             --format @microsoft/eslint-formatter-sarif \
             --output-file eslint-results.sarif
-        continue-on-error: true
 
       - name: Upload analysis results to GitHub
+        if: ${{ !cancelled() && hashFiles('eslint-results.sarif') != '' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: eslint-results.sarif

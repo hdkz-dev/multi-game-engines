@@ -58,4 +58,36 @@ describe("ChessBoard.vue", () => {
     const el = board.element as ChessBoardElement;
     expect(el.pieceNames.P).toBe("Soldier");
   });
+  it("renders safely when optional piece mappings are omitted or removed", async () => {
+    const wrapper = mount(ChessBoardComponent, {
+      props: {
+        fen: createFEN(
+          "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        ),
+      },
+      attachTo: document.body,
+    });
+    try {
+      const el = wrapper.find("chess-board").element as ChessBoardElement;
+      await el.updateComplete;
+      expect(el.pieceNames).toEqual({});
+      expect(el.pieceSymbols).toEqual({});
+      expect(el.shadowRoot?.querySelectorAll(".square")).toHaveLength(64);
+      await wrapper.setProps({
+        pieceNames: { P: "Soldier" },
+        pieceSymbols: { P: "P" },
+      });
+      await el.updateComplete;
+      await wrapper.setProps({
+        pieceNames: undefined,
+        pieceSymbols: undefined,
+      });
+      await el.updateComplete;
+      expect(el.pieceNames).toEqual({});
+      expect(el.pieceSymbols).toEqual({});
+      expect(el.shadowRoot?.querySelectorAll(".square")).toHaveLength(64);
+    } finally {
+      wrapper.unmount();
+    }
+  });
 });

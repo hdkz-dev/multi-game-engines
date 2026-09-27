@@ -4,7 +4,7 @@ import {
   formatNumber,
   formatTime,
 } from "@multi-game-engines/ui-core";
-import { Gauge, Cpu, Layers, Timer } from "lucide-vue-next";
+import { Gauge, Cpu, Layers, Timer } from "@lucide/vue";
 import { useEngineUI } from "@multi-game-engines/ui-vue-core";
 
 interface Props {

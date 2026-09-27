@@ -5,6 +5,9 @@ export default defineConfig({
     globals: true,
     testTimeout: 10000,
     environment: "node",
+    benchmark: {
+      include: ["src/__benchmarks__/**/*.bench.ts"],
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "text-summary", "json", "html"],
@@ -30,10 +33,5 @@ export default defineConfig({
         functions: 93,
       },
     },
-  },
-  bench: {
-    include: ["src/__benchmarks__/**/*.bench.ts"],
-    reporters: ["default", "json"],
-    outputFile: "bench-results.json",
   },
 });

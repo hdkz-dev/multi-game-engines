@@ -2,11 +2,11 @@
  * Checkers (Draughts) – official rules edge case tests.
  *
  * English checkers: 8x8 board, 32 playable dark squares numbered 1-32.
- * Move format: \d+-\d+  OR  (none)
+ * Move format: `\d+-\d+`  OR  (none)
  *   - Normal move:  e.g., "11-15"
  *   - Jump (capture): e.g., "11-18" (same format as normal but longer distance)
  *   - (none): no move available (game over)
- *   Note: the implementation uses \d+-\d+ with no upper bound on square
+ *   Note: the implementation uses `\d+-\d+` with no upper bound on square
  *   numbers — this test documents actual implementation behavior.
  *
  * Board string: any non-empty string without control characters.

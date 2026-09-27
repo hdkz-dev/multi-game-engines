@@ -6,8 +6,8 @@
  *   - color: w | b
  *   - castling: K, Q, k, q (no duplicates) or -
  *   - en passant: - or [a-h][36] only (rank 3 after White's double-pawn push, rank 6 after Black's)
- *   - halfmove clock: integer >= 0
- *   - fullmove: integer >= 1
+ *   - halfmove clock: integer `>= 0`
+ *   - fullmove: integer `>= 1`
  *   - startpos: special alias
  */
 import { describe, it, expect } from "vitest";

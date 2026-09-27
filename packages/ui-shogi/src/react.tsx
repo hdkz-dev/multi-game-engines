@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { ShogiBoard as ShogiBoardElement } from "./elements.js";
 
 import { Move } from "@multi-game-engines/core";

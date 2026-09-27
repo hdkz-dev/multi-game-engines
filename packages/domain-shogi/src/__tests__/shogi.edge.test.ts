@@ -10,7 +10,7 @@
  * SFEN: <board> <turn> <hand> <move-counter>
  *   - turn: b (Sente/Black) | w (Gote/White)
  *   - hand: "-" or combinations like "2P3p" (uppercase=Sente, lowercase=Gote)
- *   - move-counter: integer >= 1
+ *   - move-counter: integer `>= 1`
  */
 import { describe, it, expect } from "vitest";
 import {

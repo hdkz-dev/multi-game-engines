@@ -1,5 +1,5 @@
 /**
- * @multi-game-engines/core/node
+ * `@multi-game-engines/core/node`
  *
  * Node.js-only entry point.  Import this subpath when building adapters that
  * run in Node.js (CLI tools, desktop apps, server-side analysis pipelines).

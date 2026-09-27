@@ -244,6 +244,7 @@ export default function Dashboard() {
   );
 
   const { state: chessState } = useEngineMonitor(chessEngine, {
+    initialPosition: chessOptions.fen,
     autoMiddleware: true,
   });
 
@@ -258,6 +259,7 @@ export default function Dashboard() {
   );
 
   const { state: shogiState } = useEngineMonitor(shogiEngine, {
+    initialPosition: shogiOptions.sfen,
     autoMiddleware: true,
   });
 

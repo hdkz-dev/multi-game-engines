@@ -226,3 +226,23 @@ UI 上での全ての操作（探索開始・停止等）およびエンジン�
    - **静的解析**: DeepSource による TypeScript アンチパターンとバグの自動修正。
    - **セキュリティ**: Snyk による依存関係とコードの脆弱性スキャン。
 3. **仕様の自己修復**: 実装の変更に合わせて API ドキュメントやアーキテクチャ図（Mermaid.js）を AI が自動生成し、ドキュメントの陳腐化を物理的に防ぎます。
+
+## 依存更新と検証 (2026-09-17)
+
+依存更新では npm の安定版を基準に、公開 API とツールの正式な互換範囲を検証します。直接依存には互換更新を許す範囲を指定し、間接依存の override は監査で必要な安全下限と、根拠のある互換性修正に限定します。
+
+ESLint と Oxlint のアクセシビリティ検査を組み合わせ、lint の警告も品質ゲートを失敗させます。TypeScript の宣言ファイル検査は有効にし、非推奨オプションの抑制でビルドを通しません。移行と例外の根拠は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) を参照してください。
+
+2026-09-18: Nitro の ZIP 出力を Archiver 8 に対応させ、非推奨の間接依存を除去しました。React/Vue の E2E はブラウザー警告・未処理例外も検査し、初期盤面、Vue の任意 props、探索停止と実エラーの UI 処理を修正しています。詳細と検証結果は ADR 061 に記録します。
+
+```mermaid
+flowchart LR
+  UI[Monitor panel] --> Dispatcher[CommandDispatcher]
+  Dispatcher --> Engine[SearchMonitor / IEngine]
+  Engine --> Result{Command outcome}
+  Result -->|success| Ready[Ready state]
+  Result -->|SEARCH_ABORTED| Cancel[Handled cancellation]
+  Result -->|other rejection| Error[Visible command error]
+```
+
+2026-09-27: 統合前レビューで、エンジン切り替えと新しい操作の開始後に古い失敗結果が UI を上書きしないよう補強しました。追加の依存更新と検証結果は ADR 061 に記録しています。

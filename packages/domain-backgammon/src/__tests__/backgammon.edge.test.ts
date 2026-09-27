@@ -8,7 +8,7 @@
  *
  * Move format (case-insensitive):
  *   (<from>/<to>)( <from>/<to>)*
- *   from: bar | \d+     to: off | \d+
+ *   `from: bar | \d+     to: off | \d+`
  *   Multiple sub-moves space-separated (up to 4 dice rolls)
  *   Examples: "24/18", "bar/24", "6/off", "24/18 18/13", "6/1 6/1 6/1 6/1"
  */

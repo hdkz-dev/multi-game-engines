@@ -41,17 +41,17 @@
     "@multi-game-engines/core": "workspace:*"
   },
   "devDependencies": {
-    "eslint": "^10.4.0",
+    "eslint": "^10.11.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.2"
   },
   "scripts": {
     "build": "tsup --clean src/index.ts --external @multi-game-engines/* --format esm && tsc -p tsconfig.build.json --emitDeclarationOnly --composite false --declaration --outDir dist",
     "dev": "tsup src/index.ts --external @multi-game-engines/* --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings 0"
   },
   "engines": {
     "node": ">=24.0.0"

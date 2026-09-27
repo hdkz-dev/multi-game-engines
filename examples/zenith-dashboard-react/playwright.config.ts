@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const proxyPort = process.env.PORTLESS_PORT;
+const baseURL = `http://dashboard.localhost${proxyPort && proxyPort !== "80" ? `:${proxyPort}` : ""}`;
+
 export default defineConfig({
   testDir: "./e2e",
   timeout: 45000,
@@ -12,7 +15,7 @@ export default defineConfig({
   workers: 1, // 2026: データベース競合（Lock）を防ぐため並列度を制限
   reporter: [["html", { open: "never" }]],
   use: {
-    baseURL: "http://localhost:3001",
+    baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
@@ -23,9 +26,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run build && PORT=3001 npm run start",
-    url: "http://localhost:3001",
-    reuseExistingServer: !process.env.CI,
+    env: { PORTLESS_HTTPS: "0" },
+    command: "pnpm exec portless dashboard next start",
+    url: baseURL,
+    reuseExistingServer: false,
+    gracefulShutdown: { signal: "SIGINT", timeout: 5000 },
     timeout: 120000,
   },
 });

@@ -4,8 +4,10 @@ import { EngineErrorCode, IEngineError, I18nKey } from "../types.js";
  * V8 エンジンの Error コンストラクタ定義。
  */
 interface V8ErrorConstructor {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  captureStackTrace?: (target: object, ctor?: any) => void;
+  captureStackTrace?: (
+    target: object,
+    ctor?: abstract new (...args: never[]) => object,
+  ) => void;
 }
 
 /**

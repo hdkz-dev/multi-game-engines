@@ -1,0 +1,13 @@
+diff --git a/dist/chunk-CJ1Nc_eA.d.ts b/dist/chunk-CJ1Nc_eA.d.ts
+index 8e68dc5880537cbeb050a77dd6c8f20e931617ae..110ea99e5e30cb8875fc2f459bbebea045698403 100644
+--- a/dist/chunk-CJ1Nc_eA.d.ts
++++ b/dist/chunk-CJ1Nc_eA.d.ts
+@@ -46,7 +46,7 @@ type TypescriptOptions$1 = TypescriptOptions & {
+    * @default `'react-docgen'`
+    */
+   reactDocgen: 'react-docgen-typescript' | 'react-docgen' | false; /** Configures `@joshwooding/vite-plugin-react-docgen-typescript` */
+-  reactDocgenTypescriptOptions: Parameters<typeof docgenTypescript>[0];
++  reactDocgenTypescriptOptions: typeof docgenTypescript extends { default: (options?: infer Options) => unknown } ? Options : typeof docgenTypescript extends (options?: infer Options) => unknown ? Options : never;
+ };
+ /** The interface for Storybook configuration in `main.ts` files. */
+ type StorybookConfig$1 = Omit<StorybookConfig, keyof StorybookConfigVite | keyof StorybookConfigFramework | 'typescript'> & StorybookConfigVite & StorybookConfigFramework & {

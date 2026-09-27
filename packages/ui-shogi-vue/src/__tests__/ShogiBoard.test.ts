@@ -39,8 +39,12 @@ describe("ShogiBoard.vue", () => {
     const el = board.element as ShogiBoardElement;
     expect(el.locale).toBe("ja");
     expect(el.boardLabel || el.getAttribute("board-label")).toBe("将棋盤");
-    expect(el.handSenteLabel || el.getAttribute("hand-sente-label")).toBe("先手持ち駒");
-    expect(el.handGoteLabel || el.getAttribute("hand-gote-label")).toBe("後手持ち駒");
+    expect(el.handSenteLabel || el.getAttribute("hand-sente-label")).toBe(
+      "先手持ち駒",
+    );
+    expect(el.handGoteLabel || el.getAttribute("hand-gote-label")).toBe(
+      "後手持ち駒",
+    );
   });
 
   it("passes complex i18n props to custom element", () => {
@@ -49,7 +53,7 @@ describe("ShogiBoard.vue", () => {
     );
     const pieceNames = { P: "歩兵", L: "香車" };
     const handPieceCount = "{piece}が{count}枚";
-    
+
     const wrapper = mount(ShogiBoardComponent, {
       props: {
         sfen,
@@ -62,7 +66,41 @@ describe("ShogiBoard.vue", () => {
     const el = board.element as ShogiBoardElement;
     // For Lit properties, they might be on the element instance
     // For attributes, check the DOM attribute
-    expect(el.handPieceCount || board.attributes("hand-piece-count")).toBe(handPieceCount);
+    expect(el.handPieceCount || board.attributes("hand-piece-count")).toBe(
+      handPieceCount,
+    );
     expect((el.pieceNames as Record<string, string>).P).toBe("歩兵");
+  });
+  it("renders safely when optional piece mappings are omitted or removed", async () => {
+    const wrapper = mount(ShogiBoardComponent, {
+      props: {
+        sfen: createSFEN(
+          "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
+        ),
+      },
+      attachTo: document.body,
+    });
+    try {
+      const el = wrapper.find("shogi-board").element as ShogiBoardElement;
+      await el.updateComplete;
+      expect(el.pieceNames).toEqual({});
+      expect(el.pieceSymbols).toEqual({});
+      expect(el.shadowRoot?.querySelectorAll(".square")).toHaveLength(81);
+      await wrapper.setProps({
+        pieceNames: { P: "Soldier" },
+        pieceSymbols: { P: "P" },
+      });
+      await el.updateComplete;
+      await wrapper.setProps({
+        pieceNames: undefined,
+        pieceSymbols: undefined,
+      });
+      await el.updateComplete;
+      expect(el.pieceNames).toEqual({});
+      expect(el.pieceSymbols).toEqual({});
+      expect(el.shadowRoot?.querySelectorAll(".square")).toHaveLength(81);
+    } finally {
+      wrapper.unmount();
+    }
   });
 });

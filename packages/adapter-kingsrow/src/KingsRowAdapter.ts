@@ -29,7 +29,7 @@ import { tCommon as translate } from "@multi-game-engines/i18n-common";
  * 2026 Zenith Tier: Checkers adapter backed by rapid-draughts.
  *
  * Replaces the proprietary KingsRow engine (Windows DLL only, no WASM path)
- * with rapid-draughts@1.0.6 — a pure TypeScript English Draughts engine
+ * with `rapid-draughts@1.0.6` — a pure TypeScript English Draughts engine
  * that runs natively in the browser without a Web Worker or WASM build.
  *
  * Architecture:
@@ -83,8 +83,8 @@ export class KingsRowAdapter extends BaseAdapter<
    * Otherwise the adapter uses the maintained game state (updated via
    * `applyMove()` calls from the game loop).
    *
-   * @param options.board  "startpos" to reset, or any value to use current state.
-   * @param options.depth  Alpha-beta search depth (default: 7).
+   * @param options - Set `board` to "startpos" to reset; other values use the current state.
+   *   `depth` sets the alpha-beta search depth (default: 7).
    */
   override async search(
     options: ICheckersSearchOptions,
@@ -134,7 +134,7 @@ export class KingsRowAdapter extends BaseAdapter<
    * Apply a move to the internal game state (advance the game after the
    * opponent or the engine has played a move).
    *
-   * @param moveStr  Standard notation: "11-15" (origin-destination).
+   * @param moveStr - Standard notation: "11-15" (origin-destination).
    */
   applyMove(moveStr: string): void {
     if (!this.game) return;

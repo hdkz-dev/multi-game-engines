@@ -1,0 +1,14 @@
+diff --git a/dist/test/index.d.ts b/dist/test/index.d.ts
+index b5ae26ad31bbfeb2a81ed20f7e7ddbd383676e8b..fed4db04eab04d681dbfe2bd736f62bbf28f0b4e 100644
+--- a/dist/test/index.d.ts
++++ b/dist/test/index.d.ts
+@@ -4,7 +4,7 @@ import { userEvent as userEvent$1 } from "@testing-library/user-event";
+ import { TestingLibraryMatchers } from "@testing-library/jest-dom/matchers";
+ import { AsymmetricMatchersContaining, ExpectStatic, JestAssertion, MatcherState, MatchersObject } from "@vitest/expect";
+ import { MaybeMocked, MaybeMockedDeep, MaybePartiallyMocked, MaybePartiallyMockedDeep, Mock, MockInstance, isMockFunction, mocks, spyOn as spyOn$1 } from "@vitest/spy";
+-import { FireObject } from "@testing-library/dom/types/events";
++import { FireObject } from "@testing-library/dom/types/events.js";
+ export * from "@vitest/spy";
+-
++
+ //#region code/core/.dts-emit/code/core/src/test/utils.d.ts

@@ -21,22 +21,23 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0"
   },
   "license": "MIT",
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "stockfish": "18.0.7",
+    "stockfish": "^19.0.0",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.2"
   },
   "peerDependencies": {
     "@multi-game-engines/core": "workspace:*"
   },
   "dependencies": {
     "@multi-game-engines/i18n-engines": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "engines": {
     "node": ">=24.0.0"

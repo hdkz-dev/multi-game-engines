@@ -17,9 +17,9 @@
     }
   },
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist --composite false",
+    "build": "vite build && vue-tsc -p tsconfig.build.json --emitDeclarationOnly --declaration --outDir dist --composite false && node ../../scripts/fix-vue-declaration-imports.mjs dist",
     "dev": "vite build --watch",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:e2e": "playwright test -c playwright-ct.config.ts",
     "test:e2e:install": "playwright install chromium --with-deps",
@@ -34,30 +34,29 @@
     "vue": ">=3.3.0"
   },
   "dependencies": {
+    "@lucide/vue": "^1.48.0",
     "@multi-game-engines/core": "workspace:*",
     "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-vue-core": "workspace:*",
     "clsx": "^2.1.1",
-    "lucide-vue-next": "^1.0.0",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
-    "@playwright/experimental-ct-vue": "^1.60.0",
-    "@playwright/test": "^1.60.0",
-    "@storybook/vue3": "10.4.1",
-    "@storybook/vue3-vite": "10.4.1",
-    "@types/node": "^25.9.1",
-    "@vitejs/plugin-vue": "^6.0.7",
-    "@vue/compiler-dom": "^3.5.35",
-    "@vue/test-utils": "^2.4.10",
-    "happy-dom": "^20.9.0",
+    "@playwright/experimental-ct-vue": "^1.62.1",
+    "@storybook/vue3": "^10.6.0",
+    "@storybook/vue3-vite": "^10.6.0",
+    "@types/node": "^25.9.7",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "@vue/compiler-dom": "^3.5.43",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^20.14.5",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16",
-    "vite-plugin-dts": "^5.0.1",
-    "vitest": "^4.1.7",
-    "vue": "3.5.35",
-    "vue-tsc": "^3.3.2"
+    "vite": "^8.3.0",
+    "vite-plugin-dts": "^5.1.1",
+    "vitest": "^5.0.2",
+    "vue": "^3.5.43",
+    "vue-tsc": "^3.3.11"
   },
   "author": "hdkz-dev",
   "repository": {

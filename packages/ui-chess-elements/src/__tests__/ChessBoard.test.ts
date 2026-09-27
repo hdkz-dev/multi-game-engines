@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import "../index.js";
 import { ChessBoard } from "../index.js";
 import { createFEN } from "@multi-game-engines/domain-chess";
 import { createMove } from "@multi-game-engines/core";
@@ -14,7 +13,7 @@ describe("chess-board Web Component", () => {
   });
 
   it("should be defined", () => {
-    expect(customElements.get("chess-board")).toBeDefined();
+    expect(customElements.get("chess-board")).toBe(ChessBoard);
   });
 
   it("should render initial board", async () => {

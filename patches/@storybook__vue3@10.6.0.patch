@@ -1,0 +1,36 @@
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 61de6b4cb392b82691283b529fa7aaf748a6bdbb..9773c8c9825cb892cc34165f880ed3c550348eca 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1,3 +1,4 @@
++import type { ComponentAnnotations as CSFComponentAnnotations, StoryAnnotations as CSFStoryAnnotations } from "storybook/internal/csf";
+ import { AnnotatedStoryFn, ArgTypes, Args, Args as Args$1, ArgsFromMeta, ArgsStoryFn, Canvas, ComponentAnnotations, ComposedStoryFn, DecoratorFunction, LoaderFunction, NamedOrDefaultProjectAnnotations, NormalizedProjectAnnotations, Parameters, ProjectAnnotations, Renderer, Store_CSFExports, StoriesWithPartialProps, StoryAnnotations, StoryAnnotationsOrFn, StoryContext as StoryContext$1, StrictArgs, StrictArgs as StrictArgs$1, WebRenderer } from "storybook/internal/types";
+ import { App, ConcreteComponent, FunctionalComponent, VNodeChild } from "vue";
+ import { ComponentMeta } from "vue-component-meta";
+@@ -230,7 +231,7 @@ type DecoratorsArgs<TRenderer extends Renderer, Decorators> = UnionToIntersectio
+  * provided in meta become optional in stories, while missing required args must be provided at the
+  * story level.
+  */
+-interface VueMeta<T extends VueTypes, MetaInput extends ComponentAnnotations<T>> /** @ts-expect-error VueMeta requires two type parameters, but Meta's constraints differ */ extends Meta$1<T, MetaInput> {
++interface VueMeta<T extends VueTypes, MetaInput extends ComponentAnnotations<T>> extends Meta$1<T, MetaInput & CSFComponentAnnotations<T, T["args"]>> {
+   /**
+    * Creates a story with a custom render function that takes no args.
+    *
+@@ -278,7 +279,7 @@ interface VueMeta<T extends VueTypes, MetaInput extends ComponentAnnotations<T>>
+    * });
+    * ```
+    */
+-  story<TInput extends Simplify<StoryAnnotations<T, T['args'], SetOptional<T['args'], keyof T['args'] & keyof MetaInput['args']>>>>(story: TInput): VueStory<T, TInput>;
++  story<TInput extends Simplify<StoryAnnotations<T, T['args'], SetOptional<T['args'], keyof T['args'] & keyof MetaInput['args']>>>>(story: TInput): VueStory<T, TInput & StoryAnnotations<T, T["args"]>>;
+   /**
+    * Creates a story with no additional configuration.
+    *
+@@ -304,6 +305,6 @@ interface VueMeta<T extends VueTypes, MetaInput extends ComponentAnnotations<T>>
+  * Represents a single story with its configuration and provides access to the composed story for
+  * testing via `story.run()`.
+  */
+-interface VueStory<T extends VueTypes, TInput extends StoryAnnotations<T, T['args']>> extends Story<T, TInput> {}
++interface VueStory<T extends VueTypes, TInput extends StoryAnnotations<T, T['args']>> extends Story<T, TInput & CSFStoryAnnotations<T, T["args"]>> {}
+ //#endregion
+ export { type ArgTypes, type Args, ComponentPropsAndSlots, Decorator, Loader, Meta, type Parameters, Preview, StoryContext, StoryFn, StoryObj, type StrictArgs, type VueDocgenInfo, type VueDocgenInfoEntry, type VueDocgenPlugin, VueMeta, VuePreview, type VueRenderer, VueStory, type VueTypes, __definePreview, composeStories, composeStory, setProjectAnnotations, setup, vueProjectAnnotations };
+\ No newline at end of file
