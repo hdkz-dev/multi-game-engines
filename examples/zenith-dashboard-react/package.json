@@ -39,7 +39,7 @@
     "@multi-game-engines/ui-shogi-react": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^1.48.0",
-    "next": "^16.3.5",
+    "next": "^16.3.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwind-merge": "^3.7.0"
@@ -47,10 +47,10 @@
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^5.20.8",
     "@multi-game-engines/eslint-config-react": "workspace:*",
-    "@next/eslint-plugin-next": "^16.3.5",
+    "@next/eslint-plugin-next": "^16.3.6",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^25.9.7",
+    "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "babel-plugin-react-compiler": "^1.0.0",
