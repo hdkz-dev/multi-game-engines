@@ -85,9 +85,9 @@
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.7",
+    "@types/node": "^26.6.3",
     "@types/pug": "^2.0.10",
-    "@typescript-eslint/parser": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.1",
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^10.11.0",
     "eslint-import-resolver-typescript": "^4.4.5",
@@ -97,16 +97,16 @@
     "eslint-plugin-promise": "^7.3.0",
     "eslint-plugin-storybook": "^10.6.0",
     "eslint-plugin-tsdoc": "^0.5.3",
-    "eslint-plugin-unicorn": "^64.0.0",
+    "eslint-plugin-unicorn": "^76.0.0",
     "eslint-plugin-wc": "^3.1.0",
     "husky": "^9.1.7",
-    "lint-staged": "^17.5.1",
-    "oxlint": "^1.83.0",
+    "lint-staged": "^17.6.0",
+    "oxlint": "^1.85.0",
     "portless": "^0.15.6",
     "prettier": "^3.9.9",
-    "turbo": "^2.11.4",
+    "turbo": "^2.11.5",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.0"
+    "typescript-eslint": "^8.70.1"
   }
 }
