@@ -105,7 +105,6 @@ export class MockEngine implements IEngine<
     }
   }
 
-  // eslint-disable-next-line @eslint-react/no-unnecessary-use-prefix
   use(
     _middleware: IMiddleware<
       IBaseSearchOptions,
