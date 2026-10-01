@@ -96,3 +96,9 @@ lint、型チェック、全体ビルド、テスト、Core coverage、benchmark
 - ブラウザー E2E は React CT 64件、Vue CT 57件、React dashboard 4件、Vue dashboard 5件が成功。ダッシュボード内の console warning/error と未処理例外は0件。
 - 並行ビルド時に Nuxt のプラグイン時間割合の警告が1回発生したが、E2E の単独ビルドでは再現しなかった。端末の `NO_COLOR` と Playwright の `FORCE_COLOR` の競合は、検証環境で `NO_COLOR` を解除して解消し、E2E 130件を警告なしで再確認した。
 - パッチ再適用後の pre-commit で import-x の parser 解決失敗を検出した。間接依存の配置に頼らず `@typescript-eslint/parser` を直接 devDependency として宣言し、クリーンな依存配置でも検査可能にした。
+
+### 依存更新の継続 (2026-10-01)
+
+- Dependabot #258 の artifact download action v25 と、#260 の互換範囲内の依存更新を統合する。
+- Wrangler の上流更新で `undici` 7.29.1 を導入し、`serialize-javascript` も既存の依存範囲内で修正版へ更新する。新しい override や監査の除外は追加しない。
+- TypeScript 7 は最新の typescript-eslint / TypeDoc の peer 範囲外である。Unicorn 76 は既存 CI で追加規則への多数の違反が確認されており、ES2022 を維持する本更新から分離する。Node 26 型定義も Node 24 の検証環境に合わせて保留を継続する。

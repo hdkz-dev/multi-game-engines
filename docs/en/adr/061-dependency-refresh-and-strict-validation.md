@@ -96,3 +96,9 @@ Validate lint, type checking, the complete build, tests, Core coverage, benchmar
 - Browser E2E passed: React CT 64, Vue CT 57, React dashboard 4, Vue dashboard 5. Dashboard console warnings/errors and unhandled exceptions were absent.
 - A Nuxt plugin timing warning appeared once during concurrent builds and did not recur in the standalone E2E build. Unset `NO_COLOR` in the validation environment to resolve its conflict with Playwright's `FORCE_COLOR`; all 130 E2E tests passed again without warnings.
 - Pre-commit validation after patch reinstallation detected import-x failing to resolve its TypeScript parser. Declare `@typescript-eslint/parser` as a direct development dependency instead of relying on transitive package placement.
+
+### Continued dependency updates (2026-10-01)
+
+- Integrate artifact download action v25 from Dependabot #258 and compatible dependency updates from #260.
+- Upgrade Wrangler to obtain undici 7.29.1 and update serialize-javascript to a patched release within its existing dependency range. Add no new overrides or audit exclusions.
+- TypeScript 7 remains outside the latest typescript-eslint / TypeDoc peer ranges. Unicorn 76 triggers numerous additional rule violations in existing CI and remains a separate migration while this update retains ES2022. Node 26 type definitions also remain deferred to match the Node 24 validation environment.
