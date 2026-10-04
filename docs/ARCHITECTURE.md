@@ -246,3 +246,5 @@ flowchart LR
 ```
 
 2026-09-27: 統合前レビューで、エンジン切り替えと新しい操作の開始後に古い失敗結果が UI を上書きしないよう補強しました。追加の依存更新と検証結果は ADR 061 に記録しています。
+
+依存更新の2026-10-04時点の制約と Dependabot 失敗の原因は [ADR 061](./adr/061-dependency-refresh-and-strict-validation.md) を参照。

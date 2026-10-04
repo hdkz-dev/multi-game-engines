@@ -102,3 +102,13 @@ lint、型チェック、全体ビルド、テスト、Core coverage、benchmark
 - Dependabot #258 の artifact download action v25 と、#260 の互換範囲内の依存更新を統合する。
 - Wrangler の上流更新で `undici` 7.29.1 を導入し、`serialize-javascript` も既存の依存範囲内で修正版へ更新する。新しい override や監査の除外は追加しない。
 - TypeScript 7 は最新の typescript-eslint / TypeDoc の peer 範囲外である。Unicorn 76 は既存 CI で追加規則への多数の違反が確認されており、ES2022 を維持する本更新から分離する。Node 26 型定義も Node 24 の検証環境に合わせて保留を継続する。
+
+### 依存更新の継続 (2026-10-04)
+
+- 10月2日の Dependabot 更新失敗は、公開後36時間の React ESLint プラグインと35時間の Next.js ESLint プラグインが `minimumReleaseAge` に拒否されたためだった。対象として報告された Node 型定義・Unicorn・TypeScript 自体の不具合ではない。待機期間の除外は追加しない。
+- GitHub はこの Dependabot 実行の再試行を許可しないため、互換範囲内の依存をローカルで更新し、strict peer dependency 検査を維持して依存解決を再検証する。
+- TypeScript 7 は typescript-eslint の `>=4.8.4 <6.1.0`、TypeDoc の `6.0.x` までの対応範囲外であり、引き続き別途移行が必要。Unicorn 77 と Node 26 型定義は別途検証する。Storybook 10.6.1 は5件の既存パッチを再適用して更新する。開発依存 devalue は既存の許容範囲内で修正版へ更新する。node-forge と braces は現行 npm 監査で修正版なしと報告されているため未解決として記録する。監査の除外や新しい override は追加しない。
+
+- 未解決の開発依存: [node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv)、[braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)。`pnpm audit` の失敗を成功扱いにしない。
+
+- 最終構成の `pnpm build` は56/56タスク、`pnpm typecheck` は99/99タスクが成功。`pnpm lint`、`pnpm test`、lockfile 再インストール、doc-sync が成功した。CodeRabbit の依存更新レビューと追加パッチレビューはともに指摘0件。本番依存監査は0件、全依存監査には上記の高リスク2件が残る。E2E・リモート CI・公開は未実施。
