@@ -8,10 +8,10 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20261001.1",
+    "@cloudflare/workers-types": "^5.20261002.1",
     "@multi-game-engines/core": "workspace:*",
     "typescript": "^6.0.3",
-    "wrangler": "^4.145.0"
+    "wrangler": "^4.146.0"
   },
   "engines": {
     "node": ">=24.0.0"
