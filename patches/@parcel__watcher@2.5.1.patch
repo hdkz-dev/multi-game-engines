@@ -1,0 +1,11 @@
+diff --git a/wrapper.js b/wrapper.js
+index 496d56bc1c448895543933156e991831421834a6..9a508f23c25223d43887ef039d84a0fbfb119aef 100644
+--- a/wrapper.js
++++ b/wrapper.js
+@@ -1,5 +1,5 @@
+ const path = require('path');
+-const micromatch = require('micromatch');
++const micromatch = require('picomatch');
+ const isGlob = require('is-glob');
+ 
+ function normalizeOptions(dir, opts = {}) {

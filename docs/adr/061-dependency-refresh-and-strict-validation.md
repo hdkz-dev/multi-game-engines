@@ -112,3 +112,7 @@ lint、型チェック、全体ビルド、テスト、Core coverage、benchmark
 - 未解決の開発依存: [node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv)、[braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)。`pnpm audit` の失敗を成功扱いにしない。
 
 - 最終構成の `pnpm build` は56/56タスク、`pnpm typecheck` は99/99タスクが成功。`pnpm lint`、`pnpm test`、lockfile 再インストール、doc-sync が成功した。CodeRabbit の依存更新レビューと追加パッチレビューはともに指摘0件。本番依存監査は0件、全依存監査には上記の高リスク2件が残る。E2E・リモート CI・公開は未実施。
+
+### 2026-10-05: 未修正依存の置換
+
+修正版のない node-forge と braces の依存経路を置き換えた。決定と保守手順は [ADR 062](062-development-tooling-security-backends.md) を参照。

@@ -43,8 +43,8 @@
     "docs": "npx typedoc",
     "docs:check": "npx typedoc --treatWarningsAsErrors",
     "lint:a11y": "oxlint --config .oxlintrc.json --deny-warnings packages examples",
-    "test:tooling": "node --test scripts/validation.test.mjs",
-    "lint:tooling": "eslint --no-ignore scripts/doc-sync.js scripts/refresh-engine-sris.mjs scripts/fix-vue-declaration-imports.mjs scripts/validation.test.mjs --max-warnings 0"
+    "test:tooling": "node --test scripts/validation.test.mjs scripts/tooling-security.test.mjs",
+    "lint:tooling": "eslint --no-ignore scripts/doc-sync.js scripts/refresh-engine-sris.mjs scripts/fix-vue-declaration-imports.mjs scripts/validation.test.mjs --max-warnings 0 .pnpmfile.cjs scripts/tooling-security.test.mjs"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -78,7 +78,12 @@
       "@storybook/react@10.6.1": "patches/@storybook__react@10.6.1.patch",
       "@storybook/react-vite@10.6.1": "patches/@storybook__react-vite@10.6.1.patch",
       "storybook@10.6.1": "patches/storybook@10.6.1.patch",
-      "@storybook/web-components@10.6.1": "patches/@storybook__web-components@10.6.1.patch"
+      "@storybook/web-components@10.6.1": "patches/@storybook__web-components@10.6.1.patch",
+      "listhen@1.10.1": "patches/listhen@1.10.1.patch",
+      "@next/eslint-plugin-next@16.3.8": "patches/@next__eslint-plugin-next@16.3.8.patch",
+      "fast-glob@3.3.3": "patches/fast-glob@3.3.3.patch",
+      "globby@16.2.4": "patches/globby@16.2.4.patch",
+      "@parcel/watcher@2.5.1": "patches/@parcel__watcher@2.5.1.patch"
     }
   },
   "devDependencies": {

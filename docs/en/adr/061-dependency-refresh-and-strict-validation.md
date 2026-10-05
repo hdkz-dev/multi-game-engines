@@ -112,3 +112,7 @@ Validate lint, type checking, the complete build, tests, Core coverage, benchmar
 - Unresolved development dependencies: [node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv) and [braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). The failing full `pnpm audit` is not reported as passing.
 
 - Final validation: `pnpm build` passed 56/56 tasks and `pnpm typecheck` passed 99/99 tasks. `pnpm lint`, `pnpm test`, frozen-lockfile installation, and doc-sync passed. CodeRabbit dependency and additional patch reviews each completed with zero findings. Production audit found no vulnerabilities; the full audit retains the two high-severity findings above. E2E, remote CI, and publication have not been performed.
+
+### 2026-10-05: Replace dependencies without patched releases
+
+Replace the consuming paths for node-forge and braces. See [ADR 062](062-development-tooling-security-backends.md) for the decision and maintenance procedure.

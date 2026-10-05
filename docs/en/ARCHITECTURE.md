@@ -175,3 +175,17 @@ flowchart LR
 2026-09-27: Integration review hardened command error handling so failures from a previous engine or an older operation cannot overwrite the current UI. ADR 061 records the additional dependency updates and validation results.
 
 See [ADR 061](./adr/061-dependency-refresh-and-strict-validation.md) for dependency constraints and the Dependabot failure diagnosis as of 2026-10-04.
+
+Development tooling cryptography and glob dependencies migrate to safe implementations. See [ADR 062](./adr/062-development-tooling-security-backends.md) for the graph, scoped versions, and regression validation.
+
+### Development tooling dependencies
+
+```mermaid
+flowchart LR
+  CLI[Nuxt CLI] --> TLS[Patched listhen]
+  TLS --> Native[Node WebCrypto and TLS]
+  TLS --> X509[Peculiar X509]
+  Lint[Next ESLint] --> Tiny[Tinyglobby]
+  Build[Nitro and Tailwind] --> Glob[Patched glob and watcher]
+  Glob --> Match[Picomatch and bounded expansion]
+```

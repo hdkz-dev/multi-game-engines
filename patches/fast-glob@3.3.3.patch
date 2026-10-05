@@ -1,0 +1,52 @@
+diff --git a/out/utils/pattern.js b/out/utils/pattern.js
+index b2924e7874dbc901ef6f261e9c508c17e9365f45..0877ec67d9e6be5a825cd083589a3c1d7524e20a 100644
+--- a/out/utils/pattern.js
++++ b/out/utils/pattern.js
+@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.isAbsolute = exports.partitionAbsoluteAndRelative = exports.removeDuplicateSlashes = exports.matchAny = exports.convertPatternsToRe = exports.makeRe = exports.getPatternParts = exports.expandBraceExpansion = exports.expandPatternsWithBraceExpansion = exports.isAffectDepthOfReadingPattern = exports.endsWithSlashGlobStar = exports.hasGlobStar = exports.getBaseDirectory = exports.isPatternRelatedToParentDirectory = exports.getPatternsOutsideCurrentDirectory = exports.getPatternsInsideCurrentDirectory = exports.getPositivePatterns = exports.getNegativePatterns = exports.isPositivePattern = exports.isNegativePattern = exports.convertToNegativePattern = exports.convertToPositivePattern = exports.isDynamicPattern = exports.isStaticPattern = void 0;
+ const path = require("path");
+ const globParent = require("glob-parent");
+-const micromatch = require("micromatch");
++const micromatch = require("picomatch");
++const { expand } = require("@isaacs/brace-expansion");
+ const GLOBSTAR = '**';
+ const ESCAPE_SYMBOL = '\\';
+ const COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
+@@ -134,7 +135,36 @@ function expandPatternsWithBraceExpansion(patterns) {
+ }
+ exports.expandPatternsWithBraceExpansion = expandPatternsWithBraceExpansion;
+ function expandBraceExpansion(pattern) {
+-    const patterns = micromatch.braces(pattern, { expand: true, nodupes: true, keepEscaping: true });
++    if (pattern.length > 65536 || pattern.includes('\0')) throw new Error('Unsupported glob pattern length or null character');
++    const escaped = [];
++    const protectedPattern = pattern.replace(/\\./g, (value) => {
++        const index = escaped.push(value) - 1;
++        return `\0${index}\0`;
++    });
++    let depth = 0;
++    let groups = 0;
++    for (const character of protectedPattern) {
++        if (character === '{') {
++            if (++groups > 256) throw new Error('Glob brace groups exceed 256');
++            if (++depth > 64) throw new Error('Glob brace nesting exceeds 64 levels');
++        }
++        if (character === '}') depth = Math.max(0, depth - 1);
++    }
++    for (const range of protectedPattern.matchAll(/\{(-?\d+)\.\.(-?\d+)(?:\.\.(-?\d+))?\}/g)) {
++        const start = BigInt(range[1]);
++        const end = BigInt(range[2]);
++        const rawStep = BigInt(range[3] || '1');
++        const step = rawStep === 0n ? 1n : rawStep < 0n ? -rawStep : rawStep;
++        const distance = end > start ? end - start : start - end;
++        if (distance / step + 1n > 10000n) throw new Error('Glob brace expansion exceeds 10000 patterns');
++        if (start > BigInt(Number.MAX_SAFE_INTEGER) || start < BigInt(Number.MIN_SAFE_INTEGER) ||
++            end > BigInt(Number.MAX_SAFE_INTEGER) || end < BigInt(Number.MIN_SAFE_INTEGER)) {
++            throw new Error('Glob brace range exceeds safe integer bounds');
++        }
++    }
++    const expanded = expand(protectedPattern, { max: 10001 });
++    if (expanded.length > 10000) throw new Error('Glob brace expansion exceeds 10000 patterns');
++    const patterns = [...new Set(expanded.map((value) => value.replace(/\0(\d+)\0/g, (_, index) => escaped[Number(index)])))];
+     /**
+      * Sort the patterns by length so that the same depth patterns are processed side by side.
+      * `a/{b,}/{c,}/*` – `['a///*', 'a/b//*', 'a//c/*', 'a/b/c/*']`
