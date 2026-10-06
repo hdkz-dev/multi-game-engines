@@ -1,0 +1,44 @@
+# ADR 062: 開発ツールの暗号・glob 依存置換
+
+- 日付: 2026-10-05
+- 状態: 採用
+
+## 背景
+
+PR #262 の OSV 監査で、修正版のない `node-forge` 1.4.0 と `braces` 3.0.3 が検出された。これらは開発ツールの間接依存だが、全依存監査を失敗させる。上流の公開を待つだけでは修正が完了しないため、必要な機能を維持して依存経路を置き換える。
+
+## 決定
+
+- `listhen` 1.10.1 の証明書処理を Node.js の WebCrypto・TLS と `@peculiar/x509` に移行する。CJS/ESM の両方に適用し、証明書チェーン、DNS/IP SAN、暗号化 PEM、PFX を維持する。CA とサーバー証明書に異なる識別名と鍵識別子を付ける。PFX は Node.js の TLS に直接渡すため、listener の証明書型は PEM と PFX の union とする。
+- `@next/eslint-plugin-next` 16.3.8 のルート検索を `tinyglobby` に移行し、絶対パス・相対パスと末尾区切りの形式を保持する。
+- `fast-glob` 3.3.3、`globby` 16.2.4、`@parcel/watcher` 2.5.1 で使用する matching を `picomatch` に移行する。Fast-glob の brace 展開は `@isaacs/brace-expansion` を使い、エスケープを保持する。65,536文字・64段の入れ子・256組の括弧・10,000件の展開を超える入力は明示的なエラーにする。結果を黙って切り詰めない。
+- `pnpm patch` による実装変更と `.pnpmfile.cjs` の対象名・バージョンを限定した依存変更を組み合わせる。パッチの適用だけでは依存解決の graph は変わらないため、hook が不要になった依存を除去し、実際に使用する置換ライブラリを宣言する。置換先は互換バージョン範囲、パッチ対象は検証したバージョンに限定する。
+- audit/OSV の除外、成功扱いへの変換、脆弱なパッケージの別名化は行わない。lockfile に `node-forge`・`braces`・`micromatch` がないことを回帰テストで確認する。
+
+```mermaid
+flowchart LR
+  Nuxt[Nuxt CLI] --> Listener[Patched listhen]
+  Listener --> Native[Node WebCrypto and TLS]
+  Listener --> X509[Peculiar X509]
+  Next[Next ESLint] --> Tiny[Tinyglobby]
+  Nitro[Nitro and test tools] --> Glob[Patched globby and fast-glob]
+  Watch[Tailwind watcher] --> Match[Picomatch]
+  Glob --> Match
+  Glob --> Expand[Bounded brace expansion]
+  Hook[Scoped pnpm hook and patches] --> Lock[Lockfile without vulnerable dependencies]
+  Lock --> Audit[Full audit and OSV]
+```
+
+## 検証と保守
+
+`scripts/tooling-security.test.mjs` で、実際にインストールされた CJS/ESM の HTTPS サーバー、信頼する CA 付き TLS 通信、暗号化 PEM と PFX、誤ったパスワード、glob 検索と除外、範囲・エスケープ・過剰展開、監視の除外パターンを検証する。PFX のテスト用データはシステムの OpenSSL で一時的に生成し、秘密鍵や固定の認証情報をリポジトリに保存しない。
+
+上流更新時はパッチと hook をセットで再検証し、上流が安全な実装へ移行したら両方を除去する。既存のブリッジライブラリの通信・SRI・公開 API は変更しない。検証結果は PR に記録し、未実施や失敗した検証を成功扱いにしない。
+
+## 参照
+
+- [node-forge advisory](https://github.com/advisories/GHSA-86w9-cpqp-85rv)
+- [braces advisory](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm)
+- [Peculiar X509](https://github.com/PeculiarVentures/x509)
+- [Tinyglobby](https://github.com/SuperchupuDev/tinyglobby)
+- [Brace expansion](https://github.com/isaacs/brace-expansion)

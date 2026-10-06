@@ -1317,3 +1317,7 @@ PR #136 マージ後、念のため `pnpm audit` を実行したところ dev �
 ESLint 10.11.0 を採用し、依存更新・不要な固定の解除・厳格な検査を反映しました。9月17日のローカル検証と18日の React/Vue ダッシュボード E2E 成功は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) に記録しています。Nitro の Archiver 8 対応により glob の非推奨依存は除去済みです。
 
 既存 PR の互換更新を統合し、TypeScript 7 / Unicorn のメジャー移行は互換制約により分離します。CodeRabbit が指摘したエンジン切り替え後の遅延エラー表示を修正し、React/Vue 双方に探索・停止の回帰テストを追加しました。最終ローカルゲートは成功し、単体1,678件・補助4件、E2E 130件、benchmark19件が成功しました。依存監査は全 severity 0件です。GitHub CI は統合 PR で確認します。上記の過去スナップショットは現在の CI・公開状態を示しません。
+
+### 2026-10-04: 互換依存更新の検証
+
+ESLint 10.12.0 と互換範囲内の依存更新を検証。Dependabot の失敗原因と上流制約は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) を参照。

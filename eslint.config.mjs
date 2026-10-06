@@ -38,6 +38,13 @@ export default [
       parserOptions: { tsconfigRootDir: import.meta.dirname },
     },
   },
+  {
+    files: [".pnpmfile.cjs", "scripts/**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: { module: "readonly", require: "readonly" },
+    },
+  },
   lit.configs["flat/recommended"],
   wc.configs["flat/recommended"],
   // Import-x Configuration

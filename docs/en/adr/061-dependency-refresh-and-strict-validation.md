@@ -102,3 +102,17 @@ Validate lint, type checking, the complete build, tests, Core coverage, benchmar
 - Integrate artifact download action v25 from Dependabot #258 and compatible dependency updates from #260.
 - Upgrade Wrangler to obtain undici 7.29.1 and update serialize-javascript to a patched release within its existing dependency range. Add no new overrides or audit exclusions.
 - TypeScript 7 remains outside the latest typescript-eslint / TypeDoc peer ranges. Unicorn 76 triggers numerous additional rule violations in existing CI and remains a separate migration while this update retains ES2022. Node 26 type definitions also remain deferred to match the Node 24 validation environment.
+
+### Continued dependency updates (2026-10-04)
+
+- The October 2 Dependabot failures were caused by `minimumReleaseAge` rejecting the React ESLint plugin released 36 hours earlier and the Next.js ESLint plugin released 35 hours earlier. They do not establish defects in the reported Node types, Unicorn, or TypeScript updates. No release-age exclusions are added.
+- GitHub does not allow retrying this Dependabot run. Compatible dependencies are therefore updated locally and resolution is revalidated with strict peer dependency checks.
+- TypeScript 7 remains outside typescript-eslint's `>=4.8.4 <6.1.0` peer range and TypeDoc's support through `6.0.x`. Unicorn 77 and Node 26 types require separate verification. Storybook is updated to 10.6.1 with five existing patches reapplied. Development dependency devalue is updated within its existing allowed range. The npm audit reports no patched versions for node-forge and braces; these remain unresolved. No audit exclusions or new overrides are added.
+
+- Unresolved development dependencies: [node-forge](https://github.com/advisories/GHSA-86w9-cpqp-85rv) and [braces](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm). The failing full `pnpm audit` is not reported as passing.
+
+- Final validation: `pnpm build` passed 56/56 tasks and `pnpm typecheck` passed 99/99 tasks. `pnpm lint`, `pnpm test`, frozen-lockfile installation, and doc-sync passed. CodeRabbit dependency and additional patch reviews each completed with zero findings. Production audit found no vulnerabilities; the full audit retains the two high-severity findings above. E2E, remote CI, and publication have not been performed.
+
+### 2026-10-05: Replace dependencies without patched releases
+
+Replace the consuming paths for node-forge and braces. See [ADR 062](062-development-tooling-security-backends.md) for the decision and maintenance procedure.

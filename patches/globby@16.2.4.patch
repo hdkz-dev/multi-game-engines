@@ -1,0 +1,13 @@
+diff --git a/utilities.js b/utilities.js
+index 656d4589e23c3540a61f76b9b954134a299fdad5..15c7e6eecb1c5afdfa412d0cb51aa705e6a12fab 100644
+--- a/utilities.js
++++ b/utilities.js
+@@ -4,7 +4,7 @@ import {promisify} from 'node:util';
+ import fastGlob from 'fast-glob';
+ import gitIgnore, {isPathValid} from 'ignore';
+ import isPathInside from 'is-path-inside';
+-import micromatch from 'micromatch';
++import micromatch from 'picomatch';
+ import slash from 'slash';
+ 
+ export const isNegativePattern = pattern => pattern[0] === '!';
