@@ -1,5 +1,17 @@
 # プロジェクト・バックログ (TASKS.md)
 
+## 現在の優先バックログ (2026-10-06)
+
+現在の確認結果は [PROGRESS](PROGRESS.md)、作業の前提・完了条件は [保守計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照。以下の旧フェーズ・実測値は履歴であり、現在の警告0件や本番モデル完成を意味しない。
+
+- [ ] M1: ChunkedDownloaderのCodeQL High警告68–70を根本修正。
+- [ ] M2: 通常依存11種類の互換更新と監査・E2E。
+- [ ] M3: 公開認証・トークン期限の確認。文書整合は進行中、運用確認は未完了。
+- [ ] M4–M6: TypeScript 7、Unicorn 77、Node型定義26の個別移行。
+- [ ] M7: 安全な上流対応を確認したパッチ・overrideの撤去。
+- [ ] F1–F4: 本番AIモデル、CDN、ハードウェア加速、Mobile/Hybrid。
+- [ ] Expert Mapping: 固定重み付き戦略は実装済み。局面フェーズに応じた動的マッピングは未確認。
+
 ## 🏗️ フェーズ 1: コア・フレームワークの実装 (完了)
 
 - [x] **基本型システム**: Branded Types (FEN, Move) の確立。
@@ -70,7 +82,7 @@
     - [x] `build-wasm.yml:build-mortal` — スタブ Worker を artifact 化 → SHA-384 算出
     - [x] `docs.yml` — Mortal スタブ資産のステージング追加
     - [x] CI artifact → GitHub Pages 配置 → `pnpm sri:refresh` → `__unsafeNoSRI` 解除 ✅
-- [x] **WebNN / WebGPU Generalization**: NNUE や CNN モデルのハードウェア加速レイヤーの汎用実装。
+- [x] **WebNN / WebGPU診断基盤**: HardwareAccelerator診断ユーティリティを実装。本格的な推論・探索オフロードは将来作業。
   - [x] `HardwareAccelerator` 診断ユーティリティの実装。
 - [x] **Segmented SRI (Zenith Loader)**: 100MB 超の巨大ファイルの分割ダウンロードとインクリメンタルハッシュ検証。
   - [x] `SegmentedVerifier` による分割ハッシュ検証ロジックの実装。
@@ -153,7 +165,7 @@
 - [x] **ドキュメント実態同期 (PR #208)** — README のサポート状況に Backgammon / Checkers / Poker / Bridge / Fairy-Stockfish を追加、PROGRESS.md に 2026-07-18 スナップショット (実測カバレッジ 98.45%、npm 53 パッケージ全数確認) とインシデント記録を追加。
 - [x] **Serena 設定のテンプレート追随 (PR #209)** — `.serena/project.yml` を上流の最新テンプレートへ移行 (実効設定の変更なし)。
 - [x] **陳腐化 stash の整理** — 2026-03-04 の `integration/all-updates` WIP を精査。ESLint 10.0.2 整合はすでに 10.4.x へ前進、ループバック HTTP 例外は ADR-060 としてより堅牢な形で実装済みのため破棄 (復旧用 SHA: `5ca424cc`)。
-- [ ] **NPM_TOKEN ローテーション** — 期限 2026-07-29。⏸️ 期限切れまで保留する方針 (2026-07-18 決定)。次回 publish 前に要対応。
+- [ ] **NPM_TOKENの公開前確認** — 旧期限2026-07-29は履歴。secret最終更新は2026-07-31、現在の期限・書き込み権限は未確認。次回の実publish前に確認する（M3）。
 
 ### 2026-05-30 完了: Fairy-Stockfish アダプター追加 ✅
 

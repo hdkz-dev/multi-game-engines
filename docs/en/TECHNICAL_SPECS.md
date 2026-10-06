@@ -1,5 +1,11 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## Current implementation and maintenance scope (2026-10-06)
+
+Baseline: main `9c4aff7`. CI succeeded and dependency audits report zero findings, but CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
+
+KataGo/Mortal assets have registered SRI and return HTTP 200, but are stubs. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) and [current progress](PROGRESS.md) for priorities, acceptance criteria, and verified operational state.
+
 ## 1. Core Type Definitions
 
 The `core` package provides abstract definitions independent of specific games.

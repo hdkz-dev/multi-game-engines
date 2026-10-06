@@ -68,3 +68,8 @@
 - [ADR-042: Mobile UI and Monitor Design Standard](./adr/042-mobile-ui-and-monitor-design.md) (Proposed - 2026-02-21)
 - [ADR-055: Standardization of Piece Visualization through pieceSymbols property](./adr/055-piece-symbols-standardization.md) (Accepted - 2026-03-01)
 - [ADR-058: Lit と Web Components 用の ESLint プラグインの導入](./adr/058-eslint-lit-wc-introduction.md) (Accepted - 2026-03-05)
+
+## 保守・依存管理
+
+- [ADR 061: 依存更新と厳格な検証](adr/061-dependency-refresh-and-strict-validation.md) (Accepted, 2026-09-17; current follow-up documented)
+- [ADR 062: 開発ツールの安全な暗号・glob実装](adr/062-development-tooling-security-backends.md) (Accepted, 2026-10-05; PR #265 follow-up)

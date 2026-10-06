@@ -3,6 +3,10 @@
 - Date: 2026-09-17
 - Status: Accepted (upstream constraints documented below)
 
+## Current status (2026-10-06)
+
+Unresolved findings below describe dated historical snapshots. ADR 062 removed the node-forge/braces dependency paths, and PR #265 is merged with zero dependency audit findings. Three CodeQL transport-boundary alerts and major migrations remain in the [execution plan](../implementation_plans/20261006-maintenance-and-roadmap.md).
+
 ## Context
 
 Broad overrides held dependencies back. Permissive peer rules, skipped declaration checking, and successful lint runs with warnings obscured incompatibilities.

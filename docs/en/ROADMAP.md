@@ -62,14 +62,14 @@ The UI layer uses a two-tier architecture that minimises framework coupling whil
 - [x] **Binary Variant Selection**: Auto-dispatching optimal WASM binary based on SIMD / Threads capability.
 - [ ] **Custom Distribution**: Binary supply via private CDN (Cloudflare R2 / Workers).
 - [x] **Release Automation**: Changesets pipeline with `release.yml` wired to npm publish. `@changesets/changelog-github` generates PR-attributed changelogs automatically.
-- [x] **Quality Gate Stabilisation**: `lint`, `typecheck`, `build`, `test`, `CodeQL`, and `CodeRabbit` all green.
-- [ ] **Observability**: OpenTelemetry (OTel) integration for runtime performance visibility.
+- [x] **Quality Gate Stabilisation**: Verification workflows are established. Latest main CI passes, but three High CodeQL alerts remain open. CLI CodeRabbit reviews and skipped GitHub bot reviews are distinct.
+- [x] **Observability**: OpenTelemetry (OTel) integration for runtime performance visibility.
 - [x] **Extended Adapters**:
   - **Board Games**: Backgammon (gnubg), Checkers (KingsRow), Reversi (Edax).
   - **Asian Variants**: Chinese Chess / Xiangqi, Korean Chess / Janggi.
   - **Incomplete Information**: Poker (Texas Hold'em), Contract Bridge.
 - [x] **Multi-Runtime Bridge**: `resolveRuntime()` auto-selects `NativeCommunicator` (Node.js native binary) or `WorkerCommunicator` (browser Web Worker) transparently.
-- [ ] **Multi-Engine Ensemble**: UI / Logic for simultaneous multi-engine analysis of the same position.
+- [x] **Multi-Engine Ensemble**: UI / Logic for simultaneous multi-engine analysis of the same position.
 
 ---
 
@@ -119,3 +119,9 @@ See [ADR 061](./adr/061-dependency-refresh-and-strict-validation.md) for depende
 Development tooling cryptography and glob dependencies migrate to safe implementations. See [ADR 062](./adr/062-development-tooling-security-backends.md) for the graph, scoped versions, and regression validation.
 
 2026-10-06: Address five newly reported vulnerabilities using vulnerable-range overrides for simple-git >=4.0.1 <5, @simple-git/argv-parser >=2.0.1 <3, and source-map-js >=1.2.2 <2. Update the Nuxt DevTools 3.4.2 Git factory import to its named export and verify branch/revparse/status compatibility. Remove these overrides and the patch once upstream adopts secure dependency ranges.
+
+## Remaining work and execution order (2026-10-06)
+
+Prioritize the three open High CodeQL alerts in ChunkedDownloader, eleven routine dependency updates, and release-readiness/documentation alignment. Handle TypeScript 7, Unicorn 77, and Node 26 types as separate migrations. KataGo and Mortal assets return HTTP 200 and have registered SRI values, but remain stubs; real-model integration is incomplete. The KataGo model URL secret is absent, and both stub build jobs exist. Release succeeded with no unpublished packages; it did not publish new npm versions. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) for prerequisites and acceptance criteria.
+
+- [ ] **Phase-specific expert mapping**: Fixed-weight ensemble strategy and tests exist; dynamic opening/endgame mapping remains unverified.

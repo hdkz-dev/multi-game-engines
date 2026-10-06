@@ -3,6 +3,10 @@
 - Date: 2026-10-05
 - Status: Accepted
 
+## Current validation state (2026-10-06)
+
+PRs #262 and #265 are merged. Dependency audits report zero findings; latest main CI, E2E, and deployment workflows succeeded. This does not resolve ChunkedDownloader CodeQL High alerts 68–70. See the [maintenance plan](../implementation_plans/20261006-maintenance-and-roadmap.md) for remaining work and retirement criteria.
+
 ## Context
 
 PR #262's OSV audit detected node-forge 1.4.0 and braces 3.0.3, with no patched releases. Although these are transitive development dependencies, they fail the full dependency audit. Waiting for an upstream release alone does not finish the remediation, so the consuming implementations are migrated while preserving required functionality.

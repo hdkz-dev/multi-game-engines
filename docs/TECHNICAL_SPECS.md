@@ -1,5 +1,11 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
+## 現状と保守対象 (2026-10-06)
+
+確認基準は main `9c4aff7`。全CI成功と依存監査0件を確認したが、ChunkedDownloaderのHEAD・Range・単一fetchにCodeQL High警告68–70が残る。公開APIはURLを直接fetchし、SRIはオプションであり、安全な通信境界とSRI契約の再検証は未着手。設計原則と現在の実装を区別する。
+
+KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完成を意味しない。保守の順序と完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)、最新の運用確認は [PROGRESS](PROGRESS.md) を参照。
+
 ## 1. コア型定義 (Core Types)
 
 Core パッケージは、特定のゲーム（チェス、将棋等）に依存しない抽象定義のみを提供します。

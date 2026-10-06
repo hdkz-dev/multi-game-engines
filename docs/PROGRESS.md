@@ -1,6 +1,18 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 📅 更新日: 2026年7月21日 (実装担当: Zenith Quality Engineer)
+## 現在の確認結果 (2026-10-06 15:50 JST)
+
+[English summary](en/PROGRESS.md) / [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)
+
+main `9c4aff7` はローカル・GitHubで同期済み。PR #262 / #265 は統合済み。最新mainのCI・E2E・ESLint・ベンチマーク、Pages公開、SRI更新は成功。未処理PR・Issue・実行中/待機中Actionsは0件。pnpm audit・Dependabotは0件だが、CodeQLのHigh警告68–70はChunkedDownloaderに3件残る。
+
+Releaseは成功したが、未公開パッケージがなく新規npm公開は行われていない。NPM_TOKENのsecret最終更新は2026-07-31、現在の有効期限は未確認。KataGo/MortalはHTTP 200・SRI登録済みのスタブで、本番モデルは未実装。
+
+通常依存更新11種類とメジャー移行3種類、コード解析警告、公開準備、上流対応後のパッチ撤去を [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md) で管理する。個人設定ファイル2件の変更は保守PRに含めない。
+
+以下は過去の確認履歴であり、現在の状態を表さない。
+
+## 履歴: 2026年7月21日 (実装担当: Zenith Quality Engineer)
 
 ## 📊 現在の状態スナップショット (2026年7月21日)
 

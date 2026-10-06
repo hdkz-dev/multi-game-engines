@@ -28,7 +28,7 @@
 ### 4-2. Rebase & Merge ポリシー
 
 - **フィーチャーブランチ**: 個人ブランチでは原則 `rebase` を使用し、履歴を線形に保ちます。
-- **PR マージ**: GitHub 上でのマージは `Squash and merge` を基本とし、`main` の履歴を機能単位でクリーンに保ちます。
+- **PR マージ**: 必ず merge commit (`gh pr merge --merge`) を使用し、ブランチ内の修正履歴を保持します。AGENTS.md の NO SQUASH ポリシーに従います。ブランチ保護で管理者マージが必要な場合は user の明示的な許可を得ます。
 
 ### 4-3. コンフリクト解決のガイドライン
 
@@ -37,4 +37,8 @@
   ```bash
   git config --global rerere.enabled true
   ```
-- **論理的整合性の検証**: コンフリクト解決後は、必ず `pnpm typecheck` と `pnpm test` を実行し、意味論的な破壊（Silent failure）が起きていないか検証してください。
+- **論理的整合性の検証**: コンフリクト解決後は、`pnpm lint && pnpm typecheck && pnpm build && pnpm test` を成功させ、変更に応じた監査・E2E・ドキュメント同期も確認してください。
+
+## 5. 状況と計画の管理 (2026-10-06)
+
+現在の運用結果は [PROGRESS](PROGRESS.md)、残件の優先度・前提・完了条件は [保守計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照します。過去の実測値、CI成功、依存監査、CodeQL警告、実際のnpm公開を別々に記録し、未確認事項は完了扱いにしません。
