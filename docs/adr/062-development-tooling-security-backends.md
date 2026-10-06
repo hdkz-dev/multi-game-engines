@@ -42,3 +42,5 @@ flowchart LR
 - [Peculiar X509](https://github.com/PeculiarVentures/x509)
 - [Tinyglobby](https://github.com/SuperchupuDev/tinyglobby)
 - [Brace expansion](https://github.com/isaacs/brace-expansion)
+
+2026-10-06: 新規の5件の脆弱性を修正するため simple-git >=4.0.1 <5、@simple-git/argv-parser >=2.0.1 <3、source-map-js >=1.2.2 <2 を脆弱な範囲に限定して適用する。Nuxt DevTools 3.4.2 のGitファクトリ参照を名前付きエクスポートへ更新し、branch/revparse/status の互換性を検証する。上流が安全な依存範囲へ移行した時点で override とパッチを除去する。
