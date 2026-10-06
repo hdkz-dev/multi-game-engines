@@ -42,3 +42,5 @@ Revalidate patches and the hook together during upstream updates. Remove both on
 - [Peculiar X509](https://github.com/PeculiarVentures/x509)
 - [Tinyglobby](https://github.com/SuperchupuDev/tinyglobby)
 - [Brace expansion](https://github.com/isaacs/brace-expansion)
+
+2026-10-06: Address five newly reported vulnerabilities using vulnerable-range overrides for simple-git >=4.0.1 <5, @simple-git/argv-parser >=2.0.1 <3, and source-map-js >=1.2.2 <2. Update the Nuxt DevTools 3.4.2 Git factory import to its named export and verify branch/revparse/status compatibility. Remove these overrides and the patch once upstream adopts secure dependency ranges.

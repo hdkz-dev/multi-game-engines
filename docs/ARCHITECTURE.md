@@ -262,3 +262,5 @@ flowchart LR
   Build[Nitro and Tailwind] --> Glob[Patched glob and watcher]
   Glob --> Match[Picomatch and bounded expansion]
 ```
+
+2026-10-06: 新規の5件の脆弱性を修正するため simple-git >=4.0.1 <5、@simple-git/argv-parser >=2.0.1 <3、source-map-js >=1.2.2 <2 を脆弱な範囲に限定して適用する。Nuxt DevTools 3.4.2 のGitファクトリ参照を名前付きエクスポートへ更新し、branch/revparse/status の互換性を検証する。上流が安全な依存範囲へ移行した時点で override とパッチを除去する。

@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  simple-git@<4.0.1: ">=4.0.1 <5"
+  "@simple-git/argv-parser@<2.0.1": ">=2.0.1 <3"
+  source-map-js@<1.2.2: ">=1.2.2 <2"
   eslint-plugin-tsdoc>@typescript-eslint/utils: ^8.70.0
   minimatch@>=10.0.0 <10.2.3: ">=10.2.3 <11"
   ajv@>=7.0.0-alpha.0 <8.18.0: ">=8.18.0 <9"
@@ -18,6 +21,9 @@ patchedDependencies:
   "@next/eslint-plugin-next@16.3.8":
     hash: fc955135a5b023c6216348a51696ac94cc0c7bfbd02ad3e0ffaa0a7e16d42aaf
     path: patches/@next__eslint-plugin-next@16.3.8.patch
+  "@nuxt/devtools@3.4.2":
+    hash: f5f6b99ade191fa056e35c03f247ad65922604b135187e8c55b034335bd97705
+    path: patches/@nuxt__devtools@3.4.2.patch
   "@parcel/watcher@2.5.1":
     hash: 8c314c80fc4838e2835fe51c7d982d417a99c759757524c881e517e8aedbc176
     path: patches/@parcel__watcher@2.5.1.patch
@@ -5710,16 +5716,16 @@ packages:
         integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==,
       }
 
-  "@simple-git/args-pathspec@1.0.3":
+  "@simple-git/args-pathspec@1.0.4":
     resolution:
       {
-        integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==,
+        integrity: sha512-EtMX6XjRWSastG2SdkmSQByPtJ9dx/NIjnHbpQPCYt62j4RmSx5rgLTGpw0YCjF5h191gZOmBfheOT23cRSFdw==,
       }
 
-  "@simple-git/argv-parser@1.1.1":
+  "@simple-git/argv-parser@2.0.1":
     resolution:
       {
-        integrity: sha512-Q9lBcfQ+VQCpQqGJFHe5yooOS5hGdLFFbJ5R+R5aDsnkPCahtn1hSkMcORX65J2Z5lxSkD0lQorMsncuBQxYUw==,
+        integrity: sha512-M++IaVWrN+vYalilOHfwvT2IL3wYZtVEBQpmX6DLSOJLtxbZ+SUeIDE3IiPogzhPACLajwtxfa5rp+ZX1FczzQ==,
       }
 
   "@sindresorhus/is@7.2.0":
@@ -12567,10 +12573,10 @@ packages:
       }
     engines: { node: ">=14" }
 
-  simple-git@3.36.0:
+  simple-git@4.0.2:
     resolution:
       {
-        integrity: sha512-cGQjLjK8bxJw4QuYT7gxHw3/IouVESbhahSsHrX97MzCL1gu2u7oy38W6L2ZIGECEfIBG4BabsWDPjBxJENv9Q==,
+        integrity: sha512-l0sIsv9VrPwovKELFDBOj/lhmIcbMvxBk2B+hRhsMM4/VL3gKtuZvYnBNixVo+N/0HnqQx2cBdLvxnAbygHpqA==,
       }
 
   sirv@3.0.2:
@@ -12614,10 +12620,10 @@ packages:
       }
     engines: { node: ">=20.0.0" }
 
-  source-map-js@1.2.1:
+  source-map-js@1.2.2:
     resolution:
       {
-        integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==,
+        integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==,
       }
     engines: { node: ">=0.10.0" }
 
@@ -15358,7 +15364,7 @@ snapshots:
       pkg-types: 2.3.3
       semver: 7.8.5
 
-  "@nuxt/devtools@3.4.2(db0@0.3.4)(ioredis@5.11.1)(magic-string@1.4.1)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))":
+  "@nuxt/devtools@3.4.2(patch_hash=f5f6b99ade191fa056e35c03f247ad65922604b135187e8c55b034335bd97705)(db0@0.3.4)(ioredis@5.11.1)(magic-string@1.4.1)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))":
     dependencies:
       "@nuxt/devtools-kit": 3.4.2(magic-string@1.4.1)(magicast@0.5.5)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
       "@nuxt/devtools-wizard": 3.4.2
@@ -15384,7 +15390,7 @@ snapshots:
       perfect-debounce: 2.1.0
       pkg-types: 2.3.3
       semver: 7.8.5
-      simple-git: 3.36.0
+      simple-git: 4.0.2
       sirv: 3.0.2
       structured-clone-es: 2.0.1
       tinyglobby: 0.2.17
@@ -16419,11 +16425,11 @@ snapshots:
 
   "@shikijs/vscode-textmate@10.0.2": {}
 
-  "@simple-git/args-pathspec@1.0.3": {}
+  "@simple-git/args-pathspec@1.0.4": {}
 
-  "@simple-git/argv-parser@1.1.1":
+  "@simple-git/argv-parser@2.0.1":
     dependencies:
-      "@simple-git/args-pathspec": 1.0.3
+      "@simple-git/args-pathspec": 1.0.4
 
   "@sindresorhus/is@7.2.0": {}
 
@@ -16647,7 +16653,7 @@ snapshots:
       jiti: 2.7.0
       lightningcss: 1.32.0
       magic-string: 0.30.21
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       tailwindcss: 4.3.3
 
   "@tailwindcss/oxide-android-arm64@4.3.3":
@@ -17449,7 +17455,7 @@ snapshots:
       "@vue/shared": 3.5.43
       entities: 7.0.1
       estree-walker: 2.0.2
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   "@vue/compiler-dom@3.5.43":
     dependencies:
@@ -17466,7 +17472,7 @@ snapshots:
       estree-walker: 2.0.2
       magic-string: 0.30.21
       postcss: 8.5.28
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   "@vue/compiler-ssr@3.5.43":
     dependencies:
@@ -18106,12 +18112,12 @@ snapshots:
   css-tree@2.2.1:
     dependencies:
       mdn-data: 2.0.28
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-tree@3.2.1:
     dependencies:
       mdn-data: 2.27.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   css-what@7.0.0: {}
 
@@ -19612,7 +19618,7 @@ snapshots:
     dependencies:
       "@babel/parser": 7.29.8
       "@babel/types": 7.29.8
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   make-dir@4.0.0:
     dependencies:
@@ -19911,7 +19917,7 @@ snapshots:
     dependencies:
       "@dxup/nuxt": 0.5.10(esbuild@0.28.2)(magicast@0.5.5)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))
       "@nuxt/cli": 3.37.0(@nuxt/schema@4.5.2)(cac@6.7.14)(commander@14.0.3)(magicast@0.5.5)
-      "@nuxt/devtools": 3.4.2(db0@0.3.4)(ioredis@5.11.1)(magic-string@1.4.1)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
+      "@nuxt/devtools": 3.4.2(patch_hash=f5f6b99ade191fa056e35c03f247ad65922604b135187e8c55b034335bd97705)(db0@0.3.4)(ioredis@5.11.1)(magic-string@1.4.1)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.43(typescript@6.0.3))
       "@nuxt/kit": 4.5.2(magic-string@1.4.1)(magicast@0.5.5)(rolldown@1.2.12)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.12)(rollup@4.63.3)(vite@8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
       "@nuxt/nitro-server": 4.5.2(e6cc290e7f9b3e4a917c6f64e998e208)
       "@nuxt/schema": 4.5.2
@@ -20473,13 +20479,13 @@ snapshots:
     dependencies:
       nanoid: 3.3.19
       picocolors: 1.1.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   postcss@8.5.28:
     dependencies:
       nanoid: 3.3.19
       picocolors: 1.1.1
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
 
   powershell-utils@0.1.0: {}
 
@@ -20961,12 +20967,12 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-git@3.36.0:
+  simple-git@4.0.2:
     dependencies:
       "@kwsites/file-exists": 1.1.1
       "@kwsites/promise-deferred": 1.1.1
-      "@simple-git/args-pathspec": 1.0.3
-      "@simple-git/argv-parser": 1.1.1
+      "@simple-git/args-pathspec": 1.0.4
+      "@simple-git/argv-parser": 2.0.1
       debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
@@ -20991,7 +20997,7 @@ snapshots:
 
   smob@1.6.2: {}
 
-  source-map-js@1.2.1: {}
+  source-map-js@1.2.2: {}
 
   source-map-support@0.5.21:
     dependencies:
@@ -21670,7 +21676,7 @@ snapshots:
       exsolve: 1.1.1
       magic-string: 1.4.1
       pathe: 2.0.3
-      source-map-js: 1.2.1
+      source-map-js: 1.2.2
       vite: 8.3.2(@types/node@25.9.7)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)
       vue: 3.5.43(typescript@6.0.3)
 

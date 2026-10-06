@@ -123,3 +123,5 @@ ESLint と Oxlint のアクセシビリティ検査を組み合わせ、lint の
 依存更新の2026-10-04時点の制約と Dependabot 失敗の原因は [ADR 061](./adr/061-dependency-refresh-and-strict-validation.md) を参照。
 
 開発ツールの暗号・glob 依存を安全な実装に移行する。構成図、対象バージョン、回帰検証は [ADR 062](./adr/062-development-tooling-security-backends.md) を参照。
+
+2026-10-06: 新規の5件の脆弱性を修正するため simple-git >=4.0.1 <5、@simple-git/argv-parser >=2.0.1 <3、source-map-js >=1.2.2 <2 を脆弱な範囲に限定して適用する。Nuxt DevTools 3.4.2 のGitファクトリ参照を名前付きエクスポートへ更新し、branch/revparse/status の互換性を検証する。上流が安全な依存範囲へ移行した時点で override とパッチを除去する。
