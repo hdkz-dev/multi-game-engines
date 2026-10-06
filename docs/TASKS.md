@@ -120,7 +120,7 @@
   - [x] `NativeCommunicator` (Node.js/child_process) の基盤実装。
   - [x] `IEngineConfig.binaryPath` 追加、`isNodeEnvironment()` を core main entry からエクスポート。
   - [x] UCI / USI / GTP アダプターに native path を統合。ネイティブモードテスト追加・全パス確認。
-- [x] **WebNN / WebGPU**: NNUE や CNN モデルのハードウェア加速の汎用化。
+- [x] **WebNN / WebGPU診断基盤**: 利用可否と加速方式選択の診断機能を実装。NNUE/CNNの推論・探索オフロードは未完了。
   - [x] `HardwareAccelerator` — `checkWebGPU()` / `checkWebNN()` / `getBestAcceleration()` 実装 (packages/core/src/capabilities/HardwareAccelerator.ts)
   - [x] `capabilities/index.ts` + `core/index.ts` からエクスポート済み
   - [x] ユニットテスト 4件 全通過 (`HardwareAccelerator.test.ts`)
