@@ -1,6 +1,6 @@
 # Multi-Game Engines Bridge
 
-2026年の Web 標準（OPFS, WebNN, WebGPU）をフル活用した、次世代のゲームエンジン・ブリッジライブラリ。
+OPFS・WASMを活用したゲームエンジン・ブリッジライブラリ。WebNN/WebGPUによる本格的なハードウェア加速はロードマップで管理しています。
 
 ---
 
@@ -11,7 +11,7 @@
 - **Zenith Robustness & High Coverage**: `core` パッケージのラインカバレッジは **98.45% / ブランチ 89.05%** (2026-07-18 計測) で、目標 **≥98.4%** を達成 ✅。CI は `lines ≥98.4 / branches ≥88` でしきい値固定 (PR #161)。ミドルウェア絶縁、循環参照保護、パケット分割耐性は実装済み。
 - **Universal Storage & Flow Control**: Web (OPFS) / Node.js (Local FS) の自動切替と AbortSignal 制御。
 - **AI Ensemble 開発**: Gemini, CodeRabbit, DeepSource, Snyk 等の AI ツールが相互に監査を行う自律的品質保証。
-- **Modern Security**: SRI 必須化、分割検証 (Segmented SRI)、および「Refuse by Exception」ポリシー。
+- **Modern Security**: エンジンリソースのSRI検証、分割検証 (Segmented SRI)、および「Refuse by Exception」ポリシー。直接利用可能なChunkedDownloaderの通信境界・SRI契約には未解決の保守項目があります。
 - **Telemetry & Observability**: パフォーマンス計測やエラー追跡を統一的に行うミドルウェア基盤。
 - **High Performance Storage**: OPFS を活用したバイナリの高速永続化キャッシュ。
 - **Universal & Federated UI Architecture**:
@@ -35,12 +35,12 @@
 - **Chess**: Stockfish 16 (WASM) - **Ready**
 - **Chess Variants**: Fairy-Stockfish 1.1.11 (WASM) - **Ready**
 - **Shogi**: やねうら王 7.5.0 (WASM) / Fairy-Stockfish Shogi (WASM) - **Ready**
-- **Go**: KataGo (ONNX Runtime Web) - **Ready** (stub model; set `KATAGO_ONNX_URL` for production)
+- **Go**: KataGo (ONNX Runtime Web) - **Stub integration** (実モデルの取得・変換・推論検証が本番利用の前提)
 - **Xiangqi**: Universal Chinese Chess Interface (UCCI) - **Ready**
 - **Janggi**: Universal Janggi Chess Interface (UJCI) - **Ready**
 - **Reversi**: Edax 4.4 (Board/Move Protocol) - **Ready**
 - **Gomoku**: Renju Solvers (Custom Protocol) - **Ready**
-- **Mahjong**: Mortal (MahjongJSON Protocol) - **Ready** (stub Worker; PyTorch→ONNX 移行で実モデル統合予定)
+- **Mahjong**: Mortal (MahjongJSON Protocol) - **Stub integration** (ルールベースWorker配信中、実モデル統合は未完了)
 - **Backgammon**: GNU Backgammon 1.05 (WASM) - **Ready**
 - **Checkers**: rapid-draughts (Pure TypeScript, English Draughts) - **Ready**
 - **Poker**: Texas Hold'em (JSON-RPC Protocol) - **Ready** (エンジン持ち込み式 / bring your own engine)
@@ -84,6 +84,7 @@ console.log(`Best Move: ${result.bestMove}`);
 - [セキュリティポリシー (SECURITY.md)](SECURITY.md)
 - [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
 - [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
+- [ロードマップ](docs/ROADMAP.md) | [保守・残作業の実行計画](docs/implementation_plans/20261006-maintenance-and-roadmap.md)
 
 ### English (Global)
 
@@ -91,6 +92,8 @@ console.log(`Best Move: ${result.bestMove}`);
 - [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)
 - [Security Policy](SECURITY.md)
+- [Current Progress](docs/en/PROGRESS.md) | [Roadmap](docs/en/ROADMAP.md)
+- [Maintenance Plan](docs/en/implementation_plans/20261006-maintenance-and-roadmap.md)
 
 ## 🛡️ セキュリティ / Security
 

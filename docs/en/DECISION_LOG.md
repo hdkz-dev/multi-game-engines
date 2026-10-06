@@ -68,3 +68,8 @@ This document indexes the major design decisions recorded as ADRs (Architecture 
 - [ADR-042: Mobile UI and Monitor Design Standard](../adr/042-mobile-ui-and-monitor-design.md) (Proposed - 2026-02-21)
 - [ADR-055: Standardisation of Piece Visualisation via pieceSymbols Property](../adr/055-piece-symbols-standardization.md) (Accepted - 2026-03-01)
 - [ADR-058: Introduction of ESLint Plugins for Lit and Web Components](../adr/058-eslint-lit-wc-introduction.md) (Accepted - 2026-03-05)
+
+## Maintenance and dependency management
+
+- [ADR 061: Dependency refresh and strict validation](adr/061-dependency-refresh-and-strict-validation.md) (Accepted, 2026-09-17; current follow-up documented)
+- [ADR 062: Secure development-tooling backends](adr/062-development-tooling-security-backends.md) (Accepted, 2026-10-05; PR #265 follow-up)

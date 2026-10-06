@@ -45,6 +45,10 @@ Details of the vulnerability will be kept private until a fix is completed and a
 
 全ての外部バイナリ（WASM等）およびスクリプトのロードには、SRI ハッシュ検証が必須です。改竄されたリソースの実行をブラウザレベルおよびライブラリレベルで遮断します。
 
+これは設計上の要件です。2026-10-06時点で、直接利用可能な `ChunkedDownloader` はSRIをオプションとしており、通信境界にCodeQL High警告68–70が残っています。修正は [保守計画](docs/implementation_plans/20261006-maintenance-and-roadmap.md) のM1で管理します。依存監査0件は、コード解析警告0件を意味しません。
+
+This is a design requirement. As of 2026-10-06, the directly usable `ChunkedDownloader` API makes SRI optional and has three open High CodeQL transport alerts (68–70). Remediation is tracked as M1 in the [maintenance plan](docs/en/implementation_plans/20261006-maintenance-and-roadmap.md). Zero dependency findings do not mean zero code-scanning alerts.
+
 ### 2. 「Refuse by Exception」ポリシー / Injection Prevention
 
 プロトコルレベルのコマンドインジェクションを防ぐため、不正な制御文字（\r, \n, \0 等）を含む入力はサニタイズせず即座に拒否（例外スロー）します。

@@ -51,7 +51,7 @@
   - **WebGPU Compute**: 並列探索アルゴリズムの GPU へのオフロード。
 - [x] **Swarm (Ensemble) Architecture**:
   - **アンサンブル・アダプター**: 複数エンジンによる合議システムの実装。
-  - **エキスパート・マッピング**: 各エンジンの特性（序盤・終盤等）に応じた動的な重み付け指し手選定。
+  - [ ] **エキスパート・マッピング**: 固定重み付き戦略は実装・テスト済み。序盤・終盤等に応じた動的マッピングは未確認のため残件として管理する。
 - [ ] **Mobile & Hybrid Bridge (Native Power)**:
   - **Hybrid Bridge**: 環境（Browser/Node/Desktop）応じた WASM/Native バイナリの透過的切替。
   - **Mobile Native Bridge**: Capacitor/Cordova プラグインによる、モバイル OS ネイティブ環境での最高性能エンジン実行。
@@ -62,12 +62,12 @@
 - [x] **Binary Variant Selection**: SIMD/Threads に応じた最適な WASM バイナリの自動ディスパッチ。
 - [ ] **Custom Distribution**: 自前 CDN (Cloudflare R2/Workers) によるバイナリ供給。
 - [x] **Release Automation**: Changesets 自動化 + `release.yml` 整備（npm publish パイプライン構築済み。`NPM_TOKEN` 登録で本番稼働）。
-- [x] **Quality Gate Stabilization**: PR #60 で `lint`, `typecheck`, `build`, `test`, `CodeQL`, `CodeRabbit` を全て green に収束。
+- [x] **Quality Gate Stabilization**: PR #60時点で検証ワークフローを整備。最新mainのCIは成功しているが、CodeQL High警告3件は未解決。CLI CodeRabbitレビューとGitHub botのレビュー実施有無は区別する。
 - [x] **Observability**: OpenTelemetry (OTel) 統合による実行時パフォーマンスの可視化。
 - [x] **Release Readiness (2026-02-19 レビュー指摘)**: npm 公開に向けたメタデータ整備。✅ **2026-05-08 npm publish 完了 (46パッケージ)**
   - [x] ルート LICENSE ファイル作成、全パッケージの `license` フィールド追加。
   - [x] **[BLOCKER-A]** Stockfish 全バリアント SRI 算出完了（`pnpm sri:refresh` で実 SHA-384 を `engines.json` へ反映済み）。
-  - [ ] **[BLOCKER-B]** 自社ホスト済みバイナリの SRI 確定 — やねうら王・Edax は GitHub Pages 配信済み・SHA-384 確定 ✅。**KataGo**: ONNX URL プレースホルダー・`KATAGO_ONNX_URL` シークレット未設定・HTTP 404 継続 ❌。**Mortal**: ビルドジョブ未存在・HTTP 404 継続 ❌。`__unsafeNoSRI` は本番で `SECURITY_ERROR` により自動遮断済みのため、ロジック変更不要。バイナリは MIT リポジトリとは物理分離して管理（ADR-014）。
+  - [ ] **[BLOCKER-B] 本番AIモデルへの置換** — 2026-10-06確認: KataGo/MortalはGitHub PagesでHTTP 200、SRI登録済み。KataGoのスタブONNX生成・MortalのスタブWorker配信ジョブは存在する。KataGoの実モデルURL (`KATAGO_ONNX_URL`) は未登録、Mortalの実モデル変換・推論実装は未完了。配信済みスタブと本番モデルを区別する（ADR-014）。
   - [x] 20パッケージへの README.md 追加。
   - [x] CI (`release.yml`) の Node.js バージョン不整合の修正。
   - [x] **npm publish 達成** — core@0.2.0, adapter-bridge/poker/uci/usi/gtp@1.0.0, ui-react/vue-monitor@0.2.0 ほか 46パッケージ (2026-05-08)
@@ -125,3 +125,7 @@ ESLint と Oxlint のアクセシビリティ検査を組み合わせ、lint の
 開発ツールの暗号・glob 依存を安全な実装に移行する。構成図、対象バージョン、回帰検証は [ADR 062](./adr/062-development-tooling-security-backends.md) を参照。
 
 2026-10-06: 新規の5件の脆弱性を修正するため simple-git >=4.0.1 <5、@simple-git/argv-parser >=2.0.1 <3、source-map-js >=1.2.2 <2 を脆弱な範囲に限定して適用する。Nuxt DevTools 3.4.2 のGitファクトリ参照を名前付きエクスポートへ更新し、branch/revparse/status の互換性を検証する。上流が安全な依存範囲へ移行した時点で override とパッチを除去する。
+
+## 現在の残作業と実行順序 (2026-10-06)
+
+CodeQL High 3件の通信境界修正、通常依存11種類の更新、公開準備・状況文書の整合を優先する。TypeScript 7・Unicorn 77・Node型定義26は個別移行として扱う。上流対応後のパッチ撤去と将来機能の前提・完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照。CI成功はコード解析警告0件や本番モデル完成を意味しない。
