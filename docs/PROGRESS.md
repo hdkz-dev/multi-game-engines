@@ -1,10 +1,12 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 現在の確認結果 (2026-10-06 15:50 JST)
+最新課題の根拠・影響・未検証事項は [課題台帳](ISSUES.md) を参照（2026-10-06更新）。
+
+## 現在の確認結果 (2026-10-07 11:51 JST)
 
 [English summary](en/PROGRESS.md) / [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)
 
-main `9c4aff7` はローカル・GitHubで同期済み。PR #262 / #265 は統合済み。最新mainのCI・E2E・ESLint・ベンチマーク、Pages公開、SRI更新は成功。未処理PR・Issue・実行中/待機中Actionsは0件。pnpm audit・Dependabotは0件だが、CodeQLのHigh警告68–70はChunkedDownloaderに3件残る。
+main `3febeb0` はローカル・GitHubで同期済み。PR #262 / #265 / #266 は統合済み。最新mainのCI・E2E・ESLint・ベンチマーク、Pages公開、SRI更新は成功。未処理PR・Issue・実行中/待機中Actionsは0件。Dependabotは0件だが、10月7日のpnpm auditはshell-quote（Critical）・sharp（High）の2件を検出。CodeQLのHigh警告68–70はChunkedDownloaderに3件残る。
 
 Releaseは成功したが、未公開パッケージがなく新規npm公開は行われていない。NPM_TOKENのsecret最終更新は2026-07-31、現在の有効期限は未確認。KataGo/MortalはHTTP 200・SRI登録済みのスタブで、本番モデルは未実装。
 
@@ -1333,3 +1335,9 @@ ESLint 10.11.0 を採用し、依存更新・不要な固定の解除・厳格�
 ### 2026-10-04: 互換依存更新の検証
 
 ESLint 10.12.0 と互換範囲内の依存更新を検証。Dependabot の失敗原因と上流制約は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) を参照。
+
+2026-10-06詳細整理: 通信・SRI・応答契約調査をM1a/M1b/M1cに分割し、Q1（テストany）とF5（動的Expert Mapping）を管理する。18種類の依存版一覧、15パッチ/10 overridesの撤去条件、検証マトリクスは [課題台帳](ISSUES.md) を参照。担当・期限は未割当、実装修正は未完了。
+
+## 2026-10-07の更新
+
+最新mainは `3febeb0`。新規監査のshell-quote Critical（S1）・sharp High（S2）を最優先とし、CodeQL High 3件は別に管理する。依存更新候補は18種類（通常15、メジャー3）。S1/S2はshell-quote 1.11.0・sharp 0.35.5へ修正済み（統合待ち）。Next経由とWrangler→Miniflare経由のsharpを、脆弱範囲限定の `sharp@<0.35.5: >=0.35.5 <0.36` で解決した。修正ブランチのpnpm auditは0件、lint・typecheck・build・test、Changesets status、sharpのSVG→PNG変換、Wrangler起動確認は成功。CodeQL High 3件とその他の課題は未解消。根拠・経路・安全下限・検証条件は [課題台帳](ISSUES.md) を参照。10月6日の監査0件は履歴として扱う。

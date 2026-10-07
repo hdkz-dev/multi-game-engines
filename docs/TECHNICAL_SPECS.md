@@ -1,12 +1,20 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
-## 現状と保守対象 (2026-10-06)
+最新課題の根拠・影響・未検証事項は [課題台帳](ISSUES.md) を参照（2026-10-06更新）。
 
-確認基準は main `9c4aff7`。全CI成功と依存監査0件を確認したが、ChunkedDownloaderのHEAD・Range・単一fetchにCodeQL High警告68–70が残る。公開APIはURLを直接fetchし、SRIはオプションであり、安全な通信境界とSRI契約の再検証は未着手。設計原則と現在の実装を区別する。
+## 現状と保守対象 (2026-10-07)
+
+確認基準は main `3febeb0`。最後のmain CIは成功したが、10月7日の依存監査はCritical 1件・High 1件で失敗し、ChunkedDownloaderのHEAD・Range・単一fetchにCodeQL High警告68–70が残る。公開APIはURLを直接fetchし、SRIはオプションであり、安全な通信境界とSRI契約の再検証は未着手。設計原則と現在の実装を区別する。
 
 KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完成を意味しない。保守の順序と完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)、最新の運用確認は [PROGRESS](PROGRESS.md) を参照。
 
 ## 1. コア型定義 (Core Types)
+
+### 保守対象APIの現状と検証境界
+
+`ChunkedDownloader.download(url, options)` はcoreから公開され、`options.sri` は省略可能です。現在は指定時だけ全体SRI検証を行い、キャッシュ取得・HEAD・Range・単一fetchを処理します。EngineLoaderはSRIと明示sizeが32 MiB以上の場合にこのAPIへ委譲し、timeoutは300秒、通常取得は30秒です。
+
+この記述は現状の契約であり、SRI必須原則に適合済みという保証ではありません。M1a/M1bで通信・完全性の契約を決定し、M1cで応答サイズ・中断・redirect等を再現検証します。破壊的変更・移行ガイド・changesetの要否を実装前に判断します。[検証マトリクス](ISSUES.md) を参照。
 
 Core パッケージは、特定のゲーム（チェス、将棋等）に依存しない抽象定義のみを提供します。
 
@@ -302,3 +310,7 @@ ESLint と Oxlint のアクセシビリティ検査を組み合わせ、lint の
 開発ツールの暗号・glob 依存を安全な実装に移行する。構成図、対象バージョン、回帰検証は [ADR 062](./adr/062-development-tooling-security-backends.md) を参照。
 
 2026-10-06: 新規の5件の脆弱性を修正するため simple-git >=4.0.1 <5、@simple-git/argv-parser >=2.0.1 <3、source-map-js >=1.2.2 <2 を脆弱な範囲に限定して適用する。Nuxt DevTools 3.4.2 のGitファクトリ参照を名前付きエクスポートへ更新し、branch/revparse/status の互換性を検証する。上流が安全な依存範囲へ移行した時点で override とパッチを除去する。
+
+## 2026-10-07の更新
+
+最新mainは `3febeb0`。新規監査のshell-quote Critical（S1）・sharp High（S2）を最優先とし、CodeQL High 3件は別に管理する。依存更新候補は18種類（通常15、メジャー3）。S1/S2はshell-quote 1.11.0・sharp 0.35.5へ修正済み（統合待ち）。Next経由とWrangler→Miniflare経由のsharpを、脆弱範囲限定の `sharp@<0.35.5: >=0.35.5 <0.36` で解決した。修正ブランチのpnpm auditは0件、lint・typecheck・build・test、Changesets status、sharpのSVG→PNG変換、Wrangler起動確認は成功。CodeQL High 3件とその他の課題は未解消。根拠・経路・安全下限・検証条件は [課題台帳](ISSUES.md) を参照。10月6日の監査0件は履歴として扱う。

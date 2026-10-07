@@ -1,5 +1,7 @@
 # プロジェクト・ロードマップ (2026-2027)
 
+最新課題の根拠・影響・未検証事項は [課題台帳](ISSUES.md) を参照（2026-10-06更新）。
+
 本プロジェクトは、Web標準を極限まで活用し、ブラウザ上で業界最高水準のゲーム探索性能を提供することを目指します。
 
 ---
@@ -128,4 +130,10 @@ ESLint と Oxlint のアクセシビリティ検査を組み合わせ、lint の
 
 ## 現在の残作業と実行順序 (2026-10-06)
 
-CodeQL High 3件の通信境界修正、通常依存11種類の更新、公開準備・状況文書の整合を優先する。TypeScript 7・Unicorn 77・Node型定義26は個別移行として扱う。上流対応後のパッチ撤去と将来機能の前提・完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照。CI成功はコード解析警告0件や本番モデル完成を意味しない。
+CodeQL High 3件の通信境界修正、通常依存15種類の更新、公開準備・状況文書の整合を優先する。TypeScript 7・Unicorn 77・Node型定義26は個別移行として扱う。上流対応後のパッチ撤去と将来機能の前提・完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照。CI成功はコード解析警告0件や本番モデル完成を意味しない。
+
+2026-10-06詳細整理: 通信・SRI・応答契約調査をM1a/M1b/M1cに分割し、Q1（テストany）とF5（動的Expert Mapping）を管理する。18種類の依存版一覧、15パッチ/10 overridesの撤去条件、検証マトリクスは [課題台帳](ISSUES.md) を参照。担当・期限は未割当、実装修正は未完了。
+
+## 2026-10-07の更新
+
+最新mainは `3febeb0`。新規監査のshell-quote Critical（S1）・sharp High（S2）を最優先とし、CodeQL High 3件は別に管理する。依存更新候補は18種類（通常15、メジャー3）。S1/S2はshell-quote 1.11.0・sharp 0.35.5へ修正済み（統合待ち）。Next経由とWrangler→Miniflare経由のsharpを、脆弱範囲限定の `sharp@<0.35.5: >=0.35.5 <0.36` で解決した。修正ブランチのpnpm auditは0件、lint・typecheck・build・test、Changesets status、sharpのSVG→PNG変換、Wrangler起動確認は成功。CodeQL High 3件とその他の課題は未解消。根拠・経路・安全下限・検証条件は [課題台帳](ISSUES.md) を参照。10月6日の監査0件は履歴として扱う。
