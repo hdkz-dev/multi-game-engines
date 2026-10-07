@@ -1,10 +1,14 @@
 # Architecture & Design
 
+## Transport boundary remediation (2026-10-07)
+
+PR #268 dependency fixes are merged on main `2b6b534`; audit reports zero findings and post-merge CI, E2E, Release, docs deployment and SRI refresh passed. This change implements M1a pending integration: validate URLs before cache access; use safeFetch with credentials omit and redirect error for HEAD, Range and GET. Invalid URLs, embedded credentials and remote HTTP raise SECURITY_ERROR. HEAD security refusals and aborts do not fall back. Confirm closure of CodeQL 68–70 after integration. M1b mandatory SRI, M1c response-size contracts remain incomplete. Q1 public-API tests remove any and suppression, pending integration. This change also includes Dependabot PR #267 action-download-artifact v27.
+
 See the [issue register](ISSUES.md) for evidence, impact, and investigation items (updated 2026-10-06).
 
 ## Current implementation and maintenance scope (2026-10-07)
 
-Baseline: main `3febeb0`. Last main CI succeeded, but the October 7 audit reports one Critical and one High dependency finding, and CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
+PR #268 dependency fixes are merged on main `2b6b534`; audit reports zero findings and post-merge CI, E2E, Release, docs deployment and SRI refresh passed. This change implements M1a pending integration: validate URLs before cache access; use safeFetch with credentials omit and redirect error for HEAD, Range and GET. Invalid URLs, embedded credentials and remote HTTP raise SECURITY_ERROR. HEAD security refusals and aborts do not fall back. Confirm closure of CodeQL 68–70 after integration. M1b mandatory SRI, M1c response-size contracts remain incomplete. Q1 public-API tests remove any and suppression, pending integration. This change also includes Dependabot PR #267 action-download-artifact v27.
 
 KataGo/Mortal assets have registered SRI and return HTTP 200, but are stubs. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) and [current progress](PROGRESS.md) for priorities, acceptance criteria, and verified operational state.
 
@@ -29,22 +33,22 @@ This document explains the design principles and technical architecture of `mult
 
 ### Current resource-download boundary
 
-This diagram shows existing implementation, not completed M1 remediation. Verify both direct public API use and the Loader path.
+This change implements M1a for both public API and Loader paths; M1b/M1c remain open.
 
 ```mermaid
 flowchart TD
-    A[EngineLoader.loadResource] --> B[Initial URL validation]
-    B --> C{At least 32 MiB and SRI supplied}
-    C -->|Yes| D[ChunkedDownloader]
-    C -->|No| E[SecurityAdvisor.safeFetch]
-    F[Public ChunkedDownloader API] --> D
-    D --> G[HEAD / Range / single fetch]
-    D --> H[Full integrity check only when SRI supplied]
-    G --> I[M1a Transport / M1c response investigation]
-    H --> J[M1b Integrity contract]
+    Loader[EngineLoader] --> Choice{size >= 32 MiB and SRI}
+    Choice -->|yes| Downloader[ChunkedDownloader]
+    Choice -->|no| Ordinary[SecurityAdvisor.safeFetch]
+    Direct[Public API] --> Downloader
+    Downloader --> Validate[Validate URL before cache]
+    Validate --> Cache[Storage cache]
+    Validate --> Fetch[safeFetch HEAD / Range / GET]
+    Fetch --> Policy[Omit credentials / reject redirects]
+    Fetch --> Integrity[Optional full SRI: M1b remains]
 ```
 
-Initial URL validation and redirect-destination safety are separate checks. safeFetch permits HTTPS, blob, data and loopback HTTP; applying these rules to the downloader remains a contract decision. See the [issue register](ISSUES.md).
+safeFetch permits HTTPS, blob, data and loopback HTTP. ChunkedDownloader rejects redirects and requires the secure final URL directly. See the [issue register](ISSUES.md).
 
 1.  **EngineBridge**: The orchestrator managing engine lifecycles, adapter registration, and global event monitoring.
 2.  **EngineFacade**: The unified interface users interact with directly. It hides implementation details and handles sequential task management. **Middleware Isolation** ensures that failure in a single middleware (e.g., telemetry) does not interrupt the core engine process.

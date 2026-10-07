@@ -30,6 +30,18 @@ describe("SecurityAdvisor", () => {
     });
   });
 
+  it("rejects empty integrity metadata before digest verification", async () => {
+    expect(SecurityAdvisor.isValidSRI("")).toBe(false);
+    await expect(SecurityAdvisor.verifySRI(testData, "")).resolves.toBe(false);
+  });
+
+  it("resolves relative resource URLs against browser location", () => {
+    vi.stubGlobal("location", { href: "https://example.com/app/index.html" });
+    expect(SecurityAdvisor.validateResourceUrl("../engine.wasm").href).toBe(
+      "https://example.com/engine.wasm",
+    );
+  });
+
   describe("getSafeFetchOptions", () => {
     it("should return integrity options for valid SRI", () => {
       const options = SecurityAdvisor.getSafeFetchOptions(validSha256);

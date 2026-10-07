@@ -1,5 +1,9 @@
 # Project Roadmap (2026-2027)
 
+## Transport boundary remediation (2026-10-07)
+
+PR #268 dependency fixes are merged on main `2b6b534`; audit reports zero findings and post-merge CI, E2E, Release, docs deployment and SRI refresh passed. This change implements M1a pending integration: validate URLs before cache access; use safeFetch with credentials omit and redirect error for HEAD, Range and GET. Invalid URLs, embedded credentials and remote HTTP raise SECURITY_ERROR. HEAD security refusals and aborts do not fall back. Confirm closure of CodeQL 68–70 after integration. M1b mandatory SRI, M1c response-size contracts remain incomplete. Q1 public-API tests remove any and suppression, pending integration. This change also includes Dependabot PR #267 action-download-artifact v27.
+
 See the [issue register](ISSUES.md) for evidence, impact, and investigation items (updated 2026-10-06).
 
 Leveraging 2026 Web standards to deliver industry-leading game analysis performance in the browser.

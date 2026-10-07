@@ -184,7 +184,6 @@ export class EngineLoader implements IEngineLoader {
   private validateResourceUrl(
     config: IEngineSourceConfig,
     engineId: string,
-    forceProduction?: boolean,
   ): void {
     const url = config.url;
 
@@ -221,10 +220,9 @@ export class EngineLoader implements IEngineLoader {
 
     if (config.__unsafeNoSRI) {
       const isProd =
-        forceProduction ??
-        ((typeof process !== "undefined" &&
+        (typeof process !== "undefined" &&
           process.env["NODE_ENV"] === "production") ||
-          (globalThis as Record<string, unknown>).NODE_ENV === "production");
+        (globalThis as Record<string, unknown>).NODE_ENV === "production";
       if (isProd) {
         throw new EngineError({
           code: EngineErrorCode.SECURITY_ERROR,

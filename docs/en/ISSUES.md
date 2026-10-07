@@ -1,17 +1,21 @@
 # Issue register (2026-10-07)
 
-## New October 7 audit findings and priority
+## Transport boundary remediation (2026-10-07)
 
-Main remains `3febeb0`; no open PRs or running/queued Actions. Last main CI passed, but the new pnpm audit fails with one Critical and one High finding. Previous CI success is not current audit success. GitHub Dependabot still reports zero, reflecting a data/timing difference.
+PR #268 dependency fixes are merged on main `2b6b534`; audit reports zero findings and post-merge CI, E2E, Release, docs deployment and SRI refresh passed. This change implements M1a pending integration: validate URLs before cache access; use safeFetch with credentials omit and redirect error for HEAD, Range and GET. Invalid URLs, embedded credentials and remote HTTP raise SECURITY_ERROR. HEAD security refusals and aborts do not fall back. Confirm closure of CodeQL 68–70 after integration. M1b mandatory SRI, M1c response-size contracts remain incomplete. Q1 public-API tests remove any and suppression, pending integration. This change also includes Dependabot PR #267 action-download-artifact v27.
 
-| ID  | Priority / status               | Dependency path and evidence                                                                      | Fix and acceptance                                                                                                               |
-| --- | ------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| S1  | P0 / fixed, integration pending | shell-quote 1.10.0, root→@changesets/cli→launch-editor; Critical quote command injection          | Resolve >=1.11.0, preferably through parent ranges; remove vulnerable lockfile path, verify release tooling and all gates/audits |
-| S2  | P0 / fixed, integration pending | sharp 0.35.4, React Dashboard→next→sharp and Wrangler→Miniflare→sharp; High librsvg vulnerability | Resolve >=0.35.5; validate Next build/relevant image behavior, patches/runtime if Next changes, all gates/audits                 |
+## Historical audit: October 7 11:51 JST, main 3febeb0
+
+At 11:51 JST, main was `3febeb0` with no open PRs or running/queued Actions. Last main CI passed, but the new pnpm audit fails with one Critical and one High finding. Previous CI success is not current audit success. GitHub Dependabot still reports zero, reflecting a data/timing difference.
+
+| ID  | Priority / status  | Dependency path and evidence                                                                      | Fix and acceptance                                                                                                               |
+| --- | ------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| S1  | Complete / PR #268 | shell-quote 1.10.0, root→@changesets/cli→launch-editor; Critical quote command injection          | Resolve >=1.11.0, preferably through parent ranges; remove vulnerable lockfile path, verify release tooling and all gates/audits |
+| S2  | Complete / PR #268 | sharp 0.35.4, React Dashboard→next→sharp and Wrangler→Miniflare→sharp; High librsvg vulnerability | Resolve >=0.35.5; validate Next build/relevant image behavior, patches/runtime if Next changes, all gates/audits                 |
 
 [S1 advisory](https://github.com/advisories/GHSA-pqg4-j6r4-53mv) / [S2 advisory](https://github.com/advisories/GHSA-wq5f-xc86-pv6w). These identify vulnerable dependency versions, not demonstrated exploitation in this project. Three High CodeQL findings belong to a separate analysis; track them separately.
 
-Order: **S1/S2 → M1a/M1b plus M1c/Q1 → M2 → M3a → prerequisite-ready M4–M7**. S1/S2 may share a security dependency PR, without unrelated major migrations. S1/S2 are implemented and awaiting integration: shell-quote 1.11.0 and sharp 0.35.5. Both Next and Wrangler→Miniflare paths resolve securely through the vulnerable-range-only override `sharp@<0.35.5: >=0.35.5 <0.36`. Branch pnpm audit reports zero findings; lint, typecheck, build, test, Changesets status, sharp SVG-to-PNG conversion and Wrangler startup passed. Three High CodeQL alerts and other issues remain open.
+Order: **S1/S2 → M1a/M1b plus M1c/Q1 → M2 → M3a → prerequisite-ready M4–M7**. S1/S2 may share a security dependency PR, without unrelated major migrations. S1/S2 are merged in PR #268: shell-quote 1.11.0 and sharp 0.35.5. Both Next and Wrangler→Miniflare paths resolve securely through the vulnerable-range-only override `sharp@<0.35.5: >=0.35.5 <0.36`. Branch pnpm audit reports zero findings; lint, typecheck, build, test, Changesets status, sharp SVG-to-PNG conversion and Wrangler startup passed. Three High CodeQL alerts and other issues remain open.
 
 ## Baseline and classification
 
@@ -19,19 +23,19 @@ Rechecked on 2026-10-07 at 11:51 JST against main `3febeb0`. PR #266 is merged; 
 
 Confirmed findings have code/configuration/API evidence. Investigation items are not claimed as demonstrated vulnerabilities. Deferred work needs upstream compatibility or external prerequisites. Completion requires the stated acceptance criteria, not merely successful CI.
 
-| ID  | Class / priority   | Evidence and impact                                                                    | Next action / completion criteria                                                                                         |
-| --- | ------------------ | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| M1a | Confirmed / P0     | Latest-main CodeQL High alerts 68–70; ChunkedDownloader fetches supplied URLs directly | Define HTTPS, URL credentials, local-development and redirect policy; regression tests, gates, alert resolution           |
-| M1b | Confirmed / P0     | Public download API makes SRI optional and full verification conditional               | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
-| M1c | Investigation / P1 | HEAD fallback, Range accepts 200, offsets advance by returned bytes                    | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
-| Q1  | Confirmed / P1     | EngineLoader.security.test.ts:23 uses `as any`                                         | Replace with type-safe or public-contract testing while retaining security coverage                                       |
-| M2  | Confirmed / P1     | Outdated JSON contains 18 distinct packages: fifteen routine updates, three majors     | Check release age/peers/runtime; gates, E2E, zero npm/OSV findings; explain deferrals                                     |
-| M3a | Investigation / P1 | NPM_TOKEN exists, updated July 31; current expiry/write permissions unknown            | Verify privately before actual publishing; workflow success with no packages does not prove write access                  |
-| M3b | Complete / P1      | PR #266 aligned 24 documents and bilingual plans                                       | Continue register/link maintenance; operational M3a remains incomplete                                                    |
-| M4  | Deferred / P2      | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x                    | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
-| M5  | Deferred / P2      | Unicorn 64 vs latest 77; ES2022 target                                                 | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
-| M6  | Deferred / P2      | Node types 25.9.7 vs 26.6.4; CI uses Node 24                                           | Decide runtime support before type migration; validate aligned environments                                               |
-| M7  | Deferred / P2      | Root configuration has 15 patches, 10 overrides and a readPackage hook                 | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
+| ID  | Class / priority                      | Evidence and impact                                                                                          | Next action / completion criteria                                                                                         |
+| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| M1a | Implemented, integration pending / P0 | Latest-main CodeQL High alerts 68–70; Branch implements URL validation before cache and safeFetch throughout | Define HTTPS, URL credentials, local-development and redirect policy; regression tests, gates, alert resolution           |
+| M1b | Confirmed / P0                        | Public download API makes SRI optional and full verification conditional                                     | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
+| M1c | Investigation / P1                    | HEAD fallback, Range accepts 200, offsets advance by returned bytes                                          | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
+| Q1  | Confirmed / P1                        | EngineLoader.security.test.ts:23 uses `as any`                                                               | Replace with type-safe or public-contract testing while retaining security coverage                                       |
+| M2  | Confirmed / P1                        | Outdated JSON contains 18 distinct packages: fifteen routine updates, three majors                           | Check release age/peers/runtime; gates, E2E, zero npm/OSV findings; explain deferrals                                     |
+| M3a | Investigation / P1                    | NPM_TOKEN exists, updated July 31; current expiry/write permissions unknown                                  | Verify privately before actual publishing; workflow success with no packages does not prove write access                  |
+| M3b | Complete / P1                         | PR #266 aligned 24 documents and bilingual plans                                                             | Continue register/link maintenance; operational M3a remains incomplete                                                    |
+| M4  | Deferred / P2                         | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x                                          | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
+| M5  | Deferred / P2                         | Unicorn 64 vs latest 77; ES2022 target                                                                       | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
+| M6  | Deferred / P2                         | Node types 25.9.7 vs 26.6.4; CI uses Node 24                                                                 | Decide runtime support before type migration; validate aligned environments                                               |
+| M7  | Deferred / P2                         | Root configuration has 15 patches, 10 overrides and a readPackage hook                                       | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
 
 Q1 identifies one confirmed occurrence, not a completed repository-wide any audit. M1c is a source-derived investigation list, not additional confirmed security alerts.
 
@@ -66,15 +70,15 @@ Preserve unrelated local settings. Do not remove all patches together. This inve
 
 Existing ChunkedDownloader tests cover cache, valid Range, progress, fallback, successful/mismatched SRI, HTTP errors, storage, failed HEAD and segmented verification. Additional checks below are planned, not completed verification.
 
-| Boundary              | Evidence                                                  | Additional checks / acceptance                                                                                 |
-| --------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Direct API / Loader   | Public export and EngineLoader delegation                 | Consistent policy; reject before any fetch including HEAD                                                      |
-| URLs / redirects      | safeFetch parses initial URL; downloader fetches directly | Specify loopback/Portless, credentials, HTTPS-to-HTTP redirects, relative URLs and protocols                   |
-| Integrity             | SRI/segment tests exist                                   | Missing/multiple hashes, insufficient segments, cache revalidation                                             |
-| Range                 | Valid chunks and HTTP failures tested                     | 200/206, Content-Range, empty/oversized chunks, total-length mismatch; prevent invalid copying or non-progress |
-| Cancellation / limits | Signals and Loader timeouts                               | Cancellation during HEAD/read/chunk transitions; length limits and invalid chunk sizes                         |
-| Cache / progress      | Cache failure fallback, writes and progress tested        | Corrupt cache, failed writes, completed notifications on errors, retry contract                                |
-| Errors / types        | DownloadError/EngineError and Q1 any occurrence           | Public-API rejection tests, type safety and compatible errors                                                  |
+| Boundary              | Evidence                                                    | Additional checks / acceptance                                                                                 |
+| --------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Direct API / Loader   | Public export and EngineLoader delegation                   | Consistent policy; reject before any fetch including HEAD                                                      |
+| URLs / redirects      | Validate before cache; safeFetch with omit/error throughout | Specify loopback/Portless, credentials, HTTPS-to-HTTP redirects, relative URLs and protocols                   |
+| Integrity             | SRI/segment tests exist                                     | Missing/multiple hashes, insufficient segments, cache revalidation                                             |
+| Range                 | Valid chunks and HTTP failures tested                       | 200/206, Content-Range, empty/oversized chunks, total-length mismatch; prevent invalid copying or non-progress |
+| Cancellation / limits | Signals and Loader timeouts                                 | Cancellation during HEAD/read/chunk transitions; length limits and invalid chunk sizes                         |
+| Cache / progress      | Cache failure fallback, writes and progress tested          | Corrupt cache, failed writes, completed notifications on errors, retry contract                                |
+| Errors / types        | DownloadError/EngineError and Q1 any occurrence             | Public-API rejection tests, type safety and compatible errors                                                  |
 
 Use meaningful deterministic tests. Decide whether URL/SRI contract changes need an ADR, migration guide and changeset.
 

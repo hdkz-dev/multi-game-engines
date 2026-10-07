@@ -1,10 +1,14 @@
 # アーキテクチャと設計
 
+## 通信境界の修正 (2026-10-07)
+
+main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
+
 最新課題の根拠・影響・未検証事項は [課題台帳](ISSUES.md) を参照（2026-10-06更新）。
 
 ## 現状と保守対象 (2026-10-07)
 
-確認基準は main `3febeb0`。最後のmain CIは成功したが、10月7日の依存監査はCritical 1件・High 1件で失敗し、ChunkedDownloaderのHEAD・Range・単一fetchにCodeQL High警告68–70が残る。公開APIはURLを直接fetchし、SRIはオプションであり、安全な通信境界とSRI契約の再検証は未着手。設計原則と現在の実装を区別する。
+main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
 
 KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完成を意味しない。保守の順序と完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)、最新の運用確認は [PROGRESS](PROGRESS.md) を参照。
 
@@ -29,22 +33,22 @@ KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完
 
 ### 現在のリソース取得境界と残件
 
-以下は現在の実装経路であり、M1の修正済み構成ではありません。直接API利用とLoader経由を両方検証します。
+以下は本変更の構成です。M1aを実装し、M1b/M1cは残件として管理します。
 
 ```mermaid
 flowchart TD
-    A[EngineLoader.loadResource] --> B[初期URL検証]
-    B --> C{sizeが32 MiB以上かつSRIあり}
-    C -->|はい| D[ChunkedDownloader]
-    C -->|いいえ| E[SecurityAdvisor.safeFetch]
-    F[公開ChunkedDownloader API] --> D
-    D --> G[HEAD / Range / 単一fetch]
-    D --> H[SRI指定時のみ全体検証]
-    G --> I[M1a 通信境界 / M1c 応答契約の調査]
-    H --> J[M1b SRI契約]
+    Loader[EngineLoader] --> Choice{size >= 32 MiB and SRI}
+    Choice -->|yes| Downloader[ChunkedDownloader]
+    Choice -->|no| Ordinary[SecurityAdvisor.safeFetch]
+    Direct[Public API] --> Downloader
+    Downloader --> Validate[Validate URL before cache]
+    Validate --> Cache[Storage cache]
+    Validate --> Fetch[safeFetch HEAD / Range / GET]
+    Fetch --> Policy[Omit credentials / reject redirects]
+    Fetch --> Integrity[Optional full SRI: M1b remains]
 ```
 
-URLの初期検証とredirect先の安全性は別の検証対象です。safeFetchはHTTPS・blob・dataとloopback HTTPを許可していますが、これをChunkedDownloaderの安全契約へどう適用するかは未決定です。根拠・検証項目は [課題台帳](ISSUES.md) を参照。
+safeFetchはHTTPS・blob・dataとloopback HTTPを許可します。ChunkedDownloaderはredirectを拒否し、安全な最終URLの直接指定を要求します。根拠・検証項目は [課題台帳](ISSUES.md) を参照。
 
 1. **ブリッジ (EngineBridge)**: 全てのエンジンのオーケストレーター。アダプターの登録、グローバルなイベント監視、ブリッジ全体の破棄（dispose）を担います。
 2. **ファサード (EngineFacade)**: 利用者が直接対話する統一インターフェース。内部的なアダプターの詳細を隠蔽し、ミドルウェアの適用や排他的なタスク管理を行います。**ミドルウェア絶縁 (Middleware Isolation)** により、特定のミドルウェア（テレメトリ等）が故障しても、エンジン本体の探索プロセスへの影響を完全に遮断します。

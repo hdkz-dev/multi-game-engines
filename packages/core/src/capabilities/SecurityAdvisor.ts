@@ -73,8 +73,42 @@ export class SecurityAdvisor {
     url: string,
     options?: RequestInit,
   ): Promise<Response> {
+    const resolved = SecurityAdvisor.validateResourceUrl(url);
+    return fetch(resolved.href, options);
+  }
+
+  /** Validates resource transport before network or cache access. */
+  static validateResourceUrl(url: string): URL {
+    if (
+      Array.from(url).some((character) => {
+        const code = character.charCodeAt(0);
+        return code <= 31 || code === 127;
+      })
+    ) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Control characters in resource URLs are not allowed.",
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
     // Resolve relative URLs against the current origin (browser) or reject them (non-browser).
-    const resolved = new URL(url, globalThis.location?.href);
+    let resolved: URL;
+    try {
+      resolved = new URL(url, globalThis.location?.href);
+    } catch {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Invalid resource URL.",
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
+    if (resolved.username || resolved.password) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Credentials in resource URLs are not allowed.",
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
 
     const isAllowedProtocol = SecurityAdvisor.ALLOWED_PROTOCOLS.has(
       resolved.protocol,
@@ -91,7 +125,7 @@ export class SecurityAdvisor {
       });
     }
 
-    return fetch(resolved.href, options);
+    return resolved;
   }
 
   /**

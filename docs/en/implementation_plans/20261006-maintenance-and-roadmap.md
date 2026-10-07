@@ -1,5 +1,7 @@
 # Maintenance and remaining-work plan (2026-10-06)
 
+M1a transport validation and Q1 public-API security tests are implemented pending integration. PR #268 dependency fixes are merged. Includes PR #267 action-download-artifact v27. M1b mandatory SRI and M1c response-size contracts remain open. See ADR 063 and the issue register.
+
 The [issue register](../ISSUES.md) owns detailed evidence. Split M1 into transport (M1a), SRI (M1b), and response-contract investigation (M1c); add Q1 (type-safe security tests) and F5 (expert mapping). PR #266 completed documentation alignment (M3b), while credentials/expiry checks (M3a) remain incomplete.
 
 ## Baseline and scope

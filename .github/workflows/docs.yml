@@ -97,7 +97,7 @@ jobs:
       # skipped gracefully and the Edax placeholder URL remains inactive.
       - name: Download Edax WASM artifact (if available)
         id: dl-edax
-        uses: dawidd6/action-download-artifact@v25
+        uses: dawidd6/action-download-artifact@v27
         with:
           name: edax-wasm-v4.4
           workflow: build-wasm.yml
@@ -141,7 +141,7 @@ jobs:
       # ── gnubg WASM (Phase B2: Emscripten build from build-wasm.yml) ────────
       - name: Download gnubg WASM artifact (if available)
         id: dl-gnubg
-        uses: dawidd6/action-download-artifact@v25
+        uses: dawidd6/action-download-artifact@v27
         with:
           name: gnubg-wasm-v1.05
           workflow: build-wasm.yml
@@ -186,7 +186,7 @@ jobs:
       # ── KataGo ONNX model (Phase B2) ─────────────────────────────────────
       - name: Download KataGo ONNX model (if available)
         id: dl-katago
-        uses: dawidd6/action-download-artifact@v25
+        uses: dawidd6/action-download-artifact@v27
         with:
           name: katago-onnx-v1.14
           workflow: build-wasm.yml
@@ -223,7 +223,7 @@ jobs:
       # ── Mortal stub Worker (Phase B: stub until real ONNX is ready) ─────
       - name: Download Mortal stub artifact (if available)
         id: dl-mortal
-        uses: dawidd6/action-download-artifact@v25
+        uses: dawidd6/action-download-artifact@v27
         with:
           name: mortal-stub-v1.0
           workflow: build-wasm.yml
