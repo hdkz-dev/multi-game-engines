@@ -1,4 +1,11 @@
-import { IFileStorage, ISegmentedSRI, ProgressCallback } from "../types.js";
+import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
+import { EngineError } from "../errors/EngineError.js";
+import {
+  EngineErrorCode,
+  IFileStorage,
+  ISegmentedSRI,
+  ProgressCallback,
+} from "../types.js";
 
 /** HTTP Range リクエストによるチャンクダウンロードのオプション */
 export interface ChunkedDownloadOptions {
@@ -56,6 +63,9 @@ export class ChunkedDownloader {
       signal,
       storage,
     } = options;
+
+    SecurityAdvisor.validateResourceUrl(url);
+    signal?.throwIfAborted();
 
     // ---- キャッシュ確認 ----
     if (storage && sri) {
@@ -122,7 +132,9 @@ export class ChunkedDownloader {
     signal?: AbortSignal,
   ): Promise<{ acceptsRanges: boolean; totalBytes: number | null }> {
     try {
-      const res = await fetch(url, {
+      const res = await SecurityAdvisor.safeFetch(url, {
+        credentials: "omit",
+        redirect: "error",
         method: "HEAD",
         ...(signal != null && { signal }),
       });
@@ -130,7 +142,14 @@ export class ChunkedDownloader {
       const cl = res.headers.get("content-length");
       const totalBytes = cl ? parseInt(cl, 10) : null;
       return { acceptsRanges, totalBytes };
-    } catch {
+    } catch (error: unknown) {
+      signal?.throwIfAborted();
+      if (
+        error instanceof EngineError &&
+        error.code === EngineErrorCode.SECURITY_ERROR
+      ) {
+        throw error;
+      }
       // HEAD に失敗した場合 (CORS など) はフォールバックさせる
       return { acceptsRanges: false, totalBytes: null };
     }
@@ -161,7 +180,9 @@ export class ChunkedDownloader {
       signal?.throwIfAborted();
 
       const end = Math.min(offset + chunkSize - 1, totalBytes - 1);
-      const res = await fetch(url, {
+      const res = await SecurityAdvisor.safeFetch(url, {
+        credentials: "omit",
+        redirect: "error",
         headers: { Range: `bytes=${offset}-${end}` },
         ...(signal != null && { signal }),
       });
@@ -213,7 +234,9 @@ export class ChunkedDownloader {
       resource: url,
     });
 
-    const res = await fetch(url, {
+    const res = await SecurityAdvisor.safeFetch(url, {
+      credentials: "omit",
+      redirect: "error",
       ...(signal != null && { signal }),
     });
     if (!res.ok) {

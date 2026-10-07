@@ -1,9 +1,13 @@
+import { createServer } from "node:http";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   ChunkedDownloader,
   ChunkedDownloadError,
 } from "../ChunkedDownloader.js";
-import { IFileStorage, ILoadProgress } from "../../types.js";
+import { EngineError } from "../../errors/EngineError.js";
+import { EngineErrorCode, IFileStorage, ILoadProgress } from "../../types.js";
+
+const nativeFetch = globalThis.fetch;
 
 const VALID_SHA256_SRI = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; // will be mocked
 const INVALID_SRI = "sha256-INVALID_HASH_VALUE==============================";
@@ -395,5 +399,125 @@ describe("ChunkedDownloader", () => {
     expect(result.buffer.byteLength).toBe(8);
     // 2 chunks => 2 verify calls (per-segment)
     expect(digestSpy).toHaveBeenCalledTimes(2);
+  });
+  it.each([
+    "http://example.com/engine.wasm",
+    "http://localhost.example.com/engine.wasm",
+    "ftp://example.com/engine.wasm",
+    "https://user:password@example.com/engine.wasm",
+    "not-a-url",
+  ])("rejects unsafe URL %s before cache or network access", async (url) => {
+    vi.mocked(storage.get).mockResolvedValue(makeBuffer(4));
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloader.download(url, { storage, sri: VALID_SHA256_SRI }),
+    ).rejects.toMatchObject({ code: EngineErrorCode.SECURITY_ERROR });
+    expect(storage.get).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("omits credentials and rejects redirects in every Range request", async () => {
+    const fetchMock = makeFetchMock({
+      headAcceptRanges: true,
+      contentLength: 8,
+      chunks: [makeBuffer(4), makeBuffer(4)],
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await downloader.download("http://dashboard.localhost/engine.wasm", {
+      chunkSize: 4,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(init).toMatchObject({ credentials: "omit", redirect: "error" });
+    }
+  });
+
+  it("omits credentials and rejects redirects in fallback GET", async () => {
+    const fetchMock = makeFetchMock({ singleBuffer: makeBuffer(4) });
+    vi.stubGlobal("fetch", fetchMock);
+    await downloader.download("https://example.com/engine.wasm");
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "https://example.com/engine.wasm",
+      expect.objectContaining({ credentials: "omit", redirect: "error" }),
+    );
+  });
+
+  it("does not fall back after a HEAD security refusal", async () => {
+    const error = new EngineError({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "refused",
+    });
+    const fetchMock = vi.fn().mockRejectedValue(error);
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloader.download("https://example.com/engine.wasm"),
+    ).rejects.toBe(error);
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("does not fetch when already aborted, even on a cache hit", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloader.download("https://example.com/engine.wasm", {
+        signal: controller.signal,
+        storage,
+        sri: VALID_SHA256_SRI,
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(storage.get).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not fall back after HEAD aborts", async () => {
+    const controller = new AbortController();
+    const fetchMock = vi.fn().mockImplementation(() => {
+      controller.abort();
+      throw controller.signal.reason;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloader.download("https://example.com/engine.wasm", {
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+  it("never follows an actual HTTP redirect, including HEAD fallback", async () => {
+    let targetRequests = 0;
+    const server = createServer((request, response) => {
+      if (request.url === "/target") {
+        targetRequests++;
+        response.end("unexpected");
+      } else {
+        response.writeHead(302, { Location: "/target" });
+        response.end();
+      }
+    });
+    await new Promise<void>((resolve, reject) => {
+      server.once("error", reject);
+      server.listen(0, "127.0.0.1", resolve);
+    });
+    try {
+      const address = server.address();
+      if (!address || typeof address === "string")
+        throw new Error("Missing server address");
+      vi.stubGlobal("fetch", nativeFetch);
+      await expect(
+        downloader.download(`http://127.0.0.1:${address.port}/redirect`),
+      ).rejects.toThrow();
+      expect(targetRequests).toBe(0);
+    } finally {
+      server.closeAllConnections();
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => {
+          if (error) reject(error);
+          else resolve();
+        }),
+      );
+    }
   });
 });

@@ -1,10 +1,14 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
+## 通信境界の修正 (2026-10-07)
+
+main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
+
 最新課題の根拠・影響・未検証事項は [課題台帳](ISSUES.md) を参照（2026-10-06更新）。
 
 ## 現状と保守対象 (2026-10-07)
 
-確認基準は main `3febeb0`。最後のmain CIは成功したが、10月7日の依存監査はCritical 1件・High 1件で失敗し、ChunkedDownloaderのHEAD・Range・単一fetchにCodeQL High警告68–70が残る。公開APIはURLを直接fetchし、SRIはオプションであり、安全な通信境界とSRI契約の再検証は未着手。設計原則と現在の実装を区別する。
+main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
 
 KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完成を意味しない。保守の順序と完了条件は [実行計画](implementation_plans/20261006-maintenance-and-roadmap.md)、最新の運用確認は [PROGRESS](PROGRESS.md) を参照。
 

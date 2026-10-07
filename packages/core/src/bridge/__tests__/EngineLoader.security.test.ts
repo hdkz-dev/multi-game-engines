@@ -1,102 +1,97 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { EngineLoader } from "../EngineLoader.js";
 import { EngineErrorCode } from "../../types.js";
-import { EngineError } from "../../errors/EngineError.js";
 
 describe("EngineLoader Security", () => {
-  const loader = new EngineLoader();
-
-  const callValidate = (
-    url: string,
-    sri?: string,
-    unsafe?: boolean,
-    forceProd?: boolean,
-  ) => {
-    // 物理的整合性: プライベートメソッドをテストから呼び出し
-    const config = {
-      url,
-      type: "worker-js" as const,
-      sri,
-      __unsafeNoSRI: unsafe,
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (loader as any).validateResourceUrl(
-      config,
-      "test-engine",
-      forceProd,
+  let loader: EngineLoader;
+  beforeEach(() => {
+    loader = new EngineLoader();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(new Uint8Array([1]))),
     );
-  };
+  });
+  afterEach(() => {
+    loader.revokeAll();
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
 
-  describe("validateResourceUrl", () => {
-    it("should allow https URLs with SRI", () => {
-      expect(() =>
-        callValidate("https://example.com/e.js", "sha256-abc"),
-      ).not.toThrow();
-    });
+  it.each([
+    "https://example.com/e.js",
+    "http://localhost/e.js",
+    "http://127.0.0.1/e.js",
+    "http://[::1]/e.js",
+    "http://dashboard.localhost/e.js",
+  ])(
+    "allows secure or loopback URL %s with SRI through the public API",
+    async (url) => {
+      await expect(
+        loader.loadResource("test-engine", {
+          url,
+          type: "worker-js",
+          sri: "sha256-abc",
+        }),
+      ).resolves.toMatch(/^blob:/);
+      expect(fetch).toHaveBeenCalledOnce();
+    },
+  );
 
-    it("should allow http for loopback hosts (ADR-060)", () => {
-      expect(() =>
-        callValidate("http://localhost/e.js", "sha256-abc"),
-      ).not.toThrow();
-      expect(() =>
-        callValidate("http://127.0.0.1/e.js", "sha256-abc"),
-      ).not.toThrow();
-      expect(() =>
-        callValidate("http://[::1]/e.js", "sha256-abc"),
-      ).not.toThrow();
-      expect(() =>
-        callValidate("http://dashboard.localhost/e.js", "sha256-abc"),
-      ).not.toThrow();
+  it("rejects remote HTTP before fetching", async () => {
+    await expect(
+      loader.loadResource("test-engine", {
+        url: "http://malicious.com/worker.js",
+        type: "worker-js",
+        sri: "sha256-abc",
+      }),
+    ).rejects.toMatchObject({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: expect.stringContaining("Insecure connection (HTTP)"),
     });
+    expect(fetch).not.toHaveBeenCalled();
+  });
 
-    it("should throw SECURITY_ERROR for non-localhost http", () => {
-      let thrown: unknown;
-      try {
-        callValidate("http://malicious.com/worker.js", "sha256-abc");
-      } catch (e) {
-        thrown = e;
-      }
-      expect(thrown).toBeInstanceOf(EngineError);
-      if (thrown instanceof EngineError) {
-        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(thrown.message).toContain("Insecure connection (HTTP)");
-      }
+  it("rejects empty SRI before fetching", async () => {
+    await expect(
+      loader.loadResource("test-engine", {
+        url: "https://example.com/worker.js",
+        type: "worker-js",
+        sri: "",
+      }),
+    ).rejects.toMatchObject({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: expect.stringContaining("SRI hash is required"),
     });
+    expect(fetch).not.toHaveBeenCalled();
+  });
 
-    it("should throw SECURITY_ERROR if SRI is missing and unsafe flag is false", () => {
-      let thrown: unknown;
-      try {
-        callValidate("https://app.example.com/worker.js");
-      } catch (e) {
-        thrown = e;
-      }
-      expect(thrown).toBeInstanceOf(EngineError);
-      if (thrown instanceof EngineError) {
-        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(thrown.message).toContain("SRI hash is required");
-      }
+  it("rejects the unsafe SRI flag in production through the public API", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    await expect(
+      loader.loadResource("test-engine", {
+        url: "https://example.com/worker.js",
+        type: "worker-js",
+        __unsafeNoSRI: true,
+      }),
+    ).rejects.toMatchObject({
+      code: EngineErrorCode.SECURITY_ERROR,
+      message: "SRI bypass (__unsafeNoSRI) is not allowed in production.",
     });
-
-    it("should throw SECURITY_ERROR if unsafe flag is used in production", () => {
-      let thrown: unknown;
-      try {
-        // 物理的修正: forceProd=true を渡して確実にエラーを誘発
-        callValidate(
-          "https://app.example.com/worker.js",
-          undefined,
-          true,
-          true,
-        );
-      } catch (e) {
-        thrown = e;
-      }
-      expect(thrown).toBeInstanceOf(EngineError);
-      if (thrown instanceof EngineError) {
-        expect(thrown.code).toBe(EngineErrorCode.SECURITY_ERROR);
-        expect(thrown.message).toContain(
-          "SRI bypass (__unsafeNoSRI) is not allowed in production.",
-        );
-      }
-    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("reports network failures and permits a subsequent retry", async () => {
+    vi.mocked(fetch).mockRejectedValueOnce(new TypeError("network failed"));
+    const config = {
+      url: "https://example.com/worker.js",
+      type: "worker-js" as const,
+      sri: "sha256-abc",
+    };
+    await expect(
+      loader.loadResource("test-engine", config),
+    ).rejects.toMatchObject({ code: EngineErrorCode.NETWORK_ERROR });
+    await expect(loader.loadResource("test-engine", config)).resolves.toMatch(
+      /^blob:/,
+    );
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });
