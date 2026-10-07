@@ -4,9 +4,9 @@
 
 PR #268 dependency fixes are merged on main `2b6b534`; audit reports zero findings and post-merge CI, E2E, Release, docs deployment and SRI refresh passed. This change implements M1a pending integration: validate URLs before cache access; use safeFetch with credentials omit and redirect error for HEAD, Range and GET. Invalid URLs, embedded credentials and remote HTTP raise SECURITY_ERROR. HEAD security refusals and aborts do not fall back. Confirm closure of CodeQL 68–70 after integration. M1b mandatory SRI, M1c response-size contracts remain incomplete. Q1 public-API tests remove any and suppression, pending integration. This change also includes Dependabot PR #267 action-download-artifact v27.
 
-## New October 7 audit findings and priority
+## Historical audit: October 7 11:51 JST, main 3febeb0
 
-Main remains `3febeb0`; no open PRs or running/queued Actions. Last main CI passed, but the new pnpm audit fails with one Critical and one High finding. Previous CI success is not current audit success. GitHub Dependabot still reports zero, reflecting a data/timing difference.
+At 11:51 JST, main was `3febeb0` with no open PRs or running/queued Actions. Last main CI passed, but the new pnpm audit fails with one Critical and one High finding. Previous CI success is not current audit success. GitHub Dependabot still reports zero, reflecting a data/timing difference.
 
 | ID  | Priority / status  | Dependency path and evidence                                                                      | Fix and acceptance                                                                                                               |
 | --- | ------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |

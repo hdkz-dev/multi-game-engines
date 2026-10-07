@@ -37,7 +37,9 @@ This change implements M1a for both public API and Loader paths; M1b/M1c remain 
 
 ```mermaid
 flowchart TD
-    Loader[EngineLoader] --> Downloader[ChunkedDownloader]
+    Loader[EngineLoader] --> Choice{size >= 32 MiB and SRI}
+    Choice -->|yes| Downloader[ChunkedDownloader]
+    Choice -->|no| Ordinary[SecurityAdvisor.safeFetch]
     Direct[Public API] --> Downloader
     Downloader --> Validate[Validate URL before cache]
     Validate --> Cache[Storage cache]

@@ -37,7 +37,9 @@ KataGo/MortalはSRI登録済み・HTTP 200のスタブで、本番AIモデル完
 
 ```mermaid
 flowchart TD
-    Loader[EngineLoader] --> Downloader[ChunkedDownloader]
+    Loader[EngineLoader] --> Choice{size >= 32 MiB and SRI}
+    Choice -->|yes| Downloader[ChunkedDownloader]
+    Choice -->|no| Ordinary[SecurityAdvisor.safeFetch]
     Direct[Public API] --> Downloader
     Downloader --> Validate[Validate URL before cache]
     Validate --> Cache[Storage cache]

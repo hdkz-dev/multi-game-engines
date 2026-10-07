@@ -79,6 +79,18 @@ export class SecurityAdvisor {
 
   /** Validates resource transport before network or cache access. */
   static validateResourceUrl(url: string): URL {
+    if (
+      Array.from(url).some((character) => {
+        const code = character.charCodeAt(0);
+        return code <= 31 || code === 127;
+      })
+    ) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "Control characters in resource URLs are not allowed.",
+        i18nKey: createI18nKey("engine.errors.insecureConnection"),
+      });
+    }
     // Resolve relative URLs against the current origin (browser) or reject them (non-browser).
     let resolved: URL;
     try {

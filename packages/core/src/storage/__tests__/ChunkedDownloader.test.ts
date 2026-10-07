@@ -406,6 +406,8 @@ describe("ChunkedDownloader", () => {
     "ftp://example.com/engine.wasm",
     "https://user:password@example.com/engine.wasm",
     "not-a-url",
+    "https://exam\nple.com/engine.wasm",
+    "https://example.com/engine\t.wasm",
   ])("rejects unsafe URL %s before cache or network access", async (url) => {
     vi.mocked(storage.get).mockResolvedValue(makeBuffer(4));
     const fetchMock = vi.fn();

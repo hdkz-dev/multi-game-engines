@@ -4,7 +4,7 @@
 
 main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
 
-## 10月7日の新規監査結果と優先順位
+## 履歴: 10月7日11:51 JST、main 3febeb0の監査
 
 mainは引き続き `3febeb0`。未処理PR・実行中/待機中Actionsは0件、最後のmain CIは成功。ただし新しいpnpm監査はCritical 1件・High 1件で失敗する。最新mainの過去CI成功を、現在の監査成功として扱わない。GitHub Dependabotは0件を返しており、監査の反映時点・データ差がある。
 
