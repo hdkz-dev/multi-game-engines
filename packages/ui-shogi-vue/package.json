@@ -1,6 +1,6 @@
 {
   "name": "@multi-game-engines/ui-shogi-vue",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "files": [
     "dist",
     "README.md",

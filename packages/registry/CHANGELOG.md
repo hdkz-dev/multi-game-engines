@@ -1,5 +1,13 @@
 # @multi-game-engines/registry
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [[`1139581`](https://github.com/hdkz-dev/multi-game-engines/commit/11395810a6a724688f3ead8ac8415e56aac58003)]:
+  - @multi-game-engines/core@0.2.2
+  - @multi-game-engines/i18n-engines@0.1.3
+
 ## 1.1.3
 
 ### Patch Changes

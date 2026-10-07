@@ -1,5 +1,16 @@
 # @multi-game-engines/ui-elements
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [[`1139581`](https://github.com/hdkz-dev/multi-game-engines/commit/11395810a6a724688f3ead8ac8415e56aac58003)]:
+  - @multi-game-engines/core@0.2.2
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/ui-chess-elements@0.1.6
+  - @multi-game-engines/ui-core@0.1.5
+  - @multi-game-engines/ui-shogi-elements@0.1.6
+
 ## 0.1.7
 
 ### Patch Changes
