@@ -1,12 +1,18 @@
 # プロジェクト・バックログ (TASKS.md)
 
-## 現在の優先バックログ (2026-10-06)
+根拠・影響・完了条件は [課題台帳](ISSUES.md) で管理する。
+
+## 現在の優先バックログ (2026-10-07)
 
 現在の確認結果は [PROGRESS](PROGRESS.md)、作業の前提・完了条件は [保守計画](implementation_plans/20261006-maintenance-and-roadmap.md) を参照。以下の旧フェーズ・実測値は履歴であり、現在の警告0件や本番モデル完成を意味しない。
 
+- [ ] S1: shell-quote 1.10.0のCritical監査所見を修正版1.11.0以上へ解決。
+- [ ] S2: sharp 0.35.4のHigh監査所見を修正版0.35.5以上へ解決。
 - [ ] M1: ChunkedDownloaderのCodeQL High警告68–70を根本修正。
-- [ ] M2: 通常依存11種類の互換更新と監査・E2E。
-- [ ] M3: 公開認証・トークン期限の確認。文書整合は進行中、運用確認は未完了。
+- [ ] M2: 通常依存15種類の互換更新と監査・E2E。
+- [x] M3b: PR #266で24文書の状況・方針・日英計画を整合。
+- [ ] M3a: 公開認証・トークン期限の確認。
+- [ ] Q1: EngineLoader.security.test.tsのany除去とセキュリティ検証維持。
 - [ ] M4–M6: TypeScript 7、Unicorn 77、Node型定義26の個別移行。
 - [ ] M7: 安全な上流対応を確認したパッチ・overrideの撤去。
 - [ ] F1–F4: 本番AIモデル、CDN、ハードウェア加速、Mobile/Hybrid。

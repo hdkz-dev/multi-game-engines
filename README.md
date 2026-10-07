@@ -84,6 +84,7 @@ console.log(`Best Move: ${result.bestMove}`);
 - [セキュリティポリシー (SECURITY.md)](SECURITY.md)
 - [進行状況 (TASKS.md)](docs/TASKS.md) | [PROGRESS.md](docs/PROGRESS.md)
 - [意思決定記録 (DECISION_LOG.md)](docs/DECISION_LOG.md)
+- [課題台帳](docs/ISSUES.md)
 - [ロードマップ](docs/ROADMAP.md) | [保守・残作業の実行計画](docs/implementation_plans/20261006-maintenance-and-roadmap.md)
 
 ### English (Global)
@@ -92,6 +93,7 @@ console.log(`Best Move: ${result.bestMove}`);
 - [Technical Specifications](docs/en/TECHNICAL_SPECS.md)
 - [Contributing Guide](CONTRIBUTING.md) (Bilingual)
 - [Security Policy](SECURITY.md)
+- [Issue Register](docs/en/ISSUES.md)
 - [Current Progress](docs/en/PROGRESS.md) | [Roadmap](docs/en/ROADMAP.md)
 - [Maintenance Plan](docs/en/implementation_plans/20261006-maintenance-and-roadmap.md)
 

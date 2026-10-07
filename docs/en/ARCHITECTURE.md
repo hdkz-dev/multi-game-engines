@@ -1,8 +1,10 @@
 # Architecture & Design
 
-## Current implementation and maintenance scope (2026-10-06)
+See the [issue register](ISSUES.md) for evidence, impact, and investigation items (updated 2026-10-06).
 
-Baseline: main `9c4aff7`. CI succeeded and dependency audits report zero findings, but CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
+## Current implementation and maintenance scope (2026-10-07)
+
+Baseline: main `3febeb0`. Last main CI succeeded, but the October 7 audit reports one Critical and one High dependency finding, and CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
 
 KataGo/Mortal assets have registered SRI and return HTTP 200, but are stubs. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) and [current progress](PROGRESS.md) for priorities, acceptance criteria, and verified operational state.
 
@@ -24,6 +26,25 @@ This document explains the design principles and technical architecture of `mult
     - **AbortSignal & ReadableStream**: Standardized cancellation and data streaming.
 
 ## Core Concepts
+
+### Current resource-download boundary
+
+This diagram shows existing implementation, not completed M1 remediation. Verify both direct public API use and the Loader path.
+
+```mermaid
+flowchart TD
+    A[EngineLoader.loadResource] --> B[Initial URL validation]
+    B --> C{At least 32 MiB and SRI supplied}
+    C -->|Yes| D[ChunkedDownloader]
+    C -->|No| E[SecurityAdvisor.safeFetch]
+    F[Public ChunkedDownloader API] --> D
+    D --> G[HEAD / Range / single fetch]
+    D --> H[Full integrity check only when SRI supplied]
+    G --> I[M1a Transport / M1c response investigation]
+    H --> J[M1b Integrity contract]
+```
+
+Initial URL validation and redirect-destination safety are separate checks. safeFetch permits HTTPS, blob, data and loopback HTTP; applying these rules to the downloader remains a contract decision. See the [issue register](ISSUES.md).
 
 1.  **EngineBridge**: The orchestrator managing engine lifecycles, adapter registration, and global event monitoring.
 2.  **EngineFacade**: The unified interface users interact with directly. It hides implementation details and handles sequential task management. **Middleware Isolation** ensures that failure in a single middleware (e.g., telemetry) does not interrupt the core engine process.
@@ -197,3 +218,7 @@ flowchart LR
 ```
 
 2026-10-06: Address five newly reported vulnerabilities using vulnerable-range overrides for simple-git >=4.0.1 <5, @simple-git/argv-parser >=2.0.1 <3, and source-map-js >=1.2.2 <2. Update the Nuxt DevTools 3.4.2 Git factory import to its named export and verify branch/revparse/status compatibility. Remove these overrides and the patch once upstream adopts secure dependency ranges.
+
+## 2026-10-07 update
+
+Main remains `3febeb0`. Prioritize new audit findings S1 (Critical shell-quote) and S2 (High sharp); track the three High CodeQL alerts separately. Outdated has eighteen candidates (fifteen routine, three majors). S1/S2 are implemented and awaiting integration: shell-quote 1.11.0 and sharp 0.35.5. Both Next and Wrangler→Miniflare paths resolve securely through the vulnerable-range-only override `sharp@<0.35.5: >=0.35.5 <0.36`. Branch pnpm audit reports zero findings; lint, typecheck, build, test, Changesets status, sharp SVG-to-PNG conversion and Wrangler startup passed. Three High CodeQL alerts and other issues remain open. See the [issue register](ISSUES.md) for paths, secure floors and acceptance criteria. October 6 zero-audit results are historical.

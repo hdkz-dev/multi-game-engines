@@ -1,12 +1,20 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
-## Current implementation and maintenance scope (2026-10-06)
+See the [issue register](ISSUES.md) for evidence, impact, and investigation items (updated 2026-10-06).
 
-Baseline: main `9c4aff7`. CI succeeded and dependency audits report zero findings, but CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
+## Current implementation and maintenance scope (2026-10-07)
+
+Baseline: main `3febeb0`. Last main CI succeeded, but the October 7 audit reports one Critical and one High dependency finding, and CodeQL High alerts 68–70 remain in the HEAD, Range, and single-fetch paths of ChunkedDownloader. Its public API directly fetches the supplied URL and makes SRI optional. Transport-boundary and SRI-contract remediation has not started; distinguish design requirements from implemented guarantees.
 
 KataGo/Mortal assets have registered SRI and return HTTP 200, but are stubs. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) and [current progress](PROGRESS.md) for priorities, acceptance criteria, and verified operational state.
 
 ## 1. Core Type Definitions
+
+### Maintenance API and verification boundaries
+
+`ChunkedDownloader.download(url, options)` is publicly exported; `options.sri` is optional. Full SRI verification is conditional, and the API handles cache, HEAD, Range and single-fetch paths. EngineLoader delegates when SRI and explicit size of at least 32 MiB are supplied; timeout defaults are 300 seconds for this path and 30 seconds for ordinary fetching.
+
+This describes current behavior, not compliance with mandatory-SRI policy. M1a/M1b decide transport/integrity contracts; M1c reproduces response-size, cancellation and redirect scenarios. Determine breaking-change, migration-guide and changeset requirements before implementation. See the [verification matrix](ISSUES.md).
 
 The `core` package provides abstract definitions independent of specific games.
 
@@ -217,3 +225,7 @@ See [ADR 061](./adr/061-dependency-refresh-and-strict-validation.md) for depende
 Development tooling cryptography and glob dependencies migrate to safe implementations. See [ADR 062](./adr/062-development-tooling-security-backends.md) for the graph, scoped versions, and regression validation.
 
 2026-10-06: Address five newly reported vulnerabilities using vulnerable-range overrides for simple-git >=4.0.1 <5, @simple-git/argv-parser >=2.0.1 <3, and source-map-js >=1.2.2 <2. Update the Nuxt DevTools 3.4.2 Git factory import to its named export and verify branch/revparse/status compatibility. Remove these overrides and the patch once upstream adopts secure dependency ranges.
+
+## 2026-10-07 update
+
+Main remains `3febeb0`. Prioritize new audit findings S1 (Critical shell-quote) and S2 (High sharp); track the three High CodeQL alerts separately. Outdated has eighteen candidates (fifteen routine, three majors). S1/S2 are implemented and awaiting integration: shell-quote 1.11.0 and sharp 0.35.5. Both Next and Wrangler→Miniflare paths resolve securely through the vulnerable-range-only override `sharp@<0.35.5: >=0.35.5 <0.36`. Branch pnpm audit reports zero findings; lint, typecheck, build, test, Changesets status, sharp SVG-to-PNG conversion and Wrangler startup passed. Three High CodeQL alerts and other issues remain open. See the [issue register](ISSUES.md) for paths, secure floors and acceptance criteria. October 6 zero-audit results are historical.

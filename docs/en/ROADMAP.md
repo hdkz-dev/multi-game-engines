@@ -1,5 +1,7 @@
 # Project Roadmap (2026-2027)
 
+See the [issue register](ISSUES.md) for evidence, impact, and investigation items (updated 2026-10-06).
+
 Leveraging 2026 Web standards to deliver industry-leading game analysis performance in the browser.
 
 ---
@@ -122,6 +124,12 @@ Development tooling cryptography and glob dependencies migrate to safe implement
 
 ## Remaining work and execution order (2026-10-06)
 
-Prioritize the three open High CodeQL alerts in ChunkedDownloader, eleven routine dependency updates, and release-readiness/documentation alignment. Handle TypeScript 7, Unicorn 77, and Node 26 types as separate migrations. KataGo and Mortal assets return HTTP 200 and have registered SRI values, but remain stubs; real-model integration is incomplete. The KataGo model URL secret is absent, and both stub build jobs exist. Release succeeded with no unpublished packages; it did not publish new npm versions. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) for prerequisites and acceptance criteria.
+Prioritize the three open High CodeQL alerts in ChunkedDownloader, fifteen routine dependency updates, and release-readiness/documentation alignment. Handle TypeScript 7, Unicorn 77, and Node 26 types as separate migrations. KataGo and Mortal assets return HTTP 200 and have registered SRI values, but remain stubs; real-model integration is incomplete. The KataGo model URL secret is absent, and both stub build jobs exist. Release succeeded with no unpublished packages; it did not publish new npm versions. See the [execution plan](implementation_plans/20261006-maintenance-and-roadmap.md) for prerequisites and acceptance criteria.
 
 - [ ] **Phase-specific expert mapping**: Fixed-weight ensemble strategy and tests exist; dynamic opening/endgame mapping remains unverified.
+
+2026-10-06 detailed follow-up: M1 is split into transport, SRI and response-contract investigation; Q1 tracks the test any occurrence and F5 dynamic expert mapping. The [issue register](ISSUES.md) contains eighteen dependency candidates, retirement criteria for fifteen patches/ten overrides, and verification matrices. Owners/dates are unassigned; implementation remains incomplete.
+
+## 2026-10-07 update
+
+Main remains `3febeb0`. Prioritize new audit findings S1 (Critical shell-quote) and S2 (High sharp); track the three High CodeQL alerts separately. Outdated has eighteen candidates (fifteen routine, three majors). S1/S2 are implemented and awaiting integration: shell-quote 1.11.0 and sharp 0.35.5. Both Next and Wrangler→Miniflare paths resolve securely through the vulnerable-range-only override `sharp@<0.35.5: >=0.35.5 <0.36`. Branch pnpm audit reports zero findings; lint, typecheck, build, test, Changesets status, sharp SVG-to-PNG conversion and Wrangler startup passed. Three High CodeQL alerts and other issues remain open. See the [issue register](ISSUES.md) for paths, secure floors and acceptance criteria. October 6 zero-audit results are historical.
