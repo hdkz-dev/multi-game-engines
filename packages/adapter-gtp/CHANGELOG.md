@@ -1,5 +1,15 @@
 # @multi-game-engines/adapter-gtp
 
+## 1.0.6
+
+### Patch Changes
+
+- Updated dependencies [[`1139581`](https://github.com/hdkz-dev/multi-game-engines/commit/11395810a6a724688f3ead8ac8415e56aac58003)]:
+  - @multi-game-engines/core@0.2.2
+  - @multi-game-engines/domain-go@0.1.5
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/registry@1.1.4
+
 ## 1.0.5
 
 ### Patch Changes

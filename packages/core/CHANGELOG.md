@@ -1,5 +1,11 @@
 # @multi-game-engines/core
 
+## 0.2.2
+
+### Patch Changes
+
+- [#269](https://github.com/hdkz-dev/multi-game-engines/pull/269) [`1139581`](https://github.com/hdkz-dev/multi-game-engines/commit/11395810a6a724688f3ead8ac8415e56aac58003) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Reject insecure or credential-bearing chunked download URLs before cache access. Use safe transport for HEAD, Range and GET, omit credentials and reject redirects; preserve abort and security refusals during HEAD fallback. Redirecting resource URLs must be replaced with their secure final URLs.
+
 ## 0.2.1
 
 ### Patch Changes
