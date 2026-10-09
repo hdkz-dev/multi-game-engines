@@ -1,5 +1,9 @@
 # 課題台帳 (2026-10-07)
 
+## 2026-10-09再開時の状況
+
+PR #269でM1a（通信境界）とQ1（公開APIテストの型安全化）は統合済み。mainのCodeQL警告・Dependabot警告は0件。PR #270は2026-10-09に統合済み（7391dbb）、core 0.2.2を含む45パッケージのnpm公開結果はReleaseで確認中。PR #272はUnicorn 77の設定互換性で失敗したため、ADR 061に従いUnicorn 64・Node 25型を維持し、minor/patch更新を検証する。Node型の解決版は25.9.9へ更新。メジャー更新はDependabotの通常グループから分離して個別に審査し、無視設定は追加しない。M1b（SRI必須化とキャッシュ完全性）・M1c（応答サイズ契約）は残件。
+
 ## 通信境界の修正 (2026-10-07)
 
 main `2b6b534`でPR #268の依存修正は統合済み。監査0件、統合後CI・E2E・Release・文書公開・SRI更新は成功。今回M1aの通信境界を修正（統合待ち）：キャッシュ前にURLを検証し、HEAD・Range・GETはsafeFetch、credentials omit、redirect errorを使う。URL内資格情報・不正URL・外部HTTPをSECURITY_ERRORで拒否する。HEADのセキュリティ拒否・中断はfallbackしない。CodeQL 68–70の閉鎖は統合後に確認する。M1bのSRI必須化、M1cの応答サイズ契約、Q1は公開API経由のテストへ移行し、anyと抑制を除去済み（統合待ち）。Dependabot PR #267のaction-download-artifact v27更新も本変更に含める。
