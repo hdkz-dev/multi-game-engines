@@ -46,7 +46,7 @@
     "@playwright/experimental-ct-vue": "^1.62.1",
     "@storybook/vue3": "^10.6.1",
     "@storybook/vue3-vite": "^10.6.1",
-    "@types/node": "^25.9.7",
+    "@types/node": "^26.6.4",
     "@vitejs/plugin-vue": "^6.0.9",
     "@vue/compiler-dom": "^3.5.43",
     "@vue/test-utils": "^2.5.1",
