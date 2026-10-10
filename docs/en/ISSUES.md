@@ -1,4 +1,4 @@
-# Issue register (2026-10-07)
+# Issue register (2026-10-09)
 
 ## Resumption status (2026-10-09)
 
@@ -23,7 +23,7 @@ Order: **S1/S2 → M1a/M1b plus M1c/Q1 → M2 → M3a → prerequisite-ready M4�
 
 ## Baseline and classification
 
-Rechecked on 2026-10-07 at 11:51 JST against main `3febeb0`. PR #266 is merged; post-merge validation, Release, Pages, and SRI workflows succeeded. This change also implements S1/S2 dependency fixes. M1 onward and credential rotation remain incomplete.
+Rechecked on 2026-10-09 against main `7391dbb` and the PR #272 fix branch. S1/S2, M1a and Q1 are merged; actual publication and npm verification of all 45 versions complete M3a. M1b/M1c and dependency candidates requiring compatibility investigation remain open. The October 7 records above are retained as history.
 
 Confirmed findings have code/configuration/API evidence. Investigation items are not claimed as demonstrated vulnerabilities. Deferred work needs upstream compatibility or external prerequisites. Completion requires the stated acceptance criteria, not merely successful CI.
 
