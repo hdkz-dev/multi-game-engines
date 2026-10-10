@@ -1,5 +1,11 @@
 # @multi-game-engines/ui-react-monitor
 
+## 0.2.4
+
+### Patch Changes
+
+- [#272](https://github.com/hdkz-dev/multi-game-engines/pull/272) [`c8c4daf`](https://github.com/hdkz-dev/multi-game-engines/commit/c8c4daf7af42d1d6a9df3865d42e6dce8eb77c1b) Thanks [@dependabot](https://github.com/apps/dependabot)! - Refresh compatible Radix scroll-area, separator and slot dependencies while preserving the public monitor API.
+
 ## 0.2.3
 
 ### Patch Changes
