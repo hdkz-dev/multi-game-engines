@@ -2,7 +2,7 @@
 
 ## Resumption status (2026-10-09)
 
-M1a transport validation and Q1 public-API type-safe tests are merged in PR #269; main has zero open CodeQL and Dependabot alerts. PR #270 merged on 2026-10-09 (7391dbb); Release publication of 45 packages including core 0.2.2 is being verified. PR #272 failed on Unicorn 77 configuration compatibility. Preserve Unicorn 64 and Node 25 types per ADR 061 while validating minor/patch updates; Node types resolve to 25.9.9. Separate major updates from the routine Dependabot group for individual review without adding ignore rules. M1b mandatory SRI/cache integrity and M1c response-size contracts remain open.
+M1a transport validation and Q1 public-API type-safe tests are merged in PR #269; main has zero open CodeQL and Dependabot alerts. PR #270 merged on 2026-10-09 (7391dbb); All 45 target npm versions including core 0.2.2 are verified published with distribution integrity; post-merge CI, E2E, docs, SRI and Release passed. PR #272 failed on Unicorn 77 configuration compatibility. Preserve Unicorn 64 and Node 25 types per ADR 061 while validating minor/patch updates; Node types resolve to 25.9.9. Separate major updates from the routine Dependabot group for individual review without adding ignore rules. M1b mandatory SRI/cache integrity and M1c response-size contracts remain open.
 
 ## Transport boundary remediation (2026-10-07)
 
@@ -27,19 +27,19 @@ Rechecked on 2026-10-07 at 11:51 JST against main `3febeb0`. PR #266 is merged; 
 
 Confirmed findings have code/configuration/API evidence. Investigation items are not claimed as demonstrated vulnerabilities. Deferred work needs upstream compatibility or external prerequisites. Completion requires the stated acceptance criteria, not merely successful CI.
 
-| ID  | Class / priority                      | Evidence and impact                                                                                          | Next action / completion criteria                                                                                         |
-| --- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| M1a | Implemented, integration pending / P0 | Latest-main CodeQL High alerts 68–70; Branch implements URL validation before cache and safeFetch throughout | Define HTTPS, URL credentials, local-development and redirect policy; regression tests, gates, alert resolution           |
-| M1b | Confirmed / P0                        | Public download API makes SRI optional and full verification conditional                                     | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
-| M1c | Investigation / P1                    | HEAD fallback, Range accepts 200, offsets advance by returned bytes                                          | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
-| Q1  | Confirmed / P1                        | EngineLoader.security.test.ts:23 uses `as any`                                                               | Replace with type-safe or public-contract testing while retaining security coverage                                       |
-| M2  | Confirmed / P1                        | Outdated JSON contains 18 distinct packages: fifteen routine updates, three majors                           | Check release age/peers/runtime; gates, E2E, zero npm/OSV findings; explain deferrals                                     |
-| M3a | Investigation / P1                    | NPM_TOKEN exists, updated July 31; current expiry/write permissions unknown                                  | Verify privately before actual publishing; workflow success with no packages does not prove write access                  |
-| M3b | Complete / P1                         | PR #266 aligned 24 documents and bilingual plans                                                             | Continue register/link maintenance; operational M3a remains incomplete                                                    |
-| M4  | Deferred / P2                         | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x                                          | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
-| M5  | Deferred / P2                         | Unicorn 64 vs latest 77; ES2022 target                                                                       | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
-| M6  | Deferred / P2                         | Node types 25.9.7 vs 26.6.4; CI uses Node 24                                                                 | Decide runtime support before type migration; validate aligned environments                                               |
-| M7  | Deferred / P2                         | Root configuration has 15 patches, 10 overrides and a readPackage hook                                       | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
+| ID  | Class / priority   | Evidence and impact                                                                | Next action / completion criteria                                                                                         |
+| --- | ------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| M1a | Complete / PR #269 | Zero main CodeQL alerts; pre-cache URL validation and safe transport               | Maintain regressions                                                                                                      | Post-merge CI passed                   |
+| M1b | Confirmed / P0     | Public download API makes SRI optional and full verification conditional           | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
+| M1c | Investigation / P1 | HEAD fallback, Range accepts 200, offsets advance by returned bytes                | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
+| Q1  | Complete / PR #269 | Public loadResource tests remove any and suppression                               | Maintain regressions                                                                                                      | Types and rejection regressions passed |
+| M2  | Confirmed / P1     | Outdated JSON contains 18 distinct packages: fifteen routine updates, three majors | Check release age/peers/runtime; gates, E2E, zero npm/OSV findings; explain deferrals                                     |
+| M3a | Investigation / P1 | NPM_TOKEN exists, updated July 31; current expiry/write permissions unknown        | Verify privately before actual publishing; workflow success with no packages does not prove write access                  |
+| M3b | Complete / P1      | PR #266 aligned 24 documents and bilingual plans                                   | Continue register/link maintenance; operational M3a remains incomplete                                                    |
+| M4  | Deferred / P2      | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x                | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
+| M5  | Deferred / P2      | Unicorn 64 vs latest 77; ES2022 target                                             | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
+| M6  | Deferred / P2      | Node types 25.9.7 vs 26.6.4; CI uses Node 24                                       | Decide runtime support before type migration; validate aligned environments                                               |
+| M7  | Deferred / P2      | Root configuration has 15 patches, 10 overrides and a readPackage hook             | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
 
 Q1 identifies one confirmed occurrence, not a completed repository-wide any audit. M1c is a source-derived investigation list, not additional confirmed security alerts.
 
@@ -116,27 +116,20 @@ M3b alignment was completed in PR #266; this register adds detail. M3a must dist
 
 Owners and dates are unassigned. Assign after contract decisions, credential checks and external prerequisites. Plan creation is not implementation completion; CI success is not production-model readiness.
 
-## M2 / M4–M6 version inventory
+## M2 / M4–M6 remaining candidates (2026-10-09, revised PR #272)
 
-Re-fetched on 2026-10-07: eighteen packages (fifteen routine updates, three major migrations). wanted is a resolution result, not adoption approval. Next/Next ESLint and Nuxt updates require validation of exact-version patches and hooks.
+Eleven candidates: eight routine updates and three majors. This is a remaining-candidate list, not adopted versions. Next patches/hooks, Playwright browsers and other compatibility requirements need separate verification.
 
-| Package                     | current      | wanted       | latest       | Dependents | Issue |
-| --------------------------- | ------------ | ------------ | ------------ | ---------- | ----- |
-| @eslint-react/eslint-plugin | 5.24.0       | 5.24.0       | 5.24.8       | 1          | M2    |
-| @radix-ui/react-separator   | 1.1.15       | 1.1.15       | 1.1.16       | 1          | M2    |
-| @typescript-eslint/parser   | 8.71.0       | 8.71.0       | 8.71.1       | 1          | M2    |
-| @vitejs/plugin-react        | 6.1.1        | 6.1.1        | 6.1.2        | 4          | M2    |
-| postcss                     | 8.5.28       | 8.5.28       | 8.5.29       | 1          | M2    |
-| typescript-eslint           | 8.71.0       | 8.71.0       | 8.71.1       | 2          | M2    |
-| vite                        | 8.3.2        | 8.3.2        | 8.3.3        | 9          | M2    |
-| @cloudflare/workers-types   | 5.20261004.1 | 5.20261004.1 | 5.20261007.1 | 1          | M2    |
-| @next/eslint-plugin-next    | 16.3.8       | 16.3.8       | 16.4.0       | 1          | M2    |
-| @radix-ui/react-scroll-area | 1.2.18       | 1.2.18       | 1.3.0        | 1          | M2    |
-| @radix-ui/react-slot        | 1.3.3        | 1.3.3        | 1.4.0        | 1          | M2    |
-| next                        | 16.3.8       | 16.3.8       | 16.4.0       | 1          | M2    |
-| nuxt                        | 4.5.2        | 4.5.2        | 4.6.0        | 1          | M2    |
-| oxlint                      | 1.86.0       | 1.86.0       | 1.87.0       | 1          | M2    |
-| wrangler                    | 4.147.0      | 4.147.0      | 4.148.0      | 1          | M2    |
-| @types/node                 | 25.9.7       | 25.9.7       | 26.6.4       | 14         | M6    |
-| eslint-plugin-unicorn       | 64.0.0       | 64.0.0       | 77.0.0       | 1          | M5    |
-| typescript                  | 6.0.3        | 6.0.3        | 7.0.2        | 57         | M4    |
+| Package                  | current | wanted  | latest  |
+| ------------------------ | ------- | ------- | ------- |
+| happy-dom                | 20.14.5 | 20.14.5 | 20.14.6 |
+| vite                     | 8.3.2   | 8.3.2   | 8.3.4   |
+| @lucide/vue              | 1.52.0  | 1.52.0  | 1.54.0  |
+| @next/eslint-plugin-next | 16.3.8  | 16.3.8  | 16.4.0  |
+| @playwright/test         | 1.63.0  | 1.63.0  | 1.64.0  |
+| lucide-react             | 1.52.0  | 1.52.0  | 1.54.0  |
+| next                     | 16.3.8  | 16.3.8  | 16.4.0  |
+| wrangler                 | 4.147.0 | 4.147.0 | 4.149.0 |
+| @types/node              | 25.9.9  | 25.9.9  | 26.6.4  |
+| eslint-plugin-unicorn    | 64.0.0  | 64.0.0  | 77.0.0  |
+| typescript               | 6.0.3   | 6.0.3   | 7.0.2   |
