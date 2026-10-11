@@ -1,5 +1,9 @@
 # プロジェクト・ロードマップ (2026-2027)
 
+## 2026-10-11依存最新化
+
+2026-10-11、最新main `8f91525`を基点に使用中の直接依存を再調査し、17種類を最新互換版へ更新。Next 16.4.0のglob修正パッチを移植し、Node型26.6.5はNode 24で検証する。TypeScript 7はtypescript-eslint/TypeDocのpeer範囲外、Unicorn 77は試行で公開boolean名・クラス構造に波及する新規則を確認したため別移行として残す。新たな固定・ignore・規則抑制は追加しない。詳細は [依存最新化記録](implementation_plans/20261011-dependency-refresh.md) を参照。PR #273の監視UI2件はnpm公開・integrity照合まで完了済み。M1b/M1cは別の残課題。
+
 ## 2026-10-09再開時の状況
 
 PR #269でM1a（通信境界）とQ1（公開APIテストの型安全化）は統合済み。mainのCodeQL警告・Dependabot警告は0件。PR #270は2026-10-09に統合済み（7391dbb）、core 0.2.2を含む45パッケージのnpm公開を全件確認。公開後CI・E2E・文書公開・SRI更新・Releaseもすべて成功。PR #272はUnicorn 77の設定互換性で失敗したため、ADR 061に従いUnicorn 64・Node 25型を維持し、minor/patch更新を検証する。Node型の解決版は25.9.9へ更新。メジャー更新はDependabotの通常グループから分離して個別に審査し、無視設定は追加しない。M1b（SRI必須化とキャッシュ完全性）・M1c（応答サイズ契約）は残件。
