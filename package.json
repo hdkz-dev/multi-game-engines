@@ -84,18 +84,18 @@
       "storybook@10.6.1": "patches/storybook@10.6.1.patch",
       "@storybook/web-components@10.6.1": "patches/@storybook__web-components@10.6.1.patch",
       "listhen@1.10.1": "patches/listhen@1.10.1.patch",
-      "@next/eslint-plugin-next@16.3.8": "patches/@next__eslint-plugin-next@16.3.8.patch",
       "fast-glob@3.3.3": "patches/fast-glob@3.3.3.patch",
       "globby@16.2.4": "patches/globby@16.2.4.patch",
       "@parcel/watcher@2.5.1": "patches/@parcel__watcher@2.5.1.patch",
-      "@nuxt/devtools@3.4.2": "patches/@nuxt__devtools@3.4.2.patch"
+      "@nuxt/devtools@3.4.2": "patches/@nuxt__devtools@3.4.2.patch",
+      "@next/eslint-plugin-next@16.4.0": "patches/@next__eslint-plugin-next@16.4.0.patch"
     }
   },
   "devDependencies": {
     "@changesets/changelog-github": "^1.0.1",
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.9.7",
+    "@types/node": "^26.6.5",
     "@types/pug": "^2.0.10",
     "@typescript-eslint/parser": "^8.71.1",
     "@vitest/eslint-plugin": "^1.6.27",
@@ -113,7 +113,7 @@
     "lint-staged": "^17.6.0",
     "oxlint": "^1.87.0",
     "portless": "^0.15.7",
-    "prettier": "^3.9.9",
+    "prettier": "^3.9.10",
     "turbo": "^2.11.7",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
