@@ -1,5 +1,12 @@
 # @multi-game-engines/ui-vue
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`1e1e530`](https://github.com/hdkz-dev/multi-game-engines/commit/1e1e5301fc6f2b6492b1cd61dc75fc55641c9ab5)]:
+  - @multi-game-engines/ui-vue-monitor@0.2.5
+
 ## 0.1.8
 
 ### Patch Changes

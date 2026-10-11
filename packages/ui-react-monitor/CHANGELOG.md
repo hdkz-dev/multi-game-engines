@@ -1,5 +1,11 @@
 # @multi-game-engines/ui-react-monitor
 
+## 0.2.5
+
+### Patch Changes
+
+- [#274](https://github.com/hdkz-dev/multi-game-engines/pull/274) [`1e1e530`](https://github.com/hdkz-dev/multi-game-engines/commit/1e1e5301fc6f2b6492b1cd61dc75fc55641c9ab5) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Update monitor icon dependencies to Lucide 1.55.0 while preserving the public monitor API.
+
 ## 0.2.4
 
 ### Patch Changes
