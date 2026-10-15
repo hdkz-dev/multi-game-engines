@@ -1,5 +1,11 @@
 # Issue register (2026-10-09)
 
+## Current audit and next maintenance update (2026-10-15)
+
+Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.
+
+[2026-10-15 maintenance record](implementation_plans/20261015-status-and-dependency-maintenance.md)
+
 ## Dependency refresh (2026-10-11)
 
 On 2026-10-11, rechecked used direct dependencies from latest main `8f91525` and updated 17 packages to current compatible releases. Ported the Next 16.4.0 glob patch; Node types 26.6.5 are verified on Node 24. TypeScript 7 is outside typescript-eslint/TypeDoc peer support. The Unicorn 77 trial exposed new rules affecting public boolean names and class structure, so its migration remains separate. No new pins, ignore rules or rule suppressions are added. See the [dependency refresh record](implementation_plans/20261011-dependency-refresh.md). Both PR #273 monitor releases have been verified in npm with integrity metadata. M1b/M1c remain separate open work.
@@ -37,12 +43,12 @@ Confirmed findings have code/configuration/API evidence. Investigation items are
 | M1b | Confirmed / P0     | Public download API makes SRI optional and full verification conditional    | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
 | M1c | Investigation / P1 | HEAD fallback, Range accepts 200, offsets advance by returned bytes         | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
 | Q1  | Complete / PR #269 | Public loadResource tests remove any and suppression                        | Maintain regressions; types and rejection regressions passed                                                              |
-| M2  | Validating / P1    | 17 packages updated to current compatible releases                          | Gates, E2E and audits; only M4/M5 remain                                                                                  |
+| M2  | Ongoing / P1       | PR #274 adopted, #275 published; validate six updates in #277               | Remaining candidates are recorded in the October 15 snapshot                                                              |
 | M3a | Complete / P1      | PR #270 published all 45 versions; npm versions and dist.integrity verified | Repeat secret-safe authentication checks before future releases; current expiry remains private                           |
 | M3b | Complete / P1      | PR #266 aligned 24 documents and bilingual plans                            | Continue register/link maintenance; PR #270 publication completes M3a                                                     |
 | M4  | Deferred / P2      | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x         | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
 | M5  | Deferred / P2      | Unicorn 64 vs latest 77; ES2022 target                                      | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
-| M6  | Validating / P2    | Node types 26.6.5, Node 24 runtime                                          | No new Node APIs; types, declarations and Node 24 regressions                                                             |
+| M6  | Complete / PR #274 | Node types 26.6.5 passed Node 24 types, declarations and CI                 | Check Node 24 support for future APIs                                                                                     |
 | M7  | Deferred / P2      | Root configuration has 15 patches, 10 overrides and a readPackage hook      | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
 
 Q1 identifies one confirmed occurrence, not a completed repository-wide any audit. M1c is a source-derived investigation list, not additional confirmed security alerts.

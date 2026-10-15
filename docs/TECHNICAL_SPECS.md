@@ -1,5 +1,11 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
+## 最新確認と次の保守更新 (2026-10-15)
+
+main `56d8932`とリモートmainは一致。PR #274の17種類の更新とPR #275の4パッケージ公開は完了し、npmの対象版・integrityを再確認した。mainの未解決CodeQL・Dependabot警告は0件。新規PRは#276（Unicorn、CI失敗）、#277（通常依存更新）、#278（Happy DOM 21、元CI成功）。#277にHappy DOM 21とZod 4.6.7をまとめ、6種類を検証する。#278は#277統合確認後に重複整理する。TypeScript 7・Unicorn 78・tsup 9の移行と他の最新候補は別途評価する。M1b/M1cは未完了。
+
+[2026-10-15 maintenance record](implementation_plans/20261015-status-and-dependency-maintenance.md)
+
 ## 2026-10-11依存最新化
 
 2026-10-11、最新main `8f91525`を基点に使用中の直接依存を再調査し、17種類を最新互換版へ更新。Next 16.4.0のglob修正パッチを移植し、Node型26.6.5はNode 24で検証する。TypeScript 7はtypescript-eslint/TypeDocのpeer範囲外、Unicorn 77は試行で公開boolean名・クラス構造に波及する新規則を確認したため別移行として残す。新たな固定・ignore・規則抑制は追加しない。詳細は [依存最新化記録](implementation_plans/20261011-dependency-refresh.md) を参照。PR #273の監視UI2件はnpm公開・integrity照合まで完了済み。M1b/M1cは別の残課題。

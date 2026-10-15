@@ -1,5 +1,11 @@
 # Architecture & Design
 
+## Current audit and next maintenance update (2026-10-15)
+
+Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.
+
+[2026-10-15 maintenance record](implementation_plans/20261015-status-and-dependency-maintenance.md)
+
 ## Dependency refresh (2026-10-11)
 
 On 2026-10-11, rechecked used direct dependencies from latest main `8f91525` and updated 17 packages to current compatible releases. Ported the Next 16.4.0 glob patch; Node types 26.6.5 are verified on Node 24. TypeScript 7 is outside typescript-eslint/TypeDoc peer support. The Unicorn 77 trial exposed new rules affecting public boolean names and class structure, so its migration remains separate. No new pins, ignore rules or rule suppressions are added. See the [dependency refresh record](implementation_plans/20261011-dependency-refresh.md). Both PR #273 monitor releases have been verified in npm with integrity metadata. M1b/M1c remain separate open work.
