@@ -37,9 +37,9 @@
     "@multi-game-engines/i18n-common": "workspace:*",
     "@multi-game-engines/ui-core": "workspace:*",
     "@multi-game-engines/ui-react-core": "workspace:*",
-    "@radix-ui/react-scroll-area": "^1.3.0",
-    "@radix-ui/react-separator": "^1.1.16",
-    "@radix-ui/react-slot": "^1.4.0",
+    "@radix-ui/react-scroll-area": "^1.4.0",
+    "@radix-ui/react-separator": "^1.2.0",
+    "@radix-ui/react-slot": "^1.5.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.55.0",
     "tailwind-merge": "^3.7.0"
