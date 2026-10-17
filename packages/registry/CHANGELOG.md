@@ -1,5 +1,14 @@
 # @multi-game-engines/registry
 
+## 1.1.5
+
+### Patch Changes
+
+- [#277](https://github.com/hdkz-dev/multi-game-engines/pull/277) [`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578) Thanks [@dependabot](https://github.com/apps/dependabot)! - Update Zod schema dependencies to 4.6.7 and Radix monitor primitives to their reviewed current minor releases while preserving public APIs.
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/i18n-engines@0.1.3
+
 ## 1.1.4
 
 ### Patch Changes

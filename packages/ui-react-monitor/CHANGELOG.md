@@ -1,5 +1,16 @@
 # @multi-game-engines/ui-react-monitor
 
+## 0.2.6
+
+### Patch Changes
+
+- [#277](https://github.com/hdkz-dev/multi-game-engines/pull/277) [`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578) Thanks [@dependabot](https://github.com/apps/dependabot)! - Update Zod schema dependencies to 4.6.7 and Radix monitor primitives to their reviewed current minor releases while preserving public APIs.
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/ui-core@0.1.6
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/ui-react-core@0.1.6
+
 ## 0.2.5
 
 ### Patch Changes
