@@ -1,0 +1,13 @@
+diff --git a/dist/runtime-core.d.ts b/dist/runtime-core.d.ts
+index 1713b7d0341ef20b4a47444da3bc628a90100724..a64c71e27efc618e13e81b8160a6f834f35b67a8 100644
+--- a/dist/runtime-core.d.ts
++++ b/dist/runtime-core.d.ts
+@@ -152,7 +152,7 @@ export type ExtractPublicPropTypes<O> = {
+     [K in keyof Pick<O, PublicOptionalKeys<O>>]?: InferPropType<O[K]>;
+ };
+ export type ExtractDefaultPropTypes<O> = O extends object ? {
+-    [K in keyof Pick<O, DefaultKeys<O>>]: InferPropType<O[K]>;
++    [K in keyof O as K extends DefaultKeys<O> ? K : never]: InferPropType<O[K]>;
+ } : {};
+ 
+ /**

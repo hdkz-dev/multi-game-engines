@@ -71,24 +71,24 @@
       "ajv@>=7.0.0-alpha.0 <8.18.0": ">=8.18.0 <9",
       "lodash@<=4.17.23": ">=4.18.0 <5",
       "esbuild@>=0.27.3 <0.28.1": ">=0.28.1 <0.29",
-      "nitropack>archiver": "^8.0.0"
+      "nitropack>archiver": "^8.0.0",
+      "undici@>=7.18.0 <7.30.1": ">=7.30.1 <8"
     },
     "patchedDependencies": {
       "tsup@8.5.1": "patches/tsup@8.5.1.patch",
       "rapid-draughts@1.0.6": "patches/rapid-draughts@1.0.6.patch",
       "@testing-library/jest-dom@7.0.1": "patches/@testing-library__jest-dom@7.0.1.patch",
-      "nitropack@2.13.4": "patches/nitropack@2.13.4.patch",
       "@storybook/vue3@10.6.1": "patches/@storybook__vue3@10.6.1.patch",
       "@storybook/react@10.6.1": "patches/@storybook__react@10.6.1.patch",
       "@storybook/react-vite@10.6.1": "patches/@storybook__react-vite@10.6.1.patch",
-      "storybook@10.6.1": "patches/storybook@10.6.1.patch",
       "@storybook/web-components@10.6.1": "patches/@storybook__web-components@10.6.1.patch",
       "listhen@1.10.1": "patches/listhen@1.10.1.patch",
       "fast-glob@3.3.3": "patches/fast-glob@3.3.3.patch",
       "globby@16.2.4": "patches/globby@16.2.4.patch",
       "@parcel/watcher@2.5.1": "patches/@parcel__watcher@2.5.1.patch",
-      "@nuxt/devtools@3.4.2": "patches/@nuxt__devtools@3.4.2.patch",
-      "@next/eslint-plugin-next@16.4.0": "patches/@next__eslint-plugin-next@16.4.0.patch"
+      "@next/eslint-plugin-next@16.4.0": "patches/@next__eslint-plugin-next@16.4.0.patch",
+      "nitropack@2.13.5": "patches/nitropack@2.13.5.patch",
+      "@vue/runtime-core@3.5.44": "patches/@vue__runtime-core@3.5.44.patch"
     }
   },
   "devDependencies": {

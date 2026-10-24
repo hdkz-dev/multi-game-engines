@@ -1,5 +1,9 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## 2026-10-24 security maintenance (locally validated)
+
+An isolated checkout of main `2d9ffbc` identified 26 pnpm advisories, including critical Next.js and Storybook findings, beyond the GitHub notifications. Compatible Next/Nuxt/Storybook and transitive dependency updates retain the existing declaration and Nuxt compatibility patches. No public API or architecture change, audit exclusion, or new version pin is introduced. Main integration and npm publication have not occurred. See the [maintenance record](implementation_plans/20261024-security-maintenance.md) for validation.
+
 ## Current audit and next maintenance update (2026-10-15)
 
 Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.

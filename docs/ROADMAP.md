@@ -1,5 +1,9 @@
 # プロジェクト・ロードマップ (2026-2027)
 
+## 2026-10-24 セキュリティ保守（ローカル検証済み）
+
+main `2d9ffbc`を隔離チェックアウトで監査し、GitHub通知に加えてpnpm監査でNext.js・Storybookのcriticalを含む26件を確認した。Next/Nuxt/Storybookと脆弱な推移依存を互換範囲内で更新し、既存の型宣言・Nuxt互換パッチを移植する。公開API・アーキテクチャの変更、監査除外、新しい固定は追加しない。main統合とnpm公開は未実施。検証結果は[保守記録](implementation_plans/20261024-security-maintenance.md)を参照。
+
 ## 最新確認と次の保守更新 (2026-10-15)
 
 main `56d8932`とリモートmainは一致。PR #274の17種類の更新とPR #275の4パッケージ公開は完了し、npmの対象版・integrityを再確認した。mainの未解決CodeQL・Dependabot警告は0件。新規PRは#276（Unicorn、CI失敗）、#277（通常依存更新）、#278（Happy DOM 21、元CI成功）。#277にHappy DOM 21とZod 4.6.7をまとめ、6種類を検証する。#278は#277統合確認後に重複整理する。TypeScript 7・Unicorn 78・tsup 9の移行と他の最新候補は別途評価する。M1b/M1cは未完了。
