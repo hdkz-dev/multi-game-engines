@@ -1,5 +1,14 @@
 # @multi-game-engines/domain-shogi
 
+## 0.1.6
+
+### Patch Changes
+
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/i18n-shogi@0.1.3
+
 ## 0.1.5
 
 ### Patch Changes

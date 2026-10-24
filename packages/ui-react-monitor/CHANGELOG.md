@@ -1,5 +1,18 @@
 # @multi-game-engines/ui-react-monitor
 
+## 0.2.6
+
+### Patch Changes
+
+- [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) [`2ea32d5`](https://github.com/hdkz-dev/multi-game-engines/commit/2ea32d5d18ceb4a0d5b8886cc55fcec61b724f5c) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Refresh monitor icon dependencies to current compatible releases.
+
+- [#277](https://github.com/hdkz-dev/multi-game-engines/pull/277) [`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578) Thanks [@dependabot](https://github.com/apps/dependabot)! - Update Zod schema dependencies to 4.6.7 and Radix monitor primitives to their reviewed current minor releases while preserving public APIs.
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/ui-core@0.1.6
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/ui-react-core@0.1.6
+
 ## 0.2.5
 
 ### Patch Changes
