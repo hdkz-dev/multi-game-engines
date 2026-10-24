@@ -1,5 +1,17 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## Waiting for the upstream OSV correction (2026-10-25)
+
+Implementation commit `2ea32d5` in maintenance PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) passed CI build, lint, typecheck, tests, core coverage and document synchronization, all four E2E lanes, ESLint, CodeQL and benchmarks. Full and production pnpm audits report zero findings. However, the OSV audit fails because the Nuxt 3 ranges in GHSA-vjh5-4x84-xrqp lack an upper bound and incorrectly match the fixed nuxt / @nuxt/nitro-server 4.6.2 releases. Overall auditing has not passed.
+
+Independently validated the existing upstream PR [github/advisory-database#10504](https://github.com/github/advisory-database/pull/10504) against all 277 published stable Nuxt versions and 32 published stable @nuxt/nitro-server versions; membership matches the maintainer's affected ranges. [Added downstream CI reproduction evidence](https://github.com/github/advisory-database/pull/10504#issuecomment-6385792027). The upstream PR is still open and OSV has not incorporated the correction. Rerun CI after confirming propagation. No audit exclusions or forced merge have been applied.
+
+## Development dependencies and tools refresh (2026-10-24)
+
+From main `2d9ffbc`, update 43 direct dependency families plus pnpm 12.15.0 and OSV Scanner 2.7.0. Adopt Next 16.4.3, Storybook 10.6.3, Nuxt 4.6.2 and tsup 9.0.0; pnpm audit reports zero findings at every severity. Move pnpm settings to pnpm-workspace.yaml while retaining strict peer checks, the same approved build packages and a 24-hour release-age policy. Do not exempt newly published releases. TypeScript 7 remains outside supported tool peer ranges. Unicorn 78 produces 644 new rule findings in core alone and requires a separate migration involving public APIs and asynchronous behavior. Publication of #280 and M1b/M1c remain pending.
+
+[Maintenance record](implementation_plans/20261024-toolchain-refresh.md) / [ADR 065](adr/065-pnpm12-and-toolchain-refresh.md)
+
 ## Current audit and next maintenance update (2026-10-15)
 
 Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.

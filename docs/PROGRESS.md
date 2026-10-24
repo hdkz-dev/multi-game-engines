@@ -1352,7 +1352,7 @@ ESLint 10.11.0 を採用し、依存更新・不要な固定の解除・厳格�
 
 ### 2026-10-04: 互換依存更新の検証
 
-ESLint 10.12.0 と互換範囲内の依存更新を検証。Dependabot の失敗原因と上流制約は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) を参照。
+ESLint 10.13.0 と互換範囲内の依存更新を検証。Dependabot の失敗原因と上流制約は [ADR 061](adr/061-dependency-refresh-and-strict-validation.md) を参照。
 
 2026-10-06詳細整理: 通信・SRI・応答契約調査をM1a/M1b/M1cに分割し、Q1（テストany）とF5（動的Expert Mapping）を管理する。18種類の依存版一覧、15パッチ/10 overridesの撤去条件、検証マトリクスは [課題台帳](ISSUES.md) を参照。担当・期限は未割当、実装修正は未完了。
 

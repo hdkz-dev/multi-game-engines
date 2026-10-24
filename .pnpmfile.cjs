@@ -7,7 +7,7 @@ module.exports = {
         pkg.dependencies["@peculiar/x509"] = "^2.1.0";
         pkg.dependencies["reflect-metadata"] = "^0.2.2";
       }
-      if (pkg.name === "@next/eslint-plugin-next" && pkg.version === "16.4.0") {
+      if (pkg.name === "@next/eslint-plugin-next" && pkg.version === "16.4.3") {
         delete pkg.dependencies["fast-glob"];
         pkg.dependencies.tinyglobby = "^0.2.17";
       }

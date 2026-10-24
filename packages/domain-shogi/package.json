@@ -27,9 +27,9 @@
     "@multi-game-engines/i18n-shogi": "workspace:*"
   },
   "devDependencies": {
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   },
   "types": "./dist/index.d.ts",
   "author": "hdkz-dev",
