@@ -1,5 +1,9 @@
 # アーキテクチャと設計
 
+## 開発用Node LTSの更新 (2026-10-25)
+
+`.node-version` と `.nvmrc` を24.13.0から、24系LTSのセキュリティリリース24.22.1へ更新する。[公式リリース一覧](https://nodejs.org/dist/index.json)と配布物のSHA-256を照合し、実際のNode 24.22.1で品質ゲートを検証する。CIのNode指定は引き続き24系。公開API・公開パッケージの対応範囲は変更しない。OSV監査の上流待ちは別の未完了条件として維持する。
+
 ## OSV監査の上流修正待ち (2026-10-25)
 
 保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) の実装コミット `2ea32d5` は、CIのbuild・lint・typecheck・test・core coverage・文書同期、E2E全4系統、ESLint・CodeQL・ベンチマークを通過した。pnpm audit（全依存・本番依存）は0件。一方、OSV監査はGHSA-vjh5-4x84-xrqpのNuxt 3向け範囲に上限がないため、修正済みのnuxt / @nuxt/nitro-server 4.6.2を誤検出して失敗している。監査全体の成功とは扱わない。
