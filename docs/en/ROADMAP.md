@@ -1,5 +1,11 @@
 # Project Roadmap (2026-2027)
 
+## Development dependencies and tools refresh (2026-10-24)
+
+From main `2d9ffbc`, update 43 direct dependency families plus pnpm 12.15.0 and OSV Scanner 2.7.0. Adopt Next 16.4.3, Storybook 10.6.3, Nuxt 4.6.2 and tsup 9.0.0; dependency auditing reports zero findings at every severity. Move pnpm settings to pnpm-workspace.yaml while retaining strict peer checks, the same approved build packages and a 24-hour release-age policy. Do not exempt newly published releases. TypeScript 7 remains outside supported tool peer ranges. Unicorn 78 produces 644 new rule findings in core alone and requires a separate migration involving public APIs and asynchronous behavior. Publication of #280 and M1b/M1c remain pending.
+
+[Maintenance record](implementation_plans/20261024-toolchain-refresh.md) / [ADR 065](adr/065-pnpm12-and-toolchain-refresh.md)
+
 ## Current audit and next maintenance update (2026-10-15)
 
 Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.

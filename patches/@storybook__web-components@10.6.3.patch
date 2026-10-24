@@ -1,5 +1,4 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c07450f53f 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -1,3 +1,4 @@
@@ -7,7 +6,7 @@ index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c0
  import { AnnotatedStoryFn, ArgTypes, Args, Args as Args$1, ArgsStoryFn, ComponentAnnotations, DecoratorFunction, LoaderFunction, NamedOrDefaultProjectAnnotations, NormalizedProjectAnnotations, Parameters as Parameters$1, ProjectAnnotations, Renderer, StoryAnnotations, StoryContext as StoryContext$1, StrictArgs, StrictArgs as StrictArgs$1, WebRenderer } from "storybook/internal/types";
  import { SVGTemplateResult, TemplateResult } from "lit";
  import { AddonTypes, InferTypes, Meta as Meta$1, Preview as Preview$1, PreviewAddon, Story } from "storybook/internal/csf";
-@@ -1040,7 +1041,7 @@ type DecoratorsArgs<TRenderer extends Renderer, Decorators> = UnionToIntersectio
+@@ -1040,7 +1041,7 @@
   * provided in meta become optional in stories, while missing required args must be provided at the
   * story level.
   */
@@ -16,7 +15,7 @@ index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c0
    /**
     * Creates a story with a custom render function that takes no args.
     *
-@@ -1086,7 +1087,7 @@ interface WebComponentsMeta<T extends WebComponentsTypes, MetaInput extends Comp
+@@ -1086,7 +1087,7 @@
     * });
     * ```
     */
@@ -25,7 +24,7 @@ index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c0
    /**
     * Creates a story with no additional configuration.
     *
-@@ -1112,6 +1113,6 @@ interface WebComponentsMeta<T extends WebComponentsTypes, MetaInput extends Comp
+@@ -1112,6 +1113,6 @@
   * Represents a single story with its configuration and provides access to the composed story for
   * testing via `story.run()`.
   */
@@ -33,4 +32,3 @@ index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c0
 +interface WebComponentsStory<T extends WebComponentsTypes, TInput extends StoryAnnotations<T, T['args']>> extends Story<T, TInput & CSFStoryAnnotations<T, T["args"]>> {}
  //#endregion
  export { type ArgTypes, type Args, Decorator, Loader, Meta, type Parameters$1 as Parameters, Preview, StoryContext, StoryFn, StoryObj, type StrictArgs, WebComponentsMeta, WebComponentsPreview, type WebComponentsRenderer, WebComponentsStory, type WebComponentsTypes, __definePreview, getCustomElements, isValidComponent, isValidMetaData, setCustomElements, setCustomElementsManifest, setProjectAnnotations };
-\ No newline at end of file

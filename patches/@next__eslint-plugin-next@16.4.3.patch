@@ -1,8 +1,7 @@
 diff --git a/dist/utils/get-root-dirs.js b/dist/utils/get-root-dirs.js
-index 47108c943514a1d7e686c5eb18aad00a59963c83..daa7ee57059d50cbe18099757fcedd7556ed2065 100644
 --- a/dist/utils/get-root-dirs.js
 +++ b/dist/utils/get-root-dirs.js
-@@ -8,12 +8,17 @@ Object.defineProperty(exports, "getRootDirs", {
+@@ -8,12 +8,17 @@
          return getRootDirs;
      }
  });

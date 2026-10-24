@@ -1,8 +1,7 @@
 diff --git a/dist/chunk-CJ1Nc_eA.d.ts b/dist/chunk-CJ1Nc_eA.d.ts
-index 8e68dc5880537cbeb050a77dd6c8f20e931617ae..110ea99e5e30cb8875fc2f459bbebea045698403 100644
 --- a/dist/chunk-CJ1Nc_eA.d.ts
 +++ b/dist/chunk-CJ1Nc_eA.d.ts
-@@ -46,7 +46,7 @@ type TypescriptOptions$1 = TypescriptOptions & {
+@@ -46,7 +46,7 @@
     * @default `'react-docgen'`
     */
    reactDocgen: 'react-docgen-typescript' | 'react-docgen' | false; /** Configures `@joshwooding/vite-plugin-react-docgen-typescript` */
