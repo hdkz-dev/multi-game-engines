@@ -25,4 +25,10 @@ Remove obsolete Storybook core, tsup and Nuxt DevTools patches. Port required fr
 
 ## Validation
 
-Passed: pnpm 12 frozen installation with publication-age verification; lint 98/98 including Oxlint and tooling ESLint; typecheck 99/99; build 56/56; 148 Vitest files with 1,697 tests and 12 tooling tests. Both full and production dependency audits report zero findings. TypeDoc with warnings treated as errors, document synchronization, Changesets status and formatting checks also passed. Check CodeRabbit and remote CI/E2E during PR preparation.
+Passed: pnpm 12 frozen installation with publication-age verification; lint 98/98 including Oxlint and tooling ESLint; typecheck 99/99; build 56/56; 148 Vitest files with 1,697 tests and 12 tooling tests. Both full and production pnpm audits report zero findings. TypeDoc with warnings treated as errors, document synchronization, Changesets status and formatting checks also passed. CodeRabbit CLI raised one lockfile consistency finding, already verified by the successful pnpm 12 frozen install. GitHub Codex review completed without findings. See the following update for remote validation results.
+
+## Waiting for the upstream OSV correction (2026-10-25)
+
+Implementation commit `2ea32d5` in maintenance PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) passed CI build, lint, typecheck, tests, core coverage and document synchronization, all four E2E lanes, ESLint, CodeQL and benchmarks. Full and production pnpm audits report zero findings. However, the OSV audit fails because the Nuxt 3 ranges in GHSA-vjh5-4x84-xrqp lack an upper bound and incorrectly match the fixed nuxt / @nuxt/nitro-server 4.6.2 releases. Overall auditing has not passed.
+
+Independently validated the existing upstream PR [github/advisory-database#10504](https://github.com/github/advisory-database/pull/10504) against all 277 published stable Nuxt versions and 32 published stable @nuxt/nitro-server versions; membership matches the maintainer's affected ranges. [Added downstream CI reproduction evidence](https://github.com/github/advisory-database/pull/10504#issuecomment-6385792027). The upstream PR is still open and OSV has not incorporated the correction. Rerun CI after confirming propagation. No audit exclusions or forced merge have been applied.

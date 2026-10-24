@@ -1,8 +1,14 @@
 # プロジェクト・ロードマップ (2026-2027)
 
+## OSV監査の上流修正待ち (2026-10-25)
+
+保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) の実装コミット `2ea32d5` は、CIのbuild・lint・typecheck・test・core coverage・文書同期、E2E全4系統、ESLint・CodeQL・ベンチマークを通過した。pnpm audit（全依存・本番依存）は0件。一方、OSV監査はGHSA-vjh5-4x84-xrqpのNuxt 3向け範囲に上限がないため、修正済みのnuxt / @nuxt/nitro-server 4.6.2を誤検出して失敗している。監査全体の成功とは扱わない。
+
+既存の上流修正PR [github/advisory-database#10504](https://github.com/github/advisory-database/pull/10504) を独立検証し、公開済み安定版Nuxt 277版・@nuxt/nitro-server 32版で公式の影響範囲との一致を確認した。[下流CIの再現情報を追記済み](https://github.com/github/advisory-database/pull/10504#issuecomment-6385792027)。現時点では上流未統合・OSV未反映。反映を確認してからCIを再実行する。監査除外・強制統合は行っていない。
+
 ## 開発依存とツールの更新 (2026-10-24)
 
-main `2d9ffbc`を基点に43種類の直接依存とpnpm 12.15.0・OSV Scanner 2.7.0を更新。Next 16.4.3・Storybook 10.6.3・Nuxt 4.6.2・tsup 9.0.0を採用し、依存監査は全深刻度0件。pnpm設定をpnpm-workspace.yamlへ移し、strict peer検査・同一のビルド許可対象・公開後24時間の保護を維持する。公開直後の版には例外を設けない。TypeScript 7は周辺ツールのpeer範囲外、Unicorn 78はcoreだけで644件の新規則指摘があり、公開API・非同期処理に及ぶ移行として分離する。#280の公開とM1b/M1cは未完了。
+main `2d9ffbc`を基点に43種類の直接依存とpnpm 12.15.0・OSV Scanner 2.7.0を更新。Next 16.4.3・Storybook 10.6.3・Nuxt 4.6.2・tsup 9.0.0を採用し、pnpm auditは全深刻度0件。pnpm設定をpnpm-workspace.yamlへ移し、strict peer検査・同一のビルド許可対象・公開後24時間の保護を維持する。公開直後の版には例外を設けない。TypeScript 7は周辺ツールのpeer範囲外、Unicorn 78はcoreだけで644件の新規則指摘があり、公開API・非同期処理に及ぶ移行として分離する。#280の公開とM1b/M1cは未完了。
 
 [保守更新記録](implementation_plans/20261024-toolchain-refresh.md) / [ADR 065](adr/065-pnpm12-and-toolchain-refresh.md)
 

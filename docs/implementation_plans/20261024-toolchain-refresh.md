@@ -25,4 +25,10 @@ Storybook本体・tsup・Nuxt DevToolsの不要パッチを撤去。Storybook各
 
 ## 検証
 
-pnpm 12の公開時刻検査を含むfrozen install、lint 98/98（Oxlint・tooling ESLintを含む）、typecheck 99/99、build 56/56、Vitest 148ファイル・1,697テストとtooling 12テストが成功。全依存・本番依存のauditは0件。TypeDocの警告エラー化検査、文書同期、Changesets status、整形検査も成功。CodeRabbitとリモートCI/E2EはPR作成段階で確認する。
+pnpm 12の公開時刻検査を含むfrozen install、lint 98/98（Oxlint・tooling ESLintを含む）、typecheck 99/99、build 56/56、Vitest 148ファイル・1,697テストとtooling 12テストが成功。全依存・本番依存のpnpm auditは0件。TypeDocの警告エラー化検査、文書同期、Changesets status、整形検査も成功。CodeRabbit CLIはlockfile整合性の指摘1件（pnpm 12のfrozen install成功で確認済み）。GitHub Codexレビューは指摘なし。リモート検証の結果は次の追記を参照。
+
+## OSV監査の上流修正待ち (2026-10-25)
+
+保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) の実装コミット `2ea32d5` は、CIのbuild・lint・typecheck・test・core coverage・文書同期、E2E全4系統、ESLint・CodeQL・ベンチマークを通過した。pnpm audit（全依存・本番依存）は0件。一方、OSV監査はGHSA-vjh5-4x84-xrqpのNuxt 3向け範囲に上限がないため、修正済みのnuxt / @nuxt/nitro-server 4.6.2を誤検出して失敗している。監査全体の成功とは扱わない。
+
+既存の上流修正PR [github/advisory-database#10504](https://github.com/github/advisory-database/pull/10504) を独立検証し、公開済み安定版Nuxt 277版・@nuxt/nitro-server 32版で公式の影響範囲との一致を確認した。[下流CIの再現情報を追記済み](https://github.com/github/advisory-database/pull/10504#issuecomment-6385792027)。現時点では上流未統合・OSV未反映。反映を確認してからCIを再実行する。監査除外・強制統合は行っていない。
