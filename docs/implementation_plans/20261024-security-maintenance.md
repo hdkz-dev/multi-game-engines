@@ -30,6 +30,12 @@ Vueを揃えた後、Storybookを含むui-vue-monitorの型検査でVue 3.5.44�
 - `pnpm test`: 全workspaceとtooling 13試験成功。
 - `pnpm --filter @multi-game-engines/core test:coverage`: 成功、行98.47%。
 - CodeRabbit: 2回確認。初回の記録リンク2件は修正。2回目のlockfile整合指摘はfrozen installとCIで検証する。Vue最終パッチは独立レビューとreadonly・値型の実コンパイラ回帰試験で確認。
-- `pnpm doc-sync`、`git diff --check`: 成功。リモートCI/E2EはPR作成後の確認対象。
+- `pnpm doc-sync`、`git diff --check`: 成功。PR #285のリモートE2E4種類・ESLint・CodeQL・benchmarksは成功。CIのbuild・lint・typecheck・test・core coverage・doc-syncも成功し、最終OSV監査だけが下記の上流データ矛盾で失敗。
+
+## リモートOSVの外部ブロッカー
+
+[CI 40097166449](https://github.com/hdkz-dev/multi-game-engines/actions/runs/40097166449)のOSV Scanner 2.6.0は、Nuxtと@nuxt/nitro-serverの4.6.2に対しGHSA-vjh5-4x84-xrqpを検出し、修正版欄にも4.6.2を表示した。[GitHub公式アドバイザリ](https://github.com/advisories/GHSA-vjh5-4x84-xrqp)は4系列を`<4.6.2`、3系列を`<4.0.0`と明示する。一方[OSVデータ](https://api.osv.dev/v1/vulns/GHSA-vjh5-4x84-xrqp)は3系列の上限をdatabase_specific.last_known_affected_version_rangeだけに保存し、rangesのintroduced3.0.0/3.20.0には上限イベントがない。
+
+`api.osv.dev/v1/query`へnuxt4.6.2を直接問い合わせても同じ通知が返ることを確認した。クライアント更新だけでは直らない上流の判定データ不整合であり、修正版を未適用という結果ではない。監査除外・成功扱い・検査削除は行わない。上流報告原稿を準備したが、外部への投稿は未実施。mainは承認レビュー1件を必須としており、マージ・npm公開は未実施。
 
 公開APIや通信境界の変更はない。main統合・npm公開は未実施。別途M1b/M1cの残課題は継続する。

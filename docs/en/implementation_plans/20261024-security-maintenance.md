@@ -30,6 +30,12 @@ Registry metadata confirms that the latest Wrangler 4.152.0 uses Miniflare `5.20
 - `pnpm test`: all workspace tests and 13 tooling tests passed.
 - `pnpm --filter @multi-game-engines/core test:coverage`: passed, 98.47% lines.
 - CodeRabbit: two reviews. The initial two record-link issues were fixed. The second lockfile-consistency request is checked by frozen installation and CI. The final Vue patch received independent review and a real compiler regression test for readonly and value types.
-- `pnpm doc-sync` and `git diff --check`: passed. Remote CI/E2E remain to be checked after PR creation.
+- `pnpm doc-sync` and `git diff --check`: passed. PR #285 remote E2E (all four), ESLint, CodeQL and benchmarks passed. CI build/lint/typecheck/test/core coverage/doc-sync passed; only the final OSV audit failed due to the upstream data conflict below.
+
+## Remote OSV external blocker
+
+[CI 40097166449](https://github.com/hdkz-dev/multi-game-engines/actions/runs/40097166449) uses OSV Scanner2.6.0 and reports GHSA-vjh5-4x84-xrqp against nuxt and @nuxt/nitro-server4.6.2 while also displaying4.6.2 as the fixed version. The [official GitHub advisory](https://github.com/advisories/GHSA-vjh5-4x84-xrqp) bounds the4.x range below4.6.2 and the3.x range below4.0.0. The [OSV record](https://api.osv.dev/v1/vulns/GHSA-vjh5-4x84-xrqp) stores the3.x upper bound only in database_specific.last_known_affected_version_range; the introduced3.0.0/3.20.0 ranges lack an upper event.
+
+A direct api.osv.dev/v1/query request for nuxt4.6.2 reproduces the finding independently of the scanner client. This is an upstream matching-data conflict, not an unapplied fix. No exclusion, successful-result substitution or check removal is used. An upstream report draft is prepared but has not been posted externally. Main requires one approving review; merging and npm publication have not occurred.
 
 Public APIs and communication boundaries are unchanged. Main integration and npm publication have not occurred. M1b/M1c remain separate work.
