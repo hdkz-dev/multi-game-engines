@@ -1,5 +1,9 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## Development Node LTS update (2026-10-25)
+
+Update `.node-version` and `.nvmrc` from 24.13.0 to the Node 24 LTS security release 24.22.1. Verify the [official release index](https://nodejs.org/dist/index.json) and distribution SHA-256, then run the quality gates with Node 24.22.1. CI continues to select the Node 24 line. Public APIs and published package compatibility ranges are unchanged. The upstream OSV audit blocker remains a separate unmet condition.
+
 ## Waiting for the upstream OSV correction (2026-10-25)
 
 Implementation commit `2ea32d5` in maintenance PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) passed CI build, lint, typecheck, tests, core coverage and document synchronization, all four E2E lanes, ESLint, CodeQL and benchmarks. Full and production pnpm audits report zero findings. However, the OSV audit fails because the Nuxt 3 ranges in GHSA-vjh5-4x84-xrqp lack an upper bound and incorrectly match the fixed nuxt / @nuxt/nitro-server 4.6.2 releases. Overall auditing has not passed.

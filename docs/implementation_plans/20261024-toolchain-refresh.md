@@ -32,3 +32,9 @@ pnpm 12の公開時刻検査を含むfrozen install、lint 98/98（Oxlint・tool
 保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) の実装コミット `2ea32d5` は、CIのbuild・lint・typecheck・test・core coverage・文書同期、E2E全4系統、ESLint・CodeQL・ベンチマークを通過した。pnpm audit（全依存・本番依存）は0件。一方、OSV監査はGHSA-vjh5-4x84-xrqpのNuxt 3向け範囲に上限がないため、修正済みのnuxt / @nuxt/nitro-server 4.6.2を誤検出して失敗している。監査全体の成功とは扱わない。
 
 既存の上流修正PR [github/advisory-database#10504](https://github.com/github/advisory-database/pull/10504) を独立検証し、公開済み安定版Nuxt 277版・@nuxt/nitro-server 32版で公式の影響範囲との一致を確認した。[下流CIの再現情報を追記済み](https://github.com/github/advisory-database/pull/10504#issuecomment-6385792027)。現時点では上流未統合・OSV未反映。反映を確認してからCIを再実行する。監査除外・強制統合は行っていない。
+
+## 開発用Node LTSの更新 (2026-10-25)
+
+`.node-version` と `.nvmrc` を24.13.0から、24系LTSのセキュリティリリース24.22.1へ更新する。[公式リリース一覧](https://nodejs.org/dist/index.json)と配布物のSHA-256を照合し、実際のNode 24.22.1で品質ゲートを検証する。CIのNode指定は引き続き24系。公開API・公開パッケージの対応範囲は変更しない。OSV監査の上流待ちは別の未完了条件として維持する。
+
+Node 24.22.1でキャッシュを無効化してlint 98/98・typecheck 99/99・build 56/56を再実行し成功。Vitest 148ファイル・1,697テスト、tooling 12テスト、TypeDocの警告エラー化検査、文書同期、frozen installも成功した。既存のOSVデータ不備は未解消。
