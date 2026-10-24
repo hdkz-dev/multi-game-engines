@@ -4,7 +4,7 @@
     "@changesets/changelog-github",
     { "repo": "hdkz-dev/multi-game-engines" }
   ],
-  "commit": true,
+  "commit": false,
   "fixed": [],
   "linked": [],
   "access": "public",

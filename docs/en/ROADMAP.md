@@ -1,5 +1,9 @@
 # Project Roadmap (2026-2027)
 
+## Release Action commit ownership (2026-10-25)
+
+Set `commit` to `false` in `.changeset/config.json` to remove duplicate commit ownership between the Changesets CLI and Release Action. The CLI generates versions and changelogs; the Release Action commits the result. Release proposal contents and approval requirements remain unchanged. [ADR 066](adr/066-release-action-owns-version-commits.md) records the evidence and validation criteria.
+
 ## Post-merge verification (2026-10-25)
 
 Maintenance PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) merged into main at 2026-10-25 01:20 JST with merge commit `db25265`. The OSV data defect remains unresolved; post-merge CI, E2E and Release runs are being checked. The Node 24.22.1 version-file update was not included in that merge, so validate it as a separate change based on current main. Zero pnpm audit findings do not mean that OSV auditing or publication has completed.

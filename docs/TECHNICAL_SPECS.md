@@ -1,5 +1,9 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
+## Release Actionのコミット責務 (2026-10-25)
+
+Changesets CLIとRelease Actionの二重コミットを解消するため、`.changeset/config.json`の`commit`を`false`にする。CLIはバージョン・changelog生成、Release Actionは生成結果のコミットを担当する。公開候補の内容・承認要件は変更しない。[ADR 066](adr/066-release-action-owns-version-commits.md)で根拠と検証条件を記録する。
+
 ## 統合後の確認 (2026-10-25)
 
 保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) は2026-10-25 01:20 JSTにmerge commit `db25265`でmainへ統合済み。OSVデータの不備は未解消で、統合後のCI・E2E・Releaseの実行結果を確認中。Node 24.22.1の指定更新はこのマージに含まれていないため、最新mainを基点とする追加変更として検証する。pnpm auditは0件だが、OSV監査の成功・公開完了を意味しない。
