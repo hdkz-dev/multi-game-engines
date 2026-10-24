@@ -1,5 +1,16 @@
 # @multi-game-engines/ui-vue-monitor
 
+## 0.2.6
+
+### Patch Changes
+
+- [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) [`2ea32d5`](https://github.com/hdkz-dev/multi-game-engines/commit/2ea32d5d18ceb4a0d5b8886cc55fcec61b724f5c) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Refresh monitor icon dependencies to current compatible releases.
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/ui-core@0.1.6
+  - @multi-game-engines/i18n-common@0.1.4
+  - @multi-game-engines/ui-vue-core@0.1.7
+
 ## 0.2.5
 
 ### Patch Changes

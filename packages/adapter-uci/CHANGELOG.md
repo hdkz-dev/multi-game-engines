@@ -1,5 +1,16 @@
 # @multi-game-engines/adapter-uci
 
+## 1.0.7
+
+### Patch Changes
+
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/registry@1.1.5
+  - @multi-game-engines/domain-chess@0.1.6
+  - @multi-game-engines/i18n-chess@0.1.3
+  - @multi-game-engines/i18n-common@0.1.4
+
 ## 1.0.6
 
 ### Patch Changes

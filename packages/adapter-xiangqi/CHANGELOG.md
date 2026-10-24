@@ -1,5 +1,14 @@
 # @multi-game-engines/adapter-xiangqi
 
+## 0.1.8
+
+### Patch Changes
+
+- Updated dependencies [[`02b3f8b`](https://github.com/hdkz-dev/multi-game-engines/commit/02b3f8bbfb77bcc8a2d664d3ddf59313815d8578)]:
+  - @multi-game-engines/core@0.2.3
+  - @multi-game-engines/domain-xiangqi@0.1.8
+  - @multi-game-engines/i18n-common@0.1.4
+
 ## 0.1.7
 
 ### Patch Changes
