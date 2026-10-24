@@ -42,3 +42,7 @@ With Node 24.22.1 and caching disabled, lint 98/98, typecheck 99/99 and build 56
 ## Post-merge verification (2026-10-25)
 
 Maintenance PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) merged into main at 2026-10-25 01:20 JST with merge commit `db25265`. The OSV data defect remains unresolved; post-merge CI, E2E and Release runs are being checked. The Node 24.22.1 version-file update was not included in that merge, so validate it as a separate change based on current main. Zero pnpm audit findings do not mean that OSV auditing or publication has completed.
+
+## Preserve the unique PR #285 regression test (2026-10-25)
+
+Retain the Vue default-prop inference test from duplicate candidate PR #285. With TypeScript 6.0.3 and Vue 3.5.44, only the intentional readonly assignment and invalid boolean assignment are rejected. The test passes without an additional Vue runtime-core patch, bringing tooling coverage to 13 tests. Generated versions for all 45 bumped public packages match PR #280; the isolated release candidate also passed uncached lint 98/98, typecheck 99/99, build 56/56 and 1,697 Vitest cases.

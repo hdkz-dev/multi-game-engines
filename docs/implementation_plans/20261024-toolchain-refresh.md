@@ -42,3 +42,7 @@ Node 24.22.1でキャッシュを無効化してlint 98/98・typecheck 99/99・b
 ## 統合後の確認 (2026-10-25)
 
 保守PR [#286](https://github.com/hdkz-dev/multi-game-engines/pull/286) は2026-10-25 01:20 JSTにmerge commit `db25265`でmainへ統合済み。OSVデータの不備は未解消で、統合後のCI・E2E・Releaseの実行結果を確認中。Node 24.22.1の指定更新はこのマージに含まれていないため、最新mainを基点とする追加変更として検証する。pnpm auditは0件だが、OSV監査の成功・公開完了を意味しない。
+
+## PR #285の固有試験の保持 (2026-10-25)
+
+重複候補PR #285のVue default props型推論試験を保持した。TypeScript 6.0.3とVue 3.5.44で、readonlyへの代入とbooleanへの不正な値の代入だけが期待どおり拒否される。追加のVue runtime-coreパッチなしで成功し、tooling試験は13件となった。公開候補45件のバージョン生成はPR #280と一致し、隔離環境でもキャッシュなしlint 98/98・typecheck 99/99・build 56/56と1,697件のVitestが成功した。
