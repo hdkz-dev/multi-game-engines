@@ -1,5 +1,16 @@
 # プロジェクト・バックログ (TASKS.md)
 
+## 2026-10-25保守更新と残件
+
+- [x] PR #286の依存更新とPR #287のNode 24.22.1・Release二重コミット解消・Vue回帰試験をmainへ統合（`aca79a5`）。
+- [x] PR #280の更新45件を含む公開53パッケージの対象版とdist.integrityを確認。
+- [x] PR #288の開発ツール3件をローカル品質ゲートで検証（lint 98/98、typecheck 99/99、build 56/56、Vitest 1,697件、tooling 13件）。
+- [ ] PR #288の最新headのCI確認とmain統合。追加のnpm公開は不要。
+- [ ] 上流PR #10504とOSV API両パッケージの誤検出解消を確認後、対象CIの失敗ジョブだけを一度再実行。main `aca79a5`は監査以外成功、E2E全4系統・ESLint・CodeQL・Release・文書配信・ベンチマーク・SRI更新は成功。
+- [ ] TypeScript 7の周辺ツール対応とUnicorn 79の別移行（PR #276）。M1b/M1c等の機能バックログは別件。
+
+検証根拠は [進捗](PROGRESS.md)、[技術仕様](TECHNICAL_SPECS.md)、[保守記録](implementation_plans/20261024-toolchain-refresh.md) を参照。
+
 ## 2026-10-15保守更新
 
 main `56d8932`とリモートmainは一致。PR #274の17種類の更新とPR #275の4パッケージ公開は完了し、npmの対象版・integrityを再確認した。mainの未解決CodeQL・Dependabot警告は0件。新規PRは#276（Unicorn、CI失敗）、#277（通常依存更新）、#278（Happy DOM 21、元CI成功）。#277にHappy DOM 21とZod 4.6.7をまとめ、6種類を検証する。#278は#277統合確認後に重複整理する。TypeScript 7・Unicorn 78・tsup 9の移行と他の最新候補は別途評価する。M1b/M1cは未完了。
