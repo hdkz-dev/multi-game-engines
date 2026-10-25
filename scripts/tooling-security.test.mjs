@@ -8,7 +8,7 @@ import { get } from "node:https";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 import process from "node:process";
-import { URL, pathToFileURL } from "node:url";
+import { URL, fileURLToPath, pathToFileURL } from "node:url";
 
 const vueRequire = createRequire(
   new URL("../examples/zenith-dashboard-vue/package.json", import.meta.url),
@@ -275,4 +275,59 @@ test("lockfile excludes vulnerable cryptography and brace dependencies", async (
     "utf8",
   );
   assert.doesNotMatch(lock, /(?:node-forge|braces|micromatch)@/);
+});
+
+test("Vue default prop inference preserves readonly keys and value types", () => {
+  const ts = vueRequire("typescript");
+  const fixture = fileURLToPath(
+    new URL(
+      "../examples/zenith-dashboard-vue/vue-default-props-contract.ts",
+      import.meta.url,
+    ),
+  );
+  const source = `
+import type { ExtractDefaultPropTypes } from "vue";
+type Props = ExtractDefaultPropTypes<{
+  readonly title: { type: StringConstructor; default: "text" };
+  enabled: { type: BooleanConstructor };
+  optional?: { type: NumberConstructor };
+}>;
+const valid: Props = { title: "text", enabled: true };
+valid.title = "changed";
+valid.enabled = "invalid";
+`;
+  const options = {
+    strict: true,
+    noEmit: true,
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.NodeNext,
+    moduleResolution: ts.ModuleResolutionKind.NodeNext,
+  };
+  const host = ts.createCompilerHost(options);
+  const getSourceFile = host.getSourceFile.bind(host);
+  host.getSourceFile = (
+    file,
+    languageVersion,
+    onError,
+    shouldCreateNewSourceFile,
+  ) =>
+    file === fixture
+      ? ts.createSourceFile(file, source, languageVersion)
+      : getSourceFile(
+          file,
+          languageVersion,
+          onError,
+          shouldCreateNewSourceFile,
+        );
+  const program = ts.createProgram([fixture], options, host);
+  const diagnostics = ts.getPreEmitDiagnostics(program);
+  assert.deepEqual(
+    diagnostics.map((diagnostic) => diagnostic.code).sort(),
+    [2322, 2540],
+    ts.formatDiagnosticsWithColorAndContext(diagnostics, {
+      getCanonicalFileName: (file) => file,
+      getCurrentDirectory: () => process.cwd(),
+      getNewLine: () => "\n",
+    }),
+  );
 });
