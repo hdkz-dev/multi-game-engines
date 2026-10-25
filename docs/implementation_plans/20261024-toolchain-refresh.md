@@ -46,3 +46,7 @@ Node 24.22.1でキャッシュを無効化してlint 98/98・typecheck 99/99・b
 ## PR #285の固有試験の保持 (2026-10-25)
 
 重複候補PR #285のVue default props型推論試験を保持した。TypeScript 6.0.3とVue 3.5.44で、readonlyへの代入とbooleanへの不正な値の代入だけが期待どおり拒否される。追加のVue runtime-coreパッチなしで成功し、tooling試験は13件となった。公開候補45件のバージョン生成はPR #280と一致し、隔離環境でもキャッシュなしlint 98/98・typecheck 99/99・build 56/56と1,697件のVitestが成功した。
+
+## 最新確認の追補 (2026-10-25)
+
+PR #286・公開PR #280・追加PR #287はmainへ統合済み（最新確認時のmain `aca79a5`）。npmの全53パッケージで対象版とdist.integrityを確認し、更新45件の公開も確認した。GitHubのDependabot・CodeQL未解決警告は0件。一方、OSVのGHSA-vjh5-4x84-xrqpは修正済みNuxt 4.6.2を引き続き誤検出しており、上流PR #10504待ち。PR #287でNode 24.22.1・Release二重コミット解消・PR #285の固有試験保持を統合した。今回の別更新では、保護期間を経過したESLint React 5.28.8・Portless 0.15.11・Workers型5.20261024.1へ更新し、Node 24.22.1でキャッシュなしlint 98/98・typecheck 99/99・build 56/56、1,697件のVitestと13件のtooling試験を通過した。これらは開発用・privateパッケージの依存で、追加のnpm公開は不要。

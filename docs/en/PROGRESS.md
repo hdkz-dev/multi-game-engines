@@ -1,5 +1,9 @@
 # Current project progress
 
+## Latest verification addendum (2026-10-25)
+
+PR #286, release PR #280 and follow-up PR #287 have merged into main (`aca79a5` at inspection). Exact versions and dist.integrity were verified for all 53 public npm packages, including the 45 updated releases. GitHub reports zero open Dependabot and CodeQL alerts. OSV still incorrectly matches fixed Nuxt 4.6.2 through GHSA-vjh5-4x84-xrqp; upstream PR #10504 remains pending. PR #287 integrated Node 24.22.1, elimination of duplicate Release commits and the unique PR #285 regression test. This separate update adopts the now-mature ESLint React 5.28.8, Portless 0.15.11 and Workers types 5.20261024.1 updates. With Node 24.22.1, uncached lint 98/98, typecheck 99/99, build 56/56, 1,697 Vitest cases and 13 tooling tests passed. These dependency changes affect development tooling or private packages and require no further npm publication.
+
 ## Current audit and next maintenance update (2026-10-15)
 
 Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.
