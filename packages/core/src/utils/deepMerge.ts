@@ -23,10 +23,10 @@ export function deepMerge<T extends object>(
 
       if (
         sourceValue &&
-        typeof sourceValue === "object" &&
-        !Array.isArray(sourceValue) &&
         targetValue &&
+        typeof sourceValue === "object" &&
         typeof targetValue === "object" &&
+        !Array.isArray(sourceValue) &&
         !Array.isArray(targetValue)
       ) {
         output[key] = deepMerge(targetValue as object, sourceValue as object);

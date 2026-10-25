@@ -81,9 +81,9 @@ export function createGomokuMove(move: string): GomokuMove {
     });
   }
   if (
-    !/^[a-zA-Z][1-9][0-9]?$/.test(move) &&
     move !== "resign" &&
-    move !== "pass"
+    move !== "pass" &&
+    !/^[a-zA-Z][1-9][0-9]?$/.test(move)
   ) {
     const i18nKey = createI18nKey("engine.errors.invalidMoveFormat");
     const i18nParams = { move };

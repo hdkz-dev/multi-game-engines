@@ -109,13 +109,13 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     initializing: t("initializing", "Initializing..."),
     ready: t("ready", "Ready"),
     mateIn: (n: number) =>
-      t("mateIn", "Mate in {n}").replace("{n}", n.toString()),
+      t("mateIn", "Mate in {n}").replace("{n}", () => n.toString()),
     advantage: (side: "plus" | "minus" | "neutral", v: number) => {
       if (side === "neutral") return t("even", "Even");
       const sign = side === "plus" ? "+" : "-";
       return t("advantage", "{sign}{v}")
-        .replace("{sign}", sign)
-        .replace("{v}", (v / 100).toFixed(2));
+        .replace("{sign}", () => sign)
+        .replace("{v}", () => (v / 100).toFixed(2));
     },
     retry: t("retry", "Retry"),
     reloadResources: t("reloadResources", "Reload"),
@@ -124,19 +124,20 @@ export function createUIStrings(data: unknown): EngineUIStrings {
     errorDefaultRemediation: t("errorDefaultRemediation", "Please try again."),
     timeUnitSeconds: t("timeUnitSeconds", "s"),
     noMove: t("noMove", "---"),
-    pvCount: (n: number) => t("pvCount", "N={n}").replace("{n}", n.toString()),
+    pvCount: (n: number) =>
+      t("pvCount", "N={n}").replace("{n}", () => n.toString()),
     logCount: (n: number) =>
-      t("logCount", "{n} entries").replace("{n}", n.toString()),
+      t("logCount", "{n} entries").replace("{n}", () => n.toString()),
     moveAriaLabel: (move: string) =>
-      t("moveAriaLabel", "Move {move}").replace("{move}", move),
+      t("moveAriaLabel", "Move {move}").replace("{move}", () => move),
     engineVersion: (name: string, version: string) =>
       t("engineVersion", "{name} v{version}")
-        .replace("{name}", name)
-        .replace("{version}", version),
+        .replace("{name}", () => name)
+        .replace("{version}", () => version),
     engineBridgeStandard: (year: number) =>
       t("engineBridgeStandard", "{year} Engine Bridge Standard").replace(
         "{year}",
-        year.toString(),
+        () => year.toString(),
       ),
     errors: e.errors,
   };

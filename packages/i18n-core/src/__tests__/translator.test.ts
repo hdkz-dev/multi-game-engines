@@ -41,6 +41,16 @@ describe("createTranslator", () => {
     expect(tJa("params", { name: "Alice" })).toBe("こんにちは Alice さん");
   });
 
+  it.each(["$&", "$$", "$`", "$'", "$1", "price $& $$"])(
+    "preserves literal replacement value %s",
+    (name) => {
+      const translate = createTranslator({
+        greeting: "Hello {name} / {name}!",
+      });
+      expect(translate("greeting", { name })).toBe(`Hello ${name} / ${name}!`);
+    },
+  );
+
   it("should replace multiple parameters", () => {
     const tEn = createTranslator(locales.en);
     expect(tEn("multiple", { a: "One", b: "Two" })).toBe("One and Two");
@@ -48,8 +58,7 @@ describe("createTranslator", () => {
 
   it("should return key if translation is missing", () => {
     const tEn = createTranslator(locales.en);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(tEn("missing" as any)).toBe("missing");
+    expect(tEn("missing")).toBe("missing");
   });
 
   it("should handle deep nesting", () => {

@@ -1,0 +1,57 @@
+# Publication proposal for Unicorn 79 migration and literal translation values
+
+2026-10-26. Not published. Changeset status proposes 51 patch updates, including seven directly modified packages and dependent packages. Reconcile the generated release PR diff and target list and obtain explicit authorization before publication. This proposal is separate from the completed previous 45-version release.
+
+| Package                               | Current | Proposed |
+| ------------------------------------- | ------- | -------- |
+| @multi-game-engines/adapter-bridge    | 1.0.6   | 1.0.7    |
+| @multi-game-engines/adapter-edax      | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-ensemble  | 1.0.5   | 1.0.6    |
+| @multi-game-engines/adapter-gnubg     | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-gtp       | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-janggi    | 0.1.8   | 0.1.9    |
+| @multi-game-engines/adapter-katago    | 1.0.6   | 1.0.7    |
+| @multi-game-engines/adapter-kingsrow  | 1.0.6   | 1.0.7    |
+| @multi-game-engines/adapter-mortal    | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-poker     | 1.0.6   | 1.0.7    |
+| @multi-game-engines/adapter-stockfish | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-uci       | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-usi       | 1.0.7   | 1.0.8    |
+| @multi-game-engines/adapter-xiangqi   | 0.1.8   | 0.1.9    |
+| @multi-game-engines/adapter-yaneuraou | 1.0.7   | 1.0.8    |
+| @multi-game-engines/core              | 0.2.3   | 0.2.4    |
+| @multi-game-engines/domain-backgammon | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-bridge     | 0.2.6   | 0.2.7    |
+| @multi-game-engines/domain-checkers   | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-chess      | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-go         | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-gomoku     | 0.1.8   | 0.1.9    |
+| @multi-game-engines/domain-janggi     | 0.1.8   | 0.1.9    |
+| @multi-game-engines/domain-mahjong    | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-poker      | 0.2.6   | 0.2.7    |
+| @multi-game-engines/domain-reversi    | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-shogi      | 0.1.6   | 0.1.7    |
+| @multi-game-engines/domain-xiangqi    | 0.1.8   | 0.1.9    |
+| @multi-game-engines/i18n-chess        | 0.1.3   | 0.1.4    |
+| @multi-game-engines/i18n-common       | 0.1.4   | 0.1.5    |
+| @multi-game-engines/i18n-core         | 0.1.3   | 0.1.4    |
+| @multi-game-engines/i18n-dashboard    | 0.1.3   | 0.1.4    |
+| @multi-game-engines/i18n-engines      | 0.1.3   | 0.1.4    |
+| @multi-game-engines/i18n-shogi        | 0.1.3   | 0.1.4    |
+| @multi-game-engines/registry          | 1.1.5   | 1.1.6    |
+| @multi-game-engines/ui-chess          | 0.1.8   | 0.1.9    |
+| @multi-game-engines/ui-chess-elements | 0.1.7   | 0.1.8    |
+| @multi-game-engines/ui-chess-react    | 0.1.7   | 0.1.8    |
+| @multi-game-engines/ui-chess-vue      | 0.1.8   | 0.1.9    |
+| @multi-game-engines/ui-core           | 0.1.6   | 0.1.7    |
+| @multi-game-engines/ui-elements       | 0.1.9   | 0.1.10   |
+| @multi-game-engines/ui-react          | 0.1.11  | 0.1.12   |
+| @multi-game-engines/ui-react-core     | 0.1.6   | 0.1.7    |
+| @multi-game-engines/ui-react-monitor  | 0.2.6   | 0.2.7    |
+| @multi-game-engines/ui-shogi          | 0.1.8   | 0.1.9    |
+| @multi-game-engines/ui-shogi-elements | 0.1.7   | 0.1.8    |
+| @multi-game-engines/ui-shogi-react    | 0.1.7   | 0.1.8    |
+| @multi-game-engines/ui-shogi-vue      | 0.1.8   | 0.1.9    |
+| @multi-game-engines/ui-vue            | 0.1.10  | 0.1.11   |
+| @multi-game-engines/ui-vue-core       | 0.1.7   | 0.1.8    |
+| @multi-game-engines/ui-vue-monitor    | 0.2.6   | 0.2.7    |

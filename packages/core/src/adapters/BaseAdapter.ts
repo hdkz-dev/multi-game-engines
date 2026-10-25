@@ -377,7 +377,7 @@ export abstract class BaseAdapter<
       /* ignore */
     }
     this.infoController = null;
-    if (this._status === "busy" && !skipReadyTransition)
+    if (!skipReadyTransition && this._status === "busy")
       this.emitStatusChange("ready");
   }
 

@@ -58,7 +58,7 @@ export function createCheckersMove(move: string): CheckersMove {
     });
   }
   ProtocolValidator.assertNoInjection(move, "CheckersMove");
-  if (!/^\d+-\d+$/.test(move) && move !== "(none)") {
+  if (move !== "(none)" && !/^\d+-\d+$/.test(move)) {
     const i18nKey = createI18nKey("engine.errors.invalidCheckersMove");
     const i18nParams = { move };
     throw new EngineError({

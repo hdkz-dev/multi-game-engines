@@ -35,7 +35,7 @@ export function createTranslator<T extends string>(
     if (typeof value !== "string") return key as string;
     if (!params) return value;
     return Object.entries(params).reduce((str, [k, v]) => {
-      return str.replace(new RegExp(`{${k}}`, "g"), String(v));
+      return str.replace(new RegExp(`{${k}}`, "g"), () => String(v));
     }, value);
   };
 }

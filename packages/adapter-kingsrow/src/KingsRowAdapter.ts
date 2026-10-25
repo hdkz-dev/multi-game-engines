@@ -101,7 +101,7 @@ export class KingsRowAdapter extends BaseAdapter<
 
     // Reset to default position if requested or if game is uninitialised.
     const boardStr = options.board as string | undefined;
-    if (!this.game || !boardStr || boardStr === "startpos") {
+    if (!boardStr || boardStr === "startpos" || !this.game) {
       this.game = EnglishDraughts.setup();
     }
 
