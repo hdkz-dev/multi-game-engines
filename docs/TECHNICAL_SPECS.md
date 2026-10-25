@@ -1,5 +1,9 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
+## 最新確認の追補 (2026-10-25)
+
+PR #286・公開PR #280・追加PR #287はmainへ統合済み（最新確認時のmain `aca79a5`）。npmの全53パッケージで対象版とdist.integrityを確認し、更新45件の公開も確認した。GitHubのDependabot・CodeQL未解決警告は0件。一方、OSVのGHSA-vjh5-4x84-xrqpは修正済みNuxt 4.6.2を引き続き誤検出しており、上流PR #10504待ち。PR #287でNode 24.22.1・Release二重コミット解消・PR #285の固有試験保持を統合した。今回の別更新では、保護期間を経過したESLint React 5.28.8・Portless 0.15.11・Workers型5.20261024.1へ更新し、Node 24.22.1でキャッシュなしlint 98/98・typecheck 99/99・build 56/56、1,697件のVitestと13件のtooling試験を通過した。これらは開発用・privateパッケージの依存で、追加のnpm公開は不要。
+
 ## Release Actionのコミット責務 (2026-10-25)
 
 Changesets CLIとRelease Actionの二重コミットを解消するため、`.changeset/config.json`の`commit`を`false`にする。CLIはバージョン・changelog生成、Release Actionは生成結果のコミットを担当する。公開候補の内容・承認要件は変更しない。[ADR 066](adr/066-release-action-owns-version-commits.md)で根拠と検証条件を記録する。

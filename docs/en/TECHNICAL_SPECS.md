@@ -1,5 +1,9 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## Latest verification addendum (2026-10-25)
+
+PR #286, release PR #280 and follow-up PR #287 have merged into main (`aca79a5` at inspection). Exact versions and dist.integrity were verified for all 53 public npm packages, including the 45 updated releases. GitHub reports zero open Dependabot and CodeQL alerts. OSV still incorrectly matches fixed Nuxt 4.6.2 through GHSA-vjh5-4x84-xrqp; upstream PR #10504 remains pending. PR #287 integrated Node 24.22.1, Release commit ownership and the unique PR #285 regression test. This separate update adopts the now-mature ESLint React 5.28.8, Portless 0.15.11 and Workers types 5.20261024.1 updates. With Node 24.22.1, uncached lint 98/98, typecheck 99/99, build 56/56, 1,697 Vitest cases and 13 tooling tests passed. These dependency changes affect development tooling or private packages and require no further npm publication.
+
 ## Release Action commit ownership (2026-10-25)
 
 Set `commit` to `false` in `.changeset/config.json` to remove duplicate commit ownership between the Changesets CLI and Release Action. The CLI generates versions and changelogs; the Release Action commits the result. Release proposal contents and approval requirements remain unchanged. [ADR 066](adr/066-release-action-owns-version-commits.md) records the evidence and validation criteria.
