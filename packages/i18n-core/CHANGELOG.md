@@ -1,5 +1,11 @@
 # @multi-game-engines/i18n-core
 
+## 0.1.4
+
+### Patch Changes
+
+- [#289](https://github.com/hdkz-dev/multi-game-engines/pull/289) [`92663f5`](https://github.com/hdkz-dev/multi-game-engines/commit/92663f5c83a2b2f3692f74e50ddd68baa2ba4328) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Preserve literal translation parameter values containing dollar replacement tokens. Reorder internal guards without changing their outcomes while validating the maintained lint rules on Unicorn 79.
+
 ## 0.1.3
 
 ### Patch Changes
