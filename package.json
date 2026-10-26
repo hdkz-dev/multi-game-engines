@@ -43,8 +43,8 @@
     "docs": "npx typedoc",
     "docs:check": "npx typedoc --treatWarningsAsErrors",
     "lint:a11y": "oxlint --config .oxlintrc.json --deny-warnings packages examples",
-    "test:tooling": "node --test scripts/validation.test.mjs scripts/tooling-security.test.mjs",
-    "lint:tooling": "eslint --no-ignore scripts/doc-sync.js scripts/refresh-engine-sris.mjs scripts/fix-vue-declaration-imports.mjs scripts/validation.test.mjs --max-warnings 0 .pnpmfile.cjs scripts/tooling-security.test.mjs"
+    "test:tooling": "node --test scripts/validation.test.mjs scripts/tooling-security.test.mjs scripts/eslint-policy.test.mjs",
+    "lint:tooling": "eslint --no-ignore scripts/doc-sync.js scripts/refresh-engine-sris.mjs scripts/fix-vue-declaration-imports.mjs scripts/validation.test.mjs --max-warnings 0 .pnpmfile.cjs scripts/tooling-security.test.mjs eslint-unicorn-policy.mjs scripts/eslint-policy.test.mjs"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -66,7 +66,7 @@
     "eslint-plugin-promise": "^7.3.0",
     "eslint-plugin-storybook": "^10.6.3",
     "eslint-plugin-tsdoc": "^0.5.4",
-    "eslint-plugin-unicorn": "^64.0.0",
+    "eslint-plugin-unicorn": "^79.0.0",
     "eslint-plugin-wc": "^3.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",

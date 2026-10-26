@@ -54,7 +54,7 @@ async function calculateSRI(url) {
           .digest("base64");
         return `sha384-${hash}`;
       }
-      if (!isTransientStatus(response.status) || isLastAttempt) {
+      if (isLastAttempt || !isTransientStatus(response.status)) {
         console.warn(
           `  ⚠️ Warning: Failed to fetch ${url} (HTTP ${response.status}). Skipping update.`,
         );

@@ -325,16 +325,18 @@ export class ShogiBoard extends LitElement {
             tabindex="${this._focusedIndex === squareIdx ? "0" : "-1"}"
             @click="${() => (this._focusedIndex = squareIdx)}"
           >
-            ${piece
-              ? html`
-                <span
-                  class="piece ${isGotePiece(piece) ? "gote" : ""}"
-                  role="img"
-                  aria-hidden="true"
-                  >${pieceSymbol}</span
-                >
-              `
-              : ""}
+            ${
+              piece
+                ? html`
+                  <span
+                    class="piece ${isGotePiece(piece) ? "gote" : ""}"
+                    role="img"
+                    aria-hidden="true"
+                    >${pieceSymbol}</span
+                  >
+                `
+                : ""
+            }
           </div>
         `);
       }
@@ -380,8 +382,8 @@ export class ShogiBoard extends LitElement {
       const ariaLabel =
         count > 1
           ? handPieceCount
-              .replace("{piece}", pieceLabel || "")
-              .replace("{count}", String(count))
+              .replace("{piece}", () => pieceLabel || "")
+              .replace("{count}", () => String(count))
           : pieceLabel;
       return html`
         <span title="${pieceLabel}" aria-label="${ariaLabel}"

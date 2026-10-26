@@ -1,4 +1,10 @@
-import { EngineStatus, IEngine, IBaseSearchOptions, IBaseSearchInfo, IBaseSearchResult } from "@multi-game-engines/core";
+import {
+  EngineStatus,
+  IEngine,
+  IBaseSearchOptions,
+  IBaseSearchInfo,
+  IBaseSearchResult,
+} from "@multi-game-engines/core";
 import { EngineStore, Unsubscribe } from "../state/store.js";
 import { SubscriptionManager } from "../state/SubscriptionManager.js";
 
@@ -92,8 +98,8 @@ export class SearchMonitor<
 
       if (this.updateTimerId !== null) {
         if (
-          typeof this.updateTimerId === "number" &&
-          typeof cancelAnimationFrame !== "undefined"
+          typeof cancelAnimationFrame !== "undefined" &&
+          typeof this.updateTimerId === "number"
         ) {
           cancelAnimationFrame(this.updateTimerId);
         } else {

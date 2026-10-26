@@ -52,7 +52,7 @@ export const SearchStateTransformer = {
     };
 
     // PVの更新 (MultiPV対応)
-    if (validatedInfo.pv && multipv !== undefined) {
+    if (multipv !== undefined && validatedInfo.pv) {
       // 2026 Best Practice: Zod で変換済みのブランド型 Move[] をそのまま使用
       const validatedMoves = validatedInfo.pv;
 
