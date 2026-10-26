@@ -1,5 +1,14 @@
 # @multi-game-engines/ui-react-core
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [[`92663f5`](https://github.com/hdkz-dev/multi-game-engines/commit/92663f5c83a2b2f3692f74e50ddd68baa2ba4328)]:
+  - @multi-game-engines/core@0.2.4
+  - @multi-game-engines/ui-core@0.1.7
+  - @multi-game-engines/i18n-common@0.1.5
+
 ## 0.1.6
 
 ### Patch Changes
