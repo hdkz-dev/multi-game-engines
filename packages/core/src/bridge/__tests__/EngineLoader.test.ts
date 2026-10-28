@@ -414,4 +414,66 @@ describe("EngineLoader", () => {
     loader.revokeAll();
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
   });
+  it("rejects corrupt stored bytes before exposing a blob or completion", async () => {
+    vi.mocked(storage.get).mockResolvedValue(
+      new TextEncoder().encode("tampered").buffer,
+    );
+    const progress = vi.fn();
+    await expect(
+      loader.loadResource(
+        "secure",
+        { url: "https://example.com/engine", type: "script", sri: dummySRI },
+        { onProgress: progress },
+      ),
+    ).rejects.toMatchObject({ code: "SRI_MISMATCH" });
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(progress).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("separates cached blob identities by SRI", async () => {
+    vi.mocked(storage.get).mockResolvedValue(
+      new TextEncoder().encode("test").buffer,
+    );
+    await loader.loadResource("secure", {
+      url: "https://example.com/engine",
+      type: "script",
+      sri: dummySRI,
+    });
+    await expect(
+      loader.loadResource("secure", {
+        url: "https://example.com/engine",
+        type: "script",
+        sri: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      }),
+    ).rejects.toMatchObject({ code: "SRI_MISMATCH" });
+    expect(storage.get).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects an already aborted load before cache access", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(
+      loader.loadResource(
+        "secure",
+        { url: "https://example.com/engine", type: "script", sri: dummySRI },
+        { signal: controller.signal },
+      ),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(storage.get).not.toHaveBeenCalled();
+  });
+  it.each([
+    "https://user:password@example.com/engine",
+    "ftp://example.com/engine",
+    "https://exam\nple.com/engine",
+  ])("rejects unsafe cached URL %s before storage", async (url) => {
+    vi.mocked(storage.get).mockResolvedValue(
+      new TextEncoder().encode("test").buffer,
+    );
+    await expect(
+      loader.loadResource("secure", { url, type: "script", sri: dummySRI }),
+    ).rejects.toMatchObject({ code: "SECURITY_ERROR" });
+    expect(storage.get).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
 });

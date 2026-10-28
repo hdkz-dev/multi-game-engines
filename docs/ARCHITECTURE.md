@@ -1,5 +1,19 @@
 # アーキテクチャと設計
 
+## 2026-10-28 SRI・応答契約の修正（ローカル検証済み・統合待ち）
+
+M1b/M1cの修正はローカル検証済み、リモート検証・統合待ち。`ChunkedDownloader.download(url, { sri })`は全体SRIを型・実行時とも必須にし、省略を`SECURITY_ERROR`で拒否する。`EngineLoader`と直接ダウンローダーは保存データを再検証し、キャッシュ識別子はURL・SRI全体からSHA-256で生成し、固定長にする。旧キャッシュは再利用しない。複数SRIは既存SecurityAdvisorの最強アルゴリズム選択に従う。セグメントSRIは全体検証に追加し、segmentSizeと取得幅・hash数を一致させる。
+
+応答は安全な整数のContent-Length、完全一致する206 Content-Rangeとチャンク長を要求する。Range要求への200は拒否する。HEADの通信失敗/非成功は単一GETへfallbackできるが、セキュリティ拒否・中断・不正な長さはfallbackしない。圧縮単一応答は展開後の長さを圧縮時Content-Lengthと比較しない。`maxBytes`は既定512 MiBで、呼出側が明示的に調整でき、streamを上限超過時に中断する。ダウンロード完了通知はSRI・サイズ・中断確認の後だけに行う。
+
+直接APIのSRI省略互換性が変わるためcoreのminor changesetを追加する。移行は`{ sri }`を明示し、大規模資源では必要な`maxBytes`を指定する。EngineLoaderは宣言済みconfig.sizeを上限に用いる。`cacheKey()`の返値はPromiseとなり、awaitが必要。公開は別途対象版と承認を確認する。詳細は[ADR 069](adr/069-verified-resource-response-contract.md)。
+
+## 2026-10-28 保守監査と残件
+
+最新main `ce432366`にはPR #288・#289・#290が統合済み。Unicorn 79移行と51パッケージの公開は完了扱いとし、過去の「統合待ち」「公開待ち」は履歴として読む。現在の未処理はWorkers型更新PR #291、OSV監査、M1b（SRI・キャッシュ完全性）とM1c（応答契約）。TypeScript 7、上流対応後のパッチ撤去、F1–F5の外部前提・将来機能は別に残る。
+
+OSV監査はNuxt 4.6.2のGHSA-vjh5-4x84-xrqpに加え、deepmerge 4.3.1のGHSA-gcqx-w48m-w2h4を検出した。Nuxtの上流PR #10504は未統合。deepmergeはNuxt→Nitro→Rollup resolverの経路にあり、resolver 16.0.3の唯一の使用箇所（固定defaultsの複製）を`structuredClone`へ置換し、readPackage hookで依存を除く。CJS/ESMと不変の既定値を回帰検証する。Workers型の許容下限は5.20261025.1、解決版は保護期間経過済みの5.20261027.1。公開API・公開パッケージの変更はない。監査除外は追加しない。詳細は[ADR 068](adr/068-remove-deepmerge-from-resolver.md)。
+
 ## Unicorn 79への設定移行 (2026-10-26)
 
 main `d75a296`でPR #288の統合後検証を完了した。Releaseは追加公開なしで成功し、公開済み45版と保留changeset 0件を確認した。CIの失敗は承認済みGHSA-vjh5-4x84-xrqpの誤検出のみで、監査全体の成功とは扱わない。

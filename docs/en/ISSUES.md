@@ -1,5 +1,19 @@
 # Issue register (2026-10-09)
 
+## 2026-10-28 SRI and response contract changes (locally validated; integration pending)
+
+M1b/M1c are locally validated; remote verification and integration are pending. `ChunkedDownloader.download(url, { sri })` requires full-resource SRI in its type and at runtime; omission raises `SECURITY_ERROR`. Both EngineLoader and direct downloads revalidate persisted bytes. Cache identities hash complete URLs and SRI values with SHA-256 into fixed-length names, so old cache entries are not reused. Multiple hashes use SecurityAdvisor's strongest-algorithm selection. Segment hashes supplement the full hash and must match segmentSize, request width, and resource size.
+
+Responses require safe integer Content-Length values, exact 206 Content-Range intervals, and exact chunk lengths. A 200 response to a Range request is rejected. HEAD transport failures/non-success may fall back to a single GET; security refusal, abort, and malformed lengths cannot. Compressed single responses are not compared against compressed Content-Length. `maxBytes` defaults to 512 MiB and can be explicitly adjusted; streaming stops on overflow. Completion is emitted only after integrity, size, and abort checks.
+
+A core minor changeset records the direct API compatibility change. Migrate callers to explicit `{ sri }` and supply `maxBytes` when large resources require it. EngineLoader uses declared config.size as its limit. `cacheKey()` now returns a Promise and must be awaited. Publication requires separate version/scope approval. See [ADR 069](adr/069-verified-resource-response-contract.md).
+
+## 2026-10-28 maintenance audit and remaining work
+
+Main `ce432366` includes PRs #288, #289 and #290. The Unicorn 79 migration and 51-package release are complete; earlier integration/publication pending statements are historical. Remaining work includes Workers type update PR #291, OSV auditing, M1b (SRI/cache integrity), and M1c (response contracts). TypeScript 7, upstream-dependent patch removal, and F1–F5 external prerequisites/future features remain separate.
+
+OSV now reports GHSA-gcqx-w48m-w2h4 in deepmerge 4.3.1 in addition to the Nuxt 4.6.2 GHSA-vjh5-4x84-xrqp finding. Upstream Nuxt advisory PR #10504 remains open. The Nuxt→Nitro→Rollup resolver path uses deepmerge only to clone fixed defaults. A version-scoped patch replaces this operation with `structuredClone`, and a readPackage hook removes the dependency. Regression checks cover CJS/ESM and frozen defaults. Workers types use a ^5.20261025.1 range and resolve to mature 5.20261027.1. Public packages and APIs are unchanged; no audit exclusions are added. See [ADR 068](adr/068-remove-deepmerge-from-resolver.md).
+
 ## Current audit and next maintenance update (2026-10-15)
 
 Local and remote main agree at `56d8932`. PR #274 adopted 17 updates; PR #275 published four packages, reverified in npm with integrity metadata. Main has zero open CodeQL and Dependabot alerts. New PRs: #276 (Unicorn, failed CI), #277 (routine updates), #278 (Happy DOM 21, original CI passed). Consolidate Happy DOM 21 and Zod 4.6.7 into #277 and validate six packages. Close duplicate #278 only after #277 is confirmed merged. TypeScript 7, Unicorn 78, tsup 9 and other candidates require separate evaluation. M1b/M1c remain open.
@@ -37,19 +51,19 @@ Rechecked on 2026-10-09 against main `7391dbb` and the PR #272 fix branch. S1/S2
 
 Confirmed findings have code/configuration/API evidence. Investigation items are not claimed as demonstrated vulnerabilities. Deferred work needs upstream compatibility or external prerequisites. Completion requires the stated acceptance criteria, not merely successful CI.
 
-| ID  | Class / priority   | Evidence and impact                                                         | Next action / completion criteria                                                                                         |
-| --- | ------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| M1a | Complete / PR #269 | Zero main CodeQL alerts; pre-cache URL validation and safe transport        | Maintain regressions; post-merge CI passed                                                                                |
-| M1b | Confirmed / P0     | Public download API makes SRI optional and full verification conditional    | Reconcile mandatory-SRI policy with public contract and migration; preserve cache and segmented integrity                 |
-| M1c | Investigation / P1 | HEAD fallback, Range accepts 200, offsets advance by returned bytes         | Test cancellation, empty chunks, invalid lengths, mismatched/oversized responses and redirects; fix demonstrated failures |
-| Q1  | Complete / PR #269 | Public loadResource tests remove any and suppression                        | Maintain regressions; types and rejection regressions passed                                                              |
-| M2  | Ongoing / P1       | PR #274 adopted, #275 published; validate six updates in #277               | Remaining candidates are recorded in the October 15 snapshot                                                              |
-| M3a | Complete / P1      | PR #270 published all 45 versions; npm versions and dist.integrity verified | Repeat secret-safe authentication checks before future releases; current expiry remains private                           |
-| M3b | Complete / P1      | PR #266 aligned 24 documents and bilingual plans                            | Continue register/link maintenance; PR #270 publication completes M3a                                                     |
-| M4  | Deferred / P2      | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x         | Verify official upstream TS7 support, then declarations, API docs and gates                                               |
-| M5  | Deferred / P2      | Unicorn 64 vs latest 77; ES2022 target                                      | Investigate rules/APIs/runtime and fix violations without suppression                                                     |
-| M6  | Complete / PR #274 | Node types 26.6.5 passed Node 24 types, declarations and CI                 | Check Node 24 support for future APIs                                                                                     |
-| M7  | Deferred / P2      | Root configuration has 15 patches, 10 overrides and a readPackage hook      | Retire per upstream fix; frozen install, regressions and zero audits after removal                                        |
+| ID  | Class / priority             | Evidence and impact                                                                | Next action / completion criteria                                                                |
+| --- | ---------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| M1a | Complete / PR #269           | Zero main CodeQL alerts; pre-cache URL validation and safe transport               | Maintain regressions; post-merge CI passed                                                       |
+| M1b | Fixed / integration pending  | Mandatory full SRI, verified cache, complete cache identity                        | ADR 069 and regressions; core minor changeset; remote gates/review required                      |
+| M1c | Fixed / integration pending  | Exact 206 intervals, bounded lengths/streams, abort, completion after verification | ADR 069 regressions; remote gates/review required                                                |
+| Q1  | Complete / PR #269           | Public loadResource tests remove any and suppression                               | Maintain regressions; types and rejection regressions passed                                     |
+| M2  | Ongoing / P1                 | PR #274 adopted, #275 published; validate six updates in #277                      | Remaining candidates are recorded in the October 15 snapshot                                     |
+| M3a | Complete / P1                | PR #270 published all 45 versions; npm versions and dist.integrity verified        | Repeat secret-safe authentication checks before future releases; current expiry remains private  |
+| M3b | Complete / P1                | PR #266 aligned 24 documents and bilingual plans                                   | Continue register/link maintenance; PR #270 publication completes M3a                            |
+| M4  | Deferred / P2                | Installed typescript-eslint supports TS <6.1; TypeDoc through 6.0.x                | Verify official upstream TS7 support, then declarations, API docs and gates                      |
+| M5  | Complete / PRs #289 and #290 | Unicorn 79 and explicit rule policy released                                       | Maintain regression coverage; ADR 067 pending statements are historical                          |
+| M6  | Complete / PR #274           | Node types 26.6.5 passed Node 24 types, declarations and CI                        | Check Node 24 support for future APIs                                                            |
+| M7  | Upstream-dependent / P2      | Currently 13 patches, 14 overrides and readPackage hooks                           | The 15-patch/10-override inventory below is historical; retire individually after upstream fixes |
 
 Q1 identifies one confirmed occurrence, not a completed repository-wide any audit. M1c is a source-derived investigation list, not additional confirmed security alerts.
 

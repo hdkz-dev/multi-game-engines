@@ -1,3 +1,4 @@
+import { resourceCacheKey } from "./ResourceCacheKey.js";
 import { SecurityAdvisor } from "../capabilities/SecurityAdvisor.js";
 import { EngineError } from "../errors/EngineError.js";
 import {
@@ -10,11 +11,13 @@ import {
 /** HTTP Range リクエストによるチャンクダウンロードのオプション */
 export interface ChunkedDownloadOptions {
   /** SRI ハッシュ (sha256-/sha384-/sha512- プレフィックス形式) */
-  sri?: string | undefined;
+  sri: string;
   /** セグメント単位 SRI ハッシュ設定 (IEngineSourceConfig.segmentedSri と同形式) */
   segmentedSri?: ISegmentedSRI | undefined;
   /** チャンクサイズ (bytes)。デフォルト 4 MiB。 */
   chunkSize?: number | undefined;
+  /** 最大応答サイズ (bytes)。デフォルト 512 MiB。 */
+  maxBytes?: number | undefined;
   /** 進捗コールバック (loadedBytes, totalBytes?) */
   onProgress?: ProgressCallback | undefined;
   /** ダウンロード中断用シグナル */
@@ -44,6 +47,7 @@ export interface ChunkedDownloadResult {
 export class ChunkedDownloader {
   /** デフォルトチャンクサイズ: 4 MiB */
   static readonly DEFAULT_CHUNK_SIZE = 4 * 1024 * 1024;
+  static readonly DEFAULT_MAX_BYTES = 512 * 1024 * 1024;
 
   /**
    * 指定 URL からデータをダウンロードします。
@@ -53,25 +57,59 @@ export class ChunkedDownloader {
    */
   async download(
     url: string,
-    options: ChunkedDownloadOptions = {},
+    options: ChunkedDownloadOptions,
   ): Promise<ChunkedDownloadResult> {
+    SecurityAdvisor.validateResourceUrl(url);
+    options?.signal?.throwIfAborted();
+    if (!options?.sri) {
+      throw new EngineError({
+        code: EngineErrorCode.SECURITY_ERROR,
+        message: "SRI is required",
+      });
+    }
     const {
       sri,
       segmentedSri,
-      chunkSize = ChunkedDownloader.DEFAULT_CHUNK_SIZE,
+      chunkSize = segmentedSri?.segmentSize ??
+        ChunkedDownloader.DEFAULT_CHUNK_SIZE,
+      maxBytes = ChunkedDownloader.DEFAULT_MAX_BYTES,
       onProgress,
       signal,
       storage,
     } = options;
 
-    SecurityAdvisor.validateResourceUrl(url);
-    signal?.throwIfAborted();
+    if (!SecurityAdvisor.isValidSRI(sri)) {
+      throw new ChunkedDownloadError(`Invalid SRI format: ${sri}`, url);
+    }
+    if (
+      !Number.isSafeInteger(chunkSize) ||
+      chunkSize <= 0 ||
+      !Number.isSafeInteger(maxBytes) ||
+      maxBytes <= 0
+    ) {
+      throw new ChunkedDownloadError("Invalid download size limit", url);
+    }
+    if (
+      segmentedSri &&
+      (segmentedSri.segmentSize !== chunkSize ||
+        segmentedSri.hashes.length === 0 ||
+        segmentedSri.hashes.some((hash) => !SecurityAdvisor.isValidSRI(hash)))
+    ) {
+      throw new ChunkedDownloadError(
+        "Invalid segmented SRI configuration",
+        url,
+      );
+    }
 
     // ---- キャッシュ確認 ----
-    if (storage && sri) {
-      const cacheKey = this.cacheKey(url, sri);
+    if (storage) {
+      const cacheKey = await this.cacheKey(url, sri);
       const cached = await storage.get(cacheKey).catch(() => null);
       if (cached) {
+        signal?.throwIfAborted();
+        this.validateLength(cached.byteLength, maxBytes, url);
+        await this.verifyBuffer(cached, sri, segmentedSri, chunkSize, url);
+        signal?.throwIfAborted();
         onProgress?.({
           status: "completed",
           loadedBytes: cached.byteLength,
@@ -85,6 +123,17 @@ export class ChunkedDownloader {
 
     // ---- HEAD リクエストでサーバー能力を確認 ----
     const { acceptsRanges, totalBytes } = await this.probe(url, signal);
+    if (totalBytes !== null) this.validateLength(totalBytes, maxBytes, url);
+    if (
+      segmentedSri &&
+      totalBytes !== null &&
+      segmentedSri.hashes.length !== Math.ceil(totalBytes / chunkSize)
+    ) {
+      throw new ChunkedDownloadError(
+        "Segment hash count does not match resource size",
+        url,
+      );
+    }
 
     let buffer: ArrayBuffer;
 
@@ -94,27 +143,39 @@ export class ChunkedDownloader {
         url,
         totalBytes,
         chunkSize,
-        segmentedSri,
         onProgress,
         signal,
       );
     } else {
       // ---- フォールバック: 単一 fetch ----
-      buffer = await this.downloadSingle(url, totalBytes, onProgress, signal);
+      buffer = await this.downloadSingle(
+        url,
+        totalBytes,
+        maxBytes,
+        onProgress,
+        signal,
+      );
     }
 
     // ---- 全体 SRI 検証 ----
-    if (sri) {
-      await this.verifySri(buffer, sri, url);
-    }
+    await this.verifyBuffer(buffer, sri, segmentedSri, chunkSize, url);
+    signal?.throwIfAborted();
 
     // ---- キャッシュへ書き込み ----
-    if (storage && sri) {
-      await storage.set(this.cacheKey(url, sri), buffer).catch(() => {
+    if (storage) {
+      await storage.set(await this.cacheKey(url, sri), buffer).catch(() => {
         // キャッシュ書き込み失敗はダウンロード成功を妨げない
       });
     }
 
+    signal?.throwIfAborted();
+    onProgress?.({
+      status: "completed",
+      loadedBytes: buffer.byteLength,
+      totalBytes: buffer.byteLength,
+      percentage: 100,
+      resource: url,
+    });
     return {
       buffer,
       transferredBytes: buffer.byteLength,
@@ -138,9 +199,12 @@ export class ChunkedDownloader {
         method: "HEAD",
         ...(signal != null && { signal }),
       });
+      if (!res.ok) return { acceptsRanges: false, totalBytes: null };
+      const encoding = res.headers.get("content-encoding");
+      if (encoding && encoding !== "identity")
+        return { acceptsRanges: false, totalBytes: null };
       const acceptsRanges = res.headers.get("accept-ranges") === "bytes";
-      const cl = res.headers.get("content-length");
-      const totalBytes = cl ? parseInt(cl, 10) : null;
+      const totalBytes = this.contentLength(res, url);
       return { acceptsRanges, totalBytes };
     } catch (error: unknown) {
       signal?.throwIfAborted();
@@ -150,6 +214,7 @@ export class ChunkedDownloader {
       ) {
         throw error;
       }
+      if (error instanceof ChunkedDownloadError) throw error;
       // HEAD に失敗した場合 (CORS など) はフォールバックさせる
       return { acceptsRanges: false, totalBytes: null };
     }
@@ -160,13 +225,11 @@ export class ChunkedDownloader {
     url: string,
     totalBytes: number,
     chunkSize: number,
-    segmentedSri: ISegmentedSRI | undefined,
     onProgress: ProgressCallback | undefined,
     signal: AbortSignal | undefined,
   ): Promise<ArrayBuffer> {
     const result = new Uint8Array(totalBytes);
     let offset = 0;
-    let chunkIdx = 0;
 
     onProgress?.({
       status: "downloading",
@@ -187,28 +250,42 @@ export class ChunkedDownloader {
         ...(signal != null && { signal }),
       });
 
-      // 206 Partial Content または 200 OK を許容
-      if (!res.ok && res.status !== 206) {
+      if (res.status !== 206) {
         throw new ChunkedDownloadError(
           `Range request failed with HTTP ${res.status}: ${url}`,
           url,
         );
       }
 
-      const chunk = new Uint8Array(await res.arrayBuffer());
+      const expectedLength = end - offset + 1;
+      const encoding = res.headers.get("content-encoding");
+      if (
+        (encoding && encoding !== "identity") ||
+        res.headers.get("content-range") !==
+          `bytes ${offset}-${end}/${totalBytes}`
+      ) {
+        throw new ChunkedDownloadError(
+          "Invalid Content-Range or encoding",
+          url,
+        );
+      }
+      const declaredLength = this.contentLength(res, url);
+      if (declaredLength !== null && declaredLength !== expectedLength) {
+        throw new ChunkedDownloadError("Invalid chunk Content-Length", url);
+      }
+      const chunk = new Uint8Array(
+        await this.readBody(res, expectedLength, url, signal),
+      );
+      if (chunk.byteLength !== expectedLength) {
+        throw new ChunkedDownloadError("Invalid chunk length", url);
+      }
       result.set(chunk, offset);
 
-      // セグメント単位の SRI 検証
-      if (segmentedSri && chunkIdx < segmentedSri.hashes.length) {
-        await this.verifySri(chunk.buffer, segmentedSri.hashes[chunkIdx]!, url);
-      }
-
       offset += chunk.byteLength;
-      chunkIdx++;
 
       const pct = Math.round((offset / totalBytes) * 100);
       onProgress?.({
-        status: offset >= totalBytes ? "completed" : "downloading",
+        status: "downloading",
         loadedBytes: offset,
         totalBytes,
         percentage: pct,
@@ -223,6 +300,7 @@ export class ChunkedDownloader {
   private async downloadSingle(
     url: string,
     totalBytes: number | null,
+    maxBytes: number,
     onProgress: ProgressCallback | undefined,
     signal: AbortSignal | undefined,
   ): Promise<ArrayBuffer> {
@@ -239,24 +317,59 @@ export class ChunkedDownloader {
       redirect: "error",
       ...(signal != null && { signal }),
     });
-    if (!res.ok) {
+    if (res.status !== 200) {
       throw new ChunkedDownloadError(
         `Fetch failed with HTTP ${res.status}: ${url}`,
         url,
       );
     }
 
-    const buffer = await res.arrayBuffer();
-
-    onProgress?.({
-      status: "completed",
-      loadedBytes: buffer.byteLength,
-      totalBytes: buffer.byteLength,
-      percentage: 100,
-      resource: url,
-    });
+    const encoding = res.headers.get("content-encoding");
+    const declaredLength =
+      encoding && encoding !== "identity" ? null : this.contentLength(res, url);
+    if (declaredLength !== null)
+      this.validateLength(declaredLength, maxBytes, url);
+    const buffer = await this.readBody(
+      res,
+      Math.min(totalBytes ?? maxBytes, declaredLength ?? maxBytes, maxBytes),
+      url,
+      signal,
+    );
+    if (
+      (totalBytes !== null && buffer.byteLength !== totalBytes) ||
+      (declaredLength !== null && buffer.byteLength !== declaredLength)
+    ) {
+      throw new ChunkedDownloadError("Response length mismatch", url);
+    }
 
     return buffer;
+  }
+
+  private async verifyBuffer(
+    buffer: ArrayBuffer,
+    sri: string,
+    segmentedSri: ISegmentedSRI | undefined,
+    chunkSize: number,
+    url: string,
+  ): Promise<void> {
+    await this.verifySri(buffer, sri, url);
+    if (segmentedSri) {
+      if (
+        segmentedSri.hashes.length !== Math.ceil(buffer.byteLength / chunkSize)
+      ) {
+        throw new ChunkedDownloadError(
+          "Segment hash count does not match resource size",
+          url,
+        );
+      }
+      for (let index = 0; index < segmentedSri.hashes.length; index++) {
+        await this.verifySri(
+          buffer.slice(index * chunkSize, (index + 1) * chunkSize),
+          segmentedSri.hashes[index]!,
+          url,
+        );
+      }
+    }
   }
 
   /** SRI ハッシュを検証します (sha256/sha384/sha512) */
@@ -265,36 +378,75 @@ export class ChunkedDownloader {
     sri: string,
     url: string,
   ): Promise<void> {
-    const match = /^sha(256|384|512)-(.+)$/.exec(sri);
-    if (!match) {
-      throw new ChunkedDownloadError(`Invalid SRI format: ${sri}`, url);
+    if (!(await SecurityAdvisor.verifySRI(buffer, sri))) {
+      throw new ChunkedDownloadError(`SRI verification failed for ${url}`, url);
     }
+  }
 
-    const algo = `SHA-${match[1]}`;
-    const expected = match[2]!;
+  private validateLength(length: number, limit: number, url: string): void {
+    if (!Number.isSafeInteger(length) || length < 0 || length > limit) {
+      throw new ChunkedDownloadError("Response exceeds size limit", url);
+    }
+  }
 
-    const digest = await crypto.subtle.digest(algo, buffer);
-    // バイト列を Base64 に変換
-    const actual = btoa(
-      Array.from(new Uint8Array(digest))
-        .map((b) => String.fromCharCode(b))
-        .join(""),
-    );
+  private contentLength(response: Response, url: string): number | null {
+    const value = response.headers.get("content-length");
+    if (value === null) return null;
+    if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
+      throw new ChunkedDownloadError("Invalid Content-Length", url);
+    }
+    return Number(value);
+  }
 
-    if (actual !== expected) {
-      throw new ChunkedDownloadError(
-        `SRI verification failed for ${url} (expected ${sri})`,
-        url,
-      );
+  private async readBody(
+    response: Response,
+    limit: number,
+    url: string,
+    signal?: AbortSignal,
+  ): Promise<ArrayBuffer> {
+    if (!response.body) {
+      const buffer = await response.arrayBuffer();
+      signal?.throwIfAborted();
+      this.validateLength(buffer.byteLength, limit, url);
+      return buffer;
+    }
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let length = 0;
+    const abort = (): void => {
+      void reader.cancel(signal?.reason).catch(() => undefined);
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+    try {
+      while (true) {
+        signal?.throwIfAborted();
+        const { done, value } = await reader.read();
+        signal?.throwIfAborted();
+        if (done) break;
+        length += value.byteLength;
+        this.validateLength(length, limit, url);
+        chunks.push(value);
+      }
+      const buffer = new Uint8Array(length);
+      let offset = 0;
+      for (const chunk of chunks) {
+        buffer.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      return buffer.buffer;
+    } finally {
+      signal?.removeEventListener("abort", abort);
+      await reader.cancel().catch(() => undefined);
+      reader.releaseLock();
     }
   }
 
   /**
    * URL と SRI からストレージキャッシュキーを生成します。
-   * SRI の先頭 20 文字 + URL 末尾 40 文字で衝突しにくいキーを生成します。
+   * URL と SRI の全体を含め、異なるリソースやハッシュを分離します。
    */
-  cacheKey(url: string, sri: string): string {
-    return `chunked:${sri.slice(0, 20)}:${url.slice(-40)}`;
+  async cacheKey(url: string, sri: string): Promise<string> {
+    return `chunked:${await resourceCacheKey(url, sri)}`;
   }
 }
 

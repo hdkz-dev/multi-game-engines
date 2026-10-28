@@ -19,6 +19,7 @@ overrides:
   serialize-javascript@<7.1.3: ">=7.1.3 <8"
   fast-uri@>=3.0.0 <3.1.9: ">=3.1.9 <4"
 patchedDependencies:
+  "@rollup/plugin-node-resolve@16.0.3": patches/@rollup__plugin-node-resolve@16.0.3.patch
   rapid-draughts@1.0.6: patches/rapid-draughts@1.0.6.patch
   "@testing-library/jest-dom@7.0.1": patches/@testing-library__jest-dom@7.0.1.patch
   nitropack@2.13.5: patches/nitropack@2.13.5.patch

@@ -331,3 +331,28 @@ valid.enabled = "invalid";
     }),
   );
 });
+
+test("Rollup resolver clones and freezes defaults without deepmerge", async () => {
+  const resolverRequire = createRequire(
+    nitroRequire.resolve("@rollup/plugin-node-resolve"),
+  );
+  const { DEFAULTS, nodeResolve } = resolverRequire(
+    "@rollup/plugin-node-resolve",
+  );
+  assert.deepEqual(DEFAULTS.extensions, [".mjs", ".js", ".json", ".node"]);
+  assert.equal(Object.isFrozen(DEFAULTS), true);
+  assert.equal(Object.isFrozen(DEFAULTS.extensions), true);
+  const custom = nodeResolve({ extensions: [".custom"] });
+  assert.equal(custom.name, "node-resolve");
+  assert.deepEqual(DEFAULTS.extensions, [".mjs", ".js", ".json", ".node"]);
+  const esm = await import(
+    pathToFileURL(resolverRequire.resolve("../es/index.js")).href
+  );
+  assert.deepEqual(esm.DEFAULTS, DEFAULTS);
+  assert.equal(Object.isFrozen(esm.DEFAULTS.extensions), true);
+  const lock = await readFile(
+    new URL("../pnpm-lock.yaml", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(lock, /(?:^|\s)deepmerge@/);
+});
