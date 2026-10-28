@@ -1,5 +1,14 @@
 # @multi-game-engines/ui-vue-core
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`468c2d5`](https://github.com/hdkz-dev/multi-game-engines/commit/468c2d54e71b9da0bc029f335503254c3d1d3427)]:
+  - @multi-game-engines/core@0.3.0
+  - @multi-game-engines/i18n-common@0.1.5
+  - @multi-game-engines/ui-core@0.1.8
+
 ## 0.1.8
 
 ### Patch Changes

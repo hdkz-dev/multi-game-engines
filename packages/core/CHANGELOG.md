@@ -1,5 +1,11 @@
 # @multi-game-engines/core
 
+## 0.3.0
+
+### Minor Changes
+
+- [#292](https://github.com/hdkz-dev/multi-game-engines/pull/292) [`468c2d5`](https://github.com/hdkz-dev/multi-game-engines/commit/468c2d54e71b9da0bc029f335503254c3d1d3427) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Require a valid full-resource SRI for direct ChunkedDownloader calls and revalidate stored resources before exposing them. Callers must now pass `{ sri }`; segmented hashes supplement the required full hash. Download options add `maxBytes` (512 MiB by default), Range responses must exactly match requested intervals, and completion is emitted only after integrity checks. `cacheKey()` now returns a Promise of a fixed-length SHA-256 identity of the complete URL and SRI; existing cache entries are ignored and fetched again.
+
 ## 0.2.4
 
 ### Patch Changes

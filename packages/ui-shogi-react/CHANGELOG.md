@@ -1,5 +1,15 @@
 # @multi-game-engines/ui-shogi-react
 
+## 0.1.9
+
+### Patch Changes
+
+- Updated dependencies [[`468c2d5`](https://github.com/hdkz-dev/multi-game-engines/commit/468c2d54e71b9da0bc029f335503254c3d1d3427)]:
+  - @multi-game-engines/core@0.3.0
+  - @multi-game-engines/domain-shogi@0.1.8
+  - @multi-game-engines/i18n-shogi@0.1.4
+  - @multi-game-engines/ui-shogi-elements@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes
