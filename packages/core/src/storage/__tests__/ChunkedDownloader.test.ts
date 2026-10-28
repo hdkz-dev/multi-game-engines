@@ -3,11 +3,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   ChunkedDownloader,
   ChunkedDownloadError,
+  type ChunkedDownloadOptions,
 } from "../ChunkedDownloader.js";
 import { EngineError } from "../../errors/EngineError.js";
 import { EngineErrorCode, IFileStorage, ILoadProgress } from "../../types.js";
 
 const nativeFetch = globalThis.fetch;
+const nativeCrypto = globalThis.crypto;
 
 const VALID_SHA256_SRI = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; // will be mocked
 const INVALID_SRI = "sha256-INVALID_HASH_VALUE==============================";
@@ -53,7 +55,12 @@ function makeFetchMock(options: {
       return {
         ok: true,
         status: options.status ?? 206,
-        headers: { get: () => null },
+        headers: {
+          get: (key: string) =>
+            key === "content-range"
+              ? `bytes ${start}-${match?.[2]}/${options.contentLength}`
+              : null,
+        },
         arrayBuffer: async () => chunk ?? makeBuffer(0),
       };
     }
@@ -71,6 +78,12 @@ function makeFetchMock(options: {
 describe("ChunkedDownloader", () => {
   let downloader: ChunkedDownloader;
   let storage: IFileStorage;
+  function downloadVerified(
+    url: string,
+    options: Partial<ChunkedDownloadOptions> = {},
+  ) {
+    return downloader.download(url, { sri: VALID_SHA256_SRI, ...options });
+  }
 
   beforeEach(() => {
     downloader = new ChunkedDownloader();
@@ -106,7 +119,7 @@ describe("ChunkedDownloader", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await downloader.download("https://example.com/file.wasm", {
+    const result = await downloadVerified("https://example.com/file.wasm", {
       sri: VALID_SHA256_SRI,
       storage,
     });
@@ -123,7 +136,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", vi.fn());
 
     const events: ILoadProgress[] = [];
-    await downloader.download("https://example.com/file.wasm", {
+    await downloadVerified("https://example.com/file.wasm", {
       sri: VALID_SHA256_SRI,
       storage,
       onProgress: (p) => events.push(p),
@@ -146,12 +159,9 @@ describe("ChunkedDownloader", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await downloader.download(
-      "https://cdn.example.com/big.wasm",
-      {
-        chunkSize: 4,
-      },
-    );
+    const result = await downloadVerified("https://cdn.example.com/big.wasm", {
+      chunkSize: 4,
+    });
 
     expect(result.fromCache).toBe(false);
     expect(result.buffer.byteLength).toBe(8);
@@ -168,7 +178,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const events: ILoadProgress[] = [];
-    await downloader.download("https://cdn.example.com/big.wasm", {
+    await downloadVerified("https://cdn.example.com/big.wasm", {
       chunkSize: 4,
       onProgress: (p) => events.push(p),
     });
@@ -190,7 +200,7 @@ describe("ChunkedDownloader", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await downloader.download("https://example.com/file.wasm");
+    const result = await downloadVerified("https://example.com/file.wasm");
 
     expect(result.fromCache).toBe(false);
     expect(result.buffer.byteLength).toBe(16);
@@ -206,7 +216,7 @@ describe("ChunkedDownloader", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await downloader.download("https://example.com/small.wasm");
+    const result = await downloadVerified("https://example.com/small.wasm");
     expect(result.buffer.byteLength).toBe(4);
   });
 
@@ -219,7 +229,7 @@ describe("ChunkedDownloader", () => {
     const validSri = `sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`;
 
     await expect(
-      downloader.download("https://example.com/file.wasm", { sri: validSri }),
+      downloadVerified("https://example.com/file.wasm", { sri: validSri }),
     ).resolves.toBeDefined();
   });
 
@@ -228,7 +238,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      downloader.download("https://example.com/file.wasm", {
+      downloadVerified("https://example.com/file.wasm", {
         sri: INVALID_SRI,
       }),
     ).rejects.toBeInstanceOf(ChunkedDownloadError);
@@ -242,7 +252,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      downloader.download("https://example.com/missing.wasm"),
+      downloadVerified("https://example.com/missing.wasm"),
     ).rejects.toBeInstanceOf(ChunkedDownloadError);
   });
 
@@ -253,7 +263,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const sri = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-    await downloader.download("https://cdn.example.com/engine.wasm", {
+    await downloadVerified("https://cdn.example.com/engine.wasm", {
       sri,
       storage,
     });
@@ -265,11 +275,11 @@ describe("ChunkedDownloader", () => {
 
   // ---- cacheKey ----
 
-  it("generates deterministic cache keys", () => {
+  it("generates deterministic cache keys", async () => {
     const url = "https://cdn.example.com/engine.wasm";
     const sri = "sha384-abc123def456";
-    const key1 = downloader.cacheKey(url, sri);
-    const key2 = downloader.cacheKey(url, sri);
+    const key1 = await downloader.cacheKey(url, sri);
+    const key2 = await downloader.cacheKey(url, sri);
     expect(key1).toBe(key2);
     expect(key1).toContain("chunked:");
   });
@@ -288,7 +298,7 @@ describe("ChunkedDownloader", () => {
       clear: vi.fn(),
     };
 
-    const result = await downloader.download(
+    const result = await downloadVerified(
       "https://cdn.example.com/engine.wasm",
       {
         sri: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
@@ -305,7 +315,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      downloader.download("https://cdn.example.com/engine.wasm", {
+      downloadVerified("https://cdn.example.com/engine.wasm", {
         sri: "md5-not-a-valid-sri-prefix",
       }),
     ).rejects.toThrow(/Invalid SRI format/);
@@ -328,7 +338,7 @@ describe("ChunkedDownloader", () => {
       });
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await downloader.download(
+    const result = await downloadVerified(
       "https://cdn.example.com/engine.wasm",
       { sri: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" },
     );
@@ -364,7 +374,7 @@ describe("ChunkedDownloader", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      downloader.download("https://cdn.example.com/big.wasm", { chunkSize: 4 }),
+      downloadVerified("https://cdn.example.com/big.wasm", { chunkSize: 4 }),
     ).rejects.toBeInstanceOf(ChunkedDownloadError);
   });
 
@@ -388,17 +398,14 @@ describe("ChunkedDownloader", () => {
       ).crypto.subtle.digest,
     );
 
-    const result = await downloader.download(
-      "https://cdn.example.com/big.wasm",
-      {
-        chunkSize: 4,
-        segmentedSri: { segmentSize: 4, hashes: [segmentHash, segmentHash] },
-      },
-    );
+    const result = await downloadVerified("https://cdn.example.com/big.wasm", {
+      chunkSize: 4,
+      segmentedSri: { segmentSize: 4, hashes: [segmentHash, segmentHash] },
+    });
 
     expect(result.buffer.byteLength).toBe(8);
     // 2 chunks => 2 verify calls (per-segment)
-    expect(digestSpy).toHaveBeenCalledTimes(2);
+    expect(digestSpy).toHaveBeenCalledTimes(3);
   });
   it.each([
     "http://example.com/engine.wasm",
@@ -413,7 +420,7 @@ describe("ChunkedDownloader", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     await expect(
-      downloader.download(url, { storage, sri: VALID_SHA256_SRI }),
+      downloadVerified(url, { storage, sri: VALID_SHA256_SRI }),
     ).rejects.toMatchObject({ code: EngineErrorCode.SECURITY_ERROR });
     expect(storage.get).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -426,7 +433,7 @@ describe("ChunkedDownloader", () => {
       chunks: [makeBuffer(4), makeBuffer(4)],
     });
     vi.stubGlobal("fetch", fetchMock);
-    await downloader.download("http://dashboard.localhost/engine.wasm", {
+    await downloadVerified("http://dashboard.localhost/engine.wasm", {
       chunkSize: 4,
     });
     expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -438,7 +445,7 @@ describe("ChunkedDownloader", () => {
   it("omits credentials and rejects redirects in fallback GET", async () => {
     const fetchMock = makeFetchMock({ singleBuffer: makeBuffer(4) });
     vi.stubGlobal("fetch", fetchMock);
-    await downloader.download("https://example.com/engine.wasm");
+    await downloadVerified("https://example.com/engine.wasm");
     expect(fetchMock).toHaveBeenLastCalledWith(
       "https://example.com/engine.wasm",
       expect.objectContaining({ credentials: "omit", redirect: "error" }),
@@ -453,7 +460,7 @@ describe("ChunkedDownloader", () => {
     const fetchMock = vi.fn().mockRejectedValue(error);
     vi.stubGlobal("fetch", fetchMock);
     await expect(
-      downloader.download("https://example.com/engine.wasm"),
+      downloadVerified("https://example.com/engine.wasm"),
     ).rejects.toBe(error);
     expect(fetchMock).toHaveBeenCalledOnce();
   });
@@ -464,7 +471,7 @@ describe("ChunkedDownloader", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     await expect(
-      downloader.download("https://example.com/engine.wasm", {
+      downloadVerified("https://example.com/engine.wasm", {
         signal: controller.signal,
         storage,
         sri: VALID_SHA256_SRI,
@@ -482,7 +489,7 @@ describe("ChunkedDownloader", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
     await expect(
-      downloader.download("https://example.com/engine.wasm", {
+      downloadVerified("https://example.com/engine.wasm", {
         signal: controller.signal,
       }),
     ).rejects.toMatchObject({ name: "AbortError" });
@@ -509,7 +516,7 @@ describe("ChunkedDownloader", () => {
         throw new Error("Missing server address");
       vi.stubGlobal("fetch", nativeFetch);
       await expect(
-        downloader.download(`http://127.0.0.1:${address.port}/redirect`),
+        downloadVerified(`http://127.0.0.1:${address.port}/redirect`),
       ).rejects.toThrow();
       expect(targetRequests).toBe(0);
     } finally {
@@ -521,5 +528,338 @@ describe("ChunkedDownloader", () => {
         }),
       );
     }
+  });
+  it("requires SRI before accessing cache or network", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloader.download("https://example.com/file", { sri: "", storage }),
+    ).rejects.toMatchObject({ code: EngineErrorCode.SECURITY_ERROR });
+    expect(storage.get).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid chunk and response limits %s before fetching",
+    async (size) => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      await expect(
+        downloadVerified("https://example.com/file", { chunkSize: size }),
+      ).rejects.toThrow("Invalid download size limit");
+      await expect(
+        downloadVerified("https://example.com/file", { maxBytes: size }),
+      ).rejects.toThrow("Invalid download size limit");
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { segmentSize: 4, hashes: [] },
+    { segmentSize: 4, hashes: ["invalid"] },
+    { segmentSize: 8, hashes: [VALID_SHA256_SRI] },
+  ])(
+    "rejects invalid segment configuration before fetching",
+    async (segmentedSri) => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      await expect(
+        downloadVerified("https://example.com/file", {
+          chunkSize: 4,
+          segmentedSri,
+        }),
+      ).rejects.toThrow("Invalid segmented SRI");
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects corrupt cached data without completing or fetching", async () => {
+    vi.mocked(storage.get).mockResolvedValue(makeBuffer(4));
+    vi.mocked(crypto.subtle.digest).mockResolvedValue(
+      new Uint8Array(32).fill(1).buffer,
+    );
+    const progress = vi.fn<(event: ILoadProgress) => void>();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(
+      downloadVerified("https://example.com/file", {
+        storage,
+        onProgress: progress,
+      }),
+    ).rejects.toThrow("SRI verification failed");
+    expect(progress).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it("keeps full URLs and hashes distinct in fixed-length cache keys", async () => {
+    vi.stubGlobal("crypto", nativeCrypto);
+    const suffix = "a".repeat(1000);
+    const first = await downloader.cacheKey(
+      `https://one.example/${suffix}`,
+      VALID_SHA256_SRI,
+    );
+    const second = await downloader.cacheKey(
+      `https://two.example/${suffix}`,
+      VALID_SHA256_SRI,
+    );
+    expect(first).not.toBe(second);
+    expect(first).toMatch(/^chunked:[a-f0-9]{64}$/);
+    expect(
+      await downloader.cacheKey(
+        "https://example.com/file",
+        `${VALID_SHA256_SRI}one`,
+      ),
+    ).not.toBe(
+      await downloader.cacheKey(
+        "https://example.com/file",
+        `${VALID_SHA256_SRI}two`,
+      ),
+    );
+  });
+
+  it.each(["-1", "1garbage", "1.5", "9007199254740992"])(
+    "rejects malformed HEAD Content-Length %s without fallback",
+    async (length) => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(
+          new Response(null, { headers: { "content-length": length } }),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+      await expect(
+        downloadVerified("https://example.com/file"),
+      ).rejects.toThrow("Invalid Content-Length");
+      expect(fetchMock).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("rejects oversized HEAD and cached data", async () => {
+    vi.stubGlobal("fetch", makeFetchMock({ contentLength: 9 }));
+    await expect(
+      downloadVerified("https://example.com/file", { maxBytes: 8 }),
+    ).rejects.toThrow("size limit");
+    vi.mocked(storage.get).mockResolvedValue(makeBuffer(9));
+    await expect(
+      downloadVerified("https://example.com/file", { maxBytes: 8, storage }),
+    ).rejects.toThrow("size limit");
+  });
+
+  it.each([
+    { status: 200, range: "bytes 0-3/8", size: 4 },
+    { status: 206, range: "bytes 1-4/8", size: 4 },
+    { status: 206, range: "bytes 0-3/9", size: 4 },
+    { status: 206, range: "bytes 0-3/8", size: 0 },
+    { status: 206, range: "bytes 0-3/8", size: 3 },
+    { status: 206, range: "bytes 0-3/8", size: 5 },
+  ])(
+    "rejects invalid Range response %j without completion",
+    async ({ status, range, size }) => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(
+          new Response(null, {
+            headers: { "accept-ranges": "bytes", "content-length": "8" },
+          }),
+        )
+        .mockResolvedValueOnce(
+          new Response(makeBuffer(size), {
+            status,
+            headers: { "content-range": range },
+          }),
+        );
+      vi.stubGlobal("fetch", fetchMock);
+      const progress = vi.fn<(event: ILoadProgress) => void>();
+      await expect(
+        downloadVerified("https://example.com/file", {
+          chunkSize: 4,
+          onProgress: progress,
+        }),
+      ).rejects.toBeInstanceOf(ChunkedDownloadError);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(
+        progress.mock.calls.some(([event]) => event.status === "completed"),
+      ).toBe(false);
+    },
+  );
+
+  it.each([{ "content-length": "3" }, { "content-encoding": "gzip" }])(
+    "rejects inconsistent Range headers %j",
+    async (headers) => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValueOnce(
+            new Response(null, {
+              headers: { "accept-ranges": "bytes", "content-length": "8" },
+            }),
+          )
+          .mockResolvedValueOnce(
+            new Response(makeBuffer(4), {
+              status: 206,
+              headers: { "content-range": "bytes 0-3/8", ...headers },
+            }),
+          ),
+      );
+      await expect(
+        downloadVerified("https://example.com/file", { chunkSize: 4 }),
+      ).rejects.toBeInstanceOf(ChunkedDownloadError);
+    },
+  );
+
+  it.each([true, false])(
+    "rejects missing segment hashes with HEAD size available: %s",
+    async (headSize) => {
+      vi.stubGlobal(
+        "fetch",
+        makeFetchMock({
+          ...(headSize ? { contentLength: 8 } : {}),
+          singleBuffer: makeBuffer(8),
+        }),
+      );
+      await expect(
+        downloadVerified("https://example.com/file", {
+          segmentedSri: { segmentSize: 4, hashes: [VALID_SHA256_SRI] },
+        }),
+      ).rejects.toThrow("Segment hash count");
+    },
+  );
+
+  it("verifies segments in single-fetch fallback using segmentSize", async () => {
+    vi.stubGlobal("fetch", makeFetchMock({ singleBuffer: makeBuffer(8) }));
+    await downloadVerified("https://example.com/file", {
+      segmentedSri: {
+        segmentSize: 4,
+        hashes: [VALID_SHA256_SRI, VALID_SHA256_SRI],
+      },
+    });
+    expect(crypto.subtle.digest).toHaveBeenCalledTimes(3);
+  });
+
+  it.each([4, 9])(
+    "rejects mismatching single response lengths %s",
+    async (length) => {
+      vi.stubGlobal(
+        "fetch",
+        vi
+          .fn()
+          .mockResolvedValueOnce(
+            new Response(null, { headers: { "content-length": "8" } }),
+          )
+          .mockResolvedValueOnce(
+            new Response(makeBuffer(length), {
+              headers: { "content-length": String(length) },
+            }),
+          ),
+      );
+      await expect(
+        downloadVerified("https://example.com/file"),
+      ).rejects.toBeInstanceOf(ChunkedDownloadError);
+    },
+  );
+
+  it("bounds unknown-length streaming bodies and cancels on overflow", async () => {
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(9));
+      },
+      cancel,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(new Response(null, { status: 405 }))
+        .mockResolvedValueOnce(new Response(stream)),
+    );
+    await expect(
+      downloadVerified("https://example.com/file", { maxBytes: 8 }),
+    ).rejects.toThrow("size limit");
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it("aborts an in-flight stream read and cancels the reader", async () => {
+    const controller = new AbortController();
+    const cancel = vi.fn();
+    const stream = new ReadableStream<Uint8Array>({
+      pull() {
+        controller.abort();
+      },
+      cancel,
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(new Response(null))
+        .mockResolvedValueOnce(new Response(stream)),
+    );
+    await expect(
+      downloadVerified("https://example.com/file", {
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it("never completes or caches an SRI mismatch after download", async () => {
+    vi.stubGlobal("fetch", makeFetchMock({ singleBuffer: makeBuffer(8) }));
+    const progress = vi.fn<(event: ILoadProgress) => void>();
+    await expect(
+      downloadVerified("https://example.com/file", {
+        sri: INVALID_SRI,
+        storage,
+        onProgress: progress,
+      }),
+    ).rejects.toThrow();
+    expect(
+      progress.mock.calls.some(([event]) => event.status === "completed"),
+    ).toBe(false);
+    expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it("accepts encoded single responses without comparing compressed lengths", async () => {
+    const headers = { "content-encoding": "gzip", "content-length": "2" };
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValueOnce(new Response(null, { headers }))
+        .mockResolvedValueOnce(new Response(makeBuffer(8), { headers })),
+    );
+    expect(
+      (await downloadVerified("https://example.com/file")).buffer.byteLength,
+    ).toBe(8);
+  });
+  it("uses real SRI and requires the strongest advertised hash", async () => {
+    vi.stubGlobal("crypto", nativeCrypto);
+    const bytes = new TextEncoder().encode("verified").buffer;
+    const digest = await nativeCrypto.subtle.digest("SHA-512", bytes);
+    const hash = `sha512-${btoa(String.fromCharCode(...new Uint8Array(digest)))}`;
+    vi.stubGlobal("fetch", makeFetchMock({ singleBuffer: bytes }));
+    await expect(
+      downloadVerified("https://example.com/file", {
+        sri: `${VALID_SHA256_SRI} ${hash}`,
+      }),
+    ).resolves.toMatchObject({ buffer: bytes });
+    vi.stubGlobal(
+      "fetch",
+      makeFetchMock({
+        singleBuffer: new TextEncoder().encode("tampered").buffer,
+      }),
+    );
+    await expect(
+      downloadVerified("https://example.com/file", { sri: hash }),
+    ).rejects.toThrow("SRI verification failed");
+  });
+
+  it("does not turn cache write failure into download failure", async () => {
+    vi.mocked(storage.set).mockRejectedValue(new Error("read-only"));
+    vi.stubGlobal("fetch", makeFetchMock({ singleBuffer: makeBuffer(4) }));
+    await expect(
+      downloadVerified("https://example.com/file", { storage }),
+    ).resolves.toMatchObject({ fromCache: false });
   });
 });

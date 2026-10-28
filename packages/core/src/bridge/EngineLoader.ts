@@ -1,3 +1,4 @@
+import { resourceCacheKey } from "../storage/ResourceCacheKey.js";
 import {
   IEngineLoader,
   IEngineSourceConfig,
@@ -42,9 +43,14 @@ export class EngineLoader implements IEngineLoader {
     options?: { signal?: AbortSignal; onProgress?: ProgressCallback },
   ): Promise<string> {
     this.validateResourceUrl(config, engineId);
+    SecurityAdvisor.validateResourceUrl(config.url);
+    options?.signal?.throwIfAborted();
 
     const safeId = engineId.replace(/[^a-zA-Z0-9]/g, "_");
-    const cacheKey = `${safeId}-${encodeURIComponent(config.url)}`;
+    const identity = await resourceCacheKey(config.url, config.sri ?? "unsafe");
+    options?.signal?.throwIfAborted();
+    const cacheKey = `${safeId}-${identity}`;
+    const storageKey = `resource:${identity}`;
 
     if (this.activeBlobs.has(cacheKey)) {
       return this.activeBlobs.get(cacheKey)!;
@@ -57,8 +63,10 @@ export class EngineLoader implements IEngineLoader {
     const performLoad = async (): Promise<string> => {
       try {
         if (this.storage) {
-          const cached = await this.storage.get(cacheKey);
+          const cached = await this.storage.get(storageKey);
           if (cached) {
+            if (config.sri) await SecurityAdvisor.assertSRI(cached, config.sri);
+            options?.signal?.throwIfAborted();
             options?.onProgress?.({
               status: "completed",
               loadedBytes: cached.byteLength,
@@ -88,6 +96,7 @@ export class EngineLoader implements IEngineLoader {
           const result = await this.chunkedDownloader.download(config.url, {
             sri: config.sri,
             segmentedSri: config.segmentedSri,
+            maxBytes: config.size,
             onProgress: options?.onProgress,
             signal: options?.signal ?? AbortSignal.timeout(300_000),
             storage: this.storage,
@@ -113,7 +122,7 @@ export class EngineLoader implements IEngineLoader {
 
           buffer = await response.arrayBuffer();
           if (this.storage) {
-            void this.storage.set(cacheKey, buffer);
+            void this.storage.set(storageKey, buffer);
           }
 
           options?.onProgress?.({
@@ -231,7 +240,7 @@ export class EngineLoader implements IEngineLoader {
           i18nKey: createI18nKey("engine.errors.sriBypassNotAllowed"),
         });
       }
-    } else if (!config.sri) {
+    } else if (!config.sri || !SecurityAdvisor.isValidSRI(config.sri)) {
       throw new EngineError({
         code: EngineErrorCode.SECURITY_ERROR,
         message: `SRI hash is required for resource: ${url}`,
