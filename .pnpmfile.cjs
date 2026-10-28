@@ -21,6 +21,12 @@ module.exports = {
         if (pkg.name === "fast-glob")
           pkg.dependencies["@isaacs/brace-expansion"] = "^5.0.1";
       }
+      if (
+        pkg.name === "@rollup/plugin-node-resolve" &&
+        pkg.version === "16.0.3"
+      ) {
+        delete pkg.dependencies.deepmerge;
+      }
       return pkg;
     },
   },
