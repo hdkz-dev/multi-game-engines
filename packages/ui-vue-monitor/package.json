@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@playwright/experimental-ct-vue": "^1.62.1",
-    "@storybook/vue3": "^10.6.3",
+    "@storybook/vue3": "^10.6.4",
     "@storybook/vue3-vite": "^10.6.3",
     "@types/node": "^26.6.5",
     "@vitejs/plugin-vue": "^6.0.10",
