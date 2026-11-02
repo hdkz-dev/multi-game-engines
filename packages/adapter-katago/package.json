@@ -38,7 +38,7 @@
     "@multi-game-engines/i18n-common": "workspace:*"
   },
   "dependencies": {
-    "onnxruntime-web": "^1.30.0"
+    "onnxruntime-web": "^1.31.1"
   },
   "devDependencies": {
     "@multi-game-engines/domain-go": "workspace:*",
