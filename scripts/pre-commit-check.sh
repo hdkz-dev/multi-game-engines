@@ -47,6 +47,15 @@ if [ $EXIT_CODE -ne 0 ]; then
     exit $EXIT_CODE
 fi
 
+# Formatting can change files after the interactive lint run. Check the entire
+# project here, including tooling .mjs files that lint-staged does not lint.
+echo "🔍 Running full lint after formatting..."
+pnpm lint
+if [ $? -ne 0 ]; then
+    echo "⚠️ Lint failed after formatting. Commit aborted."
+    exit 1
+fi
+
 # 3. Type Consistency Check (Reliability)
 # 全パッケージの整合性を確認するため、変更ファイルだけでなく全体をチェックします
 echo "⌨️  Running typecheck..."

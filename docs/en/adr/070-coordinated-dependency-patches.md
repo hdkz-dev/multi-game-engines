@@ -15,6 +15,8 @@ Nitro 2.13.6 uses archiver 8's ZipArchive API, and Parcel watcher 2.6.0 uses pic
 
 A regression test exposed Nitro including its output ZIP in itself, so a separate 2.13.6 patch excludes that file. Override Tailwind’s old watcher pin to 2.6.0 or later. Port the import-x rule from minimatch 11’s removed makeRe API to pattern matching and test both allow and forbid behavior. TypeDoc directory traversal also moves from the removed matchOne method to the public match API with partial matching.
 
+The pre-commit pipeline runs full lint after formatting, rejecting formatter-induced rule violations, including tooling .mjs files, before typecheck/build/test.
+
 ```mermaid
 flowchart LR
   A[更新候補と監査] --> B[依存ファミリーを同時解決]

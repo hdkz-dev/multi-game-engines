@@ -15,6 +15,8 @@ Nitro 2.13.6はarchiver 8のZipArchive APIを使用し、Parcel watcher 2.6.0は
 
 回帰試験ではNitroの出力ZIP自身の混入を検出したため、2.13.6向けに出力ファイルを除外する独立パッチを追加する。Tailwindの旧watcher固定は2.6.0以降へ上書きする。minimatch 11で削除されたmakeReを使うimport-xルールは、パターン照合APIへ移植し許可・禁止双方を検証する。 TypeDocのディレクトリ探索も、削除されたmatchOneから公開match APIのpartial指定へ移行する。
 
+コミット前処理では整形後に全lintを実行し、整形が導入する規則違反（toolingの.mjsも含む）をtypecheck/build/testの前に拒否する。
+
 ```mermaid
 flowchart LR
   A[更新候補と監査] --> B[依存ファミリーを同時解決]

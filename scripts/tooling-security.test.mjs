@@ -268,14 +268,17 @@ test("Nitro Azure deployment creates an archive with server files and routes", a
     );
     assert.equal(routes.entryPoint, "handle");
     const archive = await readFile(join(dir, "deploy.zip"));
-    assert.equal(archive.readUInt32LE(0), 0x04034b50);
+    assert.equal(archive.toString("latin1", 0, 4), "PK\u0003\u0004");
     const end = archive.length - 22;
-    assert.equal(archive.readUInt32LE(end), 0x06054b50);
+    assert.equal(archive.toString("latin1", end, end + 4), "PK\u0005\u0006");
     let offset = archive.readUInt32LE(end + 16);
     const names = [];
     const count = archive.readUInt16LE(end + 10);
     for (let index = 0; index < count; index++) {
-      assert.equal(archive.readUInt32LE(offset), 0x02014b50);
+      assert.equal(
+        archive.toString("latin1", offset, offset + 4),
+        "PK\u0001\u0002",
+      );
       const nameLength = archive.readUInt16LE(offset + 28);
       names.push(
         archive.toString("utf8", offset + 46, offset + 46 + nameLength),
