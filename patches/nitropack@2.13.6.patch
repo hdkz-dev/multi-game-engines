@@ -1,0 +1,21 @@
+diff --git a/dist/presets/azure/utils.mjs b/dist/presets/azure/utils.mjs
+--- a/dist/presets/azure/utils.mjs
++++ b/dist/presets/azure/utils.mjs
+@@ -2,7 +2,7 @@
+ import fsp from "node:fs/promises";
+ import { ZipArchive } from "archiver";
+ import { writeFile } from "nitropack/kit";
+-import { join, resolve } from "pathe";
++import { join, relative, resolve } from "pathe";
+ export async function writeFunctionsRoutes(nitro) {
+   const host = {
+     version: "2.0",
+@@ -176,7 +176,7 @@
+   const archive = new ZipArchive({ zlib: { level: 9 } });
+   const stream = createWriteStream(outfile);
+   return new Promise((resolve2, reject) => {
+-    archive.glob("**/*", { cwd: dir, nodir: true, dot: true, follow: true }).on("error", (err) => reject(err)).pipe(stream);
++    archive.glob("**/*", { cwd: dir, nodir: true, dot: true, follow: true, ignore: [relative(dir, outfile)] }).on("error", (err) => reject(err)).pipe(stream);
+     stream.on("close", () => resolve2(void 0));
+     archive.finalize();
+   });

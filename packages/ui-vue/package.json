@@ -51,8 +51,8 @@
   "devDependencies": {
     "@multi-game-engines/domain-chess": "workspace:*",
     "@multi-game-engines/domain-shogi": "workspace:*",
-    "@storybook/vue3": "^10.6.3",
-    "@storybook/vue3-vite": "^10.6.3",
+    "@storybook/vue3": "^10.6.5",
+    "@storybook/vue3-vite": "^10.6.5",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.6.5",
     "@vitejs/plugin-vue": "^6.0.10",
@@ -60,7 +60,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.3.5",
     "vite-plugin-dts": "^5.1.2",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "author": "hdkz-dev",
   "repository": {

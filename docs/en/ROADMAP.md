@@ -1,5 +1,13 @@
 # Project Roadmap (2026-2027)
 
+## 2026-11-07 Coordinated dependency and patch maintenance
+
+Update Nuxt 4.6.4, Vitest/coverage 5.1.0 and Storybook 10.6.5 together with their related packages. Retain the 24-hour release age, strict peers and unused-patch rejection. Remove the Azure ZIP and Parcel watcher patches only after confirming their fixes in Nitro 2.13.6 and watcher 2.6.0; port the Storybook declaration and Next.js root discovery patches. Resolve new advisories with glob 14.0.2 and minimatch 11.0.1. See [ADR 070](adr/070-coordinated-dependency-patches.md).
+
+The GHSA-vjh5-4x84-xrqp OSV false positive can remain after dependency updates. Do not report a successful audit until upstream source ranges, OSV distribution and direct queries are verified. GHSA-9v7c-q64q-vv33 is a real vulnerability requiring 4.6.3 or later. Record local checks, remote CI and main integration independently.
+
+A regression test exposed Nitro including its output ZIP in itself, so a separate 2.13.6 patch excludes that file. Override Tailwind’s old watcher pin to 2.6.0 or later. Port the import-x rule from minimatch 11’s removed makeRe API to pattern matching and test both allow and forbid behavior. TypeDoc directory traversal also moves from the removed matchOne method to the public match API with partial matching.
+
 ## 2026-10-28 SRI and response contract changes (locally validated; integration pending)
 
 M1b/M1c are locally validated; remote verification and integration are pending. `ChunkedDownloader.download(url, { sri })` requires full-resource SRI in its type and at runtime; omission raises `SECURITY_ERROR`. Both EngineLoader and direct downloads revalidate persisted bytes. Cache identities hash complete URLs and SRI values with SHA-256 into fixed-length names, so old cache entries are not reused. Multiple hashes use SecurityAdvisor's strongest-algorithm selection. Segment hashes supplement the full hash and must match segmentSize, request width, and resource size.

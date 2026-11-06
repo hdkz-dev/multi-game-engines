@@ -1,5 +1,13 @@
 # アーキテクチャと設計
 
+## 2026-11-07 依存更新とパッチの整合性
+
+Nuxt 4.6.4、Vitest/coverage 5.1.0、Storybook 10.6.5を関連パッケージと同時に更新する。公開後24時間、strict peer、未使用パッチ拒否を維持する。Nitro 2.13.6のAzure ZIP修正とParcel watcher 2.6.0のpicomatch移行は上流実装を確認して独自パッチを撤去し、Storybook型定義とNext.jsのroot探索の修正は移植する。glob 14.0.2・minimatch 11.0.1で新規監査指摘に対応する。詳細は[ADR 070](adr/070-coordinated-dependency-patches.md)。
+
+OSVのGHSA-vjh5-4x84-xrqp誤検出は依存更新後も別に残り得る。GitHubの配信元範囲修正とOSV配信・直接照会を確認するまで監査成功とは扱わない。GHSA-9v7c-q64q-vv33は実脆弱性であり4.6.3以降への更新が必要。ローカル検証、リモートCI、main統合はそれぞれ独立に記録する。
+
+回帰試験ではNitroの出力ZIP自身の混入を検出したため、2.13.6向けに出力ファイルを除外する独立パッチを追加する。Tailwindの旧watcher固定は2.6.0以降へ上書きする。minimatch 11で削除されたmakeReを使うimport-xルールは、パターン照合APIへ移植し許可・禁止双方を検証する。 TypeDocのディレクトリ探索も、削除されたmatchOneから公開match APIのpartial指定へ移行する。
+
 ## 2026-10-28 SRI・応答契約の修正（ローカル検証済み・統合待ち）
 
 M1b/M1cの修正はローカル検証済み、リモート検証・統合待ち。`ChunkedDownloader.download(url, { sri })`は全体SRIを型・実行時とも必須にし、省略を`SECURITY_ERROR`で拒否する。`EngineLoader`と直接ダウンローダーは保存データを再検証し、キャッシュ識別子はURL・SRI全体からSHA-256で生成し、固定長にする。旧キャッシュは再利用しない。複数SRIは既存SecurityAdvisorの最強アルゴリズム選択に従う。セグメントSRIは全体検証に追加し、segmentSizeと取得幅・hash数を一致させる。

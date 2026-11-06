@@ -7,14 +7,13 @@ module.exports = {
         pkg.dependencies["@peculiar/x509"] = "^2.1.0";
         pkg.dependencies["reflect-metadata"] = "^0.2.2";
       }
-      if (pkg.name === "@next/eslint-plugin-next" && pkg.version === "16.4.3") {
+      if (pkg.name === "@next/eslint-plugin-next" && pkg.version === "16.4.5") {
         delete pkg.dependencies["fast-glob"];
         pkg.dependencies.tinyglobby = "^0.2.17";
       }
       if (
         (pkg.name === "fast-glob" && pkg.version === "3.3.3") ||
-        (pkg.name === "globby" && pkg.version === "16.2.4") ||
-        (pkg.name === "@parcel/watcher" && pkg.version === "2.5.1")
+        (pkg.name === "globby" && pkg.version === "16.2.4")
       ) {
         delete pkg.dependencies.micromatch;
         pkg.dependencies.picomatch = "^4.0.4";

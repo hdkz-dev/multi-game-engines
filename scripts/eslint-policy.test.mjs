@@ -3,6 +3,7 @@ import test from "node:test";
 import { resolve, dirname } from "node:path";
 import { ESLint, Linter } from "eslint";
 import unicorn from "eslint-plugin-unicorn";
+import { importX } from "eslint-plugin-import-x";
 import { unicornRules } from "../eslint-unicorn-policy.mjs";
 
 // Independent baseline captured from the effective Unicorn 64 project config.
@@ -122,4 +123,42 @@ test("Unicorn policy rejects unsafe constructs and accepts safe equivalents", ()
       rule,
     );
   }
+});
+
+test("internal import restrictions retain allow and forbid glob behavior with minimatch 11", () => {
+  const linter = new Linter();
+  function check(source, options) {
+    return linter.verify(
+      source,
+      {
+        plugins: { "import-x": importX },
+        rules: { "import-x/no-internal-modules": ["error", options] },
+      },
+      { filename: resolve("import-contract.mjs") },
+    );
+  }
+  assert.equal(
+    check('import helper from "./scripts/validation.test.mjs";', {
+      allow: ["**/validation.test.mjs"],
+    }).length,
+    0,
+  );
+  assert.equal(
+    check('import helper from "./scripts/doc-sync.js";', {
+      allow: ["**/validation.test.mjs"],
+    }).length,
+    1,
+  );
+  assert.equal(
+    check('import helper from "./scripts/doc-sync.js";', {
+      forbid: ["**/doc-sync.js"],
+    }).length,
+    1,
+  );
+  assert.equal(
+    check('import helper from "./scripts/validation.test.mjs";', {
+      forbid: ["**/doc-sync.js"],
+    }).length,
+    0,
+  );
 });
