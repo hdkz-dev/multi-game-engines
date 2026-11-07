@@ -2,6 +2,14 @@
 module.exports = {
   hooks: {
     readPackage(pkg) {
+      // The formatter loads the invoking ESLint; do not install its obsolete ESLint 8.
+      if (
+        pkg.name === "@microsoft/eslint-formatter-sarif" &&
+        pkg.version === "3.1.0"
+      ) {
+        delete pkg.dependencies.eslint;
+        pkg.peerDependencies = { ...pkg.peerDependencies, eslint: "^10.13.0" };
+      }
       if (pkg.name === "listhen" && pkg.version === "1.10.1") {
         delete pkg.dependencies["node-forge"];
         pkg.dependencies["@peculiar/x509"] = "^2.1.0";

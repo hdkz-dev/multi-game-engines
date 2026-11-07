@@ -2,11 +2,19 @@
 
 ## 2026-11-07 依存更新とパッチの整合性
 
-Nuxt 4.6.4、Vitest/coverage 5.1.0、Storybook 10.6.5を関連パッケージと同時に更新する。公開後24時間、strict peer、未使用パッチ拒否を維持する。Nitro 2.13.6のAzure ZIP修正とParcel watcher 2.6.0のpicomatch移行は上流実装を確認して独自パッチを撤去し、Storybook型定義とNext.jsのroot探索の修正は移植する。glob 14.0.2・minimatch 11.0.1で新規監査指摘に対応する。詳細は[ADR 070](adr/070-coordinated-dependency-patches.md)。
+現状の基準はmain `964f1e98`（PR #292/#293統合済み）。M1b/M1cのSRI・キャッシュ・応答契約の修正と対応する公開は2026-10-28の担当チャットで完了しており、PR #291もクローズ済み。以下の古い日付の「統合待ち」「公開待ち」は当時の履歴であり、現在の残件ではない。本作業は公開パッケージのruntimeソース・版・本番依存・exports・peerを変更せず、追加npm公開は不要。過去公開物の全tarball再照合を今回実施したとは扱わない。PR #301の追加修正は新headの検証・レビュー・統合が必要であり、mainに反映済みとは扱わない。
+
+Nuxt 4.6.4、Vitest/coverage 5.1.0、Storybook 10.6.6を関連パッケージと同時に更新する。公開後24時間、strict peer、未使用パッチ拒否を維持する。Nitro 2.13.6のAzure ZIP修正とParcel watcher 2.6.0のpicomatch移行は上流実装を確認して独自パッチを撤去し、Storybook型定義とNext.jsのroot探索の修正は移植する。glob 14.0.2・minimatch 11.0.1で新規監査指摘に対応する。詳細は[ADR 070](adr/070-coordinated-dependency-patches.md)。
 
 OSVのGHSA-vjh5-4x84-xrqp誤検出は依存更新後も別に残り得る。GitHubの配信元範囲修正とOSV配信・直接照会を確認するまで監査成功とは扱わない。GHSA-9v7c-q64q-vv33は実脆弱性であり4.6.3以降への更新が必要。ローカル検証、リモートCI、main統合はそれぞれ独立に記録する。
 
 回帰試験ではNitroの出力ZIP自身の混入を検出したため、2.13.6向けに出力ファイルを除外する独立パッチを追加する。Tailwindの旧watcher固定は2.6.0以降へ上書きする。minimatch 11で削除されたmakeReを使うimport-xルールは、パターン照合APIへ移植し許可・禁止双方を検証する。 TypeDocのディレクトリ探索も、削除されたmatchOneから公開match APIのpartial指定へ移行する。
+
+同日の協調監査で、import-xのドットファイル判定の回帰を実fixtureで再現した。元の経路と末尾slash付き経路、それぞれの既定/dot判定を比較し、禁止はOR、許可はANDで束ねる。否定パターン・末尾/**のゼロ階層境界も回帰試験に含める。独立比較33,660組では従来の禁止縮小・許可拡大0件だが、全パターンの数学的な完全互換とは主張しない。旧makeReとの完全互換ではなく、曖昧なドット経路を安全側へ限定する。正規/隠しファイル・明示ドット・否定globの回帰を追加する。
+
+SARIF formatter 3.1.0をrootとlockfileに固定し、CIの動的pnpm addを撤去する。formatterは実行側ESLintを参照するため、バージョン限定hookで古いESLint8依存を検証済みESLint10のpeerへ訂正し、実CLIのSARIF形式・実行版・違反記録を検証する。Nitro2.13.6自身と同じ不要Archiver overrideも撤去する。
+
+npm公式の公開日時を再照合し、24時間経過済みの同一major更新37種類を選定した。Storybook10.6.6とVue3.5.45、Next16.4.5、ESLint10.14等を採用する。TypeScript7のpeer非互換、jsdom31のmajor移行、公開24時間未満の最新版は別に残す。過去の10.6.6待機判断はその時点の時刻に基づくもので、永久保留ではない。
 
 ## 2026-10-28 SRI・応答契約の修正（ローカル検証済み・統合待ち）
 

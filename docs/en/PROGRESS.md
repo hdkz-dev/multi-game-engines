@@ -1,5 +1,9 @@
 # Current project progress
 
+## 2026-11-07 Coordinated dependency and CI audit
+
+Select mature releases including ESLint 10.14.0 and Storybook 10.6.6, separating the known OSV range problem from real vulnerabilities. Fix the independently discovered hidden/zero-depth import boundaries, dynamic SARIF dependency installation, redundant override and stale status text. Completion requires local and remote checks at the new head. Retain public dependency lower bounds and validate mature versions within those ranges in the lockfile. No additional publication or administrator merge is performed.
+
 ## 2026-10-28 SRI and response contract changes (locally validated; integration pending)
 
 M1b/M1c are locally validated; remote verification and integration are pending. `ChunkedDownloader.download(url, { sri })` requires full-resource SRI in its type and at runtime; omission raises `SECURITY_ERROR`. Both EngineLoader and direct downloads revalidate persisted bytes. Cache identities hash complete URLs and SRI values with SHA-256 into fixed-length names, so old cache entries are not reused. Multiple hashes use SecurityAdvisor's strongest-algorithm selection. Segment hashes supplement the full hash and must match segmentSize, request width, and resource size.

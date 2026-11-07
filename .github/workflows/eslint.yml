@@ -33,9 +33,6 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install SARIF formatter
-        run: pnpm add -D @microsoft/eslint-formatter-sarif --ignore-workspace-root-check
-
       - name: Check accessibility
         run: pnpm lint:a11y
 

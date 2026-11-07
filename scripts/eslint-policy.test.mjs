@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, join } from "node:path";
+import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { createRequire } from "node:module";
+import { spawnSync } from "node:child_process";
+import process from "node:process";
 import { ESLint, Linter } from "eslint";
 import unicorn from "eslint-plugin-unicorn";
 import { importX } from "eslint-plugin-import-x";
@@ -161,4 +166,79 @@ test("internal import restrictions retain allow and forbid glob behavior with mi
     }).length,
     0,
   );
+});
+
+test("internal import restrictions do not loosen for hidden files or negated globs", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "mge-import-boundary-"));
+  try {
+    for (const folder of ["private", "other"]) {
+      await mkdir(join(dir, folder));
+      for (const file of ["public.js", ".secret.js"]) {
+        await writeFile(join(dir, folder, file), "export default 1;\n");
+      }
+    }
+    await writeFile(join(dir, "other/private"), "export default 1;\n");
+    const linter = new Linter({ cwd: dir });
+    const cases = [
+      ["other/private", { forbid: ["**/private/**"] }, 1],
+      ["other/private", { allow: ["!**/private/**"] }, 1],
+      ["private/public.js", { forbid: ["**/private/**"] }, 1],
+      ["private/.secret.js", { forbid: ["**/private/**"] }, 1],
+      ["private/public.js", { allow: ["**/private/**"] }, 0],
+      ["private/.secret.js", { allow: ["**/private/**"] }, 1],
+      ["private/.secret.js", { allow: ["**/private/.*"] }, 0],
+      ["private/.secret.js", { allow: ["!**/private/**"] }, 1],
+      ["private/public.js", { forbid: ["!**/private/**"] }, 0],
+      ["private/.secret.js", { forbid: ["!**/private/**"] }, 1],
+      ["private/.secret.js", { forbid: ["!**/private/*"] }, 1],
+      ["other/public.js", { forbid: ["!**/private/**"] }, 1],
+    ];
+    for (const [path, options, violations] of cases) {
+      const messages = linter.verify(
+        `import value from "./${path}";`,
+        {
+          plugins: { "import-x": importX },
+          rules: { "import-x/no-internal-modules": ["error", options] },
+        },
+        { filename: join(dir, "entry.mjs") },
+      );
+      assert.equal(
+        messages.length,
+        violations,
+        JSON.stringify({ path, options, messages }),
+      );
+    }
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("locked SARIF formatter reports the invoking ESLint and real violations", () => {
+  const require = createRequire(import.meta.url);
+  const cli = join(
+    dirname(require.resolve("eslint/package.json")),
+    "bin/eslint.js",
+  );
+  const result = spawnSync(
+    process.execPath,
+    [
+      cli,
+      "--no-config-lookup",
+      "--no-ignore",
+      "--rule",
+      "no-debugger:error",
+      "--stdin",
+      "--stdin-filename",
+      "sarif-contract.js",
+      "--format",
+      "@microsoft/eslint-formatter-sarif",
+    ],
+    { input: "debugger;\n", encoding: "utf8" },
+  );
+  assert.equal(result.status, 1, result.stderr);
+  const sarif = JSON.parse(result.stdout);
+  assert.equal(sarif.version, "2.1.0");
+  assert.equal(sarif.runs[0].tool.driver.name, "ESLint");
+  assert.equal(sarif.runs[0].tool.driver.version, ESLint.version);
+  assert.equal(sarif.runs[0].results[0].ruleId, "no-debugger");
 });

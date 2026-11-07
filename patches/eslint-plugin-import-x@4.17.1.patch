@@ -21,11 +21,11 @@ diff --git a/lib/rules/no-internal-modules.js b/lib/rules/no-internal-modules.js
 +        const forbidPatterns = options.forbid || [];
          function reachingAllowed(importPath) {
 -            return allowRegexps.some(re => re.test(importPath));
-+            return allowPatterns.some(pattern => minimatch(importPath, pattern));
++            return allowPatterns.some(pattern => [importPath, `${importPath}/`].every(path => minimatch(path, pattern) && minimatch(path, pattern, { dot: true })));
          }
          function reachingForbidden(importPath) {
 -            return forbidRegexps.some(re => re.test(importPath));
-+            return forbidPatterns.some(pattern => minimatch(importPath, pattern));
++            return forbidPatterns.some(pattern => [importPath, `${importPath}/`].some(path => minimatch(path, pattern) || minimatch(path, pattern, { dot: true })));
          }
          function isAllowViolation(importPath) {
              const steps = toSteps(importPath);
