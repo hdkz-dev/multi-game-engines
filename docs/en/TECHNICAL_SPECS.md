@@ -14,6 +14,8 @@ A coordinated audit reproduced an import-x hidden-file regression using real fix
 
 Lock SARIF formatter 3.1.0 at the root and remove CI's dynamic pnpm add. The formatter uses the invoking ESLint, so a version-scoped hook replaces its obsolete ESLint8 dependency with a validated ESLint10 peer. An actual CLI test verifies SARIF format, executing version and violations. Remove the redundant Archiver override already matched by Nitro2.13.6 itself.
 
+The repository-wide typed SARIF scan exhausted its 4GB heap. Isolate analysis in child processes while preserving every target and zero-warning enforcement, then aggregate LintResult and rule metadata and invoke the formatter once. Reject child failures and conflicting metadata; emit one SARIF run within GitHub's 20-run limit.
+
 Recheck official npm publication timestamps and select 37 same-major updates older than 24 hours, including Storybook10.6.6, Vue3.5.45, Next16.4.5 and ESLint10.14. Keep the TypeScript7 peer incompatibility, jsdom31 major migration and newer immature releases separate. The earlier Storybook10.6.6 age hold was time-specific, not permanent.
 
 ## 2026-10-28 SRI and response contract changes (locally validated; integration pending)

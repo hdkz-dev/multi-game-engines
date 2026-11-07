@@ -44,10 +44,7 @@ jobs:
           SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
-          pnpm exec eslint . \
-            --max-warnings 0 \
-            --format @microsoft/eslint-formatter-sarif \
-            --output-file eslint-results.sarif
+          node scripts/eslint-sarif.mjs --output-file eslint-results.sarif
 
       - name: Upload analysis results to GitHub
         if: ${{ !cancelled() && hashFiles('eslint-results.sarif') != '' }}

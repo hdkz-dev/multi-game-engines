@@ -14,6 +14,17 @@ OSVのGHSA-vjh5-4x84-xrqp誤検出は依存更新後も別に残り得る。GitH
 
 SARIF formatter 3.1.0をrootとlockfileに固定し、CIの動的pnpm addを撤去する。formatterは実行側ESLintを参照するため、バージョン限定hookで古いESLint8依存を検証済みESLint10のpeerへ訂正し、実CLIのSARIF形式・実行版・違反記録を検証する。Nitro2.13.6自身と同じ不要Archiver overrideも撤去する。
 
+全リポジトリを単一プロセスで型解析するSARIFジョブは4GB上限で停止したため、解析を独立プロセスへ分割する。全対象と警告ゼロ条件を維持し、LintResultとrule metadataを集約してformatterを一度だけ実行する。子プロセスの失敗・metadata衝突は拒否し、GitHubの20 runs制限に収まる単一SARIF runを出力する。
+
+```mermaid
+flowchart LR
+  R[Root and workspace targets] --> C[Serial isolated ESLint children]
+  C --> J[Lint results and rule metadata]
+  J --> V[Reject missing reports and conflicts]
+  V --> S[One SARIF formatter invocation]
+  S --> U[GitHub code scanning upload]
+```
+
 npm公式の公開日時を再照合し、24時間経過済みの同一major更新37種類を選定した。Storybook10.6.6とVue3.5.45、Next16.4.5、ESLint10.14等を採用する。TypeScript7のpeer非互換、jsdom31のmajor移行、公開24時間未満の最新版は別に残す。過去の10.6.6待機判断はその時点の時刻に基づくもので、永久保留ではない。
 
 ## 2026-10-28 SRI・応答契約の修正（ローカル検証済み・統合待ち）
