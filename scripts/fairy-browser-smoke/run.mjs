@@ -218,6 +218,11 @@ try {
           "An unisolated page must not start this threaded engine",
         );
         assert.equal(report.phase, "load");
+        assert.equal(
+          report.disposeError,
+          undefined,
+          "Expected capability rejection must still dispose successfully",
+        );
         assert.match(
           report.error.message,
           /crossOriginIsolated.*SharedArrayBuffer/,

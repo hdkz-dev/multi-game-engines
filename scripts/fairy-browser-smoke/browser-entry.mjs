@@ -95,11 +95,19 @@ globalThis.runFairySmoke = async (protocol) => {
       environment: environmentSnapshot(),
     };
   } catch (error) {
-    await engine.dispose();
+    let disposeError;
+    try {
+      await engine.dispose();
+    } catch (cause) {
+      disposeError = {
+        message: cause instanceof Error ? cause.message : String(cause),
+      };
+    }
     return {
       ok: false,
       protocol,
       phase,
+      disposeError,
       error: {
         message: error instanceof Error ? error.message : String(error),
       },
