@@ -236,3 +236,23 @@ test("all partitions still run after violations and receive zero-warning argumen
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test("missing workspace configuration fails instead of silently scanning monolithically", async () => {
+  const cwd = await fixture();
+  try {
+    await writeFile(
+      join(cwd, "package.json"),
+      JSON.stringify({ private: true }),
+    );
+    await writeFile(join(cwd, "eslint-results.sarif"), "stale");
+    await assert.rejects(
+      runESLintSarif({ cwd }),
+      /Expected a package.json workspaces array/,
+    );
+    await assert.rejects(readFile(join(cwd, "eslint-results.sarif")), {
+      code: "ENOENT",
+    });
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

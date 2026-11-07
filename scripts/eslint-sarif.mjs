@@ -32,7 +32,7 @@ export async function createPartitions(cwd) {
   const manifest = JSON.parse(
     await readFile(join(cwd, "package.json"), "utf8"),
   );
-  const patterns = manifest.workspaces ?? [];
+  const patterns = manifest.workspaces;
   if (
     !Array.isArray(patterns) ||
     patterns.some((pattern) => typeof pattern !== "string")
