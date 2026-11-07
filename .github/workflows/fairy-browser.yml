@@ -1,0 +1,38 @@
+name: Fairy-Stockfish browser
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  fairy-browser:
+    name: Fairy browser — real UCI and USI
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build SDK dependencies
+        run: pnpm --filter '@multi-game-engines/adapter-fairy-stockfish...' --filter '@multi-game-engines/adapter-fairy-stockfish-shogi...' build
+      - name: Install Chromium
+        working-directory: examples/zenith-dashboard-react
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Verify real factory, handshake, legal move and disposal
+        env:
+          FAIRY_SMOKE_REPORT: artifacts/fairy-browser/results.json
+        run: pnpm test:browser:fairy
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: fairy-browser-results
+          path: artifacts/fairy-browser
+          if-no-files-found: error

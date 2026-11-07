@@ -38,6 +38,8 @@ export class EngineFacade<
   private _lastError: EngineError | null = null;
   private loadPromise: Promise<void> | null = null;
   private disposed = false;
+  private readonly lifecycleAbort = new AbortController();
+  private disposalPromise: Promise<void> | undefined;
   private _internalStatusOverride: EngineStatus | null = null;
 
   public loadingStrategy?: EngineLoadingStrategy;
@@ -166,7 +168,21 @@ export class EngineFacade<
         if (!this.resolvedLoader) {
           this.resolvedLoader = await this.loaderProvider();
         }
-        await this.adapter.load(this.resolvedLoader);
+        if (this.disposed) throw new Error("Load cancelled due to dispose");
+        await this.adapter.load(
+          this.resolvedLoader,
+          this.lifecycleAbort.signal,
+        );
+        if (this.disposed) throw new Error("Load cancelled due to dispose");
+      } catch (error) {
+        if (this.disposed) {
+          throw new EngineError({
+            code: EngineErrorCode.CANCELLED,
+            message: "Load cancelled due to dispose",
+            engineId: this.id,
+          });
+        }
+        throw error;
       } finally {
         this.loadPromise = null;
       }
@@ -322,9 +338,24 @@ export class EngineFacade<
     this.currentSearchTask = null;
   }
 
-  async dispose(): Promise<void> {
-    if (this.disposed) return;
+  dispose(): Promise<void> {
     this.disposed = true;
+    this.disposalPromise ??= Promise.resolve().then(() =>
+      this.performDisposal(),
+    );
+    return this.disposalPromise;
+  }
+
+  private async performDisposal(): Promise<void> {
+    this.lifecycleAbort.abort();
+    // Non-cooperative adapters must settle loading before their resources can be disposed.
+    await this.loadPromise?.catch(() => {});
+    if (this.currentSearchTask) {
+      void this.adapter.stop();
+    }
+
+    // Keep verified resource URLs alive until the adapter's workers shut down.
+    await this.adapter.dispose().catch(() => {});
 
     const loader = this.resolvedLoader || (await this.loaderProvider());
     if (loader) {
@@ -333,12 +364,6 @@ export class EngineFacade<
         loader.revokeAll();
       }
     }
-
-    if (this.currentSearchTask) {
-      void this.adapter.stop();
-    }
-
-    void this.adapter.dispose().catch(() => {});
 
     this.middlewares = [];
     this.currentSearchTask = null;

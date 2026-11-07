@@ -35,6 +35,9 @@ export interface ICommunicator {
    */
   onMessage(callback: (data: unknown) => void): () => void;
 
+  /** Subscribe to asynchronous transport failures when supported. */
+  onError?(callback: (error: Error) => void): () => void;
+
   /**
    * Wait for the next message that satisfies `predicate`.
    *

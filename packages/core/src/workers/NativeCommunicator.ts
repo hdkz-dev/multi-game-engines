@@ -13,9 +13,9 @@ import type { ICommunicator } from "./ICommunicator.js";
  * Note: `postMessage` converts the value to a string before writing to
  * stdin, so callers should pass string commands for cross-runtime compatibility.
  *
- * `node:child_process` is imported dynamically inside `spawn` so that
- * browser bundlers (Webpack, Turbopack, Vite) do not encounter a static
- * reference to a Node.js built-in and can safely tree-shake this class away.
+ * This implementation belongs to the Node.js conditional package export.
+ * The browser/default export uses a separate entry without Node.js builtins.
+ * The dynamic import defers process API loading until spawn is requested.
  */
 export class NativeCommunicator implements ICommunicator {
   private child: ChildProcess | null = null;
@@ -30,8 +30,7 @@ export class NativeCommunicator implements ICommunicator {
   async spawn(): Promise<void> {
     if (this.child) return;
 
-    // Dynamic import keeps `node:child_process` out of the static module graph
-    // so browser bundlers do not attempt to resolve or bundle it.
+    // Load the Node.js process API only when native spawning is requested.
     const { spawn } = await import("node:child_process");
 
     this.child = spawn(this.binaryPath, [], {

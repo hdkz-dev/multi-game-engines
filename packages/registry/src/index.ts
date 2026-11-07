@@ -40,6 +40,7 @@ const EngineSourceSchema = z
     ]),
     size: z.number().optional(),
     mountPath: z.string().optional(),
+    workerFactory: z.literal("Stockfish").optional(),
   })
   .and(
     z.union([
