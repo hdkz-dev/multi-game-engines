@@ -4,9 +4,9 @@
  * Node.js-only entry point.  Import this subpath when building adapters that
  * run in Node.js (CLI tools, desktop apps, server-side analysis pipelines).
  *
- * **Do not import this from browser code.**  Browser bundles (webpack,
- * Turbopack, Vite) will fail to resolve the `node:child_process` dependency
- * that NativeCommunicator uses internally.
+ * The Node.js package condition selects this native implementation. Browser
+ * and other default resolvers receive a separate safe entry: worker selection
+ * remains available, while native process construction fails explicitly.
  *
  * @example
  * ```typescript

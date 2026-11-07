@@ -26,3 +26,11 @@ scripts/fairy-browser-smokeとCIに実factoryのbrowser試験を保持する。S
 ## ライフサイクルの中断
 
 終了時はlifecycle signalをabortし、進行中loadの確定を待ってからadapter停止と検証済み資源の解放を行う。loader生成後・資源ロード後にも中断を確認し、遅れて完了するcustom loaderからキャンセル後にWorkerが作られることを防ぐ。従来fetch30秒・chunked300秒の期限はlifecycle signalと合成して維持する。並行disposeは同じ完了を待つ。中断を無視して永遠に確定しない任意custom adapterまでPromise契約だけで強制停止できるとは扱わず、解放成功として報告しない。Worker障害は進行中探索を拒否し、以後の通信も拒否する。失敗操作でerror状態へ移行した後の明示loadで復帰できるが、自動再起動は行わない。
+
+## 標準package解決とCSP
+
+隔離clean consumerにより、標準resolverがcore/nodeからchild_processへ到達する既存のbrowser packaging失敗を検出した。従来のworkspace専用external規則はこの問題を隠していた。node条件には本来のNode ESM/CJS実装を維持し、defaultにはNative構築を拒否しWorker transportを生成できるbrowser-safe entryを選ぶ。SDK alias/native external無しの通常package exportsとbundle metafileで検証する。[Node条件付きexport仕様](https://nodejs.org/api/packages.html#conditional-exports)に従う。
+
+Chromium fixtureのCSPは `default-src 'none'; script-src 'self' blob: 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' blob: https://cdn.jsdelivr.net; base-uri 'none'; frame-ancestors 'none'`。unsafe-evalは許可しない。この条件下でBlob script import、検証済みWASM BlobのfetchとWASMコンパイルを実証する。これらの許可を欠くpolicyや全browser engineとの互換を確認済みとは扱わない。consumerのpolicyは本SDK差分で変更しない。
+
+失敗transportからのUCI/USI再ロードは、置換前に旧communicatorの購読を解除して終了する。最終dispose時に新世代だけが閉じられ旧Workerが残る状態を防ぐ。

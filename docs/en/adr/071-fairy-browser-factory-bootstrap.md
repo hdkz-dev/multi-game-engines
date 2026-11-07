@@ -26,3 +26,11 @@ Keep the real factory browser smoke in scripts/fairy-browser-smoke and CI. It ch
 ## Lifecycle cancellation
 
 Disposal aborts the lifecycle signal and waits for the in-flight load to settle before stopping the adapter and revoking verified resources. Check cancellation after loader creation and resource loading so a late custom loader cannot create a Worker after cancellation. Keep the existing 30-second fetch and 300-second chunked deadlines by composing timeout and lifecycle signals. Concurrent disposal calls share completion. An arbitrary custom adapter that ignores cancellation and never settles cannot be forcibly stopped by this Promise contract; do not report it as cleaned up. Worker faults reject in-flight searches and prevent later communication, while an explicit subsequent load may recover the adapter after the failed operation marks it as error.
+
+## Standard package resolution and CSP
+
+An isolated clean consumer exposed a pre-existing browser packaging failure: the standard resolver followed core/node into child_process. The earlier workspace-only external rule masked it. Keep the real Node ESM/CJS implementation under the node condition and select a browser-safe default entry that refuses native construction and can create Worker transports. Validate ordinary package exports without SDK aliases or native externals, including the bundle metafile. See the [Node conditional export contract](https://nodejs.org/api/packages.html#conditional-exports).
+
+The Chromium fixture CSP is `default-src 'none'; script-src 'self' blob: 'wasm-unsafe-eval'; worker-src 'self' blob:; connect-src 'self' blob: https://cdn.jsdelivr.net; base-uri 'none'; frame-ancestors 'none'`. It does not permit unsafe-eval. Blob script imports, verified WASM Blob fetches and WASM compilation are exercised under this exact policy. Compatibility with a policy omitting these allowances or every browser engine has not been verified. Consumer policy is not modified by this SDK change.
+
+Failed transport recovery terminates and unsubscribes the previous UCI/USI communicator before installing a replacement. A final dispose therefore owns and closes both transport generations.

@@ -2,7 +2,14 @@ import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import console from "node:console";
 import { createServer } from "node:http";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -69,32 +76,62 @@ for (const signal of ["SIGINT", "SIGTERM"])
   });
 try {
   const bundle = join(temporary, "bundle.js");
-  await build({
-    entryPoints: [join(import.meta.dirname, "browser-entry.mjs")],
+  const consumer = join(temporary, "consumer");
+  const scope = join(consumer, "node_modules/@multi-game-engines");
+  await mkdir(scope, { recursive: true });
+  // Resolve the public package exports, exactly as an installed consumer does.
+  for (const name of [
+    "adapter-fairy-stockfish",
+    "adapter-fairy-stockfish-shogi",
+  ]) {
+    await symlink(join(root, "packages", name), join(scope, name), "dir");
+  }
+  const built = await build({
+    stdin: {
+      contents: await readFile(
+        join(import.meta.dirname, "browser-entry.mjs"),
+        "utf8",
+      ),
+      resolveDir: consumer,
+      sourcefile: "browser-entry.mjs",
+      loader: "js",
+    },
     outfile: bundle,
     bundle: true,
     format: "esm",
     platform: "browser",
-    plugins: [
-      {
-        name: "workspace-dist",
-        setup(builder) {
-          builder.onResolve({ filter: /^@multi-game-engines\// }, (args) => {
-            if (args.path.endsWith("/node"))
-              return { path: args.path, external: true };
-            return {
-              path: join(
-                root,
-                "packages",
-                args.path.slice("@multi-game-engines/".length),
-                "dist/index.js",
-              ),
-            };
-          });
-        },
-      },
-    ],
+    metafile: true,
   });
+  const inputs = Object.keys(built.metafile.inputs);
+  assert.ok(
+    inputs.some((file) => file.endsWith("/core/dist/node-browser.js")),
+    "Browser conditional entry must be resolved",
+  );
+  assert.ok(
+    !inputs.some((file) => file.endsWith("/core/dist/node.js")),
+    "Native entry must not be in the browser graph",
+  );
+  for (const item of [
+    ...Object.values(built.metafile.inputs),
+    ...Object.values(built.metafile.outputs),
+  ]) {
+    for (const dependency of item.imports) {
+      assert.notEqual(
+        dependency.external,
+        true,
+        `Unexpected external dependency: ${dependency.path}`,
+      );
+      assert.ok(
+        !dependency.path.startsWith("node:"),
+        `Node.js builtin in browser graph: ${dependency.path}`,
+      );
+    }
+  }
+  await mkdir(dirname(reportFile), { recursive: true });
+  await writeFile(
+    join(dirname(reportFile), "bundle-metafile.json"),
+    `${JSON.stringify(built.metafile, null, 2)}\n`,
+  );
   const body = await readFile(bundle);
   server = createServer((request, response) => {
     if (request.url !== "/unisolated") {

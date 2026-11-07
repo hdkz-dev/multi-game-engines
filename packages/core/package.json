@@ -21,9 +21,16 @@
       "require": "./dist/index.cjs"
     },
     "./node": {
-      "types": "./dist/node.d.ts",
-      "import": "./dist/node.js",
-      "require": "./dist/node.cjs"
+      "node": {
+        "types": "./dist/node.d.ts",
+        "import": "./dist/node.js",
+        "require": "./dist/node.cjs"
+      },
+      "default": {
+        "types": "./dist/node-browser.d.ts",
+        "import": "./dist/node-browser.js",
+        "require": "./dist/node-browser.cjs"
+      }
     },
     "./mocks": {
       "types": "./dist/mocks/index.d.ts",

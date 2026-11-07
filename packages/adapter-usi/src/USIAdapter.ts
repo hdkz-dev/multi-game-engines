@@ -49,6 +49,13 @@ export class USIAdapter extends BaseAdapter<
   async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
+      this.cleanupPendingTask("Engine reloaded", true);
+      this.messageUnsubscriber?.();
+      this.messageUnsubscriber = null;
+      if (this.communicator) {
+        await this.communicator.terminate();
+        this.communicator = null;
+      }
       if (isNodeEnvironment() && this.config.binaryPath) {
         // Node.js ネイティブバイナリモード
         const { NativeCommunicator } = await import(

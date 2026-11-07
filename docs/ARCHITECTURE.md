@@ -16,6 +16,8 @@ flowchart LR
   H --> S[Search and bestmove]
 ```
 
+標準clean consumerでNode builtin解決の既存失敗も検出したため、core/nodeをnode/default条件付きexportで分離する。通常browser解決はSDK aliasやnative externalに依存せず、Node ESM/CJSは従来経路を維持する。CSP実証はself/blob/wasm-unsafe-evalと指定CDN接続を許可したChromium fixtureに限定し、consumer設定の変更や一般的なstrict-CSP互換を完了事項に含めない。
+
 ## 2026-11-07 依存更新とパッチの整合性
 
 現状の基準はmain `964f1e98`（PR #292/#293統合済み）。M1b/M1cのSRI・キャッシュ・応答契約の修正と対応する公開は2026-10-28の担当チャットで完了しており、PR #291もクローズ済み。以下の古い日付の「統合待ち」「公開待ち」は当時の履歴であり、現在の残件ではない。本作業は公開パッケージのruntimeソース・版・本番依存・exports・peerを変更せず、追加npm公開は不要。過去公開物の全tarball再照合を今回実施したとは扱わない。PR #301の追加修正は新headの検証・レビュー・統合が必要であり、mainに反映済みとは扱わない。
