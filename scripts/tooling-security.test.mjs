@@ -243,6 +243,61 @@ test("patched globs and Next root discovery find directory alternatives and resp
   }
 });
 
+test("Nitro Azure deployment creates an archive with server files and routes", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "mge-azure-"));
+  try {
+    const serverDir = join(dir, "server");
+    await mkdir(serverDir);
+    await writeFile(
+      join(serverDir, "index.mjs"),
+      "export const handle = () => {};\n",
+    );
+    const nitroPackageDir = dirname(
+      nitroRequire.resolve("nitropack/package.json"),
+    );
+    const { writeFunctionsRoutes } = await import(
+      pathToFileURL(join(nitroPackageDir, "dist/presets/azure/utils.mjs")).href
+    );
+    await writeFunctionsRoutes({ options: { output: { dir, serverDir } } });
+    assert.equal(
+      JSON.parse(await readFile(join(dir, "host.json"), "utf8")).version,
+      "2.0",
+    );
+    const routes = JSON.parse(
+      await readFile(join(serverDir, "function.json"), "utf8"),
+    );
+    assert.equal(routes.entryPoint, "handle");
+    const archive = await readFile(join(dir, "deploy.zip"));
+    assert.equal(archive.toString("latin1", 0, 4), "PK\u0003\u0004");
+    const end = archive.length - 22;
+    assert.equal(archive.toString("latin1", end, end + 4), "PK\u0005\u0006");
+    let offset = archive.readUInt32LE(end + 16);
+    const names = [];
+    const count = archive.readUInt16LE(end + 10);
+    for (let index = 0; index < count; index++) {
+      assert.equal(
+        archive.toString("latin1", offset, offset + 4),
+        "PK\u0001\u0002",
+      );
+      const nameLength = archive.readUInt16LE(offset + 28);
+      names.push(
+        archive.toString("utf8", offset + 46, offset + 46 + nameLength),
+      );
+      offset +=
+        46 +
+        nameLength +
+        archive.readUInt16LE(offset + 30) +
+        archive.readUInt16LE(offset + 32);
+    }
+    assert.ok(names.includes("server/index.mjs"));
+    assert.ok(names.includes("server/function.json"));
+    assert.ok(names.includes("host.json"));
+    assert.equal(names.includes("deploy.zip"), false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("patched watcher preserves ignore glob compilation", async () => {
   const tailwindRequire = createRequire(
     new URL("../packages/ui-react/package.json", import.meta.url),

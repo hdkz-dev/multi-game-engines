@@ -1,5 +1,23 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## 2026-11-07 Coordinated dependency and patch maintenance
+
+The current baseline is main `964f1e98`, containing PRs #292/#293. The M1b/M1c SRI, cache and response-contract fixes and their publication were completed by the responsible chat on 2026-10-28; PR #291 is closed. Older dated integration/publication-pending statements below are historical, not current backlog. This work changes no public package runtime source, version, production dependency, exports or peer dependency, so no additional npm publication is required. It does not constitute a fresh full-tarball verification of earlier releases. Further PR #301 changes require validation, review and integration at their new head and are not yet reflected on main.
+
+Update Nuxt 4.6.4, Vitest/coverage 5.1.0 and Storybook 10.6.6 together with their related packages. Retain the 24-hour release age, strict peers and unused-patch rejection. Remove the Azure ZIP and Parcel watcher patches only after confirming their fixes in Nitro 2.13.6 and watcher 2.6.0; port the Storybook declaration and Next.js root discovery patches. Resolve new advisories with glob 14.0.2 and minimatch 11.0.1. See [ADR 070](adr/070-coordinated-dependency-patches.md).
+
+The GHSA-vjh5-4x84-xrqp OSV false positive can remain after dependency updates. Do not report a successful audit until upstream source ranges, OSV distribution and direct queries are verified. GHSA-9v7c-q64q-vv33 is a real vulnerability requiring 4.6.3 or later. Record local checks, remote CI and main integration independently.
+
+A regression test exposed Nitro including its output ZIP in itself, so a separate 2.13.6 patch excludes that file. Override Tailwind’s old watcher pin to 2.6.0 or later. Port the import-x rule from minimatch 11’s removed makeRe API to pattern matching and test both allow and forbid behavior. TypeDoc directory traversal also moves from the removed matchOne method to the public match API with partial matching.
+
+A coordinated audit reproduced an import-x hidden-file regression using real fixtures. Compare original and trailing-slash paths under default/dot matching. Forbid patterns combine these four checks with OR; allow patterns use AND. Tests cover negation and zero-depth trailing-globstar boundaries. Independent comparison of 33,660 pairs found no weaker forbids or broader allows, without claiming mathematical equivalence for every possible pattern. It deliberately restricts ambiguous hidden paths rather than claiming complete compatibility with the old makeRe behavior. Tests cover ordinary/hidden files, explicit dots and negated globs.
+
+Lock SARIF formatter 3.1.0 at the root and remove CI's dynamic pnpm add. The formatter uses the invoking ESLint, so a version-scoped hook replaces its obsolete ESLint8 dependency with a validated ESLint10 peer. An actual CLI test verifies SARIF format, executing version and violations. Remove the redundant Archiver override already matched by Nitro2.13.6 itself.
+
+The repository-wide typed SARIF scan exhausted its 4GB heap. Isolate analysis in child processes while preserving every target and zero-warning enforcement, then aggregate LintResult and rule metadata and invoke the formatter once. Reject child failures and conflicting metadata; emit one SARIF run within GitHub's 20-run limit.
+
+Recheck official npm publication timestamps and select 37 same-major updates older than 24 hours, including Storybook10.6.6, Vue3.5.45, Next16.4.5 and ESLint10.14. Keep the TypeScript7 peer incompatibility, jsdom31 major migration and newer immature releases separate. The earlier Storybook10.6.6 age hold was time-specific, not permanent.
+
 ## 2026-10-28 SRI and response contract changes (locally validated; integration pending)
 
 M1b/M1c are locally validated; remote verification and integration are pending. `ChunkedDownloader.download(url, { sri })` requires full-resource SRI in its type and at runtime; omission raises `SECURITY_ERROR`. Both EngineLoader and direct downloads revalidate persisted bytes. Cache identities hash complete URLs and SRI values with SHA-256 into fixed-length names, so old cache entries are not reused. Multiple hashes use SecurityAdvisor's strongest-algorithm selection. Segment hashes supplement the full hash and must match segmentSize, request width, and resource size.

@@ -37,10 +37,10 @@
   },
   "devDependencies": {
     "@multi-game-engines/core": "workspace:*",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "tsup": "^9.0.0",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "build": "tsup --clean src/index.ts --external @multi-game-engines/* --format esm --dts",
