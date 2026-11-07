@@ -58,6 +58,8 @@ export abstract class BaseAdapter<
   >();
 
   protected pendingResolve: ((value: T_RESULT) => void) | null = null;
+  private unsubscribeSearchError: (() => void) | undefined;
+
   protected pendingReject: ((reason?: unknown) => void) | null = null;
   protected messageUnsubscriber: (() => void) | null = null;
   protected infoController: ReadableStreamDefaultController<T_INFO> | null =
@@ -108,10 +110,12 @@ export abstract class BaseAdapter<
     sources: Record<string, IEngineSourceConfig>,
     signal?: AbortSignal,
   ): Promise<Record<string, string>> {
-    return loader.loadResources(this.id, sources, {
+    const resources = await loader.loadResources(this.id, sources, {
       ...(signal ? { signal } : {}),
       onProgress: (p: ILoadProgress) => this.emitProgress(p),
     });
+    signal?.throwIfAborted();
+    return resources;
   }
 
   /**
@@ -222,12 +226,19 @@ export abstract class BaseAdapter<
       this.pendingReject = reject;
     });
 
+    this.unsubscribeSearchError?.();
+    this.unsubscribeSearchError = this.communicator.onError?.((error) => {
+      this.cleanupPendingTask(error.message, true);
+      this.emitStatusChange("error");
+    });
+
     try {
       this.sendSearchCommand(command);
     } catch (err) {
       this.pendingResolve = null;
       this.pendingReject = null;
-      this.emitStatusChange("ready");
+      this.cleanupPendingTask(undefined, true);
+      this.emitStatusChange("error");
       throw err;
     }
 
@@ -318,6 +329,8 @@ export abstract class BaseAdapter<
 
     const result = this.parser.parseResult(rawData);
     if (result) {
+      this.unsubscribeSearchError?.();
+      this.unsubscribeSearchError = undefined;
       if (this.pendingResolve) {
         this.pendingResolve(result);
         this.pendingResolve = null;
@@ -357,6 +370,8 @@ export abstract class BaseAdapter<
     reason?: string,
     skipReadyTransition = false,
   ): void {
+    this.unsubscribeSearchError?.();
+    this.unsubscribeSearchError = undefined;
     if (this.pendingReject) {
       const reject = this.pendingReject;
       this.pendingReject = null;

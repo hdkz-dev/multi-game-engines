@@ -11,15 +11,13 @@ describe("WorkerCommunicator", () => {
 
   const deliver = (data: unknown): void => {
     const onmessage = mockWorker.onmessage as
-      | ((ev: { data: unknown }) => void)
-      | null;
+      ((ev: { data: unknown }) => void) | null;
     onmessage?.({ data });
   };
 
   const fireWorkerError = (message: string): void => {
     const onerror = mockWorker.onerror as
-      | ((ev: { message?: string }) => void)
-      | null;
+      ((ev: { message?: string }) => void) | null;
     onerror?.({ message });
   };
 
@@ -37,6 +35,72 @@ describe("WorkerCommunicator", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("notifies error subscribers and removes them on unsubscribe or termination", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const comm = new WorkerCommunicator("test.js");
+    const listener = vi.fn();
+    const removed = vi.fn();
+    comm.onError(listener);
+    const unsubscribe = comm.onError(removed);
+    unsubscribe();
+    fireWorkerError("crashed");
+    expect(listener).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ message: "crashed" }),
+    );
+    expect(removed).not.toHaveBeenCalled();
+    await comm.terminate();
+    fireWorkerError("late");
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails future operations immediately after a terminal worker error", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const comm = new WorkerCommunicator("test.js");
+    fireWorkerError("terminal crash");
+    expect(() => comm.postMessage("go")).toThrow("terminal crash");
+    await expect(comm.expectMessage(() => true)).rejects.toThrow(
+      "terminal crash",
+    );
+    expect(mockWorker.postMessage).not.toHaveBeenCalled();
+    await comm.terminate();
+  });
+
+  it("removes the external abort listener when an expectation times out", async () => {
+    vi.useFakeTimers();
+    try {
+      const comm = new WorkerCommunicator("test.js");
+      const controller = new AbortController();
+      const add = vi.spyOn(controller.signal, "addEventListener");
+      const remove = vi.spyOn(controller.signal, "removeEventListener");
+      const pending = comm.expectMessage(() => false, {
+        timeoutMs: 10,
+        signal: controller.signal,
+      });
+      const outcome = pending.catch((error: unknown) => error);
+      await vi.advanceTimersByTimeAsync(10);
+      expect(await outcome).toMatchObject({ code: "TIMEOUT" });
+      expect(remove).toHaveBeenCalledExactlyOnceWith(
+        "abort",
+        add.mock.calls[0]?.[1],
+      );
+      await comm.terminate();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("rejects pre-aborted expectations without retaining an abort listener", async () => {
+    const comm = new WorkerCommunicator("test.js");
+    const controller = new AbortController();
+    controller.abort();
+    const add = vi.spyOn(controller.signal, "addEventListener");
+    await expect(
+      comm.expectMessage(() => false, { signal: controller.signal }),
+    ).rejects.toMatchObject({ code: "CANCELLED" });
+    expect(add).not.toHaveBeenCalled();
+    await comm.terminate();
   });
 
   it("should post messages to worker", () => {

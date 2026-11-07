@@ -98,7 +98,9 @@ export class EngineLoader implements IEngineLoader {
             segmentedSri: config.segmentedSri,
             maxBytes: config.size,
             onProgress: options?.onProgress,
-            signal: options?.signal ?? AbortSignal.timeout(300_000),
+            signal: options?.signal
+              ? AbortSignal.any([options.signal, AbortSignal.timeout(300_000)])
+              : AbortSignal.timeout(300_000),
             storage: this.storage,
           });
           buffer = result.buffer;
@@ -108,7 +110,9 @@ export class EngineLoader implements IEngineLoader {
           );
           const response = await SecurityAdvisor.safeFetch(config.url, {
             ...fetchOptions,
-            signal: options?.signal ?? AbortSignal.timeout(30_000),
+            signal: options?.signal
+              ? AbortSignal.any([options.signal, AbortSignal.timeout(30_000)])
+              : AbortSignal.timeout(30_000),
           });
 
           if (!response.ok) {

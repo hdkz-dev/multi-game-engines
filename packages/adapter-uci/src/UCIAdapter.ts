@@ -6,6 +6,7 @@ import {
   EngineError,
   EngineErrorCode,
   ResourceMap,
+  type ICommunicator,
   IEngineConfig,
   IEngineSourceConfig,
   createI18nKey,
@@ -111,7 +112,7 @@ export class UCIAdapter extends BaseAdapter<
           });
         }
 
-        this.communicator = new WorkerCommunicator(resources["main"]);
+        this.communicator = this.createBrowserCommunicator(resources);
 
         // 依存性注入: WASM や評価関数等の Blob URL マップを Worker に送信
         const resourceMap: ResourceMap = {};
@@ -153,6 +154,15 @@ export class UCIAdapter extends BaseAdapter<
       this.emitStatusChange("error");
       throw EngineError.from(error, this.id);
     }
+  }
+
+  /** Creates the browser transport after all resources pass loader verification. */
+  protected createBrowserCommunicator(
+    resources: Readonly<Record<string, string>>,
+  ): ICommunicator {
+    const main = resources["main"];
+    if (!main) throw new Error("Missing verified worker entry");
+    return new WorkerCommunicator(main);
   }
 
   protected async onBookLoaded(url: string): Promise<void> {

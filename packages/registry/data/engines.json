@@ -194,7 +194,8 @@
               "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.js",
               "type": "worker-js",
               "size": 64273,
-              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd"
+              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd",
+              "workerFactory": "Stockfish"
             },
             "wasm": {
               "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.wasm",
@@ -230,7 +231,8 @@
               "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.js",
               "type": "worker-js",
               "size": 64273,
-              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd"
+              "sri": "sha384-qE3ZUy7CWqquR4WfOlxa7lAtBpCUBkZK4bgMf3nIsUAXacNI7F5BjO3Fkv9gWpTd",
+              "workerFactory": "Stockfish"
             },
             "wasm": {
               "url": "https://cdn.jsdelivr.net/npm/fairy-stockfish-nnue.wasm@1.1.11/stockfish.wasm",

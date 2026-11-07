@@ -69,7 +69,7 @@ describe("BaseAdapter: Low-Level Robustness & Stress Tests", () => {
     ).not.toThrow();
   });
 
-  it("メッセージ送信中に communicator が同期的に失敗した場合でも、busy 状態が解除され ready に戻ること", async () => {
+  it("メッセージ送信中に communicator が同期的に失敗した場合でも、busy 状態を解除して error に遷移すること", async () => {
     const adapter = new RobustTestAdapter();
     adapter.setStatus("ready");
 
@@ -83,7 +83,7 @@ describe("BaseAdapter: Low-Level Robustness & Stress Tests", () => {
     });
 
     expect(() => adapter.searchRaw("go")).toThrow("Network split");
-    expect(adapter.status).toBe("ready");
+    expect(adapter.status).toBe("error");
   });
 
   it("AsyncGenerator でのメッセージ受信中、エンジンが error 状態に遷移した場合、イテレータが適切に close されること", async () => {

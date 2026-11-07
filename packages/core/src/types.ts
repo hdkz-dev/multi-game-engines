@@ -264,10 +264,7 @@ export enum MiddlewarePriority {
 }
 
 export type MiddlewareCommand =
-  | string
-  | string[]
-  | Record<string, unknown>
-  | Uint8Array;
+  string | string[] | Record<string, unknown> | Uint8Array;
 
 export interface IMiddleware<
   T_OPTIONS = IBaseSearchOptions,
@@ -395,7 +392,7 @@ export interface IEngineAdapter<
   readonly parser: IProtocolParser<T_OPTIONS, T_INFO, T_RESULT>;
   readonly requiredCapabilities?: Partial<ICapabilities>;
 
-  load(loader?: IEngineLoader): Promise<void>;
+  load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void>;
   updateStatus(status: EngineStatus): void;
   search(options: T_OPTIONS): Promise<T_RESULT>;
   searchRaw(command: MiddlewareCommand): ISearchTask<T_INFO, T_RESULT>;
@@ -520,11 +517,12 @@ export type IEngineSourceConfig = {
    * Blob URL 環境下での相対パス解決に使用される。
    */
   mountPath?: string;
+  /** Instantiate the verified Emscripten factory instead of treating it as a Worker entry. */
+  workerFactory?: "Stockfish";
   /** 分割された SRI ハッシュ (100MB 超の巨大ファイル用) */
   segmentedSri?: ISegmentedSRI | undefined;
 } & (
-  | { sri: string; __unsafeNoSRI?: never }
-  | { sri?: never; __unsafeNoSRI: true }
+  { sri: string; __unsafeNoSRI?: never } | { sri?: never; __unsafeNoSRI: true }
 );
 
 /**
@@ -551,13 +549,10 @@ export interface IEngineConfig {
         eval?: IEngineSourceConfig | undefined;
         /** 特定の環境向けバリアント定義 (simd, threads 等) */
         variants?:
-          | Record<string, Partial<IEngineConfig["sources"]>>
-          | undefined;
+          Record<string, Partial<IEngineConfig["sources"]>> | undefined;
         /** 追加の任意リソース */
         [key: string]:
-          | IEngineSourceConfig
-          | Record<string, unknown>
-          | undefined;
+          IEngineSourceConfig | Record<string, unknown> | undefined;
       }
     | undefined;
   /** ライセンス情報 URL */
@@ -633,8 +628,7 @@ export type IBookAsset = {
   size?: number | undefined;
   type: "bin" | "db" | "json";
 } & (
-  | { sri: string; __unsafeNoSRI?: never }
-  | { sri?: never; __unsafeNoSRI: true }
+  { sri: string; __unsafeNoSRI?: never } | { sri?: never; __unsafeNoSRI: true }
 );
 
 /**

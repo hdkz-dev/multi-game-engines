@@ -10,6 +10,7 @@ import type { ICommunicator } from "./ICommunicator.js";
  */
 export class WorkerCommunicator implements ICommunicator {
   private worker: Worker;
+  private terminalError: Error | undefined;
   private pendingExpectations = new Map<
     string,
     {
@@ -30,7 +31,15 @@ export class WorkerCommunicator implements ICommunicator {
    * Worker へメッセージを送信します。
    */
   postMessage(message: unknown): void {
+    if (this.terminalError) throw this.terminalError;
     this.worker.postMessage(message);
+  }
+
+  private errorListeners = new Set<(error: Error) => void>();
+
+  onError(callback: (error: Error) => void): () => void {
+    this.errorListeners.add(callback);
+    return () => this.errorListeners.delete(callback);
   }
 
   onMessage(callback: (data: unknown) => void): () => void {
@@ -50,14 +59,24 @@ export class WorkerCommunicator implements ICommunicator {
           signal?: AbortSignal | undefined;
         } = 5000,
   ): Promise<T> {
+    if (this.terminalError) return Promise.reject(this.terminalError);
     const timeoutMs =
       typeof options === "number" ? options : (options.timeoutMs ?? 5000);
     const signal = typeof options === "number" ? undefined : options.signal;
+    if (signal?.aborted) {
+      return Promise.reject(
+        new EngineError({
+          code: EngineErrorCode.CANCELLED,
+          message: "Operation cancelled",
+        }),
+      );
+    }
 
     const id = Math.random().toString(36).substring(2);
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         if (this.pendingExpectations.has(id)) {
+          cleanup();
           this.pendingExpectations.delete(id);
           reject(
             new EngineError({
@@ -111,6 +130,7 @@ export class WorkerCommunicator implements ICommunicator {
     }
     this.pendingExpectations.clear();
     this.messageListeners.clear();
+    this.errorListeners.clear();
 
     this.worker.terminate();
   }
@@ -130,9 +150,11 @@ export class WorkerCommunicator implements ICommunicator {
   private handleError(error: ErrorEvent): void {
     console.error("Worker error:", error);
     const err = new Error(error.message || "Worker error");
+    this.terminalError = err;
     for (const expectation of this.pendingExpectations.values()) {
       expectation.reject(err);
     }
     this.pendingExpectations.clear();
+    for (const listener of this.errorListeners) listener(err);
   }
 }

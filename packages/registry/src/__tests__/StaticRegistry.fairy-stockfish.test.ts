@@ -9,6 +9,7 @@ describe("StaticRegistry fairy-stockfish entries", () => {
     expect(sources).not.toBeNull();
     expect(sources?.["main"]?.url).toContain("fairy-stockfish-nnue.wasm");
     expect(sources?.["main"]?.type).toBe("worker-js");
+    expect(sources?.["main"]?.workerFactory).toBe("Stockfish");
     expect(sources?.["wasm"]?.type).toBe("wasm");
   });
 
@@ -19,6 +20,7 @@ describe("StaticRegistry fairy-stockfish entries", () => {
     expect(sources).not.toBeNull();
     expect(sources?.["main"]?.url).toContain("fairy-stockfish-nnue.wasm");
     expect(sources?.["main"]?.type).toBe("worker-js");
+    expect(sources?.["main"]?.workerFactory).toBe("Stockfish");
     expect(sources?.["wasm"]?.type).toBe("wasm");
   });
 });
