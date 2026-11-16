@@ -1,5 +1,14 @@
 # @multi-game-engines/adapter-gnubg
 
+## 1.0.10
+
+### Patch Changes
+
+- Updated dependencies [[`f3668d0`](https://github.com/hdkz-dev/multi-game-engines/commit/f3668d0af951d98ec170b5b7f6c9fd8ebc774a33)]:
+  - @multi-game-engines/core@0.3.1
+  - @multi-game-engines/registry@1.1.8
+  - @multi-game-engines/i18n-common@0.1.5
+
 ## 1.0.9
 
 ### Patch Changes

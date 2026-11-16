@@ -1,5 +1,16 @@
 # @multi-game-engines/ui-chess
 
+## 0.1.11
+
+### Patch Changes
+
+- Updated dependencies [[`f3668d0`](https://github.com/hdkz-dev/multi-game-engines/commit/f3668d0af951d98ec170b5b7f6c9fd8ebc774a33)]:
+  - @multi-game-engines/core@0.3.1
+  - @multi-game-engines/domain-chess@0.1.9
+  - @multi-game-engines/i18n-chess@0.1.4
+  - @multi-game-engines/ui-chess-elements@0.1.10
+  - @multi-game-engines/ui-core@0.1.9
+
 ## 0.1.10
 
 ### Patch Changes
