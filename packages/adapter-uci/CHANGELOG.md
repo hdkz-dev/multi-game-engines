@@ -1,5 +1,26 @@
 # @multi-game-engines/adapter-uci
 
+## 1.0.10
+
+### Patch Changes
+
+- [#302](https://github.com/hdkz-dev/multi-game-engines/pull/302) [`f3668d0`](https://github.com/hdkz-dev/multi-game-engines/commit/f3668d0af951d98ec170b5b7f6c9fd8ebc774a33) Thanks [@hdkz-dev](https://github.com/hdkz-dev)! - Instantiate the verified Fairy-Stockfish Emscripten factory in a browser Worker, resolve its WASM and pthread assets from loader-verified Blob URLs, and retain protocol handshakes before declaring readiness. Preserve custom standalone Worker sources and native binary behavior. Fail explicitly when the browser cannot provide shared memory; terminate and release bootstrap resources on failure or disposal.
+
+  Wait for adapter shutdown before revoking verified resources, and reject in-flight searches when their browser Worker fails instead of leaving the result pending.
+
+  Cancel in-flight loading on disposal, preserve existing resource deadlines, and wait for shared cleanup completion so late loaders cannot leave a new Worker behind.
+
+  Separate core/node package exports by runtime so standard browser bundlers do not resolve Node builtins, while retaining native Node ESM/CJS entry points.
+
+  Release failed UCI/USI transports before reload so a replacement does not leave the previous Worker or process alive.
+
+- Updated dependencies [[`f3668d0`](https://github.com/hdkz-dev/multi-game-engines/commit/f3668d0af951d98ec170b5b7f6c9fd8ebc774a33)]:
+  - @multi-game-engines/core@0.3.1
+  - @multi-game-engines/registry@1.1.8
+  - @multi-game-engines/domain-chess@0.1.9
+  - @multi-game-engines/i18n-chess@0.1.4
+  - @multi-game-engines/i18n-common@0.1.5
+
 ## 1.0.9
 
 ### Patch Changes

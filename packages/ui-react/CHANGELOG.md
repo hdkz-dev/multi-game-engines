@@ -1,5 +1,19 @@
 # @multi-game-engines/ui-react
 
+## 0.1.14
+
+### Patch Changes
+
+- Updated dependencies [[`f3668d0`](https://github.com/hdkz-dev/multi-game-engines/commit/f3668d0af951d98ec170b5b7f6c9fd8ebc774a33)]:
+  - @multi-game-engines/core@0.3.1
+  - @multi-game-engines/i18n-common@0.1.5
+  - @multi-game-engines/ui-chess-react@0.1.10
+  - @multi-game-engines/ui-core@0.1.9
+  - @multi-game-engines/ui-elements@0.1.12
+  - @multi-game-engines/ui-react-core@0.1.9
+  - @multi-game-engines/ui-react-monitor@0.2.9
+  - @multi-game-engines/ui-shogi-react@0.1.10
+
 ## 0.1.13
 
 ### Patch Changes
