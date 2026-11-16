@@ -3,6 +3,8 @@ import { EngineFacade } from "../EngineFacade.js";
 import { MockAdapter } from "../../mocks/MockAdapter.js";
 import { createMove } from "../../protocol/ProtocolValidator.js";
 import {
+  IEngineLoader,
+  IEngineAdapter,
   IBaseSearchOptions,
   IBaseSearchInfo,
   IBaseSearchResult,
@@ -52,6 +54,139 @@ describe("EngineFacade: dispose race coverage", () => {
     };
     return { task, resolveResult, rejectResult };
   }
+
+  it.each([false, true])(
+    "keeps verified URLs alive until adapter disposal settles (reject=%s)",
+    async (reject) => {
+      let finish!: () => void;
+      let entered!: () => void;
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const gate = new Promise<void>((resolve, rejectGate) => {
+        finish = () => {
+          if (reject) rejectGate(new Error("shutdown failed"));
+          else resolve();
+        };
+      });
+      vi.spyOn(adapter, "dispose").mockImplementation(() => {
+        entered();
+        return gate;
+      });
+      const loader: IEngineLoader = {
+        loadResource: vi.fn(),
+        loadResources: vi.fn(),
+        revoke: vi.fn(),
+        revokeAll: vi.fn(),
+        revokeByEngineId: vi.fn(),
+      };
+      const facade = new EngineFacade(adapter, [], async () => loader);
+      let settled = false;
+      const first = facade.dispose();
+      const second = facade.dispose();
+      expect(second).toBe(first);
+      const disposal = Promise.all([first, second]).then(() => {
+        settled = true;
+      });
+      await started;
+      expect(settled).toBe(false);
+      expect(loader.revokeByEngineId).not.toHaveBeenCalled();
+      finish();
+      await disposal;
+      expect(settled).toBe(true);
+      expect(adapter.dispose).toHaveBeenCalledOnce();
+      expect(loader.revokeByEngineId).toHaveBeenCalledExactlyOnceWith(
+        adapter.id,
+      );
+    },
+  );
+
+  it.each([false, true])(
+    "waits for loading before disposal even when abort is ignored (cooperative=%s)",
+    async (cooperative) => {
+      let release!: () => void;
+      let entered!: () => void;
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      let alive = 0;
+      adapter.setStatus("uninitialized");
+      vi.spyOn(adapter as IEngineAdapter, "load").mockImplementation(
+        async (_loader, signal) => {
+          entered();
+          if (cooperative) {
+            await new Promise<void>((resolve) => {
+              signal?.addEventListener("abort", () => resolve(), {
+                once: true,
+              });
+            });
+            throw new Error("aborted");
+          }
+          await gate;
+          alive++;
+          adapter.setStatus("ready");
+        },
+      );
+      vi.spyOn(adapter, "dispose").mockImplementation(async () => {
+        alive = 0;
+        adapter.setStatus("terminated");
+      });
+      const loader: IEngineLoader = {
+        loadResource: vi.fn(),
+        loadResources: vi.fn(),
+        revoke: vi.fn(),
+        revokeAll: vi.fn(),
+        revokeByEngineId: vi.fn(),
+      };
+      const facade = new EngineFacade(adapter, [], async () => loader);
+      const loading = facade.load();
+      const outcome = loading.catch((error: unknown) => error);
+      await started;
+      let settled = false;
+      const disposal = facade.dispose().then(() => {
+        settled = true;
+      });
+      if (!cooperative) {
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(settled).toBe(false);
+        expect(adapter.dispose).not.toHaveBeenCalled();
+        expect(loader.revokeByEngineId).not.toHaveBeenCalled();
+        release();
+      }
+      await disposal;
+      expect(await outcome).toMatchObject({ code: EngineErrorCode.CANCELLED });
+      expect(alive).toBe(0);
+      expect(facade.status).toBe("terminated");
+      expect(adapter.dispose).toHaveBeenCalledOnce();
+      expect(loader.revokeByEngineId).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("cancels before adapter loading when the loader provider resolves after disposal", async () => {
+    let release!: (loader: IEngineLoader) => void;
+    const provider = new Promise<IEngineLoader>((resolve) => {
+      release = resolve;
+    });
+    adapter.setStatus("uninitialized");
+    const load = vi.spyOn(adapter, "load");
+    const facade = new EngineFacade(adapter, [], () => provider);
+    const loading = facade.load().catch((error: unknown) => error);
+    const disposal = facade.dispose();
+    release({
+      loadResource: vi.fn(),
+      loadResources: vi.fn(),
+      revoke: vi.fn(),
+      revokeAll: vi.fn(),
+      revokeByEngineId: vi.fn(),
+    });
+    await disposal;
+    expect(await loading).toMatchObject({ code: EngineErrorCode.CANCELLED });
+    expect(load).not.toHaveBeenCalled();
+  });
 
   it("throws CANCELLED if dispose() lands while a middleware is still running (line 265)", async () => {
     let releaseMw!: () => void;

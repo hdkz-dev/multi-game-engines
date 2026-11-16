@@ -1,5 +1,13 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
+## 2026-11-07 Fairy-Stockfish browser bootstrap fix (not integrated)
+
+The distributed stockfish.js defines an Emscripten factory rather than a Worker entry and cannot return uciok/usiok when launched directly. Registry workerFactory metadata selects the bootstrap only for default assets. Instantiate it using loader-verified main/WASM/pthread Blob URLs; keep URLs and SRI in the registry rather than copying them into consumers. Require shared memory and cross-origin isolation, bound commands queued during initialization, and verify typed UCI/USI handshakes, search, failures and Worker/Blob cleanup. Preserve custom standalone Worker overrides and native Node binaries.
+
+This is an independent stacked diff based on dependency PR #301 head1212b303. The dependency-only no-publication statement below does not apply to this runtime fix. Record core, UCI, USI, both Fairy adapters and registry in a Changeset, and review transitive release scope separately. Publication, merge and release remain unauthorized. See [ADR 071](adr/071-fairy-browser-factory-bootstrap.md).
+
+A standard clean consumer also exposed an existing Node builtin resolution failure. Separate core/node with node/default conditional exports so ordinary browser resolution needs no SDK alias or native external, while retaining native Node ESM/CJS. CSP evidence is limited to the Chromium fixture allowing self/blob/wasm-unsafe-eval and the designated CDN; it does not authorize consumer policy changes or establish compatibility with every strict policy.
+
 ## 2026-11-07 Coordinated dependency and patch maintenance
 
 The current baseline is main `964f1e98`, containing PRs #292/#293. The M1b/M1c SRI, cache and response-contract fixes and their publication were completed by the responsible chat on 2026-10-28; PR #291 is closed. Older dated integration/publication-pending statements below are historical, not current backlog. This work changes no public package runtime source, version, production dependency, exports or peer dependency, so no additional npm publication is required. It does not constitute a fresh full-tarball verification of earlier releases. Further PR #301 changes require validation, review and integration at their new head and are not yet reflected on main.

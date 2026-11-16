@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ChunkedDownloader } from "../../storage/ChunkedDownloader.js";
 import { EngineLoader } from "../EngineLoader.js";
 import { IFileStorage, IEngineSourceConfig } from "../../types.js";
 import { SecurityAdvisor } from "../../capabilities/SecurityAdvisor.js";
@@ -44,6 +45,66 @@ describe("EngineLoader", () => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
+
+  it.each([
+    { chunked: false, abortExternal: false },
+    { chunked: false, abortExternal: true },
+    { chunked: true, abortExternal: false },
+    { chunked: true, abortExternal: true },
+  ])(
+    "preserves deadline and external cancellation: %j",
+    async ({ chunked, abortExternal }) => {
+      const external = new AbortController();
+      const deadline = new AbortController();
+      const timeout = vi
+        .spyOn(AbortSignal, "timeout")
+        .mockReturnValue(deadline.signal);
+      let entered!: () => void;
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      let actualSignal: AbortSignal | null | undefined;
+      const pendingResponse = (
+        signal: AbortSignal | null | undefined,
+      ): Promise<never> => {
+        actualSignal = signal;
+        entered();
+        return new Promise<never>((_resolve, reject) => {
+          signal?.addEventListener(
+            "abort",
+            () => reject(new Error("cancelled request")),
+            { once: true },
+          );
+        });
+      };
+      if (chunked)
+        vi.spyOn(ChunkedDownloader.prototype, "download").mockImplementation(
+          (_url, options) => pendingResponse(options.signal),
+        );
+      else
+        vi.spyOn(SecurityAdvisor, "safeFetch").mockImplementation(
+          (_url, options) => pendingResponse(options?.signal),
+        );
+      const loading = loader.loadResource(
+        "signal-test",
+        {
+          url: "https://example.com/engine.js",
+          type: "worker-js",
+          sri: dummySRI,
+          ...(chunked ? { size: 40 * 1024 * 1024 } : {}),
+        },
+        { signal: external.signal },
+      );
+      const outcome = loading.catch((error: unknown) => error);
+      await started;
+      expect(actualSignal).not.toBe(external.signal);
+      expect(timeout).toHaveBeenCalledExactlyOnceWith(chunked ? 300000 : 30000);
+      if (abortExternal) external.abort();
+      else deadline.abort();
+      expect(await outcome).toBeInstanceOf(Error);
+      expect(actualSignal?.aborted).toBe(true);
+    },
+  );
 
   it("should fetch and cache if not in storage", async () => {
     vi.mocked(storage.get).mockResolvedValue(null);

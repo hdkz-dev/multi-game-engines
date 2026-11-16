@@ -65,3 +65,5 @@ export type {
 
 // 標準ミドルウェア
 export * from "./middlewares/index.js";
+
+export { EmscriptenWorkerCommunicator } from "./workers/index.js";

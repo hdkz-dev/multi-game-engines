@@ -80,3 +80,20 @@ describe("FairyStockfishAdapter", () => {
     expect(adapter.status).toBe("ready");
   });
 });
+
+describe("browser factory source selection", () => {
+  it("marks default registry assets as a factory and preserves standalone overrides", () => {
+    const defaults = createFairyStockfishEngine();
+    expect(defaults.config?.sources?.main.workerFactory).toBe("Stockfish");
+    const custom = createFairyStockfishEngine({
+      sources: {
+        main: {
+          url: "https://example.com/custom-worker.js",
+          type: "worker-js",
+          __unsafeNoSRI: true,
+        },
+      },
+    });
+    expect(custom.config?.sources?.main.workerFactory).toBeUndefined();
+  });
+});

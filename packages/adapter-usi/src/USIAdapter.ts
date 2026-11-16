@@ -6,6 +6,7 @@ import {
   EngineError,
   EngineErrorCode,
   ResourceMap,
+  type ICommunicator,
   IEngineConfig,
   IEngineSourceConfig,
   createI18nKey,
@@ -48,6 +49,13 @@ export class USIAdapter extends BaseAdapter<
   async load(loader?: IEngineLoader, signal?: AbortSignal): Promise<void> {
     this.emitStatusChange("loading");
     try {
+      this.cleanupPendingTask("Engine reloaded", true);
+      this.messageUnsubscriber?.();
+      this.messageUnsubscriber = null;
+      if (this.communicator) {
+        await this.communicator.terminate();
+        this.communicator = null;
+      }
       if (isNodeEnvironment() && this.config.binaryPath) {
         // Node.js ネイティブバイナリモード
         const { NativeCommunicator } = await import(
@@ -105,7 +113,7 @@ export class USIAdapter extends BaseAdapter<
           });
         }
 
-        this.communicator = new WorkerCommunicator(resources["main"]);
+        this.communicator = this.createBrowserCommunicator(resources);
         const resourceMap: ResourceMap = {};
         for (const [key, sourceVal] of Object.entries(sources)) {
           const source = sourceVal as IEngineSourceConfig | undefined;
@@ -140,6 +148,15 @@ export class USIAdapter extends BaseAdapter<
       this.emitStatusChange("error");
       throw EngineError.from(e, this.id);
     }
+  }
+
+  /** Creates the browser transport after all resources pass loader verification. */
+  protected createBrowserCommunicator(
+    resources: Readonly<Record<string, string>>,
+  ): ICommunicator {
+    const main = resources["main"];
+    if (!main) throw new Error("Missing verified worker entry");
+    return new WorkerCommunicator(main);
   }
 
   protected async onBookLoaded(url: string): Promise<void> {

@@ -415,7 +415,7 @@ describe("BaseAdapter", () => {
       await expect(firstSettled).resolves.toBeUndefined();
     });
 
-    it("searchRaw() should reset status to ready when sendSearchCommand throws", () => {
+    it("searchRaw() should report error when sendSearchCommand throws", () => {
       const a = new TestAdapter();
       a.setStatus("ready");
       a.setCommunicator({
@@ -426,7 +426,7 @@ describe("BaseAdapter", () => {
       } as unknown);
 
       expect(() => a.searchRaw("go")).toThrow(/post failed/);
-      expect(a.status).toBe("ready");
+      expect(a.status).toBe("error");
     });
 
     it("searchRaw().stop() should call adapter.stop()", async () => {
@@ -686,3 +686,88 @@ const adapterParser = (a: { parser: unknown }) =>
   a.parser as {
     translateError?: (data: unknown) => string | null;
   };
+
+describe("BaseAdapter loader cancellation boundary", () => {
+  it("rejects late resources from a loader that ignores cancellation", async () => {
+    const adapter = new TestAdapter();
+    const controller = new AbortController();
+    let release!: (resources: Record<string, string>) => void;
+    const gate = new Promise<Record<string, string>>((resolve) => {
+      release = resolve;
+    });
+    const loader = {
+      loadResource: vi.fn(),
+      loadResources: vi.fn(() => gate),
+      revoke: vi.fn(),
+      revokeAll: vi.fn(),
+      revokeByEngineId: vi.fn(),
+    };
+    const loading = adapter.testLoadWithProgress(loader, {}, controller.signal);
+    const outcome = loading.catch((error: unknown) => error);
+    controller.abort();
+    release({ main: "blob:late" });
+    expect(await outcome).toMatchObject({ name: "AbortError" });
+  });
+});
+
+describe("BaseAdapter asynchronous transport failures", () => {
+  it("rejects pending search, closes info, reports error and releases its subscription", async () => {
+    const adapter = new TestAdapter();
+    const listeners = new Set<(error: Error) => void>();
+    const unsubscribe = vi.fn();
+    adapter.setCommunicator({
+      postMessage: vi.fn(),
+      terminate: vi.fn(),
+      onError: (callback: (error: Error) => void) => {
+        listeners.add(callback);
+        return () => {
+          listeners.delete(callback);
+          unsubscribe();
+        };
+      },
+    });
+    adapter.setStatus("ready");
+    const task = adapter.searchRaw(["position startpos", "go depth 1"]);
+    const result = task.result.catch((error: unknown) => error);
+    const next = task.info[Symbol.asyncIterator]().next();
+    expect(listeners.size).toBe(1);
+    for (const listener of listeners) listener(new Error("worker crashed"));
+    expect(await result).toMatchObject({
+      code: "SEARCH_ABORTED",
+      message: "worker crashed",
+    });
+    await expect(next).resolves.toMatchObject({ done: true });
+    expect(adapter.status).toBe("error");
+    expect(listeners.size).toBe(0);
+    await adapter.dispose();
+    expect(unsubscribe).toHaveBeenCalledOnce();
+  });
+
+  it("unsubscribes after results, restart and synchronous send failure", async () => {
+    const adapter = new TestAdapter();
+    const unsubscribe = vi.fn();
+    const postMessage = vi.fn();
+    const onError = vi.fn(() => unsubscribe);
+    adapter.setCommunicator({ postMessage, onError, terminate: vi.fn() });
+    adapter.setStatus("ready");
+    const first = adapter.searchRaw("go");
+    const rejected = first.result.catch((error: unknown) => error);
+    const second = adapter.searchRaw("go");
+    expect(await rejected).toBeDefined();
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+    adapter.parser.parseResult.mockReturnValue({
+      bestMove: createMove("e2e4"),
+      raw: "bestmove e2e4",
+    });
+    adapter.testHandleIncomingMessage("bestmove e2e4");
+    await second.result;
+    expect(unsubscribe).toHaveBeenCalledTimes(2);
+    postMessage.mockImplementation(() => {
+      throw new Error("send failed");
+    });
+    expect(() => adapter.searchRaw("go")).toThrow("send failed");
+    expect(adapter.status).toBe("error");
+    expect(unsubscribe).toHaveBeenCalledTimes(3);
+    await adapter.dispose();
+  });
+});

@@ -1,4 +1,10 @@
-import { IEngineConfig, IEngine, deepMerge } from "@multi-game-engines/core";
+import {
+  IEngineConfig,
+  IEngine,
+  deepMerge,
+  EmscriptenWorkerCommunicator,
+  type ICommunicator,
+} from "@multi-game-engines/core";
 import { USIAdapter } from "@multi-game-engines/adapter-usi";
 import {
   IShogiSearchOptions,
@@ -7,6 +13,23 @@ import {
 } from "@multi-game-engines/domain-shogi";
 
 export class FairyStockfishShogiAdapter extends USIAdapter {
+  protected override createBrowserCommunicator(
+    resources: Readonly<Record<string, string>>,
+  ): ICommunicator {
+    if (this.config.sources?.main?.workerFactory === "Stockfish") {
+      return new EmscriptenWorkerCommunicator(resources);
+    }
+    return super.createBrowserCommunicator(resources);
+  }
+
+  protected override async injectResources(
+    resourceMap: Record<string, string>,
+  ): Promise<void> {
+    if (this.config.sources?.main?.workerFactory !== "Stockfish") {
+      await super.injectResources(resourceMap);
+    }
+  }
+
   constructor(config?: Partial<IEngineConfig>) {
     const defaultConfig: IEngineConfig = {
       id: "fairy-stockfish-shogi",

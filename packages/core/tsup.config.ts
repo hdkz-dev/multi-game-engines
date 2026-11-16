@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     node: "src/node.ts",
+    "node-browser": "src/node-browser.ts",
     "mocks/index": "src/mocks/index.ts",
   },
   format: ["cjs", "esm"],

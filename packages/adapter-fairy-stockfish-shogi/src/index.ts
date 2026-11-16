@@ -21,13 +21,20 @@ export function createFairyStockfishShogiEngine(
     config.version,
   );
 
+  const sources = normalizeAndValidateSources(
+    registrySources,
+    config,
+    "fairy-stockfish-shogi",
+  );
+  // Keep default bootstrapping correct when an older compatible registry is installed.
+  // A caller-supplied main remains an explicit standalone Worker override.
+  if (!config.sources?.main) {
+    sources.main = { ...sources.main, workerFactory: "Stockfish" };
+  }
+
   const mergedConfig: IEngineConfig = {
     ...config,
-    sources: normalizeAndValidateSources(
-      registrySources,
-      config,
-      "fairy-stockfish-shogi",
-    ),
+    sources,
   };
 
   return new EngineFacade(new FairyStockfishShogiAdapter(mergedConfig));
