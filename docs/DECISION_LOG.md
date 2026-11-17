@@ -73,3 +73,12 @@
 
 - [ADR 061: 依存更新と厳格な検証](adr/061-dependency-refresh-and-strict-validation.md) (Accepted, 2026-09-17; current follow-up documented)
 - [ADR 062: 開発ツールの安全な暗号・glob実装](adr/062-development-tooling-security-backends.md) (Accepted, 2026-10-05; PR #265 follow-up)
+- [ADR 063: チャンク取得の通信境界](./adr/063-chunked-download-transport-boundary.md) (Accepted)
+- [ADR 064: 2026-10-11依存最新化と型環境の検証](./adr/064-dependency-refresh-and-node-type-validation.md) (Accepted, 2026-10-11)
+- [ADR 065: pnpm 12と開発ツールの保守更新](./adr/065-pnpm12-and-toolchain-refresh.md) (2026-10-24)
+- [ADR 066: Release Actionにバージョン変更のコミットを集約する](./adr/066-release-action-owns-version-commits.md) (2026-10-25)
+- [ADR 067: Explicit Unicorn rule policy](./adr/067-explicit-unicorn-rule-policy.md) (2026-10-26)
+- [ADR 068: Remove deepmerge from Rollup resolver](./adr/068-remove-deepmerge-from-resolver.md) (2026-10-28)
+- [ADR 069: Verified resource and response contracts](./adr/069-verified-resource-response-contract.md) (2026-10-28)
+- [ADR 070: 依存ファミリーとバージョン別パッチの協調更新](./adr/070-coordinated-dependency-patches.md) (2026-11-07, PR #301 統合)
+- [ADR 071: Fairy-Stockfish browser factoryの起動](./adr/071-fairy-browser-factory-bootstrap.md) (2026-11-07, PR #302 / #307 統合・公開済み)

@@ -1,5 +1,17 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
+## 2026-11-17 PR #301/#302/#307 統合および 47 パッケージ npm 公開完了
+
+- **PR #301（`codex/dependency-patch-coherence`, `main` `102c201d`）**: 依存更新と ESLint SARIF パーティション検証、バージョン限定パッチを統合完了。
+- **PR #302（`codex/fairy-worker-bootstrap`, `main` `b7c3fccc`）**: `EmscriptenWorkerCommunicator` による検証済み Fairy-Stockfish Emscripten ファクトリの Worker ブートストラップ、コア `./node` の条件付きブラウザエクスポート分離、再ロード時の旧トランスポート解放を統合完了（ADR 071）。
+- **Version Packages PR #307（`main` `be98c03c`）と npm 公開完了**: GitHub Secrets の `NPM_TOKEN`（2026-07-31 設定、90 日有効期限で 2026-10-29 満了）を更新後、`Release` ワークフロー（`run 43893092912`）を実行し、対象 **47 パッケージ**（`@multi-game-engines/core@0.3.1`、`@multi-game-engines/adapter-fairy-stockfish@1.0.7`、`@multi-game-engines/adapter-fairy-stockfish-shogi@1.0.7`、`@multi-game-engines/registry@1.1.8` 等、既公開 `i18n-*` 6 件を除く）の npm 公開および GitHub Release / タグ 47 件の作成を完了した。
+- **継続保守・残課題と方針（ブランチ `docs/release-sync-2026-11-17`）**:
+  - **GitHub Actions 更新（PR #298）**: `.github/workflows/docs.yml` の `dawidd6/action-download-artifact` を `v27` → `v28` へ更新。
+  - **Dependabot 依存更新 PR #308（27 件）**: ADR 070 の方針に従い、公開パッケージの `dependencies`（`@lucide/vue` 等）変更と `@storybook/*` 10.6.7 / `@next/eslint-plugin-next` パッチ互換性・`minimumReleaseAge: 1440` を独立ブランチで切り分けて検証する。
+  - **jsdom 31 メジャー移行（PR #303）**: UI テスト環境（React / Elements / Vue Core）への破壊的変更の影響を通常依存更新から分離して個別検証する。
+  - **OSV 誤検出（`GHSA-vjh5-4x84-xrqp`）**: 修正済み `nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対して OSV 上流データに 3.x 上限が欠落していることによる誤検出であり、監査除外は追加せず上流解消を待つ。
+  - **Open Issue**: 0 件。実モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は将来バックログとして維持する。
+
 ## 2026-11-07 協調監査による依存・CI見直し
 
 ESLint 10.14.0、Storybook 10.6.6等の成熟版を選定し、既知のOSV範囲問題と実脆弱性を分離する。独立監査で見つかったimport制限のドット/ゼロ階層境界、SARIFの動的依存追加、不要override、古い状態表記を修正中。新しいheadのローカル・CI結果を確認してから完了とする。公開パッケージの下限範囲は維持し、許容範囲内の成熟版をlockfileで検証する。追加公開・管理者マージは行わない。

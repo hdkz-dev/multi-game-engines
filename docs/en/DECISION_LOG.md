@@ -73,3 +73,12 @@ This document indexes the major design decisions recorded as ADRs (Architecture 
 
 - [ADR 061: Dependency refresh and strict validation](adr/061-dependency-refresh-and-strict-validation.md) (Accepted, 2026-09-17; current follow-up documented)
 - [ADR 062: Secure development-tooling backends](adr/062-development-tooling-security-backends.md) (Accepted, 2026-10-05; PR #265 follow-up)
+- [ADR 063: Chunked download transport boundary](../adr/063-chunked-download-transport-boundary.md) (Accepted)
+- [ADR 064: Dependency refresh and Node type validation](../adr/064-dependency-refresh-and-node-type-validation.md) (Accepted, 2026-10-11)
+- [ADR 065: pnpm 12 and toolchain refresh](../adr/065-pnpm12-and-toolchain-refresh.md) (2026-10-24)
+- [ADR 066: Release Action owns version commits](../adr/066-release-action-owns-version-commits.md) (2026-10-25)
+- [ADR 067: Explicit Unicorn rule policy](../adr/067-explicit-unicorn-rule-policy.md) (2026-10-26)
+- [ADR 068: Remove deepmerge from Rollup resolver](../adr/068-remove-deepmerge-from-resolver.md) (2026-10-28)
+- [ADR 069: Verified resource and response contracts](../adr/069-verified-resource-response-contract.md) (2026-10-28)
+- [ADR 070: Coordinated dependency patches](../adr/070-coordinated-dependency-patches.md) (2026-11-07, integrated in PR #301)
+- [ADR 071: Fairy-Stockfish browser factory bootstrap](../adr/071-fairy-browser-factory-bootstrap.md) (2026-11-07, integrated & released via PR #302 / #307)

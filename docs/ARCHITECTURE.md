@@ -1,6 +1,10 @@
 # アーキテクチャと設計
 
-## 2026-11-07 Fairy-Stockfish browser起動修正（未統合）
+## 2026-11-17 リリース統合状態（main `be98c03c`）
+
+下記の `PR #301`（依存更新・ESLint SARIF 分割・バージョン限定パッチ、`main` `102c201d`）および `PR #302`（Fairy-Stockfish Emscripten factory Worker ブートストラップ・`core/node` 条件付き export 分離・ADR 071、`main` `b7c3fccc`）はすべて `main` へ統合済みであり、`PR #307`（`be98c03c`）および `Release` ワークフロー（`run 43893092912`）にて対象 47 パッケージの npm 公開を完了している。
+
+## 2026-11-07 Fairy-Stockfish browser起動修正（PR #302で統合・公開済み）
 
 配布stockfish.jsはWorker入口ではなくEmscripten factoryであり、そのままWorker化してもuciok/usiokを返さない。registryのworkerFactoryメタデータで既定資源だけをbootstrapへ接続し、検証済みmain/wasm/pthreadのBlob URLから初期化する。URL・SRIはregistryを正本とし、consumerに複製しない。共有メモリとcross-origin isolationを必須とし、初期化前の命令は上限付きで待機させる。型付きUCI/USI通信、起動失敗、dispose時のWorker/Blob解放を検証する。独自のstandalone Worker上書きとNode native経路は維持する。
 

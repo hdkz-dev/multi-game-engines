@@ -1,5 +1,17 @@
 # Current project progress
 
+## 2026-11-17 PR #301/#302/#307 Integration and 47-Package npm Release Completed
+
+- **PR #301 (`codex/dependency-patch-coherence`, `main` `102c201d`)**: Integrated coordinated dependency updates, ESLint SARIF partition checks, and version-scoped patches.
+- **PR #302 (`codex/fairy-worker-bootstrap`, `main` `b7c3fccc`)**: Integrated `EmscriptenWorkerCommunicator` for browser Worker bootstrapping of verified Fairy-Stockfish factories, conditional browser exports on `@multi-game-engines/core/node`, and prior transport cleanup on reload (ADR 071).
+- **Version Packages PR #307 (`main` `be98c03c`) & npm Publication**: After rotating the expired `NPM_TOKEN` GitHub Secret (created `2026-07-31`, expired after 90 days on `2026-10-29`), `Release` workflow run `43893092912` succeeded and published all **47 target packages** (`@multi-game-engines/core@0.3.1`, `@multi-game-engines/adapter-fairy-stockfish@1.0.7`, `@multi-game-engines/adapter-fairy-stockfish-shogi@1.0.7`, `@multi-game-engines/registry@1.1.8`, etc., excluding the 6 already-published `i18n-*` packages) along with 47 GitHub Releases and git tags.
+- **Ongoing Maintenance & Backlog Policy (branch `docs/release-sync-2026-11-17`)**:
+  - **GitHub Actions update (PR #298)**: Updated `dawidd6/action-download-artifact` from `v27` to `v28` in `.github/workflows/docs.yml`.
+  - **Dependabot group PR #308 (27 updates)**: Following ADR 070, validate compatibility with existing patches (`@storybook/*` 10.6.7, `@next/eslint-plugin-next`, `@typescript-eslint/*`) and separate runtime `dependencies` bumps (`@lucide/vue`) from dev tooling while preserving `minimumReleaseAge: 1440`.
+  - **jsdom 31 major upgrade (PR #303)**: Evaluate separately from routine minor/patch updates across UI test packages.
+  - **Upstream OSV false positive (`GHSA-vjh5-4x84-xrqp`)**: Affects fixed `nuxt@4.6.4` and `@nuxt/nitro-server@4.6.4` due to missing `<4.0.0` upper bound in upstream OSV records; wait for upstream fix without adding audit suppressions.
+  - **Open Issues**: 0. Production KataGo/Mortal model integration and dynamic Expert Mapping remain future feature backlog items.
+
 ## 2026-11-07 Coordinated dependency and CI audit
 
 Select mature releases including ESLint 10.14.0 and Storybook 10.6.6, separating the known OSV range problem from real vulnerabilities. Fix the independently discovered hidden/zero-depth import boundaries, dynamic SARIF dependency installation, redundant override and stale status text. Completion requires local and remote checks at the new head. Retain public dependency lower bounds and validate mature versions within those ranges in the lockfile. No additional publication or administrator merge is performed.

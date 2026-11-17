@@ -1,6 +1,18 @@
 # プロジェクト・バックログ (TASKS.md)
 
-## 2026-10-26 Unicorn移行
+## 2026-11-17 リリース統合・公開と継続保守方針
+
+- [x] PR #301（`102c201d`）・PR #302（`b7c3fccc`）・Version Packages PR #307（`be98c03c`）を `--merge` で `main` に統合。
+- [x] 期限切れだった `NPM_TOKEN` を再発行・更新し、`Release` ワークフロー（`run 43893092912`）にて全 47 パッケージの npm 公開・GitHub Release / タグ作成を完了（`core@0.3.1`, `adapter-fairy-stockfish@1.0.7`, `adapter-fairy-stockfish-shogi@1.0.7`, `registry@1.1.8` 等）。
+- [x] PR #298（`dawidd6/action-download-artifact@v28`）を `.github/workflows/docs.yml` へ反映し、進捗・タスク文書を最新化（作業ブランチ `docs/release-sync-2026-11-17`）。
+- [ ] Dependabot PR #308（27件グループ更新）の検証・統合（ADR 070 に沿って `@storybook/*` 10.6.7・`vite` 8.3.8・`oxlint` 1.93.0 等のパッチ・peer 互換性と公開 `dependencies` 範囲の分離を確認し、`minimumReleaseAge: 1440` を維持して実施）。
+- [ ] Dependabot PR #303（`jsdom` 30.1.3 → 31.0.0 メジャー移行）の個別互換検証。
+- [ ] OSV 上流の `GHSA-vjh5-4x84-xrqp`（Nuxt 3.x 上限データ不備）修正確認後の再監査（監査除外設定は追加しない）。
+- [ ] 将来機能バックログ: `F1–F4`（実 AI モデル統合、`KATAGO_ONNX_URL` 設定、動的 Expert Mapping）および TypeScript 7 周辺ツール正式対応後の移行評価。
+
+---
+
+## 2026-10-26 Unicorn移行 (履歴)
 
 - [x] PR #288をmerge commit `d75a296`で統合。統合後の通常検証・E2E・Releaseは成功し、CI監査は承認済みのOSV誤検出1件のみ。
 - [x] Unicorn 79の明示ルール設定と、従来58ルールの維持を検証する回帰試験を追加。
