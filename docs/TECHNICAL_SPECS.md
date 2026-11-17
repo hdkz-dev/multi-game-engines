@@ -1,6 +1,10 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
-## 2026-11-07 Fairy-Stockfish browser起動修正（未統合）
+## 2026-11-17 リリース統合状態（main `be98c03c`）
+
+`PR #301`（`102c201d`）・`PR #302`（`b7c3fccc`, ADR 071）・`PR #307`（`be98c03c`）はすべて統合済みであり、`Release` ワークフロー（`run 43893092912`）にて `@multi-game-engines/core@0.3.1`、`adapter-fairy-stockfish@1.0.7`、`adapter-fairy-stockfish-shogi@1.0.7`、`registry@1.1.8` 等を含む全 47 パッケージを公開済み。
+
+## 2026-11-07 Fairy-Stockfish browser起動修正（PR #302で統合・公開済み）
 
 配布stockfish.jsはWorker入口ではなくEmscripten factoryであり、そのままWorker化してもuciok/usiokを返さない。registryのworkerFactoryメタデータで既定資源だけをbootstrapへ接続し、検証済みmain/wasm/pthreadのBlob URLから初期化する。URL・SRIはregistryを正本とし、consumerに複製しない。共有メモリとcross-origin isolationを必須とし、初期化前の命令は上限付きで待機させる。型付きUCI/USI通信、起動失敗、dispose時のWorker/Blob解放を検証する。独自のstandalone Worker上書きとNode native経路は維持する。
 

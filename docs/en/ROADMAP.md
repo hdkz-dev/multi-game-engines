@@ -1,6 +1,11 @@
 # Project Roadmap (2026-2027)
 
-## 2026-11-07 Fairy-Stockfish browser bootstrap fix (not integrated)
+## 2026-11-17 Release Completion and Next Phases (main `be98c03c`)
+
+- Completed integration of `PR #301` (`102c201d`), `PR #302` (`b7c3fccc`), and `PR #307` (`be98c03c`), plus npm publication of all 47 target packages (`Release` run `43893092912`).
+- Ongoing phases: alongside syncing `.github/workflows/docs.yml` (`action-download-artifact@v28`, PR #298), validate Dependabot PR #308 (27 updates, ADR 070 patch coherence) and PR #303 (`jsdom` 31 major upgrade) in dedicated batches. Production AI models (KataGo ONNX / Mortal) and dynamic Expert Mapping remain future roadmap items.
+
+## 2026-11-07 Fairy-Stockfish browser bootstrap fix (Integrated & Released via PR #302 / #307)
 
 The distributed stockfish.js defines an Emscripten factory rather than a Worker entry and cannot return uciok/usiok when launched directly. Registry workerFactory metadata selects the bootstrap only for default assets. Instantiate it using loader-verified main/WASM/pthread Blob URLs; keep URLs and SRI in the registry rather than copying them into consumers. Require shared memory and cross-origin isolation, bound commands queued during initialization, and verify typed UCI/USI handshakes, search, failures and Worker/Blob cleanup. Preserve custom standalone Worker overrides and native Node binaries.
 

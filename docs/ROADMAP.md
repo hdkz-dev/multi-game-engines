@@ -1,6 +1,11 @@
 # プロジェクト・ロードマップ (2026-2027)
 
-## 2026-11-07 Fairy-Stockfish browser起動修正（未統合）
+## 2026-11-17 リリース完了と今後のフェーズ（main `be98c03c`）
+
+- `PR #301`（依存整合・SARIF 分割、`102c201d`）・`PR #302`（Fairy-Stockfish browser factory bootstrap、`b7c3fccc`）・`PR #307`（Version Packages、`be98c03c`）の統合および全 47 パッケージの npm 公開（`Release` run `43893092912`）を完了。
+- 継続フェーズ: `.github/workflows/docs.yml` の `action-download-artifact@v28` 同期（PR #298）に続き、Dependabot PR #308（27件更新・ADR 070 パッチ整合確認）および PR #303（`jsdom` 31 メジャー移行）を段階的に検証する。実 AI モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は次期機能ロードマップとして維持する。
+
+## 2026-11-07 Fairy-Stockfish browser起動修正（PR #302で統合・公開済み）
 
 配布stockfish.jsはWorker入口ではなくEmscripten factoryであり、そのままWorker化してもuciok/usiokを返さない。registryのworkerFactoryメタデータで既定資源だけをbootstrapへ接続し、検証済みmain/wasm/pthreadのBlob URLから初期化する。URL・SRIはregistryを正本とし、consumerに複製しない。共有メモリとcross-origin isolationを必須とし、初期化前の命令は上限付きで待機させる。型付きUCI/USI通信、起動失敗、dispose時のWorker/Blob解放を検証する。独自のstandalone Worker上書きとNode native経路は維持する。
 

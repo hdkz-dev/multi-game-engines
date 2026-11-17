@@ -1,6 +1,10 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
-## 2026-11-07 Fairy-Stockfish browser bootstrap fix (not integrated)
+## 2026-11-17 Release Integration Status (main `be98c03c`)
+
+`PR #301` (`102c201d`), `PR #302` (`b7c3fccc`, ADR 071), and `PR #307` (`be98c03c`) are integrated on `main`, and all 47 target packages (`@multi-game-engines/core@0.3.1`, `adapter-fairy-stockfish@1.0.7`, `adapter-fairy-stockfish-shogi@1.0.7`, `registry@1.1.8`, etc.) have been published to npm (`Release` run `43893092912`).
+
+## 2026-11-07 Fairy-Stockfish browser bootstrap fix (Integrated & Released via PR #302 / #307)
 
 The distributed stockfish.js defines an Emscripten factory rather than a Worker entry and cannot return uciok/usiok when launched directly. Registry workerFactory metadata selects the bootstrap only for default assets. Instantiate it using loader-verified main/WASM/pthread Blob URLs; keep URLs and SRI in the registry rather than copying them into consumers. Require shared memory and cross-origin isolation, bound commands queued during initialization, and verify typed UCI/USI handshakes, search, failures and Worker/Blob cleanup. Preserve custom standalone Worker overrides and native Node binaries.
 
