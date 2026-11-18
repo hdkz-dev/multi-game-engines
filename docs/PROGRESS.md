@@ -5,11 +5,10 @@
 - **PR #301（`codex/dependency-patch-coherence`, `main` `102c201d`）**: 依存更新と ESLint SARIF パーティション検証、バージョン限定パッチを統合完了。
 - **PR #302（`codex/fairy-worker-bootstrap`, `main` `b7c3fccc`）**: `EmscriptenWorkerCommunicator` による検証済み Fairy-Stockfish Emscripten ファクトリの Worker ブートストラップ、コア `./node` の条件付きブラウザエクスポート分離、再ロード時の旧トランスポート解放を統合完了（ADR 071）。
 - **Version Packages PR #307（`main` `be98c03c`）と npm 公開完了**: GitHub Secrets の `NPM_TOKEN`（2026-07-31 設定、90 日有効期限で 2026-10-29 満了）を更新後、`Release` ワークフロー（`run 43893092912`）を実行し、対象 **47 パッケージ**（`@multi-game-engines/core@0.3.1`、`@multi-game-engines/adapter-fairy-stockfish@1.0.7`、`@multi-game-engines/adapter-fairy-stockfish-shogi@1.0.7`、`@multi-game-engines/registry@1.1.8` 等、既公開 `i18n-*` 6 件を除く）の npm 公開および GitHub Release / タグ 47 件の作成を完了した。
-- **継続保守・残課題と方針（ブランチ `docs/release-sync-2026-11-17`）**:
-  - **GitHub Actions 更新（PR #298）**: `.github/workflows/docs.yml` の `dawidd6/action-download-artifact` を `v27` → `v28` へ更新。
-  - **Dependabot 依存更新 PR #308（27 件）**: ADR 070 の方針に従い、公開パッケージの `dependencies`（`@lucide/vue` 等）変更と `@storybook/*` 10.6.7 / `@next/eslint-plugin-next` パッチ互換性・`minimumReleaseAge: 1440` を独立ブランチで切り分けて検証する。
-  - **jsdom 31 メジャー移行（PR #303）**: UI テスト環境（React / Elements / Vue Core）への破壊的変更の影響を通常依存更新から分離して個別検証する。
-  - **OSV 誤検出（`GHSA-vjh5-4x84-xrqp`）**: 修正済み `nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対して OSV 上流データに 3.x 上限が欠落していることによる誤検出であり、監査除外は追加せず上流解消を待つ。
+- **継続保守・依存関係同期（2026-11-18、ブランチ `chore/deps-refresh-2026-11-17`）**:
+  - **GitHub Actions 更新（PR #298）**: `.github/workflows/docs.yml` の `dawidd6/action-download-artifact` を `v27` → `v28` へ更新し、PR #310（`979c764d`）で `main` に統合済み。
+  - **Dependabot PR #308（27 件）+ PR #303（`jsdom` `^31.0.0`）統合検証**: ADR 070 に従い公開パッケージの `dependencies` 下限（`"lucide-react": "^1.61.0"` / `"@lucide/vue": "^1.61.0"`）と `minimumReleaseAge: 1440` を維持したまま、`@storybook/*` を `^10.6.7` へ統一して 4 パッチ（`vue3`, `react`, `react-vite`, `web-components`）を移植し、`jsdom` を `^31.0.0` へ移行した。ローカル品質ゲート（`pnpm install`、`pnpm lint` 98/98 + `oxlint` 0 warnings、`pnpm typecheck` 99/99、`pnpm build` 56/56、`pnpm test` 全 Vitest + tooling 28/28）のすべてが通過。
+  - **上流監査待機（`GHSA-vjh5-4x84-xrqp` / `GHSA-fc5q-39xc-vjpf`）**: 修正済み `nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対する OSV 上流データ不備（`GHSA-vjh5-4x84-xrqp`）および `picomatch <= 4.0.7` の上流修正版未公開（`GHSA-fc5q-39xc-vjpf`）については、監査除外を追加せず上流解消を待つ。
   - **Open Issue**: 0 件。実モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は将来バックログとして維持する。
 
 ## 2026-11-07 協調監査による依存・CI見直し

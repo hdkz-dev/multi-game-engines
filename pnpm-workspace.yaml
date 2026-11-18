@@ -29,10 +29,10 @@ patchedDependencies:
   listhen@1.10.1: patches/listhen@1.10.1.patch
   fast-glob@3.3.3: patches/fast-glob@3.3.3.patch
   globby@16.2.4: patches/globby@16.2.4.patch
-  "@storybook/vue3@10.6.6": patches/@storybook__vue3@10.6.6.patch
-  "@storybook/react@10.6.6": patches/@storybook__react@10.6.6.patch
-  "@storybook/react-vite@10.6.6": patches/@storybook__react-vite@10.6.6.patch
-  "@storybook/web-components@10.6.6": patches/@storybook__web-components@10.6.6.patch
+  "@storybook/vue3@10.6.7": patches/@storybook__vue3@10.6.7.patch
+  "@storybook/react@10.6.7": patches/@storybook__react@10.6.7.patch
+  "@storybook/react-vite@10.6.7": patches/@storybook__react-vite@10.6.7.patch
+  "@storybook/web-components@10.6.7": patches/@storybook__web-components@10.6.7.patch
   "@next/eslint-plugin-next@16.4.5": patches/@next__eslint-plugin-next@16.4.5.patch
 allowBuilds:
   "@parcel/watcher": true

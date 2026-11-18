@@ -1,4 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
+index c5777bd..f7cf170 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -1,3 +1,4 @@
@@ -6,7 +7,7 @@ diff --git a/dist/index.d.ts b/dist/index.d.ts
  import { AnnotatedStoryFn, ArgTypes, Args, Args as Args$1, ArgsStoryFn, ComponentAnnotations, DecoratorFunction, LoaderFunction, NamedOrDefaultProjectAnnotations, NormalizedProjectAnnotations, Parameters as Parameters$1, ProjectAnnotations, Renderer, StoryAnnotations, StoryContext as StoryContext$1, StrictArgs, StrictArgs as StrictArgs$1, WebRenderer } from "storybook/internal/types";
  import { SVGTemplateResult, TemplateResult } from "lit";
  import { AddonTypes, InferTypes, Meta as Meta$1, Preview as Preview$1, PreviewAddon, Story } from "storybook/internal/csf";
-@@ -1040,7 +1041,7 @@
+@@ -1040,7 +1041,7 @@ type DecoratorsArgs<TRenderer extends Renderer, Decorators> = UnionToIntersectio
   * provided in meta become optional in stories, while missing required args must be provided at the
   * story level.
   */
@@ -15,7 +16,7 @@ diff --git a/dist/index.d.ts b/dist/index.d.ts
    /**
     * Creates a story with a custom render function that takes no args.
     *
-@@ -1086,7 +1087,7 @@
+@@ -1086,7 +1087,7 @@ interface WebComponentsMeta<T extends WebComponentsTypes, MetaInput extends Comp
     * });
     * ```
     */
@@ -24,7 +25,7 @@ diff --git a/dist/index.d.ts b/dist/index.d.ts
    /**
     * Creates a story with no additional configuration.
     *
-@@ -1112,6 +1113,6 @@
+@@ -1112,6 +1113,6 @@ interface WebComponentsMeta<T extends WebComponentsTypes, MetaInput extends Comp
   * Represents a single story with its configuration and provides access to the composed story for
   * testing via `story.run()`.
   */
@@ -32,3 +33,4 @@ diff --git a/dist/index.d.ts b/dist/index.d.ts
 +interface WebComponentsStory<T extends WebComponentsTypes, TInput extends StoryAnnotations<T, T['args']>> extends Story<T, TInput & CSFStoryAnnotations<T, T["args"]>> {}
  //#endregion
  export { type ArgTypes, type Args, Decorator, Loader, Meta, type Parameters$1 as Parameters, Preview, StoryContext, StoryFn, StoryObj, type StrictArgs, WebComponentsMeta, WebComponentsPreview, type WebComponentsRenderer, WebComponentsStory, type WebComponentsTypes, __definePreview, getCustomElements, isValidComponent, isValidMetaData, setCustomElements, setCustomElementsManifest, setProjectAnnotations };
+\ No newline at end of file
