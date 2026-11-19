@@ -3,7 +3,7 @@
 ## 2026-11-17 Release Completion and Next Phases (main `be98c03c`)
 
 - Completed integration of `PR #301` (`102c201d`), `PR #302` (`b7c3fccc`), and `PR #307` (`be98c03c`), plus npm publication of all 47 target packages (`Release` run `43893092912`).
-- Ongoing phases (`chore/deps-refresh-2026-11-17`): Following the `.github/workflows/docs.yml` `action-download-artifact@v28` sync (PR #298 / PR #310 `979c764d`), validated and consolidated Dependabot PR #308 (27 updates, ADR 070 `@storybook/*` `^10.6.7` patch coherence) and PR #303 (`jsdom` `^31.0.0` major upgrade). Production AI models (KataGo ONNX / Mortal) and dynamic Expert Mapping remain future roadmap items.
+- Ongoing phases (`chore/consolidate-pr311-315-and-cleanup-2026-11-19`): Following PR #310 (`979c764d`, PR #298) and PR #313 (`3001feb1`, PR #308/#303 consolidation), consolidated PR #311 (`osv-scanner-action` digest), PR #315 (superseding PR #314: ESLint 10.15.0, preserving ADR 070 lower bounds), and local config schema updates. Production AI models (KataGo ONNX / Mortal) and dynamic Expert Mapping remain future roadmap items.
 
 ## 2026-11-07 Fairy-Stockfish browser bootstrap fix (Integrated & Released via PR #302 / #307)
 
