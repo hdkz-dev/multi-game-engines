@@ -1,6 +1,9 @@
 {
   "general": {
-    "enablePromptCompletion": true
+    "enablePromptCompletion": true,
+    "plan": {
+      "enabled": true
+    }
   },
   "ui": {
     "inlineThinkingMode": "full"
@@ -13,7 +16,9 @@
     "toolOutputMasking": {
       "enabled": true
     },
-    "jitContext": true,
-    "plan": true
+    "jitContext": true
+  },
+  "agents": {
+    "overrides": {}
   }
 }
