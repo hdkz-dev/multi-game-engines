@@ -1,0 +1,60 @@
+diff --git a/lib/rules/no-internal-modules.js b/lib/rules/no-internal-modules.js
+index 5c586ba8e78c373328c370adbe8e42f78cd4d833..c147d86b889bf44f7eb3cc26d9850700d88b950f 100644
+--- a/lib/rules/no-internal-modules.js
++++ b/lib/rules/no-internal-modules.js
+@@ -14,23 +14,29 @@ function toSteps(somePath) {
+         return [...acc, step];
+     }, []);
+ }
+-function toMatcher(pattern) {
+-    const mm = new Minimatch(pattern);
+-    const dirs = [];
+-    for (const glob of mm.globSet) {
+-        const dir = glob.replace(/(\/\*\*)+$/, '');
+-        if (dir !== glob) {
+-            dirs.push(new Minimatch(dir, { nocomment: true, nonegate: true }));
++function toMatcher(pattern, isAllow) {
++    const create = (dot) => {
++        const mm = new Minimatch(pattern, { dot });
++        const dirs = [];
++        for (const glob of mm.globSet) {
++            const dir = glob.replace(/(\/\*\*)+$/, '');
++            if (dir !== glob) {
++                dirs.push(new Minimatch(dir, { dot, nocomment: true, nonegate: true }));
++            }
+         }
+-    }
+-    const inDir = (path) => dirs.some(dir => dir.match(path));
+-    return mm.negate
+-        ?
+-            (path) => path !== '' && mm.match(path) && !inDir(path)
+-        : (path) => mm.match(path) || inDir(path);
++        const inDir = (path) => dirs.some(dir => dir.match(path));
++        return mm.negate
++            ? (path) => path !== '' && mm.match(path) && !inDir(path)
++            : (path) => mm.match(path) || inDir(path);
++    };
++    const matchDefault = create(false);
++    const matchDot = create(true);
++    return isAllow
++        ? (path) => matchDefault(path) && matchDot(path)
++        : (path) => matchDefault(path) || matchDot(path);
+ }
+-function toMatchers(patterns = []) {
+-    return patterns.filter(Boolean).map(toMatcher);
++function toMatchers(patterns = [], isAllow = false) {
++    return patterns.filter(Boolean).map(pattern => toMatcher(pattern, isAllow));
+ }
+ const potentialViolationTypes = new Set([
+     'parent',
+@@ -84,8 +90,8 @@ export default createRule({
+     defaultOptions: [],
+     create(context) {
+         const options = context.options[0] || {};
+-        const allowMatchers = toMatchers(options.allow);
+-        const forbidMatchers = toMatchers(options.forbid);
++        const allowMatchers = toMatchers(options.allow, true);
++        const forbidMatchers = toMatchers(options.forbid, false);
+         function reachingAllowed(importPath) {
+             return allowMatchers.some(match => match(importPath));
+         }

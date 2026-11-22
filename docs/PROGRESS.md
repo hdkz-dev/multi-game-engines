@@ -1,5 +1,14 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
+## 2026-11-22 OIDC Trusted Publishing Phase 0 完了（PR #319）および開発環境・依存関係近代化（`main` `48bc467d` 基点）
+
+- **PR #319 マージ済み（`main` `48bc467d`）**: 方式 A（OIDC Trusted Publishing + Changesets PR 承認 + トークン公開禁止、[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md)）の Phase 0 整備を `main` に統合（欠落 12 パッケージの `repository` 補完・`scripts/setup-trusted-publishers.mjs` 刷新・`initial-publish.yml` 廃止・`scripts/validation.test.mjs` 回帰テスト追加）。CI 13 チェック通過（`CI/build-and-test` の `Audit` のみ既知の上流 `nuxt@4.6.4` OSV 誤検知 `GHSA-vjh5-4x84-xrqp` 群のため `--admin` マージ・詳細ログ検証済み）。
+- **ツールチェーン・依存関係・パッチ/overrides の近代化整理（2026-11-22、PR #317/#318 統合）**:
+  - **ツールチェーン最新化**: `packageManager` を `pnpm@12.21.0`（`engines.pnpm >= 12.21.0`）、`.nvmrc` / `.node-version` を Node 24 LTS 最新セキュリティ版 `24.22.3` へ更新。
+  - **成熟依存の一括更新（24 時間 `minimumReleaseAge: 1440`・`strictPeerDependencies: true` 厳守）**: `eslint-plugin-unicorn@^80.0.0`（PR #318 統合、ADR 067 の明示ポリシー維持）、`vitest` / `@vitest/*` `^5.1.1`、Storybook ファミリー `^10.6.8`、`@typescript-eslint/*` `^8.73.0`、`vue` / `@vue/compiler-dom` `^3.5.46`、`eslint-plugin-import-x@^4.18.1`、`@next/eslint-plugin-next@^16.4.6`、`@testing-library/jest-dom@^8.0.0`、`@testing-library/user-event@^14.6.13`、`@cloudflare/workers-types@^5.20261121.1`、`wrangler@^4.166.0`、`jsdom@^31.0.1`、`oxlint@^1.94.0`、`portless@^0.18.1`、`tailwind-merge@^3.7.1`、`turbo@^2.11.13`、およびサンプルアプリの `lucide-react` / `@lucide/vue` `^1.77.0` を更新（PR #317 統合）。公開パッケージ `packages/ui-{react,vue}-monitor` の `^1.61.0` および `adapter-katago` の `onnxruntime-web@^1.30.0`（lockfile 上 `1.31.1` 解決）の下限互換範囲は維持し、公開後 24 時間未満の版（`@eslint-react/eslint-plugin@5.30.6`, `lint-staged@17.6.2`）は据え置いた。ESLint 10.15.0 維持。
+  - **パッチ整理（14 → 13 件）**: `@testing-library/jest-dom@8.0.0` が公式に Vitest 5（`<R, T>`）へ対応したため専用パッチを完全撤去。一方、`eslint-plugin-import-x@4.18.1` は非パッチ時に隠しファイル境界（`private/.secret.js`）回帰を確認したため `toMatcher` への最小パッチを移植、`@next/eslint-plugin-next@16.4.6` と `@storybook/{react,react-vite,vue3,web-components}@10.6.8` の 5 件も TS 6 / `tinyglobby` 要件のため新版へ移植した。
+  - **overrides 整理（15 → 10 件）**: 実依存経路を精査し、消滅または全親パッケージが安全版へ追いついた 5 件（`simple-git@<4.0.1`, `@simple-git/argv-parser@<2.0.1`, `sharp@<0.35.5`, `ajv@>=7.0.0-alpha.0 <8.18.0`, `undici@>=7.0.0 <7.30.1`）を `pnpm-workspace.yaml` から撤去。`pnpm audit --prod` / `pnpm audit` ともに 0 件を確認済み。
+
 ## 2026-11-22 npm v12 適合確認・Trusted Publishing (OIDC) 移行計画策定（`main` `8ce924b6`）
 
 - **PR #316 マージ済み（`main` `8ce924b6`）**: 2026-11-19 に PR #316（PR #311・PR #315・設定スキーマ・文書同期）を `main` へ統合完了し、ローカル・リモートとも `main` 単一・オープン PR/Issue 0 件となった（ESLint 10.15.0、PR #316 run `44477859299` で `picomatch` `GHSA-fc5q-39xc-vjpf` 非検出・`0 Critical, 0 High` 確認済み）。

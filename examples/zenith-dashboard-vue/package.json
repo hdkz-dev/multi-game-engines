@@ -17,7 +17,7 @@
     "pretest:e2e": "pnpm copy-mocks"
   },
   "dependencies": {
-    "@lucide/vue": "^1.73.0",
+    "@lucide/vue": "^1.77.0",
     "@multi-game-engines/adapter-edax": "workspace:*",
     "@multi-game-engines/adapter-gnubg": "workspace:*",
     "@multi-game-engines/adapter-gtp": "workspace:*",
@@ -39,7 +39,7 @@
     "@multi-game-engines/ui-shogi-vue": "workspace:*",
     "@multi-game-engines/ui-vue": "workspace:*",
     "@multi-game-engines/ui-vue-monitor": "workspace:*",
-    "vue": "^3.5.45"
+    "vue": "^3.5.46"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -53,7 +53,7 @@
     "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.72.2",
+    "typescript-eslint": "^8.73.0",
     "vite": "^8.3.8",
     "vue-eslint-parser": "^10.4.2",
     "vue-tsc": "^3.3.14"

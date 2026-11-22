@@ -1,12 +1,12 @@
 # Technical Specifications (TECHNICAL_SPECS.md)
 
-## 2026-11-22 Publication Metadata & npm v12 Compatibility Specification (main `8ce924b6`)
+## 2026-11-22 Publication Metadata & npm v12 Compatibility Specification (`main` `48bc467d` Baseline)
 
-`main` (`8ce924b6`) includes `PR #301`–`#307` (47-package npm release), `PR #310`, `PR #313`, and `PR #316`. Following the 2026-11-22 audit ([ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) / [migration plan](implementation_plans/20261122-npm-v12-and-oidc-migration.md)), publication and security boundaries are specified as follows:
+`main` (`48bc467d`) includes `PR #301`–`#307` (47-package npm release), `PR #310`, `PR #313`, `PR #316`, and `PR #319` (ADR 072 Phase 0). Following the 2026-11-22 audit ([ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) / [migration plan](implementation_plans/20261122-npm-v12-and-oidc-migration.md)) and toolchain modernization, publication and security boundaries are specified as follows:
 
-- **npm v12 Consumer Compatibility (All 53 Public Packages)**: Zero `preinstall`/`install`/`postinstall`/`prepare` lifecycle scripts, zero `binding.gyp` files, and zero Git or remote tarball URL dependencies (verified 0 across all 53 packages on 2026-11-22). Workspace builds enforce `allowBuilds` (8 explicit entries), `minimumReleaseAge: 1440`, and `strictPeerDependencies: true` via `pnpm-workspace.yaml` (`pnpm@12.15.0`).
+- **npm v12 Consumer Compatibility (All 53 Public Packages)**: Zero `preinstall`/`install`/`postinstall`/`prepare` lifecycle scripts, zero `binding.gyp` files, and zero Git or remote tarball URL dependencies (verified 0 across all 53 packages on 2026-11-22). Workspace builds enforce `allowBuilds` (8 explicit entries), `minimumReleaseAge: 1440`, `strictPeerDependencies: true`, 13 scoped patches (`@testing-library/jest-dom` retired; `import-x`/`next`/`storybook/*` ported), and 10 compatibility overrides (5 obsolete overrides retired: `simple-git`, `@simple-git/argv-parser`, `sharp`, `ajv`, `undici`) via `pnpm-workspace.yaml` (`pnpm@12.21.0`).
 - **OIDC Trusted Publishing / Provenance Contract**:
-  - Runtime requirements: `Node >= 22.14.0` (project baseline `>=24.0.0`), `npm >= 11.15.0` for `npm trust` / staged publishing CLI (`11.21.3` locally verified), and workflow `permissions: id-token: write`.
+  - Runtime requirements: `Node >= 22.14.0` (project `.nvmrc` / `.node-version` `24.22.3`, `engines.node >= 24.0.0`, `actions/setup-node` `node-version: "24"`), `npm >= 11.15.0` for `npm trust` / staged publishing CLI (`11.21.3` locally verified), and workflow `permissions: id-token: write`.
   - Every public package manifest must define `repository: { type: "git", url: "git+https://github.com/hdkz-dev/multi-game-engines.git", directory: "packages/<dir>" }` (all 53 packages populated and enforced via regression tests in `scripts/validation.test.mjs`).
   - Unvalidated Trusted Publishing bindings expire 48 hours (2 days) after creation; initial trust registration must be paired with an immediate full release of all configured packages within 48 hours.
 
