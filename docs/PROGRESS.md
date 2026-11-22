@@ -1,15 +1,24 @@
 # プロジェクト進捗状況 (PROGRESS.md)
 
-## 2026-11-17 PR #301/#302/#307 統合および 47 パッケージ npm 公開完了
+## 2026-11-22 npm v12 適合確認・Trusted Publishing (OIDC) 移行計画策定（`main` `8ce924b6`）
+
+- **PR #316 マージ済み（`main` `8ce924b6`）**: 2026-11-19 に PR #316（PR #311・PR #315・設定スキーマ・文書同期）を `main` へ統合完了し、ローカル・リモートとも `main` 単一・オープン PR/Issue 0 件となった（ESLint 10.15.0、PR #316 run `44477859299` で `picomatch` `GHSA-fc5q-39xc-vjpf` 非検出・`0 Critical, 0 High` 確認済み）。
+- **npm v12 インストール時セキュリティ・2FA バイパス GAT 廃止監査（2026-11-22）**:
+  - 2026-07-08 発表の npm v12 セキュリティデフォルト（`allowScripts: off` / `--allow-git=none` / `--allow-remote=none`）および 2FA バイパス GAT 廃止（2026-08 管理操作禁止、2027-01 直接公開廃止予定）と、2026-09〜10 の後続仕様（2026-10-02 発効の未検証 Trusted Publisher 48 時間自動失効ルール等）を精査。
+  - 全 53 公開パッケージの実態監査を実施し、npm v12 利用者影響（ライフサイクルスクリプト 0 件・`binding.gyp` 0 件・Git/リモート URL 依存 0 件）がゼロである一方、OIDC 移行上の課題（12 パッケージの `repository` 欠落、`scripts/setup-trusted-publishers.mjs` の `npm >= 11.15.0` / `--allow-publish` / 2 秒スリープ未対応、`.github/workflows/release.yml` の `NPM_TOKEN` 依存、`.github/workflows/initial-publish.yml` 残存）を特定した。
+  - 方式 A（OIDC Trusted Publishing + Changesets PR 承認 + トークン公開禁止）を正式採用（[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) / [実装計画書](implementation_plans/20261122-npm-v12-and-oidc-migration.md)）。
+  - **Phase 0 事前整備完了（2026-11-22）**: 欠落 12 パッケージの `package.json`（`repository`/`author`/`bugs`/`homepage`）を補完して全 53 公開パッケージを OIDC 互換に統一、`scripts/setup-trusted-publishers.mjs` を `npm >= 11.15.0`・`--mode` (`--allow-publish` 等)・2 秒スリープ・48 時間警告・`lint:tooling` 検査対象へ刷新、`.github/workflows/initial-publish.yml` を廃止し、`scripts/validation.test.mjs` に 53 パッケージ横断の再発防止回帰テストを追加した。以降は Phase 1（OIDC 本番切替）待機状態。
+
+## 2026-11-17〜19 PR #301/#302/#307 統合および 47 パッケージ npm 公開・PR #316 整理完了
 
 - **PR #301（`codex/dependency-patch-coherence`, `main` `102c201d`）**: 依存更新と ESLint SARIF パーティション検証、バージョン限定パッチを統合完了。
 - **PR #302（`codex/fairy-worker-bootstrap`, `main` `b7c3fccc`）**: `EmscriptenWorkerCommunicator` による検証済み Fairy-Stockfish Emscripten ファクトリの Worker ブートストラップ、コア `./node` の条件付きブラウザエクスポート分離、再ロード時の旧トランスポート解放を統合完了（ADR 071）。
-- **Version Packages PR #307（`main` `be98c03c`）と npm 公開完了**: GitHub Secrets の `NPM_TOKEN`（2026-07-31 設定、90 日有効期限で 2026-10-29 満了）を更新後、`Release` ワークフロー（`run 43893092912`）を実行し、対象 **47 パッケージ**（`@multi-game-engines/core@0.3.1`、`@multi-game-engines/adapter-fairy-stockfish@1.0.7`、`@multi-game-engines/adapter-fairy-stockfish-shogi@1.0.7`、`@multi-game-engines/registry@1.1.8` 等、既公開 `i18n-*` 6 件を除く）の npm 公開および GitHub Release / タグ 47 件の作成を完了した。
-- **継続保守・依存関係同期（2026-11-18、ブランチ `chore/deps-refresh-2026-11-17`）**:
+- **Version Packages PR #307（`main` `be98c03c`）と npm 公開完了**: GitHub Secrets の `NPM_TOKEN`（2026-07-31 設定、90 日有効期限で 2026-10-29 満了）を更新後、`Release` ワークフロー（`run 43893092912`）を実行し、対象 **47 パッケージ**（`@multi-game-engines/core@0.3.1`、`@multi-game-engines/adapter-fairy-stockfish@1.0.7`、`@multi-game-engines/adapter-fairy-stockfish-shogi@1.0.7`、`@multi-game-engines/registry@1.1.8` 等、既公開 `i18n-*` 6 件を除く）の npm 公開および GitHub Release / タグ 47 件の作成を完了した（当該暫定トークンの有効期限は 2026-12-16、ADR 072 に沿って OIDC へ移行予定）。
+- **継続保守・依存関係同期（2026-11-18〜19）**:
   - **GitHub Actions 更新（PR #298）**: `.github/workflows/docs.yml` の `dawidd6/action-download-artifact` を `v27` → `v28` へ更新し、PR #310（`979c764d`）で `main` に統合済み。
   - **Dependabot PR #308（27 件）+ PR #303（`jsdom` `^31.0.0`）統合検証（PR #313 `3001feb1`）**: ADR 070 に従い公開パッケージの `dependencies` 下限（`"lucide-react": "^1.61.0"` / `"@lucide/vue": "^1.61.0"`）と `minimumReleaseAge: 1440` を維持したまま、`@storybook/*` を `^10.6.7` へ統一して 4 パッチ（`vue3`, `react`, `react-vite`, `web-components`）を移植し、`jsdom` を `^31.0.0` へ移行した。
-  - **追加追従・作業ツリー整理（2026-11-19、ブランチ `chore/consolidate-pr311-315-and-cleanup-2026-11-19`）**: PR #311（`google/osv-scanner-action` digest 更新）と PR #315（PR #314 後継、ESLint 10.15.0 / `lint-staged` `^17.6.1` / `@playwright/test` `^1.65.1` / `postcss` `^8.5.33` / `@vue/test-utils` `^2.6.0`、ADR 070 の公開 `dependencies` 下限 `^1.61.0` 維持）、および `.gemini/settings.json` / `.serena/project.yml` スキーマ更新を統合し、旧 worktree・旧ローカル 6 ブランチ・旧リモート 8 ブランチを整理した。ローカル品質ゲート（`pnpm install`、`pnpm lint` 98/98 + `oxlint` 0 warnings、`pnpm typecheck` 99/99、`pnpm build` 56/56、`pnpm test` 全 Vitest + tooling 28/28）のすべてが通過。
-  - **上流監査待機（`GHSA-vjh5-4x84-xrqp` / `GHSA-fc5q-39xc-vjpf`）**: 修正済み `nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対する OSV 上流データ不備（`GHSA-vjh5-4x84-xrqp`）および `picomatch <= 4.0.7` の上流修正版未公開（`GHSA-fc5q-39xc-vjpf`）については、監査除外を追加せず上流解消を待つ。
+  - **追加追従・作業ツリー整理（PR #316 `8ce924b6`）**: PR #311（`google/osv-scanner-action` digest 更新）と PR #315（PR #314 後継、ESLint 10.15.0 / `lint-staged` `^17.6.1` / `@playwright/test` `^1.65.1` / `postcss` `^8.5.33` / `@vue/test-utils` `^2.6.0`、ADR 070 の公開 `dependencies` 下限 `^1.61.0` 維持）、および `.gemini/settings.json` / `.serena/project.yml` スキーマ更新を統合し、旧 worktree・旧ローカル 6 ブランチ・旧リモート 8 ブランチを整理した。ローカル品質ゲート（`pnpm install`、`pnpm lint` 98/98 + `oxlint` 0 warnings、`pnpm typecheck` 99/99、`pnpm build` 56/56、`pnpm test` 全 Vitest + tooling 28/28）のすべてが通過。
+  - **上流監査待機（`GHSA-vjh5-4x84-xrqp`）**: 修正済み `nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対する OSV 上流データ不備（`GHSA-vjh5-4x84-xrqp`）については、監査除外を追加せず上流解消を待つ。
   - **Open Issue**: 0 件。実モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は将来バックログとして維持する。
 
 ## 2026-11-07 協調監査による依存・CI見直し

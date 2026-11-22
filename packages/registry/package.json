@@ -39,6 +39,16 @@
     "@multi-game-engines/i18n-engines": "workspace:*",
     "zod": "^4.6.7"
   },
+  "author": "hdkz-dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hdkz-dev/multi-game-engines.git",
+    "directory": "packages/registry"
+  },
+  "bugs": {
+    "url": "https://github.com/hdkz-dev/multi-game-engines/issues"
+  },
+  "homepage": "https://github.com/hdkz-dev/multi-game-engines#readme",
   "engines": {
     "node": ">=24.0.0"
   }

@@ -1,14 +1,22 @@
 # プロジェクト・バックログ (TASKS.md)
 
-## 2026-11-17 リリース統合・公開と継続保守方針
+## 2026-11-22 npm v12 適合確認と Trusted Publishing (OIDC) 移行計画
+
+- [x] [2026-07-08 公式発表](https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/) および 2026-09〜10 の Trusted/Staged Publishing 仕様更新（48 時間未検証失効ルール等）を調査し、全 53 公開パッケージの実態監査を実施（ライフサイクルスクリプト 0 件・Git/リモート依存 0 件・`repository` 欠落 12 件・`setup-trusted-publishers.mjs` 仕様乖離を特定）。
+- [x] [ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) および [実装計画書](implementation_plans/20261122-npm-v12-and-oidc-migration.md) を日英で策定し、**方式 A（OIDC Trusted Publishing + Changesets PR 人間承認 + トークン公開禁止）を正式採用**。
+- [x] **[Phase 0 / 事前整備]** 欠落していた 12 パッケージへの `repository`（および `author`/`bugs`/`homepage`）補完、全 53 公開パッケージ OIDC メタデータ＆npm v12 安全回帰テストを `scripts/validation.test.mjs` へ追加、`scripts/setup-trusted-publishers.mjs` 刷新（`npm >= 11.15.0`、`--mode` / `--allow-publish`、2 秒レート制御、48 時間検証警告、`lint:tooling` 統合）、および `.github/workflows/initial-publish.yml` 削除を完了。
+- [ ] **[Phase 1 / 期限: 現 `NPM_TOKEN` 満了の 2026-12-16 より前]** `.github/workflows/release.yml` の `NPM_TOKEN` 依存除去、直前の `pnpm run npm:setup-oidc`（全 53 件）実行、48 時間以内の全 53 パッケージ一括 OIDC 公開・Provenance 確認。
+- [ ] **[Phase 2 / 期限: 2027-01 廃止前]** 全 53 パッケージで `Require two-factor authentication and disallow tokens` を有効化し、GitHub Secret `NPM_TOKEN` 削除および GAT Revoke を完了（`ISSUES.md` M8 クローズ）。
+
+## 2026-11-17〜19 リリース統合・公開・整理完了と継続保守方針
 
 - [x] PR #301（`102c201d`）・PR #302（`b7c3fccc`）・Version Packages PR #307（`be98c03c`）を `--merge` で `main` に統合。
 - [x] 期限切れだった `NPM_TOKEN` を再発行・更新し、`Release` ワークフロー（`run 43893092912`）にて全 47 パッケージの npm 公開・GitHub Release / タグ作成を完了（`core@0.3.1`, `adapter-fairy-stockfish@1.0.7`, `adapter-fairy-stockfish-shogi@1.0.7`, `registry@1.1.8` 等）。
 - [x] PR #298（`dawidd6/action-download-artifact@v28`）を `.github/workflows/docs.yml` へ反映し、PR #310（`979c764d`）で `main` に統合済み。
 - [x] Dependabot PR #308（27件グループ更新）の検証・統合（ADR 070 に沿って `@storybook/*` `^10.6.7` 4パッチ移植・`vite` `^8.3.8`・`oxlint` `^1.93.0` 等を更新し、`lucide-react` / `@lucide/vue` の公開 `dependencies` 下限 `^1.61.0` と `minimumReleaseAge: 1440` を維持して検証）。
 - [x] Dependabot PR #303（`jsdom` 30.1.3 → `^31.0.0` メジャー移行）の互換検証（`lint` 98/98・`typecheck` 99/99・`build` 56/56・全 Vitest・tooling 28/28 通過）。
-- [x] PR #311（`google/osv-scanner-action` digest 更新）・PR #315（PR #314 後継の `ESLint 10.15.0` / `lint-staged` `^17.6.1` / `@playwright/test` `^1.65.1` / `postcss` `^8.5.33` / `@vue/test-utils` `^2.6.0` 等 8 件、ADR 070 の公開 `dependencies` 下限 `^1.61.0` 維持）・`.gemini/settings.json` / `.serena/project.yml` スキーマ更新の統合、および残存 worktree 1 件・旧ローカル 6 ブランチ・旧リモート 8 ブランチの整理完了。
-- [ ] OSV 上流の `GHSA-vjh5-4x84-xrqp`（Nuxt 3.x 上限データ不備）および `GHSA-fc5q-39xc-vjpf`（`picomatch <= 4.0.7`、上流修正版未公開）修正確認後の再監査（監査除外設定は追加しない）。
+- [x] PR #311（`google/osv-scanner-action` digest 更新）・PR #315（PR #314 後継の `ESLint 10.15.0` / `lint-staged` `^17.6.1` / `@playwright/test` `^1.65.1` / `postcss` `^8.5.33` / `@vue/test-utils` `^2.6.0` 等 8 件、ADR 070 の公開 `dependencies` 下限 `^1.61.0` 維持）・`.gemini/settings.json` / `.serena/project.yml` スキーマ更新を **PR #316**（`8ce924b6`）で `main` に統合し、残存 worktree 1 件・旧ローカル 6 ブランチ・旧リモート 8 ブランチを整理完了（オープン PR 0 件）。
+- [ ] OSV 上流の `GHSA-vjh5-4x84-xrqp` 群（`nuxt@4.6.4` / `@nuxt/nitro-server@4.6.4` に対する OSV データ不備）修正確認後の再監査（`GHSA-fc5q-39xc-vjpf` `picomatch` は PR #316 `run 44477859299` の OSV 監査で非検出・`0 Critical, 0 High` に改善済み。監査除外設定は追加しない）。
 - [ ] 将来機能バックログ: `F1–F4`（実 AI モデル統合、`KATAGO_ONNX_URL` 設定、動的 Expert Mapping）および TypeScript 7 周辺ツール正式対応後の移行評価。
 
 ---
@@ -213,7 +221,7 @@ M1aの通信境界とQ1の公開API経由セキュリティテストを実装済
 - [x] **ドキュメント実態同期 (PR #208)** — README のサポート状況に Backgammon / Checkers / Poker / Bridge / Fairy-Stockfish を追加、PROGRESS.md に 2026-07-18 スナップショット (実測カバレッジ 98.45%、npm 53 パッケージ全数確認) とインシデント記録を追加。
 - [x] **Serena 設定のテンプレート追随 (PR #209)** — `.serena/project.yml` を上流の最新テンプレートへ移行 (実効設定の変更なし)。
 - [x] **陳腐化 stash の整理** — 2026-03-04 の `integration/all-updates` WIP を精査。ESLint 10.0.2 整合はすでに 10.4.x へ前進、ループバック HTTP 例外は ADR-060 としてより堅牢な形で実装済みのため破棄 (復旧用 SHA: `5ca424cc`)。
-- [ ] **NPM_TOKENの公開前確認** — 旧期限2026-07-29は履歴。secret最終更新は2026-07-31、現在の期限・書き込み権限は未確認。次回の実publish前に確認する（M3）。
+- [ ] **NPM_TOKENの公開前確認（履歴・[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) へ引き継ぎ）** — 旧期限 2026-07-29 / 2026-10-29 は履歴。2026-11-17 公開時に 30 日期限 GAT（`2026-12-16` 満了）で暫定更新済み。2027-01 ごろの 2FA バイパス GAT 直接公開廃止に伴い、上記 2026-11-22 計画（OIDC Trusted Publishing 移行 + トークン撤廃）へ統合して管理する（M8）。
 
 ### 2026-05-30 完了: Fairy-Stockfish アダプター追加 ✅
 
