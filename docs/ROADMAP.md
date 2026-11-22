@@ -1,9 +1,11 @@
 # プロジェクト・ロードマップ (2026-2027)
 
-## 2026-11-17 リリース完了と今後のフェーズ（main `be98c03c`）
+## 2026-11-22 リリース完了後の状態と OIDC Trusted Publishing 移行マイルストーン（main `8ce924b6`）
 
 - `PR #301`（依存整合・SARIF 分割、`102c201d`）・`PR #302`（Fairy-Stockfish browser factory bootstrap、`b7c3fccc`）・`PR #307`（Version Packages、`be98c03c`）の統合および全 47 パッケージの npm 公開（`Release` run `43893092912`）を完了。
-- 継続フェーズ（`chore/consolidate-pr311-315-and-cleanup-2026-11-19`）: PR #310（`979c764d`, PR #298）および PR #313（`3001feb1`, PR #308・#303 統合）に続き、PR #311（`osv-scanner-action` digest）・PR #315（PR #314 後継、ESLint 10.15.0 等・ADR 070 下限維持）・設定スキーマ整理を統合検証した。実 AI モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は次期機能ロードマップとして維持する。
+- その後、`PR #310`（`979c764d`, PR #298）・`PR #313`（`3001feb1`, PR #308・#303 統合）に続き、`PR #316`（`8ce924b6`, PR #311・PR #315 ESLint 10.15.0 等・ADR 070 下限維持・設定スキーマ・文書同期）を統合し、旧 worktree・旧ブランチをすべて整理済み。
+- **次期最重要マイルストーン（2026年12月〜2027年1月前）**: 2026-07-08 発表の 2FA バイパス GAT 直接公開廃止（2027年1月ごろ）および現行 `NPM_TOKEN` 期限（2026-12-16）に対応するため、[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) と [実装計画](implementation_plans/20261122-npm-v12-and-oidc-migration.md) に従い Phase 0（完了：12 パッケージ `repository` 補完・`setup-trusted-publishers.mjs` 刷新・`initial-publish.yml` 廃止・回帰テスト追加）→ Phase 1（OIDC 切替＋48 時間以内の全 53 件一括検証リリース）→ Phase 2（トークン公開禁止・`NPM_TOKEN` 削除）を実施する。
+- 実 AI モデル統合（KataGo ONNX / Mortal）および動的 Expert Mapping は引き続き次期機能ロードマップとして維持する。
 
 ## 2026-11-07 Fairy-Stockfish browser起動修正（PR #302で統合・公開済み）
 

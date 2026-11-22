@@ -2,10 +2,11 @@
 /**
  * initial-publish.mjs
  *
- * 初回 npm publish 専用スクリプト。
- * パッケージが npm に存在しない状態での初回登録に使います。
- *
- * 実行後は setup-trusted-publishers.mjs を実行して OIDC に完全移行してください。
+ * 新規（npm 未存在）パッケージの初回登録専用スクリプト（ADR 072）。
+ * 2FA バイパス GAT による直接 publish は 2027-01 ごろ廃止予定のため、
+ * 既存パッケージの通常リリースには使用せず GitHub Actions OIDC (`release.yml`) を使用してください。
+ * 新規パッケージを作成する場合は `npm stage publish`（`0.0.0-stage`）または初回登録後に
+ * `pnpm run npm:setup-oidc` を実行し、48 時間以内に OIDC で初回リリースして恒久化してください。
  *
  * 使い方:
  *   NPM_TOKEN=npm_xxx node scripts/initial-publish.mjs
@@ -57,9 +58,7 @@ if (!npmOk) {
 // ────────────────────────────────────────────────
 const localNpmrc = join(root, ".npmrc");
 const hadLocalNpmrc = existsSync(localNpmrc);
-const originalContent = hadLocalNpmrc
-  ? readFileSync(localNpmrc, "utf8")
-  : null;
+const originalContent = hadLocalNpmrc ? readFileSync(localNpmrc, "utf8") : null;
 
 console.log("\n📝 .npmrc を一時設定中...");
 writeFileSync(
@@ -108,6 +107,4 @@ console.log("\n📋 次のステップ:");
 console.log("   1. npm login");
 console.log("   2. pnpm npm:setup-oidc   # Trusted Publisher を一括設定");
 console.log("   3. npmjs.com で Granular Token を削除（不要になります）");
-console.log(
-  "   4. 以降の publish は GitHub Actions の release.yml が自動実行",
-);
+console.log("   4. 以降の publish は GitHub Actions の release.yml が自動実行");

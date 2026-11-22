@@ -82,3 +82,4 @@
 - [ADR 069: Verified resource and response contracts](./adr/069-verified-resource-response-contract.md) (2026-10-28)
 - [ADR 070: 依存ファミリーとバージョン別パッチの協調更新](./adr/070-coordinated-dependency-patches.md) (2026-11-07, PR #301 統合)
 - [ADR 071: Fairy-Stockfish browser factoryの起動](./adr/071-fairy-browser-factory-bootstrap.md) (2026-11-07, PR #302 / #307 統合・公開済み)
+- [ADR 072: npm v12インストール時セキュリティ適合とTrusted Publishing (OIDC) 移行](./adr/072-npm-trusted-publishing-and-install-security.md) (採用 / Phase 0 完了, 2026-11-22)

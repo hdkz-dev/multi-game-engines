@@ -82,3 +82,4 @@ This document indexes the major design decisions recorded as ADRs (Architecture 
 - [ADR 069: Verified resource and response contracts](../adr/069-verified-resource-response-contract.md) (2026-10-28)
 - [ADR 070: Coordinated dependency patches](../adr/070-coordinated-dependency-patches.md) (2026-11-07, integrated in PR #301)
 - [ADR 071: Fairy-Stockfish browser factory bootstrap](../adr/071-fairy-browser-factory-bootstrap.md) (2026-11-07, integrated & released via PR #302 / #307)
+- [ADR 072: npm v12 install-time security compliance and Trusted Publishing (OIDC) migration](adr/072-npm-trusted-publishing-and-install-security.md) (Accepted / Phase 0 complete, 2026-11-22)

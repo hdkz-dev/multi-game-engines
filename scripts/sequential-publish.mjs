@@ -2,7 +2,9 @@
 /**
  * sequential-publish.mjs
  *
- * E429 レートリミット対策のため、未 publish パッケージを1件ずつ順番に publish する。
+ * E429 レートリミット対策のため、新規未登録パッケージを1件ずつ順番に登録する手動補助スクリプト（ADR 072）。
+ * 2FA バイパス GAT による直接 publish は 2027-01 ごろ廃止予定のため、
+ * 既存パッケージの通常リリースには使用せず GitHub Actions OIDC (`release.yml`) を使用してください。
  *
  * 使い方:
  *   NPM_TOKEN=npm_xxx node scripts/sequential-publish.mjs
@@ -21,7 +23,9 @@ const root = join(__dirname, "..");
 // NPM_TOKEN または NODE_AUTH_TOKEN のいずれかを受け付ける
 const token = process.env.NPM_TOKEN ?? process.env.NODE_AUTH_TOKEN;
 if (!token) {
-  console.error("❌ NPM_TOKEN または NODE_AUTH_TOKEN 環境変数が設定されていません。");
+  console.error(
+    "❌ NPM_TOKEN または NODE_AUTH_TOKEN 環境変数が設定されていません。",
+  );
   process.exit(1);
 }
 
@@ -33,7 +37,11 @@ const originalContent = hadLocalNpmrc ? readFileSync(localNpmrc, "utf8") : null;
 const needsNpmrc = !hadLocalNpmrc || !originalContent?.includes("_authToken");
 
 if (needsNpmrc) {
-  writeFileSync(localNpmrc, `//registry.npmjs.org/:_authToken=${token}\n`, "utf8");
+  writeFileSync(
+    localNpmrc,
+    `//registry.npmjs.org/:_authToken=${token}\n`,
+    "utf8",
+  );
   console.log("📝 .npmrc を一時設定しました。\n");
 } else {
   console.log("📝 .npmrc は既に認証設定済みです（上書きしません）。\n");
@@ -90,25 +98,23 @@ async function getUnpublishedPackages() {
 async function publishOne(pkg) {
   console.log(`\n📦 Publishing ${pkg.name}@${pkg.version} ...`);
 
-  const result = spawnSync(
-    "npm",
-    ["publish", "--access", "public"],
-    {
-      cwd: pkg.dir,
-      encoding: "utf8",
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        NODE_AUTH_TOKEN: token,
-      },
-    }
-  );
+  const result = spawnSync("npm", ["publish", "--access", "public"], {
+    cwd: pkg.dir,
+    encoding: "utf8",
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      NODE_AUTH_TOKEN: token,
+    },
+  });
 
   if (result.status === 0) {
     console.log(`  ✅ Published: ${pkg.name}@${pkg.version}`);
     return true;
   } else {
-    console.error(`  ❌ Failed: ${pkg.name}@${pkg.version} (exit code: ${result.status})`);
+    console.error(
+      `  ❌ Failed: ${pkg.name}@${pkg.version} (exit code: ${result.status})`,
+    );
     return false;
   }
 }
@@ -129,7 +135,9 @@ try {
     console.log(`  - ${pkg.name}@${pkg.version}`);
   }
 
-  console.log("\n🚀 順番に publish を開始します（各パッケージ間に 60 秒の待機を挟みます）...\n");
+  console.log(
+    "\n🚀 順番に publish を開始します（各パッケージ間に 60 秒の待機を挟みます）...\n",
+  );
 
   const DELAY_MS = 60000; // 60秒（レートリミット対策）
   const MAX_RETRIES = 3;
@@ -143,7 +151,9 @@ try {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       if (attempt > 1) {
         const retryDelay = attempt * 60000; // リトライは60秒・120秒と増加
-        console.log(`  ⏳ リトライ ${attempt}/${MAX_RETRIES} — ${retryDelay / 1000}秒後...`);
+        console.log(
+          `  ⏳ リトライ ${attempt}/${MAX_RETRIES} — ${retryDelay / 1000}秒後...`,
+        );
         await sleep(retryDelay);
       }
       success = await publishOne(pkg);

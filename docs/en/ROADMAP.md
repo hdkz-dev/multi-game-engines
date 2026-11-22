@@ -1,9 +1,11 @@
 # Project Roadmap (2026-2027)
 
-## 2026-11-17 Release Completion and Next Phases (main `be98c03c`)
+## 2026-11-22 Post-Release Baseline and OIDC Trusted Publishing Milestone (main `8ce924b6`)
 
 - Completed integration of `PR #301` (`102c201d`), `PR #302` (`b7c3fccc`), and `PR #307` (`be98c03c`), plus npm publication of all 47 target packages (`Release` run `43893092912`).
-- Ongoing phases (`chore/consolidate-pr311-315-and-cleanup-2026-11-19`): Following PR #310 (`979c764d`, PR #298) and PR #313 (`3001feb1`, PR #308/#303 consolidation), consolidated PR #311 (`osv-scanner-action` digest), PR #315 (superseding PR #314: ESLint 10.15.0, preserving ADR 070 lower bounds), and local config schema updates. Production AI models (KataGo ONNX / Mortal) and dynamic Expert Mapping remain future roadmap items.
+- Following PR #310 (`979c764d`, PR #298) and PR #313 (`3001feb1`, PR #308/#303 consolidation), merged **PR #316** (`8ce924b6`, consolidating PR #311, PR #315 ESLint 10.15.0, ADR 070 lower bounds, schema updates, and docs) and removed all stale worktrees and obsolete branches.
+- **Next Priority Security Milestone (Dec 2026 – prior to Jan 2027)**: Ahead of current `NPM_TOKEN` expiry (`2026-12-16`) and direct publish removal for 2FA-bypass GATs (~Jan 2027), execute [ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) and the [migration plan](implementation_plans/20261122-npm-v12-and-oidc-migration.md): Phase 0 (completed: 12 package `repository` fixes, `setup-trusted-publishers.mjs` upgrade, `initial-publish.yml` removal, regression tests) → Phase 1 (OIDC switch & coordinated 53-package release within 48h) → Phase 2 (tokenless publishing enforcement & `NPM_TOKEN` removal).
+- Production AI models (KataGo ONNX / Mortal) and dynamic Expert Mapping remain future roadmap items.
 
 ## 2026-11-07 Fairy-Stockfish browser bootstrap fix (Integrated & Released via PR #302 / #307)
 

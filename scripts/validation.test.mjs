@@ -2,11 +2,25 @@ import process from "node:process";
 import { URL, fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import {
+  buildTrustArgs,
+  isNpmVersionSupported,
+  isTrustEntryConfigured,
+  parseCliArgs,
+} from "./setup-trusted-publishers.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 
@@ -113,4 +127,187 @@ test("Nitro's patched Azure preset generates a ZIP with Archiver 8", async () =>
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+test("all public packages declare OIDC-compatible repository metadata and MIT license", async () => {
+  const packagesDir = join(root, "packages");
+  const entries = (await readdir(packagesDir)).toSorted();
+  const publicPackages = [];
+
+  for (const dir of entries) {
+    const manifestPath = join(packagesDir, dir, "package.json");
+    if (!existsSync(manifestPath)) continue;
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    if (manifest.private) continue;
+    publicPackages.push({ dir, manifest });
+  }
+
+  assert.equal(publicPackages.length, 53);
+
+  for (const { dir, manifest } of publicPackages) {
+    assert.equal(manifest.license, "MIT", `${dir}: license must be MIT`);
+    assert.deepEqual(
+      manifest.repository,
+      {
+        type: "git",
+        url: "git+https://github.com/hdkz-dev/multi-game-engines.git",
+        directory: `packages/${dir}`,
+      },
+      `${dir}: repository metadata must match GitHub OIDC provenance contract`,
+    );
+  }
+});
+
+test("all public packages remain safe under npm v12 install-time security defaults", async () => {
+  const packagesDir = join(root, "packages");
+  const entries = (await readdir(packagesDir)).toSorted();
+  const forbiddenScripts = ["preinstall", "install", "postinstall", "prepare"];
+  const forbiddenSchemes = ["git+", "http://", "https://", "github:"];
+
+  for (const dir of entries) {
+    const pkgDir = join(packagesDir, dir);
+    const manifestPath = join(pkgDir, "package.json");
+    if (!existsSync(manifestPath)) continue;
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+    if (manifest.private) continue;
+
+    assert.equal(
+      existsSync(join(pkgDir, "binding.gyp")),
+      false,
+      `${dir}: public package must not require implicit node-gyp rebuild`,
+    );
+
+    const scripts = manifest.scripts ?? {};
+    for (const scriptName of forbiddenScripts) {
+      assert.equal(
+        Object.hasOwn(scripts, scriptName),
+        false,
+        `${dir}: public package must not declare lifecycle script "${scriptName}"`,
+      );
+    }
+
+    for (const field of [
+      "dependencies",
+      "optionalDependencies",
+      "peerDependencies",
+    ]) {
+      const deps = manifest[field] ?? {};
+      for (const [dep, spec] of Object.entries(deps)) {
+        for (const scheme of forbiddenSchemes) {
+          assert.equal(
+            String(spec).startsWith(scheme),
+            false,
+            `${dir}: ${field}.${dep} must not use "${scheme}" (${spec})`,
+          );
+        }
+      }
+    }
+  }
+});
+
+test("setup-trusted-publishers CLI and helpers enforce npm 11.15.0+ and permission flags", () => {
+  assert.equal(isNpmVersionSupported("11.14.9"), false);
+  assert.equal(isNpmVersionSupported("11.15.0"), true);
+  assert.equal(isNpmVersionSupported("12.0.0"), true);
+
+  assert.deepEqual(parseCliArgs(["--dry-run"]), {
+    mode: "direct",
+    dryRun: true,
+    sleepMs: 0,
+    filter: null,
+    otp: null,
+  });
+  assert.throws(() => parseCliArgs(["--mode=invalid"]), /不正な --mode/);
+
+  assert.ok(
+    buildTrustArgs({
+      pkg: "@multi-game-engines/core",
+      mode: "direct",
+    }).includes("--allow-publish"),
+  );
+  assert.ok(
+    buildTrustArgs({ pkg: "@multi-game-engines/core", mode: "stage" }).includes(
+      "--allow-stage-publish",
+    ),
+  );
+
+  assert.equal(
+    isTrustEntryConfigured(
+      [
+        {
+          type: "github",
+          repository: "hdkz-dev/multi-game-engines",
+          workflow: "release.yml",
+          allowPublish: false,
+        },
+      ],
+      { mode: "direct" },
+    ),
+    false,
+  );
+  assert.equal(
+    isTrustEntryConfigured(
+      [
+        {
+          type: "github",
+          repository: "hdkz-dev/multi-game-engines",
+          workflow: "release.yml",
+          allowPublish: true,
+        },
+      ],
+      { mode: "direct" },
+    ),
+    true,
+  );
+
+  const dryDirect = spawnSync(
+    process.execPath,
+    ["scripts/setup-trusted-publishers.mjs", "--dry-run"],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.ifError(dryDirect.error);
+  assert.equal(dryDirect.status, 0, dryDirect.stderr);
+  const directLines = dryDirect.stdout
+    .split("\n")
+    .filter((line) => line.includes("[dry-run] npm trust github "));
+  assert.equal(directLines.length, 53);
+  for (const line of directLines) {
+    assert.match(line, /--allow-publish/);
+  }
+
+  const dryStage = spawnSync(
+    process.execPath,
+    [
+      "scripts/setup-trusted-publishers.mjs",
+      "--mode=stage",
+      "--dry-run",
+      "--filter=@multi-game-engines/core",
+    ],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.ifError(dryStage.error);
+  assert.equal(dryStage.status, 0, dryStage.stderr);
+  assert.match(dryStage.stdout, /--allow-stage-publish/);
+
+  const dryBoth = spawnSync(
+    process.execPath,
+    [
+      "scripts/setup-trusted-publishers.mjs",
+      "--mode=both",
+      "--dry-run",
+      "--filter=@multi-game-engines/core",
+    ],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.ifError(dryBoth.error);
+  assert.equal(dryBoth.status, 0, dryBoth.stderr);
+  assert.match(dryBoth.stdout, /--allow-publish --allow-stage-publish/);
+
+  const dryInvalid = spawnSync(
+    process.execPath,
+    ["scripts/setup-trusted-publishers.mjs", "--mode=invalid", "--dry-run"],
+    { cwd: root, encoding: "utf8" },
+  );
+  assert.ifError(dryInvalid.error);
+  assert.equal(dryInvalid.status, 1);
 });

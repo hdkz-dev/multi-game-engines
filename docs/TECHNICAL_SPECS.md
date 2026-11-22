@@ -1,6 +1,16 @@
 # 技術仕様書 (TECHNICAL_SPECS.md)
 
-## 2026-11-17 リリース統合状態（main `be98c03c`）
+## 2026-11-22 パッケージ公開メタデータ・npm v12 互換仕様（main `8ce924b6`）
+
+`main` (`8ce924b6`) は `PR #301`〜`#307`（47 パッケージ npm 公開）・`PR #310`・`PR #313`・`PR #316` 統合済み。2026-11-22 の監査（[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) / [実装計画](implementation_plans/20261122-npm-v12-and-oidc-migration.md)）に基づき、パッケージ公開仕様と互換境界を以下の通り定義する。
+
+- **npm v12 互換契約（公開 53 パッケージ）**: `preinstall` / `install` / `postinstall` / `prepare` スクリプト、`binding.gyp`、Git 依存、およびリモート tarball URL 依存を持たない（2026-11-22 全数検証で 0 件）。開発環境は `pnpm@12.15.0` の `pnpm-workspace.yaml` にて `allowBuilds`（8 件明示許可）・`minimumReleaseAge: 1440`・`strictPeerDependencies: true` を適用する。
+- **OIDC Trusted Publishing / Provenance メタデータ契約**:
+  - 実行要件: `Node >= 22.14.0`（現行指定 `>=24.0.0`、`actions/setup-node` `node-version: "24"`）、OIDC 登録 CLI `npm >= 11.15.0`（検証時 `11.21.3`）、`permissions: id-token: write`。
+  - 全 53 公開パッケージの `package.json` において `repository.type = "git"`・`repository.url = "git+https://github.com/hdkz-dev/multi-game-engines.git"`・`repository.directory = "packages/<dir>"` を必須とする（Phase 0 にて全 53 件整備および `scripts/validation.test.mjs` 回帰テスト追加済み）。
+  - 未検証 Trusted Publishing 設定は作成後 48 時間（2 日）で自動失効するため、設定直後のリリースで全対象パッケージを 48 時間以内に初回公開して検証済み状態へ確定する。
+
+## 2026-11-17 リリース統合状態（履歴）
 
 `PR #301`（`102c201d`）・`PR #302`（`b7c3fccc`, ADR 071）・`PR #307`（`be98c03c`）はすべて統合済みであり、`Release` ワークフロー（`run 43893092912`）にて `@multi-game-engines/core@0.3.1`、`adapter-fairy-stockfish@1.0.7`、`adapter-fairy-stockfish-shogi@1.0.7`、`registry@1.1.8` 等を含む全 47 パッケージを公開済み。
 
