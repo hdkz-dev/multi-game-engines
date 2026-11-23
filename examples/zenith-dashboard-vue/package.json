@@ -17,7 +17,7 @@
     "pretest:e2e": "pnpm copy-mocks"
   },
   "dependencies": {
-    "@lucide/vue": "^1.77.0",
+    "@lucide/vue": "^1.76.0",
     "@multi-game-engines/adapter-edax": "workspace:*",
     "@multi-game-engines/adapter-gnubg": "workspace:*",
     "@multi-game-engines/adapter-gtp": "workspace:*",
