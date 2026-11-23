@@ -1,8 +1,8 @@
 # アーキテクチャと設計
 
-## 2026-11-22 リリース認証アーキテクチャ移行方針・最新統合状態（main `8ce924b6`）
+## 2026-11-22 リリース認証アーキテクチャ移行方針・最新統合状態（`main` `48bc467d` 基点）
 
-`PR #301`（`102c201d`）・`PR #302`（`b7c3fccc`, ADR 071）・`PR #307`（`be98c03c`, 全 47 パッケージ npm 公開）・`PR #310`（`979c764d`）・`PR #313`（`3001feb1`）・`PR #316`（`8ce924b6`, PR #311・PR #315 等統合・ブランチ整理）はすべて `main` へ統合済みである。
+`PR #301`（`102c201d`）・`PR #302`（`b7c3fccc`, ADR 071）・`PR #307`（`be98c03c`, 全 47 パッケージ npm 公開）・`PR #310`（`979c764d`）・`PR #313`（`3001feb1`）・`PR #316`（`8ce924b6`, PR #311・PR #315 等統合・ブランチ整理）・`PR #319`（`48bc467d`, ADR 072 Phase 0 完了）はすべて `main` へ統合済みである。加えて `pnpm@12.21.0` / Node `24.22.3` への近代化および不要パッチ・override 削減（14→13 / 15→10）により、保守負債の圧縮と供給網防御の強化を両立している。
 
 次期リリース基盤では、[ADR 072](adr/072-npm-trusted-publishing-and-install-security.md) に基づき、2FA バイパス有効 GAT（`NPM_TOKEN`）による直接公開から **GitHub Actions OIDC Trusted Publishing + 自動 Provenance + トークン公開禁止（`Require two-factor authentication and disallow tokens`）** へ移行する方針を策定した（[実装計画](implementation_plans/20261122-npm-v12-and-oidc-migration.md)）。全 53 公開パッケージはライフサイクルスクリプト 0 件・Git/リモート URL 依存 0 件であり npm v12 環境と完全互換である。一方、12 パッケージでの `repository` 補完および初回 OIDC 切替時の 48 時間以内全 53 件検証公開を移行要件とする。
 

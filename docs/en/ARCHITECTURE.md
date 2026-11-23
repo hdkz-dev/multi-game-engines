@@ -1,8 +1,8 @@
 # Architecture & Design
 
-## 2026-11-22 Release Authentication Migration & Current Baseline (main `8ce924b6`)
+## 2026-11-22 Release Authentication Migration & Current Baseline (`main` `48bc467d` Baseline)
 
-`PR #301` (`102c201d`), `PR #302` (`b7c3fccc`, ADR 071), `PR #307` (`be98c03c`, 47-package npm release), `PR #310` (`979c764d`), `PR #313` (`3001feb1`), and `PR #316` (`8ce924b6`, consolidating PR #311, PR #315, schemas, and cleanup) are all integrated on `main`.
+`PR #301` (`102c201d`), `PR #302` (`b7c3fccc`, ADR 071), `PR #307` (`be98c03c`, 47-package npm release), `PR #310` (`979c764d`), `PR #313` (`3001feb1`), `PR #316` (`8ce924b6`, consolidating PR #311, PR #315, schemas, and cleanup), and `PR #319` (`48bc467d`, ADR 072 Phase 0) are all integrated on `main`, followed by toolchain modernization (`pnpm@12.21.0`, Node `24.22.3`) and reduction of patches (14 → 13) and overrides (15 → 10).
 
 Under [ADR 072](adr/072-npm-trusted-publishing-and-install-security.md), the release pipeline is scheduled to transition from 2FA-bypass GAT (`NPM_TOKEN`) direct publishing to **GitHub Actions OIDC Trusted Publishing + automatic provenance + tokenless enforcement (`Require two-factor authentication and disallow tokens`)** ([migration plan](implementation_plans/20261122-npm-v12-and-oidc-migration.md)). All 53 public packages contain zero lifecycle scripts and zero Git/remote URL dependencies, ensuring full npm v12 consumer compatibility; completing `repository` metadata across 12 packages and validating all 53 trust bindings within the 48-hour OIDC window are planned for Phases 0–1.
 

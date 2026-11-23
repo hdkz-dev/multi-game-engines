@@ -1,5 +1,5 @@
 diff --git a/dist/index.d.ts b/dist/index.d.ts
-index c5777bd..f7cf170 100644
+index c5777bddf2f8c1a3fd20d5151e6d1f30ed5d1982..f7cf1705293095ee49a8088da5b8b5c07450f53f 100644
 --- a/dist/index.d.ts
 +++ b/dist/index.d.ts
 @@ -1,3 +1,4 @@
@@ -34,3 +34,36 @@ index c5777bd..f7cf170 100644
  //#endregion
  export { type ArgTypes, type Args, Decorator, Loader, Meta, type Parameters$1 as Parameters, Preview, StoryContext, StoryFn, StoryObj, type StrictArgs, WebComponentsMeta, WebComponentsPreview, type WebComponentsRenderer, WebComponentsStory, type WebComponentsTypes, __definePreview, getCustomElements, isValidComponent, isValidMetaData, setCustomElements, setCustomElementsManifest, setProjectAnnotations };
 \ No newline at end of file
+diff --git a/template/components/Button.js b/template/components/Button.js
+deleted file mode 100644
+index 9f498477117161114b7e99b52c5af7136fbd9334..0000000000000000000000000000000000000000
+diff --git a/template/components/Form.js b/template/components/Form.js
+deleted file mode 100644
+index a4cd6805b347090df565233a41c560a7dcd0e3bb..0000000000000000000000000000000000000000
+diff --git a/template/components/Html.js b/template/components/Html.js
+deleted file mode 100644
+index 2f90aa8900dae1a248acbedd3fc2eb4c80865797..0000000000000000000000000000000000000000
+diff --git a/template/components/Pre.js b/template/components/Pre.js
+deleted file mode 100644
+index 3beb81b6beb67a6bc6c9b94c7a69a25dd70b6066..0000000000000000000000000000000000000000
+diff --git a/template/components/index.js b/template/components/index.js
+deleted file mode 100644
+index 943967d57be3bd712f26aafa62ec2760a23ebb6d..0000000000000000000000000000000000000000
+diff --git a/template/stories/demo-wc-card/DemoWcCard.js b/template/stories/demo-wc-card/DemoWcCard.js
+deleted file mode 100644
+index 212a1a7463be601c5521a7723420015c8305edd3..0000000000000000000000000000000000000000
+diff --git a/template/stories/demo-wc-card/demoWcCardStyle.css.js b/template/stories/demo-wc-card/demoWcCardStyle.css.js
+deleted file mode 100644
+index fab0ada59ec802a735dc72ff3e13cbf299fe0426..0000000000000000000000000000000000000000
+diff --git a/template/stories/demo-wc-card/index.js b/template/stories/demo-wc-card/index.js
+deleted file mode 100644
+index e5ef957d2ecad9c00c42038e62cdf2a108a3cca8..0000000000000000000000000000000000000000
+diff --git a/template/stories/demo-wc-card.stories.js b/template/stories/demo-wc-card.stories.js
+deleted file mode 100644
+index fccfc253511a5893367792559368b00144f937d7..0000000000000000000000000000000000000000
+diff --git a/template/stories/preview.js b/template/stories/preview.js
+deleted file mode 100644
+index 127b104ee030803214f3132bf52c1f620b30bd98..0000000000000000000000000000000000000000
+diff --git a/template/stories/script.stories.js b/template/stories/script.stories.js
+deleted file mode 100644
+index d19bf48bc2f01aa32482afb5924530c673bffe7e..0000000000000000000000000000000000000000
